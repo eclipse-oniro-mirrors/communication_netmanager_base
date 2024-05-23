@@ -18,14 +18,14 @@
 
 #include <map>
 
+#include "ffrt.h"
 #include "iremote_stub.h"
-
 #include "i_net_policy_service.h"
 #include "net_policy_event_handler.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr const char *NET_POLICY_WORK_THREAD = "NET_POLICY_WORK_THREAD";
+constexpr const char *NET_POLICY_STUB_QUEUE = "NET_POLICY_STUB_QUEUE";
 
 class NetPolicyServiceStub : public IRemoteStub<INetPolicyService> {
 public:
@@ -37,7 +37,8 @@ public:
 protected:
     bool SubCheckPermission(const std::string &permission, uint32_t funcCode);
     int32_t CheckPolicyPermission(uint32_t funcCode);
-    std::shared_ptr<AppExecFwk::EventRunner> runner_;
+
+    ffrt::queue ffrtQueue_;
     std::shared_ptr<NetPolicyEventHandler> handler_;
 
 private:
@@ -45,6 +46,7 @@ private:
 
 private:
     void InitEventHandler();
+    void ExtraNetPolicyServiceStub();
     int32_t OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply);
@@ -67,9 +69,13 @@ private:
     int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnCheckPermission(MessageParcel &data, MessageParcel &reply);
     int32_t OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;
+    std::once_flag onceFlag;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

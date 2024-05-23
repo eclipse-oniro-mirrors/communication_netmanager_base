@@ -67,6 +67,12 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest001, TestSi
     ret = nativeClient_.NetworkAddRoute(netId, iface, "", "");
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = nativeClient_.SetIpv6PrivacyExtensions(iface, 1);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = nativeClient_.SetEnableIpv6(iface, 1);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     ret = nativeClient_.NetworkRemoveRoute(netId, iface, "", "");
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
@@ -123,10 +129,10 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest002, TestSi
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.GetAllRxBytes();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.GetAllTxBytes();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest003, TestSize.Level1)

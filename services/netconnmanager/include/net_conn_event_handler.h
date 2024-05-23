@@ -28,6 +28,7 @@ public:
     explicit NetConnEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
     ~NetConnEventHandler() override = default;
     bool PostAsyncTask(const Callback &callback, int64_t delayTime = 0);
+    bool PostAsyncTask(const Callback &callback, const std::string& taskName, int64_t delayTime = 0);
     bool PostSyncTask(const Callback &callback);
     void RemoveAsyncTask(const std::string &name);
 };

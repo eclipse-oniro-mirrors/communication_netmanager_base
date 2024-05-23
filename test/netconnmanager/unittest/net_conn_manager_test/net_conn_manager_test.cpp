@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,13 @@
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
-#include "net_conn_security.h"
 #include "net_detection_callback_test.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
+#include "net_detection_callback_stub.h"
+#include "network.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -51,6 +53,7 @@ public:
 
     void LogCapabilities(const std::list<sptr<NetHandle>> &netList) const;
     static sptr<INetConnService> GetProxy();
+    void GlobalHttpProxyTest(HttpProxy &httpProxy);
 };
 
 void NetConnManagerTest::SetUpTestCase()
@@ -159,6 +162,21 @@ sptr<INetConnService> NetConnManagerTest::GetProxy()
     }
 }
 
+void NetConnManagerTest::GlobalHttpProxyTest(HttpProxy &httpProxy)
+{
+    NetManagerBaseNotSystemToken token;
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
+
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    std::list<std::string> exclusionList = httpProxy.GetExclusionList();
+    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
+    for (auto exclusion : exclusionList) {
+        std::cout << "Get global http exclusion:" << exclusion << std::endl;
+    }
+}
+
 /**
  * @tc.name: NetConnManager001
  * @tc.desc: Test NetConnManager SystemReady.
@@ -177,7 +195,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager001, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident01";
@@ -193,7 +211,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident02";
@@ -213,7 +231,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 
 HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident03";
@@ -237,7 +255,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
@@ -258,7 +276,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
@@ -290,6 +308,32 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NetConnManager007
+ * @tc.desc: Test NetConnManager RegisterNetDetectionCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager007, TestSize.Level1)
+{
+    NetHandle netHandle;
+    int32_t result = NetConnClient::GetInstance().GetDefaultNet(netHandle);
+    if (result != NETMANAGER_SUCCESS) {
+        return ;
+    }
+    sptr<NetDetectionCallbackStub> callback = new NetDetectionCallbackStub();
+    int32_t netId = netHandle.GetNetId();
+    std::cout << "RegisterNetDetectionCallback netId:"<< netId << std::endl;
+    result = NetConnClient::GetInstance().RegisterNetDetectionCallback(netId, callback);
+    if (result == 0) {
+        std::cout << "RegisterNetDetectionCallback register success" << std::endl;
+        return;
+    }
+    std::cout << "RegisterNetDetectionCallback failed ret = %{public}d"<< result << std::endl;
+
+    result = NetConnClient::GetInstance().UnRegisterNetDetectionCallback(netId, callback);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: NetConnManager008
  * @tc.desc: Test NetConnManager RegisterNetDetectionCallback.
  * @tc.type: FUNC
@@ -301,7 +345,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::list<sptr<NetHandle>> netList;
     int32_t result = client.GetAllNets(netList);
     std::cout << "netIdList size:" << netList.size() << std::endl;
@@ -394,7 +438,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId1);
@@ -436,7 +480,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     NetBearType bearerTypeEth = BEARER_ETHERNET;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId1);
@@ -473,7 +517,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -496,7 +540,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -525,7 +569,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     bool isMetered = false;
     int32_t result = NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -596,7 +640,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result;
     std::list<sptr<NetHandle>> netList;
     result = client.GetAllNets(netList);
@@ -690,17 +734,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager019, TestSize.Level1)
     uint16_t port = 8080;
     std::list<std::string> exclusionList = {"example.com", "::1", "localhost"};
     HttpProxy httpProxy = {host, port, exclusionList};
-    NetConnManagerNotSystemToken token;
-    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-
-    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-    exclusionList = httpProxy.GetExclusionList();
-    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
-    for (auto exclusion : exclusionList) {
-        std::cout << "Get global http exclusion:" << exclusion << std::endl;
-    }
+    GlobalHttpProxyTest(httpProxy);
 }
 
 /**
@@ -714,17 +748,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
     uint16_t port = 0;
     std::list<std::string> exclusionList = {};
     HttpProxy httpProxy = {host, port, exclusionList};
-    NetConnManagerNotSystemToken token;
-    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-
-    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-    exclusionList = httpProxy.GetExclusionList();
-    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
-    for (auto exclusion : exclusionList) {
-        std::cout << "Get global http exclusion:" << exclusion << std::endl;
-    }
+    GlobalHttpProxyTest(httpProxy);
 }
 
 HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
@@ -761,6 +785,61 @@ HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
     INetAddr addr;
     result = proxy->GetAddressByName(host, netId, addr);
     EXPECT_NE(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+    uint32_t supplierId = 0;
+    std::string testString = "test";
+    std::set<NetCap> netCaps{NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
+    auto netSupplierRet = NetConnClient::GetInstance().RegisterNetSupplier(
+        NetBearType::BEARER_CELLULAR, testString, netCaps, supplierId);
+    EXPECT_EQ(netSupplierRet, NETMANAGER_SUCCESS);
+    sptr<NetSupplierInfo> netSupplierInfo = std::make_unique<NetSupplierInfo>().release();
+    netSupplierInfo->isAvailable_ = true;
+    NetConnClient::GetInstance().UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    NetConnClient::GetInstance().UpdateNetLinkInfo(supplierId, GetUpdateLinkInfoSample());
+    std::string ident = "ident";
+    sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
+    netSpecifier->ident_ = ident;
+    netSpecifier->SetCapabilities(netCaps);
+    sptr<NetConnCallbackTest> callback = GetINetConnCallbackSample();
+    constexpr uint32_t TEST_TIMEOUTMS = 1000;
+    auto netConnRet = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, TEST_TIMEOUTMS);
+    EXPECT_EQ(netConnRet, NETMANAGER_SUCCESS);
+
+    std::list<sptr<NetHandle>> netList;
+    auto ret = NetConnClient::GetInstance().GetAllNets(netList);
+
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    bool isInternalDefaultNetIdIn = false;
+    for (auto net : netList) {
+        if (net->GetNetId() >= MIN_INTERNAL_NET_ID && net->GetNetId() <= MAX_INTERNAL_NET_ID) {
+            isInternalDefaultNetIdIn = true;
+        }
+    }
+
+    EXPECT_TRUE(isInternalDefaultNetIdIn);
+    auto unRegisterRet = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    EXPECT_EQ(unRegisterRet, NETSYS_SUCCESS);
+
+    std::list<sptr<NetHandle>> otherNetList;
+    auto result = NetConnClient::GetInstance().GetAllNets(otherNetList);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    isInternalDefaultNetIdIn = false;
+    for (auto net : otherNetList) {
+        if (net->GetNetId() >= MIN_INTERNAL_NET_ID && net->GetNetId() <= MAX_INTERNAL_NET_ID) {
+            isInternalDefaultNetIdIn = true;
+        }
+    }
+
+    EXPECT_FALSE(isInternalDefaultNetIdIn);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

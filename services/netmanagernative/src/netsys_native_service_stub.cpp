@@ -51,7 +51,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
-        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_GUARD};
+        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
 
 void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
@@ -100,6 +100,10 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
+        &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
+        &NetsysNativeServiceStub::CmdSetIpv6Enable;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -112,6 +116,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
         &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllContainerStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
@@ -138,6 +144,12 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION)] =
         &NetsysNativeServiceStub::CmdSetInternetPermission;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdSetNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdDelNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE)] =
+        &NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -150,6 +162,10 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdGetNetworkSharingType;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
@@ -383,7 +399,8 @@ int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, Mes
 
 int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
 {
-    struct addrinfo *ai, *ainext;
+    struct addrinfo *ai;
+    struct addrinfo *ainext;
     for (ai = aihead; ai != nullptr; ai = ainext) {
         if (ai->ai_addr != nullptr)
             free(ai->ai_addr);
@@ -630,7 +647,8 @@ int32_t NetsysNativeServiceStub::CmdSetInternetPermission(MessageParcel &data, M
 {
     uint32_t uid = data.ReadUint32();
     uint8_t allow = data.ReadUint8();
-    int32_t result = SetInternetPermission(uid, allow);
+    uint8_t isBroker = data.ReadUint8();
+    int32_t result = SetInternetPermission(uid, allow, isBroker);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetInternetPermission has recved result %{public}d", result);
     return result;
@@ -958,8 +976,8 @@ int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParce
 int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
-    const auto &fromIface = data.ReadString();
-    const auto &toIface = data.ReadString();
+    std::string fromIface = data.ReadString();
+    std::string toIface = data.ReadString();
     int32_t result = IpfwdAddInterfaceForward(fromIface, toIface);
     reply.WriteInt32(result);
     return result;
@@ -1185,6 +1203,22 @@ int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessagePa
     }
     return result;
 }
+
+int32_t NetsysNativeServiceStub::CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t result = GetAllContainerStatsInfo(stats);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
@@ -1564,5 +1598,147 @@ int32_t NetsysNativeServiceStub::CmdGetCookieStats(MessageParcel &data, MessageP
     }
     return result;
 }
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = GetNetworkSharingType(sharingTypeIsOn);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint32(sharingTypeIsOn.size())) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+    }
+    for (auto mem : sharingTypeIsOn) {
+        if (!reply.WriteUint32(mem)) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    
+    return ret;
+}
+
+int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = ERR_NONE;
+    if (!data.ReadUint32(type)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (type < ERR_NONE) {
+        NETNATIVE_LOGE("type parameter invalid");
+        return ERR_INVALID_DATA;
+    }
+
+    bool isOpen = false;
+    if (!data.ReadBool(isOpen)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = UpdateNetworkSharingType(type, isOpen);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ret;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetIpv6PrivacyExtensions(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6PrivacyExtensions has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetEnableIpv6(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t wifi_allow = 0;
+    if (!data.ReadUint8(wifi_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t cellular_allow = 0;
+    if (!data.ReadUint8(cellular_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool reconfirmFlag = true;
+    if (!data.ReadBool(reconfirmFlag)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    NetworkAccessPolicy policy;
+    policy.wifiAllow = wifi_allow;
+    policy.cellularAllow = cellular_allow;
+    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DeleteNetworkAccessPolicy(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<NetBearType> bearerTypes;
+
+    uint32_t size = 0;
+    uint32_t value = 0;
+    if (!data.ReadUint32(size)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadUint32(value)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (value >= BEARER_DEFAULT) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        bearerTypes.insert(static_cast<NetBearType>(value));
+    }
+    int32_t result = NotifyNetBearerTypeChange(bearerTypes);
+    reply.WriteInt32(result);
+    return result;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

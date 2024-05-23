@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,27 +14,15 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_ndk_library("libnet_connection") {
-  output_name = "net_connection"
-  output_extension = "so"
-  ndk_description_file = "./libnet_connection.ndk.json"
-  min_compact_version = "1"
-  system_capability = "SystemCapability.Communication.NetManager.Core"
-  system_capability_headers = [
-    "./include/net_connection.h",
-    "./include/net_connection_type.h",
-  ]
-}
-
-ohos_ndk_headers("netconn_header") {
-  dest_dir = "$ndk_headers_out_dir/network/netmanager"
-  sources = [
-    "./include/net_connection.h",
-    "./include/net_connection_type.h",
-  ]
-}
-
 ohos_shared_library("net_connection") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   output_extension = "so"
   include_dirs =
       [ "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/include" ]
@@ -42,6 +30,18 @@ ohos_shared_library("net_connection") {
   sources = [
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_connection.cpp",
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_connection_adapter.cpp",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   deps = [

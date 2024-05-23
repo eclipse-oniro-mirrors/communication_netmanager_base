@@ -18,12 +18,20 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
 #include "conn_manager.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 #include "network_permission.h"
+
+#include "net_all_capabilities.h"
+#include "net_conn_client.h"
+#include "net_handle.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -84,6 +92,17 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetManagerBaseAccessToken access;
+    NetHandle handle;
+    NetConnClient::GetInstance().GetDefaultNet(handle);
+    NetAllCapabilities netAllCap;
+    NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
+    if (netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
+        netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0) {
+        return;
+    }
+
     ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
@@ -129,6 +148,20 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetDefaultNetworkTest001, TestSize.Level1
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkGetDefault();
     EXPECT_EQ(ret, NETID);
+}
+
+/**
+ * @tc.name: GetAllContainerStatsInfoTest001
+ * @tc.desc: Test NetsysNativeServiceProxy GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t ret = netsysNativeService->GetAllContainerStatsInfo(stats);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -208,7 +241,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
-    int32_t ret = netsysNativeService->SetInternetPermission(UID, true);
+    int32_t ret = netsysNativeService->SetInternetPermission(UID, true, false);
     ret = netsysNativeService->NetworkCreateVirtual(NETID, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -251,6 +284,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetCookieStatsTest001, TestSize.Level1)
     uint64_t stats = 0;
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = netsysNativeService->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
@@ -290,6 +324,75 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, Te
     uint64_t cookie = 0;
     ret = netsysNativeService->GetCookieStats(stats, type, cookie);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = netsysNativeService->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint32_t type = 0;
+    int32_t ret = netsysNativeService->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysNativeService->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string interface = "wlan0";
+    uint32_t on = 0;
+    int32_t ret = netsysNativeService->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysNativeService->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = netsysNativeService->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = netsysNativeService->NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint32_t uid = 0;
+    int32_t ret = netsysNativeService->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

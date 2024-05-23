@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,8 @@ namespace {
 
     const std::string TEST_TRUST_ANCHORS(R"([{"certificates": "@resource/raw/ca"}])");
 
-    const std::string TEST_DOMAINS(R"({[{"include-subdomains": false, "name": "baidu.com"}]})");
+    const std::string TEST_DOMAINS(R"([{"include-subdomains": false, "name": "baidu.com"},
+                                       {"include-subdomains": true, "name": "taobao.com"}])");
 
     const std::string TEST_PINSET(R"({
                     "expiration": "2024-8-6",
@@ -60,13 +61,9 @@ void NetworkSecurityConfigTest::SetUp() {}
 
 void NetworkSecurityConfigTest::TearDown() {}
 
-void BuildTestJsonObject(std::string &content, Json::Value &root)
+void BuildTestJsonObject(std::string &content, cJSON* &json)
 {
-    Json::CharReaderBuilder builder;
-    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
-    JSONCPP_STRING errs;
-
-    reader->parse(content.c_str(), content.c_str() + content.length(), &root, &errs);
+    json = cJSON_Parse(content.c_str());
 }
 
 /**
@@ -184,7 +181,7 @@ HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level1)
 {
-    Json::Value root;
+    cJSON *root = nullptr;
     TrustAnchors trustAnchors;
 
     std::string jsonTxt(TEST_TRUST_ANCHORS);
@@ -196,6 +193,28 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: ParseJsonDomainsTest001
+ * @tc.desc: Test NetworkSecurityConfig::ParseJsonDomains, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonDomainsTest001, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    std::vector<Domain> domains;
+
+    std::string jsonTxt(TEST_DOMAINS);
+    BuildTestJsonObject(jsonTxt, root);
+
+    std::cout << "ParseJsonDomainsTest001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonDomains(root, domains);
+    ASSERT_EQ(domains[0].domainName_, "baidu.com");
+    ASSERT_EQ(domains[0].includeSubDomains_, false);
+    ASSERT_EQ(domains[1].domainName_, "taobao.com");
+    EXPECT_EQ(domains[1].includeSubDomains_, true);
+}
+
+/**
  * @tc.name: ParseJsonPinSet001
  * @tc.desc: Test NetworkSecurityConfig::ParseJsonPinSet, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED
@@ -203,14 +222,15 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
 {
-    Json::Value root;
+    cJSON *root = nullptr;
     PinSet pinSet;
-    
+
     std::string jsonTxt(TEST_PINSET);
     BuildTestJsonObject(jsonTxt, root);
 
     std::cout << "ParseJsonPinSet001 In" << std::endl;
     NetworkSecurityConfig::GetInstance().ParseJsonPinSet(root, pinSet);
+    ASSERT_EQ(pinSet.expiration_, "2024-8-6");
     ASSERT_EQ(pinSet.pins_[0].digestAlgorithm_, "sha256");
     ASSERT_EQ(pinSet.pins_[0].digest_, "Q9TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY=");
     ASSERT_EQ(pinSet.pins_[1].digestAlgorithm_, "sha256");
@@ -225,9 +245,8 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
  */
 HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostName001, TestSize.Level1)
 {
-    Json::Value root;
     PinSet pinSet;
-    
+
     std::string hostname("www.example.com");
     std::string pins;
 

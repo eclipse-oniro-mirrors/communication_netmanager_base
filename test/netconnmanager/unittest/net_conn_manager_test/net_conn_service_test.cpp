@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,27 +20,22 @@
 #define protected public
 #endif
 
-#include "accesstoken_kit.h"
+#include "common_net_conn_callback_test.h"
+#include "http_proxy.h"
 #include "net_all_capabilities.h"
-#include "net_conn_service.h"
+#include "net_conn_callback_stub.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_service.h"
 #include "net_conn_types.h"
-#include "net_manager_constants.h"
-#include "net_mgr_log_wrapper.h"
-#include "token_setproc.h"
-#include "net_supplier_callback_stub.h"
-#include "net_conn_callback_stub.h"
-#include "http_proxy.h"
 #include "net_detection_callback_test.h"
-#include "net_manager_center.h"
-#include "netsys_controller.h"
+#include "net_factoryreset_callback_stub.h"
 #include "net_http_proxy_tracker.h"
 #include "net_interface_callback_stub.h"
-#include "net_factoryreset_callback_stub.h"
-
+#include "net_manager_center.h"
+#include "net_mgr_log_wrapper.h"
+#include "netsys_controller.h"
 #include "system_ability_definition.h"
-
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -78,46 +73,6 @@ constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THRE
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 
-class NetSupplierTestCallback : public NetSupplierCallbackStub {
-public:
-    inline int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-};
-
-class NetConnTestCallback : public NetConnCallbackStub {
-public:
-    inline int32_t NetAvailable(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override
-    {
-        return 0;
-    }
-    inline int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override
-    {
-        return 0;
-    }
-    inline int32_t NetLost(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetUnavailable() override
-    {
-        return 0;
-    }
-    inline int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override
-    {
-        return 0;
-    }
-};
-
 class TestDnsService : public DnsBaseService {
 public:
     int32_t GetAddressesByName(const std::string &hostName, int32_t netId,
@@ -134,7 +89,7 @@ public:
     }
 };
 
-sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnTestCallback();
+sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
 uint32_t g_vpnSupplierId = 0;
@@ -159,8 +114,6 @@ void NetConnServiceTest::SetUpTestCase()
             std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
         NetConnService::GetInstance()->serviceIface_ = std::make_unique<NetConnServiceIface>().release();
         NetManagerCenter::GetInstance().RegisterConnService(NetConnService::GetInstance()->serviceIface_);
-        NetConnService::GetInstance()->netScore_ = std::make_unique<NetScore>();
-        ASSERT_NE(NetConnService::GetInstance()->netScore_, nullptr);
         NetHttpProxyTracker httpProxyTracker;
         httpProxyTracker.ReadFromSettingsData(NetConnService::GetInstance()->globalHttpProxy_);
         NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(NetConnService::GetInstance()->globalHttpProxy_);
@@ -241,9 +194,19 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    auto ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT,
+        netCaps, g_supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
 {
-    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierTestCallback();
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
     ASSERT_NE(callback, nullptr);
     std::set<NetCap> netCaps;
     auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallback(g_supplierId, callback);
@@ -287,6 +250,73 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest002, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    netLinkInfo->ifaceName_ = "rmnet0";
+    INetAddr netAddr;
+    netAddr.type_ = INetAddr::IPV4;
+    netAddr.hostName_ = "testHost";
+    netLinkInfo->netAddrList_.push_back(netAddr);
+    auto ret = NetConnService::GetInstance()->UpdateNetLinkInfo(g_supplierId, netLinkInfo);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    ret = NetConnService::GetInstance()->IsIfaceNameInUse("rmnet0", 1);
+    EXPECT_FALSE(ret);
+    ret = NetConnService::GetInstance()->IsIfaceNameInUse("rmnet0", 100);
+    EXPECT_TRUE(ret);
+
+    ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 1, netAddr);
+    EXPECT_FALSE(ret);
+    ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 100, netAddr);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
+    netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
+    ASSERT_NE(netSpecifier, nullptr);
+    auto ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    sptr<INetConnCallback> callback = nullptr;
+    uint32_t timeoutMS = 0;
+    sptr<NetSpecifier> invalidNetSpecifier = nullptr;
+    ret = NetConnService::GetInstance()->RequestNetConnection(invalidNetSpecifier, callback, timeoutMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    NetConnService::RegisterType registerType = NetConnService::RegisterType::INVALIDTYPE;
+    uint32_t reqId = 0;
+    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType);
+    EXPECT_EQ(registerType, NetConnService::RegisterType::REQUEST);
+
+    ret = NetConnService::GetInstance()->UnregisterNetConnCallback(g_callback);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RequestNetConnectionTest002, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    int64_t TEST_CALLBACK_UID = 1111;
+    auto ret = -1;
+    vector<sptr<INetConnCallback>> uidCallbacks;
+    for (int32_t i = 1; i <= 2000; ++i) {
+        sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+        ret = NetConnService::GetInstance()->RequestNetConnectionAsync(netSpecifier, uidCallback, 0,
+                                                                                        TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        uidCallbacks.push_back(uidCallback);
+    }
+    sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+    ret = NetConnService::GetInstance()->RequestNetConnectionAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM);
+    for (auto& callback : uidCallbacks) {
+        ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(callback, TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+}
+
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->RegisterNetConnCallback(g_callback);
@@ -295,7 +325,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest001, TestSize.Level1)
 {
-    sptr<INetConnCallback> netCallback = new (std::nothrow) NetConnTestCallback();
+    sptr<INetConnCallback> netCallback = new (std::nothrow) NetConnCallbackStubCb();
     auto ret = NetConnService::GetInstance()->UnregisterNetConnCallback(netCallback);
     EXPECT_EQ(ret, NET_CONN_ERR_CALLBACK_NOT_FOUND);
 
@@ -310,6 +340,28 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest002, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->RegisterNetConnCallback(netSpecifier, g_callback,
                                                                                         TEST_TIMEOUTMS);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    int64_t TEST_CALLBACK_UID = 1111;
+    auto ret = -1;
+    vector<sptr<INetConnCallback>> uidCallbacks;
+    for (int32_t i = 1; i <= 2000; ++i) {
+        sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0,
+                                                                                        TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        uidCallbacks.push_back(uidCallback);
+    }
+    sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM);
+    for (auto& callback : uidCallbacks) {
+        ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(callback, TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetDetectionCallbackTest001, TestSize.Level1)
@@ -472,13 +524,13 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest001, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(true);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest002, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(false);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
@@ -613,6 +665,13 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest002, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetCallingUserIdTest001, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
 {
     std::list<int32_t> netIdList;
@@ -628,8 +687,8 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_NO_RESTRICT_BACKGROUND);
 
-    NetConnService::GetInstance()->HandleDetectionResult(TEST_NOTEXISTSUPPLIER, true);
-    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, true);
+    NetConnService::GetInstance()->HandleDetectionResult(TEST_NOTEXISTSUPPLIER, VERIFICATION_STATE);
+    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, VERIFICATION_STATE);
 
     std::vector<std::u16string> args;
     args.emplace_back(u"dummy data");
@@ -676,6 +735,13 @@ HWTEST_F(NetConnServiceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 
     ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_VPN, TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> data;
+    auto ret = NetConnService::GetInstance()->GetIfaceNameIdentMaps(BEARER_CELLULAR, data);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -811,13 +877,13 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
     type = static_cast<CallbackType>(validType);
     NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
 
-    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(nullptr, nullptr, 0);
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(nullptr, nullptr, 0, TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
 {
-    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr);
+    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr, TEST_UID);
     EXPECT_NE(ret, NETSYS_SUCCESS);
 
     sptr<NetSupplier> supplier = nullptr;
@@ -871,9 +937,17 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
 
     HttpProxy proxy;
     uint32_t supplierId = 0;
+    std::string testString = "test";
+    int32_t testInt = 0;
+    std::set<NetCap> netCaps;
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
+    NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_BLUETOOTH, testString, netCaps, supplierId);
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
     NetConnService::GetInstance()->UpdateGlobalHttpProxy(proxy);
+    NetConnService::GetInstance()->OnNetActivateTimeOut(testInt);
+    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId);
+    sptr<NetSupplier> supplier = nullptr;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, CallbackType::CALL_TYPE_AVAILABLE);
 
     sptr<INetSupplierCallback> supplierCallback = nullptr;
     auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallbackAsync(supplierId, supplierCallback);
@@ -888,12 +962,42 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     ret = NetConnService::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
+    ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, callback, timeoutMS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->UnregisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<INetDetectionCallback> detectionCallback = nullptr;
+    ret = NetConnService::GetInstance()->RegUnRegNetDetectionCallback(testInt, detectionCallback, false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->UpdateNetStateForTest(netSpecifier, testInt);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<NetSupplierInfo> netSupplierInfo = nullptr;
+    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(testInt, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<NetLinkInfo> netLinkInfo = nullptr;
+    ret = NetConnService::GetInstance()->UpdateNetLinkInfo(testInt, netLinkInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->NetDetection(testInt);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
+{
     NetConnService::GetInstance()->RequestAllNetworkExceptDefault();
 
     NetConnService::NetInterfaceStateCallback stateCallback;
     std::string testString = "test";
     int32_t testInt = 0;
-    ret = stateCallback.OnInterfaceAddressUpdated(testString, testString, testInt, testInt);
+    auto ret = stateCallback.OnInterfaceAddressUpdated(testString, testString, testInt, testInt);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = stateCallback.OnInterfaceAddressRemoved(testString, testString, testInt, testInt);
@@ -924,6 +1028,67 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     sptr<INetInterfaceStateCallback> interfaceStateCallback = nullptr;
     ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
+{
+    NetHttpProxyTracker httpProxyTracker;
+    std::string exclusions = "";
+    NetConnService::GetInstance()->GetPreferredUrl();
+    std::list<std::string> list = httpProxyTracker.ParseExclusionList(exclusions);
+    EXPECT_TRUE(list.empty());
+
+    std::string result = httpProxyTracker.GetExclusionsAsString(list);
+    EXPECT_TRUE(result.empty());
+
+    uint32_t supplierId = 10;
+    int32_t type = 0;
+    auto ret = NetConnService::GetInstance()->RegisterSlotType(supplierId, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string slotType = "";
+    ret = NetConnService::GetInstance()->GetSlotType(slotType);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string url = "";
+    bool preferCellular = false;
+    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetConnService::GetInstance()->netFactoryResetCallback_ = nullptr;
+    ret = NetConnService::GetInstance()->FactoryResetNetwork();
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnServiceTest, FindSupplierWithInternetByBearerType001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
+        netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::vector<sptr<NetSupplier>> suppliers =
+        NetConnService::GetInstance()->FindSupplierWithInternetByBearerType(NetBearType::BEARER_WIFI);
+    EXPECT_FALSE(suppliers.empty());
+}
+
+HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
+        netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
+        NetConnService::GetInstance()->netSuppliers_[supplierId]);
+    bool isBetter = false;
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

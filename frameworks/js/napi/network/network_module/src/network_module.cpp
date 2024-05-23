@@ -47,14 +47,14 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 
 napi_value NetworkModule::GetType(napi_env env, napi_callback_info info)
 {
-    NETMANAGER_BASE_LOGI("NetworkModule::GetType is called");
+    NETMANAGER_BASE_LOGD("GetType is called");
     return ModuleTemplate::InterfaceWithoutManager<GetTypeContext>(
         env, info, "SystemNetworkGetType", nullptr, NetworkAsyncWork::ExecGetType, NetworkAsyncWork::GetTypeCallback);
 }
 
 napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 {
-    NETMANAGER_BASE_LOGI("NetworkModule::Subscribe is called");
+    NETMANAGER_BASE_LOGI("Subscribe is called");
     return ModuleTemplate::Interface<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
                                                        NetworkAsyncWork::ExecSubscribe,
                                                        NetworkAsyncWork::SubscribeCallback);
@@ -62,7 +62,7 @@ napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
-    NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
+    NETMANAGER_BASE_LOGI("Unsubscribe is called");
     return ModuleTemplate::InterfaceSync<UnsubscribeContext>(
         env, info, "SystemNetworkUnsubscribe", nullptr, NetworkExec::ExecUnsubscribe, NetworkExec::UnsubscribeCallback);
 }

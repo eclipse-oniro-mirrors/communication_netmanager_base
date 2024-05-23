@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,7 @@
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
-#include "net_policy_inner_define.h"
-#include "net_policy_security.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -67,7 +66,7 @@ void NetPolicyManagerTest::SetUpTestCase()
 
 void NetPolicyManagerTest::TearDownTestCase()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t ret1 =
         DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(TEST_UID2, NetUidPolicy::NET_POLICY_NONE);
     std::cout << "Result ret1" << ret1 << std::endl;
@@ -123,7 +122,7 @@ sptr<NetPolicyCallbackTest> NetPolicyManagerTest::GetINetPolicyCallbackSample() 
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager001, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID7, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     std::cout << "NetPolicyManager001 SetPolicyByUid result:" << result << std::endl;
@@ -142,7 +141,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager001, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager002, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID2, NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -160,7 +159,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager002, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager003, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     std::vector<uint32_t> uids;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(
         NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND, uids);
@@ -174,7 +173,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager003, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager004, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     bool isAllowed = false;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(TEST_UID7, false, isAllowed);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -188,7 +187,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager004, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager005, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     bool isAllowed = false;
     int32_t result =
         DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(TEST_UID7, std::string("test"), isAllowed);
@@ -199,7 +198,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager005, TestSize.Level1)
 void TrigerCallback()
 {
     usleep(TRIGER_DELAY_US);
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -212,7 +211,7 @@ void TrigerCallback()
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager006, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = client->RegisterNetPolicyCallback(callback);
@@ -230,7 +229,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager006, TestSize.Level1)
     } else {
         std::cout << "NetPolicyManager006 RegisterNetPolicyCallback return fail" << std::endl;
     }
-    NetPolicyAccessToken token1;
+    NetManagerBaseAccessToken token1;
     result = client->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -255,7 +254,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
     quotaPolicy.quotapolicy.metered = true;
     quotaPolicy.quotapolicy.source = 0;
     quotaPolicies.push_back(quotaPolicy);
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -268,7 +267,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager008, TestSize.Level1)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -297,7 +296,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 
         quotaPolicies.push_back(cellularPolicy);
     }
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -310,7 +309,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager010, TestSize.Level1)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -323,7 +322,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager010, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
 {
     std::string simId = "0";
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(simId);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -335,7 +334,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager012, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->UpdateRemindPolicy(
         0, std::to_string(TRIGER_DELAY_US), RemindType::REMIND_TYPE_LIMIT);
     std::cout << "NetPolicyManager012 result value:" << result << std::endl;
@@ -349,7 +348,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager012, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager013, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleTrustlist({TEST_UID7}, true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -361,7 +360,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager013, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager014, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     std::vector<uint32_t> uids;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetDeviceIdleTrustlist(uids);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -374,7 +373,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager014, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager015, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
     ASSERT_EQ(result, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -386,7 +385,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager015, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager016, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     bool backgroundPolicy = false;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicy(backgroundPolicy);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -399,7 +398,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager016, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t ret1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(false);
     uint32_t backgroundPolicyOfUid = 0;
     int32_t ret2 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
@@ -417,7 +416,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t ret1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
     uint32_t backgroundPolicyOfUid = 0;
     int32_t ret2 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
@@ -435,7 +434,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager019, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleTrustlist({TEST_UID6}, true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -447,7 +446,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager019, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager020, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
     int32_t ret1 = client->SetDeviceIdleTrustlist({TEST_UID8}, true);
     int32_t ret2 = client->SetDeviceIdleTrustlist({TEST_UID6}, true);
@@ -466,7 +465,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager020, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager021, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
     int32_t ret1 = client->SetDeviceIdleTrustlist({TEST_UID1}, false);
     int32_t ret2 = client->SetDeviceIdleTrustlist({TEST_UID6}, false);
@@ -488,7 +487,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager021, TestSize.Level1)
 
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager022, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t ret1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID2, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     int32_t ret2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
@@ -539,7 +538,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager022, TestSize.Level1)
 
 void SetBackgroundPolicyCallback()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     usleep(TRIGER_DELAY_US);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(false);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -551,7 +550,7 @@ void SetBackgroundPolicyCallback()
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager023, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = client->RegisterNetPolicyCallback(callback);
@@ -565,14 +564,14 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager023, TestSize.Level1)
     } else {
         std::cout << "NetPolicyManager023 RegisterNetPolicyCallback return fail" << std::endl;
     }
-    NetPolicyAccessToken token1;
+    NetManagerBaseAccessToken token1;
     result = client->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 void SetNetRuleChangeCallback()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     usleep(TRIGER_DELAY_US);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID6, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
@@ -586,7 +585,7 @@ void SetNetRuleChangeCallback()
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager024, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callback);
 
@@ -600,14 +599,14 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager024, TestSize.Level1)
     } else {
         std::cout << "NetPolicyManager024 SetNetRuleChangeCallback return fail" << std::endl;
     }
-    NetPolicyAccessToken token1;
+    NetManagerBaseAccessToken token1;
     result = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 void SetNetQuotaPoliciesCallback()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     usleep(TRIGER_DELAY_US);
 
     std::vector<NetQuotaPolicy> quotaPolicies;
@@ -632,7 +631,7 @@ void SetNetQuotaPoliciesCallback()
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callback);
     if (result == NETMANAGER_SUCCESS) {
@@ -643,7 +642,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
     } else {
         std::cout << "NetPolicyManager025 RegisterNetPolicyCallback return fail" << std::endl;
     }
-    NetPolicyAccessToken token1;
+    NetManagerBaseAccessToken token1;
     result = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -655,7 +654,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager027, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveTrustlist({TEST_UID1}, true);
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
     int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveTrustlist({TEST_UID6}, true);
@@ -674,9 +673,52 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager027, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager028, TestSize.Level1)
 {
     std::vector<uint32_t> uids;
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPowerSaveTrustlist(uids);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager029
+ * @tc.desc: Test NetPolicyManager SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager029, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+        TEST_UID1, netAccessPolicy, reconfirmFlag);
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+    reconfirmFlag = false;
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+        TEST_UID6, netAccessPolicy, reconfirmFlag);
+    ASSERT_EQ(result2, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager030
+ * @tc.desc: Test NetPolicyManager GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager030, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    AccessPolicyParameter parameter;
+    parameter.flag = 0;
+    parameter.uid = TEST_UID1;
+    AccessPolicySave resultSave;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+    parameter.flag = 1;
+    parameter.uid = TEST_UID6;
+    auto result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -22,6 +22,8 @@
 #include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
+#include "get_traffic_stats_by_network_context.h"
+#include "get_traffic_stats_by_uid_network_context.h"
 #include "get_uid_rxbytes_context.h"
 #include "module_template.h"
 #include "napi_utils.h"
@@ -52,6 +54,8 @@ constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
 constexpr const char *FUNCTION_GET_SOCKFD_RXBYTES = "getSockfdRxBytes";
 constexpr const char *FUNCTION_GET_SOCKFD_TXBYTES = "getSockfdTxBytes";
+constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK = "getTrafficStatsByNetwork";
+constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK = "getTrafficStatsByUidNetwork";
 } // namespace
 
 napi_value GetCellularRxBytes(napi_env env, napi_callback_info info)
@@ -138,6 +142,20 @@ napi_value GetIfaceUidStats(napi_env env, napi_callback_info info)
                                                               StatisticsAsyncWork::GetIfaceUidStatsCallback);
 }
 
+napi_value GetTrafficStatsByNetwork(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetTrafficStatsByNetworkContext>(
+        env, info, FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK, nullptr, StatisticsAsyncWork::ExecGetTrafficStatsByNetwork,
+        StatisticsAsyncWork::GetTrafficStatsByNetworkCallback);
+}
+
+napi_value GetTrafficStatsByUidNetwork(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetTrafficStatsByUidNetworkContext>(
+        env, info, FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK, nullptr,
+        StatisticsAsyncWork::ExecGetTrafficStatsByUidNetwork, StatisticsAsyncWork::GetTrafficStatsByUidNetworkCallback);
+}
+
 napi_value UpdateIfacesStats(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<UpdateIfacesStatsContext>(env, info, FUNCTION_UPDATE_IFACE_STATS, nullptr,
@@ -164,25 +182,28 @@ napi_value Off(napi_env env, napi_callback_info info)
 
 napi_value InitStatisticsModule(napi_env env, napi_value exports)
 {
-    NapiUtils::DefineProperties(env, exports,
-                                {
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_RXBYTES, GetCellularRxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_TXBYTES, GetCellularTxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_RXBYTES, GetAllRxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_TXBYTES, GetAllTxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_RXBYTES, GetUidRxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_RXBYTES, GetSockfdRxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_TXBYTES, GetSockfdTxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_STATS, GetIfaceStats),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_UID_STATS, GetIfaceUidStats),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_IFACE_STATS, UpdateIfacesStats),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_STATS_DATA, UpdateStatsData),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
-                                    DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
-                                });
+    NapiUtils::DefineProperties(
+        env, exports,
+        {
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_RXBYTES, GetCellularRxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_TXBYTES, GetCellularTxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_RXBYTES, GetAllRxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_TXBYTES, GetAllTxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_RXBYTES, GetUidRxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_RXBYTES, GetSockfdRxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_TXBYTES, GetSockfdTxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_STATS, GetIfaceStats),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_UID_STATS, GetIfaceUidStats),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK, GetTrafficStatsByNetwork),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK, GetTrafficStatsByUidNetwork),
+            DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_IFACE_STATS, UpdateIfacesStats),
+            DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_STATS_DATA, UpdateStatsData),
+            DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
+            DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
+        });
     return exports;
 }
 

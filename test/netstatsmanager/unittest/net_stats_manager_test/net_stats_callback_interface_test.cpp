@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "common_mock_net_remote_object_test.h"
+#include "common_net_stats_callback_test.h"
 #include "net_stats_callback_proxy.h"
-#include "net_stats_callback_stub.h"
-#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,81 +26,6 @@ namespace {
 using namespace testing::ext;
 constexpr const char *TEST_IFACE = "TEST_IFACE";
 constexpr uint32_t TEST_UID = 4454;
-
-class NetStatsCallbackStubTest : public NetStatsCallbackStub {
-public:
-    NetStatsCallbackStubTest() = default;
-    ~NetStatsCallbackStubTest() override {}
-    int32_t NetIfaceStatsChanged(const std::string &iface) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetIfaceStatsChanged::iface: " << iface << std::endl;
-        return 0;
-    }
-    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetUidStatsChanged::iface: " << iface << ", uid:" << uid << std::endl;
-        return 0;
-    }
-};
-
-class MockNetIRemoteObject : public IRemoteObject {
-public:
-    MockNetIRemoteObject() : IRemoteObject(u"mock_i_remote_object") {}
-    ~MockNetIRemoteObject() {}
-
-    int32_t GetObjectRefCount() override
-    {
-        return 0;
-    }
-
-    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        return 0;
-    }
-
-    bool IsProxyObject() const override
-    {
-        return true;
-    }
-
-    bool CheckObjectLegality() const override
-    {
-        return true;
-    }
-
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool Marshalling(Parcel &parcel) const override
-    {
-        return true;
-    }
-
-    sptr<IRemoteBroker> AsInterface() override
-    {
-        return nullptr;
-    }
-
-    int Dump(int fd, const std::vector<std::u16string> &args) override
-    {
-        return 0;
-    }
-
-    std::u16string GetObjectDescriptor() const
-    {
-        std::u16string descriptor = std::u16string();
-        return descriptor;
-    }
-};
 
 class NetStatsCallbackNotifyTest {
 public:
@@ -211,7 +136,7 @@ public:
 void NetStatsCallbackInterfaceTest::SetUpTestCase()
 {
     instance_ = std::make_shared<NetStatsCallbackNotifyTest>();
-    sptr<NetStatsCallbackStub> callback = new (std::nothrow) NetStatsCallbackStubTest();
+    sptr<NetStatsCallbackStub> callback = new (std::nothrow) NetStatsCallbackTestCb();
     instance_->RegisterNetStatsCbChanged(callback);
 }
 

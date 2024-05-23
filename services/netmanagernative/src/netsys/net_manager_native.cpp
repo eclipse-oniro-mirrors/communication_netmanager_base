@@ -79,9 +79,9 @@ int32_t NetManagerNative::NetworkReinitRoute()
     return connManager_->ReinitRoute();
 }
 
-int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow)
+int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
-    return connManager_->SetInternetPermission(uid, allow);
+    return connManager_->SetInternetPermission(uid, allow, isBroker);
 }
 
 int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permission)
@@ -132,8 +132,7 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
 
 int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
-    interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
-    return NETMANAGER_SUCCESS;
+    return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
@@ -310,6 +309,16 @@ int64_t NetManagerNative::GetIfaceTxBytes(std::string interfaceName)
 int32_t NetManagerNative::IpEnableForwarding(const std::string &requester)
 {
     return sharingManager_->IpEnableForwarding(requester);
+}
+
+int32_t NetManagerNative::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetEnableIpv6(interfaceName, on);
 }
 
 int32_t NetManagerNative::IpDisableForwarding(const std::string &requester)
@@ -496,5 +505,19 @@ int32_t NetManagerNative::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCa
     return dnsManager_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetManagerNative::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return connManager_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetManagerNative::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    return connManager_->NotifyNetBearerTypeChange(bearerTypes);
+}
 } // namespace nmd
 } // namespace OHOS

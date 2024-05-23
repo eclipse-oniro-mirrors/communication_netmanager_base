@@ -21,6 +21,8 @@
 #include "i_net_dns_result_callback.h"
 #include "i_netsys_controller_service.h"
 #include "refbase.h"
+#include <set>
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetsysController {
@@ -697,6 +699,13 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName);
 
     /**
+     * Get all container stats info
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
      * Get all stats info
      *
      * @param stats stats
@@ -817,6 +826,27 @@ public:
      * @return returns the stats of the cookie
      */
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie);
+
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn);
+
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen);
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid - The specified UID of application.
+     * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
+
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
 private:
     NetsysController() = default;
 

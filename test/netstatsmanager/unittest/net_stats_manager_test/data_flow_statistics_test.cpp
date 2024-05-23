@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
-#include "net_stats_security.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -172,12 +172,12 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager010, TestSize.Level1)
  */
 HWTEST_F(DataFlowStatisticsTest, NetStatsManager011, TestSize.Level1)
 {
-    NetStatsSecurityAccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<NetStatsCallbackTest> callback = GetINetStatsCallbackSample();
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
-    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+    ASSERT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
     result = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
-    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+    ASSERT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

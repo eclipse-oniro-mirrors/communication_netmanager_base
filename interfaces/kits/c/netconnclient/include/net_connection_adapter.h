@@ -24,7 +24,17 @@
 
 namespace OHOS::NetManagerStandard {
 
-int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList);
+int32_t Conv2NetHandle(NetHandle &netHandleObj, NetConn_NetHandle *netHandle);
+
+int32_t Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj);
+
+int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, NetConn_NetHandleList *netHandleList);
+
+int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *prop);
+
+int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCapabilities *netAllCaps);
+
+int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy);
 
 } // namespace OHOS::NetManagerStandard
 #endif /* NATIVE_NET_CONN_ADAPTER_H */

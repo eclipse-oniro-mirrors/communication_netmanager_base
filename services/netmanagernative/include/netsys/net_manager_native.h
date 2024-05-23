@@ -30,6 +30,7 @@
 #include "route_type.h"
 #include "sharing_manager.h"
 #include "uid_range.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace nmd {
@@ -47,7 +48,7 @@ public:
     void Init();
 
     int32_t NetworkReinitRoute();
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
     int32_t NetworkDestroy(int32_t netId);
@@ -128,7 +129,11 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback);
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
-
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

@@ -80,7 +80,7 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     auto policyCondition = BuildTransCondition(uid, policy);
     TransConditionToRuleAndNetsys(policyCondition, uid, policy);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
-    NETMGR_LOG_I("End TransPolicyToRule");
+    NETMGR_LOG_D("End TransPolicyToRule");
     return NETMANAGER_SUCCESS;
 }
 
@@ -343,6 +343,7 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
@@ -410,6 +411,7 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
 
 void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     if (isForeground) {
         foregroundUidList_.insert(uid);
         return;
@@ -451,6 +453,16 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
+}
+
+int32_t NetPolicyRule::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    return GetNetsysInst()->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetPolicyRule::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return GetNetsysInst()->DeleteNetworkAccessPolicy(uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

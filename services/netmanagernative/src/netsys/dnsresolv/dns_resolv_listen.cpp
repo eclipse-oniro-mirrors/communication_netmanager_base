@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "netsys_client.h"
 #include "init_socket.h"
 #ifdef USE_SELINUX
-#include "selinux.h"
+#include "selinux/selinux.h"
 #endif
 #include "singleton.h"
 #include <ipc_skeleton.h>
@@ -35,14 +35,10 @@
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
-namespace {
-constexpr const char *DNS_RESOLV_THREAD = "DNS_RESOLV_THREAD";
-} // namespace
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
-    dnsResolvRunner_ = AppExecFwk::EventRunner::Create(DNS_RESOLV_THREAD);
-    dnsResolvHandler_ = std::make_shared<AppExecFwk::EventHandler>(dnsResolvRunner_);
+    dnsResolvListenFfrtQueue_ = std::make_shared<ffrt::queue>("DnsResolvListen");
 }
 
 DnsResolvListen::~DnsResolvListen()
@@ -190,52 +186,31 @@ void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
     }
 }
 
-void DnsResolvListen::ProcPostDnsResultCommandEx(int32_t clientSockFd, int32_t& queryret,
-                                                 uint32_t& ai_size, struct QueryParam& param)
+bool DnsResolvListen::ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid)
 {
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
-        NETNATIVE_LOGE("read queryret errno %{public}d", errno);
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read1 errno %{public}d", errno);
         close(clientSockFd);
-        return;
+        return false;
     }
 
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
-        NETNATIVE_LOGE("read ai_size errno %{public}d", errno);
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read2 errno %{public}d", errno);
         close(clientSockFd);
-        return;
+        return false;
     }
 
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
-        NETNATIVE_LOGE("read param errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
+    return true;
 }
 
 void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
 {
-    NETNATIVE_LOGI("ProcPostDnsResultCommand");
-
     char name[MAX_HOST_NAME_LEN] = {0};
-
     uint32_t netid = netId;
-    NETNATIVE_LOGE("ProcPostDnsResultCommand %{public}d", netid);
+    uint32_t uid;
+    uint32_t pid;
 
-    uint32_t uid = 0;
-    uint32_t pid = 0;
-    uint32_t usedtime = 0;
-    int32_t queryret = 0;
-    struct QueryParam param;
-    uint32_t ai_size = MAX_RESULTS;
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read uid errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
-
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read pid errno %{public}d", errno);
-        close(clientSockFd);
+    if (!ProcPostDnsThreadResult(clientSockFd, uid, pid)) {
         return;
     }
     
@@ -244,13 +219,33 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+    uint32_t usedtime;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read usedtime errno %{public}d", errno);
+        NETNATIVE_LOGE("read3 errno %{public}d", errno);
         close(clientSockFd);
         return;
     }
 
-    ProcPostDnsResultCommandEx(clientSockFd, queryret, ai_size, param);
+    int32_t queryret;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read4 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    uint32_t ai_size = MAX_RESULTS;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
+        NETNATIVE_LOGE("read5 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    struct QueryParam param;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
+        NETNATIVE_LOGE("read6 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
 
     if ((queryret == 0) && (ai_size > 0)) {
         ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
@@ -265,15 +260,11 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     } else {
         DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name, 0, queryret, param, nullptr);
     }
-
-    NETNATIVE_LOGI("ProcPostDnsResultCommand end");
 }
 
 void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId)
 {
     // Todo recv data
-    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand");
-
     OHOS::NetManagerStandard::NetHandle netHandle;
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
     int netid = netHandle.GetNetId();
@@ -281,15 +272,11 @@ void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t ne
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netid), sizeof(int))) {
         NETNATIVE_LOGE("send failed");
     }
-
-    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand end");
 }
 
 void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
 {
     // Todo recv data
-    NETNATIVE_LOGI("ProcBindSocketCommand");
-
     int32_t fd = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&fd), sizeof(int32_t))) {
         NETNATIVE_LOGE("read errno %{public}d", errno);
@@ -300,8 +287,6 @@ void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
     if (OHOS::nmd::FwmarkClient().BindSocket(fd, netId) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("BindSocket to netid failed");
     }
- 
-    NETNATIVE_LOGI("ProcBindSocketCommand end");
 }
 
 void DnsResolvListen::ProcCommand(int clientSockFd)
@@ -379,11 +364,14 @@ void DnsResolvListen::StartListen()
             close(clientSockFd);
             continue;
         }
-        if (dnsResolvHandler_ != nullptr) {
-            dnsResolvHandler_->PostSyncTask([this, &clientSockFd]() {
-                this->ProcCommand(clientSockFd);
-            });
+        if (!dnsResolvListenFfrtQueue_) {
+            NETNATIVE_LOGE("FFRT Init Fail");
+            return;
         }
+        ffrt::task_handle StartListenTask = dnsResolvListenFfrtQueue_->submit_h([this, &clientSockFd]() {
+            this->ProcCommand(clientSockFd);
+        });
+        dnsResolvListenFfrtQueue_->wait(StartListenTask);
     }
 }
 } // namespace OHOS::nmd

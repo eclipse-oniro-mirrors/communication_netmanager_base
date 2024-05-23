@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -551,7 +552,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
+int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -563,6 +564,10 @@ int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t al
     }
 
     if (!data.WriteUint8(allow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(isBroker)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -700,16 +705,8 @@ int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to AddInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -726,16 +723,8 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to DelInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1572,7 +1561,9 @@ int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, ui
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetUidStats ret= %{public}d", ret);
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to GetUidStats ret= %{public}d", ret);
+        }
         return ret;
     }
     if (!reply.ReadUint64(stats)) {
@@ -1608,13 +1599,49 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        }
         return ret;
     }
     if (!reply.ReadUint64(stats)) {
         NETNATIVE_LOGE("get stats falil");
         return ERR_FLATTEN_OBJECT;
     }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO),
+                                        data,
+                                        reply,
+                                        option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetAllContainerStatsInfo ret= %{public}d", ret);
+        return ret;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     return ERR_NONE;
 }
 
@@ -1649,7 +1676,8 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                                           IptablesType ipType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1940,16 +1968,8 @@ int32_t NetsysNativeServiceProxy::AddStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1978,16 +1998,8 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -2180,5 +2192,197 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
     }
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("GetNetworkSharingType in");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("GetNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t count = ERR_NONE;
+    if (!reply.ReadUint32(count)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t tmp = ERR_NONE;
+    for (size_t index = 0; index < count; ++index) {
+        if (!reply.ReadUint32(tmp)) {
+            NETNATIVE_LOGE("GetNetworkSharingType falil");
+            return ERR_FLATTEN_OBJECT;
+        }
+        sharingTypeIsOn.insert(tmp);
+    }
+
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("UpdateNetworkSharingType");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetIpv6PrivacyExtensions");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetEnableIpv6");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(policy.wifiAllow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(policy.cellularAllow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(reconfirmFlag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY), data, reply,
+                          option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteNetworkAccessPolicy");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY), data, reply,
+                          option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    if (!data.WriteUint32(size)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto bearerType : bearerTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE), data,
+                          reply, option);
+    return reply.ReadInt32();
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

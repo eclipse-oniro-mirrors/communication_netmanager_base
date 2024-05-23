@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,16 @@
 #include <list>
 
 #include "parcel.h"
+#include "securec.h"
+#include "netmanager_secure_data.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+class NetConnService;
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 class NET_SYMBOL_VISIBLE HttpProxy final : public Parcelable {
 public:
+    friend class NetConnService;
     HttpProxy();
     HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList);
 
@@ -33,6 +37,8 @@ public:
     [[nodiscard]] uint16_t GetPort() const;
     [[nodiscard]] std::list<std::string> GetExclusionList() const;
     [[nodiscard]] std::string ToString() const;
+    [[nodiscard]] SecureData GetUsername() const;
+    [[nodiscard]] SecureData GetPassword() const;
     void inline SetHost(std::string &&host)
     {
         host_ = host;
@@ -45,6 +51,14 @@ public:
     {
         exclusionList_ = list;
     }
+    void inline SetUserName(const SecureData &username)
+    {
+        username_ = username;
+    }
+    void inline SetPassword(const SecureData &password)
+    {
+        password_ = password;
+    }
 
     bool operator==(const HttpProxy &httpProxy) const;
     bool operator!=(const HttpProxy &httpProxy) const;
@@ -54,6 +68,8 @@ public:
 private:
     std::string host_;
     uint16_t port_;
+    SecureData username_;
+    SecureData password_;
     std::list<std::string> exclusionList_;
 };
 } // namespace NetManagerStandard

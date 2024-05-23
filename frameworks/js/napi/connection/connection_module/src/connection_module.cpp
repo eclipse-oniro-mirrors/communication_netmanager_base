@@ -218,7 +218,7 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
         DECLARE_NET_CAP(NET_CAPABILITY_INTERNET),
         DECLARE_NET_CAP(NET_CAPABILITY_NOT_VPN),
         DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED),
-        DECLARE_NET_CAP(NET_CAPABILITY_CAPTIVE_PORTAL),
+        DECLARE_NET_CAP(NET_CAPABILITY_PORTAL),
         DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT),
     };
     napi_value caps = NapiUtils::CreateObject(env);
@@ -266,9 +266,8 @@ napi_value ConnectionModule::IsDefaultNetMetered(napi_env env, napi_callback_inf
 
 napi_value ConnectionModule::IsDefaultNetMeteredSync(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED, nullptr,
-                                                                     ConnectionExec::ExecIsDefaultNetMetered,
-                                                                     ConnectionExec::IsDefaultNetMeteredCallback);
+    return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED,
+        nullptr, ConnectionExec::ExecIsDefaultNetMetered, ConnectionExec::IsDefaultNetMeteredCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)

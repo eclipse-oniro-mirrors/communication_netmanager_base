@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#include <thread>
-
 #include <securec.h>
-
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include <thread>
 
 #include "i_net_policy_service.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
 #include "net_quota_policy.h"
+#include "netmanager_base_test_security.h"
 #define private public
 #include "net_policy_service.h"
 #include "net_policy_service_stub.h"
@@ -40,128 +36,34 @@ static constexpr uint32_t CONVERT_NUMBER_TO_BOOL = 2;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "net_policy_client_fuzzer",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_client_fuzzer",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
-
-HapInfoParams testInfoParms2 = {.userID = 1,
-                                .bundleName = "net_policy_client_fuzzer",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-
-PermissionDef testPermDef2 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_client_fuzzer",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState2 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams2 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef2},
-                                    .permStateList = {testState2}};
-
-HapInfoParams testInfoParms3 = {.userID = 1,
-                                .bundleName = "net_policy_client_fuzzer",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-
-PermissionDef testPermDef3 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_client_fuzzer",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState3 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams3 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef3},
-                                    .permStateList = {testState3}};
 } // namespace
 
-template <class T> T GetData()
+template<class T>
+T NetPolicyGetData()
 {
-    T object{};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    T object {};
+    size_t netPolicySize = sizeof(object);
+    if (g_baseFuzzData == nullptr || netPolicySize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, netPolicySize, g_baseFuzzData + g_baseFuzzPos, netPolicySize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += netPolicySize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetPolicyGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetPolicyGetData<char>();
     }
     std::string str(cstr);
     return str;
 }
-
-class AccessToken {
-public:
-    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
 
 class INetPolicyCallbackTest : public IRemoteStub<INetPolicyCallback> {
 public:
@@ -226,23 +128,32 @@ bool WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
+bool IsValidPolicyFuzzData(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
     if ((data == nullptr) || (size == 0)) {
-        return;
+        return false;
     }
+
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
 
-    AccessToken token(testInfoParms2, testPolicyPrams2);
-    uint32_t uid = GetData<uint32_t>();
-    uint32_t policy = GetData<uint32_t>() % 3;
-
-    MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
+        return false;
+    }
+    return true;
+}
+
+void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    uint32_t policy = NetPolicyGetData<uint32_t>() % 3;
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint32(policy);
 
@@ -251,17 +162,11 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    AccessToken token(testInfoParms3, testPolicyPrams3);
-    uint32_t uid = GetData<uint32_t>();
+    NetManagerBaseAccessToken token;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(uid);
@@ -271,16 +176,13 @@ void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    AccessToken token(testInfoParms3, testPolicyPrams3);
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    uint32_t policy = GetData<uint32_t>() % 3;
+    uint32_t policy = NetPolicyGetData<uint32_t>() % 3;
     dataParcel.WriteUint32(policy);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), dataParcel);
@@ -288,18 +190,11 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms2, testPolicyPrams2);
-    bool isBackgroundPolicyAllow = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    NetManagerBaseAccessToken token;
+    bool isBackgroundPolicyAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteBool(isBackgroundPolicyAllow);
@@ -308,17 +203,11 @@ void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-    uint32_t uid = GetData<uint32_t>();
+    NetManagerBaseAccessToken token;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(uid);
@@ -327,32 +216,29 @@ void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetManagerBaseAccessToken token;
 
-    uint32_t vectorSize = GetData<uint32_t>() % 21;
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 21;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = NetPolicyGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = NetPolicyGetString(STR_LEN);
 
-        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = NetPolicyGetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -363,17 +249,14 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetManagerBaseAccessToken token;
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
     if (callback == nullptr) {
         return;
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -384,20 +267,15 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    AccessToken token(testInfoParms1, testPolicyPrams1);
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
     if (callback == nullptr) {
         return;
     }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK), dataParcel);
@@ -408,7 +286,7 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size == 0)) {
         return;
     }
-    AccessToken token(testInfoParms3, testPolicyPrams3);
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
@@ -419,33 +297,28 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    AccessToken token(testInfoParms2, testPolicyPrams2);
-
-    uint32_t vectorSize = GetData<uint32_t>() % 21;
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 21;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = NetPolicyGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = NetPolicyGetString(STR_LEN);
 
-        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = NetPolicyGetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
-    }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
     }
     NetQuotaPolicy::Marshalling(dataParcel, quotaPolicies);
 
@@ -454,22 +327,14 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-    uint32_t uid = GetData<uint32_t>();
-    bool metered = uid % CONVERT_NUMBER_TO_BOOL == 0;
-    std::string ifaceName = GetStringFromData(STR_LEN);
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    bool metered = uid % CONVERT_NUMBER_TO_BOOL == 0;
+    std::string ifaceName = NetPolicyGetString(STR_LEN);
     dataParcel.WriteUint32(uid);
     dataParcel.WriteBool(metered);
 
@@ -488,17 +353,11 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    AccessToken token(testInfoParms2, testPolicyPrams2);
-    std::string simId = GetStringFromData(STR_LEN);
+    NetManagerBaseAccessToken token;
+    std::string simId = NetPolicyGetString(STR_LEN);
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -509,23 +368,14 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms2, testPolicyPrams2);
-    int32_t netType = GetData<int32_t>();
-    uint32_t remindType = GetData<uint32_t>();
-    std::string simId = GetStringFromData(STR_LEN);
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-
+    int32_t netType = NetPolicyGetData<int32_t>();
+    uint32_t remindType = NetPolicyGetData<uint32_t>();
+    std::string simId = NetPolicyGetString(STR_LEN);
     dataParcel.WriteInt32(netType);
     dataParcel.WriteString(simId);
     dataParcel.WriteUint32(remindType);
@@ -535,22 +385,14 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-    bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
+    bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
@@ -559,21 +401,13 @@ void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
+    bool enable = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteBool(enable);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), dataParcel);
@@ -581,22 +415,14 @@ void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
-    bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
+    bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
     dataParcel.WriteBool(isAllowed);
     dataParcel.WriteUInt32Vector(uids);
 
@@ -605,21 +431,110 @@ void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 
 void GetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessToken token(testInfoParms1, testPolicyPrams1);
-
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), dataParcel);
+}
+
+void GetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST), dataParcel);
+}
+
+void GetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY), dataParcel);
+}
+
+void SetPowerSavePolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    bool enable = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    dataParcel.WriteBool(enable);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), dataParcel);
+}
+
+void CheckPermissionFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), dataParcel);
+}
+
+/**
+ * @tc.name: SetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void SetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    NetworkAccessPolicy netAccessPolicy;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    netAccessPolicy.wifiAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    netAccessPolicy.cellularAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    bool reconfirmFlag = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUint8(netAccessPolicy.wifiAllow);
+    dataParcel.WriteUint8(netAccessPolicy.cellularAllow);
+    dataParcel.WriteBool(reconfirmFlag);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY), dataParcel);
+}
+
+/**
+ * @tc.name: GetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void GetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    bool flag = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    uint32_t userId = NetPolicyGetData<uint32_t>();
+    dataParcel.WriteBool(flag);
+    dataParcel.WriteInt32(uid);
+    dataParcel.WriteUint32(userId);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -643,5 +558,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetPowerSaveTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::GetPowerSaveTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetDeviceIdleTrustlistFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetBackgroundPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetPowerSavePolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::CheckPermissionFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetNetworkAccessPolicyFuzzTest(data, size);
     return 0;
 }

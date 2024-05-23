@@ -19,9 +19,13 @@
 
 #include "system_ability_definition.h"
 
+#include "bundle_constants.h"
+#include "bundle_mgr_proxy.h"
+#include "iservice_registry.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_policy_base.h"
 #include "net_policy_constants.h"
 #include "net_policy_core.h"
 #include "net_policy_file.h"
@@ -29,7 +33,9 @@
 #include "net_quota_policy.h"
 #include "net_settings.h"
 #include "netmanager_base_permission.h"
-#include "net_policy_base.h"
+#include "system_ability_definition.h"
+#include "net_policy_listener.h"
+#include "net_access_policy_dialog.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -45,7 +51,7 @@ NetPolicyService::~NetPolicyService() = default;
 
 void NetPolicyService::OnStart()
 {
-    NETMGR_LOG_I("NetPolicyService OnStart");
+    NETMGR_LOG_I("OnStart");
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_W("NetPolicyService already start.");
         return;
@@ -70,9 +76,7 @@ void NetPolicyService::OnStart()
 
 void NetPolicyService::OnStop()
 {
-    runner_->Stop();
     handler_.reset();
-    runner_.reset();
     netPolicyCore_.reset();
     netPolicyCallback_.reset();
     netPolicyTraffic_.reset();
@@ -93,9 +97,9 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
 
 void NetPolicyService::Init()
 {
-    NETMGR_LOG_D("NetPolicyService Init");
+    NETMGR_LOG_D("Init");
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    handler_->PostTask(
+    ffrtQueue_.submit(
         [this]() {
             serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
             NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
@@ -105,8 +109,9 @@ void NetPolicyService::Init()
             netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
             netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
             RegisterFactoryResetCallback();
-        },
-        AppExecFwk::EventQueue::Priority::HIGH);
+            netAccessPolicy_.InitRdbStore();
+            UpdateNetAccessPolicyToMapFromDB();
+        });
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
@@ -344,18 +349,26 @@ int32_t NetPolicyService::CheckPermission()
 
 void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetPolicyService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
             OnNetSysRestart();
             hasSARemoved_ = false;
         }
+
+        EventFwk::MatchingSkills matchingSkills;
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+        subscribeInfo.SetPriority(1);
+        std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
+            subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+        EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
     }
 }
 
 void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetPolicyService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         hasSARemoved_ = true;
     }
@@ -363,7 +376,7 @@ void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 
 void NetPolicyService::OnNetSysRestart()
 {
-    NETMGR_LOG_I("NetPolicyService::OnNetSysRestart");
+    NETMGR_LOG_I("OnNetSysRestart");
     
     if (netPolicyRule_ != nullptr) {
         netPolicyRule_->TransPolicyToRule();
@@ -385,7 +398,7 @@ int32_t NetPolicyService::FactoryResetPolicies()
 
 void NetPolicyService::RegisterFactoryResetCallback()
 {
-    NETMGR_LOG_I("NetPolicyService RegisterFactetCallback enter.");
+    NETMGR_LOG_I("RegisterFactetCallback enter.");
 
     if (netFactoryResetCallback_ == nullptr) {
         netFactoryResetCallback_ =
@@ -396,11 +409,120 @@ void NetPolicyService::RegisterFactoryResetCallback()
     if (netFactoryResetCallback_ != nullptr) {
         int32_t ret = NetManagerCenter::GetInstance().RegisterNetFactoryResetCallback(netFactoryResetCallback_);
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("NetPolicyService RegisterFactoryResetCallback ret[%{public}d]", ret);
+            NETMGR_LOG_E("RegisterFactoryResetCallback ret[%{public}d]", ret);
         }
     } else {
         NETMGR_LOG_E("netFactoryResetCallback_ is null");
     }
+}
+
+void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
+{
+    NETMGR_LOG_I("UpdateNetAccessPolicyToMapFromDB enter.");
+    std::vector<NetAccessPolicyData> result = netAccessPolicy_.QueryAll();
+    for (size_t i = 0; i < result.size(); i++) {
+        NetworkAccessPolicy policy;
+        policy.wifiAllow = result[i].wifiPolicy;
+        policy.cellularAllow = result[i].cellularPolicy;
+        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
+    }
+}
+
+// Do not post into event handler, because this interface should have good performance
+int32_t NetPolicyService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    NETMGR_LOG_I("SetNetworkAccessPolicy enter.");
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    NetAccessPolicyData data;
+    data.uid = uid;
+    data.wifiPolicy = policy.wifiAllow;
+    data.cellularPolicy = policy.cellularAllow;
+    data.setFromConfigFlag = !reconfirmFlag;
+    netAccessPolicy_.InsertData(data);
+    return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag);
+}
+
+int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
+{
+    NETMGR_LOG_I("GetNetworkAccessPolicy enter.");
+    if (parameter.flag) {
+        NetAccessPolicyData policyData;
+        if (netAccessPolicy_.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
+            policy.policy.wifiAllow = true;
+            policy.policy.cellularAllow = true;
+            return NETMANAGER_SUCCESS;
+        }
+        policy.policy.wifiAllow = policyData.wifiPolicy;
+        policy.policy.cellularAllow = policyData.cellularPolicy;
+        return NETMANAGER_SUCCESS;
+    }
+
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        NETMGR_LOG_E("fail to get system ability mgr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        NETMGR_LOG_E("fail to get bundle manager proxy.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    std::vector<AppExecFwk::ApplicationInfo> appInfos;
+    bool retC = bundleMgrProxy->GetApplicationInfos(AppExecFwk::ApplicationFlag::GET_APPLICATION_INFO_WITH_PERMISSION,
+                                                    static_cast<uint32_t>(parameter.userId), appInfos);
+    if (!retC) {
+        NETMGR_LOG_E("GetApplicationInfos Error");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    for (const auto &appInfo : appInfos) {
+        NetworkAccessPolicy policyTmp;
+        NetAccessPolicyData policyData;
+        if (netAccessPolicy_.QueryByUid(appInfo.uid, policyData) == NETMANAGER_SUCCESS) {
+            policyTmp.wifiAllow = policyData.wifiPolicy;
+            policyTmp.cellularAllow = policyData.cellularPolicy;
+        } else {
+            policyTmp.wifiAllow = true;
+            policyTmp.cellularAllow = true;
+        }
+        policy.uid_policies.insert(std::pair<uint32_t, NetworkAccessPolicy>(appInfo.uid, policyTmp));
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyService::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
+{
+    NETMGR_LOG_I("NotifyNetAccessPolicyDiag");
+
+    NetAccessPolicyDialog policyDialog;
+    if (!policyDialog.ConnectSystemUi(uid)) {
+        NETMGR_LOG_E("connect systemUi failed");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

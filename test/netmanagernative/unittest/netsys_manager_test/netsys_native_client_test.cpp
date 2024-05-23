@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #ifdef GTEST_API_
 #define private public
 #endif
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_client.h"
@@ -258,6 +261,9 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = nativeClient_.GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
+
+    ret = nativeClient_.GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest006, TestSize.Level1)
@@ -360,9 +366,25 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = nativeClient_.GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint64_t type = 0;
+    bool isOpen = true;
+    int32_t ret = nativeClient_.UpdateNetworkSharingType(type, isOpen);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -373,6 +395,48 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     int32_t ret = nativeClient_.RegisterDnsResultCallback(callback, timeStep);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = nativeClient_.UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = nativeClient_.RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = nativeClient_.SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = nativeClient_.SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = nativeClient_.NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = nativeClient_.DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

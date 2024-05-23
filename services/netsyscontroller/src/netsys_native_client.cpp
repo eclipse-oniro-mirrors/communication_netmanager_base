@@ -35,6 +35,7 @@
 #include "netmanager_base_common_utils.h"
 #include "netsys_native_client.h"
 #include "netsys_native_service_proxy.h"
+#include "ipc_skeleton.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -45,6 +46,7 @@ static constexpr const char *IF_CFG_DOWN = "down";
 static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/public/netmanager/route";
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
+static constexpr uint32_t UID_BROKER_SERVICE = 5557;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -56,8 +58,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
                                                                             int scope)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -67,8 +74,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
                                                                             int scope)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -76,8 +88,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAdded(ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAdded(ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -85,8 +102,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceRemoved(ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceRemoved(ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -94,8 +116,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceChanged(ifName, up);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceChanged(ifName, up);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -103,8 +130,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceLinkStateChanged(ifName, up);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceLinkStateChanged(ifName, up);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -113,15 +145,20 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
                                                                  const std::string &gateway, const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnRouteChanged(updated, route, gateway, ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnRouteChanged(updated, route, gateway, ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
-    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess");
+    NETMGR_LOG_I("OnDhcpSuccess");
     netsysNativeClient_.ProcessDhcpResult(dhcpResult);
     return NETMANAGER_SUCCESS;
 }
@@ -129,7 +166,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::Netsy
 int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
                                                                           const std::string &iface)
 {
-    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
+    NETMGR_LOG_I("OnBandwidthReachedLimit");
     netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
     return NETMANAGER_SUCCESS;
 }
@@ -143,8 +180,14 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
     std::list<OHOS::NetsysNative::NetDnsResultReport> res)
 {
     std::lock_guard lock(netsysNativeClient_.cbDnsReportObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbDnsReportObjects_) {
-        cb->OnDnsResultReport(size, res);
+    for (auto cb = netsysNativeClient_.cbDnsReportObjects_.begin();
+         cb != netsysNativeClient_.cbDnsReportObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbDnsReportObjects_.erase(cb);
+        } else {
+            (*cb)->OnDnsResultReport(size, res);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -161,7 +204,9 @@ int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetInternetPermission(uid, allow);
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    uint8_t isBroker = callingUid == UID_BROKER_SERVICE ? 1 : 0;
+    return proxy->SetInternetPermission(uid, allow, isBroker);
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
@@ -1023,16 +1068,21 @@ void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultPa
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
     std::lock_guard lock(cbObjMutex_);
     NetsysControllerCallback::DhcpResult result;
-    for (auto &cbObject : cbObjects_) {
-        result.iface_ = dhcpResult->iface_;
-        result.ipAddr_ = dhcpResult->ipAddr_;
-        result.gateWay_ = dhcpResult->gateWay_;
-        result.subNet_ = dhcpResult->subNet_;
-        result.route1_ = dhcpResult->route1_;
-        result.route2_ = dhcpResult->route2_;
-        result.dns1_ = dhcpResult->dns1_;
-        result.dns2_ = dhcpResult->dns2_;
-        cbObject->OnDhcpSuccess(result);
+    for (auto cb = cbObjects_.begin(); cb != cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = cbObjects_.erase(cb);
+        } else {
+            result.iface_ = dhcpResult->iface_;
+            result.ipAddr_ = dhcpResult->ipAddr_;
+            result.gateWay_ = dhcpResult->gateWay_;
+            result.subNet_ = dhcpResult->subNet_;
+            result.route1_ = dhcpResult->route1_;
+            result.route2_ = dhcpResult->route2_;
+            result.dns1_ = dhcpResult->dns1_;
+            result.dns2_ = dhcpResult->dns2_;
+            (*cb)->OnDhcpSuccess(result);
+            ++cb;
+        }
     }
 }
 
@@ -1063,10 +1113,14 @@ void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitNa
     NETMGR_LOG_D("NetsysNativeClient ProcessBandwidthReachedLimit, limitName=%{public}s, iface=%{public}s",
                  limitName.c_str(), iface.c_str());
     std::lock_guard lock(cbObjMutex_);
-    std::for_each(cbObjects_.begin(), cbObjects_.end(),
-                  [limitName, iface](const sptr<NetsysControllerCallback> &callback) {
-                      callback->OnBandwidthReachedLimit(limitName, iface);
-                  });
+    for (auto cb = cbObjects_.begin(); cb != cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnBandwidthReachedLimit(limitName, iface);
+            ++cb;
+        }
+    }
 }
 
 int32_t NetsysNativeClient::BandwidthEnableDataSaver(bool enable)
@@ -1209,6 +1263,16 @@ int32_t NetsysNativeClient::GetIfaceStats(uint64_t &stats, uint32_t type, const 
     return proxy->GetIfaceStats(stats, type, interfaceName);
 }
 
+int32_t NetsysNativeClient::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     auto proxy = GetProxy();
@@ -1323,12 +1387,7 @@ int32_t NetsysNativeClient::RegisterDnsResultCallback(
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    std::lock_guard lock(cbObjMutex_);
+    std::lock_guard lock(cbDnsReportObjMutex_);
     cbDnsReportObjects_.push_back(callback);
     dnsReportTimeStep = timeStep;
     return NETMANAGER_SUCCESS;
@@ -1337,6 +1396,12 @@ int32_t NetsysNativeClient::RegisterDnsResultCallback(
 int32_t NetsysNativeClient::UnregisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
 {
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(cbDnsReportObjMutex_);
+    cbDnsReportObjects_.remove(callback);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1368,6 +1433,79 @@ int32_t NetsysNativeClient::GetCookieStats(uint64_t &stats, uint32_t type, uint6
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetCookieStats(stats, type, cookie);
+}
+
+int32_t NetsysNativeClient::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetworkSharingType(sharingTypeIsOn);
+}
+
+int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetEnableIpv6(interfaceName, on);
+}
+
+int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysNativeClient::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetsysNativeClient::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->NotifyNetBearerTypeChange(bearerTypes);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

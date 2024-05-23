@@ -28,6 +28,8 @@
 #include "network_security_config.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
+static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
+static constexpr const int32_t MAX_VALID_INTERNAL_NETID = 50;
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
 
@@ -58,13 +60,22 @@ int32_t NetConnClient::SystemReady()
 
 int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
+    uint8_t oldAllow;
+    bool ret = netPermissionMap_.Find(uid, oldAllow);
+    if (ret && allow == oldAllow) {
+        return NETMANAGER_SUCCESS;
+    }
+
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
-    return proxy->SetInternetPermission(uid, allow);
+    int32_t result = proxy->SetInternetPermission(uid, allow);
+    if (result == NETMANAGER_SUCCESS) {
+        netPermissionMap_.EnsureInsert(uid, allow);
+    }
+    return result;
 }
 
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
@@ -106,7 +117,7 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     return proxy->RegisterNetSupplierCallback(supplierId, ptr);
 }
 
-int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
     NETMGR_LOG_D("RegisterNetConnCallback client in.");
     sptr<INetConnService> proxy = GetProxy();
@@ -124,7 +135,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                               const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                               const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
     NETMGR_LOG_D("RegisterNetConnCallback with timeout client in.");
     if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
@@ -139,6 +150,28 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
     int32_t ret = proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save netSpecifier and callback and timeoutMS.");
+        registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
+    }
+
+    return ret;
+}
+
+int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                            const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+{
+    NETMGR_LOG_D("RequestNetConnection with timeout client in.");
+    if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
+        NETMGR_LOG_E("The parameter of netSpecifier is invalid");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("The parameter of proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->RequestNetConnection(netSpecifier, callback, timeoutMS);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RequestNetConnection success, save netSpecifier and callback and timeoutMS.");
         registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
@@ -165,6 +198,30 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     }
 
     return ret;
+}
+
+int32_t NetConnClient::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
+{
+    NETMGR_LOG_I("RegisterNetDetectionCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->RegisterNetDetectionCallback(netId, callback);
+}
+
+int32_t NetConnClient::UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
+{
+    NETMGR_LOG_I("UnRegisterNetDetectionCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->UnRegisterNetDetectionCallback(netId, callback);
 }
 
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
@@ -289,9 +346,21 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
     return proxy->GetAddressByName(host, netId, addr);
 }
 
+int32_t NetConnClient::GetIfaceNameIdentMaps(NetBearType bearerType,
+                                             std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+}
+
 int32_t NetConnClient::BindSocket(int32_t socketFd, int32_t netId)
 {
-    if (netId < MIN_VALID_NETID) {
+    // default netId begin whit 100, inner virtual interface netId between 1 and 50
+    if (netId < MIN_VALID_INTERNAL_NETID || (netId > MAX_VALID_INTERNAL_NETID && netId < MIN_VALID_NETID)) {
         NETMGR_LOG_E("netId is invalid.");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
@@ -367,7 +436,7 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     return proxy->SetAirplaneMode(state);
 }
 
-void NetConnClient::RecoverCallback()
+void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
     uint32_t count = 0;
     while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
@@ -376,22 +445,36 @@ void NetConnClient::RecoverCallback()
     }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
-    if (proxy != nullptr && !registerConnTupleList_.empty()) {
+    if (proxy != nullptr) {
         for (auto mem : registerConnTupleList_) {
             sptr<NetSpecifier> specifier = std::get<0>(mem);
             sptr<INetConnCallback> callback = std::get<1>(mem);
             uint32_t timeoutMS = std::get<2>(mem);
+            bool isInternalDefault = specifier != nullptr &&
+                specifier->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0;
+            int32_t ret = NETMANAGER_SUCCESS;
             if (specifier != nullptr && timeoutMS != 0) {
-                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, timeoutMS) :
+                    proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ and timeoutMS_ %{public}d", ret);
             } else if (specifier != nullptr) {
-                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, 0);
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, 0) :
+                    proxy->RegisterNetConnCallback(specifier, callback, 0);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
             } else if (callback != nullptr) {
                 int32_t ret = proxy->RegisterNetConnCallback(callback);
-                NETMGR_LOG_D("Register result %{public}d", ret);
+                NETMGR_LOG_D("Register netconn result %{public}d", ret);
             }
         }
+    }
+    if (proxy != nullptr && preAirplaneCallback_ != nullptr) {
+        int32_t ret = proxy->RegisterPreAirplaneCallback(preAirplaneCallback_);
+        NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
+    }
+
+    if (proxy != nullptr && !globalHttpProxy_.GetHost().empty()) {
+        int32_t ret = proxy->SetGlobalHttpProxy(globalHttpProxy_);
+        NETMGR_LOG_D("globalHttpProxy_ Register result %{public}d", ret);
     }
 }
 
@@ -418,10 +501,10 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
 
-    if (!registerConnTupleList_.empty()) {
+    if (!registerConnTupleList_.empty() || preAirplaneCallback_ != nullptr || !globalHttpProxy_.GetHost().empty()) {
         NETMGR_LOG_I("on remote died recover callback");
         std::thread t([this]() {
-            RecoverCallback();
+            RecoverCallbackAndGlobalProxy();
         });
         std::string threadName = "netconnRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
@@ -445,6 +528,9 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    if (globalHttpProxy_ != httpProxy) {
+        globalHttpProxy_ = httpProxy;
     }
     return proxy->SetGlobalHttpProxy(httpProxy);
 }
@@ -697,6 +783,62 @@ int32_t NetConnClient::RegisterNetFactoryResetCallback(const sptr<INetFactoryRes
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->RegisterNetFactoryResetCallback(callback);
+}
+
+int32_t NetConnClient::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->IsPreferCellularUrl(url, preferCellular);
+}
+
+int32_t NetConnClient::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    NETMGR_LOG_D("RegisterPreAirplaneCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    int32_t ret = proxy->RegisterPreAirplaneCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterPreAirplaneCallback success, save callback.");
+        preAirplaneCallback_ = callback;
+    }
+
+    return ret;
+}
+
+int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    NETMGR_LOG_D("UnregisterPreAirplaneCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    int32_t ret = proxy->UnregisterPreAirplaneCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("UnregisterPreAirplaneCallback success,delete callback.");
+        preAirplaneCallback_ = nullptr;
+    }
+
+    return ret;
+}
+
+int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr.");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateSupplierScore(bearerType, isBetter);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

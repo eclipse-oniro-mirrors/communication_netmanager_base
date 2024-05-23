@@ -43,5 +43,19 @@ int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, const std::
     auto handler = std::make_unique<NetStatsDataHandler>();
     return handler->ReadStatsData(recv, iface, uid, start, end);
 }
+
+int32_t NetStatsHistory::GetHistoryByIdent(std::vector<NetStatsInfo> &recv, const std::string &ident, uint64_t start,
+                                           uint64_t end)
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    return handler->ReadStatsDataByIdent(recv, ident, start, end);
+}
+
+int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint32_t uid, const std::string &ident,
+                                    uint64_t start, uint64_t end)
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    return handler->ReadStatsData(recv, uid, ident, start, end);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

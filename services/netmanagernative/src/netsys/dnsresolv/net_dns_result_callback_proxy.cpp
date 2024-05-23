@@ -30,7 +30,7 @@ NetDnsResultCallbackProxy::NetDnsResultCallbackProxy(const sptr<IRemoteObject> &
 int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
     const std::list<NetDnsResultReport> dnsResultReport)
 {
-    NETNATIVE_LOGI("Proxy OnDnsResultReport");
+    NETNATIVE_LOG_D("Proxy OnDnsResultReport");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");

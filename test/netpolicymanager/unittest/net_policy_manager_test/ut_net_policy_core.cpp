@@ -33,11 +33,13 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr const char *NET_POLICY_WORK_TEST_THREAD = "NET_POLICY_WORK_TEST_THREAD";
+constexpr const char *NET_POLICY_STUB_QUEUE = "NET_POLICY_STUB_QUEUE";
 constexpr const char *TEST_EVENT_ACTION = "TEST_ACTION";
 constexpr const char *EVENT_PARAM_DELETED_UID = "DeletedUid";
 std::shared_ptr<NetPolicyCore> g_netPolicyCore;
 std::shared_ptr<AppExecFwk::EventRunner> g_runner;
 std::shared_ptr<NetPolicyEventHandler> g_handler;
+ffrt::queue ffrtQueue_ = NET_POLICY_STUB_QUEUE;
 } // namespace
 
 class UtNetPolicyCore : public testing::Test {
@@ -52,7 +54,7 @@ void UtNetPolicyCore::SetUpTestCase()
 {
     g_runner = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_TEST_THREAD);
     g_netPolicyCore = DelayedSingleton<NetPolicyCore>::GetInstance();
-    g_handler = std::make_shared<NetPolicyEventHandler>(g_runner, g_netPolicyCore);
+    std::make_shared<NetPolicyEventHandler>(g_netPolicyCore, ffrtQueue_);
     g_netPolicyCore->Init(g_handler);
 }
 
@@ -86,8 +88,10 @@ HWTEST_F(UtNetPolicyCore, CreateCore001, TestSize.Level1)
 HWTEST_F(UtNetPolicyCore, HandleEvent001, TestSize.Level1)
 {
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    auto eventId = static_cast<int32_t>(event->GetInnerEventId());
+    auto eventData = event->GetSharedObject<PolicyEvent>();
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->HandleEvent(event);
+    g_netPolicyCore->HandleEvent(eventId, eventData);
 }
 
 /**
@@ -98,9 +102,11 @@ HWTEST_F(UtNetPolicyCore, HandleEvent001, TestSize.Level1)
 HWTEST_F(UtNetPolicyCore, HandleEvent002, TestSize.Level1)
 {
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    auto eventId = static_cast<int32_t>(event->GetInnerEventId());
+    auto eventData = event->GetSharedObject<PolicyEvent>();
     event.reset();
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->HandleEvent(event);
+    g_netPolicyCore->HandleEvent(eventId, eventData);
 }
 
 /**

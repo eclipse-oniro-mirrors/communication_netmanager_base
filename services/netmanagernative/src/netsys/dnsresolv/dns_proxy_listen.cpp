@@ -31,11 +31,13 @@ namespace OHOS {
 namespace nmd {
 uint16_t DnsProxyListen::netId_ = 0;
 bool DnsProxyListen::proxyListenSwitch_ = false;
+std::mutex DnsProxyListen::listenerMutex_;
 constexpr uint16_t DNS_PROXY_PORT = 53;
 constexpr uint8_t RESPONSE_FLAG = 0x80;
 constexpr uint8_t RESPONSE_FLAG_USED = 80;
 constexpr size_t FLAG_BUFF_LEN = 1;
 constexpr size_t FLAG_BUFF_OFFSET = 2;
+constexpr size_t DNS_HEAD_LENGTH = 12;
 DnsProxyListen::DnsProxyListen() : proxySockFd_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
@@ -140,12 +142,16 @@ void DnsProxyListen::StartListen()
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     proxyAddr.sin_port = htons(DNS_PROXY_PORT);
 
-    if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
-        NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
-        close(proxySockFd_);
-        proxySockFd_ = -1;
-        return;
+    {
+        std::lock_guard<std::mutex> lock(DnsProxyListen::listenerMutex_);
+        if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
+            NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
+            close(proxySockFd_);
+            proxySockFd_ = -1;
+            return;
+        }
     }
+
     while (true) {
         if (DnsThreadClose()) {
             break;
@@ -158,7 +164,7 @@ void DnsProxyListen::StartListen()
             NETNATIVE_LOGE("read errno %{public}d", errno);
             continue;
         }
-        if (CheckDnsResponse(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
+        if (!CheckDnsQuestion(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
             NETNATIVE_LOGE("read buff is not dns question");
             continue;
         }
@@ -170,6 +176,24 @@ void DnsProxyListen::StartListen()
         std::string threadName = "DnsPxyPacket";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
+    }
+}
+
+bool DnsProxyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
+{
+    if (recLen < DNS_HEAD_LENGTH) {
+        return false;
+    }
+    uint8_t flagBuff;
+    char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
+    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
+        return false;
+    }
+    int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
+    if (reqFlag) {
+        return false; // answer
+    } else {
+        return true; // question
     }
 }
 

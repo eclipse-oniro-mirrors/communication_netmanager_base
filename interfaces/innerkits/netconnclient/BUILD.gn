@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,9 @@ config("net_conn_manager_if_config") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$INNERKITS_ROOT/include",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include/netsys",
+    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
   ]
 
   cflags = []
@@ -37,7 +40,7 @@ config("net_conn_manager_if_config") {
   }
 }
 
-ohos_source_set("net_conn_parcel") {
+ohos_static_library("net_conn_parcel") {
   sources = [
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/http_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
@@ -50,8 +53,12 @@ ohos_source_set("net_conn_parcel") {
   ]
   sanitize = {
     cfi = true
+    cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
@@ -69,11 +76,17 @@ ohos_source_set("net_conn_parcel") {
 }
 
 ohos_shared_library("net_conn_manager_if") {
-  sanitize = {
-    cfi = true
-    blocklist = "./connect_blocklist.txt"
-    debug = false
-  }
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
 
   sources = [
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_conn_client.cpp",
@@ -92,8 +105,8 @@ ohos_shared_library("net_conn_manager_if") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "//third_party/musl/porting/linux/user/src/hook",
-    "//third_party/openssl/include",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   version_script = "libnetconn_kits.map"
@@ -103,15 +116,14 @@ ohos_shared_library("net_conn_manager_if") {
   deps = [
     ":net_conn_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "ipc:ipc_core",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
     "samgr:samgr_proxy",
   ]
 
@@ -139,16 +151,22 @@ config("socket_permission_config") {
 }
 
 ohos_shared_library("socket_permission") {
-  sanitize = {
-    cfi = true
-    boundary_sanitize = true
-    all_ubsan = true
-    debug = false
-  }
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
 
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
   deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
   public_configs = [ ":socket_permission_config" ]
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

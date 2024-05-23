@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,13 @@
 #define private public
 #define protected public
 #endif
+#include "common_net_diag_callback_test.h"
+#include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
-#include "net_diag_callback_stub.h"
 #include "net_dns_health_callback_stub.h"
 #include "net_dns_result_callback_stub.h"
-#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
-#include "netsys_net_diag_data.h"
-#include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -36,118 +34,6 @@ using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
-
-class NetDiagCallbackServiceStubTest : public IRemoteStub<INetDiagCallback> {
-public:
-    NetDiagCallbackServiceStubTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackServiceStubTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackServiceStubTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-    int32_t OnNotifyPingResult(const NetDiagPingResult &pingResult) override
-    {
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackServiceStubTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetDiagPingResult pingResult;
-        if (!NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
-
-class TestNotifyCallback : public NotifyCallbackStub {
-public:
-    TestNotifyCallback() = default;
-    ~TestNotifyCallback() override{};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 
 class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
 public:
@@ -176,7 +62,7 @@ public:
     TestNetsysNativeServiceStub() = default;
     ~TestNetsysNativeServiceStub() override{};
 
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker) override
     {
         return 0;
     }
@@ -501,12 +387,17 @@ public:
         return 0;
     }
 
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    {
+        return 0;
+    }
+
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
     {
         return 0;
     }
 
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;
     }
@@ -576,6 +467,41 @@ public:
     {
         return 0;
     }
+
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override
+    {
+        return 0;
+    }
+    
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override
+    {
+        return 0;
+    }
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
+    {
+        return 0;
+    }
+
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -586,7 +512,7 @@ public:
     void TearDown();
 
     static inline std::shared_ptr<NetsysNativeServiceStub> notifyStub_ = nullptr;
-    sptr<NetDiagCallbackServiceStubTest> ptrCallback = new NetDiagCallbackServiceStubTest();
+    sptr<NetDiagCallbackStubTest> ptrCallback = new NetDiagCallbackStubTest();
 };
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
@@ -806,7 +732,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceMtu001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Level1)
 {
     std::string ifName = "ifName";
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
         return;
@@ -828,7 +754,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Lev
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback002, TestSize.Level1)
 {
     std::string ifName = "ifName";
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     MessageParcel data;
     EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
 
@@ -1484,6 +1410,15 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetAllContainerStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+
 HWTEST_F(NetsysNativeServiceStubTest, NetsysFreeAddrinfoTest001, TestSize.Level1)
 {
     addrinfo *ai = nullptr;
@@ -1788,6 +1723,131 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsHealthListener001, TestSiz
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUnregisterDnsHealthListener(data, reply);
     EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingType001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    bool isOpen = true;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(type)) {
+        return;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+    return;
+    }
+    if (!data.WriteString(interface)) {
+    return;
+    }
+    if (!data.WriteUint32(0)) {
+    return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.wifiAllow)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.cellularAllow)) {
+        return;
+    }
+
+    if (!data.WriteBool(reconfirmFlag)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDelNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.clear();
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    MessageParcel data;
+
+    uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    if (!data.WriteUint32(size)) {
+        return;
+    }
+
+    for (auto bearerType : bearerTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNotifyNetBearerTypeChange(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative
 } // namespace OHOS

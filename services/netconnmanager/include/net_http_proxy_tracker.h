@@ -15,8 +15,9 @@
 
 #ifndef NET_HTTP_PROXY_TRACKER_H
 #define NET_HTTP_PROXY_TRACKER_H
-
+#include "net_proxy_userinfo.h"
 #include "http_proxy.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -28,9 +29,22 @@ public:
     void ReadFromSettingsData(HttpProxy &httpProxy);
     bool WriteToSettingsData(HttpProxy &httpProxy);
 
+    void ReadFromSettingsDataUser(HttpProxy &httpProxy, int32_t userId);
+    bool WriteToSettingsDataUser(HttpProxy &httpProxy, int32_t userId);
+
+private:
+    struct KeyUri {
+        Uri hostUri_;
+        Uri portUri_;
+        Uri exclusionsUri_;
+    };
+
 private:
     std::list<std::string> ParseExclusionList(const std::string &exclusions) const;
     std::string GetExclusionsAsString(const std::list<std::string> &exclusionList) const;
+    void ReadFromSettingsData(HttpProxy &httpProxy, KeyUri keyUri);
+    bool WriteToSettingsData(HttpProxy &httpProxy, KeyUri keyUri);
+    std::string ReplaceUserIdForUri(const char* uri, int32_t userId);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

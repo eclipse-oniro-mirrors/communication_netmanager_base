@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { AsyncCallback, Callback } from "./basic";
-import connection from "./@ohos.net.connection";
+import { AsyncCallback, Callback } from './basic';
+import connection from './@ohos.net.connection';
 
 /**
  * Provides interfaces to manage network policy rules.
@@ -186,6 +186,59 @@ declare namespace policy {
    */
   function updateRemindPolicy(netType: NetBearType, iccid: string, remindType: RemindType, callback: AsyncCallback<void>): void;
   function updateRemindPolicy(netType: NetBearType, iccid: string, remindType: RemindType): Promise<void>;
+
+  /**
+   * Set the policy to access the network of the specified application.
+   *
+   * @permission ohos.permission.MANAGE_NET_STRATEGY
+   * @param { number } uid - The specified UID of application.
+   * @param { NetworkAccessPolicy } policy - The network access policy of application. For details, see {@link NetworkAccessPolicy}.
+   * @param { boolean } [isReconfirmed] - Whether this operation is reconfirmed by user or not. Default false.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  function setNetworkAccessPolicy(uid: number, policy: NetworkAccessPolicy, isReconfirmed?: boolean): Promise<void>;
+
+  /**
+   * Query the network access policy of the specified application.
+   *
+   * @permission ohos.permission.MANAGE_NET_STRATEGY
+   * @param { number } uid - The specified UID of application.
+   * @returns { Promise<NetworkAccessPolicy> } Returns the network access policy of the application. For details, see {@link NetworkAccessPolicy}.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  function getNetworkAccessPolicy(uid: number): Promise<NetworkAccessPolicy>;
+
+  /**
+   * Query the network access policy of all applications.
+   * @permission ohos.permission.MANAGE_NET_STRATEGY
+   * @returns { Promise<UidNetworkAccessPolicy> } the network access policy of all applications.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  function getNetworkAccessPolicy(): Promise<UidNetworkAccessPolicy>;
 
   /**
    * Register uid policy change listener.
@@ -369,6 +422,49 @@ declare namespace policy {
     NET_POLICY_ALLOW_METERED_BACKGROUND = 1 << 0,
     /* Allow on metered networks when app in background. */
     NET_POLICY_REJECT_METERED_BACKGROUND = 1 << 1,
+  }
+
+  /**
+   * Network policies that limit the specified UID of application to access the network.
+   * @interface NetworkAccessPolicy
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  export interface NetworkAccessPolicy {
+    /**
+     * Indicate whether the application can be allowed to access the network by wifi.
+     * @type { boolean }
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 12
+     */
+    allowWiFi?: boolean;
+    /**
+     * Indicate whether the application can be allowed to access the network by cellular.
+     * @type { boolean }
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 12
+     */
+    allowCellular?: boolean;
+  }
+
+  /**
+   * Provides the container definition for network access policy key-value pairs.
+   * @interface UidNetworkAccessPolicy
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 12
+   */
+  export interface UidNetworkAccessPolicy {
+      /**
+       * @type key:value pair. Key indicates the specified UID of an application. For value, see @NetworkAccessPolicy.
+       * @syscap SystemCapability.Communication.NetManager.Core
+       * @systemapi Hide this for inner system use.
+       * @since 12
+       */
+      [uid: number]: NetworkAccessPolicy;
   }
 }
 

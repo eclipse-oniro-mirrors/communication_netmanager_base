@@ -17,6 +17,7 @@
 
 #include <netdb.h>
 #include <string>
+#include <set>
 
 #include "dns_config_client.h"
 #include "i_net_diag_callback.h"
@@ -30,11 +31,18 @@
 #include "netsys_ipc_interface_code.h"
 #include "route_type.h"
 #include "uid_range.h"
+#include "netsys_access_policy.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
 using namespace OHOS::NetManagerStandard;
+enum IptablesType {
+    IPTYPE_IPV4 = 1,
+    IPTYPE_IPV6 = 2,
+    IPTYPE_IPV4V6 = 3,
+};
 class INetsysService : public IRemoteBroker {
 public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -68,7 +76,7 @@ public:
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
-    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
     virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
     virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
@@ -116,7 +124,9 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
-    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                             IptablesType ipType = IPTYPE_IPV4) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
     virtual int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) = 0;
@@ -133,6 +143,13 @@ public:
     virtual int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
+    virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
+    virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
+    virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
+    virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
+    virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

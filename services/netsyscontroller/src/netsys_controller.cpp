@@ -14,6 +14,7 @@
  */
 #include "netsys_controller.h"
 
+#include "ffrt.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
 #include "net_mgr_log_wrapper.h"
@@ -40,9 +41,9 @@ void NetsysController::Init()
 NetsysController &NetsysController::GetInstance()
 {
     static NetsysController singleInstance_;
-    static std::mutex mutex_;
+    static ffrt::mutex mutex_;
     if (!singleInstance_.initFlag_) {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::unique_lock<ffrt::mutex> lock(mutex_);
         if (!singleInstance_.initFlag_) {
             singleInstance_.Init();
         }
@@ -890,6 +891,15 @@ int32_t NetsysController::GetIfaceStats(uint64_t &stats, uint32_t type, const st
     return netsysService_->GetIfaceStats(stats, static_cast<uint32_t>(type), interfaceName);
 }
 
+int32_t NetsysController::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (netsysService_ == nullptr) {
@@ -1036,5 +1046,69 @@ int32_t NetsysController::GetCookieStats(uint64_t &stats, uint32_t type, uint64_
     }
     return netsysService_->GetCookieStats(stats, type, cookie);
 }
+
+int32_t NetsysController::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("GetNetworkSharingType netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetNetworkSharingType(sharingTypeIsOn);
+}
+
+int32_t NetsysController::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("UpdateNetworkSharingType netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysController::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpv6PrivacyExtensions netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetEnableIpv6 netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetEnableIpv6(interfaceName, on);
+}
+
+int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysController::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
+}
+
+int32_t NetsysController::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DeleteNetworkAccessPolicy(uid);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <regex>
+#include <sstream>
 #include <set>
 #include <string>
 #include <sys/socket.h>
@@ -45,6 +46,7 @@ constexpr int32_t MIN_BYTE = 0;
 constexpr int32_t MAX_BYTE = 255;
 constexpr int32_t BYTE_16 = 16;
 constexpr uint32_t BIT_NUM_BYTE = 8;
+constexpr int32_t BITS_32 = 32;
 constexpr int32_t BITS_24 = 24;
 constexpr int32_t BITS_16 = 16;
 constexpr int32_t BITS_8 = 8;
@@ -149,7 +151,7 @@ int GetMaskLength(const std::string &mask)
 
 std::string GetMaskByLength(uint32_t length)
 {
-    const auto mask = length == 0 ? 0 : -1 << (NET_MASK_MAX_LENGTH - length);
+    const uint32_t mask = length == 0 ? 0 : 0xFFFFFFFF << (NET_MASK_MAX_LENGTH - length);
     auto maskGroup = new int[NET_MASK_GROUP_COUNT];
     for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
         int pos = NET_MASK_GROUP_COUNT - 1 - i;
@@ -239,10 +241,6 @@ uint32_t ConvertIpv4Address(const std::string &address)
 
 int32_t Ipv4PrefixLen(const std::string &ip)
 {
-    constexpr int32_t BIT32 = 32;
-    constexpr int32_t BIT24 = 24;
-    constexpr int32_t BIT16 = 16;
-    constexpr int32_t BIT8 = 8;
     if (ip.empty()) {
         return 0;
     }
@@ -257,21 +255,21 @@ int32_t Ipv4PrefixLen(const std::string &ip)
     if (ret != sizeof(int32_t)) {
         return 0;
     }
-    ipNum = (c1 << static_cast<uint32_t>(BIT24)) | (c2 << static_cast<uint32_t>(BIT16)) |
-            (c3 << static_cast<uint32_t>(BIT8)) | c4;
+    ipNum = (c1 << static_cast<uint32_t>(BITS_24)) | (c2 << static_cast<uint32_t>(BITS_16)) |
+            (c3 << static_cast<uint32_t>(BITS_8)) | c4;
     if (ipNum == 0xFFFFFFFF) {
-        return BIT32;
+        return BITS_32;
     }
     if (ipNum == 0xFFFFFF00) {
-        return BIT24;
+        return BITS_24;
     }
     if (ipNum == 0xFFFF0000) {
-        return BIT16;
+        return BITS_16;
     }
     if (ipNum == 0xFF000000) {
-        return BIT8;
+        return BITS_8;
     }
-    for (int32_t i = 0; i < BIT32; i++) {
+    for (int32_t i = 0; i < BITS_32; i++) {
         if ((ipNum << i) & 0x80000000) {
             cnt++;
         } else {
@@ -581,7 +579,7 @@ bool IsValidDomain(const std::string &domain)
 
     std::string pattern = HOST_DOMAIN_PATTERN_HEADER;
     pattern = std::accumulate(HOST_DOMAIN_TLDS.begin(), HOST_DOMAIN_TLDS.end(), pattern,
-                              [](const std::string& pattern, const std::string& tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
+        [](const std::string &pattern, const std::string &tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
     pattern = pattern.replace(pattern.size() - 1, 1, "") + HOST_DOMAIN_PATTERN_TAIL;
     std::regex reg(pattern);
     if (!std::regex_match(domain, reg)) {
@@ -634,5 +632,57 @@ bool HasInternetPermission()
         close(testSock);
     }
     return true;
+}
+
+std::string Trim(const std::string &str)
+{
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    if (start == std::string::npos || end == std::string::npos) {
+        return "";
+    }
+    return str.substr(start, end - start + 1);
+}
+
+bool IsUrlRegexValid(const std::string &regex)
+{
+    if (Trim(regex).empty()) {
+        return false;
+    }
+    return regex_match(regex, std::regex("^[a-zA-Z0-9\\-_\\.*]+$"));
+}
+
+std::string InsertCharBefore(const std::string &input, const char from, const char preChar, const char nextChar)
+{
+    std::ostringstream output;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (input[i] == from && (i == input.size() - 1 || input[i + 1] != nextChar)) {
+            output << preChar;
+        }
+        output << input[i];
+    }
+    return output.str();
+}
+
+std::string ReplaceCharacters(const std::string &input)
+{
+    std::string output = InsertCharBefore(input, '*', '.', '\0');
+    output = InsertCharBefore(output, '.', '\\', '*');
+    return output;
+}
+
+bool UrlRegexParse(const std::string &str, const std::string &patternStr)
+{
+    if (patternStr.empty()) {
+        return false;
+    }
+    if (patternStr == "*") {
+        return true;
+    }
+    if (!IsUrlRegexValid(patternStr)) {
+        return patternStr == str;
+    }
+    std::regex pattern(ReplaceCharacters(patternStr));
+    return !patternStr.empty() && std::regex_match(str, pattern);
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

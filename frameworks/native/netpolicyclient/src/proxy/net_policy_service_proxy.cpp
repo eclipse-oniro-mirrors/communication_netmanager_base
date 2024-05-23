@@ -17,6 +17,8 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_constants.h"
+#include "ipc_skeleton.h"
+#include "bundle_mgr_interface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -690,6 +692,119 @@ int32_t NetPolicyServiceProxy::CheckPermission()
 int32_t NetPolicyServiceProxy::FactoryResetPolicies()
 {
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint8(policy.wifiAllow)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint8(policy.cellularAllow)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteBool(reconfirmFlag)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetPolicyServiceProxy::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    parameter.userId = callingUid / AppExecFwk::Constants::BASE_USER_RANGE;
+    if (!data.WriteBool(parameter.flag)) {
+        return false;
+    }
+    if (!data.WriteInt32(parameter.uid)) {
+        return false;
+    }
+    if (!data.WriteUint32(parameter.userId)) {
+        return false;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY),
+                                  data, reply, option);
+    if (retCode != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return retCode;
+    }
+
+    retCode = NetworkAccessPolicy::Unmarshalling(reply, policy, parameter.flag);
+    if (retCode != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("proxy SendRequest unmarshalling failed, error code: [%{public}d]", retCode);
+        return retCode;
+    }
+
+    return retCode;
+}
+
+int32_t NetPolicyServiceProxy::NotifyNetAccessPolicyDiag(uint32_t uid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    MessageOption option;
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    int32_t retCode =
+        SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), data,
+                    reply, option);
+    if (retCode != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return retCode;
+    }
+
+    return retCode;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

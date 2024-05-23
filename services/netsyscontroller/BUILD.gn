@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,18 @@ config("netsys_controller_include") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
 }
 
 ohos_shared_library("netsys_controller") {
@@ -26,11 +38,13 @@ ohos_shared_library("netsys_controller") {
     cfi = true
     cfi_cross_dso = true
     boundary_sanitize = true
-    all_ubsan = true
+    ubsan = true
     debug = false
   }
 
-  all_dependent_configs = [ ":netsys_controller_include" ]
+  branch_protector_ret = "pac_ret"
+
+  public_configs = [ ":netsys_controller_include" ]
   sources = [
     "src/mock_netsys_native_client.cpp",
     "src/netsys_controller.cpp",
@@ -45,6 +59,7 @@ ohos_shared_library("netsys_controller") {
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netconnclient/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
   ]
@@ -56,6 +71,7 @@ ohos_shared_library("netsys_controller") {
 
   external_deps = [
     "c_utils:utils",
+    "ffrt:libffrt",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]

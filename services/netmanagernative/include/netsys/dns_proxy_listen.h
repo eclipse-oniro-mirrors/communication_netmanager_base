@@ -17,6 +17,7 @@
 #define INCLUDE_DNS_PROXY_LISTEN_H
 
 #include <iostream>
+#include <mutex>
 #include <netinet/in.h>
 #include <vector>
 
@@ -62,10 +63,12 @@ private:
                                  sockaddr_in proxyAddr);
     static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
     static bool CheckDnsResponse(char* recBuff, size_t recLen);
+    static bool CheckDnsQuestion(char *recBuff, size_t recLen);
     static bool DnsThreadClose();
     int32_t proxySockFd_;
     static uint16_t netId_;
     static bool proxyListenSwitch_;
+    static std::mutex listenerMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

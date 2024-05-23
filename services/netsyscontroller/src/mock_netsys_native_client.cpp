@@ -252,7 +252,7 @@ static long GetInterfaceTrafficByType(const std::string &path, const std::string
 
 int64_t MockNetsysNativeClient::GetCellularRxBytes()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetCellularRxBytes");
+    NETMGR_LOG_I("GetCellularRxBytes");
     if (access(TEST_CELL_RX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -261,7 +261,7 @@ int64_t MockNetsysNativeClient::GetCellularRxBytes()
 
 int64_t MockNetsysNativeClient::GetCellularTxBytes()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetCellularTxBytes");
+    NETMGR_LOG_I("GetCellularTxBytes");
     if (access(TEST_CELL_TX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -270,7 +270,7 @@ int64_t MockNetsysNativeClient::GetCellularTxBytes()
 
 int64_t MockNetsysNativeClient::GetAllBytes(const std::string &filename)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetAllBytes");
+    NETMGR_LOG_I("GetAllBytes");
     long allBytes = 0;
     std::vector<std::string> ifNameList = InterfaceGetList();
     if (ifNameList.empty()) {
@@ -288,7 +288,7 @@ int64_t MockNetsysNativeClient::GetAllBytes(const std::string &filename)
 
 int64_t MockNetsysNativeClient::GetAllRxBytes()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetAllRxBytes");
+    NETMGR_LOG_I("GetAllRxBytes");
     if (access(TEST_ALL_RX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -297,7 +297,7 @@ int64_t MockNetsysNativeClient::GetAllRxBytes()
 
 int64_t MockNetsysNativeClient::GetAllTxBytes()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetAllTxBytes");
+    NETMGR_LOG_I("GetAllTxBytes");
     if (access(TEST_ALL_TX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -311,13 +311,13 @@ static long GetUidTrafficFromBpf(int uid, int cgroupType)
         close(sock);
         return -1;
     }
-    sockaddr_un s_un;
-    s_un.sun_family = AF_UNIX;
-    if (strcpy_s(s_un.sun_path, sizeof(s_un.sun_path), UID_TRAFFIC_BPF_PATH.c_str()) != 0) {
+    sockaddr_un sockAddrInfo;
+    sockAddrInfo.sun_family = AF_UNIX;
+    if (strcpy_s(sockAddrInfo.sun_path, sizeof(sockAddrInfo.sun_path), UID_TRAFFIC_BPF_PATH.c_str()) != 0) {
         close(sock);
         return -1;
     }
-    if (connect(sock, reinterpret_cast<sockaddr *>(&s_un), sizeof(s_un)) != 0) {
+    if (connect(sock, reinterpret_cast<sockaddr *>(&sockAddrInfo), sizeof(sockAddrInfo)) != 0) {
         close(sock);
         return -1;
     }
@@ -345,14 +345,14 @@ static long GetUidTrafficFromBpf(int uid, int cgroupType)
 
 int64_t MockNetsysNativeClient::GetUidRxBytes(uint32_t uid)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("GetUidRxBytes uid is [%{public}u]", uid);
     long result = GetUidTrafficFromBpf(uid, 0);
     return static_cast<int64_t>(result);
 }
 
 int64_t MockNetsysNativeClient::GetUidTxBytes(uint32_t uid)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("GetUidTxBytes uid is [%{public}u]", uid);
     long result = GetUidTrafficFromBpf(uid, 1);
     return static_cast<int64_t>(result);
 }
@@ -366,14 +366,14 @@ static int64_t GetUidOnIfaceBytes(uint32_t uid, const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
@@ -397,7 +397,7 @@ int64_t MockNetsysNativeClient::GetIfaceBytes(const std::string &interfaceName, 
 
 int64_t MockNetsysNativeClient::GetIfaceRxBytes(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetIfaceRxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceRxBytes iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_RX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -406,7 +406,7 @@ int64_t MockNetsysNativeClient::GetIfaceRxBytes(const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetIfaceTxBytes(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetIfaceTxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceTxBytes iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_TX.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -415,7 +415,7 @@ int64_t MockNetsysNativeClient::GetIfaceTxBytes(const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetIfaceRxPackets(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetIfaceRxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceRxPackets iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_RX_P.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -424,7 +424,7 @@ int64_t MockNetsysNativeClient::GetIfaceRxPackets(const std::string &interfaceNa
 
 int64_t MockNetsysNativeClient::GetIfaceTxPackets(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetIfaceTxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceTxPackets iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_TX_P.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -433,7 +433,7 @@ int64_t MockNetsysNativeClient::GetIfaceTxPackets(const std::string &interfaceNa
 
 std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient InterfaceGetList");
+    NETMGR_LOG_D("InterfaceGetList");
     DIR *dir(nullptr);
     std::vector<std::string> ifList;
     if ((dir = opendir(INTERFACE_LIST_DIR.c_str())) == nullptr) {
@@ -452,7 +452,7 @@ std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
 
 std::vector<std::string> MockNetsysNativeClient::UidGetList()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient UidGetList");
+    NETMGR_LOG_I("UidGetList");
     DIR *dir(nullptr);
     std::vector<std::string> uidList;
     if ((dir = opendir(UID_LIST_DIR.c_str())) == nullptr) {
@@ -479,19 +479,19 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     _sin.sin_family = AF_INET;
     _sin.sin_port = 0;
     if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{private}s]", gateWay.c_str());
+        NETMGR_LOG_E("inet_aton gateWay[%{private}s]", gateWay.c_str());
         return -1;
     }
     int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
     NETMGR_LOG_I("copyRet = %{public}d", copyRet);
     (reinterpret_cast<struct sockaddr_in *>(&rt.rt_dst))->sin_family = AF_INET;
     if (inet_aton(ip.c_str(), &((struct sockaddr_in *)&rt.rt_dst)->sin_addr) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
+        NETMGR_LOG_E("inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
         return -1;
     }
     (reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_family = AF_INET;
     if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_addr) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton mask[%{public}s]", mask.c_str());
+        NETMGR_LOG_E("inet_aton mask[%{public}s]", mask.c_str());
         return -1;
     }
     auto name = std::make_unique<char[]>(devName.size());
@@ -504,11 +504,11 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     rt.rt_flags = RTF_GATEWAY;
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient create socket fd[%{public}d]", fd);
+        NETMGR_LOG_E("create socket fd[%{public}d]", fd);
         return -1;
     }
     if (ioctl(fd, SIOCADDRT, &rt) < 0) {
-        NETMGR_LOG_I("MockNetsysNativeClient ioctl error");
+        NETMGR_LOG_E("ioctl error");
         close(fd);
         return -1;
     }
@@ -518,43 +518,43 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
 
 int32_t MockNetsysNativeClient::SetDefaultNetWork(int32_t netId)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient SetDefaultNetWork netId is [%{public}d]", netId);
+    NETMGR_LOG_D("SetDefaultNetWork netId is [%{public}d]", netId);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::ClearDefaultNetWorkNetId()
 {
-    NETMGR_LOG_D("MockNetsysNativeClient ClearDefaultNetWorkNetId");
+    NETMGR_LOG_D("ClearDefaultNetWorkNetId");
     return 0;
 }
 
 int32_t MockNetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
+    NETMGR_LOG_D("BindSocket: netId = [%{public}u]", netId);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t MockNetsysNativeClient::ShareDnsSet(uint16_t netId)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient ShareDnsSet: netId[%{public}d]", netId);
+    NETMGR_LOG_D("ShareDnsSet: netId[%{public}d]", netId);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient RegisterNetsysNotifyCallback");
+    NETMGR_LOG_D("RegisterNetsysNotifyCallback");
     return 0;
 }
 
 int32_t MockNetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
+    NETMGR_LOG_D("BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
+    NETMGR_LOG_D("EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
     const char *ifaceName = "wlan0";
     strncpy_s(ifRequest.ifr_name, sizeof(ifRequest.ifr_name), ifaceName, strlen(ifaceName));
     NETMGR_LOG_D("ifRequest.ifr_name[%{public}s]", ifRequest.ifr_name);
@@ -570,27 +570,27 @@ int32_t MockNetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string
 
 int32_t MockNetsysNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::SetBlocking: ifaceFd[%{public}d], isBlock[%{public}d]", ifaceFd, isBlock);
+    NETMGR_LOG_D("SetBlocking: ifaceFd[%{public}d], isBlock[%{public}d]", ifaceFd, isBlock);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
+    NETMGR_LOG_D("StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
         bIpv6);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::StopDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
+    NETMGR_LOG_D("StopDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
         bIpv6);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient::RegisterCallback");
+    NETMGR_LOG_D("RegisterCallback");
     return 0;
 }
 
@@ -600,6 +600,16 @@ int32_t MockNetsysNativeClient::StartDhcpService(const std::string &iface, const
 }
 
 int32_t MockNetsysNativeClient::StopDhcpService(const std::string &iface)
+{
+    return 0;
+}
+
+int32_t MockNetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    return 0;
+}
+
+int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
 {
     return 0;
 }

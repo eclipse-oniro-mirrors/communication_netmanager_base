@@ -83,7 +83,7 @@ int InterfaceManager::GetMtu(const char *interfaceName)
     }
 
     if (!CheckIfaceName(interfaceName)) {
-        NETNATIVE_LOGE("InterfaceManager::GetMtu isIfaceName fail %{public}d", errno);
+        NETNATIVE_LOGE("GetMtu isIfaceName fail %{public}d", errno);
         return -1;
     }
     std::string mtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
@@ -94,21 +94,21 @@ int InterfaceManager::GetMtu(const char *interfaceName)
     }
     int fd = open(realPath.c_str(), 0, FILE_PERMISSION);
     if (fd == -1) {
-        NETNATIVE_LOGE("InterfaceManager::GetMtu open fail %{public}d", errno);
+        NETNATIVE_LOGE("GetMtu open fail %{public}d", errno);
         return -1;
     }
 
     char originMtuValue[MAX_MTU_LEN] = {0};
     int nread = read(fd, originMtuValue, (sizeof(char) * (MAX_MTU_LEN - 1)));
     if (nread == -1 || nread == 0) {
-        NETNATIVE_LOGE("InterfaceManager::GetMtu read fail %{public}d", errno);
+        NETNATIVE_LOGE("GetMtu read fail %{public}d", errno);
         close(fd);
         return -1;
     }
     close(fd);
 
     int32_t mtu = -1;
-    (void)NetManagerStandard::CommonUtils::ParseInt(originMtuValue, &mtu);
+    mtu = StrToInt(originMtuValue);
     return mtu;
 }
 
@@ -120,11 +120,11 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
     }
 
     if (!CheckIfaceName(interfaceName)) {
-        NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
+        NETNATIVE_LOGE("SetMtu isIfaceName fail %{public}d", errno);
     }
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
-        NETNATIVE_LOGE("InterfaceManager::SetMtu socket fail %{public}d", errno);
+        NETNATIVE_LOGE("SetMtu socket fail %{public}d", errno);
         return -1;
     }
 
@@ -142,7 +142,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
     ifr.ifr_mtu = mtu;
 
     if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
-        NETNATIVE_LOGE("InterfaceManager::SetMtu ioctl fail %{public}d", errno);
+        NETNATIVE_LOGE("SetMtu ioctl fail %{public}d", errno);
         close(sockfd);
         return -1;
     }
@@ -159,7 +159,7 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
 
     dir = opendir(SYS_NET_PATH);
     if (dir == nullptr) {
-        NETNATIVE_LOGE("InterfaceManager::GetInterfaceNames opendir fail %{public}d", errno);
+        NETNATIVE_LOGE("GetInterfaceNames opendir fail %{public}d", errno);
         return ifaceNames;
     }
 
@@ -182,7 +182,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     }
     uint32_t index = if_nametoindex(interfaceName);
     if (index == 0) {
-        NETNATIVE_LOGE("InterfaceManager::ModifyAddress, if_nametoindex error %{public}d", errno);
+        NETNATIVE_LOGE("ModifyAddress, if_nametoindex error %{public}d", errno);
         return -errno;
     }
     auto family = CommonUtils::GetAddrFamily(addr);
@@ -215,14 +215,10 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         }
     }
 
-    NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
+    NETNATIVE_LOGI("ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
                    ToAnonymousIp(addr).c_str(), prefixLen);
 
-    auto ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    if (ret < 0) {
-        return -EIO;
-    }
-    return NETMANAGER_SUCCESS;
+    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
 int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, int prefixLen)
@@ -511,16 +507,16 @@ int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr 
     }
 
     for (int i = 0; i < MAC_ADDRESS_INT_LEN; i++) {
-        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v, sizeof(uint32_t)) <= 0) {
+        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v) <= 0) {
             NETNATIVE_LOGE("sscanf_s is false");
             return NETMANAGER_ERR_OPERATION_FAILED;
         }
         strMac[i] = (char)v;
     }
 
-    if (strncpy_s(macSock.sa_data, sizeof(macSock.sa_data),
+    if (memcpy_s(macSock.sa_data, sizeof(macSock.sa_data),
                   strMac, MAC_ADDRESS_INT_LEN) != 0) {
-        NETNATIVE_LOGE("strncpy_s is false");
+        NETNATIVE_LOGE("memcpy_s is false");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 

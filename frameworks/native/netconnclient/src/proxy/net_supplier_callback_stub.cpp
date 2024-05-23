@@ -39,7 +39,7 @@ void NetSupplierCallbackStub::RegisterSupplierCallbackImpl(const sptr<NetSupplie
 int32_t NetSupplierCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                  MessageOption &option)
 {
-    NETMGR_LOG_I("Net supplier callback stub call start, code:[%{public}d]", code);
+    NETMGR_LOG_D("Net supplier callback stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetSupplierCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
@@ -71,7 +71,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -94,7 +94,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -108,6 +108,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
+        NETMGR_LOG_I("RequestNetwork[%{public}s]", ident.c_str());
         callback_->RequestNetwork(ident, netCaps);
     }
     return 0;
@@ -116,6 +117,7 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
 int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
+        NETMGR_LOG_I("ReleaseNetwork[%{public}s]", ident.c_str());
         callback_->ReleaseNetwork(ident, netCaps);
     }
     return 0;

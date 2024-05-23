@@ -683,6 +683,13 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
 
     /**
+     * Get all container stats info
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+
+    /**
      * Get all stats info
      *
      * @param stats stats
@@ -808,6 +815,25 @@ public:
      */
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
 
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override;
+    
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
+
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid - The specified UID of application.
+     * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

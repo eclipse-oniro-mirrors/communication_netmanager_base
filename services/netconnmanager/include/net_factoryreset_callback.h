@@ -22,7 +22,7 @@
 
 #include "singleton.h"
 #include "refbase.h"
-
+#include "ffrt.h"
 #include "event_handler.h"
 #include "i_net_factoryreset_callback.h"
 
@@ -32,7 +32,7 @@ class NetFactoryResetCallback : public RefBase {
 
 public:
     NetFactoryResetCallback();
-    ~NetFactoryResetCallback();
+    ~NetFactoryResetCallback() {}
     /**
      * Register net factory reset callback.
      * @param callback Interface type pointer.
@@ -60,8 +60,7 @@ private:
 
 private:
     std::vector<sptr<INetFactoryResetCallback>> callbacks_;
-    std::shared_ptr<AppExecFwk::EventRunner> factoryResetCallRunner_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> factoryResetCallHandler_ = nullptr;
+    std::shared_ptr<ffrt::queue> factoryResetCallFfrtQueue_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 
 #include "message_parcel.h"
 #include "net_conn_constants.h"
-#include "net_conn_security.h"
 #include "net_datashare_utils.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -72,7 +72,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 {
-    NetDataShareAccessToken token;
+    NetManagerBaseDataShareToken token;
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -107,7 +107,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 {
-    NetDataShareAccessToken token;
+    NetManagerBaseDataShareToken token;
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -139,7 +139,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 {
-    NetDataShareAccessToken token;
+    NetManagerBaseDataShareToken token;
     std::string airplaneMode;
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);

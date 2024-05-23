@@ -26,13 +26,11 @@
 #include "net_monitor.h"
 #include "net_supplier_info.h"
 #include "route.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t INVALID_NET_ID = 0;
-constexpr int32_t MIN_NET_ID = 100;
-constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
-using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
+using NetDetectionHandler = std::function<void(uint32_t supplierId, NetDetectionStatus netState)>;
 class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
     Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -40,18 +38,22 @@ public:
     ~Network() = default;
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
+    uint32_t GetSupplierId() const;
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;
     void UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
+    void HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &newNetLinkInfo);
     void UpdateRoutes(const NetLinkInfo &newNetLinkInfo);
     void UpdateDns(const NetLinkInfo &netLinkInfo);
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo);
+    void UpdateStatsCached(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection(bool needReport);
+    void SetNetCaps(const std::set<NetCap> &netCaps);
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
     bool IsConnecting() const;
@@ -77,9 +79,10 @@ private:
     void SendConnectionChangedBroadcast(const NetConnState &netConnState) const;
     void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
     void ResetNetlinkInfo();
-    void NetDetectionForDnsHealthSync(bool dnsHealthSuccess);
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
+    bool IsAddrInOtherNetwork(const INetAddr &netAddr);
+    bool IsIfaceNameInUse();
 
 private:
     int32_t netId_ = 0;
@@ -95,6 +98,7 @@ private:
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
+    std::set<NetCap> netCaps_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

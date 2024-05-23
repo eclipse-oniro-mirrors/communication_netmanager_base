@@ -17,6 +17,7 @@
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -162,7 +163,7 @@ int32_t NetConnServiceProxy::RegisterNetSupplierCallback(uint32_t supplierId,
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
@@ -174,7 +175,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(callback->AsObject());
 
     MessageParcel replyParcel;
     int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK),
@@ -187,7 +188,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 }
 
 int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                                     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                                     const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
@@ -201,11 +202,39 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     }
     netSpecifier->Marshalling(dataParcel);
     dataParcel.WriteUint32(timeoutMS);
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(callback->AsObject());
 
     MessageParcel replyParcel;
     int32_t retCode = RemoteSendRequest(
         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
+        dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
+    return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                                  const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+{
+    if (netSpecifier == nullptr || callback == nullptr) {
+        NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    netSpecifier->Marshalling(dataParcel);
+    dataParcel.WriteUint32(timeoutMS);
+    dataParcel.WriteRemoteObject(callback->AsObject());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION),
         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -485,6 +514,46 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
     return ret;
 }
 
+int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
+                                                   std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (bearerType >= BEARER_DEFAULT) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    uint32_t netType = static_cast<NetBearType>(bearerType);
+    if (!data.WriteUint32(netType)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS),
+                                    data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    uint32_t size = 0;
+    if (!reply.ReadUint32(size)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
+    for (uint32_t i = 0; i < size; ++i) {
+        std::string key;
+        std::string value;
+        if (!reply.ReadString(key) || !reply.ReadString(value)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        ifaceNameIdentMaps.emplace(key, value);
+    }
+    return ret;
+}
+
 bool NetConnServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetConnServiceProxy::GetDescriptor())) {
@@ -733,7 +802,7 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
         if (!reply.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netAllCap.netCaps_.insert(static_cast<NetCap>(value));
         }
     }
@@ -1418,6 +1487,100 @@ int32_t NetConnServiceProxy::RegisterNetFactoryResetCallback(const sptr<INetFact
         return retCode;
     }
     return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteString(url)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+    int32_t ret = reply.ReadInt32();
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadBool(preferCellular)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK), dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    uint32_t type = static_cast<uint32_t>(bearerType);
+    if (!data.WriteUint32(type)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteBool(isBetter)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return reply.ReadInt32();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

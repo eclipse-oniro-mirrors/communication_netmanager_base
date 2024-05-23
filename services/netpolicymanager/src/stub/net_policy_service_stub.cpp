@@ -46,11 +46,14 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), Permission::MANAGE_NET_STRATEGY},
-    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG),
+     Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
-NetPolicyServiceStub::NetPolicyServiceStub()
+NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
 {
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID)] =
         &NetPolicyServiceStub::OnSetPolicyByUid;
@@ -96,21 +99,30 @@ NetPolicyServiceStub::NetPolicyServiceStub()
         &NetPolicyServiceStub::OnCheckPermission;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES)] =
         &NetPolicyServiceStub::OnFactoryResetPolicies;
+    ExtraNetPolicyServiceStub();
     InitEventHandler();
+}
+
+void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY)] =
+        &NetPolicyServiceStub::OnSetNetworkAccessPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY)] =
+        &NetPolicyServiceStub::OnGetNetworkAccessPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG)] =
+        &NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag;
+    return;
 }
 
 NetPolicyServiceStub::~NetPolicyServiceStub() = default;
 
 void NetPolicyServiceStub::InitEventHandler()
 {
-    runner_ = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_THREAD);
-    if (!runner_) {
-        NETMGR_LOG_E("Create net policy work event runner.");
-        return;
-    }
-    auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
-    handler_ = std::make_shared<NetPolicyEventHandler>(runner_, core);
-    core->Init(handler_);
+    std::call_once(onceFlag, [this]() {
+        auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
+        handler_ = std::make_shared<NetPolicyEventHandler>(core, ffrtQueue_);
+        core->Init(handler_);
+    });
 }
 
 int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -143,9 +155,10 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         int32_t result = NETMANAGER_SUCCESS;
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            handler_->PostSyncTask(
-                [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); },
-                AppExecFwk::EventQueue::Priority::HIGH);
+            auto task = ffrtQueue_.submit_h([this, &data, &reply, &requestFunc, &result]() {
+                          result = (this->*requestFunc)(data, reply);
+                      });
+            ffrtQueue_.wait(task);
             NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, result);
             return result;
         }
@@ -614,6 +627,100 @@ int32_t NetPolicyServiceStub::OnCheckPermission(MessageParcel &data, MessageParc
 int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid;
+
+    if (!data.ReadUint32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint8_t wifi_allow;
+    uint8_t cellular_allow;
+    NetworkAccessPolicy policy;
+    bool reconfirmFlag = true;
+
+    if (!data.ReadUint8(wifi_allow)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (!data.ReadUint8(cellular_allow)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (!data.ReadBool(reconfirmFlag)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    policy.wifiAllow = wifi_allow;
+    policy.cellularAllow = cellular_allow;
+    int32_t ret = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t uid = 0;
+    uint32_t userId = 1;
+    bool flag = false;
+    if (!data.ReadBool(flag)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (!data.ReadInt32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (!data.ReadUint32(userId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    AccessPolicySave policies;
+    AccessPolicyParameter parameters;
+    parameters.flag = flag;
+    parameters.uid = uid;
+    parameters.userId = userId;
+
+    int32_t ret = GetNetworkAccessPolicy(parameters, policies);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        ret = NetworkAccessPolicy::Marshalling(reply, policies, flag);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("GetNetworkAccessPolicy marshalling failed");
+            return ret;
+        }
+    }
+
+    return ret;
+}
+
+int32_t NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("OnNotifyNetAccessPolicyDiag");
+    uint32_t uid;
+
+    if (!data.ReadUint32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = NotifyNetAccessPolicyDiag(uid);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

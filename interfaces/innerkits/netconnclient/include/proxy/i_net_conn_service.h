@@ -47,15 +47,19 @@ public:
                                         const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;
     virtual int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) = 0;
-    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
+    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                            const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) = 0;
+                                            const sptr<INetConnCallback> callback, const uint32_t &timeoutMS) = 0;
+    virtual int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                         const sptr<INetConnCallback> callback, const uint32_t timeoutMS) = 0;
     virtual int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
     virtual int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) = 0;
     virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
+    virtual int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
+                                          std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) = 0;
     virtual int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t NetDetection(int32_t netId) = 0;
@@ -95,6 +99,10 @@ public:
 
     virtual int32_t FactoryResetNetwork() = 0;
     virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
+    virtual int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) = 0;
+    virtual int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
+    virtual int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
+    virtual int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

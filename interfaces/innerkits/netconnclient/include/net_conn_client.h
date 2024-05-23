@@ -31,6 +31,7 @@
 #include "net_specifier.h"
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
+#include "safe_map.h"
 
 namespace OHOS {
 namespace nmd {
@@ -125,7 +126,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
 
     /**
      * Register net connection callback by NetSpecifier
@@ -137,9 +138,21 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS);
 
+    /**
+     * Request net connection callback by NetSpecifier
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetConnCallback interface
+     * @param timeoutMS net connection time out
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                    const uint32_t timeoutMS);
     /**
      * Unregister net connection callback
      *
@@ -150,6 +163,27 @@ public:
      */
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
 
+    /**
+     * Register net detection callback by netId
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetDetectionCallback interface
+     * @param timeoutMS net connection time out
+     * @return Returns 0, successfully register net detection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
+    /**
+     * Unregister net detection callback by netId
+     *
+     * @param callback The callback of INetDetectionCallback interface
+     * @return Returns 0, successfully unregister net detection callback, otherwise it will fail
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
+    
     /**
      * The interface is to get default network
      *
@@ -227,6 +261,18 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr);
+
+    /**
+     * The interface is to get all iface and ident maps
+     *
+     * @param bearerType the type of network
+     * @param ifaceNameIdentMaps the map of ifaceName and ident
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
+                                 std::unordered_map<std::string, std::string> &ifaceNameIdentMaps);
 
     /**
      * The interface is to bind socket
@@ -372,6 +418,20 @@ public:
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
     void UnregisterAppHttpProxyCallback(uint32_t callbackid);
     int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
+     /**
+     * Whether this url prefer cellular
+     *
+     * @param url url input
+     * @param preferCellular out param, whether prefer cellular
+     * @return Returns 0, unregister the network successfully, otherwise it will fail
+     */
+    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
+
+    int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
+    int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -394,7 +454,7 @@ private:
     NetConnClient(const NetConnClient&) = delete;
 
     sptr<INetConnService> GetProxy();
-    void RecoverCallback();
+    void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -402,12 +462,15 @@ private:
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
     HttpProxy appHttpProxy_;
+    HttpProxy globalHttpProxy_;
     char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
+    SafeMap<uint32_t, uint8_t> netPermissionMap_;
+    sptr<IPreAirplaneCallback> preAirplaneCallback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

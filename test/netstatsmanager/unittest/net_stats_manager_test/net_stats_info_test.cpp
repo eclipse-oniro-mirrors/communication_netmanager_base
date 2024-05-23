@@ -20,13 +20,20 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr int32_t TEST_UID = 20020142;
 constexpr int64_t TEST_RXBYTES = 15453;
 constexpr int64_t TEST_TXBYTES = 45115;
 constexpr int64_t TEST_RXPACKETS = 5646894;
 constexpr int64_t TEST_TXPACKETS = 7894;
+constexpr const char *TEST_IFACE = "eth0";
+constexpr const char *TEST_IDENT = "2";
 NetStatsInfo GetNetStatsInfoData()
 {
     NetStatsInfo info;
+    info.uid_ = TEST_UID;
+    info.iface_ = TEST_IFACE;
+    info.ident_ = TEST_IDENT;
+    info.date_ = TEST_RXPACKETS;
     info.rxBytes_ = TEST_RXBYTES;
     info.rxPackets_ = TEST_RXPACKETS;
     info.txBytes_ = TEST_TXBYTES;
@@ -65,6 +72,7 @@ HWTEST_F(NetStatsInfoTest, MarshallingTest001, TestSize.Level1)
     EXPECT_TRUE(info.Marshalling(parcel));
     NetStatsInfo result;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, result));
+    EXPECT_EQ(result.ident_, info.ident_);
     EXPECT_EQ(result.rxBytes_, info.rxBytes_);
     EXPECT_EQ(result.txBytes_, info.txBytes_);
     EXPECT_EQ(result.rxPackets_, info.rxPackets_);
@@ -83,6 +91,7 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest002, TestSize.Level1)
     EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, info));
     NetStatsInfo result;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, result));
+    EXPECT_EQ(result.ident_, info.ident_);
     EXPECT_EQ(result.rxBytes_, info.rxBytes_);
     EXPECT_EQ(result.txBytes_, info.txBytes_);
     EXPECT_EQ(result.rxPackets_, info.rxPackets_);
@@ -105,6 +114,25 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest003, TestSize.Level1)
 
     EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
     std::vector<NetStatsInfo> results;
+    EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingTest004
+ * @tc.desc: Test NetStatsInfo Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest004, TestSize.Level1)
+{
+    Parcel parcel;
+    std::unordered_map<uint32_t, NetStatsInfo> statsInfos;
+    NetStatsInfo infoa = GetNetStatsInfoData();
+    statsInfos.emplace(0, infoa);
+    NetStatsInfo infob = GetNetStatsInfoData();
+    statsInfos.emplace(1, infob);
+
+    EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
+    std::unordered_map<uint32_t, NetStatsInfo> results;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
 }
 

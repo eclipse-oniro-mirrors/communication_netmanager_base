@@ -26,12 +26,16 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#include "bpf_ring_buffer.h"
+#include "parameters.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
+const std::string DEVICETYPE_KEY = "const.product.devicetype";
+const std::string PHONE_TYPE = "phone";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -45,7 +49,7 @@ NetsysNativeService::NetsysNativeService()
 
 void NetsysNativeService::OnStart()
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnStart Begin");
+    NETNATIVE_LOGI("OnStart Begin");
     std::lock_guard<std::mutex> guard(instanceLock_);
     if (state_ == ServiceRunningState::STATE_RUNNING) {
         return;
@@ -74,6 +78,7 @@ void NetsysNativeService::OnStop()
     NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
     NETNATIVE_LOGI("stop listener end on stop end");
+    NetsysBpfRingBuffer::ExistRingBufferPoll();
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -122,13 +127,17 @@ bool NetsysNativeService::Init()
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
+
+    if (OHOS::system::GetParameter(DEVICETYPE_KEY, "") == PHONE_TYPE) {
+        NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
+    }
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
 
 void NetsysNativeService::OnNetManagerRestart()
 {
-    NETNATIVE_LOGI("NetsysNativeClient::OnNetManagerRestart");
+    NETNATIVE_LOGI("OnNetManagerRestart");
     if (netsysService_ != nullptr) {
         netsysService_->NetworkReinitRoute();
     }
@@ -211,7 +220,7 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
                                              const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
+    NETNATIVE_LOG_D("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
                     interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
@@ -279,9 +288,9 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t family, int32_t which, const 
     return result;
 }
 
-int32_t NetsysNativeService::SetInternetPermission(uint32_t uid, uint8_t allow)
+int32_t NetsysNativeService::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
-    int32_t result = netsysService_->SetInternetPermission(uid, allow);
+    int32_t result = netsysService_->SetInternetPermission(uid, allow, isBroker);
     NETNATIVE_LOG_D("SetInternetPermission out.");
     return result;
 }
@@ -569,7 +578,7 @@ int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIfa
 
 void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         if (!hasSARemoved_) {
             hasSARemoved_ = true;
@@ -581,7 +590,7 @@ void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std:
 
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         OnNetManagerRestart();
         hasSARemoved_ = true;
@@ -618,6 +627,15 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
+int32_t NetsysNativeService::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {
@@ -628,7 +646,7 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     return bpfStats_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
 {
     if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
         NETNATIVE_LOGE("IptablesWrapper command format is invalid");
@@ -638,7 +656,20 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
+    switch (ipType) {
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, cmd);
+            break;
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV6, cmd);
+            break;
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4V6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmd);
+            break;
+        default:
+            NETNATIVE_LOGE("IptablesWrapper ipputType is invalid");
+            return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -741,6 +772,19 @@ int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealt
     return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+    NETNATIVE_LOG_D("SetIpv6PrivacyExtensions");
+    return result;
+}
+int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on);
+    NETNATIVE_LOG_D("SetEnableIpv6");
+    return result;
+}
+
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     if (bpfStats_ == nullptr) {
@@ -749,6 +793,45 @@ int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint
     }
 
     return bpfStats_->GetCookieStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), cookie);
+}
+
+int32_t NetsysNativeService::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("GetNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    sharingTypeIsOn = sharingTypeIsOn_;
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("UpdateNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    if (isOpen) {
+        sharingTypeIsOn_.insert(type);
+    } else {
+        sharingTypeIsOn_.erase(type);
+    }
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteNetworkAccessPolicy");
+    return netsysService_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetsysNativeService::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
+    return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
 }
 } // namespace NetsysNative
 } // namespace OHOS

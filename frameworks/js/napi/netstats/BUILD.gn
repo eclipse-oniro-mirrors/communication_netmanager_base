@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,18 @@ config("statistics_config") {
     "include/context",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
 }
 
 ohos_shared_library("statistics") {
@@ -33,12 +45,16 @@ ohos_shared_library("statistics") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "src/context/get_cellular_rxbytes_context.cpp",
     "src/context/get_iface_rxbytes_context.cpp",
     "src/context/get_iface_stats_context.cpp",
     "src/context/get_iface_uid_stats_context.cpp",
     "src/context/get_sockfd_rxbytes_context.cpp",
+    "src/context/get_traffic_stats_by_network_context.cpp",
+    "src/context/get_traffic_stats_by_uid_network_context.cpp",
     "src/context/get_uid_rxbytes_context.cpp",
     "src/context/update_iface_stats_context.cpp",
     "src/statistics_async_work.cpp",

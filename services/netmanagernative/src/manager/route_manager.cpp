@@ -24,6 +24,7 @@
 #include <net/if.h>
 #include <netlink_socket.h>
 #include <sstream>
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -54,6 +55,7 @@ constexpr int32_t RULE_LEVEL_SHARING = 14000;
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
 constexpr uint32_t ROUTE_VPN_NETWORK_TABLE = 98;
 constexpr uint32_t ROUTE_LOCAL_NETWORK_TABLE = 99;
+constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 1;
 constexpr uint32_t OUTPUT_MAX = 128;
 constexpr uint32_t BIT_32_LEN = 32;
 constexpr uint32_t BIT_MAX_LEN = 255;
@@ -64,6 +66,7 @@ constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
 constexpr uid_t UID_ROOT = 0;
+constexpr std::pair<uid_t, uid_t> UID_ALLOW_INTERNAL = {7023, 7023};
 constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
 constexpr uint32_t ROUTEMANAGER_ERROR = -1;
 constexpr bool ADD_CONTROL = true;
@@ -91,7 +94,7 @@ RouteManager::RouteManager()
 int32_t RouteManager::AddRoute(TableType tableType, const std::string &interfaceName,
                                const std::string &destinationName, const std::string &nextHop)
 {
-    NETNATIVE_LOGI("Entry RouteManager::AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
+    NETNATIVE_LOGI("AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
 
     // This is a user-defined structure used to integrate the information required for setting up routes.
@@ -106,7 +109,7 @@ int32_t RouteManager::AddRoute(TableType tableType, const std::string &interface
 int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interfaceName,
                                   const std::string &destinationName, const std::string &nextHop)
 {
-    NETNATIVE_LOGI("Entry RouteManager::RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
+    NETNATIVE_LOGI("RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
 
     RouteInfo routeInfo;
@@ -119,7 +122,7 @@ int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interf
 int32_t RouteManager::UpdateRoute(TableType tableType, const std::string &interfaceName,
                                   const std::string &destinationName, const std::string &nextHop)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
+    NETNATIVE_LOGI("UpdateRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
 
     RouteInfo routeInfo;
@@ -200,9 +203,13 @@ int32_t RouteManager::RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const s
         NETNATIVE_LOGE("UpdatePhysicalNetwork err, error is %{public}d", ret);
         return ret;
     }
-    if (int32_t ret = ClearRoutes(interfaceName)) {
+    if (int32_t ret = ClearRoutes(interfaceName, netId)) {
         NETNATIVE_LOGE("ClearRoutes err, error is %{public}d", ret);
         return ret;
+    }
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        NETNATIVE_LOGI("InternalNetId skip");
+        return 0;
     }
     if (int32_t ret = ClearSharingRules(interfaceName)) {
         NETNATIVE_LOGE("ClearSharingRules err, error is %{public}d", ret);
@@ -215,7 +222,7 @@ int32_t RouteManager::RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const s
 int32_t RouteManager::ModifyPhysicalNetworkPermission(uint16_t netId, const std::string &interfaceName,
                                                       NetworkPermission oldPermission, NetworkPermission newPermission)
 {
-    NETNATIVE_LOGI("Entry RouteManager::ModifyPhysicalNetworkPermission, %{public}s", interfaceName.c_str());
+    NETNATIVE_LOGI("ModifyPhysicalNetworkPermission, %{public}s", interfaceName.c_str());
     if (int32_t ret = UpdatePhysicalNetwork(netId, interfaceName, newPermission, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdatePhysicalNetwork err, error is %{public}d", ret);
         return ret;
@@ -239,7 +246,7 @@ int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std
 
 int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::ModifyVirtualNetBasedRules,add===%{public}d", add);
+    NETNATIVE_LOGI("ModifyVirtualNetBasedRules,add===%{public}d", add);
     uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, ifaceName);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
@@ -303,7 +310,7 @@ int32_t RouteManager::RemoveUsersFromVirtualNetwork(int32_t netId, const std::st
 int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                            const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateVirtualNetwork, add == %{public}d", add);
+    NETNATIVE_LOGI("UpdateVirtualNetwork, add == %{public}d", add);
     uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
@@ -340,7 +347,7 @@ int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_
 int32_t RouteManager::UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
                                                        uid_t uidStart, uid_t uidEnd, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateExplicitNetworkRuleWithUid");
+    NETNATIVE_LOGI("UpdateExplicitNetworkRuleWithUid");
     Fwmark fwmark;
     fwmark.netId = netId;
     fwmark.explicitlySelected = true;
@@ -366,7 +373,7 @@ int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &inter
                                                         NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
                                                         bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateOutputInterfaceRulesWithUid interface:%{public}s", interface.c_str());
+    NETNATIVE_LOGI("UpdateOutputInterfaceRulesWithUid interface:%{public}s", interface.c_str());
     Fwmark fwmark;
     fwmark.permission = permission;
 
@@ -386,7 +393,7 @@ int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &inter
 
 int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry RouteManager::AddInterfaceToLocalNetwork, %{public}s", interfaceName.c_str());
+    NETNATIVE_LOGI("AddInterfaceToLocalNetwork, %{public}s", interfaceName.c_str());
     if (int32_t ret = UpdateLocalNetwork(netId, interfaceName, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdateLocalNetwork err, error is %{public}d", ret);
         return ret;
@@ -399,7 +406,7 @@ int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::stri
 
 int32_t RouteManager::RemoveInterfaceFromLocalNetwork(uint16_t netId, const std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry RouteManager::RemoveInterfaceFromLocalNetwork");
+    NETNATIVE_LOGI("RemoveInterfaceFromLocalNetwork");
     if (int32_t ret = UpdateLocalNetwork(netId, interfaceName, DEL_CONTROL)) {
         NETNATIVE_LOGE("UpdateLocalNetwork err, error is %{public}d", ret);
         return ret;
@@ -475,7 +482,7 @@ int32_t RouteManager::ReadAddr(const std::string &addr, InetAddr *res)
 
 int32_t RouteManager::Init()
 {
-    NETNATIVE_LOGI("Entry RouteManager::Init");
+    NETNATIVE_LOGI("Init");
     // need to call IptablesWrapper's RunCommand function.
     std::string commandNew;
     commandNew.append(" -t mangle -N ");
@@ -507,16 +514,16 @@ int32_t RouteManager::ClearRules()
     return ClearRouteInfo(RTM_GETRULE, 0) >= 0 ? 0 : -1;
 }
 
-int32_t RouteManager::ClearRoutes(const std::string &interfaceName)
+int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netId)
 {
     std::lock_guard lock(RouteManager::interfaceToTableLock_);
-    uint32_t table = FindTableByInterfacename(interfaceName);
-    NETNATIVE_LOGI("RouteManager::ClearRoutes--table==:%{public}d", table);
+    uint32_t table = FindTableByInterfacename(interfaceName, netId);
+    NETNATIVE_LOGI("ClearRoutes--table==:%{public}d", table);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
     }
     int32_t ret = ClearRouteInfo(RTM_GETROUTE, table);
-    if (ret == 0) {
+    if (ret == 0 && table != ROUTE_INTERNAL_DEFAULT_TABLE) {
         interfaceToTable_.erase(interfaceName);
     }
 
@@ -525,7 +532,7 @@ int32_t RouteManager::ClearRoutes(const std::string &interfaceName)
 
 int32_t RouteManager::AddLocalNetworkRules()
 {
-    NETNATIVE_LOGI("Entry RouteManager::AddLocalNetworkRules");
+    NETNATIVE_LOGI("AddLocalNetworkRules");
     if (int32_t ret =
             UpdateExplicitNetworkRule(LOCAL_NET_ID, ROUTE_LOCAL_NETWORK_TABLE, PERMISSION_NONE, ADD_CONTROL)) {
         NETNATIVE_LOGE("UpdateExplicitNetworkRule failed, err is %{public}d", ret);
@@ -551,8 +558,8 @@ int32_t RouteManager::AddLocalNetworkRules()
 int32_t RouteManager::UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName,
                                             NetworkPermission permission, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdatePhysicalNetwork,add===%{public}d", add);
-    uint32_t table = FindTableByInterfacename(interfaceName);
+    NETNATIVE_LOGI("UpdatePhysicalNetwork,add===%{public}d", add);
+    uint32_t table = FindTableByInterfacename(interfaceName, netId);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
         return -1;
@@ -573,14 +580,14 @@ int32_t RouteManager::UpdatePhysicalNetwork(uint16_t netId, const std::string &i
 
 int32_t RouteManager::UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateLocalNetwork");
+    NETNATIVE_LOGI("UpdateLocalNetwork");
     return UpdateOutputInterfaceRules(interfaceName, ROUTE_LOCAL_NETWORK_TABLE, PERMISSION_NONE, add);
 }
 
 int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
                                                NetworkPermission permission, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateIncomingPacketMark");
+    NETNATIVE_LOGI("UpdateIncomingPacketMark");
     Fwmark fwmark;
     fwmark.netId = netId;
     fwmark.explicitlySelected = true;
@@ -603,7 +610,7 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
 
 int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateExplicitNetworkRule");
+    NETNATIVE_LOGI("UpdateExplicitNetworkRule");
     Fwmark fwmark;
     fwmark.netId = netId;
     fwmark.explicitlySelected = true;
@@ -622,13 +629,17 @@ int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, 
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL,
+            ruleInfo, UID_ALLOW_INTERNAL.first, UID_ALLOW_INTERNAL.second);
+    }
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }
 
 int32_t RouteManager::UpdateOutputInterfaceRules(const std::string &interfaceName, uint32_t table,
                                                  NetworkPermission permission, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateOutputInterfaceRules");
+    NETNATIVE_LOGI("UpdateOutputInterfaceRules");
     Fwmark fwmark;
     fwmark.permission = permission;
 
@@ -649,7 +660,7 @@ int32_t RouteManager::UpdateOutputInterfaceRules(const std::string &interfaceNam
 int32_t RouteManager::UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
                                            const std::string &outputInterface)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateSharingNetwork");
+    NETNATIVE_LOGI("UpdateSharingNetwork");
     uint32_t table = FindTableByInterfacename(outputInterface);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
@@ -668,7 +679,7 @@ int32_t RouteManager::UpdateSharingNetwork(uint16_t action, const std::string &i
 
 int32_t RouteManager::ClearSharingRules(const std::string &inputInterface)
 {
-    NETNATIVE_LOGI("Entry RouteManager::ClearSharingRules");
+    NETNATIVE_LOGI("ClearSharingRules");
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = 0;
@@ -683,7 +694,7 @@ int32_t RouteManager::ClearSharingRules(const std::string &inputInterface)
 
 int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart, uid_t uidEnd)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateRuleInfo");
+    NETNATIVE_LOGI("UpdateRuleInfo");
     if (ruleInfo.rulePriority < 0) {
         NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
         return ROUTEMANAGER_ERROR;
@@ -739,7 +750,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
     if ((uidStart != INVALID_UID) && (uidEnd != INVALID_UID)) {
         FibRuleUidRange uidRange = {uidStart, uidEnd};
         if (int32_t ret = nlmsg.AddAttr(FRA_UID_RANGE, &uidRange, sizeof(uidRange))) {
-            NETNATIVE_LOGE("Entry RouteManager::SendRuleToKernel FRA_UID_RANGE is error.");
+            NETNATIVE_LOGE("SendRuleToKernel FRA_UID_RANGE is error.");
             return ret;
         }
     }
@@ -763,7 +774,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
 
 int32_t RouteManager::UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateRouteRule");
+    NETNATIVE_LOG_D("UpdateRouteRule");
     RouteInfo routeInfoModify = routeInfo;
     // The main work is to assemble the structure required for route.
     struct rtmsg msg;
@@ -846,8 +857,12 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
-uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName)
+uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
+    NETNATIVE_LOGI("FindTableByInterfacename netId %{public}d", netId);
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        return ROUTE_INTERNAL_DEFAULT_TABLE;
+    }
     auto iter = interfaceToTable_.find(interfaceName);
     if (iter != interfaceToTable_.end()) {
         return iter->second;
@@ -872,6 +887,8 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
             return ROUTE_LOCAL_NETWORK_TABLE;
         case RouteManager::VPN_NETWORK:
             return ROUTE_VPN_NETWORK_TABLE;
+        case RouteManager::INTERNAL_DEFAULT:
+            return ROUTE_INTERNAL_DEFAULT_TABLE;
         default:
             NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
             return RT_TABLE_UNSPEC;

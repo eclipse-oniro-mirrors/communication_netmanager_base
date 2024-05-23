@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 
 #include <string>
 #include <set>
-#include <json/json.h>
+
+#include "cJSON.h"
 #include "openssl/ssl.h"
 
 namespace OHOS {
@@ -73,13 +74,14 @@ private:
     int32_t CreateRehashedCertFiles();
     int32_t GetJsonFromBundle(std::string &jsonProfile);
     int32_t ParseJsonConfig(const std::string &content);
-    void ParseJsonBaseConfig(const Json::Value &root, BaseConfig &baseConfig);
-    void ParseJsonDomainConfigs(const Json::Value &root, std::vector<DomainConfig> &domainConfigs);
-    void ParseJsonTrustAnchors(const Json::Value &root, TrustAnchors &trustAnchors);
-    void ParseJsonDomains(const Json::Value &root, std::vector<Domain> &domains);
-    void ParseJsonPinSet(const Json::Value &root, PinSet &pinSet);
+    void ParseJsonBaseConfig(const cJSON* const root, BaseConfig &baseConfig);
+    void ParseJsonDomainConfigs(const cJSON* const root, std::vector<DomainConfig> &domainConfigs);
+    void ParseJsonTrustAnchors(const cJSON* const root, TrustAnchors &trustAnchors);
+    void ParseJsonDomains(const cJSON* const root, std::vector<Domain> &domains);
+    void ParseJsonPinSet(const cJSON* const root, PinSet &pinSet);
     bool ValidateDate(const std::string &dateStr);
     void DumpConfigs();
+    std::string GetJsonProfile();
 
 private:
     NetworkSecurityConfig();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 
+#include "app_net_client.h"
 #include "dns_config_client.h"
 #include <netdb.h>
 #include <securec.h>
@@ -157,7 +158,9 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
         .command = GET_CONFIG,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -236,7 +239,9 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = GET_CACHE,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     int32_t res = NetsysSendKeyForCache(sockFd, param, info);
     if (res < 0) {
         return res;
@@ -295,7 +300,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
     for (struct addrinfo *tmp = res; tmp != NULL; tmp = tmp->ai_next) {
         addrInfo[resNum].aiFlags = tmp->ai_flags;
         addrInfo[resNum].aiFamily = tmp->ai_family;
-        addrInfo[resNum].aiSockType = tmp->ai_socktype;
+        addrInfo[resNum].aiSockType = (uint32_t)(tmp->ai_socktype);
         addrInfo[resNum].aiProtocol = tmp->ai_protocol;
         addrInfo[resNum].aiAddrLen = tmp->ai_addrlen;
         if (memcpy_s(&addrInfo[resNum].aiAddr, sizeof(addrInfo[resNum].aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
@@ -316,6 +321,16 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
     return resNum;
 }
 
+static int32_t FillQueryParam(struct queryparam *orig, struct QueryParam *dest)
+{
+    dest->type = orig->qp_type;
+    dest->netId = orig->qp_netid;
+    dest->mark = orig->qp_mark;
+    dest->flags = orig->qp_flag;
+    dest->qHook = NULL;
+    return 0;
+}
+
 static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
                                             struct addrinfo *res)
 {
@@ -323,7 +338,9 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = SET_CACHE,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     int32_t result = NetsysSendKeyForCache(sockFd, param, info);
     if (result < 0) {
         return result;
@@ -411,20 +428,48 @@ int NetSysIsIpv6Enable(uint16_t netId)
     return enable;
 }
 
+static int32_t NetSysPostDnsResultPollSendData(int sockFd, int queryret, int32_t resNum, struct QueryParam *param,
+                                               struct AddrInfo addrInfo[static MAX_RESULTS])
+{
+    if (!PollSendData(sockFd, (char *)&queryret, sizeof(int))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&resNum, sizeof(int32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)param, sizeof(struct QueryParam))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (resNum > 0) {
+        if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
+            DNS_CONFIG_PRINT("send failed %d", errno);
+            return CloseSocketReturn(sockFd, -errno);
+        }
+    }
+    return CloseSocketReturn(sockFd, 0);
+}
+
 static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* name, int usedtime, int queryret,
-                                           struct addrinfo *res, struct QueryParam *param)
+                                           struct addrinfo *res, struct queryparam *param)
 {
     struct RequestInfo info = {
         .command = POST_DNS_RESULT,
         .netId = netId,
     };
 
-    int32_t uid = getuid();
+    int32_t uid = (int32_t)(getuid());
     int32_t pid = getpid();
     uint32_t nameLen = strlen(name) + 1;
     NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg", uid, pid, netId);
 
     struct AddrInfo addrInfo[MAX_RESULTS] = {};
+    struct QueryParam netparam = {};
     int32_t resNum = 0;
     if (queryret == 0) {
         resNum = FillAddrInfo(addrInfo, res);
@@ -432,6 +477,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
     if (resNum < 0) {
         return CloseSocketReturn(sockFd, -1);
     }
+    FillQueryParam(param, &netparam);
 
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -463,32 +509,11 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
         return CloseSocketReturn(sockFd, -errno);
     }
 
-    if (!PollSendData(sockFd, (char *)&queryret, sizeof(int))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)&resNum, sizeof(int32_t))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, (char *)param, sizeof(struct QueryParam))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (resNum > 0) {
-        if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
-            DNS_CONFIG_PRINT("send failed %d", errno);
-            return CloseSocketReturn(sockFd, -errno);
-        }
-    }
-    return CloseSocketReturn(sockFd, 0);
+    return NetSysPostDnsResultPollSendData(sockFd, queryret, resNum, &netparam, addrInfo);
 }
 
 int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
-                            struct addrinfo *res, struct QueryParam *param)
+                            struct addrinfo *res, struct queryparam *param)
 {
     if (name == NULL) {
         return -1;

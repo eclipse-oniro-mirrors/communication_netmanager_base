@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,22 @@
  * limitations under the License.
  */
 
+#include <securec.h>
 #include <thread>
 
-#include <securec.h>
-
-#include "accesstoken_kit.h"
-#include "iservice_registry.h"
-#include "nativetoken_kit.h"
-#include "system_ability_definition.h"
-#include "token_setproc.h"
-
+#include "common_net_conn_callback_test.h"
 #include "i_net_supplier_callback.h"
+#include "iservice_registry.h"
 #include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_supplier_callback_stub.h"
+#include "netmanager_base_test_security.h"
+#include "system_ability_definition.h"
 #define private public
 #include "net_conn_client.h"
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
 #include "net_interface_callback_stub.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -41,174 +38,45 @@ static constexpr uint32_t CREATE_NET_TYPE_VALUE = 7;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
-
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms = {.userID = 1,
-                               .bundleName = "net_conn_client_fuzzer",
-                               .instIndex = 0,
-                               .appIDDesc = "test",
-                               .isSystemApp = true};
-
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .bundleName = "net_conn_client_fuzzer",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect maneger network info",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternetPermDef = {.permissionName = "ohos.permission.INTERNET",
-                                     .bundleName = "net_conn_client_fuzzer",
-                                     .grantMode = 1,
-                                     .availableLevel = APL_SYSTEM_BASIC,
-                                     .label = "label",
-                                     .labelId = 1,
-                                     .description = "Test net connect maneger internet",
-                                     .descriptionId = 1};
-
-PermissionDef testInternalPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .bundleName = "net_conn_client_fuzzer",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internal",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testState = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
-                                 .isGeneral = true,
-                                 .resDeviceID = {"local"},
-                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                 .grantFlags = {2}};
-
-PermissionStateFull testInternetState = {.permissionName = "ohos.permission.INTERNET",
-                                         .isGeneral = true,
-                                         .resDeviceID = {"local"},
-                                         .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                         .grantFlags = {2}};
-
-PermissionStateFull testInternalState = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                   .domain = "test.domain",
-                                   .permList = {testPermDef},
-                                   .permStateList = {testState}};
-
-HapPolicyParams testInternetPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                           .domain = "test.domain",
-                                           .permList = {testPermDef, testInternetPermDef, testInternalPermDef},
-                                           .permStateList = {testState, testInternetState, testInternalState}};
 } // namespace
 
-template <class T> T GetData()
+template <class T> T NetConnGetData()
 {
     T object{};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t netConnSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || netConnSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, netConnSize, g_baseFuzzData + g_baseFuzzPos, netConnSize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += netConnSize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetConnGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetConnGetData<char>();
     }
     std::string str(cstr);
     return str;
 }
 
-class AccessToken {
-public:
-    AccessToken() : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
+SecureData GetSecureDataFromData(int8_t strlen)
+{
+    SecureData secureData;
+    char cstr[strlen];
+    cstr[strlen - 1] = '\0';
+    for (int i = 0; i < strlen - 1; i++) {
+        cstr[i] = NetConnGetData<char>();
     }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
-
-class AccessTokenInternetInfo {
-public:
-    AccessTokenInternetInfo()
-    {
-        currentID_ = GetSelfTokenID();
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testInternetPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessTokenInternetInfo()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_ = 0;
-    AccessTokenID accessID_ = 0;
-};
-
-class INetConnCallbackTest : public IRemoteStub<INetConnCallback> {
-public:
-    int32_t NetAvailable(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
-    {
-        return 0;
-    }
-
-    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
-    {
-        return 0;
-    }
-
-    int32_t NetLost(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetUnavailable()
-    {
-        return 0;
-    }
-
-    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
-    {
-        return 0;
-    }
-};
+    secureData.append(cstr, strlen-1);
+    return secureData;
+}
 
 class INetDetectionCallbackTest : public IRemoteStub<INetDetectionCallback> {
 public:
@@ -216,8 +84,6 @@ public:
     {
         return 0;
     }
-};
-class NetSupplierCallbackBaseTest : public NetSupplierCallbackStub {
 };
 
 class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {};
@@ -237,6 +103,7 @@ void Init()
 int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
+        NETMGR_LOG_D("Net conn client fuzz test g_isInited is false.");
         Init();
     }
 
@@ -250,6 +117,7 @@ int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 bool WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        NETMGR_LOG_D("Write token failed.");
         return false;
     }
     return true;
@@ -258,6 +126,7 @@ bool WriteInterfaceToken(MessageParcel &data)
 bool IsConnClientDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
     if ((data == nullptr) || (size == 0)) {
+        NETMGR_LOG_D("IsConnClientDataAndSizeValid data is nullptr or size is zero.");
         return false;
     }
     g_baseFuzzData = data;
@@ -277,7 +146,7 @@ void SetAppHttpProxyCallback(const HttpProxy &httpProxy)
 
 void SystemReadyFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -288,15 +157,15 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    uint32_t bearerType = NetConnGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     dataParcel.WriteUint32(bearerType);
 
-    std::string ident = GetStringFromData(STR_LEN);
+    std::string ident = NetConnGetString(STR_LEN);
     dataParcel.WriteString(ident);
 
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
@@ -311,8 +180,8 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    uint32_t supplierId = GetData<uint32_t>();
+    NetManagerBaseAccessToken token;
+    uint32_t supplierId = NetConnGetData<uint32_t>();
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
@@ -323,7 +192,7 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -338,7 +207,7 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size == 0)) {
         return;
     }
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -350,9 +219,9 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 
 void BindSocketFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    int32_t socketFd = GetData<int32_t>();
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken token;
+    int32_t socketFd = NetConnGetData<int32_t>();
+    int32_t netId = NetConnGetData<int32_t>();
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
@@ -364,8 +233,8 @@ void BindSocketFuzzTest(const uint8_t *data, size_t size)
 
 void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    bool state = GetData<bool>();
+    NetManagerBaseAccessToken token;
+    bool state = NetConnGetData<bool>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -377,12 +246,13 @@ void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    uint32_t supplierId = GetData<uint32_t>();
+    NetManagerBaseAccessToken token;
+    uint32_t supplierId = NetConnGetData<uint32_t>();
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("UpdateNetSupplierInfoFuzzTest write token failed or invalid parameter.");
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -392,12 +262,13 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    std::string host = GetStringFromData(STR_LEN);
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken token;
+    std::string host = NetConnGetString(STR_LEN);
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetAddressByNameFuzzTest write token failed or invalid parameter.");
         return;
     }
     dataParcel.WriteString(host);
@@ -408,9 +279,9 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    std::string host = GetStringFromData(STR_LEN);
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken token;
+    std::string host = NetConnGetString(STR_LEN);
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -424,7 +295,7 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t supplierId = GetData<uint32_t>();
+    uint32_t supplierId = NetConnGetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
     if (netLinkInfo == nullptr) {
         return;
@@ -442,9 +313,9 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    uint32_t supplierId = GetData<uint32_t>();
-    sptr<NetSupplierCallbackBaseTest> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    NetManagerBaseAccessToken token;
+    uint32_t supplierId = NetConnGetData<uint32_t>();
+    sptr<NetSupplierCallbackStubTestCb> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
     if (callback == nullptr) {
         return;
     }
@@ -461,13 +332,13 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     if (netSpecifier == nullptr || callback == nullptr) {
         return;
     }
-    uint32_t timeoutMS = GetData<uint32_t>();
+    uint32_t timeoutMS = NetConnGetData<uint32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -504,7 +375,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    AccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     if (callback == nullptr) {
         return;
@@ -521,7 +392,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -532,8 +403,8 @@ void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken token;
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -545,8 +416,8 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken token;
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -558,8 +429,8 @@ void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 
 void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessTokenInternetInfo tokenInternetInfo;
-    int32_t netId = GetData<int32_t>();
+    NetManagerBaseAccessToken tokenInternetInfo;
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -571,7 +442,7 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -583,7 +454,7 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 
 void SetAppHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    HttpProxy httpProxy = {GetStringFromData(STR_LEN), 0, {}};
+    HttpProxy httpProxy = {NetConnGetString(STR_LEN), 0, {}};
     DelayedSingleton<NetConnClient>::GetInstance()->SetAppHttpProxy(httpProxy);
 }
 
@@ -595,16 +466,16 @@ void RegisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t callbackId = GetData<int32_t>();
+    int32_t callbackId = NetConnGetData<int32_t>();
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterAppHttpProxyCallback(callbackId);
 }
 
-
 void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    HttpProxy httpProxy = {GetStringFromData(STR_LEN), 0, {}};
-
+    NetManagerBaseAccessToken token;
+    HttpProxy httpProxy = {NetConnGetString(STR_LEN), 0, {}};
+    httpProxy.SetUserName(GetSecureDataFromData(STR_LEN));
+    httpProxy.SetPassword(GetSecureDataFromData(STR_LEN));
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
@@ -615,7 +486,7 @@ void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -626,7 +497,7 @@ void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -637,8 +508,8 @@ void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
-    std::string ident = GetStringFromData(STR_LEN);
+    NetManagerBaseAccessToken token;
+    std::string ident = NetConnGetString(STR_LEN);
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -654,7 +525,7 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    AccessToken token;
+    NetManagerBaseAccessToken token;
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackTest();
     if (callback == nullptr) {
         return;
@@ -670,7 +541,7 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
 {
-    AccessToken token;
+    NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -681,10 +552,10 @@ void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t uid = GetData<uint32_t>();
-    uint8_t allow = GetData<uint8_t>();
+    uint32_t uid = NetConnGetData<uint32_t>();
+    uint8_t allow = NetConnGetData<uint8_t>();
 
-    AccessToken token;
+    NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
@@ -701,10 +572,11 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
     if (netSpecifier == nullptr) {
         return;
     }
-    auto netState = GetData<int32_t>();
+    auto netState = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("UpdateNetSupplierInfoFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -715,10 +587,11 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    uint32_t bearerType = NetConnGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetIfaceNamesFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -729,11 +602,12 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
-    std::string ident = GetStringFromData(STR_LEN);
+    uint32_t bearerType = NetConnGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    std::string ident = NetConnGetString(STR_LEN);
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetIfaceNameByTypeFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -745,7 +619,7 @@ void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
+    int32_t netId = NetConnGetData<int32_t>();
     sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
     if (callback == nullptr) {
         return;
@@ -765,7 +639,7 @@ void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
+    int32_t netId = NetConnGetData<int32_t>();
     sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
     if (callback == nullptr) {
         return;
@@ -785,7 +659,7 @@ void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    uint32_t bearerType = NetConnGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -799,7 +673,7 @@ void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
 
 void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -813,8 +687,8 @@ void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t uid = GetData<int32_t>();
-    int32_t netId = GetData<int32_t>();
+    int32_t uid = NetConnGetData<int32_t>();
+    int32_t netId = NetConnGetData<int32_t>();
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -831,13 +705,14 @@ void AddNetworkRouteFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("AddNetworkRouteFuzzTest write token failed or invalid parameter.");
         return;
     }
 
-    int32_t netId = GetData<int32_t>();
-    std::string ifName = GetStringFromData(STR_LEN);
-    std::string destination = GetStringFromData(STR_LEN);
-    std::string nextHop = GetStringFromData(STR_LEN);
+    int32_t netId = NetConnGetData<int32_t>();
+    std::string ifName = NetConnGetString(STR_LEN);
+    std::string destination = NetConnGetString(STR_LEN);
+    std::string nextHop = NetConnGetString(STR_LEN);
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
@@ -850,13 +725,14 @@ void RemoveNetworkRouteFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("RemoveNetworkRouteFuzzTest write token failed or invalid parameter.");
         return;
     }
 
-    int32_t netId = GetData<int32_t>();
-    std::string ifName = GetStringFromData(STR_LEN);
-    std::string destination = GetStringFromData(STR_LEN);
-    std::string nextHop = GetStringFromData(STR_LEN);
+    int32_t netId = NetConnGetData<int32_t>();
+    std::string ifName = NetConnGetString(STR_LEN);
+    std::string destination = NetConnGetString(STR_LEN);
+    std::string nextHop = NetConnGetString(STR_LEN);
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
@@ -869,12 +745,13 @@ void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("AddInterfaceAddressFuzzTest write token failed or invalid parameter.");
         return;
     }
 
-    int32_t prefixLength = GetData<int32_t>();
-    std::string ifName = GetStringFromData(STR_LEN);
-    std::string ipAddr = GetStringFromData(STR_LEN);
+    int32_t prefixLength = NetConnGetData<int32_t>();
+    std::string ifName = NetConnGetString(STR_LEN);
+    std::string ipAddr = NetConnGetString(STR_LEN);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteInt32(prefixLength);
@@ -886,12 +763,13 @@ void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
         return;
     }
 
-    int32_t prefixLength = GetData<int32_t>();
-    std::string ifName = GetStringFromData(STR_LEN);
-    std::string ipAddr = GetStringFromData(STR_LEN);
+    int32_t prefixLength = NetConnGetData<int32_t>();
+    std::string ifName = NetConnGetString(STR_LEN);
+    std::string ipAddr = NetConnGetString(STR_LEN);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteInt32(prefixLength);
@@ -899,37 +777,31 @@ void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS), dataParcel);
 }
 
-void AddStaticArpFuzzTest(const uint8_t *data, size_t size)
+void StaticArpProcess(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
-    MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
-    std::string ipAddr = GetStringFromData(STR_LEN);
-    std::string macAddr = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
+    std::string ipAddr = NetConnGetString(STR_LEN);
+    std::string macAddr = NetConnGetString(STR_LEN);
+    std::string ifName = NetConnGetString(STR_LEN);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteString(macAddr);
     dataParcel.WriteString(ifName);
+}
 
+void AddStaticArpFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    StaticArpProcess(data, size, dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_ARP), dataParcel);
 }
 
 void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-
-    std::string ipAddr = GetStringFromData(STR_LEN);
-    std::string macAddr = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-    dataParcel.WriteString(ipAddr);
-    dataParcel.WriteString(macAddr);
-    dataParcel.WriteString(ifName);
-
+    StaticArpProcess(data, size, dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcel);
 }
 } // namespace NetManagerStandard

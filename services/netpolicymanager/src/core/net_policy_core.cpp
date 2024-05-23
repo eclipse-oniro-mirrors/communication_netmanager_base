@@ -71,16 +71,9 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
     t.detach();
 }
 
-void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
+void NetPolicyCore::HandleEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData)
 {
-    if (!event) {
-        NETMGR_LOG_E("HandleEvent event is null.");
-        return;
-    }
-
     for (const auto &core : cores_) {
-        auto eventId = event->GetInnerEventId();
-        auto eventData = event->GetSharedObject<PolicyEvent>();
         if (eventData && core && core != eventData->sender) {
             core->HandleEvent(eventId, eventData);
         }

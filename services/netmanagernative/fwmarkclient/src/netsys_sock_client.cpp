@@ -43,7 +43,6 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
     }
 
     if (fd < 0) {
-        NETNATIVE_LOGE("musl create socket failed, errno %{public}d", errno);
         return fd;
     }
 

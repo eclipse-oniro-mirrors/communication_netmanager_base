@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,11 @@ ohos_unittest("net_conn_manager_test") {
     cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "dns_result_call_back_test.cpp",
     "inet_addr_test.cpp",
     "net_activate_test.cpp",
@@ -34,9 +38,9 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_event_handler_test.cpp",
     "net_conn_hievent_test.cpp",
     "net_conn_manager_test.cpp",
-    "net_conn_security.cpp",
     "net_conn_service_iface_test.cpp",
     "net_conn_service_proxy_test.cpp",
+    "net_conn_service_stub_test.cpp",
     "net_conn_service_test.cpp",
     "net_datashare_utils_test.cpp",
     "net_detection_callback_stub_test.cpp",
@@ -48,6 +52,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
     "net_monitor_test.cpp",
+    "net_proxy_userinfo_test.cpp",
     "net_score_test.cpp",
     "net_specifier_test.cpp",
     "net_supplier_callback_base_test.cpp",
@@ -69,6 +74,8 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
@@ -78,10 +85,10 @@ ohos_unittest("net_conn_manager_test") {
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
     "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
     "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
@@ -95,13 +102,17 @@ ohos_unittest("net_conn_manager_test") {
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

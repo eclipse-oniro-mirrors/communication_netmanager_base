@@ -24,12 +24,17 @@ namespace OHOS {
 namespace NetManagerStandard {
 enum NetCap {
     NET_CAPABILITY_MMS = 0,
+    NET_CAPABILITY_SUPL = 1,
+    NET_CAPABILITY_DUN = 2,
+    NET_CAPABILITY_IA = 3,
+    NET_CAPABILITY_XCAP = 4,
     NET_CAPABILITY_NOT_METERED = 11,
     NET_CAPABILITY_INTERNET = 12,
     NET_CAPABILITY_NOT_VPN = 15,
     NET_CAPABILITY_VALIDATED = 16,
-    NET_CAPABILITY_CAPTIVE_PORTAL = 17,
-    NET_CAPABILITY_INTERNAL_DEFAULT
+    NET_CAPABILITY_PORTAL = 17,
+    NET_CAPABILITY_INTERNAL_DEFAULT = 18, // for inner virtual interface if needed.
+    NET_CAPABILITY_END // The maximum value is 32. Do not exceed the limit.
 };
 
 enum NetBearType {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef NETSYS_SOCK_CLIENT_H
 #define NETSYS_SOCK_CLIENT_H
 
+#include "app_net_client.h"
 #include "musl_socket_dispatch.h"
 
 #ifdef __cplusplus
@@ -27,9 +28,6 @@ void ohos_socket_hook_finalize(void);
 bool ohos_socket_hook_get_hook_flag(void);
 bool ohos_socket_hook_set_hook_flag(bool);
 int ohos_socket_hook_socket(int, int, int);
-
-void SetNetForApp(int netId);
-int GetNetForApp();
 
 #ifdef __cplusplus
 }

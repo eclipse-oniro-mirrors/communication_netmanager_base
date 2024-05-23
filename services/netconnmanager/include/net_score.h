@@ -26,6 +26,7 @@ namespace NetManagerStandard {
 using NetTypeScore = std::unordered_map<NetBearType, int32_t>;
 constexpr int32_t NET_TYPE_SCORE_INTERVAL = 10;
 constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
+constexpr int32_t DIFF_SCORE_BETWEEN_GOOD_POOR = 2 * NET_TYPE_SCORE_INTERVAL;
 enum class NetTypeScoreValue : int32_t {
     USB_VALUE               = 4 * NET_TYPE_SCORE_INTERVAL,
     BLUETOOTH_VALUE         = 5 * NET_TYPE_SCORE_INTERVAL,
@@ -40,10 +41,10 @@ class NetScore {
 public:
     NetScore() = default;
     ~NetScore() = default;
-    bool GetServiceScore(sptr<NetSupplier> &supplier);
+    static bool GetServiceScore(sptr<NetSupplier> &supplier);
 
 private:
-    NetTypeScore netTypeScore_ = {
+    static inline NetTypeScore netTypeScore_ = {
         {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
         {BEARER_WIFI, static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)},
         {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},

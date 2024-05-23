@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -596,6 +596,13 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
+    auto ret = instance_->GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest006, TestSize.Level1)
 {
     instance_->mockNetsysClient_.mockApi_.clear();
@@ -697,6 +704,76 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    auto ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint64_t type = 0;
+    bool isOpen = true;
+    auto ret = instance_->UpdateNetworkSharingType(type, isOpen);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest009, TestSize.Level1)
+{
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> reportCallback = nullptr;
+    auto ret = instance_->RegisterDnsResultCallback(reportCallback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterDnsResultCallback(reportCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = instance_->RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+    uint32_t on = 1;
+    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+    bearTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    auto ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

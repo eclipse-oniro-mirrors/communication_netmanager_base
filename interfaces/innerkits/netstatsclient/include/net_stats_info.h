@@ -24,6 +24,7 @@ namespace NetManagerStandard {
 struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     uint32_t uid_ = 0;
     std::string iface_;
+    std::string ident_;
     uint64_t date_ = 0;
     uint64_t rxBytes_ = 0;
     uint64_t txBytes_ = 0;
@@ -32,8 +33,9 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
 
     inline const std::string UidData() const
     {
-        return std::to_string(uid_) + ",'" + iface_ + "'," + std::to_string(date_) + "," + std::to_string(rxBytes_) +
-               "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) + "," + std::to_string(txPackets_);
+        return std::to_string(uid_) + "," + ident_ + "," + iface_ + "," + std::to_string(date_) +
+               "," + std::to_string(rxBytes_) + "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) +
+               "," + std::to_string(txPackets_);
     }
 
     inline const std::string IfaceData() const
@@ -49,7 +51,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
 
     inline bool Equals(const NetStatsInfo &info) const
     {
-        return info.uid_ == uid_ && info.iface_ == iface_;
+        return info.uid_ == uid_ && info.iface_ == iface_ && info.ident_ == ident_;
     }
 
     inline bool HasNoData() const
@@ -62,6 +64,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
         NetStatsInfo info;
         info.uid_ = other.uid_;
         info.iface_ = other.iface_;
+        info.ident_ = other.ident_;
         info.rxPackets_ = (rxPackets_ > other.rxPackets_) ? rxPackets_ - other.rxPackets_ : 0;
         info.rxBytes_ = (rxBytes_ > other.rxBytes_) ? rxBytes_ - other.rxBytes_ : 0;
         info.txPackets_ = (txPackets_ > other.txPackets_) ? txPackets_ - other.txPackets_ : 0;
@@ -81,8 +84,10 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetStatsInfo &stats);
     static bool Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos);
+    static bool Marshalling(Parcel &parcel, const std::unordered_map<uint32_t, NetStatsInfo> &statsInfos);
     static bool Unmarshalling(Parcel &parcel, NetStatsInfo &stats);
     static bool Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos);
+    static bool Unmarshalling(Parcel &parcel, std::unordered_map<uint32_t, NetStatsInfo> &statsInfos);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

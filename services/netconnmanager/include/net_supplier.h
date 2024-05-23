@@ -50,7 +50,7 @@ public:
     bool operator==(const NetSupplier &netSupplier) const;
     void SetNetwork(const std::shared_ptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
-    int32_t UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
+    int32_t UpdateNetLinkInfo(NetLinkInfo &netLinkInfo);
     uint32_t GetSupplierId() const;
     NetBearType GetNetSupplierType() const;
     std::string GetNetSupplierIdent() const;
@@ -63,6 +63,7 @@ public:
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
     int32_t GetSupplierUid() const;
+    bool IsAvailable() const;
     std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
@@ -70,7 +71,7 @@ public:
     void UpdateNetConnState(NetConnState netConnState);
     bool IsConnecting() const;
     bool IsConnected() const;
-    void SetNetValid(bool ifValid);
+    void SetNetValid(NetDetectionStatus netState);
     bool IsNetValidated();
     void SetNetScore(int32_t score);
     int32_t GetNetScore() const;
@@ -95,6 +96,9 @@ public:
     std::string TechToType(NetSlotTech type);
 
     bool ResumeNetworkInfo();
+    bool IsNetQualityPoor();
+    bool IsNetQualityGood();
+    void ResetNetQuality();
 
 private:
     NetBearType netSupplierType_;
@@ -113,6 +117,7 @@ private:
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
     std::string type_ = "";
+    NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

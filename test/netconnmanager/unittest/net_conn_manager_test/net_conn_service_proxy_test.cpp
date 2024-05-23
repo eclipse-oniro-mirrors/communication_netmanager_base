@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include "i_net_conn_service.h"
-#include "i_net_detection_callback.h"
-#include "net_all_capabilities.h"
-#include "net_conn_callback_stub.h"
-#include "net_conn_service_proxy.h"
-#include "net_manager_constants.h"
-#include "net_supplier_callback_stub.h"
-#include "i_net_factoryreset_callback.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
+
+#include "common_net_conn_callback_test.h"
+#include "i_net_conn_service.h"
+#include "i_net_detection_callback.h"
+#include "i_net_factoryreset_callback.h"
+#include "net_all_capabilities.h"
+#include "net_conn_service_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -157,34 +156,6 @@ private:
     int eCode = NETMANAGER_SUCCESS;
 };
 
-class NetConnTestCallback : public NetConnCallbackStub {
-public:
-    inline int32_t NetAvailable(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netCap) override
-    {
-        return 0;
-    }
-    inline int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override
-    {
-        return 0;
-    }
-    inline int32_t NetLost(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetUnavailable() override
-    {
-        return 0;
-    }
-    inline int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override
-    {
-        return 0;
-    }
-};
-
 class NetDetectionTestCallback : public IRemoteStub<INetDetectionCallback> {
 public:
     int32_t OnNetDetectionResultChanged(NetDetectionResultCode resultCode, const std::string &urlRedirect) override
@@ -211,7 +182,7 @@ public:
     static inline sptr<MockNetIRemoteObject> remoteObj_ = std::make_unique<MockNetIRemoteObject>().release();
     static inline std::shared_ptr<NetConnServiceProxy> instance_ = std::make_shared<NetConnServiceProxy>(remoteObj_);
     static inline sptr<INetSupplierCallback> supplierCallback_ = new (std::nothrow) NetSupplierCallbackStub();
-    static inline sptr<INetConnCallback> netConnCallback_ = new (std::nothrow) NetConnTestCallback();
+    static inline sptr<INetConnCallback> netConnCallback_ = new (std::nothrow) NetConnCallbackStubCb();
     static inline sptr<INetDetectionCallback> detectionCallback_ = new (std::nothrow) NetDetectionTestCallback();
     static inline sptr<INetFactoryResetCallback> netFactoryResetCallback_ =
         new (std::nothrow) NetFactoryResetTestCallback();
@@ -301,6 +272,18 @@ HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackTest002, TestSize.Level
 {
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     int32_t ret = instance_->RegisterNetConnCallback(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RequestNetConnectionTest001
+ * @tc.desc: Test NetConnServiceProxy RequestNetConnection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionTest001, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    int32_t ret = instance_->RequestNetConnection(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -521,6 +504,18 @@ HWTEST_F(NetConnServiceProxyTest, GetAddresseByNameTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetIfaceNameIdentMapsTest001
+ * @tc.desc: Test NetConnServiceProxy GetIfaceNameIdentMaps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> data;
+    int32_t ret = instance_->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, data);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: BindSocketTest001
  * @tc.desc: Test NetConnServiceProxy BindSocket.
  * @tc.type: FUNC
@@ -643,6 +638,9 @@ HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Lev
     sptr<NetSpecifier> netSpecifier = nullptr;
     uint32_t timeoutMS = 0;
     ret = instance_->RegisterNetConnCallback(netSpecifier, connCallback, timeoutMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->RequestNetConnection(netSpecifier, connCallback, timeoutMS);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     ret = instance_->UnregisterNetConnCallback(connCallback);

@@ -25,6 +25,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t REG_OK = 0;
+constexpr const char *SIMID_IDENT_PREFIX = "simId";
 }
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
 
@@ -71,14 +72,17 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     }
 }
 
-int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
+int32_t NetSupplier::UpdateNetLinkInfo(NetLinkInfo &netLinkInfo)
 {
-    NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToString(" ").c_str());
     if (network_ == nullptr) {
         NETMGR_LOG_E("network_ is nullptr!");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
+    if (GetNetSupplierIdent().substr(0, strlen(SIMID_IDENT_PREFIX)) == SIMID_IDENT_PREFIX) {
+        netLinkInfo.ident_ = GetNetSupplierIdent().substr(strlen(SIMID_IDENT_PREFIX));
+    }
+    NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToString(" ").c_str());
     if (!network_->UpdateNetLinkInfo(netLinkInfo)) {
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
@@ -184,11 +188,17 @@ int32_t NetSupplier::GetSupplierUid() const
     return netSupplierInfo_.uid_;
 }
 
+bool NetSupplier::IsAvailable() const
+{
+    return netSupplierInfo_.isAvailable_;
+}
+
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_W("The supplier is currently available, there is no need to repeat the request for connection.");
+        NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
     UpdateNetConnState(NET_CONN_STATE_IDLE);
@@ -218,9 +228,10 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_W("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
+        NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
     if (netController_ == nullptr) {
@@ -283,10 +294,10 @@ int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
 
 void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
                  netSupplierIdent_.c_str(), supplierId);
     if (supplierId == supplierId_) {
-        NETMGR_LOG_W("Same net supplier, no need to disconnect.");
+        NETMGR_LOG_D("Same net supplier, no need to disconnect.");
         return;
     }
     if (requestList_.empty()) {
@@ -298,11 +309,11 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     if (netScore_ >= bestScore) {
-        NETMGR_LOG_W("High priority network, no need to disconnect");
+        NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
     requestList_.erase(reqId);
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
@@ -312,11 +323,11 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
-    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
     auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
+    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
     requestList_.erase(reqId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
@@ -327,12 +338,12 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)
 {
-    NETMGR_LOG_I("Enter RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}d]", supplierId_, reqId);
     auto iter = bestReqList_.find(reqId);
     if (iter == bestReqList_.end()) {
         return;
     }
     bestReqList_.erase(reqId);
+    NETMGR_LOG_I("RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}u]", supplierId_, reqId);
 }
 
 std::set<uint32_t> &NetSupplier::GetBestRequestList()
@@ -340,21 +351,46 @@ std::set<uint32_t> &NetSupplier::GetBestRequestList()
     return bestReqList_;
 }
 
-void NetSupplier::SetNetValid(bool ifValid)
+void NetSupplier::SetNetValid(NetDetectionStatus netState)
 {
     NETMGR_LOG_I("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]", supplierId_,
-                 netSupplierIdent_.c_str(), ifValid);
-    if (ifValid) {
+                 netSupplierIdent_.c_str(), netState);
+    if (netState == VERIFICATION_STATE) {
         if (!HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.InsertNetCap(NET_CAPABILITY_VALIDATED);
             netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_VALIDATED");
         }
+        if (HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
+        }
+    } else if (netState == CAPTIVE_PORTAL_STATE) {
+        if (!HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.InsertNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_PORTAL");
+        }
+        if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
+            netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
+        }
+    } else if (netState == QUALITY_POOR_STATE) {
+        netQuality_ = QUALITY_POOR_STATE;
+    } else if (netState == QUALITY_GOOD_STATE) {
+        netQuality_ = QUALITY_GOOD_STATE;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
             netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
+        }
+        if (HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
         }
     }
 }
@@ -442,6 +478,21 @@ bool NetSupplier::ResumeNetworkInfo()
     }
 
     return network_->ResumeNetworkInfo();
+}
+
+bool NetSupplier::IsNetQualityPoor()
+{
+    return netQuality_ == QUALITY_POOR_STATE;
+}
+
+bool NetSupplier::IsNetQualityGood()
+{
+    return netQuality_ == QUALITY_GOOD_STATE;
+}
+
+void NetSupplier::ResetNetQuality()
+{
+    netQuality_ = QUALITY_NORMAL_STATE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

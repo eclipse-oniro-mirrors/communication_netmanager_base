@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,10 @@
 #define protected public
 #endif
 
+#include "common_notify_callback_test.h"
 #include "dns_config_client.h"
-#include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
-#include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -40,58 +39,6 @@ using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-class TestNotifyCallback : public NotifyCallbackStub {
-public:
-    TestNotifyCallback() = default;
-    ~TestNotifyCallback() override {};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 } // namespace
 
 class NetsysNativeServiceTest : public testing::Test {
@@ -258,7 +205,7 @@ HWTEST_F(NetsysNativeServiceTest, GetInterfaceMtu001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, RegisterNotifyCallback001, TestSize.Level1)
 {
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     int32_t ret = instance_->RegisterNotifyCallback(callback);
     EXPECT_EQ(ret, 0);
 
@@ -495,7 +442,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
     ret = instance_->GetUidStats(stats, 0, appID);
     EXPECT_NE(ret, 0);
 
-    ret = instance_->GetIfaceStats(stats, 0, iface);
+    ret = instance_->GetIfaceStats(stats, 5, iface);
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
@@ -510,7 +457,6 @@ HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
     AddrInfo hints;
     uint16_t netId = 1031;
     std::vector<AddrInfo> res;
-    instance_->netsysService_->dnsManager_->dnsGetAddrInfo_ = std::make_shared<DnsGetAddrInfo>();
     int32_t ret = instance_->GetAddrInfo(hostName, serverName, hints, netId, res);
     DTEST_LOG << ret << std::endl;
     EXPECT_EQ(ret, NETMANAGER_ERROR);
@@ -520,7 +466,8 @@ HWTEST_F(NetsysNativeServiceTest, SetInternetPermissionTest001, TestSize.Level1)
 {
     uint32_t uid = 0;
     uint8_t allow = 1;
-    int32_t ret = instance_->SetInternetPermission(uid, allow);
+    uint8_t isBroker = 0;
+    int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -623,6 +570,13 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
     ret = instance_->GetAllStatsInfo(stats);
     instance_->bpfStats_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t ret = instance_->GetAllContainerStatsInfo(stats);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest001, TestSize.Level1)
@@ -786,6 +740,68 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest003, TestSize.Lev
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    std::set<uint32_t> sharingTypeIsOn;
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 1);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    sharingTypeIsOn.clear();
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NotifyNetBearerTypeChangeTest001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearerTypes);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

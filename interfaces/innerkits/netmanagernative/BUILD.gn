@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ config("net_native_manager_if_config") {
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netconnclient/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
@@ -40,6 +41,14 @@ config("net_native_manager_if_config") {
 }
 
 ohos_source_set("net_native_parcel") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
@@ -58,8 +67,23 @@ ohos_source_set("net_native_parcel") {
 ohos_shared_library("net_native_manager_if") {
   sanitize = {
     cfi = true
+    cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_diag_callback_stub.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
@@ -81,6 +105,7 @@ ohos_shared_library("net_native_manager_if") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

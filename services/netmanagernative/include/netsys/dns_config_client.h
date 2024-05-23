@@ -94,11 +94,11 @@ struct ParamWrapper {
 typedef int32_t (*FuncNetDnsqueryHook)(int32_t, int32_t, int32_t);
 
 struct QueryParam {
-    int32_t type_;
-    int32_t netid_;
-    int32_t mark_;
-    int32_t flags_;
-    FuncNetDnsqueryHook qhook_;
+    int32_t type;
+    int32_t netId;
+    int32_t mark;
+    int32_t flags;
+    FuncNetDnsqueryHook qHook;
 };
 
 #ifdef __cplusplus

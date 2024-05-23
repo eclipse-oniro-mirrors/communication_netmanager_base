@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 
 #include "i_net_monitor_callback.h"
 #include "net_all_capabilities.h"
-#include "net_conn_security.h"
 #include "net_conn_service.h"
+#include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -38,7 +38,7 @@ public:
     sptr<Network> GetNetwork();
     sptr<NetLinkInfo> GetNetLinkInfo() const;
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
-    void HandleDetectionResult(uint32_t supplierId, bool ifValid);
+    void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
 };
 
 void NetConnHiEventTest::SetUpTestCase() {}
@@ -97,7 +97,7 @@ sptr<NetLinkInfo> NetConnHiEventTest::GetNetLinkInfo() const
 }
 
 void NetConnHiEventTest::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) {}
-void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, bool ifValid) {}
+void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState) {}
 
 /**
  * @tc.name: NetConnHiEventTest_001
@@ -224,7 +224,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t ret = NetConnService::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }

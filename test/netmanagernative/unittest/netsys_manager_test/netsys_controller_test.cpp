@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,19 +19,20 @@
 #include <iostream>
 #include <thread>
 
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "netmanager_base_test_security.h"
 
 #ifdef GTEST_API_
 #define private public
 #define protected public
 #endif
 
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
+#include "common_net_diag_callback_test.h"
+#include "common_netsys_controller_callback_test.h"
 #include "net_conn_constants.h"
 #include "net_diag_callback_stub.h"
-#include "net_manager_constants.h"
-#include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_controller.h"
 #include "netsys_ipc_interface_code.h"
@@ -54,6 +55,7 @@ static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,5
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
+static constexpr uint32_t IPC_ERR_FLATTEN_OBJECT = 3;
 const int NET_ID = 2;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
@@ -68,155 +70,7 @@ const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
 bool g_isWaitAsync = false;
 const int32_t ERR_INVALID_DATA = 5;
-
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "netsys_native_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                              .bundleName = "netsys_native_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test netsys_native_manager_test",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
 } // namespace
-
-class AccessToken {
-public:
-    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
-
-class NetsysControllerCallbackTest : public NetsysControllerCallback {
-public:
-    virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAdded(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceRemoved(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
-    {
-        return 0;
-    }
-    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
-    {
-        return 0;
-    }
-};
-
-class NetDiagCallbackControllerTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
-public:
-    NetDiagCallbackControllerTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackControllerTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackControllerTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-
-    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
-    {
-        g_isWaitAsync = false;
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetsysNative::NetDiagPingResult pingResult;
-        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
 
 class NetsysControllerTest : public testing::Test {
 public:
@@ -230,7 +84,7 @@ public:
 
     static inline std::shared_ptr<NetsysController> instance_ = nullptr;
 
-    sptr<NetDiagCallbackControllerTest> netDiagCallback = new NetDiagCallbackControllerTest();
+    sptr<NetsysNative::NetDiagCallbackStubTest> netDiagCallback = new NetsysNative::NetDiagCallbackStubTest();
 };
 
 void NetsysControllerTest::SetUpTestCase()
@@ -539,7 +393,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest016, TestSize.Level1)
     ret = NetsysController::GetInstance().GetAddrInfo(hostName, serverName, hints, netId, res);
     EXPECT_NE(ret, 0);
 
-    auto callback = new NetsysControllerCallbackTest();
+    auto callback = new NetsysControllerCallbackTestCb();
     ret = NetsysController::GetInstance().RegisterCallback(callback);
     EXPECT_EQ(ret, 0);
 }
@@ -562,6 +416,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
@@ -570,7 +427,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetManagerBaseAccessToken token;
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 
@@ -1020,7 +877,7 @@ HWTEST_F(NetsysControllerTest, NetDiagPing001, TestSize.Level1)
     const int maxWaitSecond = 10;
     g_isWaitAsync = true;
     auto ret = NetsysController::GetInstance().NetDiagPingHost(pingOption, netDiagCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, IPC_ERR_FLATTEN_OBJECT);
     std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();
     while (g_isWaitAsync) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -1089,8 +946,11 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest001, TestSize.Level1)
     std::vector<int32_t> beginUids = {1};
     std::vector<int32_t> endUids = {1};
     int32_t netId = 0;
+
+    NetsysController::GetInstance().NetworkCreateVirtual(netId, false);
+
     auto ret = instance_->NetworkAddUids(netId, beginUids, endUids);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkDelUids(netId, beginUids, endUids);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -1135,11 +995,100 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest002, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = NetsysController::GetInstance().GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint64_t type = 0;
+    bool isOpen = true;
+    int32_t ret = NetsysController::GetInstance().UpdateNetworkSharingType(type, isOpen);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest003, TestSize.Level1)
+{
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> callback = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterDnsResultCallback(callback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> callback = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterDnsResultCallback(callback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = NetsysController::GetInstance().SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = NetsysController::GetInstance().SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = NetsysController::GetInstance().SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+    bearTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = NetsysController::GetInstance().NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

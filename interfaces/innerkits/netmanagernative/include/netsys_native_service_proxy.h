@@ -57,7 +57,7 @@ public:
                           std::string &value) override;
     int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
                           std::string &value) override;
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
@@ -105,7 +105,9 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                     IptablesType ipType = IPTYPE_IPV4) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
     int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;
@@ -123,7 +125,14 @@ public:
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)  override;
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

@@ -56,7 +56,7 @@ auto netsysServiceK_ = GetProxyK();
 } // namespace
 
 namespace {
-void freeNetsysAddrInfo(struct addrinfo *aihead)
+void FreeNetsysAddrInfo(struct addrinfo *aihead)
 {
     struct addrinfo *ai;
     struct addrinfo *ainext;

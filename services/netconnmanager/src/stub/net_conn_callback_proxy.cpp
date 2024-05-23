@@ -255,5 +255,44 @@ bool NetConnCallbackProxy::WriteInterfaceToken(MessageParcel &data)
     }
     return true;
 }
+
+PreAirplaneCallbackProxy::PreAirplaneCallbackProxy(const sptr<IRemoteObject> &impl)
+    : IRemoteProxy<IPreAirplaneCallback>(impl)
+{}
+
+int32_t PreAirplaneCallbackProxy::PreAirplaneStart()
+{
+    NETMGR_LOG_I("PreAirplaneCallbackProxy::PreAirplaneStart()");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(PreAirplaneCallbackInterfaceCode::PRE_AIRPLANE_START),
+                                      data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+
+bool PreAirplaneCallbackProxy::WriteInterfaceToken(MessageParcel &data)
+{
+    if (!data.WriteInterfaceToken(PreAirplaneCallbackProxy::GetDescriptor())) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return false;
+    }
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

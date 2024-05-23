@@ -52,28 +52,28 @@ std::mutex NetHttpProbe::initCurlMutex_;
 int32_t NetHttpProbe::useCurlCount_ = 0;
 bool NetHttpProbe::CurlGlobalInit()
 {
-    NETMGR_LOG_I("curl_global_init() in");
+    NETMGR_LOG_D("curl_global_init() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_init()");
+        NETMGR_LOG_D("Call curl_global_init()");
         if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
             NETMGR_LOG_E("curl_global_init() failed");
             return false;
         }
     }
     useCurlCount_++;
-    NETMGR_LOG_I("curl_global_init() count:[%{public}d]", useCurlCount_);
+    NETMGR_LOG_D("curl_global_init() count:[%{public}d]", useCurlCount_);
     return true;
 }
 
 void NetHttpProbe::CurlGlobalCleanup()
 {
-    NETMGR_LOG_I("CurlGlobalCleanup() in");
+    NETMGR_LOG_D("CurlGlobalCleanup() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     useCurlCount_ = useCurlCount_ > 0 ? (useCurlCount_ - 1) : 0;
-    NETMGR_LOG_I("Curl global used count remain:[%{public}d]", useCurlCount_);
+    NETMGR_LOG_D("Curl global used count remain:[%{public}d]", useCurlCount_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_cleanup()");
+        NETMGR_LOG_D("Call curl_global_cleanup()");
         curl_global_cleanup();
     }
 }
@@ -135,6 +135,7 @@ void NetHttpProbe::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 
 void NetHttpProbe::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    std::lock_guard<std::mutex> locker(proxyMtx_);
     globalHttpProxy_ = httpProxy;
 }
 
@@ -325,6 +326,7 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
     }
 
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_VERBOSE, 0L);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_FORBID_REUSE, 1L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 0L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
     if (probeType == ProbeType::PROBE_HTTPS) {
@@ -357,25 +359,20 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         return true;
     }
 
-    std::string proxyHost, proxyDomain, proxyIpAddress;
+    std::string proxyHost;
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
-    if (!globalHttpProxy_.GetHost().empty()) {
-        proxyHost = globalHttpProxy_.GetHost();
-        proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
-    } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
-        proxyHost = netLinkInfo_.httpProxy_.GetHost();
-        proxyPort = static_cast<int32_t>(netLinkInfo_.httpProxy_.GetPort());
-    } else {
+    if (!LoadProxy(proxyHost, proxyPort)) {
+        NETMGR_LOG_D("global http proxy or network proxy is empty.");
         return true;
     }
 
-    proxyDomain = ExtractDomainFormUrl(proxyHost);
+    std::string proxyDomain = ExtractDomainFormUrl(proxyHost);
     if (proxyDomain.empty()) {
         NETMGR_LOG_E("Extract proxy domain from host return empty.");
         return true;
     }
-    proxyIpAddress = GetAddrInfo(proxyDomain);
+    std::string proxyIpAddress = GetAddrInfo(proxyDomain);
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
     bool ret = false;
@@ -440,7 +437,8 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
         return true;
     }
 
-    std::string httpDomain, httpsDomain;
+    std::string httpDomain;
+    std::string httpsDomain;
     if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
         httpDomain = ExtractDomainFormUrl(httpUrl);
         if (httpDomain.empty()) {
@@ -522,7 +520,14 @@ void NetHttpProbe::RecvHttpProbeResponse()
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_RESPONSE_CODE, &responseCode);
 
         std::string redirectUrl;
-        curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &redirectUrl);
+        char* url = nullptr;
+        curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &url);
+        if (url != nullptr) {
+            redirectUrl = url;
+        } else {
+            curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_EFFECTIVE_URL, &url);
+            redirectUrl = url;
+        }
 
         if (curlMsg->easy_handle == httpCurl_) {
             httpProbeResult_ = {responseCode, redirectUrl};
@@ -536,6 +541,20 @@ void NetHttpProbe::RecvHttpProbeResponse()
             NETMGR_LOG_E("Unknown curl handle.");
         }
     }
+}
+int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
+{
+    std::lock_guard<std::mutex> locker(proxyMtx_);
+    if (!globalHttpProxy_.GetHost().empty()) {
+        proxyHost = globalHttpProxy_.GetHost();
+        proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
+    } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
+        proxyHost = netLinkInfo_.httpProxy_.GetHost();
+        proxyPort = static_cast<int32_t>(netLinkInfo_.httpProxy_.GetPort());
+    } else {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

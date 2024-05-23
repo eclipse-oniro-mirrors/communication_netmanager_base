@@ -40,6 +40,7 @@ private:
     void InitStaticArpToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
+    void InitAll();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
@@ -50,6 +51,7 @@ private:
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRequestNetConnectionBySpecifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply);
@@ -58,6 +60,7 @@ private:
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNames(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetIfaceNameIdentMaps(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetDetection(MessageParcel &data, MessageParcel &reply);
@@ -88,6 +91,10 @@ private:
     int32_t OnGetSlotType(MessageParcel &data, MessageParcel &reply);
     int32_t OnFactoryResetNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetFactoryResetCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIsPreferCellularUrl(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUnregisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

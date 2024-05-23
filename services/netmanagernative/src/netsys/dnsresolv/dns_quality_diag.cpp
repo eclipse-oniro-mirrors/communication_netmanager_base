@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,33 +78,25 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
     for (uint8_t i = 0; i < size; i++) {
         NetsysNative::NetDnsResultAddrInfo ai;
         AddrInfo *tmp = &(addrinfo[i]);
+        void* addr = NULL;
+        char c_addr[INET6_ADDRSTRLEN];
         switch (tmp->aiFamily) {
             case AF_INET:
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
-                ai.addr_ = tmp->aiAddr.sa.sa_data;
+                addr = &(tmp->aiAddr.sin.sin_addr);
                 break;
             case AF_INET6:
-                uint8_t* s6addr = tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr;
-                std::ostringstream oss;
-                uint32_t size = sizeof(tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr) / sizeof(uint8_t);
-                if (size == 0) {
-                    continue;
-                }
-                oss << s6addr[0];
-                for (uint32_t n = 1; n < size; ++n) {
-                    oss << ':';
-                    oss << s6addr[n];
-                }
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
-                ai.addr_ = oss.str();
+                addr = &(tmp->aiAddr.sin6.sin6_addr);
                 break;
         }
+        inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr));
+        ai.addr_ = c_addr;
         if (report.addrlist_.size() < MAX_RESULT_SIZE) {
             report.addrlist_.push_back(ai);
         } else {
             break;
         }
-        NETNATIVE_LOG_D("ReportDnsResult: %{public}s", ai.addr_.c_str());
     }
     return 0;
 }
@@ -117,13 +109,18 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
     NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                     netId, uid, pid, usedtime, size, failreason);
 
+    if (queryParam.type == 1) {
+        NETNATIVE_LOG_D("ReportDnsResult: query from Netmanager ignore report");
+        return 0;
+    }
+
     if (!reportSizeReachLimit) {
         NetsysNative::NetDnsResultReport report;
         report.netid_ = netId;
         report.uid_ = uid;
         report.pid_ = pid;
-        report.timeused_ = usedtime;
-        report.queryresult_ = failreason;
+        report.timeused_ = static_cast<uint32_t>(usedtime);
+        report.queryresult_ = static_cast<uint32_t>(failreason);
         report.host_ = name;
         if (failreason == 0) {
             ParseReportAddr(size, addrinfo, report);
@@ -187,7 +184,7 @@ int32_t DnsQualityDiag::UnregisterHealthListener(const sptr<INetDnsHealthCallbac
 
 int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 {
-    monitor_loop_delay = delay;
+    monitor_loop_delay = static_cast<uint32_t>(delay);
     return 0;
 }
 
@@ -195,9 +192,9 @@ int32_t DnsQualityDiag::query_default_host()
 {
 #if NETSYS_DNS_MONITOR
     struct addrinfo *res;
-#endif
     struct queryparam param;
     param.qp_type = 1;
+#endif
 
     OHOS::NetManagerStandard::NetHandle netHandle;
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
@@ -205,8 +202,8 @@ int32_t DnsQualityDiag::query_default_host()
 
     NETNATIVE_LOG_D("query_default_host: %{public}d, ", netid);
 
-    param.qp_netid = netid;
 #if NETSYS_DNS_MONITOR
+    param.qp_netid = netid;
     getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
     freeaddrinfo(res);
 #endif
@@ -243,9 +240,9 @@ int32_t DnsQualityDiag::send_dns_report()
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOG_D("send_dns_report (%{public}u)", reportSend.size());
+        NETNATIVE_LOG_D("send_dns_report (%{public}zu)", reportSend.size());
         for (auto cb: resultListeners_) {
-            NETNATIVE_LOGI("send_dns_report cb)");
+            NETNATIVE_LOG_D("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
     }
@@ -255,7 +252,6 @@ int32_t DnsQualityDiag::send_dns_report()
 
 int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report)
 {
-    NETNATIVE_LOGI("add_dns_report (%{public}s)", report->host_.c_str());
     if (report_.size() < MAX_RESULT_SIZE) {
         report_.push_back(*report);
     }

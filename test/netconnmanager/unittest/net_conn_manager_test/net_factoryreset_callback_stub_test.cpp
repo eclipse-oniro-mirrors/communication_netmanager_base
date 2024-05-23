@@ -88,5 +88,16 @@ HWTEST_F(NetFactoryResetCallbackStubTest, OnNetFactoryReset001, TestSize.Level1)
                                              data, reply, option);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
+
+/**
+ * @tc.name: OnNetFactoryReset002
+ * @tc.desc: Test NetDetectionCallbackStub OnNetFactoryReset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetFactoryResetCallbackStubTest, OnNetFactoryReset002, TestSize.Level1)
+{
+    int32_t ret = instance_->OnNetFactoryReset();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -44,7 +44,7 @@ NetAllCapabilities &NetAllCapabilities::operator=(const NetAllCapabilities &cap)
 bool NetAllCapabilities::CapsIsValid() const
 {
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
-        if ((*it < NET_CAPABILITY_MMS) || (*it >= NET_CAPABILITY_INTERNAL_DEFAULT)) {
+        if (*it < NET_CAPABILITY_MMS || *it >= NET_CAPABILITY_END) {
             return false;
         }
     }
@@ -119,7 +119,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (!parcel.ReadUint32(cap)) {
             return false;
         }
-        if (cap >= NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (cap >= NET_CAPABILITY_END) {
             continue;
         }
         netCaps_.insert(static_cast<NetCap>(cap));
@@ -173,6 +173,18 @@ void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::stri
             case NET_CAPABILITY_MMS:
                 str.append("NET_CAPABILITY_MMS");
                 break;
+            case NET_CAPABILITY_SUPL:
+                str.append("NET_CAPABILITY_SUPL");
+                break;
+            case NET_CAPABILITY_DUN:
+                str.append("NET_CAPABILITY_DUN");
+                break;
+            case NET_CAPABILITY_IA:
+                str.append("NET_CAPABILITY_IA");
+                break;
+            case NET_CAPABILITY_XCAP:
+                str.append("NET_CAPABILITY_XCAP");
+                break;
             case NET_CAPABILITY_NOT_METERED:
                 str.append("NET_CAPABILITY_NOT_METERED");
                 break;
@@ -185,8 +197,11 @@ void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::stri
             case NET_CAPABILITY_VALIDATED:
                 str.append("NET_CAPABILITY_VALIDATED");
                 break;
-            case NET_CAPABILITY_CAPTIVE_PORTAL:
-                str.append("NET_CAPABILITY_CAPTIVE_PORTAL");
+            case NET_CAPABILITY_PORTAL:
+                str.append("NET_CAPABILITY_PORTAL");
+                break;
+            case NET_CAPABILITY_INTERNAL_DEFAULT:
+                str.append("NET_CAPABILITY_INTERNAL_DEFAULT");
                 break;
             default:
                 str.append("unknown NetCap");

@@ -39,26 +39,23 @@ int64_t GetNowMilliSeconds()
 }
 } // namespace
 
-NetPolicyFileEventHandler::NetPolicyFileEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner)
-    : EventHandler(runner)
-{
-}
+NetPolicyFileEventHandler::NetPolicyFileEventHandler(const char *queueName) : netPolicyFileEventQueue_(queueName) {}
 
 void NetPolicyFileEventHandler::SendWriteEvent(AppExecFwk::InnerEvent::Pointer &event)
 {
     SendEvent(event);
 }
 
-void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+void NetPolicyFileEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &event, uint32_t delayTime)
 {
-    if ((event == nullptr) || !GetEventRunner()) {
-        NETMGR_LOG_E("parameter error (%d)", event == nullptr);
-        return;
-    }
-
     auto eventId = event->GetInnerEventId();
     auto eventData = event->GetSharedObject<PolicyFileEvent>();
+    netPolicyFileEventQueue_.submit([this, eventId, eventData] { ProcessEvent(eventId, eventData); },
+                                    ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)));
+}
 
+void NetPolicyFileEventHandler::ProcessEvent(uint32_t eventId, std::shared_ptr<PolicyFileEvent> eventData)
+{
     if (eventId == MSG_POLICY_FILE_WRITE) {
         fileContent_ = eventData->json;
         if (commitWait_) {
@@ -69,8 +66,7 @@ void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Point
         commitWait_ = true;
         NETMGR_LOG_D("SendEvent MSG_POLICY_FILE_COMMIT[delay=%{public}d, now=%{public}s]", delay,
                      std::to_string(GetNowMilliSeconds()).c_str());
-        SendEvent(AppExecFwk::InnerEvent::Get(MSG_POLICY_FILE_COMMIT, std::make_shared<PolicyFileEvent>()), delay,
-                  Priority::HIGH);
+        SendEvent(AppExecFwk::InnerEvent::Get(MSG_POLICY_FILE_COMMIT, std::make_shared<PolicyFileEvent>()), delay);
         return;
     }
 
@@ -79,10 +75,10 @@ void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Point
         timeStamp_ = GetNowMilliSeconds();
         if (commitWait_) {
             SendEvent(AppExecFwk::InnerEvent::Get(MSG_POLICY_FILE_COMMIT, std::make_shared<PolicyFileEvent>()),
-                      MAX_TIME_MS_DELTA, Priority::HIGH);
+                      MAX_TIME_MS_DELTA);
         }
         SendEvent(AppExecFwk::InnerEvent::Get(MSG_POLICY_FILE_DELETE, std::make_shared<PolicyFileEvent>()),
-                  SEND_TIME_MS_INTERVAL, Priority::HIGH);
+                  SEND_TIME_MS_INTERVAL);
         return;
     }
 
@@ -121,11 +117,21 @@ bool NetPolicyFileEventHandler::DeleteBak()
     struct stat buffer;
     if (stat(POLICY_FILE_BAK_NAME, &buffer) == 0) {
         int32_t err = remove(POLICY_FILE_BAK_NAME);
-        sync();
         if (err != 0) {
             NETMGR_LOG_E("remove file error.");
             return false;
         }
+        int fd = open(POLICY_FILE_BAK_PATH, O_RDONLY);
+        if (fd == -1) {
+            NETMGR_LOG_E("open the file path failed.");
+            return false;
+        }
+        if (fsync(fd) != 0) {
+            NETMGR_LOG_E("fsync the file path failed.");
+            close(fd);
+            return false;
+        }
+        close(fd);
     }
     return true;
 }

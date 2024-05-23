@@ -267,6 +267,12 @@ HWTEST_F(InterfaceManagerTest, AddStaticArpTest001, TestSize.Level1)
     std::string ifName = "wlan0";
     auto ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
+
+    ipAddr = "192.168.1.101";
+    macAddr = "aa:bb:cc:dd:00:ff";
+    ifName = "wlan0";
+    ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
@@ -275,6 +281,12 @@ HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
     auto ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+
+    ipAddr = "192.168.1.101";
+    macAddr = "aa:bb:cc:dd:00:ff";
+    ifName = "wlan0";
+    ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 }
 } // namespace nmd

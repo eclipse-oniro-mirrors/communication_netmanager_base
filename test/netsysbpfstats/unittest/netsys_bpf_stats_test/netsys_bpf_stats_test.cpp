@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,7 +157,7 @@ HWTEST_F(NetsysBpfStatsTest, LoadElf, TestSize.Level1)
     EXPECT_GE(ret, NETSYS_SUCCESS);
 
     ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
-    EXPECT_EQ(ret, ElfLoadError::ELF_LOAD_ERR_LOAD_PROGS_FAIL);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndUidStats, TestSize.Level1)
@@ -294,6 +294,61 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndCookieStats, TestSize.Level1)
     keys.emplace_back(TEST_COOKIE1);
     ret = appCookieStatsMap.Clear(keys);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
+{
+    BpfMapper<app_uid_sim_stats_key, app_uid_sim_stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
+    EXPECT_TRUE(uidSimStatsMap.IsValid());
+
+    app_uid_sim_stats_value value = {0};
+    value.rxBytes = TEST_BYTES0;
+    value.rxPackets = TEST_BYTES0;
+    value.txBytes = TEST_BYTES0;
+    value.txPackets = TEST_BYTES0;
+    app_uid_sim_stats_key key1 = {0};
+    key1.ifIndex = TEST_UID_IF1;
+    key1.uId = TEST_UID1;
+    auto ret = uidSimStatsMap.Write(key1, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    app_uid_sim_stats_key key2 = {0};
+    key2.ifIndex = TEST_UID_IF2;
+    key2.uId = TEST_UID2;
+    ret = uidSimStatsMap.Write(key2, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    EXPECT_EQ(bpfStats->GetAllStatsInfo(stats), NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    BpfMapper<app_uid_sim_stats_key, app_uid_sim_stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
+    EXPECT_TRUE(uidSimStatsMap.IsValid());
+
+    app_uid_sim_stats_value value = {0};
+    value.rxBytes = TEST_BYTES0;
+    value.rxPackets = TEST_BYTES0;
+    value.txBytes = TEST_BYTES0;
+    value.txPackets = TEST_BYTES0;
+    app_uid_sim_stats_key key1 = {0};
+    key1.ifIndex = TEST_UID_IF1;
+    key1.uId = TEST_UID1;
+    auto ret = uidSimStatsMap.Write(key1, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    app_uid_sim_stats_key key2 = {0};
+    key2.ifIndex = TEST_UID_IF2;
+    key2.uId = TEST_UID2;
+    ret = uidSimStatsMap.Write(key2, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    EXPECT_EQ(bpfStats->GetAllContainerStatsInfo(stats), NETSYS_SUCCESS);
+    EXPECT_EQ(stats.size(), 2);
 }
 
 HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ int32_t NetStatsServiceProxy::SendRequest(uint32_t code, MessageParcel &data,
     if (!reply.ReadInt32(ret)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-    NETMGR_LOG_D("SendRequest gsw ret = [%{public}d]", ret);
+    NETMGR_LOG_D("SendRequest ret = [%{public}d]", ret);
     return ret;
 }
 
@@ -109,7 +109,9 @@ int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -135,7 +137,9 @@ int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -157,7 +161,9 @@ int32_t NetStatsServiceProxy::GetCellularRxBytes(uint64_t &stats)
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_GET_IFACE_NAME_FAILED) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -179,7 +185,9 @@ int32_t NetStatsServiceProxy::GetCellularTxBytes(uint64_t &stats)
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_GET_IFACE_NAME_FAILED) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -250,7 +258,9 @@ int32_t NetStatsServiceProxy::GetUidRxBytes(uint64_t &stats, uint32_t uid)
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -404,6 +414,115 @@ int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return result;
 }
 
+int32_t NetStatsServiceProxy::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
+int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                       const sptr<NetStatsNetwork> &network)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (!network->Marshalling(data)) {
+        NETMGR_LOG_E("proxy Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("proxy sptr<NetStatsNetwork> Marshalling success");
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
+int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                          const sptr<NetStatsNetwork> &network)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("WriteUint32 uid failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!network->Marshalling(data)) {
+        NETMGR_LOG_E("sptr<NetStatsNetwork> Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("proxy sptr<NetStatsNetwork> Marshalling success");
+    MessageParcel reply;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    if (!NetStatsInfoSequence::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t NetStatsServiceProxy::SetAppStats(const PushStatsInfo &info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!info.Marshalling(data)) {
+        NETMGR_LOG_E("pushStatsInfo marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("PushStatsInfo Marshalling success");
+    MessageParcel reply;
+    int32_t ret = SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    return ret;
+}
+
 int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
 {
     MessageParcel data;
@@ -412,7 +531,7 @@ int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
@@ -438,7 +557,7 @@ int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 

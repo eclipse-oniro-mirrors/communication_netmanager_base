@@ -32,7 +32,7 @@ enum {
     UID_SAMGR = 5555,
     UID_PARAM_WATCHER = 1101,
     UID_EDM = 3057,
-    UID_SECURITY_GUARD = 3520,
+    UID_SECURITY_COLLECTOR = 3521,
 };
 
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
@@ -46,6 +46,7 @@ private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
     void InitNetInfoOpToInterfaceMap();
+    void InitNetInfoOpToInterfaceMapPart2();
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
@@ -117,6 +118,7 @@ private:
     int32_t CmdGetTotalStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
@@ -132,7 +134,13 @@ private:
     int32_t CmdRegisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnregisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
-
+    int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

@@ -23,11 +23,12 @@
 
 #include "i_net_stats_callback.h"
 #include "net_all_capabilities.h"
-#include "net_manager_constants.h"
 
+#include "net_push_stats_info.h"
+#include "net_stats_info_sequence.h"
+#include "net_stats_network.h"
 #include "net_stats_service_stub.h"
-#include "net_stats_callback_stub.h"
-#include "net_stats_constants.h"
+#include "common_net_stats_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -38,21 +39,21 @@ constexpr uint32_t TEST_UINT32_VALUE = 100;
 constexpr uint64_t TEST_UINT64_VALUE = 100;
 constexpr const char *TEST_STRING = "test";
 
-class TestNetStatsCallback : public NetStatsCallbackStub {
-public:
-    TestNetStatsCallback() = default;
-    ~TestNetStatsCallback() override{};
+constexpr uint32_t TEST_UID = 1001;
+constexpr int32_t TEST_TYPE = 0;
+constexpr int32_t TEST_SIM_ID = 1;
+constexpr int64_t TEST_START_TIME = 100;
+constexpr int64_t TEST_END_TIME = 200;
 
-    int32_t NetIfaceStatsChanged(const std::string &iface) override
-    {
-        return 0;
-    }
-
-    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override
-    {
-        return 0;
-    }
-};
+sptr<NetStatsNetwork> GetSptrNetworkData()
+{
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    network->type_ = TEST_TYPE;
+    network->startTime_ = TEST_START_TIME;
+    network->endTime_ = TEST_END_TIME;
+    network->simId_ = TEST_SIM_ID;
+    return network;
+}
 
 class MockNetStatsServiceStub : public NetStatsServiceStub {
 public:
@@ -100,6 +101,28 @@ public:
     }
 
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &info) override
+    {
+        return 0;
+    }
+
+    int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos) override
+    {
+        return 0;
+    }
+
+    int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                     const sptr<NetStatsNetwork> &network) override
+    {
+        return 0;
+    }
+
+    int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                        const sptr<NetStatsNetwork> &network) override
+    {
+        return 0;
+    }
+
+    int32_t SetAppStats(const PushStatsInfo &info) override
     {
         return 0;
     }
@@ -196,7 +219,7 @@ HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Leve
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
     }
-    sptr<INetStatsCallback> callback = new (std::nothrow) TestNetStatsCallback();
+    sptr<INetStatsCallback> callback = new (std::nothrow) NetStatsCallbackTestCb();
     if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
         return;
     }
@@ -218,7 +241,7 @@ HWTEST_F(TestNetStatsServiceStub, UnregisterNetStatsCallbackTest001, TestSize.Le
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
     }
-    sptr<INetStatsCallback> callback = new (std::nothrow) TestNetStatsCallback();
+    sptr<INetStatsCallback> callback = new (std::nothrow) NetStatsCallbackTestCb();
     if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
         return;
     }
@@ -522,6 +545,94 @@ HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO), data,
                                              reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetAllContainerStatsInfoTest001
+ * @tc.desc: Test NetConnCallbackStub GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO), data, reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByNetworkTest001
+ * @tc.desc: Test NetStatsServiceStub GetTrafficStatsByNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<NetStatsNetwork> network = GetSptrNetworkData();
+    if (!network->Marshalling(data)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByUidNetworkTest001
+ * @tc.desc: Test NetStatsServiceStub GetTrafficStatsByUidNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    uint32_t uid = TEST_UID;
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+    sptr<NetStatsNetwork> network = GetSptrNetworkData();
+    if (!network->Marshalling(data)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetAppStats001
+ * @tc.desc: Test NetStatsServiceStub SetAppStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, SetAppStats001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    PushStatsInfo info;
+    if (!info.Marshalling(data)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret =
+        instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
