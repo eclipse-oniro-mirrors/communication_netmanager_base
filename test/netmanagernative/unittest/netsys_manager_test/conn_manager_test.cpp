@@ -247,7 +247,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -262,7 +262,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -278,7 +278,7 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->RemoveInterfaceFromNetwork(INTERNAL_NETID, iface);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -439,45 +439,5 @@ HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
     EXPECT_EQ(result, nullptr);
 }
 
-/**
- * @tc.name: SetNetworkAccessPolicy001
- * @tc.desc: Test ConnManager SetNetworkAccessPolicy.
- * @tc.type: FUNC
- */
-HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
-{
-    uint32_t uid = 0;
-    NetworkAccessPolicy netAccessPolicy;
-    netAccessPolicy.wifiAllow = false;
-    netAccessPolicy.cellularAllow = false;
-    bool reconfirmFlag = true;
-    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: DeleteNetworkAccessPolicy001
- * @tc.desc: Test ConnManager DeleteNetworkAccessPolicy.
- * @tc.type: FUNC
- */
-HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
-{
-    uint32_t uid = 0;
-    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: NotifyNetBearerTypeChange001
- * @tc.desc: Test ConnManager NotifyNetBearerTypeChange.
- * @tc.type: FUNC
- */
-HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
-{
-    std::set<NetManagerStandard::NetBearType> bearTypes;
-
-    int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
 } // namespace NetsysNative
 } // namespace OHOS

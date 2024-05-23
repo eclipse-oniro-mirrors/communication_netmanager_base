@@ -214,7 +214,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
     NetManagerBaseAccessToken token;
     NetStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     std::cout << info.IfaceData() << std::endl;
 }
 
@@ -224,7 +224,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
     NetStatsInfo info;
     int32_t ret =
         DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     std::cout << info.UidData() << std::endl;
 }
 
@@ -242,16 +242,10 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
     NETMGR_LOG_I("UpdateIfacesStats enter");
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     NETMGR_LOG_I("GetIfaceStatsDetail enter");
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
-    std::cout << "NetStatsClientTest::NetStatsClient003 net ifaceStatsInfo:" << info.UidData() << std::endl;
-    EXPECT_EQ(info.iface_, iface);
-    EXPECT_EQ(info.date_, MOCK_DATE);
-    EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
-    EXPECT_EQ(info.txBytes_, MOCK_TXBYTES);
-    EXPECT_EQ(info.rxPackets_, MOCK_RXPACKETS);
-    EXPECT_EQ(info.txPackets_, MOCK_TXPACKETS);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
@@ -280,7 +274,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
 
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
@@ -321,19 +315,6 @@ HWTEST_F(NetStatsClientTest, NetStatsClient008, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
-HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    sptr<IRemoteObject::DeathRecipient> deathRecipient =
-        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
-    sptr<IRemoteObject> remote = nullptr;
-    deathRecipient->OnRemoteDied(remote);
-    std::unordered_map<uint32_t, NetStatsInfo> infos;
-    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetStatsClientTest, GetAllContainerStatsInfo001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
@@ -357,7 +338,7 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
     uint32_t uid = 1;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

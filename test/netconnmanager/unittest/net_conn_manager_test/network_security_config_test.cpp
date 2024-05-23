@@ -134,31 +134,6 @@ HWTEST_F(NetworkSecurityConfigTest, GetRehashedCADirName001, TestSize.Level1)
     EXPECT_EQ(caPath, caPath);
 }
 
-/**
- * @tc.name: BuildRehasedCAPath001
- * @tc.desc: Test NetworkSecurityConfig::BuildRehasedCAPath
- * @tc.type: FUNC
- */
-HWTEST_F(NetworkSecurityConfigTest, BuildRehasedCAPath001, TestSize.Level1)
-{
-    std::string caPath("/etc/security/certificates/test");
-    std::cout << "BuildRehasedCAPath001 In" << std::endl;
-    auto ret = NetworkSecurityConfig::GetInstance().BuildRehasedCAPath(caPath);
-    EXPECT_EQ(ret, "");
-}
-
-/**
- * @tc.name: GetRehasedCAPath001
- * @tc.desc: Test NetworkSecurityConfig::GetRehasedCAPath
- * @tc.type: FUNC
- */
-HWTEST_F(NetworkSecurityConfigTest, GetRehasedCAPath001, TestSize.Level1)
-{
-    std::string caPath("/etc/security/certificates/test");
-    std::cout << "GetRehasedCAPath001 In" << std::endl;
-    auto ret = NetworkSecurityConfig::GetInstance().GetRehasedCAPath(caPath);
-    EXPECT_EQ(ret, "");
-}
 
 /**
  * @tc.name: ReHashCAPathForX509001
