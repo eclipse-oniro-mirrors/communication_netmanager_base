@@ -326,6 +326,7 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
     }
 
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_VERBOSE, 0L);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_FORBID_REUSE, 1L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 0L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
     if (probeType == ProbeType::PROBE_HTTPS) {
