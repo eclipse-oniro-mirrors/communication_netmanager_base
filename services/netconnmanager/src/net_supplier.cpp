@@ -494,5 +494,15 @@ void NetSupplier::ResetNetQuality()
 {
     netQuality_ = QUALITY_NORMAL_STATE;
 }
+
+void NetSupplier::SetReducedScored(bool isReducedScore)
+{
+    alreadyReduceScore_ = isReducedScore;
+}
+
+bool NetSupplier::AlreadyReducedScore()
+{
+    return alreadyReduceScore_;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

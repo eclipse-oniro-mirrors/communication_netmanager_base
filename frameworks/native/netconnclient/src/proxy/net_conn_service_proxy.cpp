@@ -1560,7 +1560,7 @@ int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirpla
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1575,12 +1575,24 @@ int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool is
     if (!data.WriteBool(isBetter)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
     int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
         data, reply);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
-    return reply.ReadInt32();
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadUint32(supplierId)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
