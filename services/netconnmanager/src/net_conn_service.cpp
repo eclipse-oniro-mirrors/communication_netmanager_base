@@ -1474,11 +1474,11 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 
     auto suppliers = GetNetSupplierFromList(bearerType);
     for (auto supplier : suppliers) {
-        if (supplier == nullptr) {
+        if (supplier == nullptr && !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
             continue;
         }
         std::shared_ptr<Network> network = supplier->GetNetwork();
-        if (network == nullptr) {
+        if (network == nullptr && !network->IsConnected()) {
             continue;
         }
         std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
@@ -1486,7 +1486,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
             continue;
         }
         std::string ident = network->GetNetLinkInfo().ident_;
-        ifaceNameIdentMaps.emplace(std::move(ifaceName), std::move(ident));
+        ifaceNameIdentMaps[std::move(ifaceName)] = std::move(ident);
     }
     return NETMANAGER_SUCCESS;
 }
