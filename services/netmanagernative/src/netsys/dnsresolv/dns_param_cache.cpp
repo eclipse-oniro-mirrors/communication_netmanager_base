@@ -276,8 +276,8 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
     std::lock_guard<ffrt::mutex> guard(uidRangeMutex_);
     NETNATIVE_LOG_D("DnsParamCache::DelUidRange size = [%{public}zu]", uidRanges.size());
     vpnNetId_ = 0;
-    auto end =
-        std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(), uidRanges.end(), vpnUidRanges_.begin());
+    auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(),
+                                   uidRanges.end(), vpnUidRanges_.begin());
     vpnUidRanges_.erase(end, vpnUidRanges_.end());
     return 0;
 }

@@ -309,7 +309,7 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
     auto uid = info->uid;
 
     NETNATIVE_LOG_D("netId = [%{public}u], uid = [%{public}u], command = [%{public}u]",
-                   netId, uid, info->command);
+                    netId, uid, info->command);
 
     switch (info->command) {
         case GET_CONFIG:
