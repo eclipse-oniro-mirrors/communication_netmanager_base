@@ -49,17 +49,23 @@ DnsResolvListen::~DnsResolvListen()
     }
 }
 
-void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId)
+void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid)
 {
-    DNS_CONFIG_PRINT("ProcGetConfigCommand");
+    NETNATIVE_LOG_D("DnsResolvListen::ProcGetConfigCommand uid = [%{public}u]", uid);
     ResolvConfig sendData = {0};
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
 
-    auto status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers, domains,
-                                                                 baseTimeoutMsec, retryCount);
+    int status = -1;
+    if (DnsParamCache::GetInstance().IsVpnOpen()) {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers,
+                                                                domains, baseTimeoutMsec, retryCount);
+    } else {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers,
+                                                                domains, baseTimeoutMsec, retryCount);
+    }
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
         sendData.error = status;
@@ -300,10 +306,14 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
 
     auto info = reinterpret_cast<RequestInfo *>(buff);
     auto netId = info->netId;
+    auto uid = info->uid;
+
+    NETNATIVE_LOG_D("netId = [%{public}u], uid = [%{public}u], command = [%{public}u]",
+                   netId, uid, info->command);
 
     switch (info->command) {
         case GET_CONFIG:
-            ProcGetConfigCommand(clientSockFd, netId);
+            ProcGetConfigCommand(clientSockFd, netId, uid);
             break;
         case GET_CACHE:
             ProcGetCacheCommand(clientSockFd, netId);

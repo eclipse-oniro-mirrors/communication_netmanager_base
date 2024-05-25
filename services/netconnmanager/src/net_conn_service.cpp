@@ -100,13 +100,14 @@ void NetConnService::CreateDefaultRequest()
 {
     if (!defaultNetActivate_) {
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
-        defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
+        defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
         std::weak_ptr<INetActivateCallback> timeoutCb;
         defaultNetActivate_ =
             std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netActEventHandler_);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
+        NETMGR_LOG_D("defaultnetcap size = [%{public}zu]", defaultNetSpecifier_->netCapabilities_.netCaps_.size());
     }
 }
 
@@ -200,10 +201,16 @@ int32_t NetConnService::SetInternetPermission(uint32_t uid, uint8_t allow)
 int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                             const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
+    std::set<NetCap> tmp = netCaps;
+    NETMGR_LOG_D("RegisterNetSupplier in netcaps size = %{public}zu.", tmp.size());
+    if (bearerType != BEARER_VPN) {
+        tmp.insert(NET_CAPABILITY_NOT_VPN);
+    }
+    NETMGR_LOG_D("RegisterNetSupplier out netcaps size = %{public}zu.", tmp.size());
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, &ident, &netCaps, &supplierId, &result]() {
-            result = this->RegisterNetSupplierAsync(bearerType, ident, netCaps, supplierId);
+        netConnEventHandler_->PostSyncTask([this, bearerType, &ident, tmp, &supplierId, &result]() {
+            result = this->RegisterNetSupplierAsync(bearerType, ident, tmp, supplierId);
         });
     }
     return result;

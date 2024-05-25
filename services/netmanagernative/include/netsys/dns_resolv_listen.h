@@ -31,7 +31,7 @@ public:
     void StartListen();
 
 private:
-    static void ProcGetConfigCommand(int clientSockFd, uint16_t netId);
+    static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
     static void ProcSetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcGetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);

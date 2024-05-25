@@ -22,6 +22,7 @@
 #include "dns_proxy_listen.h"
 #include "i_net_dns_result_callback.h"
 #include "i_net_dns_health_callback.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace nmd {
@@ -123,6 +124,9 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback);
     int32_t RegisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
     int32_t UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
+
+    int32_t AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
+    int32_t DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;

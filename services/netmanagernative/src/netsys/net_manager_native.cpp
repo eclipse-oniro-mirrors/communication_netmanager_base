@@ -104,11 +104,13 @@ int32_t NetManagerNative::NetworkDestroy(int32_t netId)
 
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
+    dnsManager_->AddUidRange(netId, uidRanges);
     return connManager_->AddUidsToNetwork(netId, uidRanges);
 }
 
 int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
+    dnsManager_->DelUidRange(netId, uidRanges);
     return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 

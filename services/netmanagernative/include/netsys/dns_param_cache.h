@@ -22,6 +22,7 @@
 #include "ffrt.h"
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
+#include "uid_range.h"
 
 #if DNS_CONFIG_DEBUG
 #ifdef DNS_CONFIG_PRINT
@@ -57,6 +58,9 @@ public:
     int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
+    int32_t GetResolverConfig(uint16_t netId, uint32_t uid, std::vector<std::string> &servers,
+                              std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
+
     int32_t GetDefaultNetwork() const;
 
     void GetDumpInfo(std::string &info);
@@ -67,10 +71,22 @@ public:
 
     void EnableIpv6(uint16_t netId);
 
+    int32_t AddUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
+
+    int32_t DelUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
+
+    bool IsVpnOpen() const;
+
 private:
     DnsParamCache();
 
+    std::vector<NetManagerStandard::UidRange> vpnUidRanges_;
+
+    int32_t vpnNetId_;
+
     ffrt::mutex cacheMutex_;
+
+    ffrt::mutex uidRangeMutex_;
 
     std::atomic_uint defaultNetId_;
 
