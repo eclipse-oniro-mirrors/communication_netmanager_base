@@ -173,6 +173,18 @@ int32_t DnsManager::UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDns
     return DnsQualityDiag::GetInstance().UnregisterHealthListener(callback);
 }
 
+int32_t DnsManager::AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::AddUidRange");
+    return DnsParamCache::GetInstance().AddUidRange(netId, uidRanges);
+}
+
+int32_t DnsManager::DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::AddUidRange");
+    return DnsParamCache::GetInstance().DelUidRange(netId, uidRanges);
+}
+
 int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
 {
     int32_t resNum = 0;

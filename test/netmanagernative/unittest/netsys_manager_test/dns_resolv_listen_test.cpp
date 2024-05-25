@@ -177,7 +177,7 @@ HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
 
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)
 {
-    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID));
+    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID), getuid());
     ASSERT_EQ(instance_->serverSockFd_, -1);
 }
 
