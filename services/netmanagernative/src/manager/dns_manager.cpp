@@ -181,7 +181,7 @@ int32_t DnsManager::AddUidRange(int32_t netId, const std::vector<NetManagerStand
 
 int32_t DnsManager::DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
 {
-    NETNATIVE_LOG_D("DnsManager::AddUidRange");
+    NETNATIVE_LOG_D("DnsManager::DelUidRange");
     return DnsParamCache::GetInstance().DelUidRange(netId, uidRanges);
 }
 
