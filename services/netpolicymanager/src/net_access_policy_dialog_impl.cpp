@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "net_access_policy_dialog.h"
+#include "net_access_policy_dialog_impl.h"
 
 #include <atomic>
 #include <fstream>
@@ -24,7 +24,7 @@
 
 #include <ability_manager_client.h>
 #include <message_parcel.h>
-#include "netnative_log_wrapper.h"
+#include "net_mgr_log_wrapper.h"
 
 using namespace OHOS::AAFwk;
 
@@ -37,19 +37,19 @@ sptr<IRemoteObject> g_remoteObject = nullptr;
 uint32_t g_uid = 0;
 } // namespace
 
-NetAccessPolicyDialog::NetAccessPolicyDialog() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
+NetAccessPolicyDialogImpl::NetAccessPolicyDialogImpl() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
 
-NetAccessPolicyDialog::~NetAccessPolicyDialog()
+NetAccessPolicyDialogImpl::~NetAccessPolicyDialogImpl()
 {
     dialogConnectionCallback_ = nullptr;
 }
 
-bool NetAccessPolicyDialog::ConnectSystemUi(uint32_t uid)
+bool NetAccessPolicyDialogImpl::ConnectSystemUi(uint32_t uid)
 {
-    NETNATIVE_LOGI("OnAbilityConnectDone");
+    NETMGR_LOG_I("OnAbilityConnectDone");
     auto abilityManager = AbilityManagerClient::GetInstance();
     if (abilityManager == nullptr) {
-        NETNATIVE_LOGE("Get abilityManager err");
+        NETMGR_LOG_E("Get abilityManager err");
         return false;
     }
 
@@ -57,7 +57,7 @@ bool NetAccessPolicyDialog::ConnectSystemUi(uint32_t uid)
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
     ErrCode result = abilityManager->ConnectAbility(want, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
-        NETNATIVE_LOGE("ConnectAbility err");
+        NETMGR_LOG_E("ConnectAbility err");
         return false;
     }
 
@@ -65,10 +65,10 @@ bool NetAccessPolicyDialog::ConnectSystemUi(uint32_t uid)
     return true;
 }
 
-void NetAccessPolicyDialog::DialogAbilityConnection::OnAbilityConnectDone(
+void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    NETNATIVE_LOGI("OnAbilityConnectDone");
+    NETMGR_LOG_I("OnAbilityConnectDone");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -76,7 +76,6 @@ void NetAccessPolicyDialog::DialogAbilityConnection::OnAbilityConnectDone(
     std::string parameters =
         "{\"ability.want.parabilityManager.uiExtensionType\":\"sysDialog/common\",\"sysDialogZOrder\":2, \"appUid\":";
     std::string tmpParameters = parameters + std::to_string(g_uid) + "}";
-    NETNATIVE_LOGI("OnAbilityConnectDone: uid: %{public}d", g_uid);
     data.WriteInt32(SIGNAL_NUM);
     data.WriteString16(u"bundleName");
     data.WriteString16(u"com.example.myapplication");
@@ -89,12 +88,18 @@ void NetAccessPolicyDialog::DialogAbilityConnection::OnAbilityConnectDone(
     remoteObject->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
 }
 
-void NetAccessPolicyDialog::DialogAbilityConnection::OnAbilityDisconnectDone(
+void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityDisconnectDone(
     const AppExecFwk::ElementName& element, int resultCode)
 {
-    NETNATIVE_LOGI("OnAbilityDisconnectDone");
+    NETMGR_LOG_I("OnAbilityDisconnectDone");
     std::lock_guard lock(mutex_);
     g_remoteObject = nullptr;
+}
+
+INetAccessPolicyDialog *GetNetAccessPolicyDialogImpl()
+{
+    static NetAccessPolicyDialogImpl impl;
+    return &impl;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
