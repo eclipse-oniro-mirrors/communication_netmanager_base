@@ -121,17 +121,17 @@ int32_t VpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
 
     int32_t ret = 0;
     ifr.ifr_mtu = mtu;
-    if (ioctl(net4Sock_, SIOCSIFMTU, &ifr) < 0) {
+    if (!(net4Sock_ > 0 && ioctl(net4Sock_, SIOCSIFMTU, &ifr) >= 0)) {
         NETNATIVE_LOGE("set MTU error, errno:%{public}d", errno);
         ++ret;
     }
-    if (ioctl(net6Sock_, SIOCSIFMTU, &ifr) < 0) {
+    if (!(net6Sock_ > 0 && ioctl(net6Sock_, SIOCSIFMTU, &ifr) >= 0)) {
         NETNATIVE_LOGE("set ipv6 MTU error, errno:%{public}d", errno);
         ++ret;
     }
 
-    NETNATIVE_LOGI("set MTU %{public}s", (ret >= 1) ? "success" : "failed");
-    return (ret >= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    NETNATIVE_LOGI("set MTU %{public}s", (ret <= 1) ? "success" : "failed");
+    return (ret <= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
 int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &tunAddr, int32_t prefix)
@@ -199,16 +199,16 @@ int32_t VpnManager::SetVpnUp()
 
     int32_t ret = 0;
     ifr.ifr_flags = IFF_UP;
-    if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0) {
+    if (!(net4Sock_ > 0 && ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) >= 0)) {
         NETNATIVE_LOGE("set iff up failed: %{public}d", errno);
         ++ret;
     }
-    if (ioctl(net6Sock_, SIOCSIFFLAGS, &ifr) < 0) {
+    if (!(net6Sock_ > 0 && ioctl(net6Sock_, SIOCSIFFLAGS, &ifr) >= 0)) {
         NETNATIVE_LOGE("set iff ipv6 up failed: %{public}d", errno);
         ++ret;
     }
-    NETNATIVE_LOGI("set iff up %{public}s", (ret >= 1) ? "success" : "failed");
-    return (ret >= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    NETNATIVE_LOGI("set iff up %{public}s", (ret <= 1) ? "success" : "failed");
+    return (ret <= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
 int32_t VpnManager::SetVpnDown()
@@ -220,16 +220,16 @@ int32_t VpnManager::SetVpnDown()
 
     int32_t ret = 0;
     ifr.ifr_flags &= ~IFF_UP;
-    if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0) {
+    if (!(net4Sock_ > 0 && ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) >= 0)) {
         NETNATIVE_LOGE("set iff down failed: %{public}d", errno);
         ++ret;
     }
-    if (ioctl(net6Sock_, SIOCSIFFLAGS, &ifr) < 0) {
+    if (!(net6Sock_ > 0 && ioctl(net6Sock_, SIOCSIFFLAGS, &ifr) >= 0)) {
         NETNATIVE_LOGE("set iff ipv6 down failed: %{public}d", errno);
         ++ret;
     }
-    NETNATIVE_LOGI("set iff down %{public}s", (ret >= 1) ? "success" : "failed");
-    return (ret >= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    NETNATIVE_LOGI("set iff down %{public}s", (ret <= 1) ? "success" : "failed");
+    return (ret <= 1) ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
 int32_t VpnManager::InitIfreq(ifreq &ifr, const std::string &cardName)

@@ -49,7 +49,7 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     if (pos != std::string::npos) {
         destination = destination.substr(0, pos);
     }
-    if (!IsValidIPV6(destination)) {
+    if (!(IsValidIPV6(destination) && (IsValidIPV6(nextHop) || nextHop.empty()))) {
         NETNATIVE_LOGE("check IsValidIPV6 faild");
         return;
     }
