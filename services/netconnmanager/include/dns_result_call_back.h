@@ -41,6 +41,7 @@ private:
 
 private:
     SafeMap<uint32_t, NetDnsResult> netDnsResult_;
+    SafeMap<uint32_t, uint32_t> failCount_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
