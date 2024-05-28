@@ -19,46 +19,14 @@
 #include <mutex>
 #include <iostream>
 
-#include "ability_connect_callback_interface.h"
-#include "ability_connect_callback_stub.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
-class NetAccessPolicyDialog {
+class INetAccessPolicyDialog {
 public:
-    NetAccessPolicyDialog();
-    ~NetAccessPolicyDialog();
-    bool ConnectSystemUi(uint32_t uid);
-    static std::string GetBundleName()
-    {
-        return bundleName_;
-    }
-
-    static std::string GetAbilityName()
-    {
-        return abilityName_;
-    }
-
-    static std::string GetUiExtensionType()
-    {
-        return uiExtensionType_;
-    }
-private:
-    class DialogAbilityConnection : public OHOS::AAFwk::AbilityConnectionStub {
-    public:
-        void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
-                                  int resultCode) override;
-        void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
-
-    private:
-        std::mutex mutex_;
-    };
-
-    sptr<OHOS::AAFwk::IAbilityConnection> dialogConnectionCallback_{nullptr};
-    static std::string bundleName_;
-    static std::string abilityName_;
-    static std::string uiExtensionType_;
+   virtual bool ConnectSystemUi(uint32_t uid) = 0;
 };
+
+extern "C" __attribute__((visibility("default"))) INetAccessPolicyDialog *GetNetAccessPolicyDialog();
 } // namespace NetManagerStandard
 } // namespace OHOS
 

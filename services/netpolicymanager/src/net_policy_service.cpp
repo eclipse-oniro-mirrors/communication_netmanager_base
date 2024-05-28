@@ -16,6 +16,7 @@
 #include "net_policy_service.h"
 
 #include <algorithm>
+#include <dlfcn.h>
 
 #include "system_ability_definition.h"
 
@@ -37,6 +38,13 @@
 #include "net_policy_listener.h"
 #include "net_access_policy_dialog.h"
 
+#ifdef __LP64__
+const std::string LIB_LOAD_PATH = "/system/lib64/libnet_access_policy_dialog.z.so";
+#else
+const std::string LIB_LOAD_PATH = "/system/lib/libnet_access_policy_dialog.z.so";
+#endif
+
+using GetNetBundleClass = OHOS::NetManagerStandard::INetAccessPolicyDialog *(*)();
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<bool> g_RegisterToService(
@@ -516,11 +524,35 @@ int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
 {
     NETMGR_LOG_I("NotifyNetAccessPolicyDiag");
 
-    NetAccessPolicyDialog policyDialog;
-    if (!policyDialog.ConnectSystemUi(uid)) {
-        NETMGR_LOG_E("connect systemUi failed");
+    std::lock_guard<std::mutex> lock(mutex_);
+    void *handler = dlopen(LIB_LOAD_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load failed, failed reason : %{public}s", dlerror());
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    GetNetBundleClass GetNetAccessPolicyDialog = (GetNetBundleClass)dlsym(handler, "GetNetAccessPolicyDialog");
+    if (GetNetAccessPolicyDialog == nullptr) {
+        NETMGR_LOG_E("GetNetAccessPolicyDialog faild, failed reason : %{public}s", dlerror());
+        dlclose(handler);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    auto netPolicyDialog = GetNetAccessPolicyDialog();
+    if (netPolicyDialog == nullptr) {
+        NETMGR_LOG_E("netPolicyDialog is nullptr");
+        dlclose(handler);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    auto ret = netPolicyDialog->ConnectSystemUi(uid);
+    if (!ret) {
+        NETMGR_LOG_E("netPolicyDialog ConnectSystemUi failed");
+        dlclose(handler);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
+
+    NETMGR_LOG_D("NotifyNetAccessPolicyDiag success");
+    dlclose(handler);
 
     return NETMANAGER_SUCCESS;
 }
