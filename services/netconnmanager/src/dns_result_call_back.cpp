@@ -38,6 +38,8 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
             } else {
                 failValue_++;
                 if (failValue_ >= 3) {
+                    NETMGR_LOG_I("netId:%{public}d start net detection with DNS fail value failValue:%{public}d".
+				 netid, failValue_);
                     int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
                     if (result != 0) {
                         NETMGR_LOG_E("NetDetectionForDnsHealth failed");
