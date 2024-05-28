@@ -123,7 +123,7 @@ int32_t VpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
     int32_t ret6 = NETMANAGER_SUCCESS;
     ifr.ifr_mtu = mtu;
     if (net4Sock_ > 0) {
-        if (ioctl(net4Sock_, SIOCSIFMTU, &ifr) < 0)) {
+        if (ioctl(net4Sock_, SIOCSIFMTU, &ifr) < 0) {
             NETNATIVE_LOGE("set MTU error, errno:%{public}d", errno);
             ret4 = NETMANAGER_ERROR;
         }
@@ -212,7 +212,7 @@ int32_t VpnManager::SetVpnUp()
     int32_t ret6 = NETMANAGER_SUCCESS;
     ifr.ifr_flags = IFF_UP;
     if (net4Sock_ > 0) {
-        if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0)) {
+        if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0) {
             NETNATIVE_LOGE("set iff up error, errno:%{public}d", errno);
             ret4 = NETMANAGER_ERROR;
         }
@@ -245,7 +245,7 @@ int32_t VpnManager::SetVpnDown()
     int32_t ret6 = NETMANAGER_SUCCESS;
     ifr.ifr_flags &= ~IFF_UP;
     if (net4Sock_ > 0) {
-        if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0)) {
+        if (ioctl(net4Sock_, SIOCSIFFLAGS, &ifr) < 0) {
             NETNATIVE_LOGE("set iff down error, errno:%{public}d", errno);
             ret4 = NETMANAGER_ERROR;
         }
