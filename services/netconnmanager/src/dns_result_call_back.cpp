@@ -39,6 +39,7 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
         } else {
             NETMGR_LOG_D("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
                          "failReports:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_);
+            failCount_.EnsureInsert(netid, 0);
             int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, true);
             if (result != 0) {
                 NETMGR_LOG_E("NetDetectionForDnsHealth failed");
