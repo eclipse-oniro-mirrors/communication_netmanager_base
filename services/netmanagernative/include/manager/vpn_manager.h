@@ -46,6 +46,7 @@ private:
     int32_t SetVpnUp();
     int32_t SetVpnDown();
     int32_t InitIfreq(ifreq &ifr, const std::string &cardName);
+    int32_t SetVpnResult(std::atomic_int socket, unsigned long cmd, ifreq& ifr)
 
     int32_t SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd);
     void StartUnixSocketListen();
