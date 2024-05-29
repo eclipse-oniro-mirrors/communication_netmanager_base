@@ -48,7 +48,8 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     return NETMANAGER_SUCCESS;
 }
 
-void NetDnsResultCallback::RequestNetDetection(uint32_t &failValue_, uint32_t netid) {
+void NetDnsResultCallback::RequestNetDetection(uint32_t &failValue_, uint32_t netid)
+{
     if (!failCount_.Find(netid, failValue_)) {
         failValue_ = 1;
         failCount_.EnsureInsert(netid, failValue_);
