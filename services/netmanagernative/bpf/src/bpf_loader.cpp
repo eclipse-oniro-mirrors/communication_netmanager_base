@@ -103,6 +103,7 @@ static const constexpr struct {
     bool needExpectedAttach;
 } PROG_ATTACH_TYPES[] = {
     DEFINE_ATTACH_TYPE("cgroup_sock_inet_create_socket", BPF_CGROUP_INET_SOCK_CREATE, false),
+//    DEFINE_ATTACH_TYPE("cgroup_sock_inet_release_socket", BPF_CGROUP_INET_SOCK_RELEASE, false),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_addr_bind4", BPF_CGROUP_INET4_BIND, true),

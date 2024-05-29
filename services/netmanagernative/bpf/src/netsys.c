@@ -51,7 +51,7 @@ bpf_map_def SEC("maps") sock_netns_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(sock_netns_key),
     .value_size = sizeof(sock_netns_value),
-    .max_entries = OH_SOCK_PERMISSION_MAP_SIZE,
+    .max_entries = NET_NS_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -158,9 +158,9 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->rxPackets, 1);
         __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
     }
-    sock_netns_key key_sock_netns1 = skb->sk;
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
-    sock_netns_key key_sock_netns2 = NULL;
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
@@ -229,9 +229,9 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->txPackets, 1);
         __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
     }
-    sock_netns_key key_sock_netns1 = skb->sk;
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
-    sock_netns_key key_sock_netns2 = NULL;
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
@@ -280,11 +280,11 @@ bpf_map_def SEC("maps") broker_sock_permission_map = {
 SEC("cgroup_sock/inet_create_socket")
 int inet_create_socket(struct bpf_sock *sk)
 {
-    sock_netns_key key_sock_netns1 = sk;
-    sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(key_sock_netns1);
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(sk);
+    sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(sk);
     bpf_map_update_elem(&sock_netns_map, &key_sock_netns1, &value_sock_netns1, BPF_NOEXIST);
-    sock_netns_key key_sock_netns2 = NULL;
-    sock_netns_value value_sock_netns2 = bpf_get_netns_cookie(key_sock_netns2);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value value_sock_netns2 = bpf_get_netns_cookie(NULL);
     bpf_map_update_elem(&sock_netns_map, &key_sock_netns2, &value_sock_netns2, BPF_NOEXIST);
 
     void *map_ptr = &oh_sock_permission_map;
@@ -306,6 +306,17 @@ int inet_create_socket(struct bpf_sock *sk)
     }
     return 1;
 }
+//
+//SEC("cgroup_sock/inet_release_socket")
+//int inet_release_socket(struct bpf_sock *sk)
+//{
+//    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(sk);
+//    bpf_map_delete_elem(&sock_netns_map, &key_sock_netns1);
+//
+//    socket_cookie_stats_key key_sock_cookie = bpf_get_socket_cookie(sk);
+//    bpf_map_delete_elem(&app_cookie_stats_map, &key_sock_cookie);
+//    return 1;
+//}
 // internet permission end
 bpf_map_def SEC("maps") net_bear_type_map = {
     .type = BPF_MAP_TYPE_HASH,

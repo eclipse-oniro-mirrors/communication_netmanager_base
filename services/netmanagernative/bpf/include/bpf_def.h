@@ -24,6 +24,8 @@ static const int32_t IFACE_NAME_MAP_SIZE = 1000;
 static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
+static const int32_t NET_NS_MAP_SIZE = 65535;
+static const uint64_t SOCK_COOKIE_ID_NULL = UINT64_MAX;
 enum { IFNAME_SIZE = 32 };
 enum { DEFAULT_NETWORK_BEARER_MAP_KEY = 0 };
 
@@ -74,7 +76,7 @@ typedef stats_value iface_stats_value;
 typedef __u64 app_uid_stats_key;
 typedef stats_value app_uid_stats_value;
 
-typedef struct bpf_sock* sock_netns_key;
+typedef __u64 sock_netns_key;
 typedef __u64 sock_netns_value;
 
 typedef stats_key app_uid_sim_stats_key;
