@@ -107,10 +107,10 @@ void VpnManager::DestroyVpnInterface()
     }
 }
 
-int32_t VpnManager::SetVpnResult(std::atomic_int socket, unsigned long cmd, ifreq& ifr)
+int32_t VpnManager::SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
 {
-    if (socket > 0) {
-        if (ioctl(socket, cmd, &ifr) < 0) {
+    if (fd > 0) {
+        if (ioctl(fd, cmd, &ifr) < 0) {
             NETNATIVE_LOGE("set vpn error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
