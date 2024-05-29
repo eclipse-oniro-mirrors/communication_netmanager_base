@@ -114,8 +114,8 @@ static int32_t SetVpnResult(int socketId, int cmd, ifreq ifr)
             NETNATIVE_LOGE("set vpn error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
-	}
-	return NETMANAGER_SUCCESS;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t VpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
