@@ -297,15 +297,15 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 
 void NetStatsCached::ForceUpdateStats()
 {
-    if (isIfaceNameIdentMapLoaded_.load()) {
-        NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
-        isIfaceNameIdentMapLoaded_.store(false);
-    }
     isForce_ = true;
     std::function<void()> netCachedStats = [this] () {
         CacheStats();
         WriteStats();
         isForce_ = false;
+        if (isIfaceNameIdentMapLoaded_.load()) {
+            NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
+            isIfaceNameIdentMapLoaded_.store(false);
+        }
     };
     ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
 }

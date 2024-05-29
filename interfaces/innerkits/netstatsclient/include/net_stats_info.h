@@ -51,7 +51,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
 
     inline bool Equals(const NetStatsInfo &info) const
     {
-        return info.uid_ == uid_ && info.iface_ == iface_ && info.ident_ == ident_;
+        return info.uid_ == uid_ && info.iface_ == iface_;
     }
 
     inline bool HasNoData() const
