@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr double FAIL_RATE = 0.6;
+constexpr int32_t MAX_FAIL_VALUE = 3;
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
@@ -30,27 +31,24 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
         double failRate = static_cast<double>(dnsResult.failReports_) / dnsResult.totalReports_;
         NETMGR_LOG_I("netId:%{public}d, totalReports:%{public}d, failReports:%{public}d",
                      netid, dnsResult.totalReports_, dnsResult.failReports_);
-	if (failRate > FAIL_RATE) {
+        if (failRate > FAIL_RATE) {
             uint32_t failValue_;
             if (!failCount_.Find(netid, failValue_)) {
                 failValue_ = 1;
                 failCount_.EnsureInsert(netid, failValue_);
             } else {
                 failValue_++;
-                if (failValue_ >= 3) {
+                if (failValue_ >= MAX_FAIL_VALUE) {
                     NETMGR_LOG_I("netId:%{public}d start net detection with DNS fail value failValue:%{public}d",
-				 netid, failValue_);
+                                 netid, failValue_);
                     int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
-                    if (result != 0) {
-                        NETMGR_LOG_E("NetDetectionForDnsHealth failed");
-                    }
                     failCount_.EnsureInsert(netid, 0);
                 } else {
                     failCount_.EnsureInsert(netid, failValue_);
                 }
             }
-            NETMGR_LOG_D("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d, failValue:%{public}d",
-                         netid, dnsResult.totalReports_, dnsResult.failReports_, failValue_);
+            NETMGR_LOG_D("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d,
+                         failValue:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_, failValue_);
         } else {
             NETMGR_LOG_D("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
                          "failReports:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_);
