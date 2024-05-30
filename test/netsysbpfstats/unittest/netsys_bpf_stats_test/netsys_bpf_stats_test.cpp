@@ -44,6 +44,7 @@ static constexpr uint32_t TEST_UID_IF2 = 11002;
 static constexpr uint32_t TEST_BYTES0 = 11;
 static constexpr uint32_t STATS_TYPE_INVALID_VALUE = 4;
 static constexpr uint64_t TEST_COOKIE1 = 1;
+static constexpr uint64_t TEST_NET_NS = 1;
 static constexpr const char *TEST_IFACE_NAME_WLAN0 = "wlan0";
 static constexpr const char *TEST_IFACE_NAME_LO = "lo";
 static constexpr const char *TEST_IFACE_NAME_DUMMY0 = "dummy0";
@@ -362,20 +363,14 @@ HWTEST_F(NetsysBpfStatsTest, SockNetnsMapTest001, TestSize.Level1)
         EXPECT_EQ(sockNetnsMap.Read(k, v), NETSYS_SUCCESS);
     }
 
-    sock_netns_key key1 = nullptr;
-    sock_netns_value value1 = 1;
+    sock_netns_key key1 = TEST_NET_NS;
+    sock_netns_value value1 = TEST_NET_NS;
     auto ret = sockNetnsMap.Write(key1, value1, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
     sock_netns_value result = {};
     ret = sockNetnsMap.Read(key1, result);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
     EXPECT_EQ(result, value1);
-
-    sock_netns_key key2 = nullptr;
-    sock_netns_value value2 = {};
-    ret = sockNetnsMap.Read(key2, value2);
-    EXPECT_EQ(ret, NETSYS_SUCCESS);
-    EXPECT_EQ(value2, value1);
 }
 
 HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)
