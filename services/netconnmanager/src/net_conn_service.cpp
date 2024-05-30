@@ -1477,6 +1477,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     netConnEventHandler_->PostSyncTask([bearerType, &ifaceNameIdentMaps, this]() {
+        NETMGR_LOG_I("Enter GetIfaceNameIdentMaps, netBearType=%{public}d", bearerType);
         auto suppliers = GetNetSupplierFromList(bearerType);
         for (auto supplier: suppliers) {
             if (supplier == nullptr && !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
