@@ -363,14 +363,14 @@ HWTEST_F(NetsysBpfStatsTest, SockNetnsMapTest001, TestSize.Level1)
         EXPECT_EQ(sockNetnsMap.Read(k, v), NETSYS_SUCCESS);
     }
 
-    sock_netns_key key1 = TEST_NET_NS;
-    sock_netns_value value1 = TEST_NET_NS;
-    auto ret = sockNetnsMap.Write(key1, value1, BPF_ANY);
+    sock_netns_key key = TEST_NET_NS;
+    sock_netns_value value = TEST_NET_NS;
+    auto ret = sockNetnsMap.Write(key, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
     sock_netns_value result = {};
-    ret = sockNetnsMap.Read(key1, result);
+    ret = sockNetnsMap.Read(key, result);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
-    EXPECT_EQ(result, value1);
+    EXPECT_EQ(result, value);
 }
 
 HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)

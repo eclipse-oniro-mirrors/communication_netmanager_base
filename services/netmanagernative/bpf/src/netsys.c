@@ -306,17 +306,17 @@ int inet_create_socket(struct bpf_sock *sk)
     }
     return 1;
 }
-//
-//SEC("cgroup_sock/inet_release_socket")
-//int inet_release_socket(struct bpf_sock *sk)
-//{
-//    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(sk);
-//    bpf_map_delete_elem(&sock_netns_map, &key_sock_netns1);
-//
-//    socket_cookie_stats_key key_sock_cookie = bpf_get_socket_cookie(sk);
-//    bpf_map_delete_elem(&app_cookie_stats_map, &key_sock_cookie);
-//    return 1;
-//}
+
+SEC("cgroup_sock/inet_release_socket")
+int inet_release_socket(struct bpf_sock *sk)
+{
+    sock_netns_key key_sock_netns = bpf_get_socket_cookie(sk);
+    bpf_map_delete_elem(&sock_netns_map, &key_sock_netns);
+
+    socket_cookie_stats_key key_sock_cookie = bpf_get_socket_cookie(sk);
+    bpf_map_delete_elem(&app_cookie_stats_map, &key_sock_cookie);
+    return 1;
+}
 // internet permission end
 bpf_map_def SEC("maps") net_bear_type_map = {
     .type = BPF_MAP_TYPE_HASH,
