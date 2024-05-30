@@ -31,6 +31,10 @@ config("netsys_native_manager_config") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
+
+  if (enable_feature_net_firewall) {
+    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
 }
 
 netsys_native_manager_sources = [
@@ -93,6 +97,13 @@ netsys_native_manager_deps = [
   "bpf:netsys",
   "bpf:netsys_bpf_utils",
 ]
+
+if (enable_feature_net_firewall) {
+  netsys_native_manager_sources += [
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_callback_proxy.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netfirewall_callback_stub.cpp",
+  ]
+}
 
 ohos_shared_library("netsys_native_manager") {
   sanitize = {

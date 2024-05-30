@@ -59,5 +59,6 @@ declare_args() {
   enable_sys_func = true
   enable_elfio = true
   enable_server_support_ipv6 = false
+  enable_feature_net_firewall = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
