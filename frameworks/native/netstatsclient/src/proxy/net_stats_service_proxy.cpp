@@ -444,6 +444,10 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::unordered_map<uint32
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     if (!network->Marshalling(data)) {
         NETMGR_LOG_E("proxy Marshalling failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
@@ -470,6 +474,10 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsIn
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     if (!data.WriteUint32(uid)) {
         NETMGR_LOG_E("WriteUint32 uid failed");

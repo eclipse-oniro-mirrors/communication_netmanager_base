@@ -24,7 +24,6 @@
 #include "netnative_log_wrapper.h"
 #include "netsys_udp_transfer.h"
 #include "singleton.h"
-#include "ffrt.h"
 
 #include "dns_proxy_listen.h"
 
@@ -48,7 +47,7 @@ DnsProxyListen::~DnsProxyListen()
     }
 }
 
-void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, const RecvBuff &recvBuff, const sockaddr_in &proxyAddr)
+void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr)
 {
     std::vector<std::string> servers;
     std::vector<std::string> domains;
@@ -173,11 +172,10 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        auto fd = this->proxySockFd_;
-        std::function<void()> dnsProxyPacket = [fd, recvBuff, proxyAddr] () {
-            DnsProxyListen::DnsProxyGetPacket(fd, recvBuff, proxyAddr);
-        };
-        ffrt::submit(std::move(dnsProxyPacket), {}, {}, ffrt::task_attr().name("DnsPxyPacket"));
+        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
+        std::string threadName = "DnsPxyPacket";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
     }
 }
 

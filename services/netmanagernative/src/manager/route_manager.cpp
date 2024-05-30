@@ -774,7 +774,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
 
 int32_t RouteManager::UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo)
 {
-    NETNATIVE_LOGI("UpdateRouteRule");
+    NETNATIVE_LOG_D("UpdateRouteRule");
     RouteInfo routeInfoModify = routeInfo;
     // The main work is to assemble the structure required for route.
     struct rtmsg msg;

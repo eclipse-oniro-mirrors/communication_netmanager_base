@@ -33,9 +33,6 @@ ohos_shared_library("net_policy_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
-    blocklist = "./policy_blocklist.txt"
     debug = false
   }
 
@@ -57,7 +54,6 @@ ohos_shared_library("net_policy_manager") {
     "src/firewall_rule/firewall_rule.cpp",
     "src/firewall_rule/power_save_firewall_rule.cpp",
     "src/net_access_policy_database.cpp",
-    "src/net_access_policy_dialog.cpp",
     "src/net_policy_listener.cpp",
     "src/net_policy_service.cpp",
     "src/stub/net_policy_callback_proxy.cpp",
@@ -99,7 +95,6 @@ ohos_shared_library("net_policy_manager") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -155,7 +150,6 @@ ohos_static_library("net_policy_manager_static") {
     "src/firewall_rule/firewall_rule.cpp",
     "src/firewall_rule/power_save_firewall_rule.cpp",
     "src/net_access_policy_database.cpp",
-    "src/net_access_policy_dialog.cpp",
     "src/net_policy_listener.cpp",
     "src/net_policy_service.cpp",
     "src/stub/net_policy_callback_proxy.cpp",
@@ -174,7 +168,6 @@ ohos_static_library("net_policy_manager_static") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -200,6 +193,49 @@ ohos_static_library("net_policy_manager_static") {
   }
 
   external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_shared_library("net_access_policy_dialog") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  include_dirs = [
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "include",
+    "include/stub",
+  ]
+
+  sources = [ "src/net_access_policy_dialog_impl.cpp" ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetPolicyService\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (is_standard_system) {
+    defines += [ "STANDARD_SYSTEM_ENABLE" ]
+  }
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:wantagent_innerkits",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

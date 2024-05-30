@@ -38,6 +38,11 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
 using namespace OHOS::NetManagerStandard;
+enum IptablesType {
+    IPTYPE_IPV4 = 1,
+    IPTYPE_IPV6 = 2,
+    IPTYPE_IPV4V6 = 3,
+};
 class INetsysService : public IRemoteBroker {
 public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -120,7 +125,8 @@ public:
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
     virtual int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
-    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                             IptablesType ipType = IPTYPE_IPV4) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
     virtual int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) = 0;

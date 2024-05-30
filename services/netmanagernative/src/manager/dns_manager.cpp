@@ -49,7 +49,7 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     if (pos != std::string::npos) {
         destination = destination.substr(0, pos);
     }
-    if (!IsValidIPV6(destination) || !IsValidIPV6(nextHop)) {
+    if (!(IsValidIPV6(destination) && (IsValidIPV6(nextHop) || nextHop.empty()))) {
         NETNATIVE_LOGE("check IsValidIPV6 faild");
         return;
     }
@@ -171,6 +171,18 @@ int32_t DnsManager::RegisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHe
 int32_t DnsManager::UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback)
 {
     return DnsQualityDiag::GetInstance().UnregisterHealthListener(callback);
+}
+
+int32_t DnsManager::AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::AddUidRange");
+    return DnsParamCache::GetInstance().AddUidRange(netId, uidRanges);
+}
+
+int32_t DnsManager::DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::DelUidRange");
+    return DnsParamCache::GetInstance().DelUidRange(netId, uidRanges);
 }
 
 int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)

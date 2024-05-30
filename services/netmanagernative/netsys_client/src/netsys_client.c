@@ -155,6 +155,7 @@ static bool MakeKey(const char *hostName, const char *serv, const struct addrinf
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = GET_CONFIG,
         .netId = netId,
     };
@@ -236,6 +237,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
                                             struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = GET_CACHE,
         .netId = netId,
     };
@@ -335,6 +337,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
                                             struct addrinfo *res)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = SET_CACHE,
         .netId = netId,
     };
@@ -395,10 +398,10 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
 static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enable)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = JUDGE_IPV6,
         .netId = netId,
     };
-
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
@@ -459,6 +462,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
                                            struct addrinfo *res, struct queryparam *param)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = POST_DNS_RESULT,
         .netId = netId,
     };
@@ -535,10 +539,10 @@ int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
 static int32_t NetSysGetDefaultNetworkInternal(int sockFd, uint16_t netId, int32_t *currentNetId)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = GET_DEFAULT_NETWORK,
         .netId = netId,
     };
-
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
@@ -566,10 +570,10 @@ int32_t NetSysGetDefaultNetwork(uint16_t netId, int32_t* currentNetId)
 static int32_t NetSysBindSocketInternal(int sockFd, uint16_t netId, int32_t fd)
 {
     struct RequestInfo info = {
+        .uid = getuid(),
         .command = BIND_SOCKET,
         .netId = netId,
     };
-
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);

@@ -63,6 +63,7 @@ public:
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
     int32_t GetSupplierUid() const;
+    bool IsAvailable() const;
     std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
@@ -98,6 +99,8 @@ public:
     bool IsNetQualityPoor();
     bool IsNetQualityGood();
     void ResetNetQuality();
+    void SetReducedScored(bool isReducedScore);
+    bool AlreadyReducedScore();
 
 private:
     NetBearType netSupplierType_;
@@ -117,6 +120,7 @@ private:
     bool restrictBackground_ = true;
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
+    bool alreadyReduceScore_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

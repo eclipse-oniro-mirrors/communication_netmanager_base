@@ -59,8 +59,8 @@ typedef struct {
     __u8 wifiPolicy;
     __u8 cellularPolicy;
     __u8 configSetFromFlag;
-    __u32 netIfIndex;
     __u8 diagAckFlag;
+    __u32 netIfIndex;
 } uid_access_policy_value;
 
 enum network_bearer_type {

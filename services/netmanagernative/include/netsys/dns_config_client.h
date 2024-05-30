@@ -58,6 +58,7 @@ enum CommandType {
 };
 
 struct RequestInfo {
+    uint32_t uid;
     uint32_t command;
     uint32_t netId;
 };

@@ -397,7 +397,7 @@ public:
         return 0;
     }
 
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;
     }
@@ -1754,6 +1754,28 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+    return;
+    }
+    if (!data.WriteString(interface)) {
+    return;
+    }
+    if (!data.WriteUint32(0)) {
+    return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

@@ -516,29 +516,22 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("fork exec parent process failed");
         return NETMANAGER_ERROR;
     }
+    if (close(pipeFd[PIPE_IN]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+    }
     if (out != nullptr) {
         char buf[CHAR_ARRAY_SIZE_MAX] = {0};
         out->clear();
-        if (close(pipeFd[PIPE_IN]) != 0) {
-            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
-        }
         while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
             if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
                 NETMGR_LOG_E("memset is false");
-                close(pipeFd[PIPE_OUT]);
-                return NETMANAGER_ERROR;
             }
         }
-        if (close(pipeFd[PIPE_OUT]) != 0) {
-            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
-            _exit(-1);
-        }
-        return NETMANAGER_SUCCESS;
-    } else {
-        NETMGR_LOG_D("there is no need to return execution results");
-        close(pipeFd[PIPE_IN]);
-        close(pipeFd[PIPE_OUT]);
+    }
+
+    if (close(pipeFd[PIPE_OUT]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     pid_t pidRet = waitpid(childPid, nullptr, 0);
     if (pidRet != childPid) {

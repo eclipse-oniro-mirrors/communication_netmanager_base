@@ -370,7 +370,6 @@ int32_t CJ_NetHandleBindSocket(int32_t netId, int socketFd)
 
 int32_t CJ_NetConnectionRegister(int64_t id)
 {
-    NETMANAGER_BASE_LOGI("CJ_NetConnectionRegister start: id: %{public}lld", id);
     auto instance = FFI::FFIData::GetData<NetConnectionProxy>(id);
     if (!instance) {
         NETMANAGER_BASE_LOGE("NetConnectionProxy instance not exist %{public}" PRId64, id);

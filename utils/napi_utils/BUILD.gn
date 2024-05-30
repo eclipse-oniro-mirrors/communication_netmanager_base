@@ -25,7 +25,6 @@ config("napi_utils_config") {
 config("napi_utils_public_config") {
   include_dirs = [
     "include",
-    "$THIRD_PARTY_ROOT/node/src",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/log/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
@@ -46,17 +45,6 @@ config("napi_utils_public_config") {
 }
 
 ohos_shared_library("napi_utils") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    all_ubsan = true
-    debug = false
-    blocklist = "./napi_utils_blocklist.txt"
-  }
-
-  branch_protector_ret = "pac_ret"
-
   sources = [
     "src/base_context.cpp",
     "src/event_listener.cpp",

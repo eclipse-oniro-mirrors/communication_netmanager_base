@@ -76,15 +76,6 @@ ohos_static_library("net_conn_parcel") {
 }
 
 ohos_shared_library("net_conn_manager_if") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    blocklist = "./connect_blocklist.txt"
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
@@ -116,7 +107,6 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
-    "//third_party/musl/porting/linux/user/src/hook",
   ]
 
   version_script = "libnetconn_kits.map"
@@ -129,6 +119,7 @@ ohos_shared_library("net_conn_manager_if") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "ipc:ipc_core",
     "openssl:libcrypto_shared",
@@ -160,17 +151,6 @@ config("socket_permission_config") {
 }
 
 ohos_shared_library("socket_permission") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    all_ubsan = true
-    blocklist = "./connect_blocklist.txt"
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
@@ -186,6 +166,7 @@ ohos_shared_library("socket_permission") {
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
   deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
   public_configs = [ ":socket_permission_config" ]
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

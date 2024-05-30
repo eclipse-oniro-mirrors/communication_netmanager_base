@@ -114,8 +114,6 @@ void NetConnServiceTest::SetUpTestCase()
             std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
         NetConnService::GetInstance()->serviceIface_ = std::make_unique<NetConnServiceIface>().release();
         NetManagerCenter::GetInstance().RegisterConnService(NetConnService::GetInstance()->serviceIface_);
-        NetConnService::GetInstance()->netScore_ = std::make_unique<NetScore>();
-        ASSERT_NE(NetConnService::GetInstance()->netScore_, nullptr);
         NetHttpProxyTracker httpProxyTracker;
         httpProxyTracker.ReadFromSettingsData(NetConnService::GetInstance()->globalHttpProxy_);
         NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(NetConnService::GetInstance()->globalHttpProxy_);
@@ -1089,7 +1087,22 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
         NetConnService::GetInstance()->netSuppliers_[supplierId]);
     bool isBetter = false;
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter);
+    uint32_t supplier;
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplier);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
+        netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    bool isBetter = true;
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

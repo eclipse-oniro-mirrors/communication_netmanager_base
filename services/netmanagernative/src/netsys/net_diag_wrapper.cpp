@@ -86,6 +86,8 @@ constexpr const char *PING_NETWORK_UNREACHABLE = "Network unreachable";
 
 NetDiagWrapper::NetDiagWrapper() {}
 
+__attribute__((no_sanitize("cfi"))) NetDiagWrapper::~NetDiagWrapper() {}
+
 int32_t NetDiagWrapper::PingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback)
 {
     NETNATIVE_LOGI("Generate ping command: ");

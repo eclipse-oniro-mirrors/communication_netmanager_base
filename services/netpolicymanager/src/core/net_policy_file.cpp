@@ -530,12 +530,7 @@ bool NetPolicyFile::ReadBackgroundPolicy()
 std::shared_ptr<NetPolicyFileEventHandler> NetPolicyFile::GetHandler()
 {
     static auto handler = [this]() -> std::shared_ptr<NetPolicyFileEventHandler> {
-        auto runner = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_THREAD);
-        if (!runner) {
-            NETMGR_LOG_E("Create net policy file work event runner.");
-            return nullptr;
-        }
-        return std::make_shared<NetPolicyFileEventHandler>(runner);
+        return std::make_shared<NetPolicyFileEventHandler>(NET_POLICY_WORK_THREAD);
     }();
     return handler;
 }

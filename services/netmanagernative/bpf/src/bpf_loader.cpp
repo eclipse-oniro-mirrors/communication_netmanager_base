@@ -32,9 +32,9 @@
 
 #include "bpf_def.h"
 #include "bpf_loader.h"
-#include "elfio/elf_types.hpp"
-#include "elfio/elfio.hpp"
-#include "elfio/elfio_relocation.hpp"
+#include "elf_types.hpp"
+#include "elfio.hpp"
+#include "elfio_relocation.hpp"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
@@ -112,6 +112,8 @@ static const constexpr struct {
     DEFINE_ATTACH_TYPE("cgroup_addr_connect6", BPF_CGROUP_INET6_CONNECT, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg4", BPF_CGROUP_UDP4_SENDMSG, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg6", BPF_CGROUP_UDP6_SENDMSG, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg4", BPF_CGROUP_UDP4_RECVMSG, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg6", BPF_CGROUP_UDP6_RECVMSG, true),
 };
 
 int32_t g_sockFd = -1;

@@ -207,7 +207,7 @@ int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &ifName, bool 
 
 int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
-    NETNATIVE_LOGI("Proxy OnInterfaceLinkStateChanged");
+    NETNATIVE_LOG_D("Proxy OnInterfaceLinkStateChanged");
     MessageParcel data;
     if (!WriteLinkStateData(data, ifName, up)) {
         return ERR_NONE;

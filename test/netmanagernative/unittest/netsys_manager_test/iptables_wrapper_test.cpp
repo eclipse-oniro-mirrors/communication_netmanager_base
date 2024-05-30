@@ -61,20 +61,22 @@ HWTEST_F(IptablesWrapperTest, RunCommandTest001, TestSize.Level1)
 
 HWTEST_F(IptablesWrapperTest, RunCommandTest002, TestSize.Level1)
 {
-    std::shared_ptr<IptablesWrapper> wrapper = DelayedSingleton<IptablesWrapper>::GetInstance();
+    IptablesWrapper wrapper;
+    wrapper.handler_ = nullptr;
     IpType ipType = IpType::IPTYPE_IPV4;
     std::string comdLine = "-A INPUT -j LOG";
-    auto ret = wrapper->RunCommand(ipType, comdLine);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    auto ret = wrapper.RunCommand(ipType, comdLine);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
 HWTEST_F(IptablesWrapperTest, RunCommandForResTest001, TestSize.Level1)
 {
-    std::shared_ptr<IptablesWrapper> wrapper = DelayedSingleton<IptablesWrapper>::GetInstance();
+    IptablesWrapper wrapper;
+    wrapper.handler_ = nullptr;
     IpType ipType = IpType::IPTYPE_IPV4;
     std::string comdLine = "-A INPUT -j LOG";
-    auto ret = wrapper->RunCommandForRes(ipType, comdLine);
-    EXPECT_EQ(ret, wrapper->result_);
+    auto ret = wrapper.RunCommandForRes(ipType, comdLine);
+    EXPECT_EQ(ret, wrapper.result_);
 }
 } // namespace NetsysNative
 } // namespace OHOS

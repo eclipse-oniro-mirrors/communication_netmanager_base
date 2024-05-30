@@ -56,6 +56,7 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *PROXY_NAME = "123456789";
 constexpr const int32_t PROXY_NAME_SIZE = 9;
+constexpr const int32_t INVALID_VALUE = 100;
 } // namespace
 
 class NetConnClientTest : public testing::Test {
@@ -1088,6 +1089,20 @@ HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetIfaceNameIdentMapsTest001
+ * @tc.desc: Test NetConnClient::GetIfaceNameIdentMaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::unordered_map<std::string, std::string> data;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR,
+                                                                                        data);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: BindSocketTest002
  * @tc.desc: Test NetConnClient::BindSocket
  * @tc.type: FUNC
@@ -1378,16 +1393,30 @@ HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     bool isBetter = false;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    uint32_t supplierId = 100;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
 {
     bool isBetter = false;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    uint32_t supplierId = 100;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)
+{
+    uint32_t invalidValue = INVALID_VALUE;
+    NetBearType bearerType = static_cast<NetBearType>(invalidValue);
+    std::unordered_map<std::string, std::string> ifaceNameIdentMaps;
+    int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+
+    bearerType = NetBearType::BEARER_BLUETOOTH;
+    ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -20,26 +20,26 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr double FAIL_RATE = 0.6;
+constexpr int32_t MAX_FAIL_VALUE = 3;
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
     NETMGR_LOG_D("Dns Result Report interface is called");
     netDnsResult_.Clear();
     IterateDnsReportResults(netDnsResultReport);
-    netDnsResult_.Iterate([](int32_t netid, NetDnsResult dnsResult) {
+    netDnsResult_.Iterate([this](int32_t netid, NetDnsResult dnsResult) {
         double failRate = static_cast<double>(dnsResult.failReports_) / dnsResult.totalReports_;
-        NETMGR_LOG_I("netId_: %{public}d, totalReports_: %{public}d, failReports_: %{public}d, failrate : %{public}f",
-                     netid, dnsResult.totalReports_, dnsResult.failReports_, failRate);
+        NETMGR_LOG_I("netId:%{public}d, totalReports:%{public}d, failReports:%{public}d",
+                     netid, dnsResult.totalReports_, dnsResult.failReports_);
         if (failRate > FAIL_RATE) {
-            NETMGR_LOG_D("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d",
-                         netid, dnsResult.totalReports_, dnsResult.failReports_);
-            int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
-            if (result != 0) {
-                NETMGR_LOG_E("NetDetectionForDnsHealth failed");
-            }
+            uint32_t failValue_ = 0;
+            RequestNetDetection(failValue_, netid);
+            NETMGR_LOG_D("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d,"
+                         "failValue:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_, failValue_);
         } else {
             NETMGR_LOG_D("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
                          "failReports:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_);
+            failCount_.EnsureInsert(netid, 0);
             int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, true);
             if (result != 0) {
                 NETMGR_LOG_E("NetDetectionForDnsHealth failed");
@@ -47,6 +47,24 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
         }
     });
     return NETMANAGER_SUCCESS;
+}
+
+void NetDnsResultCallback::RequestNetDetection(uint32_t &failValue_, uint32_t netid)
+{
+    if (!failCount_.Find(netid, failValue_)) {
+        failValue_ = 1;
+        failCount_.EnsureInsert(netid, failValue_);
+    } else {
+        failValue_++;
+        if (failValue_ >= MAX_FAIL_VALUE) {
+            NETMGR_LOG_I("netId:%{public}d start net detection with DNS fail value failValue:%{public}d",
+                         netid, failValue_);
+            int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
+            failCount_.EnsureInsert(netid, 0);
+        } else {
+            failCount_.EnsureInsert(netid, failValue_);
+        }
+    }
 }
 
 void NetDnsResultCallback::GetDumpMessageForDnsResult(std::string &message)
@@ -64,7 +82,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
 {
     int32_t defaultNetid = 0;
     int32_t result = NetConnService::GetInstance()->GetDefaultNet(defaultNetid);
-    NETMGR_LOG_I("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);
+    NETMGR_LOG_D("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);
     for (auto &it : netDnsResultReport) {
         NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);

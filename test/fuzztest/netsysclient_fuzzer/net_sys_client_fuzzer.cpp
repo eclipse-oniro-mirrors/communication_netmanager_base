@@ -66,7 +66,8 @@ std::string NetSysGetString(int strlen)
 }
 
 static bool g_isInited = false;
-void Init()
+
+__attribute__((no_sanitize("cfi"))) void Init()
 {
     nmd::IptablesWrapper::GetInstance();
     if (!DelayedSingleton<NetsysNative::NetsysNativeService>::GetInstance()->Init()) {
@@ -151,7 +152,7 @@ bool IsDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataPar
     return true;
 }
 
-void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {

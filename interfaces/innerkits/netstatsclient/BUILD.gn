@@ -38,18 +38,6 @@ config("net_stats_manager_if_config") {
   if (defined(build_public_version) && build_public_version) {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
-
-  cflags += [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
 }
 
 ohos_source_set("net_stats_parcel") {
@@ -104,12 +92,25 @@ ohos_shared_library("net_stats_manager_if") {
 
   public_configs = [ ":net_stats_manager_if_config" ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
   deps = [
     ":net_stats_parcel",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

@@ -345,7 +345,7 @@ public:
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
-    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) override;
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -424,7 +424,7 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
-    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter);
+    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
@@ -448,6 +448,8 @@ private:
     {
         return userId == PRIMARY_USER_ID;
     }
+    uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId);
+    uint32_t FindSupplierToIncreaseScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t supplierId);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
@@ -467,7 +469,6 @@ private:
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
-    std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
