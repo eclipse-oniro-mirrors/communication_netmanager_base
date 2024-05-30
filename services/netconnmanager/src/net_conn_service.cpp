@@ -1478,22 +1478,29 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
     }
 
-    auto suppliers = GetNetSupplierFromList(bearerType);
-    for (auto supplier : suppliers) {
-        if (supplier == nullptr && !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
-            continue;
-        }
-        std::shared_ptr<Network> network = supplier->GetNetwork();
-        if (network == nullptr && !network->IsConnected()) {
-            continue;
-        }
-        std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
-        if (ifaceName.empty()) {
-            continue;
-        }
-        std::string ident = network->GetNetLinkInfo().ident_;
-        ifaceNameIdentMaps[std::move(ifaceName)] = std::move(ident);
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    netConnEventHandler_->PostSyncTask([bearerType, &ifaceNameIdentMaps, this]() {
+        NETMGR_LOG_I("Enter GetIfaceNameIdentMaps, netBearType=%{public}d", bearerType);
+        auto suppliers = GetNetSupplierFromList(bearerType);
+        for (auto supplier: suppliers) {
+            if (supplier == nullptr && !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
+                continue;
+            }
+            std::shared_ptr <Network> network = supplier->GetNetwork();
+            if (network == nullptr && !network->IsConnected()) {
+                continue;
+            }
+            std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
+            if (ifaceName.empty()) {
+                continue;
+            }
+            std::string ident = network->GetNetLinkInfo().ident_;
+            ifaceNameIdentMaps[std::move(ifaceName)] = std::move(ident);
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
 
