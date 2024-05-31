@@ -45,6 +45,7 @@ constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
@@ -110,11 +111,11 @@ void NetMonitor::Detection()
             isDetecting_ = false;
             detectionSteps_ = 0;
             result = VERIFICATION_STATE;
-        } else if (probeResult.GetCode() == 302 && netType_ == 0) {
+        } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netType_ == BEARER_CELLULAR) {
             NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
             detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
             result = INVALID_DETECTION_STATE;
-        }else if (probeResult.IsNeedPortal()) {
+        } else if (probeResult.IsNeedPortal()) {
             NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
             detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
             result = CAPTIVE_PORTAL_STATE;
