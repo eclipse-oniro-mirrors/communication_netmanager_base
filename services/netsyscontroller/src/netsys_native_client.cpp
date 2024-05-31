@@ -1507,5 +1507,26 @@ int32_t NetsysNativeClient::NotifyNetBearerTypeChange(std::set<NetBearType> bear
 
     return proxy->NotifyNetBearerTypeChange(bearerTypes);
 }
+
+int32_t NetsysNativeClient::StartClat(const std::string &interfaceName, int32_t netId,
+                                      const std::string &nat64PrefixStr)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->StartClat(interfaceName, netId, nat64PrefixStr);
+}
+
+int32_t NetsysNativeClient::StopClat(const std::string &interfaceName)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->StopClat(interfaceName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

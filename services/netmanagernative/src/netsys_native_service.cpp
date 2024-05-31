@@ -124,6 +124,7 @@ bool NetsysNativeService::Init()
     sharingManager_ = std::make_unique<SharingManager>();
     iptablesWrapper_ = IptablesWrapper::GetInstance();
     netDiagWrapper = NetDiagWrapper::GetInstance();
+    clatManager_ = std::make_unique<OHOS::nmd::ClatManager>();
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
@@ -833,5 +834,21 @@ int32_t NetsysNativeService::NotifyNetBearerTypeChange(std::set<NetBearType> bea
     NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
     return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
 }
+
+int32_t NetsysNativeService::StartClat(const std::string &interfaceName, int32_t netId,
+                                       const std::string &nat64PrefixStr)
+{
+    int32_t result = clatManager_->ClatStart(interfaceName, netId, nat64PrefixStr, netsysService_.get());
+    NETNATIVE_LOG_D("StartClat");
+    return result;
+}
+
+int32_t NetsysNativeService::StopClat(const std::string &interfaceName)
+{
+    int32_t result = clatManager_->ClatStop(interfaceName);
+    NETNATIVE_LOG_D("StartClat");
+    return result;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS
