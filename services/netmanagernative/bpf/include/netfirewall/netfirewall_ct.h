@@ -19,9 +19,6 @@
 #include "netfirewall_ct_def.h"
 #include "netfirewall_ct_map.h"
 
-#define READ_ONCE(x) (*(volatile typeof(x) *)&(x))
-#define WRITE_ONCE(x, v) (*(volatile typeof(x) *)&(x)) = (v)
-
 static __always_inline void reset_seen_flags(struct ct_entry *entry)
 {
     entry->rx_seen_flag = 0;
