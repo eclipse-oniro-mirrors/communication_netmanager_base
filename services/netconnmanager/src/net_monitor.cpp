@@ -68,6 +68,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     : netId_(netId), netMonitorCallback_(callback)
 {
     httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo);
+    netType_ = bearType;
     LoadGlobalHttpProxy();
 }
 
@@ -109,7 +110,11 @@ void NetMonitor::Detection()
             isDetecting_ = false;
             detectionSteps_ = 0;
             result = VERIFICATION_STATE;
-        } else if (probeResult.IsNeedPortal()) {
+        } else if (probeResult.GetCode() == 302 && netType_ == 0) {
+            NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
+            detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
+            result = INVALID_DETECTION_STATE;
+        }else if (probeResult.IsNeedPortal()) {
             NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
             detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
             result = CAPTIVE_PORTAL_STATE;

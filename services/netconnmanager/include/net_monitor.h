@@ -94,6 +94,7 @@ private:
 
 private:
     uint32_t netId_ = 0;
+    uint32_t netType_;
     std::atomic<bool> isDetecting_ = false;
     int32_t detectionSteps_ = 0;
     std::mutex detectionMtx_;
