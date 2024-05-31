@@ -960,6 +960,9 @@ public:
 
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr);
+    int32_t StopClat(const std::string &interfaceName);
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

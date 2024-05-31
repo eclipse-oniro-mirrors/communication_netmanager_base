@@ -918,6 +918,9 @@ public:
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
+
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
+    int32_t StopClat(const std::string &interfaceName) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

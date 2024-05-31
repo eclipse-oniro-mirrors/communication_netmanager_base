@@ -17,6 +17,7 @@
 
 #include "broadcast_manager.h"
 #include "event_report.h"
+#include "net_conn_service_iface.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_client.h"
@@ -25,7 +26,6 @@
 #include "network.h"
 #include "route_utils.h"
 #include "securec.h"
-#include "net_conn_service_iface.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -91,6 +91,9 @@ bool Network::UpdateBasicNetwork(bool isAvailable_)
         if (netSupplierType_ == BEARER_VPN) {
             return ReleaseVirtualNetwork();
         }
+        if (nat464Service_ != nullptr) {
+            nat464Service_->UpdateService(NAT464_SERVICE_STOP);
+        }
         return ReleaseBasicNetwork();
     }
 }
@@ -146,8 +149,8 @@ bool Network::ReleaseBasicNetwork()
         if (!IsIfaceNameInUse()) {
             for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
                 int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-                NetsysController::GetInstance().DelInterfaceAddress(
-                    netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                    prefixLen);
             }
         }
         for (const auto &route : netLinkInfo_.routeList_) {
@@ -202,8 +205,17 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateStatsCached(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN &&
-        netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+    if (IsNat464Prefered()) {
+        if (nat464Service_ == nullptr) {
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+        }
+        nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
+        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
+    } else if (nat464Service_ != nullptr) {
+        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
+    }
+
+    if (netSupplierType_ != BEARER_VPN && netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         StartNetDetection(false);
     }
     return true;
@@ -264,17 +276,18 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
-            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
-        int32_t ret = NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
-            inetAddr.address_, prefixLen);
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
+                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
+                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
+        int32_t ret =
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         if (NETMANAGER_SUCCESS != ret) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
 
         if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
             NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
-                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             netLinkInfo_.routeList_.remove_if([family](const Route &route) {
                 INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
                 if (family == AF_INET) {
@@ -303,8 +316,9 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
-            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
+                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
+                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
         if (NETMANAGER_SUCCESS != NetsysController::GetInstance().AddInterfaceAddress(newNetLinkInfo.ifaceName_,
                                                                                       inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
@@ -620,6 +634,15 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     }
 
     SendConnectionChangedBroadcast(netConnState);
+    if (IsNat464Prefered()) {
+        if (nat464Service_ == nullptr) {
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+        }
+        nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
+        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
+    } else if (nat464Service_ != nullptr) {
+        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
+    }
     NETMGR_LOG_I("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
 }
 
@@ -694,6 +717,21 @@ bool Network::IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, boo
 bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess)
 {
     return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
+}
+
+bool Network::IsNat464Prefered()
+{
+    if (netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI && netSupplierType_ != BEARER_ETHERNET) {
+        return false;
+    }
+    if (std::any_of(netLinkInfo_.netAddrList_.begin(), netLinkInfo_.netAddrList_.end(),
+                    [](const INetAddr &i) { return i.type_ != INetAddr::IPV6; })) {
+        return false;
+    }
+    if (netLinkInfo_.ifaceName_.empty() || !IsConnected()) {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

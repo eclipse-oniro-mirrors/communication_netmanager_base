@@ -239,6 +239,27 @@ public:
      */
     static int32_t ReadAddrGw(const std::string &addr, InetAddr *res);
 
+    /**
+     * Add rules for clat tun interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, add rules successfully, otherwise it will fail
+     */
+    static int32_t AddClatTunInterface(const std::string &interfaceName, const std::string &dstAddr,
+                                       const std::string &nxtHop);
+
+    /**
+     * Remove rules for clat tun interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, remove rules successfully, otherwise it will fail
+     */
+    static int32_t RemoveClatTunInterface(const std::string &interfaceName);
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
@@ -282,6 +303,8 @@ private:
     static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,
                                 const std::string &destinationName, const std::string &nextHop,
                                 RouteInfo &routeInfo);
+    static int32_t UpdateClatTunInterface(const std::string &interfaceName,
+                                            NetworkPermission permission, bool add);
 };
 } // namespace nmd
 } // namespace OHOS

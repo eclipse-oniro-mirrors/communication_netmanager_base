@@ -790,5 +790,18 @@ int32_t NetsysControllerServiceImpl::NotifyNetBearerTypeChange(std::set<NetBearT
 {
     return netsysClient_.NotifyNetBearerTypeChange(bearerTypes);
 }
+
+int32_t NetsysControllerServiceImpl::StartClat(const std::string &interfaceName, int32_t netId,
+                                               const std::string &nat64PrefixStr)
+{
+    NETMGR_LOG_I("StartClat: interfaceName=%{public}s netId=%{public}d", interfaceName.c_str(), netId);
+    return netsysClient_.StartClat(interfaceName, netId, nat64PrefixStr);
+}
+
+int32_t NetsysControllerServiceImpl::StopClat(const std::string &interfaceName)
+{
+    NETMGR_LOG_I("StopClat: interfaceName=%{public}s", interfaceName.c_str());
+    return netsysClient_.StopClat(interfaceName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

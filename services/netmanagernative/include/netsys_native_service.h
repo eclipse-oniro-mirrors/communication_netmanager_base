@@ -35,6 +35,7 @@
 #include "netsys_native_service_stub.h"
 #include "sharing_manager.h"
 #include "netsys_access_policy.h"
+#include "clat_manager.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -168,6 +169,8 @@ public:
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
+    int32_t StopClat(const std::string &interfaceName) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -199,6 +202,8 @@ private:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     std::shared_ptr<OHOS::NetManagerStandard::NetsysBpfNetFirewall> bpfNetFirewall_ = nullptr;
 #endif
+    std::unique_ptr<OHOS::nmd::ClatManager> clatManager_ = nullptr;
+
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 
     std::mutex instanceLock_;

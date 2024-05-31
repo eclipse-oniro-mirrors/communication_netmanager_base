@@ -104,6 +104,10 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
         &NetsysNativeServiceStub::CmdSetIpv6Enable;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_START_CLAT)] =
+        &NetsysNativeServiceStub::CmdStartClat;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_STOP_CLAT)] =
+        &NetsysNativeServiceStub::CmdStopClat;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -1740,5 +1744,60 @@ int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &dat
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdStartClat(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStartClat CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string interfaceName;
+    if (!data.ReadString(interfaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        NETNATIVE_LOGE("Read int32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string nat64PrefixStr;
+    if (!data.ReadString(nat64PrefixStr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = StartClat(interfaceName, netId, nat64PrefixStr);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdStopClat(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStopClat CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string interfaceName;
+    if (!data.ReadString(interfaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = StopClat(interfaceName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
 } // namespace NetsysNative
 } // namespace OHOS
