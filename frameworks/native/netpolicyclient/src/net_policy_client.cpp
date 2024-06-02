@@ -428,5 +428,27 @@ int32_t NetPolicyClient::NotifyNetAccessPolicyDiag(uint32_t uid)
 
     return proxy->NotifyNetAccessPolicyDiag(uid);
 }
+
+int32_t NetPolicyClient::SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetPolicyClient::ClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->ClearIpAndUidRule(ip, ipType);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

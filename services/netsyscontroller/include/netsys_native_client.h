@@ -879,6 +879,8 @@ public:
 
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr);
     int32_t StopClat(const std::string &interfaceName);
+    int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
+    int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

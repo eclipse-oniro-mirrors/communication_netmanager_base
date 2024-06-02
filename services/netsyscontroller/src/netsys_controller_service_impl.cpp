@@ -803,5 +803,16 @@ int32_t NetsysControllerServiceImpl::StopClat(const std::string &interfaceName)
     NETMGR_LOG_I("StopClat: interfaceName=%{public}s", interfaceName.c_str());
     return netsysClient_.StopClat(interfaceName);
 }
+
+int32_t NetsysControllerServiceImpl::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+    const std::vector<uint32_t> &uids)
+{
+    return netsysClient_.FirewallSetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetsysControllerServiceImpl::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    return netsysClient_.FirewallClearIpAndUidRule(ip, ipType);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

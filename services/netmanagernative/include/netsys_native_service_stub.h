@@ -143,6 +143,8 @@ private:
     int32_t CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartClat(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopClat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallSetIpAndUidRule(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallClearIpAndUidRule(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

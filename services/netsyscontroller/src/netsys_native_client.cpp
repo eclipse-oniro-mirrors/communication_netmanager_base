@@ -1528,5 +1528,26 @@ int32_t NetsysNativeClient::StopClat(const std::string &interfaceName)
     }
     return proxy->StopClat(interfaceName);
 }
+
+int32_t NetsysNativeClient::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+                                                    const std::vector<uint32_t> &uids)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->FirewallSetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetsysNativeClient::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->FirewallClearIpAndUidRule(ip, ipType);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

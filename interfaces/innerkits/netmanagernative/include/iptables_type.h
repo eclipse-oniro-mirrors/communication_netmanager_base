@@ -48,6 +48,7 @@ enum ChainType {
     CHAIN_OHFW_DOZABLE,
     CHAIN_OHFW_POWERSAVING,
     CHAIN_OHFW_UNDOZABLE,
+    CHAIN_DES_FILTER,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

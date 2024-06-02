@@ -111,6 +111,8 @@ enum class NetsysInterfaceCode {
     NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE,
     NETSYS_NETWORK_START_CLAT,
     NETSYS_NETWORK_STOP_CLAT,
+    NETSYS_SET_IP_AN_UID_RULE,
+    NETSYS_CLEAR_IP_AN_UID_RULE,
 };
 
 enum class NotifyInterfaceCode {

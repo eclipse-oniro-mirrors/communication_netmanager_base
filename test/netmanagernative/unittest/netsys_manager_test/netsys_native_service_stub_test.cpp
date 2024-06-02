@@ -512,6 +512,16 @@ public:
     {
         return 0;
     }
+
+    int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids) override
+    {
+        return 0;
+    }
+
+    int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
