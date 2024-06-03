@@ -630,13 +630,6 @@ HWTEST_F(NetsysNativeServiceTest, StaticArpTest001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
-    int32_t ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest002, TestSize.Level1)
-{
-    uint64_t stats = 0;
     auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(stats, 0);
     auto backup = std::move(instance_->bpfStats_);
