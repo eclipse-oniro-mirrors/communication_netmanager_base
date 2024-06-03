@@ -2451,5 +2451,74 @@ int32_t NetsysNativeServiceProxy::StopClat(const std::string &interfaceName)
     return result;
 }
 
+int32_t NetsysNativeServiceProxy::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+    const std::vector<uint32_t> &uids)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ip)) {
+        NETNATIVE_LOGE("Write string ip failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(ipType)) {
+        NETNATIVE_LOGE("Write ipType failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUInt32Vector(uids)) {
+        NETNATIVE_LOGE("Write uids failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IP_AN_UID_RULE), data,
+        reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t res = reply.ReadInt32();
+    return res;
+}
+
+int32_t NetsysNativeServiceProxy::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ip)) {
+        NETNATIVE_LOGE("Write string ip failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(ipType)) {
+        NETNATIVE_LOGE("Write ipType failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_IP_AN_UID_RULE), data,
+        reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t res = reply.ReadInt32();
+    return res;
+}
 } // namespace NetsysNative
 } // namespace OHOS

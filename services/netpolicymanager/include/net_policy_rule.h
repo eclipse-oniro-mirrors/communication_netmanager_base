@@ -168,6 +168,25 @@ public:
      */
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
 
+    /**
+     * Set Ip And Uid iptables Rule
+     *
+     * @param ip ip
+     * @param ipType 1 for ipv4, 2 for ipv6
+     * @param uids uid list
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t PolicySetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
+
+    /**
+     * Clear Ip And Uid iptables Rule
+     *
+     * @param ip ip
+     * @param ipType 1 for ipv4, 2 for ipv6
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t PolicyClearIpAndUidRule(const std::string &ip, uint32_t ipType);
+
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);

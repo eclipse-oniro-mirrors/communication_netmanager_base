@@ -135,6 +135,9 @@ public:
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
     int32_t StopClat(const std::string &interfaceName) override;
+    int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+                                    const std::vector<uint32_t> &uids) override;
+    int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

@@ -556,5 +556,25 @@ int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetPolicyService::SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->PolicySetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetPolicyService::ClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->PolicyClearIpAndUidRule(ip, ipType);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

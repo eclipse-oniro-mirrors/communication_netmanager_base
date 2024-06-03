@@ -51,6 +51,8 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG),
      Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
@@ -112,6 +114,10 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnGetNetworkAccessPolicy;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG)] =
         &NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE)] =
+        &NetPolicyServiceStub::OnSetIpAndUidRule;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE)] =
+        &NetPolicyServiceStub::OnClearIpAndUidRule;
     return;
 }
 
@@ -767,6 +773,58 @@ int32_t NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag(MessageParcel &data, M
     }
 
     return ret;
+}
+
+int32_t NetPolicyServiceStub::OnSetIpAndUidRule(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ip;
+    if (!data.ReadString(ip)) {
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint32_t ipType = 0;
+    if (!data.ReadUint32(ipType)) {
+        NETMGR_LOG_E("Read uint32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::vector<uint32_t> uids;
+    if (!data.ReadUInt32Vector(&uids)) {
+        NETMGR_LOG_E("Read uint32 vector failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetIpAndUidRule(ip, ipType, uids);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnClearIpAndUidRule(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ip;
+    if (!data.ReadString(ip)) {
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint32_t ipType = 0;
+    if (!data.ReadUint32(ipType)) {
+        NETMGR_LOG_E("Read uint32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = ClearIpAndUidRule(ip, ipType);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
