@@ -281,7 +281,7 @@ int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string 
 
 int32_t NetPolicyService::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    NETMGR_LOG_I("SetDeviceIdleTrustlist start");
+    NETMGR_LOG_D("SetDeviceIdleTrustlist start");
     if (netPolicyFirewall_ == nullptr) {
         NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;

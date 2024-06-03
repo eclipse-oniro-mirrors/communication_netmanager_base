@@ -62,7 +62,7 @@ int32_t NetsysController::SetInternetPermission(uint32_t uid, uint8_t allow)
 
 int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
-    NETMGR_LOG_D("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
+    NETMGR_LOG_I("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -72,7 +72,7 @@ int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permissio
 
 int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
-    NETMGR_LOG_D("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
+    NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -82,7 +82,7 @@ int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
 
 int32_t NetsysController::NetworkDestroy(int32_t netId)
 {
-    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -93,7 +93,7 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
 int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids,
                                          const std::vector<int32_t> &endUids)
 {
-    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -112,7 +112,7 @@ int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_
 int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_t> &beginUids,
                                          const std::vector<int32_t> &endUids)
 {
-    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -130,7 +130,7 @@ int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_
 
 int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface)
 {
-    NETMGR_LOG_D("Add network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
+    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -140,7 +140,7 @@ int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &
 
 int32_t NetsysController::NetworkRemoveInterface(int32_t netId, const std::string &iface)
 {
-    NETMGR_LOG_D("Remove network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
+    NETMGR_LOG_I("Remove network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -174,7 +174,7 @@ int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &i
 
 int32_t NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETMGR_LOG_D("get interface config");
+    NETMGR_LOG_I("get interface config");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -184,7 +184,7 @@ int32_t NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationPa
 
 int32_t NetsysController::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETMGR_LOG_D("set interface config");
+    NETMGR_LOG_I("set interface config");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -194,7 +194,7 @@ int32_t NetsysController::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigura
 
 int32_t NetsysController::SetInterfaceDown(const std::string &iface)
 {
-    NETMGR_LOG_D("Set interface down: iface[%{public}s]", iface.c_str());
+    NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -204,7 +204,7 @@ int32_t NetsysController::SetInterfaceDown(const std::string &iface)
 
 int32_t NetsysController::SetInterfaceUp(const std::string &iface)
 {
-    NETMGR_LOG_D("Set interface up: iface[%{public}s]", iface.c_str());
+    NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -214,7 +214,7 @@ int32_t NetsysController::SetInterfaceUp(const std::string &iface)
 
 void NetsysController::ClearInterfaceAddrs(const std::string &ifName)
 {
-    NETMGR_LOG_D("Clear addrs: ifName[%{public}s]", ifName.c_str());
+    NETMGR_LOG_I("Clear addrs: ifName[%{public}s]", ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return;
@@ -224,7 +224,7 @@ void NetsysController::ClearInterfaceAddrs(const std::string &ifName)
 
 int32_t NetsysController::GetInterfaceMtu(const std::string &ifName)
 {
-    NETMGR_LOG_D("Get mtu: ifName[%{public}s]", ifName.c_str());
+    NETMGR_LOG_I("Get mtu: ifName[%{public}s]", ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -234,7 +234,7 @@ int32_t NetsysController::GetInterfaceMtu(const std::string &ifName)
 
 int32_t NetsysController::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
-    NETMGR_LOG_D("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
+    NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -244,7 +244,7 @@ int32_t NetsysController::SetInterfaceMtu(const std::string &ifName, int32_t mtu
 
 int32_t NetsysController::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 {
-    NETMGR_LOG_D("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
+    NETMGR_LOG_I("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -255,7 +255,7 @@ int32_t NetsysController::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
-    NETMGR_LOG_D("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
                  ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -267,7 +267,7 @@ int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const s
 int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
-    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
                  ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -300,7 +300,7 @@ int32_t NetsysController::SetResolverConfig(uint16_t netId, uint16_t baseTimeout
                                             const std::vector<std::string> &servers,
                                             const std::vector<std::string> &domains)
 {
-    NETMGR_LOG_D("Set resolver config: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Set resolver config: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -312,7 +312,7 @@ int32_t NetsysController::GetResolverConfig(uint16_t netId, std::vector<std::str
                                             std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                             uint8_t &retryCount)
 {
-    NETMGR_LOG_D("Get resolver config: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -322,7 +322,7 @@ int32_t NetsysController::GetResolverConfig(uint16_t netId, std::vector<std::str
 
 int32_t NetsysController::CreateNetworkCache(uint16_t netId)
 {
-    NETMGR_LOG_D("create dns cache: netId[%{public}d]", netId);
+    NETMGR_LOG_I("create dns cache: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -332,7 +332,7 @@ int32_t NetsysController::CreateNetworkCache(uint16_t netId)
 
 int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
 {
-    NETMGR_LOG_D("Destroy dns cache: netId[%{public}d]", netId);
+    NETMGR_LOG_I("Destroy dns cache: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -353,7 +353,7 @@ int32_t NetsysController::GetAddrInfo(const std::string &hostName, const std::st
 int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                                    nmd::NetworkSharingTraffic &traffic)
 {
-    NETMGR_LOG_D("NetsysController GetNetworkSharingTraffic");
+    NETMGR_LOG_I("NetsysController GetNetworkSharingTraffic");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -463,7 +463,7 @@ int64_t NetsysController::GetIfaceTxBytes(const std::string &interfaceName)
 
 std::vector<std::string> NetsysController::InterfaceGetList()
 {
-    NETMGR_LOG_D("NetsysController InterfaceGetList");
+    NETMGR_LOG_I("InterfaceGetList");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return {};
@@ -473,7 +473,7 @@ std::vector<std::string> NetsysController::InterfaceGetList()
 
 std::vector<std::string> NetsysController::UidGetList()
 {
-    NETMGR_LOG_D("NetsysController UidGetList");
+    NETMGR_LOG_I("UidGetList");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return {};
@@ -533,7 +533,7 @@ int32_t NetsysController::BindSocket(int32_t socketFd, uint32_t netId)
 
 int32_t NetsysController::IpEnableForwarding(const std::string &requestor)
 {
-    NETMGR_LOG_D("IpEnableForwarding: requestor[%{public}s]", requestor.c_str());
+    NETMGR_LOG_I("IpEnableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -543,7 +543,7 @@ int32_t NetsysController::IpEnableForwarding(const std::string &requestor)
 
 int32_t NetsysController::IpDisableForwarding(const std::string &requestor)
 {
-    NETMGR_LOG_D("IpDisableForwarding: requestor[%{public}s]", requestor.c_str());
+    NETMGR_LOG_I("IpDisableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -553,7 +553,7 @@ int32_t NetsysController::IpDisableForwarding(const std::string &requestor)
 
 int32_t NetsysController::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]", downstreamIface.c_str(),
+    NETMGR_LOG_I("EnableNat: intIface[%{public}s] intIface[%{public}s]", downstreamIface.c_str(),
                  upstreamIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -564,7 +564,7 @@ int32_t NetsysController::EnableNat(const std::string &downstreamIface, const st
 
 int32_t NetsysController::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient DisableNat: intIface[%{public}s] intIface[%{public}s]",
+    NETMGR_LOG_I("DisableNat: intIface[%{public}s] intIface[%{public}s]",
                  downstreamIface.c_str(), upstreamIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -575,7 +575,7 @@ int32_t NetsysController::DisableNat(const std::string &downstreamIface, const s
 
 int32_t NetsysController::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
-    NETMGR_LOG_D("IpfwdAddInterfaceForward: fromIface[%{public}s], toIface[%{public}s]", fromIface.c_str(),
+    NETMGR_LOG_I("IpfwdAddInterfaceForward: fromIface[%{public}s], toIface[%{public}s]", fromIface.c_str(),
                  toIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -586,7 +586,7 @@ int32_t NetsysController::IpfwdAddInterfaceForward(const std::string &fromIface,
 
 int32_t NetsysController::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
-    NETMGR_LOG_D("IpfwdRemoveInterfaceForward: fromIface[%{public}s], toIface[%{public}s]", fromIface.c_str(),
+    NETMGR_LOG_I("IpfwdRemoveInterfaceForward: fromIface[%{public}s], toIface[%{public}s]", fromIface.c_str(),
                  toIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -597,7 +597,7 @@ int32_t NetsysController::IpfwdRemoveInterfaceForward(const std::string &fromIfa
 
 int32_t NetsysController::ShareDnsSet(uint16_t netId)
 {
-    NETMGR_LOG_D("ShareDnsSet: netId[%{public}d]", netId);
+    NETMGR_LOG_I("ShareDnsSet: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -607,7 +607,7 @@ int32_t NetsysController::ShareDnsSet(uint16_t netId)
 
 int32_t NetsysController::StartDnsProxyListen()
 {
-    NETMGR_LOG_D("NetsysController::StartDnsProxyListen");
+    NETMGR_LOG_I("StartDnsProxyListen");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -617,7 +617,7 @@ int32_t NetsysController::StartDnsProxyListen()
 
 int32_t NetsysController::StopDnsProxyListen()
 {
-    NETMGR_LOG_D("NetsysController::StopDnsProxyListen");
+    NETMGR_LOG_I("StopDnsProxyListen");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -636,7 +636,7 @@ int32_t NetsysController::RegisterNetsysNotifyCallback(const NetsysNotifyCallbac
 
 int32_t NetsysController::BindNetworkServiceVpn(int32_t socketFd)
 {
-    NETMGR_LOG_D("NetsysController::BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
+    NETMGR_LOG_I("BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
     if (socketFd <= 0) {
         NETMGR_LOG_E("socketFd is null");
         return NETSYS_ERR_VPN;
@@ -650,7 +650,7 @@ int32_t NetsysController::BindNetworkServiceVpn(int32_t socketFd)
 
 int32_t NetsysController::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd)
 {
-    NETMGR_LOG_D("NetsysController::EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
+    NETMGR_LOG_I("EnableVirtualNetIfaceCard: socketFd[%{public}d]", socketFd);
     if (socketFd <= 0) {
         NETMGR_LOG_E("socketFd is null");
         return NETSYS_ERR_VPN;
@@ -693,7 +693,7 @@ int32_t NetsysController::SetBlocking(int32_t ifaceFd, bool isBlock)
 
 int32_t NetsysController::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
-    NETMGR_LOG_D("NetsysController::StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    NETMGR_LOG_I("StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -703,7 +703,7 @@ int32_t NetsysController::StartDhcpClient(const std::string &iface, bool bIpv6)
 
 int32_t NetsysController::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
-    NETMGR_LOG_D("NetsysController::SetBlocking: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    NETMGR_LOG_I("StopDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -719,7 +719,7 @@ int32_t NetsysController::RegisterCallback(sptr<NetsysControllerCallback> callba
 
 int32_t NetsysController::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
 {
-    NETMGR_LOG_D("NetsysController::StartDhcpService: iface[%{public}s], ipv4addr[%{public}s]", iface.c_str(),
+    NETMGR_LOG_I("StartDhcpService: iface[%{public}s], ipv4addr[%{public}s]", iface.c_str(),
                  ToAnonymousIp(ipv4addr).c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -730,7 +730,7 @@ int32_t NetsysController::StartDhcpService(const std::string &iface, const std::
 
 int32_t NetsysController::StopDhcpService(const std::string &iface)
 {
-    NETMGR_LOG_D("NetsysController::StopDhcpService: ifaceFd[%{public}s]", iface.c_str());
+    NETMGR_LOG_I("StopDhcpService: ifaceFd[%{public}s]", iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -919,6 +919,7 @@ int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::
         NETMGR_LOG_E("SetIptablesCommandForRes netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
+    NETMGR_LOG_I("SetIptablesCommandForRes");
     return netsysService_->SetIptablesCommandForRes(cmd, respond);
 }
 

@@ -1518,6 +1518,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
+    auto startTime = std::chrono::steady_clock::now();
     LoadGlobalHttpProxy();
     if (!globalHttpProxy_.GetHost().empty()) {
         httpProxy = globalHttpProxy_;
@@ -1535,7 +1536,9 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
 
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
-        NETMGR_LOG_I("Return default network's http proxy as default.");
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("Return default network's http proxy as default, cost=%{public}lld",  durationNs.count());
         return NETMANAGER_SUCCESS;
     }
     NETMGR_LOG_I("No default http proxy.");

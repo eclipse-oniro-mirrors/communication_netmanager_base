@@ -36,7 +36,6 @@ int32_t NetStatsSqliteStatement::Prepare(sqlite3 *dbHandle, const std::string &n
     sqlite3_stmt *stmt = nullptr;
     int32_t errCode = sqlite3_prepare_v2(dbHandle, newSql.c_str(), newSql.length(), &stmt, nullptr);
     if (errCode != SQLITE_OK) {
-        NETMGR_LOG_E("Prepare failed err = %{public}d", errCode);
         if (stmt != nullptr) {
             sqlite3_finalize(stmt);
         }

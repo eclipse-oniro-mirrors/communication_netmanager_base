@@ -75,6 +75,9 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
+    if (msgState != 0) {
+        NETNATIVE_LOGE("netlink read socket[%{public}d] failed, msgState=%{public}zd", kernelSocket, msgState);
+    }
     close(kernelSocket);
     return msgState;
 }
@@ -119,7 +122,7 @@ int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
              nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
             if (nlmsgHeader->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlmsgHeader));
-                NETNATIVE_LOGE("netlink read socket[%{public}d] failed error = %{public}d", sock, err->error);
+                NETNATIVE_LOG_D("netlink read socket[%{public}d] failed error = %{public}d", sock, err->error);
                 return err->error;
             } else if (nlmsgHeader->nlmsg_type == NLMSG_DONE) {
                 return 0;
