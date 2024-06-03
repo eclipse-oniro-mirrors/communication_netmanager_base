@@ -187,7 +187,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
         }
         netAllCaps->netCaps[i++] = iterMap->second;
     }
-    netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
+    netAllCaps->netCapsSize = static_cast<int32_t>(netAllCapsObj.netCaps_.size());
 
     i = 0;
     for (const auto& bearType : netAllCapsObj.bearerTypes_) {
