@@ -118,6 +118,63 @@ public:
      */
     int32_t DestroyNetworkCache(uint16_t netId);
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /**
+     * Set firewall default action
+     *
+     * @param inDefault Default action of NetFirewallRuleDirection:RULE_IN
+     * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
+     * @return 0 if success or-1 if an error occurred
+     */
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+
+    /**
+     * Set the Firewall DNS rules
+     *
+     * @param ruleList firewall rules
+     * @return 0 if success or-1 if an error occurred
+     */
+    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+
+    /**
+     * Clear the Firewall DNS rules
+     *
+     * @return 0 if success or-1 if an error occurred
+     */
+    int32_t ClearFirewallDnsRules();
+
+    /**
+     * Set the Firewall domain rules
+     *
+     * @param ruleList firewall rules
+     * @return 0 if success or-1 if an error occurred
+     */
+    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+
+    /**
+     * Clear the Firewall domain rules
+     *
+     * @return 0 if success or-1 if an error occurred
+     */
+    int32_t ClearFirewallDomainRules();
+
+    /**
+     * Register callback for recevie intercept event
+     *
+     * @param callback implement of INetFirewallCallback
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+
+    /**
+     * Unregister callback for recevie intercept event
+     *
+     * @param callback register callback for recevie intercept event
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
+
     void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop);
 
     int32_t RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);

@@ -23,7 +23,12 @@
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
 #include "uid_range.h"
-
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#include "i_netfirewall_callback.h"
+#include "suffix_match_trie.h"
+#include <unordered_map>
+#endif
 #if DNS_CONFIG_DEBUG
 #ifdef DNS_CONFIG_PRINT
 #undef DNS_CONFIG_PRINT
@@ -34,6 +39,9 @@
 #endif
 
 namespace OHOS::nmd {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+using namespace OHOS::NetManagerStandard;
+#endif
 class DnsParamCache {
 public:
     ~DnsParamCache() = default;
@@ -77,6 +85,32 @@ public:
 
     bool IsVpnOpen() const;
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+
+    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+
+    int32_t ClearFirewallDnsRules();
+
+    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+
+    int32_t ClearFirewallDomainRules();
+
+    void SetCallingUid(uint32_t callingUid)
+    {
+        callingUid_ = callingUid;
+    }
+
+    uint32_t GetCallingUid()
+    {
+        return callingUid_;
+    }
+
+    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+
+    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
+
 private:
     DnsParamCache();
 
@@ -93,6 +127,40 @@ private:
     std::map<uint16_t, DnsResolvConfig> serverConfigMap_;
 
     static std::vector<std::string> SelectNameservers(const std::vector<std::string> &servers);
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bool GetDnsServersByAppUid(int32_t appUid, std::vector<std::string> &servers);
+
+    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule);
+
+    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule);
+
+    FirewallRuleAction GetFirewallRuleAction(int32_t appUid, const std::vector<sptr<NetFirewallDomainRule>> &rules);
+
+    bool IsInterceptDomain(int32_t appUid, const std::string &host);
+
+    void NotifyDomianIntercept(int32_t appUid, const std::string &host);
+
+    sptr<NetManagerStandard::InterceptRecord> oldRecord_ = nullptr;
+
+    std::unordered_map<int32_t, std::vector<std::string>> netFirewallDnsRuleMap_;
+
+    std::unordered_map<std::string, std::vector<sptr<NetFirewallDomainRule>>> netFirewallDomainRulesAllowMap_;
+
+    std::unordered_map<std::string, std::vector<sptr<NetFirewallDomainRule>>> netFirewallDomainRulesDenyMap_;
+
+    std::shared_ptr<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>> domainAllowLsmTrie_ =
+        nullptr;
+
+    std::shared_ptr<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>> domainDenyLsmTrie_ =
+        nullptr;
+
+    uint32_t callingUid_;
+
+    std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
+
+    FirewallRuleAction firewallDefaultAction_ = FirewallRuleAction::RULE_INVALID;
+#endif
 };
 } // namespace OHOS::nmd
 #endif // NETSYS_DNS_PARAM_CACHE_H

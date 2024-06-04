@@ -32,6 +32,10 @@ public:
 
 private:
     static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    static void ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid);
+    static void ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid);
+#endif
     static void ProcSetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcGetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
