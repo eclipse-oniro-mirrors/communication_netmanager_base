@@ -90,7 +90,6 @@ public:
 private:
     NetHttpProbeResult SendHttpProbe(ProbeType probeType);
     void GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl);
-    void LoadGlobalHttpProxy();
 
 private:
     uint32_t netId_ = 0;

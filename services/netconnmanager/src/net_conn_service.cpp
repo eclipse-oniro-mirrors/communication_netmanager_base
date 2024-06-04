@@ -19,10 +19,18 @@
 #include <sys/time.h>
 #include <utility>
 #include <regex>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 #include "common_event_support.h"
 #include "network.h"
 #include "system_ability_definition.h"
+#include "common_event_data.h"
+#include "common_event_manager.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
+#include "want.h"
 
 #include "broadcast_manager.h"
 #include "event_report.h"
@@ -57,9 +65,13 @@ constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hi
 const uint32_t SYS_PARAMETER_SIZE = 256;
 constexpr const char *CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES = "persist.network.pre_airplane_mode_wait_times";
 constexpr const char *NO_DELAY_TIME_CONFIG = "100";
+constexpr const char *SETTINGS_DATASHARE_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
+constexpr uint16_t DATA_SHARE_WAIT_TIME = 3;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -136,6 +148,9 @@ bool NetConnService::Init()
 
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
+    SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+    
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
         NETMGR_LOG_E("Create event runner failed.");
@@ -165,21 +180,49 @@ bool NetConnService::Init()
     if (netFactoryResetCallback_ == nullptr) {
         NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
     }
-
-    RecoverInfo();
     NETMGR_LOG_I("Init end");
     return true;
 }
 
-void NetConnService::RecoverInfo()
+bool NetConnService::CheckIfSettingsDataReady()
 {
-    // recover httpproxy
-    LoadGlobalHttpProxy();
-    if (!globalHttpProxy_.GetHost().empty()) {
-        NETMGR_LOG_D("globalHttpProxy_ not empty, send broadcast");
-        SendHttpProxyChangeBroadcast(globalHttpProxy_);
-        UpdateGlobalHttpProxy(globalHttpProxy_);
+    if (isDataShareReady_) {
+        return true;
     }
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("GetSystemAbilityManager failed.");
+        return false;
+    }
+    sptr<IRemoteObject> dataShareSa = saManager->GetSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    if (dataShareSa == nullptr) {
+        NETMGR_LOG_E("Get dataShare SA Failed.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return false;
+    }
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+            DataShare::DataShareHelper::Create(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    NETMGR_LOG_I("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == DataShare::E_OK) {
+        NETMGR_LOG_I("create data_share helper success");
+        auto helper = ret.second;
+        if (helper != nullptr) {
+            bool releaseRet = helper->Release();
+            NETMGR_LOG_I("release data_share helper, releaseRet=%{public}d", releaseRet);
+        }
+        isDataShareReady_ = true;
+        return true;
+    } else if (ret.first == DataShare::E_DATA_SHARE_NOT_READY) {
+        NETMGR_LOG_E("create data_share helper failed");
+        isDataShareReady_ = false;
+        return false;
+    }
+    NETMGR_LOG_E("data_share unknown.");
+    return true;
 }
 
 int32_t NetConnService::SystemReady()
@@ -1875,6 +1918,16 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
+    if (!isDataShareReady_) {
+        std::thread checkSettingsDataReady(CheckIfSettingsDataReady);
+        std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
+        dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
+        checkSettingsDataReady.join();
+        if (!isDataShareReady_) {
+            NETMGR_LOG_E("data share is not ready.");
+            return;
+        }
+    }
     if (isGlobalProxyLoaded_.load()) {
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database.");
         return;
@@ -2154,6 +2207,33 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
+void NetConnService::SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver)
+{
+    NETMGR_LOG_I("eventName=%{public}s", eventName.c_str());
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(eventName);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+
+    auto subscriberPtr = std::make_shared<NetConnListener>(subscribeInfo, receiver);
+    if (subscriberPtr == nullptr) {
+        NETMGR_LOG_E("subscriberPtr is nullptr");
+        return;
+    }
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+}
+
+void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    auto const &want = data.GetWant();
+    std::string action = want.GetAction();
+    if (action == "usual.event.DATA_SHARE_READY") {
+        NETMGR_LOG_I("on receive data_share ready.");
+        isDataShareReady_ = true;
+        LoadGlobalHttpProxy();
+        UpdateGlobalHttpProxy(globalHttpProxy_);
+    }
+}
+
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 {
     if (ns == nullptr) {
@@ -2405,6 +2485,20 @@ uint32_t NetConnService::FindSupplierToIncreaseScore(std::vector<sptr<NetSupplie
         }
     }
     return ret;
+}
+
+NetConnService::NetConnListener::NetConnListener(const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
+    EventReceiver receiver) : EventFwk::CommonEventSubscriber(subscribeInfo), eventReceiver_(receiver) {}
+
+void NetConnService::NetConnListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
+{
+    if (eventReceiver_ == nullptr) {
+        NETMGR_LOG_E("eventReceiver is nullptr");
+        return;
+    }
+    NETMGR_LOG_I("NetConnListener::OnReceiveEvent(), event:[%{public}s], data:[%{public}s], code:[%{public}d]",
+                 eventData.GetWant().GetAction().c_str(), eventData.GetData().c_str(), eventData.GetCode());
+    eventReceiver_(eventData);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
