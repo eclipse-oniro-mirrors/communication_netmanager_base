@@ -809,14 +809,13 @@ int32_t NetsysControllerServiceImpl::SetFirewallDnsRules(const std::vector<sptr<
 }
 
 int32_t NetsysControllerServiceImpl::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
-                                                        bool isFinish)
+                                                            bool isFinish)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::AddFirewallDomainRules");
     return netsysClient_.AddFirewallDomainRules(ruleList, isFinish);
 }
 
-int32_t NetsysControllerServiceImpl::UpdateFirewallDomainRules(
-                const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
+int32_t NetsysControllerServiceImpl::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::UpdateFirewallDomainRules");
     return netsysClient_.UpdateFirewallDomainRules(ruleList);

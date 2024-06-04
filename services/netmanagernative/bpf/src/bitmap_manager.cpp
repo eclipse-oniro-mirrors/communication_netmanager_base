@@ -518,11 +518,9 @@ int32_t IpParamParser::GetIp4AndMask(const std::string &startIp, const std::stri
             ChangeStart(off + 1, tmpStart);
             off = Rfind(startIpInt, mask, off - 1, 0);
         }
-    } else {
-        if (Rfind(endIpInt, mask, IPV4_BIT_COUNT - 1, 0) == IPV4_BIT_COUNT) {
-            AddIp(startIpInt, mask, list);
-            return true;
-        }
+    } else if (Rfind(endIpInt, mask, IPV4_BIT_COUNT - 1, 0) == IPV4_BIT_COUNT) {
+        AddIp(startIpInt, mask, list);
+        return true;
     }
     off = Find(endIpInt, mask, 1);
     if (off == IPV4_BIT_COUNT) {

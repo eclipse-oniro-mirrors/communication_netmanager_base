@@ -1164,7 +1164,8 @@ int32_t NetsysController::SetFirewallDnsRules(const std::vector<sptr<NetFirewall
     return netsysService_->SetFirewallDnsRules(ruleList);
 }
 
-int32_t NetsysController::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish)
+int32_t NetsysController::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
+                                                 bool isFinish)
 {
     NETMGR_LOG_I("NetsysController::AddFirewallDomainRules");
     if (netsysService_ == nullptr) {
@@ -1184,7 +1185,7 @@ int32_t NetsysController::UpdateFirewallDomainRules(const std::vector<sptr<NetFi
     return netsysService_->UpdateFirewallDomainRules(ruleList);
 }
 
-int32_t  NetsysController::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
+int32_t NetsysController::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
 {
     NETMGR_LOG_I("NetsysController SetFirewallDomainRules");
     if (netsysService_ == nullptr) {

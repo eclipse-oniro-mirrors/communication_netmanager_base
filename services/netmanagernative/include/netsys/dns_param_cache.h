@@ -149,6 +149,8 @@ private:
 
     FirewallRuleAction GetFirewallRuleAction(int32_t appUid, const std::vector<sptr<NetFirewallDomainRule>> &rules);
 
+    bool checkEmpty4InterceptDomain(const std::string &hostName);
+
     bool IsInterceptDomain(int32_t appUid, const std::string &host);
 
     void NotifyDomianIntercept(int32_t appUid, const std::string &host);
