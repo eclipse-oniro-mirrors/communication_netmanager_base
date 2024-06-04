@@ -38,6 +38,7 @@ public:
     static int32_t Query(const std::string &strUri, const std::string &key, std::string &value);
     static int32_t Insert(const std::string &strUri, const std::string &key, const std::string &value);
     static int32_t Update(const std::string &strUri, const std::string &key, const std::string &value);
+    static int32_t Delete(const std::string &strUri, const std::string &key);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
