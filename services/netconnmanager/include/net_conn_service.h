@@ -23,6 +23,8 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <thread>
+#include <condition_variable>
 
 #include "singleton.h"
 #include "system_ability.h"
@@ -38,10 +40,15 @@
 #include "network.h"
 #include "dns_result_call_back.h"
 #include "net_factoryreset_callback.h"
+#include "common_event_data.h"
+#include "common_event_manager.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
 namespace {
 const int32_t PRIMARY_USER_ID = 100;
 }
@@ -60,6 +67,14 @@ class NetConnService : public SystemAbility,
     using NET_UIDREQUEST_MAP = std::map<uint32_t, uint32_t>;
 
 public:
+    class NetConnListener : public EventFwk::CommonEventSubscriber {
+    public:
+        NetConnListener(const EventFwk::CommonEventSubscribeInfo &subscribeInfo, EventReceiver receiver);
+        void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+
+    private:
+        EventReceiver eventReceiver_;
+    };
     static std::shared_ptr<NetConnService> &GetInstance()
     {
         static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
@@ -383,7 +398,6 @@ private:
         REQUEST,
     };
     bool Init();
-    void RecoverInfo();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                              const std::set<NetCap> &netCaps);
@@ -473,6 +487,7 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isGlobalProxyLoaded_ = false;
+    std::atomic<bool> isDataShareReady_ = false;
     HttpProxy globalHttpProxy_;
     std::mutex globalHttpProxyMutex_;
     std::mutex netManagerMutex_;
@@ -489,6 +504,7 @@ private:
     static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
+    std::shared_ptr<NetConnListener> subscriber_ = nullptr;
 
     bool hasSARemoved_ = false;
 
@@ -509,9 +525,14 @@ private:
     void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveALLClientDeathRecipient();
+    void OnReceiveEvent(const EventFwk::CommonEventData &data);
+    void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     std::vector<sptr<INetConnCallback>> remoteCallback_;
+    bool CheckIfSettingsDataReady();
+    std::mutex dataShareMutexWait;
+    std::condition_variable dataShareWait;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

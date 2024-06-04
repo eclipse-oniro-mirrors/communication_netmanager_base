@@ -70,7 +70,6 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 {
     httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo);
     netBearType_ = bearType;
-    LoadGlobalHttpProxy();
 }
 
 void NetMonitor::Start()
@@ -211,14 +210,6 @@ void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &ht
     }
     httpsUrl = httpsUrl.empty() ? NET_HTTPS_PROBE_URL : httpsUrl;
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s]", httpUrl.c_str(), httpsUrl.c_str());
-}
-
-void NetMonitor::LoadGlobalHttpProxy()
-{
-    HttpProxy globalHttpProxy;
-    NetHttpProxyTracker httpProxyTracker;
-    httpProxyTracker.ReadFromSettingsData(globalHttpProxy);
-    UpdateGlobalHttpProxy(globalHttpProxy);
 }
 
 void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
