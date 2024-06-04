@@ -30,6 +30,7 @@
 #define INGRESS_DPORT_MAP in_dport_map
 #define INGRESS_PROTO_MAP in_proto_map
 #define INGRESS_APPUID_MAP in_appuid_map
+#define INGRESS_UID_MAP in_uid_map
 #define INGRESS_ACTION_MAP in_action_map
 
 #define EGRESS_SADDR_MAP out_saddr_map
@@ -40,11 +41,13 @@
 #define EGRESS_DPORT_MAP out_dport_map
 #define EGRESS_PROTO_MAP out_proto_map
 #define EGRESS_APPUID_MAP out_appuid_map
+#define EGRESS_UID_MAP out_uid_map
 #define EGRESS_ACTION_MAP out_action_map
 
 #define EVENT_MAP event_map
 #define DEFAULT_ACTION_MAP def_act_map
 #define CT_MAP ct_map
+#define CURRENT_UID_MAP current_uid_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x

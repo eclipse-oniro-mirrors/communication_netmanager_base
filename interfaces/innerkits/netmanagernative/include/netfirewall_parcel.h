@@ -29,7 +29,8 @@ constexpr const int32_t INTERCEPT_BUFF_INTERVAL_SEC = 60;
 constexpr int32_t FIREWALL_RULE_SIZE_MAX = 1000;
 // Maximum number of domain for all users
 constexpr int32_t FIREWALL_DOMAIN_RULE_SIZE_MAX = 20000;
-constexpr int32_t FIREWALL_IPC_PAGE_SIZE = 150;
+constexpr int32_t FIREWALL_IPC_IP_RULE_PAGE_SIZE = 150;
+constexpr int32_t FIREWALL_IPC_DOMAIN_RULE_PAGE_SIZE = 6000;
 
 constexpr const char *COMMA = ",";
 constexpr const char *NET_FIREWALL_IS_OPEN = "isOpen";
@@ -155,6 +156,8 @@ struct NetFirewallDnsParam : public Parcelable {
 };
 
 struct NetFirewallDomainRule : public Parcelable {
+    int32_t userId;
+    int32_t ruleId;
     int32_t appUid;
     FirewallRuleAction ruleAction;
     std::string domain;
@@ -166,6 +169,7 @@ struct NetFirewallDomainRule : public Parcelable {
 };
 
 struct NetFirewallIpRule : public Parcelable {
+    int32_t userId;
     int32_t ruleId;
     int32_t appUid;
     NetFirewallRuleDirection ruleDirection;
@@ -182,6 +186,7 @@ struct NetFirewallIpRule : public Parcelable {
 };
 
 struct NetFirewallDnsRule : public Parcelable {
+    int32_t userId;
     int32_t appUid;
     std::string primaryDns;
     std::string standbyDns;

@@ -48,6 +48,7 @@ using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
 using DefaultActionKey = default_action_key;
+using CurrentUserIdKey = current_user_id_key;
 using ActionKey = action_key;
 using ActionValue = action_val;
 using RuleCode = struct bitmap;
@@ -56,7 +57,7 @@ using EventType = enum event_type;
 using Event = struct event;
 using InterceptEvent = struct intercept_event;
 using DebugEvent = struct debug_event;
-using MatchEvent = struct match_tuple;
+using TupleEvent = struct match_tuple;
 using DebugType = enum debug_type;
 
 using CtKey = struct ct_tuple;
@@ -108,10 +109,10 @@ public:
      * Add firewall rules to bpf maps
      *
      * @param ruleList list of NetFirewallIpRule
-     * @param finish transmit finish or not
+     * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish);
+    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool isFinish);
 
     /**
      * Update firewall rules to bpf maps
@@ -137,6 +138,14 @@ public:
      * @return  0 if success or -1 if an error occurred
      */
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+
+    /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId);
 
     /**
      * Clear firewall all ip rules and clear all bpf maps
@@ -237,7 +246,7 @@ private:
 
     static int HandleEvent(void *ctx, void *data, size_t len);
 
-    static void HandleMatchEvent(MatchEvent *ev);
+    static void HandleTupleEvent(TupleEvent *ev);
 
     static void HandleInterceptEvent(InterceptEvent *ev);
 
@@ -266,6 +275,8 @@ private:
     void WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     void WriteAppUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+
+    void WriteUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     void WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 

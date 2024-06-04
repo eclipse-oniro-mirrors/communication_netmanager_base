@@ -133,10 +133,12 @@ public:
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+    int32_t SetFirewallCurrentUserId(int32_t userId);
     int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
-    int32_t ClearFirewallDnsRules();
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
-    int32_t ClearFirewallDomainRules();
+    int32_t DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds);
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
+    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish);
+    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
     int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
     int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif

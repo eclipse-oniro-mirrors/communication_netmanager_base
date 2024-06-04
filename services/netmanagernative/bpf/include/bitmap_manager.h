@@ -675,12 +675,14 @@ private:
 using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
+using UidKey = uid_key;
 using ActionValue = action_val;
 
 using BpfStrMap = BpfUnorderedMap<std::string>;
 using BpfPortMap = BpfUnorderedMap<PortKey>;
 using BpfProtoMap = BpfUnorderedMap<ProtoKey>;
 using BpfAppUidMap = BpfUnorderedMap<AppUidKey>;
+using BpfUidMap = BpfUnorderedMap<UidKey>;
 using BpfActionMap = std::unordered_map<Bitmap, ActionValue, BitmapHash>;
 
 class BitmapManager {
@@ -735,6 +737,11 @@ public:
     BpfAppUidMap &GetAppIdMap()
     {
         return appUidMap_;
+    }
+
+    BpfUidMap &GetUidMap()
+    {
+        return uidMap_;
     }
 
     BpfActionMap &GetActionMap()
@@ -831,6 +838,7 @@ private:
     BpfPortMap dstPortMap_;
     BpfProtoMap protoMap_;
     BpfAppUidMap appUidMap_;
+    BpfUidMap uidMap_;
     BpfActionMap actionMap_;
 };
 } // namespace OHOS::NetManagerStandard
