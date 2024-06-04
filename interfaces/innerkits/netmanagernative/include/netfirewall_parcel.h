@@ -38,12 +38,12 @@ constexpr const char *NET_FIREWALL_IN_ACTION = "inAction";
 constexpr const char *NET_FIREWALL_OUT_ACTION = "outAction";
 
 namespace {
-const std::string NET_FIREWALL_RULE_ID = "ruleId";
-const std::string NET_FIREWALL_RULE_NAME = "ruleName";
-const std::string NET_FIREWALL_RULE_DESC = "ruleDescription";
-const std::string NET_FIREWALL_RULE_DIR = "ruleDirection";
-const std::string NET_FIREWALL_RULE_ACTION = "ruleAction";
-const std::string NET_FIREWALL_RULE_TYPE = "ruleType";
+const std::string NET_FIREWALL_RULE_ID = "id";
+const std::string NET_FIREWALL_RULE_NAME = "name";
+const std::string NET_FIREWALL_RULE_DESC = "description";
+const std::string NET_FIREWALL_RULE_DIR = "direction";
+const std::string NET_FIREWALL_RULE_ACTION = "action";
+const std::string NET_FIREWALL_RULE_TYPE = "type";
 const std::string NET_FIREWALL_IS_ENABLED = "isEnabled";
 const std::string NET_FIREWALL_APP_ID = "appUid";
 const std::string NET_FIREWALL_LOCAL_IP = "localIps";
