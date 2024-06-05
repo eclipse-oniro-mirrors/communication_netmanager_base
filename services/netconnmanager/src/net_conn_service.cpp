@@ -150,7 +150,7 @@ bool NetConnService::Init()
 
     SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
                          [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-    
+
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
         NETMGR_LOG_E("Create event runner failed.");
@@ -186,7 +186,7 @@ bool NetConnService::Init()
 
 bool NetConnService::CheckIfSettingsDataReady()
 {
-    if (isDataShareReady_) {
+    if (isDataShareReady_.load()) {
         return true;
     }
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -1918,12 +1918,12 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
-    if (!isDataShareReady_) {
+    if (!isDataShareReady_.load()) {
         std::thread checkSettingsDataReady([this]() { return CheckIfSettingsDataReady(); });
         std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
         dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
         checkSettingsDataReady.join();
-        if (!isDataShareReady_) {
+        if (!isDataShareReady_.load()) {
             NETMGR_LOG_E("data share is not ready.");
             return;
         }
