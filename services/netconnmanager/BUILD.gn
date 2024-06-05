@@ -102,8 +102,8 @@ ohos_shared_library("net_conn_manager") {
   ]
 
   external_deps = [
-    "ability_base:zuri",
     "ability_base:want",
+    "ability_base:zuri",
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
