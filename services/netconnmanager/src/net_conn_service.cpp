@@ -180,8 +180,6 @@ bool NetConnService::Init()
     if (netFactoryResetCallback_ == nullptr) {
         NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
     }
-
-    RecoverInfo();
     NETMGR_LOG_I("Init end");
     return true;
 }
