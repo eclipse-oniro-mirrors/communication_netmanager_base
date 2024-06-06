@@ -59,6 +59,7 @@ int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret =
         remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT),
                             data, reply, option);
