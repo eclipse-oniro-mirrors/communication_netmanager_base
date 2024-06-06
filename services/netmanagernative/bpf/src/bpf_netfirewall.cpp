@@ -104,7 +104,7 @@ void NetsysBpfNetFirewall::RingBufferListenThread(void)
         NETNATIVE_LOGE("failed to get ring buffer fd: errno=%{public}d", errno);
         return;
     }
-    struct ring_buffer *rb = ring_buffer__new(mapFd, NetsysBpfNetFirewall::HandleEvent, NULL, NULL);
+    ring_buffer *rb = ring_buffer__new(mapFd, NetsysBpfNetFirewall::HandleEvent, NULL, NULL);
     if (!rb) {
         NETNATIVE_LOGE("failed to create ring buffer: errno=%{public}d", errno);
         return;
@@ -137,7 +137,7 @@ int32_t NetsysBpfNetFirewall::StartListener()
     ctWrMap_ = std::make_unique<BpfMapper<CtKey, CtVaule>>(MAP_PATH(CT_MAP), BPF_F_WRONLY);
 
     ffrt::submit(RingBufferListenThread, {}, {}, ffrt::task_attr().name("RingBufferListen"));
-    ffrt::submit(StartConntrackGcThread, {&ctRdMap_}, {&ctWrMap_});
+    ffrt::submit(StartConntrackGcThread, { &ctRdMap_ }, { &ctWrMap_ });
     return 0;
 }
 
@@ -303,7 +303,7 @@ int32_t NetsysBpfNetFirewall::DeleteFirewallIpRules(const std::vector<int32_t> &
     }
     for (const auto &ruleId : ruleIds) {
         auto it = std::find_if(firewallIpRules_.begin(), firewallIpRules_.end(),
-        [&](const sptr<NetFirewallIpRule> &r) { return r->ruleId == ruleId; });
+            [&](const sptr<NetFirewallIpRule> &r) { return r->ruleId == ruleId; });
         if (it != firewallIpRules_.end()) {
             firewallIpRules_.erase(it);
         }
@@ -322,11 +322,9 @@ int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirew
 
     for (const auto &rule : ruleList) {
         if (rule->ruleDirection == NetFirewallRuleDirection::RULE_IN) {
-            NETNATIVE_LOG_D("SetFirewallIpRules: IN -> %{public}s", rule->ToString().c_str());
             inRules.emplace_back(rule);
         }
         if (rule->ruleDirection == NetFirewallRuleDirection::RULE_OUT) {
-            NETNATIVE_LOG_D("SetFirewallIpRules: OUT <- %{public}s", rule->ToString().c_str());
             outRules.emplace_back(rule);
         }
     }
@@ -588,20 +586,14 @@ bool NetsysBpfNetFirewall::ShouldSkipNotify(sptr<InterceptRecord> record)
     if (!record) {
         return true;
     }
-    if (!oldRecord_) {
-        oldRecord_ = record;
-    } else {
-        if ((record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
-            if (record->localIp == oldRecord_->localIp && record->remoteIp == oldRecord_->remoteIp &&
-                record->localPort == oldRecord_->localPort && record->remotePort == oldRecord_->remotePort &&
-                record->protocol == oldRecord_->protocol && record->appUid == oldRecord_->appUid) {
-                delete record;
-                return true;
-            }
+    if (oldRecord_ != nullptr && (record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
+        if (record->localIp == oldRecord_->localIp && record->remoteIp == oldRecord_->remoteIp &&
+            record->localPort == oldRecord_->localPort && record->remotePort == oldRecord_->remotePort &&
+            record->protocol == oldRecord_->protocol && record->appUid == oldRecord_->appUid) {
+            return true;
         }
-        delete oldRecord_;
-        oldRecord_ = record;
     }
+    oldRecord_ = record;
     return false;
 }
 
@@ -614,7 +606,7 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
     record->time = (int32_t)time(NULL);
     record->localPort = BitmapManager::Nstohl(info->sport);
     record->remotePort = BitmapManager::Nstohl(info->dport);
-    record->protocol = (int32_t)info->protocol;
+    record->protocol = static_cast<uint16_t>(info->protocol);
     record->appUid = (int32_t)info->appuid;
     std::string srcIp;
     std::string dstIp;
@@ -650,12 +642,10 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
 
 void NetsysBpfNetFirewall::HandleTupleEvent(TupleEvent *ev)
 {
-    NETNATIVE_LOG_D("%{public}s tuple:", (ev->dir == INGRESS) ? "> ingress" : "< egress");
-    NETNATIVE_LOG_D("\tsport=%{public}u", ntohs(ev->sport));
-    NETNATIVE_LOG_D("\tdport=%{public}u", ntohs(ev->dport));
-    NETNATIVE_LOG_D("\tprotocol=%{public}u", ev->protocol);
-    NETNATIVE_LOG_D("\tappuid=%{public}u", ev->appuid);
-    NETNATIVE_LOG_D("\tuid=%{public}u", ev->uid);
+    NETNATIVE_LOG_D(
+        "%{public}s tuple: sport=%{public}u dport=%{public}u protocol=%{public}u appuid=%{public}u uid=%{public}u",
+        (ev->dir == INGRESS) ? "> ingress" : "< egress", ntohs(ev->sport), ntohs(ev->dport), ev->protocol, ev->appuid,
+        ev->uid);
     if (ev->family == AF_INET) {
         in_addr in;
         in.s_addr = ev->ipv4.saddr;
@@ -679,11 +669,8 @@ void NetsysBpfNetFirewall::HandleInterceptEvent(InterceptEvent *ev)
 {
     GetInstance()->NotifyInterceptEvent(ev);
 
-    NETNATIVE_LOGI("%{public}s intercept:", (ev->dir == INGRESS) ? "ingress" : "egress");
-    NETNATIVE_LOGI("\tsport=%{public}u", ntohs(ev->sport));
-    NETNATIVE_LOGI("\tdport=%{public}u", ntohs(ev->dport));
-    NETNATIVE_LOGI("\tprotocol=%{public}u", ev->protocol);
-    NETNATIVE_LOGI("\tappuid=%{public}u", ev->appuid);
+    NETNATIVE_LOGI("%{public}s intercept: sport=%{public}u dport=%{public}u protocol=%{public}u appuid=%{public}u",
+        (ev->dir == INGRESS) ? "ingress" : "egress", ntohs(ev->sport), ntohs(ev->dport), ev->protocol, ev->appuid);
     if (ev->family == AF_INET) {
         in_addr in;
         in.s_addr = ev->ipv4.saddr;

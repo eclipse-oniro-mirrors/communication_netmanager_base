@@ -483,6 +483,7 @@ int32_t NetManagerNative::RegisterNetFirewallCallback(const sptr<NetsysNative::I
     NETNATIVE_LOG_D("NetManagerNative, RegisterNetFirewallCallback");
     return dnsManager_->RegisterNetFirewallCallback(callback);
 }
+
 int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     NETNATIVE_LOG_D("NetManagerNative, UnRegisterNetFirewallCallback");

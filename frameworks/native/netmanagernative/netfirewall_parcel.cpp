@@ -24,12 +24,12 @@ namespace NetManagerStandard {
 // Firewall IP parameters
 bool NetFirewallIpParam::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteInt32(family);
-    if (!parcel.WriteInt32(type)) {
+    parcel.WriteUint8(family);
+    if (!parcel.WriteUint8(type)) {
         return false;
     }
+    parcel.WriteUint8(mask);
     parcel.WriteString(address);
-    parcel.WriteInt32(mask);
     parcel.WriteString(startIp);
     parcel.WriteString(endIp);
     return true;
@@ -42,12 +42,12 @@ sptr<NetFirewallIpParam> NetFirewallIpParam::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallIpParam ptr is null");
         return nullptr;
     }
-    parcel.ReadInt32(ptr->family);
-    if (!parcel.ReadInt32(ptr->type)) {
+    parcel.ReadUint8(ptr->family);
+    if (!parcel.ReadUint8(ptr->type)) {
         return nullptr;
     }
+    parcel.ReadUint8(ptr->mask);
     parcel.ReadString(ptr->address);
-    parcel.ReadInt32(ptr->mask);
     parcel.ReadString(ptr->startIp);
     parcel.ReadString(ptr->endIp);
     return ptr;
@@ -75,23 +75,13 @@ std::string NetFirewallUtils::erase(const std::string &src, const std::string &s
     return src.substr(index + sub.length(), src.length() - sub.length());
 }
 
-std::string NetFirewallIpParam::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallIpParam:{" << NET_FIREWALL_IP_FAMILY << EQUAL << this->family << COMMA << NET_FIREWALL_IP_TYPE <<
-        EQUAL << this->type << COMMA << NET_FIREWALL_IP_ADDRESS << EQUAL << this->address << COMMA <<
-        NET_FIREWALL_IP_MASK << EQUAL << this->mask << COMMA << NET_FIREWALL_IP_START << EQUAL << this->startIp <<
-        COMMA << NET_FIREWALL_IP_END << EQUAL << this->endIp << "}";
-    return ss.str();
-}
-
 // Firewall port parameters
 bool NetFirewallPortParam::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt32(startPort)) {
+    if (!parcel.WriteUint16(startPort)) {
         return false;
     }
-    if (!parcel.WriteInt32(endPort)) {
+    if (!parcel.WriteUint16(endPort)) {
         return false;
     }
     return true;
@@ -104,21 +94,13 @@ sptr<NetFirewallPortParam> NetFirewallPortParam::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("NetFirewallPortParam ptr is null");
         return nullptr;
     }
-    if (!parcel.ReadInt32(ptr->startPort)) {
+    if (!parcel.ReadUint16(ptr->startPort)) {
         return nullptr;
     }
-    if (!parcel.ReadInt32(ptr->endPort)) {
+    if (!parcel.ReadUint16(ptr->endPort)) {
         return nullptr;
     }
     return ptr;
-}
-
-std::string NetFirewallPortParam::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallPortParam:{" << NET_FIREWALL_PORT_START << EQUAL << this->startPort << COMMA <<
-        NET_FIREWALL_PORT_END << EQUAL << this->endPort << "}";
-    return ss.str();
 }
 
 // Firewall domain name parameters
@@ -147,14 +129,6 @@ sptr<NetFirewallDomainParam> NetFirewallDomainParam::Unmarshalling(Parcel &parce
         return nullptr;
     }
     return ptr;
-}
-
-std::string NetFirewallDomainParam::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallDomainParam:{" << NET_FIREWALL_DOMAIN_IS_WILDCARD << EQUAL << std::boolalpha <<
-        this->isWildcard << COMMA << NET_FIREWALL_DOMAIN << EQUAL << this->domain << "}";
-    return ss.str();
 }
 
 bool NetFirewallDomainRule::Marshalling(Parcel &parcel) const
@@ -196,15 +170,6 @@ sptr<NetFirewallDomainRule> NetFirewallDomainRule::Unmarshalling(Parcel &parcel)
     }
     ptr->ruleAction = static_cast<FirewallRuleAction>(ruleAction);
     return ptr;
-}
-
-std::string NetFirewallDomainRule::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallDomainRule:{" << NET_FIREWALL_APP_ID << EQUAL << this->appUid << COMMA <<
-        NET_FIREWALL_DOMAIN_IS_WILDCARD << EQUAL << std::boolalpha << this->isWildcard << COMMA <<
-        NET_FIREWALL_DOMAIN << EQUAL << this->domain << "}";
-    return ss.str();
 }
 
 // Firewall DNS parameters
@@ -349,51 +314,6 @@ sptr<NetFirewallRule> NetFirewallRule::Unmarshalling(Parcel &parcel)
     return ptr;
 }
 
-std::string NetFirewallRule::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallRule:{" << NET_FIREWALL_RULE_ID << EQUAL << this->ruleId << COMMA << NET_FIREWALL_RULE_NAME <<
-        EQUAL << this->ruleName << COMMA << NET_FIREWALL_RULE_DESC << EQUAL << this->ruleDescription << COMMA <<
-        NET_FIREWALL_RULE_DIR << EQUAL << int(this->ruleDirection) << COMMA << NET_FIREWALL_RULE_ACTION << EQUAL <<
-        int(this->ruleAction) << COMMA << NET_FIREWALL_RULE_TYPE << EQUAL << int(this->ruleType) << COMMA <<
-        NET_FIREWALL_IS_ENABLED << EQUAL << this->isEnabled << COMMA << NET_FIREWALL_APP_ID << EQUAL << this->appUid <<
-        COMMA << NET_FIREWALL_PROTOCOL << EQUAL << int(this->protocol) << COMMA << NET_FIREWALL_USER_ID << EQUAL <<
-        this->userId << std::endl;
-
-    if (this->localIps.size()) {
-        ss << NET_FIREWALL_LOCAL_IP << ":" << std::endl;
-        for (const NetFirewallIpParam &ip : this->localIps) {
-            ss << ip.ToString() << std::endl;
-        }
-    }
-    if (this->remoteIps.size()) {
-        ss << NET_FIREWALL_REMOTE_IP << ":" << std::endl;
-        for (const NetFirewallIpParam &ip : this->remoteIps) {
-            ss << ip.ToString() << std::endl;
-        }
-    }
-    if (this->localPorts.size()) {
-        ss << NET_FIREWALL_LOCAL_PORT << ":" << std::endl;
-        for (const NetFirewallPortParam &port : this->localPorts) {
-            ss << port.ToString() << std::endl;
-        }
-    }
-    if (this->remotePorts.size()) {
-        ss << NET_FIREWALL_REMOTE_PORT << ":" << std::endl;
-        for (const NetFirewallPortParam &port : this->remotePorts) {
-            ss << port.ToString() << std::endl;
-        }
-    }
-    if (this->domains.size()) {
-        ss << NET_FIREWALL_DOMAIN << ":" << std::endl;
-        for (const NetFirewallDomainParam &domain : this->domains) {
-            ss << domain.ToString() << std::endl;
-        }
-    }
-
-    return ss.str();
-}
-
 // IP rule data
 bool NetFirewallIpRule::Marshalling(Parcel &parcel) const
 {
@@ -445,41 +365,6 @@ sptr<NetFirewallIpRule> NetFirewallIpRule::Unmarshalling(Parcel &parcel)
     return ptr;
 }
 
-std::string NetFirewallIpRule::ToString() const
-{
-    std::stringstream ss;
-    ss << "NetFirewallIpRule:" << NET_FIREWALL_RULE_ID << EQUAL << this->ruleId << COMMA << NET_FIREWALL_RULE_DIR <<
-        EQUAL << int(this->ruleDirection) << COMMA << NET_FIREWALL_RULE_ACTION << EQUAL << int(this->ruleAction) <<
-        COMMA << NET_FIREWALL_APP_ID << EQUAL << this->appUid << COMMA << NET_FIREWALL_PROTOCOL << EQUAL <<
-        int(this->protocol) << std::endl;
-
-    if (this->localIps.size()) {
-        ss << NET_FIREWALL_LOCAL_IP << ":" << std::endl;
-        for (const NetFirewallIpParam &ip : this->localIps) {
-            ss << ip.ToString() << std::endl;
-        }
-    }
-    if (this->remoteIps.size()) {
-        ss << NET_FIREWALL_REMOTE_IP << ":" << std::endl;
-        for (const NetFirewallIpParam &ip : this->remoteIps) {
-            ss << ip.ToString() << std::endl;
-        }
-    }
-    if (this->localPorts.size()) {
-        ss << NET_FIREWALL_LOCAL_PORT << ":" << std::endl;
-        for (const NetFirewallPortParam &port : this->localPorts) {
-            ss << port.ToString() << std::endl;
-        }
-    }
-    if (this->remotePorts.size()) {
-        ss << NET_FIREWALL_REMOTE_PORT << ":" << std::endl;
-        for (const NetFirewallPortParam &port : this->remotePorts) {
-            ss << port.ToString() << std::endl;
-        }
-    }
-    return ss.str();
-}
-
 // DNS rule data
 bool NetFirewallDnsRule::Marshalling(Parcel &parcel) const
 {
@@ -511,6 +396,9 @@ sptr<NetFirewallDnsRule> NetFirewallDnsRule::Unmarshalling(Parcel &parcel)
 // Interception Record
 bool InterceptRecord::Marshalling(Parcel &parcel) const
 {
+    parcel.WriteUint16(localPort);
+    parcel.WriteUint16(remotePort);
+    parcel.WriteUint16(protocol);
     if (!parcel.WriteInt32(time)) {
         return false;
     }
@@ -518,15 +406,6 @@ bool InterceptRecord::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString(remoteIp)) {
-        return false;
-    }
-    if (!parcel.WriteInt32(localPort)) {
-        return false;
-    }
-    if (!parcel.WriteInt32(remotePort)) {
-        return false;
-    }
-    if (!parcel.WriteInt32(protocol)) {
         return false;
     }
     if (!parcel.WriteInt32(appUid)) {
@@ -545,6 +424,9 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
         NETMGR_LOG_E("InterceptRecord ptr is null");
         return nullptr;
     }
+    parcel.ReadUint16(ptr->localPort);
+    parcel.ReadUint16(ptr->remotePort);
+    parcel.ReadUint16(ptr->protocol);
     if (!parcel.ReadInt32(ptr->time)) {
         return nullptr;
     }
@@ -554,15 +436,6 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadString(ptr->remoteIp)) {
         return nullptr;
     }
-    if (!parcel.ReadInt32(ptr->localPort)) {
-        return nullptr;
-    }
-    if (!parcel.ReadInt32(ptr->remotePort)) {
-        return nullptr;
-    }
-    if (!parcel.ReadInt32(ptr->protocol)) {
-        return nullptr;
-    }
     if (!parcel.ReadInt32(ptr->appUid)) {
         return nullptr;
     }
@@ -570,18 +443,6 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     return ptr;
-}
-
-std::string InterceptRecord::ToString() const
-{
-    std::stringstream ss;
-    ss << "InterceptRecord:{" << NET_FIREWALL_RECORD_TIME << EQUAL << this->time << COMMA <<
-        NET_FIREWALL_RECORD_LOCAL_IP << EQUAL << this->localIp << COMMA << NET_FIREWALL_RECORD_REMOTE_IP << EQUAL <<
-        this->remoteIp << COMMA << NET_FIREWALL_RECORD_LOCAL_PORT << EQUAL << this->localPort << COMMA <<
-        NET_FIREWALL_RECORD_REMOTE_PORT << EQUAL << this->remotePort << COMMA << NET_FIREWALL_RECORD_PROTOCOL <<
-        EQUAL << this->protocol << COMMA << NET_FIREWALL_RECORD_UID << EQUAL << this->appUid << COMMA <<
-        NET_FIREWALL_DOMAIN << EQUAL << this->domain << "}";
-    return ss.str();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

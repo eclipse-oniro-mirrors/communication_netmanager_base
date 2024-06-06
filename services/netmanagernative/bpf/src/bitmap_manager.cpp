@@ -119,19 +119,19 @@ uint32_t *Bitmap::Get()
     return bitmap_;
 }
 
-const int32_t FAMILY_IPV4 = 1;
-const int32_t FAMILY_IPV6 = 2;
-const int32_t IP_PARAM_SINGLE = 1;
-const int32_t IP_PARAM_SEGMENT = 2;
+const uint8_t FAMILY_IPV4 = 1;
+const uint8_t FAMILY_IPV6 = 2;
+const uint8_t IP_PARAM_SINGLE = 1;
+const uint8_t IP_PARAM_SEGMENT = 2;
 
 uint16_t BitmapManager::Hltons(int32_t n)
 {
     return htons((uint16_t)(n & 0x0000ffff));
 }
 
-int32_t BitmapManager::Nstohl(uint16_t n)
+uint16_t BitmapManager::Nstohl(uint16_t n)
 {
-    int32_t m = 0;
+    uint16_t m = 0;
     return m | ntohs(n);
 }
 
@@ -217,7 +217,7 @@ int32_t BitmapManager::InsertIp6SegBitmap(const NetFirewallIpParam &item, Bitmap
         }
         ip6Map->OrInsert(addr, static_cast<uint32_t>(item.mask), bitmap);
         std::string addrStr = IpParamParser::Addr6ToStr(addr);
-        NETNATIVE_LOG_D("InsertIpBitmap ip[%{public}s], mask[%{public}u]", addrStr.c_str(), item.mask);
+        NETNATIVE_LOG_D("InsertIp6SegBitmap ip[%{public}s], mask[%{public}u]", addrStr.c_str(), item.mask);
     } else if (item.type == IP_PARAM_SEGMENT) {
         std::vector<Ip6Data> ips;
         int32_t ret = IpParamParser::GetIp6AndMask(item.startIp, item.endIp, ips);
@@ -286,7 +286,7 @@ void BitmapManager::AddPortBitmap(const std::vector<NetFirewallPortParam> &port,
     SegmentBitmapMap &portMap)
 {
     for (const NetFirewallPortParam &item : port) {
-        int32_t startPort = item.startPort;
+        uint16_t startPort = item.startPort;
         if (startPort == 0) {
             continue;
         }
@@ -395,19 +395,6 @@ void IpParamParser::AddIp(uint32_t ip, uint32_t mask, std::vector<Ip4Data> &ip4V
     info.data = ip;
     info.mask = mask;
     ip4Vec.emplace_back(info);
-
-    uint32_t broadcastIp = ip;
-    if (mask < IPV4_MAX_PREFIXLEN) {
-        for (size_t i = 0; i <= (IPV4_BIT_COUNT - mask - 1); ++i) {
-            uint32_t value = 1 << i;
-            broadcastIp |= value;
-        }
-    }
-    std::string ipStr = Ip4ToStr(ip);
-    std::string broadcastIpStr = Ip4ToStr(broadcastIp);
-    NETNATIVE_LOG_D("ip[%{public}s], mask[%{public}u], broadcastIp[%{public}s]", ipStr.c_str(), mask,
-        broadcastIpStr.c_str());
-    NETNATIVE_LOG_D("ip hex[%{public}08x], broadcastIp[%{public}08x]", ip, broadcastIp);
 }
 
 std::string IpParamParser::Ip4ToStr(uint32_t ip)
@@ -626,7 +613,7 @@ void IpParamParser::AddIp6(const in6_addr &addr, uint32_t prefixlen, std::vector
     list.emplace_back(info);
 
     std::string startIpStr = IpParamParser::Addr6ToStr(info.data);
-    NETNATIVE_LOG_D("ip[%{public}s], mask[%{public}u]", startIpStr.c_str(), info.prefixlen);
+    NETNATIVE_LOG_D("AddIp6 ip[%{public}s], mask[%{public}u]", startIpStr.c_str(), info.prefixlen);
 }
 
 void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)

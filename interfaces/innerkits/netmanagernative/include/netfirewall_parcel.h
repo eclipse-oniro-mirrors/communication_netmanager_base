@@ -114,26 +114,24 @@ enum class NetworkProtocol {
 
 // Firewall IP parameters
 struct NetFirewallIpParam : public Parcelable {
-    int32_t family;      // IPv4=1, IPv6=2, default IPv4, not currently supported for others, optional
-    int32_t type;        // 1：IP address or subnet, when using a single IP, the mask is 32,2: IP segment. Optional
+    uint8_t family;      // IPv4=1, IPv6=2, default IPv4, not currently supported for others, optional
+    uint8_t type;        // 1：IP address or subnet, when using a single IP, the mask is 32,2: IP segment. Optional
+    uint8_t mask;        // IPv4: subnet mask, IPv6: prefix. Optional
     std::string address; // IP address, optional
-    int32_t mask;        // IPv4: subnet mask, IPv6: prefix. Optional
     std::string startIp; // Starting IP, optional
     std::string endIp;   // End IP, optional
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallIpParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall port parameters
 struct NetFirewallPortParam : public Parcelable {
-    int32_t startPort; // When there is only one port, the starting port is the same as the ending port. Optional
-    int32_t endPort;   // When there is only one end port, the start port is the same as the end port. Optional
+    uint16_t startPort; // When there is only one port, the starting port is the same as the ending port. Optional
+    uint16_t endPort;   // When there is only one end port, the start port is the same as the end port. Optional
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallPortParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall domain name parameters
@@ -143,7 +141,6 @@ struct NetFirewallDomainParam : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallDomainParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall DNS parameters
@@ -165,7 +162,6 @@ struct NetFirewallDomainRule : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallDomainRule> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 struct NetFirewallIpRule : public Parcelable {
@@ -182,7 +178,6 @@ struct NetFirewallIpRule : public Parcelable {
 
     static sptr<NetFirewallIpRule> Unmarshalling(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    std::string ToString() const;
 };
 
 struct NetFirewallDnsRule : public Parcelable {
@@ -216,23 +211,21 @@ struct NetFirewallRule : public Parcelable {
 
     static sptr<NetFirewallRule> Unmarshalling(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    std::string ToString() const;
 };
 
 // Interception Record
 struct InterceptRecord : public Parcelable {
+    uint16_t localPort;   // Local Port
+    uint16_t remotePort;  // Destination Port
+    uint16_t protocol;    // Transport Layer Protocol
     int32_t time;         // time stamp
     std::string localIp;  // Local IP
     std::string remoteIp; // Remote IP
-    int32_t localPort;    // Local Port
-    int32_t remotePort;   // Destination Port
-    int32_t protocol;     // Transport Layer Protocol
     int32_t appUid;       // Application or Service ID
     std::string domain;   // domain name
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<InterceptRecord> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 class NetFirewallUtils {

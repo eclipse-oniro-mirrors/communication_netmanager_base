@@ -26,6 +26,7 @@ static const string TEST_SUFFIX2 = "openharmony.com";
 static const string TEST_DOMAIN_STR1 = "mony.com";
 static const string TEST_DOMAIN_STR2 = "test.harmony.com";
 static const string TEST_DOMAIN_STR3 = "test.openharmony.com";
+static const string TEST_DOMAIN_STR4 = "test.openharMONY.Com";
 }
 
 class SuffixMatchTrieTest : public testing::Test {
@@ -81,6 +82,13 @@ HWTEST_F(SuffixMatchTrieTest, SuffixMatchTrieTest003, TestSize.Level0)
     trie.Insert(TEST_SUFFIX2, val2);
     int val = 0;
     int len = trie.LongestSuffixMatch(TEST_DOMAIN_STR3, val);
+
+    EXPECT_EQ(len, strlen(TEST_SUFFIX2.c_str()));
+    EXPECT_EQ(val, 102);
+
+    val = 0;
+    len = 0;
+    len = trie.LongestSuffixMatch(TEST_DOMAIN_STR4, val);
 
     EXPECT_EQ(len, strlen(TEST_SUFFIX2.c_str()));
     EXPECT_EQ(val, 102);

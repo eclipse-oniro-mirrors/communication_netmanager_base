@@ -2267,6 +2267,8 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool i
 int32_t NetsysNativeServiceProxy::AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
                                                      bool isFinish)
 {
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::AddFirewallIpRules: ruleList size=%{public}zu isFinish=%{public}d",
+                   ruleList.size(), isFinish);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2296,7 +2298,7 @@ int32_t NetsysNativeServiceProxy::AddFirewallIpRules(const std::vector<sptr<NetF
 
 int32_t NetsysNativeServiceProxy::UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule)
 {
-    NETNATIVE_LOG_D("NetsysNativeServiceProxy::UpdateFirewallIpRule: ruleId=%{public}d", rule->ruleId);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::UpdateFirewallIpRule: ruleId=%{public}d", rule->ruleId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2317,7 +2319,8 @@ int32_t NetsysNativeServiceProxy::UpdateFirewallIpRule(const sptr<NetFirewallIpR
 
 int32_t NetsysNativeServiceProxy::DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::DeleteFirewallRules");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::DeleteFirewallRules type=%{public}d ruleIds size=%{public}zu", type,
+                   ruleIds.size());
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2346,6 +2349,7 @@ int32_t NetsysNativeServiceProxy::DeleteFirewallRules(NetFirewallRuleType type, 
 
 int32_t NetsysNativeServiceProxy::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
 {
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallIpRules ruleList size=%{public}zu", ruleList.size());
     int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
     size_t size = ruleList.size();
     auto start = ruleList.begin();
@@ -2370,7 +2374,8 @@ int32_t NetsysNativeServiceProxy::SetFirewallIpRules(const std::vector<sptr<NetF
 
 int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction in=%{public}d out=%{public}d", inDefault,
+                   outDefault);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2395,7 +2400,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction in
 
 int32_t NetsysNativeServiceProxy::SetFirewallCurrentUserId(int32_t userId)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallCurrentUserId");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallCurrentUserId userId=%{public}d", userId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2417,6 +2422,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallCurrentUserId(int32_t userId)
 
 int32_t NetsysNativeServiceProxy::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
 {
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDnsRules ruleList size=%{public}zu", ruleList.size());
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2443,7 +2449,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallDnsRules(const std::vector<sptr<Net
 
 int32_t NetsysNativeServiceProxy::ClearFirewallRules(NetFirewallRuleType type)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::ClearFirewallRules");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::ClearFirewallRules type=%{public}d", type);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2466,6 +2472,8 @@ int32_t NetsysNativeServiceProxy::ClearFirewallRules(NetFirewallRuleType type)
 int32_t NetsysNativeServiceProxy::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
                                                          bool isFinish)
 {
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::AddFirewallDomainRules ruleList size=%{public}zu isFinish=%{public}d",
+                   ruleList.size(), isFinish);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2495,7 +2503,7 @@ int32_t NetsysNativeServiceProxy::AddFirewallDomainRules(const std::vector<sptr<
 
 int32_t NetsysNativeServiceProxy::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
 {
-    NETNATIVE_LOG_D("NetsysNativeServiceProxy::UpdateFirewallDomainRules");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::UpdateFirewallDomainRules ruleList size=%{public}zu", ruleList.size());
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2521,6 +2529,7 @@ int32_t NetsysNativeServiceProxy::UpdateFirewallDomainRules(const std::vector<sp
 
 int32_t NetsysNativeServiceProxy::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
 {
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDomainRules ruleList size=%{public}zu", ruleList.size());
     int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
     size_t size = ruleList.size();
     auto start = ruleList.begin();

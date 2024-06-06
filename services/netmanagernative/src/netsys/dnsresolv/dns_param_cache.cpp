@@ -415,6 +415,7 @@ bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostNam
     }
     std::string host = hostName.substr(0, hostName.find(' '));
     DNS_CONFIG_PRINT("IsInterceptDomain: appUid: %{public}d, hostName: %{public}s", appUid, host.c_str());
+    std::transform(host.begin(), host.end(), host.begin(), ::tolower);
     std::vector<sptr<NetFirewallDomainRule>> rules;
     FirewallRuleAction exactAllowAction = FirewallRuleAction::RULE_INVALID;
     auto it = netFirewallDomainRulesAllowMap_.find(host);
@@ -472,7 +473,7 @@ void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule>
         suffix = suffix.substr(wildcardCharIndex + 1);
     }
     DNS_CONFIG_PRINT("BuildFirewallDomainLsmTrie: suffix: %{public}s", suffix.c_str());
-
+    std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
     if (rule->ruleAction == FirewallRuleAction::RULE_DENY) {
         if (domainDenyLsmTrie_->LongestSuffixMatch(suffix, rules)) {
             rules.emplace_back(std::move(rule));
@@ -494,24 +495,26 @@ void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule>
 
 void DnsParamCache::BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule)
 {
+    std::string domain = rule->domain;
     std::vector<sptr<NetFirewallDomainRule>> rules;
-    DNS_CONFIG_PRINT("BuildFirewallDomainMap: domain: %{public}s", rule->domain.c_str());
+    DNS_CONFIG_PRINT("BuildFirewallDomainMap: domain: %{public}s", domain.c_str());
+    std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
     if (rule->ruleAction == FirewallRuleAction::RULE_DENY) {
-        auto it = netFirewallDomainRulesDenyMap_.find(rule->domain);
+        auto it = netFirewallDomainRulesDenyMap_.find(domain);
         if (it != netFirewallDomainRulesDenyMap_.end()) {
             rules = it->second;
         }
 
         rules.emplace_back(std::move(rule));
-        netFirewallDomainRulesDenyMap_.emplace(rule->domain, std::move(rules));
+        netFirewallDomainRulesDenyMap_.emplace(domain, std::move(rules));
     } else {
-        auto it = netFirewallDomainRulesAllowMap_.find(rule->domain);
+        auto it = netFirewallDomainRulesAllowMap_.find(domain);
         if (it != netFirewallDomainRulesAllowMap_.end()) {
             rules = it->second;
         }
 
         rules.emplace_back(rule);
-        netFirewallDomainRulesAllowMap_.emplace(rule->domain, std::move(rules));
+        netFirewallDomainRulesAllowMap_.emplace(domain, std::move(rules));
     }
 }
 
@@ -638,24 +641,18 @@ void DnsParamCache::NotifyDomianIntercept(int32_t appUid, const std::string &hos
         return;
     }
     std::string host = hostName.substr(0, hostName.find(' '));
-    NETNATIVE_LOGI("NotifyDomianIntercept: appUid: %{public}d, hostName: %{public}s", appUid, host.c_str());
+    NETNATIVE_LOGI("NotifyDomianIntercept: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
     sptr<NetManagerStandard::InterceptRecord> record = new (std::nothrow) NetManagerStandard::InterceptRecord();
     record->time = (int32_t)time(NULL);
     record->appUid = appUid;
     record->domain = host;
 
-    if (!oldRecord_) {
-        oldRecord_ = record;
-    } else {
-        if ((record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
-            if (record->appUid == oldRecord_->appUid && record->domain == oldRecord_->domain) {
-                delete record;
-                return;
-            }
+    if (oldRecord_ != nullptr && (record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
+        if (record->appUid == oldRecord_->appUid && record->domain == oldRecord_->domain) {
+            return;
         }
-        delete oldRecord_;
-        oldRecord_ = record;
     }
+    oldRecord_ = record;
     for (const auto &callback : callbacks_) {
         callback->OnIntercept(record);
     }
@@ -672,6 +669,7 @@ int32_t DnsParamCache::RegisterNetFirewallCallback(const sptr<NetsysNative::INet
 
     return 0;
 }
+
 int32_t DnsParamCache::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     if (!callback) {

@@ -894,7 +894,7 @@ int32_t NetsysNativeService::SetFirewallCurrentUserId(int32_t userId)
 
 int32_t NetsysNativeService::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::SetFirewallDnsRuleslist: size=%{public}zu", ruleList.size());
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDnsRuleslist: size=%{public}zu", ruleList.size());
     return netsysService_->SetFirewallDnsRules(ruleList);
 }
 
@@ -913,7 +913,7 @@ int32_t NetsysNativeService::UpdateFirewallDomainRules(const std::vector<sptr<Ne
 
 int32_t NetsysNativeService::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::SetFirewallDomainRules: size=%{public}zu", ruleList.size());
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDomainRules: size=%{public}zu", ruleList.size());
     return netsysService_->AddFirewallDomainRules(ruleList, true);
 }
 

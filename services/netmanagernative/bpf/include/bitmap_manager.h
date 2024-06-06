@@ -164,8 +164,8 @@ const int32_t IPV6_BIT_COUNT = 128;
 const int32_t IPV4_BIT_COUNT = 32;
 const int32_t IPV6_BYTE_COUNT = 16;
 const int32_t IPV6_SEGMENT_COUNT = 8;
-const int32_t MASK_MIN = 16;
-const int32_t MASK_MAX = 32;
+const uint8_t MASK_MIN = 16;
+const uint8_t MASK_MAX = 32;
 const int32_t IPV4_MAX_PREFIXLEN = 32;
 const int32_t IPV6_MAX_PREFIXLEN = 128;
 const uint32_t IP6_BYTES = 16;
@@ -501,8 +501,8 @@ private:
 };
 
 struct SegmentBitmap {
-    uint32_t start;
-    uint32_t end;
+    uint16_t start;
+    uint16_t end;
     Bitmap bitmap;
 };
 
@@ -517,7 +517,7 @@ public:
      * @param end end of segment
      * @param bitmap rule itmap
      */
-    void AddMap(uint32_t start, uint32_t end, const Bitmap &bitmap)
+    void AddMap(uint16_t start, uint16_t end, const Bitmap &bitmap)
     {
         std::vector<uint32_t> indexs;
         SearchIntersection(start, end, indexs);
@@ -544,7 +544,7 @@ private:
      * @param end end of segment
      * @param indexs has intersection index value in exist map
      */
-    void SearchIntersection(uint32_t start, uint32_t end, std::vector<uint32_t> &indexs)
+    void SearchIntersection(uint16_t start, uint16_t end, std::vector<uint32_t> &indexs)
     {
         for (size_t i = 0; i < mapList_.size(); ++i) {
             if (((start >= mapList_[i].start) && (start <= mapList_[i].end)) ||
@@ -572,7 +572,7 @@ private:
      * @param end end of segment
      * @param bitmap rule bitmap
      */
-    void Insert(uint32_t start, uint32_t end, const Bitmap &bitmap)
+    void Insert(uint16_t start, uint16_t end, const Bitmap &bitmap)
     {
         SegmentBitmap segBitmap;
         segBitmap.start = start;
@@ -596,7 +596,7 @@ private:
      * @param bitmap rule bitmap
      * @param mapList map list
      */
-    void AddSegBitmap(uint32_t start, uint32_t end, const Bitmap &bitmap, std::vector<SegmentBitmap> &mapList)
+    void AddSegBitmap(uint16_t start, uint16_t end, const Bitmap &bitmap, std::vector<SegmentBitmap> &mapList)
     {
         if (start > end) {
             return;
@@ -625,7 +625,7 @@ private:
      * @param indexs intersection indexs
      * @param list segment and rule bitmap map list
      */
-    void GetMapList(uint32_t start, uint32_t end, const Bitmap &bitmap, std::vector<uint32_t> &indexs,
+    void GetMapList(uint16_t start, uint16_t end, const Bitmap &bitmap, std::vector<uint32_t> &indexs,
         std::vector<SegmentBitmap> &list)
     {
         uint32_t tmpStart = start;
@@ -751,7 +751,7 @@ public:
 
     static uint16_t Hltons(int32_t n);
 
-    static int32_t Nstohl(uint16_t n);
+    static uint16_t Nstohl(uint16_t n);
 
 private:
     void Clear();
