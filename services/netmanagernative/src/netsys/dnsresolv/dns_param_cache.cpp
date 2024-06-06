@@ -414,7 +414,7 @@ bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostNam
         return (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
     }
     std::string host = hostName.substr(0, hostName.find(' '));
-    DNS_CONFIG_PRINT("IsInterceptDomain: appUid: %{public}d, hostName: %{public}s", appUid, host.c_str());
+    DNS_CONFIG_PRINT("IsInterceptDomain: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
     std::transform(host.begin(), host.end(), host.begin(), ::tolower);
     std::vector<sptr<NetFirewallDomainRule>> rules;
     FirewallRuleAction exactAllowAction = FirewallRuleAction::RULE_INVALID;
