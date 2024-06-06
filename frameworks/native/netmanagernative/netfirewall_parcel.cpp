@@ -314,6 +314,23 @@ sptr<NetFirewallRule> NetFirewallRule::Unmarshalling(Parcel &parcel)
     return ptr;
 }
 
+std::string NetFirewallRule::ToString() const
+{
+    const std::string size = " size=";
+    std::stringstream ss;
+    ss << "NetFirewallRule:{" << NET_FIREWALL_RULE_ID << EQUAL << this->ruleId << COMMA << NET_FIREWALL_RULE_NAME <<
+        EQUAL << this->ruleName << COMMA << NET_FIREWALL_RULE_DESC << EQUAL << this->ruleDescription << COMMA <<
+        NET_FIREWALL_RULE_DIR << EQUAL << int(this->ruleDirection) << COMMA << NET_FIREWALL_RULE_ACTION << EQUAL <<
+        int(this->ruleAction) << COMMA << NET_FIREWALL_RULE_TYPE << EQUAL << int(this->ruleType) << COMMA <<
+        NET_FIREWALL_IS_ENABLED << EQUAL << this->isEnabled << COMMA << NET_FIREWALL_APP_ID << EQUAL << this->appUid <<
+        COMMA << NET_FIREWALL_PROTOCOL << EQUAL << int(this->protocol) << COMMA << NET_FIREWALL_USER_ID << EQUAL <<
+        this->userId << COMMA << NET_FIREWALL_LOCAL_IP << size << this->localIps.size() << COMMA <<
+        NET_FIREWALL_REMOTE_IP << size << this->remoteIps.size() << COMMA << NET_FIREWALL_LOCAL_PORT << size <<
+        this->localPorts.size() << COMMA << NET_FIREWALL_DOMAIN << size << this->remotePorts.size() << COMMA <<
+        NET_FIREWALL_REMOTE_PORT << size << this->domains.size() << "}";
+    return ss.str();
+}
+
 // IP rule data
 bool NetFirewallIpRule::Marshalling(Parcel &parcel) const
 {

@@ -211,6 +211,7 @@ struct NetFirewallRule : public Parcelable {
 
     static sptr<NetFirewallRule> Unmarshalling(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
+    std::string ToString() const;
 };
 
 // Interception Record
