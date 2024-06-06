@@ -241,19 +241,19 @@ int32_t ClatManager::CreateAndConfigureClatSocket(const std::string &v6Iface, co
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    ret = AddAnycastSetsockopt(writeSock6, v6Addr.address_, v6IfIndex);
+    ret = ConfigureWriteSocket(writeSock6, v6Iface);
     if (ret != NETMANAGER_SUCCESS) {
         close(readSock6);
         close(writeSock6);
-        NETNATIVE_LOGW("Add anycast sockopt failed");
+        NETNATIVE_LOGW("Configure write sockopt failed");
         return ret;
     }
 
-    ret = ConfigurePacketSocket(readSock6, v6Addr.address_, v6IfIndex);
+    ret = ConfigureReadSocket(readSock6, v6Addr.address_, v6IfIndex);
     if (ret != NETMANAGER_SUCCESS) {
         close(readSock6);
         close(writeSock6);
-        NETNATIVE_LOGW("Configure packet socket failed");
+        NETNATIVE_LOGW("Configure read socket failed");
         return ret;
     }
 
