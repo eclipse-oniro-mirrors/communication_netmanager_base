@@ -26,16 +26,15 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
 #include "bpf_ring_buffer.h"
-#include "parameters.h"
+#endif
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
-const std::string DEVICETYPE_KEY = "const.product.devicetype";
-const std::string PHONE_TYPE = "phone";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -78,7 +77,9 @@ void NetsysNativeService::OnStop()
     NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
     NETNATIVE_LOGI("stop listener end on stop end");
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
     NetsysBpfRingBuffer::ExistRingBufferPoll();
+#endif
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -129,9 +130,9 @@ bool NetsysNativeService::Init()
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
 
-    if (OHOS::system::GetParameter(DEVICETYPE_KEY, "") == PHONE_TYPE) {
-        NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
-    }
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
+    NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
+#endif
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
