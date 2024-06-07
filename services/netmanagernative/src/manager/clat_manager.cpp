@@ -180,15 +180,7 @@ int32_t ClatManager::CreateAndConfigureTunIface(const std::string &v6Iface, cons
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    int detectedMtu = netsysService->GetInterfaceMtu(v6Iface);
-    if (detectedMtu < CLAT_IPV6_MIN_MTU) {
-        close(tunFd);
-        NETNATIVE_LOGW("Get MTU on %{public}s failed", v6Iface.c_str());
-        return NETMANAGER_ERR_OPERATION_FAILED;
-    }
-
-    int mtu = AdjustMtu(detectedMtu);
-
+    int mtu = CLAT_IPV6_MIN_MTU - MTU_DELTA;
     ret = netsysService->SetInterfaceMtu(tunIface, mtu);
     if (ret != NETMANAGER_SUCCESS) {
         close(tunFd);
@@ -259,15 +251,5 @@ int32_t ClatManager::CreateAndConfigureClatSocket(const std::string &v6Iface, co
 
     return NETMANAGER_SUCCESS;
 }
-
-int ClatManager::AdjustMtu(int mtu)
-{
-    mtu = std::max(mtu, CLAT_IPV6_MIN_MTU);
-    mtu = std::min(mtu, CLAT_MAX_MTU);
-    mtu -= MTU_DELTA;
-
-    return mtu;
-}
-
 } // namespace nmd
 } // namespace OHOS
