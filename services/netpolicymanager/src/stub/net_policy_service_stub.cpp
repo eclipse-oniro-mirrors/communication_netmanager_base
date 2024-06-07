@@ -19,6 +19,7 @@
 #include "net_policy_core.h"
 #include "net_quota_policy.h"
 #include "netmanager_base_permission.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -50,6 +51,8 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG),
      Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
@@ -111,6 +114,10 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnGetNetworkAccessPolicy;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG)] =
         &NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE)] =
+        &NetPolicyServiceStub::OnSetIpAndUidRule;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE)] =
+        &NetPolicyServiceStub::OnClearIpAndUidRule;
     return;
 }
 
@@ -194,6 +201,8 @@ int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetPolicyByUid callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETMGR_LOG_E("Read Uint32 data failed.");
@@ -217,6 +226,8 @@ int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParce
 
 int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetPolicyByUid callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -241,6 +252,8 @@ int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParce
 
 int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetUidsByPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t policy = 0;
     if (!data.ReadUint32(policy)) {
         NETMGR_LOG_E("Read uint32 data failed");
@@ -266,6 +279,8 @@ int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParc
 
 int32_t NetPolicyServiceStub::OnIsUidNetAllowedMetered(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("IsUidNetAllowedMetered callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid = 0;
     bool metered = false;
     if (!data.ReadUint32(uid)) {
@@ -296,6 +311,8 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedMetered(MessageParcel &data, Mess
 
 int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("IsUidNetAllowedIfaceName callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid = 0;
     std::string ifaceName;
     if (!data.ReadUint32(uid)) {
@@ -325,6 +342,8 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, Me
 
 int32_t NetPolicyServiceStub::OnRegisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("RegisterNetPolicyCallback callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
@@ -344,6 +363,8 @@ int32_t NetPolicyServiceStub::OnRegisterNetPolicyCallback(MessageParcel &data, M
 
 int32_t NetPolicyServiceStub::OnUnregisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("UnregisterNetPolicyCallback callingUid/callingPid: %{public}d/%{public}d",
+                 IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
@@ -362,6 +383,8 @@ int32_t NetPolicyServiceStub::OnUnregisterNetPolicyCallback(MessageParcel &data,
 
 int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetNetQuotaPolicies callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<NetQuotaPolicy> quotaPolicies;
     if (!NetQuotaPolicy::Unmarshalling(data, quotaPolicies)) {
         NETMGR_LOG_E("Unmarshalling failed.");
@@ -379,6 +402,8 @@ int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetNetQuotaPolicies callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     int32_t result = GetNetQuotaPolicies(quotaPolicies);
@@ -398,6 +423,8 @@ int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("ResetPolicies callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::string subscriberId;
     if (!data.ReadString(subscriberId)) {
         NETMGR_LOG_E("Read String data failed");
@@ -415,6 +442,8 @@ int32_t NetPolicyServiceStub::OnResetPolicies(MessageParcel &data, MessageParcel
 
 int32_t NetPolicyServiceStub::OnSetBackgroundPolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetBackgroundPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     bool isBackgroundPolicyAllow = false;
     if (!data.ReadBool(isBackgroundPolicyAllow)) {
         NETMGR_LOG_E("Read Bool data failed");
@@ -432,6 +461,8 @@ int32_t NetPolicyServiceStub::OnSetBackgroundPolicy(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnGetBackgroundPolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetBackgroundPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     bool backgroundPolicy = false;
     int32_t result = GetBackgroundPolicy(backgroundPolicy);
     if (!reply.WriteInt32(result)) {
@@ -449,6 +480,8 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicy(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetBackgroundPolicyByUid callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETMGR_LOG_E("Read uint32 data failed");
@@ -473,6 +506,8 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, Me
 
 int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SnoozePolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     int32_t netType = 0;
     if (!data.ReadInt32(netType)) {
         NETMGR_LOG_E("Read int32 data failed");
@@ -502,6 +537,8 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
 
 int32_t NetPolicyServiceStub::OnSetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetDeviceIdleTrustlist callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<uint32_t> uids;
     if (!data.ReadUInt32Vector(&uids)) {
         NETMGR_LOG_E("Read uint32 data failed");
@@ -525,6 +562,8 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdleTrustlist(MessageParcel &data, Mess
 
 int32_t NetPolicyServiceStub::OnGetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetDeviceIdleTrustlist callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<uint32_t> uids;
     int32_t result = GetDeviceIdleTrustlist(uids);
     if (!reply.WriteInt32(result)) {
@@ -543,6 +582,8 @@ int32_t NetPolicyServiceStub::OnGetDeviceIdleTrustlist(MessageParcel &data, Mess
 
 int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetDeviceIdlePolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     bool isAllowed = false;
     if (!data.ReadBool(isAllowed)) {
         NETMGR_LOG_E("Read Bool data failed");
@@ -559,6 +600,8 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnGetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetPowerSaveTrustlist callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<uint32_t> uids;
     int32_t result = GetPowerSaveTrustlist(uids);
     if (!reply.WriteInt32(result)) {
@@ -577,6 +620,8 @@ int32_t NetPolicyServiceStub::OnGetPowerSaveTrustlist(MessageParcel &data, Messa
 
 int32_t NetPolicyServiceStub::OnSetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetPowerSaveTrustlist callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     std::vector<uint32_t> uids;
     if (!data.ReadUInt32Vector(&uids)) {
         NETMGR_LOG_E("Read uint32 data failed");
@@ -600,6 +645,8 @@ int32_t NetPolicyServiceStub::OnSetPowerSaveTrustlist(MessageParcel &data, Messa
 
 int32_t NetPolicyServiceStub::OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetPowerSavePolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     bool isAllowed = false;
     if (!data.ReadBool(isAllowed)) {
         NETMGR_LOG_E("Read Bool data failed");
@@ -631,6 +678,8 @@ int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, Messag
 
 int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("SetNetworkAccessPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid;
 
     if (!data.ReadUint32(uid)) {
@@ -667,6 +716,8 @@ int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, Mess
 
 int32_t NetPolicyServiceStub::OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_I("GetNetworkAccessPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     int32_t uid = 0;
     uint32_t userId = 1;
     bool flag = false;
@@ -707,7 +758,8 @@ int32_t NetPolicyServiceStub::OnGetNetworkAccessPolicy(MessageParcel &data, Mess
 
 int32_t NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply)
 {
-    NETMGR_LOG_I("OnNotifyNetAccessPolicyDiag");
+    NETMGR_LOG_I("NotifyNetAccessPolicyDiag callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
     uint32_t uid;
 
     if (!data.ReadUint32(uid)) {
@@ -721,6 +773,58 @@ int32_t NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag(MessageParcel &data, M
     }
 
     return ret;
+}
+
+int32_t NetPolicyServiceStub::OnSetIpAndUidRule(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ip;
+    if (!data.ReadString(ip)) {
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint32_t ipType = 0;
+    if (!data.ReadUint32(ipType)) {
+        NETMGR_LOG_E("Read uint32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::vector<uint32_t> uids;
+    if (!data.ReadUInt32Vector(&uids)) {
+        NETMGR_LOG_E("Read uint32 vector failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetIpAndUidRule(ip, ipType, uids);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnClearIpAndUidRule(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ip;
+    if (!data.ReadString(ip)) {
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint32_t ipType = 0;
+    if (!data.ReadUint32(ipType)) {
+        NETMGR_LOG_E("Read uint32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = ClearIpAndUidRule(ip, ipType);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

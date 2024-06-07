@@ -464,5 +464,15 @@ int32_t NetPolicyRule::DeleteNetworkAccessPolicy(uint32_t uid)
 {
     return GetNetsysInst()->DeleteNetworkAccessPolicy(uid);
 }
+
+int32_t NetPolicyRule::PolicySetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)
+{
+    return GetNetsysInst()->FirewallSetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetPolicyRule::PolicyClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    return GetNetsysInst()->FirewallClearIpAndUidRule(ip, ipType);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

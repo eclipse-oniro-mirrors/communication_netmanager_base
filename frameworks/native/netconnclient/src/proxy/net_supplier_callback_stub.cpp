@@ -108,8 +108,11 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
-        NETMGR_LOG_I("RequestNetwork[%{public}s]", ident.c_str());
+        auto startTime = std::chrono::steady_clock::now();
         callback_->RequestNetwork(ident, netCaps);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
     }
     return 0;
 }
@@ -117,8 +120,11 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
 int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
-        NETMGR_LOG_I("ReleaseNetwork[%{public}s]", ident.c_str());
+        auto startTime = std::chrono::steady_clock::now();
         callback_->ReleaseNetwork(ident, netCaps);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
     }
     return 0;
 }

@@ -74,7 +74,7 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityConnectDone(
     MessageOption option;
 
     std::string parameters =
-        "{\"ability.want.parabilityManager.uiExtensionType\":\"sysDialog/common\",\"sysDialogZOrder\":2, \"appUid\":";
+        "{\"ability.want.params.uiExtensionType\":\"sysDialog/common\",\"sysDialogZOrder\":1, \"appUid\":";
     std::string tmpParameters = parameters + std::to_string(g_uid) + "}";
     data.WriteInt32(SIGNAL_NUM);
     data.WriteString16(u"bundleName");
@@ -96,7 +96,7 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityDisconnectDone
     g_remoteObject = nullptr;
 }
 
-INetAccessPolicyDialog *GetNetAccessPolicyDialogImpl()
+INetAccessPolicyDialog *GetNetAccessPolicyDialog()
 {
     static NetAccessPolicyDialogImpl impl;
     return &impl;

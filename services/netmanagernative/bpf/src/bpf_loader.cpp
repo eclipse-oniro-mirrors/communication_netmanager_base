@@ -112,8 +112,6 @@ static const constexpr struct {
     DEFINE_ATTACH_TYPE("cgroup_addr_connect6", BPF_CGROUP_INET6_CONNECT, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg4", BPF_CGROUP_UDP4_SENDMSG, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg6", BPF_CGROUP_UDP6_SENDMSG, true),
-    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg4", BPF_CGROUP_UDP4_RECVMSG, true),
-    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg6", BPF_CGROUP_UDP6_RECVMSG, true),
 };
 
 int32_t g_sockFd = -1;

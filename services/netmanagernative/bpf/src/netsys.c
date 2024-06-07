@@ -24,6 +24,10 @@
 #include "bpf/bpf_helpers.h"
 #include "bpf_def.h"
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall/netfirewall.h"
+#endif //FEATURE_NET_FIREWALL_ENABLE
+
 #define SEC(NAME) __attribute__((section(NAME), used))
 
 // network stats begin
@@ -148,6 +152,12 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         }
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (netfirewall_policy_ingress(skb) != SK_PASS) {
+        return SK_DROP;
+    }
+#endif
+
     app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
         app_uid_stats_value newValue = {};
@@ -208,6 +218,13 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (netfirewall_policy_egress(skb) != SK_PASS) {
+        return SK_DROP;
+    }
+#endif
+
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     uid_access_policy_value *netAccessPolicyValue = bpf_map_lookup_elem(&app_uid_access_policy_map, &sock_uid);
     if (netAccessPolicyValue != NULL) {

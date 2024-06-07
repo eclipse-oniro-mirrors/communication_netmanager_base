@@ -438,6 +438,59 @@ int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<u
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetManagerNative::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETNATIVE_LOG_D("NetManagerNative, SetFirewallDefaultAction");
+    return dnsManager_->SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t NetManagerNative::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETNATIVE_LOG_D("NetManagerNative, SetFirewallCurrentUserId");
+    return dnsManager_->SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetManagerNative::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
+{
+    return dnsManager_->SetFirewallDnsRules(ruleList);
+}
+
+int32_t NetManagerNative::DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds)
+{
+    return dnsManager_->DeleteFirewallDomainRules(ruleIds);
+}
+
+int32_t NetManagerNative::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETNATIVE_LOG_D("NetManagerNative, ClearFirewallRules");
+    return dnsManager_->ClearFirewallRules(type);
+}
+
+int32_t NetManagerNative::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
+                                                 bool isFinish)
+{
+    return dnsManager_->AddFirewallDomainRules(ruleList, isFinish);
+}
+
+int32_t NetManagerNative::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
+{
+    return dnsManager_->UpdateFirewallDomainRules(ruleList);
+}
+
+int32_t NetManagerNative::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOG_D("NetManagerNative, RegisterNetFirewallCallback");
+    return dnsManager_->RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOG_D("NetManagerNative, UnRegisterNetFirewallCallback");
+    return dnsManager_->UnRegisterNetFirewallCallback(callback);
+}
+#endif
+
 void NetManagerNative::ShareDnsSet(uint16_t netId)
 {
     dnsManager_->ShareDnsSet(netId);
@@ -520,6 +573,17 @@ int32_t NetManagerNative::DeleteNetworkAccessPolicy(uint32_t uid)
 int32_t NetManagerNative::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
 {
     return connManager_->NotifyNetBearerTypeChange(bearerTypes);
+}
+
+int32_t NetManagerNative::NativeSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+    const std::vector<uint32_t> &uids)
+{
+    return firewallManager_->SetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetManagerNative::NativeClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    return firewallManager_->ClearIpAndUidRule(ip, ipType);
 }
 } // namespace nmd
 } // namespace OHOS

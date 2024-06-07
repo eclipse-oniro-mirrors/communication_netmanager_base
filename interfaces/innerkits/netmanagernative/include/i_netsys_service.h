@@ -30,6 +30,10 @@
 #include "network_sharing.h"
 #include "netsys_ipc_interface_code.h"
 #include "route_type.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "i_netfirewall_callback.h"
+#include "netfirewall_parcel.h"
+#endif
 #include "uid_range.h"
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
@@ -145,11 +149,31 @@ public:
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
     virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    virtual int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish) = 0;
+    virtual int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule) = 0;
+    virtual int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList) = 0;
+    virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
+    virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
+    virtual int32_t DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds) = 0;
+    virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
+    virtual int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList) = 0;
+    virtual int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool finish) = 0;
+    virtual int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
+    virtual int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
+    virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
+    virtual int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
+#endif
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
     virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
     virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
+    virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
+    virtual int32_t StopClat(const std::string &interfaceName) = 0;
+    virtual int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+                                            const std::vector<uint32_t> &uids) = 0;
+    virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

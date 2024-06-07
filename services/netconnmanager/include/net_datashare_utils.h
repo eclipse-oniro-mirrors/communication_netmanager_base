@@ -66,9 +66,6 @@ public:
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-
-private:
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

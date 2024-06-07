@@ -129,5 +129,17 @@ int32_t NetsysPolicyWrapper::DeleteNetworkAccessPolicy(uint32_t uid)
     auto netsysReturnValue = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
     return netsysReturnValue;
 }
+
+int32_t NetsysPolicyWrapper::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+    const std::vector<uint32_t> &uids)
+{
+    auto netsysReturnValue = NetsysController::GetInstance().FirewallSetIpAndUidRule(ip, ipType, uids);
+    return netsysReturnValue;
+}
+int32_t NetsysPolicyWrapper::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    auto netsysReturnValue = NetsysController::GetInstance().FirewallClearIpAndUidRule(ip, ipType);
+    return netsysReturnValue;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

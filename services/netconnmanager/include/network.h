@@ -26,6 +26,7 @@
 #include "net_monitor.h"
 #include "net_supplier_info.h"
 #include "route.h"
+#include "nat464_service.h"
 #include "netmanager_base_common_utils.h"
 
 namespace OHOS {
@@ -83,6 +84,7 @@ private:
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsAddrInOtherNetwork(const INetAddr &netAddr);
     bool IsIfaceNameInUse();
+    bool IsNat464Prefered();
 
 private:
     int32_t netId_ = 0;
@@ -99,6 +101,7 @@ private:
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
+    std::unique_ptr<Nat464Service> nat464Service_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

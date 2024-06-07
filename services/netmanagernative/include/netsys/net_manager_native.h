@@ -131,9 +131,22 @@ public:
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+    int32_t DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds);
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
+    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish);
+    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
+    int32_t NativeSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
+    int32_t NativeClearIpAndUidRule(const std::string &ip, uint32_t ipType);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;
