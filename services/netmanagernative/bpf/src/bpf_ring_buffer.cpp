@@ -73,12 +73,10 @@ void NetsysBpfRingBuffer::ListenRingBufferThread(void)
 
         /* Process events */
         while (existThread_) {
-            if (ffrt::this_task::get_id() != 0) {
-                ffrt::sync_io(ringbufFd);
-            }
+            ffrt::sync_io(ringbufFd);
             err = ring_buffer__poll(rb, RING_BUFFER_POLL_TIME_OUT_MS);
             if (err < 0) {
-                NETNATIVE_LOGE("Bpf ring buffer poll fail");
+                NETNATIVE_LOGE("Bpf ring buffer poll fail, err: %{public}d, errno: %{public}d", err, errno);
                 break;
             }
         }
