@@ -139,10 +139,12 @@ private:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t CmdAddFirewallIpRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateFirewallIpRule(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdDeleteFirewallIpRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteFirewallRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetFirewallDnsRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply);
     int32_t CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
