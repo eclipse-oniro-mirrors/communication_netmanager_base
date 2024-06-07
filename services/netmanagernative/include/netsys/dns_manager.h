@@ -129,6 +129,14 @@ public:
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+
+    /**
      * Set the Firewall DNS rules
      *
      * @param ruleList firewall rules
@@ -137,26 +145,36 @@ public:
     int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
 
     /**
-     * Clear the Firewall DNS rules
+     * Clear the Firewall rules
      *
      * @return 0 if success or-1 if an error occurred
      */
-    int32_t ClearFirewallDnsRules();
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
 
     /**
-     * Set the Firewall domain rules
+     * Add firewall domain rules
      *
-     * @param ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish);
 
     /**
-     * Clear the Firewall domain rules
+     * Update firewall domain rules
      *
-     * @return 0 if success or-1 if an error occurred
+     * @param ruleList list of NetFirewallIpRule
+     * @return 0 if success or -1 if an error occurred
      */
-    int32_t ClearFirewallDomainRules();
+    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+
+    /**
+     * Delete firewall domain rules
+     *
+     * @param ruleIds list of NetFirewall Rule ids
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds);
 
     /**
      * Register callback for recevie intercept event

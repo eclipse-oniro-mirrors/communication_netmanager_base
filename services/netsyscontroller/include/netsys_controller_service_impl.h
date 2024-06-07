@@ -824,10 +824,10 @@ public:
      * Add firewall rules to bpf maps
      *
      * @param ruleList list of NetFirewallIpRule
-     * @param finish transmit finish or not
+     * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish) override;
+    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool isFinish) override;
 
     /**
      * Update firewall rules to bpf maps
@@ -838,12 +838,13 @@ public:
     int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule) override;
 
     /**
-     * Delete firewall rules of bpf maps
+     * Delete firewall rules
      *
-     * @param ruleIds list of NetFirewallIpRule ids
+     * @param type ip, dns, domain, all
+     * @param ruleIds list of NetFirewall Rule ids
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t DeleteFirewallIpRules(const std::vector<int32_t> &ruleIds) override;
+    int32_t DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds) override;
 
     /**
      * Set firewall rules to bpf maps
@@ -863,12 +864,37 @@ public:
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
 
     /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId) override;
+
+    /**
      * Set the Firewall DNS rules
      *
      * @param ruleList firewall rules
      * @return 0 if success or-1 if an error occurred
      */
     int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList) override;
+
+    /**
+     * Add firewall domain rules
+     *
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish) override;
+
+    /**
+     * Update firewall domain rules
+     *
+     * @param rule list of NetFirewallIpRule
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) override;
 
     /**
      * Set the Firewall domain rules
