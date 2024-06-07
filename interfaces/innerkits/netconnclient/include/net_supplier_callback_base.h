@@ -29,7 +29,9 @@ class NetSupplierCallbackBase : public virtual RefBase {
 public:
     virtual ~NetSupplierCallbackBase() = default;
 
-    virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
+    virtual int32_t RequestNetwork(const std::string &ident,
+                                   const std::set<NetCap> &netCaps,
+                                   const int32_t registerType = REGISTER);
     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
 };
 } // NetManagerStandard

@@ -485,7 +485,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
         return ret;
     }
     AddClientDeathRecipient(callback);
-    return ActivateNetwork(netSpecifier, callback, timeoutMS);
+    return ActivateNetwork(netSpecifier, callback, timeoutMS, REQUEST);
 }
 
 int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
@@ -804,7 +804,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                        const uint32_t &timeoutMS)
+                                        const uint32_t &timeoutMS, const int32_t registerType)
 {
     NETMGR_LOG_D("ActivateNetwork Enter");
     if (netSpecifier == nullptr || callback == nullptr) {
@@ -840,7 +840,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
-    SendRequestToAllNetwork(request);
+    SendRequestToAllNetwork(request, registerType);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1076,7 +1076,7 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
     }
 }
 
-void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
+void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const int32_t registerType)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
@@ -1089,7 +1089,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (iter->second == nullptr) {
             continue;
         }
-        if (!iter->second->MatchRequestAndNetwork(supplier)) {
+        if (!iter->second->MatchRequestAndNetwork(supplier, registerType)) {
             continue;
         }
         bool result = supplier->RequestToConnect(iter->first);
@@ -1100,7 +1100,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const int32_t registerType)
 {
     if (request == nullptr) {
         NETMGR_LOG_E("request is null");
@@ -1117,7 +1117,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second)) {
             continue;
         }
-        bool result = iter->second->RequestToConnect(reqId);
+        bool result = iter->second->RequestToConnect(reqId, registerType);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
                          iter->second->GetNetSupplierIdent().c_str());
