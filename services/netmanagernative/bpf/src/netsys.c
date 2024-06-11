@@ -51,6 +51,16 @@ bpf_map_def SEC("maps") app_uid_stats_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") sock_netns_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(sock_netns_key),
+    .value_size = sizeof(sock_netns_value),
+    .max_entries = NET_NS_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") app_uid_sim_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(app_uid_sim_stats_key),
@@ -158,17 +168,6 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->rxPackets, 1);
         __sync_fetch_and_add(&value->rxBytes, skb->len);
     }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    if (value_uid_if == NULL) {
-        app_uid_if_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    }
-    if (value_uid_if != NULL) {
-        __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
-        __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
-    }
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
     if (value_cookie == NULL) {
@@ -179,6 +178,36 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     if (value_cookie != NULL) {
         __sync_fetch_and_add(&value_cookie->rxPackets, 1);
         __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
+    }
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
+    if (sock_uid < CONTAINER_UID_MAX ||
+        value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+        if (value_uid_sim == NULL) {
+            app_uid_sim_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
+            value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+        }
+        if (value_uid_sim != NULL) {
+            __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
+            __sync_fetch_and_add(&value_uid_sim->rxBytes, skb->len);
+        }
+    } else {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+        }
     }
     return 1;
 }
@@ -218,17 +247,6 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->txPackets, 1);
         __sync_fetch_and_add(&value->txBytes, skb->len);
     }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    if (value_uid_if == NULL) {
-        app_uid_if_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    }
-    if (value_uid_if != NULL) {
-        __sync_fetch_and_add(&value_uid_if->txPackets, 1);
-        __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
-    }
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
     if (value_cookie == NULL) {
@@ -239,6 +257,36 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     if (value_cookie != NULL) {
         __sync_fetch_and_add(&value_cookie->txPackets, 1);
         __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
+    }
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
+    if (sock_uid < CONTAINER_UID_MAX ||
+        value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+        if (value_uid_sim == NULL) {
+            app_uid_sim_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
+            value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+        }
+        if (value_uid_sim != NULL) {
+            __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
+            __sync_fetch_and_add(&value_uid_sim->txBytes, skb->len);
+        }
+    } else {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->txPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+        }
     }
     return 1;
 }
@@ -262,6 +310,13 @@ bpf_map_def SEC("maps") broker_sock_permission_map = {
 SEC("cgroup_sock/inet_create_socket")
 int inet_create_socket(struct bpf_sock *sk)
 {
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(sk);
+    sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(sk);
+    bpf_map_update_elem(&sock_netns_map, &key_sock_netns1, &value_sock_netns1, BPF_NOEXIST);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value value_sock_netns2 = bpf_get_netns_cookie(NULL);
+    bpf_map_update_elem(&sock_netns_map, &key_sock_netns2, &value_sock_netns2, BPF_NOEXIST);
+
     void *map_ptr = &oh_sock_permission_map;
     if (bpf_get_netns_cookie(sk) != bpf_get_netns_cookie(NULL)) {
         map_ptr = &broker_sock_permission_map;
@@ -279,6 +334,17 @@ int inet_create_socket(struct bpf_sock *sk)
     if (*value == 0) {
         return 0;
     }
+    return 1;
+}
+
+SEC("cgroup_sock/inet_release_socket")
+int inet_release_socket(struct bpf_sock *sk)
+{
+    sock_netns_key key_sock_netns = bpf_get_socket_cookie(sk);
+    bpf_map_delete_elem(&sock_netns_map, &key_sock_netns);
+
+    socket_cookie_stats_key key_sock_cookie = bpf_get_socket_cookie(sk);
+    bpf_map_delete_elem(&app_cookie_stats_map, &key_sock_cookie);
     return 1;
 }
 // internet permission end
