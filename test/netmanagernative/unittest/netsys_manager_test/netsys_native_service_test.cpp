@@ -30,6 +30,7 @@
 #include "dns_config_client.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
+#include "bpf_path.h"
 
 namespace OHOS {
 namespace NetsysNative {
