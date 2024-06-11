@@ -322,7 +322,11 @@ int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirew
 
     for (const auto &rule : ruleList) {
         if (rule->ruleDirection == NetFirewallRuleDirection::RULE_IN) {
-            inRules.emplace_back(rule);
+            if (rule->protocol == NetworkProtocol::ICMP || rule->protocol == NetworkProtocol::ICMPV6) {
+                outRules.emplace_back(rule);
+            } else {
+                inRules.emplace_back(rule);
+            }
         }
         if (rule->ruleDirection == NetFirewallRuleDirection::RULE_OUT) {
             outRules.emplace_back(rule);
