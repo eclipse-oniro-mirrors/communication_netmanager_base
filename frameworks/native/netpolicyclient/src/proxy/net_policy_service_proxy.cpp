@@ -806,5 +806,68 @@ int32_t NetPolicyServiceProxy::NotifyNetAccessPolicyDiag(uint32_t uid)
 
     return retCode;
 }
+
+int32_t NetPolicyServiceProxy::SetIpAndUidRule(const std::string &ip, uint32_t ipType,
+                                               const std::vector<uint32_t> &uids)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ip)) {
+        NETMGR_LOG_E("Write ip failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(ipType)) {
+        NETMGR_LOG_E("Write ipType failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUInt32Vector(uids)) {
+        NETMGR_LOG_E("Write uids failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    MessageOption option;
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE), data,
+        reply, option);
+}
+
+int32_t NetPolicyServiceProxy::ClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ip)) {
+        NETMGR_LOG_E("Write ip failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(ipType)) {
+        NETMGR_LOG_E("Write ipType failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE), data,
+        reply, option);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

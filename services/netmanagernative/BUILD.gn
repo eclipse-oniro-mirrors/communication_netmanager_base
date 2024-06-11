@@ -45,6 +45,7 @@ netsys_native_manager_sources = [
   "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
   "src/dhcp_controller.cpp",
   "src/manager/bandwidth_manager.cpp",
+  "src/manager/clat_manager.cpp",
   "src/manager/conn_manager.cpp",
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
@@ -54,6 +55,9 @@ netsys_native_manager_sources = [
   "src/manager/traffic_manager.cpp",
   "src/manager/vpn_manager.cpp",
   "src/net_diag_callback_proxy.cpp",
+  "src/netsys/clat_utils.cpp",
+  "src/netsys/clatd.cpp",
+  "src/netsys/clatd_packet_converter.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
   "src/netsys/dnsresolv/dns_proxy_listen.cpp",
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
@@ -170,6 +174,10 @@ ohos_shared_library("netsys_native_manager") {
     defines += [ "USE_SELINUX" ]
   }
 
+  if (enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
+  }
+
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
   if (enable_sys_func) {
@@ -223,6 +231,10 @@ ohos_static_library("netsys_native_manager_static") {
   if (build_selinux) {
     external_deps += [ "selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
+  }
+
+  if (enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
   }
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]

@@ -44,6 +44,8 @@ public:
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
+    int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

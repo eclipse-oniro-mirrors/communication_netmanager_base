@@ -69,6 +69,8 @@
       "OHOS::NetManagerStandard::NetPolicyClient::SetNetworkAccessPolicy(unsigned int, OHOS::NetManagerStandard::NetworkAccessPolicy, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::GetNetworkAccessPolicy(OHOS::NetManagerStandard::AccessPolicyParameter, OHOS::NetManagerStandard::AccessPolicySave&)";
       "OHOS::NetManagerStandard::NetPolicyClient::NotifyNetAccessPolicyDiag(unsigned int)";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetIpAndUidRule(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&)";
+      "OHOS::NetManagerStandard::NetPolicyClient::ClearIpAndUidRule(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetPolicyClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
     };
   local:

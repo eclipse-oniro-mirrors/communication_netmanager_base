@@ -24,6 +24,10 @@
 #include "bpf/bpf_helpers.h"
 #include "bpf_def.h"
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall/netfirewall.h"
+#endif //FEATURE_NET_FIREWALL_ENABLE
+
 #define SEC(NAME) __attribute__((section(NAME), used))
 
 // network stats begin
@@ -138,6 +142,12 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         }
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (netfirewall_policy_ingress(skb) != SK_PASS) {
+        return SK_DROP;
+    }
+#endif
+
     app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
         app_uid_stats_value newValue = {};
@@ -179,6 +189,13 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (netfirewall_policy_egress(skb) != SK_PASS) {
+        return SK_DROP;
+    }
+#endif
+
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     uid_access_policy_value *netAccessPolicyValue = bpf_map_lookup_elem(&app_uid_access_policy_map, &sock_uid);
     if (netAccessPolicyValue != NULL) {
@@ -569,99 +586,4 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
     return 1;
 }
 
-SEC("cgroup_addr/recvmsg4")
-static int inet_check_recvmsg4(struct bpf_sock_addr *ctx)
-{
-    void *map_ptr = &app_uid_access_policy_map;
-
-    __u64 uid_gid = bpf_get_current_uid_gid();
-    __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
-    uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
-    // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
-    if (value == NULL) {
-        return 1;
-    }
-
-    void *net_bear_map_ptr = &net_bear_type_map;
-    net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
-    net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
-    if (net_bear_type == NULL) {
-        return 1;
-    }
-
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
-        if (value->diagAckFlag) {
-            return 0;
-        }
-
-        // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
-                value->diagAckFlag = 1;
-            }
-        }
-        value->netIfIndex = *net_bear_type;
-        bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
-        return 0;
-    }
-
-    value->netIfIndex = *net_bear_type;
-    bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
-    return 1;
-}
-
-SEC("cgroup_addr/recvmsg6")
-static int inet_check_recvmsg6(struct bpf_sock_addr *ctx)
-{
-    void *map_ptr = &app_uid_access_policy_map;
-
-    __u64 uid_gid = bpf_get_current_uid_gid();
-    __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
-    uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
-    // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
-    if (value == NULL) {
-        return 1;
-    }
-
-    void *net_bear_map_ptr = &net_bear_type_map;
-    net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
-    net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
-    if (net_bear_type == NULL) {
-        return 1;
-    }
-
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
-        if (value->diagAckFlag) {
-            return 0;
-        }
-
-        // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
-                value->diagAckFlag = 1;
-            }
-        }
-        value->netIfIndex = *net_bear_type;
-        bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
-        return 0;
-    }
-
-    value->netIfIndex = *net_bear_type;
-    bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
-    return 1;
-}
 char g_license[] SEC("license") = "GPL";

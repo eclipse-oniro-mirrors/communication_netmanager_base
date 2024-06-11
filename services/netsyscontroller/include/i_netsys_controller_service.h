@@ -33,6 +33,10 @@
 #include "netsys_dns_report_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#include "i_netfirewall_callback.h"
+#endif
 #include "uid_range.h"
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
@@ -841,6 +845,116 @@ public:
 
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /**
+     * Add firewall rules to bpf maps
+     *
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool isFinish) = 0;
+
+    /**
+     * Update firewall rules to bpf maps
+     *
+     * @param rule list of NetFirewallIpRule
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule) = 0;
+
+    /**
+     * Delete firewall rules
+     *
+     * @param type ip, dns, domain, all
+     * @param ruleIds list of NetFirewall Rule ids
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds) = 0;
+
+    /**
+     * Set firewall rules to bpf maps
+     *
+     * @param ruleList list of NetFirewallIpRule
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList) = 0;
+
+    /**
+     * Set firewall default action
+     *
+     * @param inDefault  Default action of NetFirewallRuleDirection:RULE_IN
+     * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
+
+    /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
+
+    /**
+     * Clear firewall rules by type
+     *
+     * @param type ip, dns, domain, all
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
+
+    /**
+     * Set the Firewall DNS rules
+     *
+     * @param ruleList firewall rules
+     * @return 0 if success or-1 if an error occurred
+     */
+    virtual int32_t SetFirewallDnsRules(const  std::vector<sptr<NetFirewallDnsRule>> &ruleList) = 0;
+
+    /**
+     * Add firewall domain rules
+     *
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish) = 0;
+
+    /**
+     * Update firewall domain rules
+     *
+     * @param rule list of NetFirewallIpRule
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
+
+    /**
+     *  Set the Firewall domain rules
+     *
+     * @param  ruleList firewall rules
+     * @return 0 if success or-1 if an error occurred
+     */
+    virtual int32_t SetFirewallDomainRules(const  std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
+
+    /**
+     * Register callback for recevie intercept event
+     *
+     * @param callback implement of INetFirewallCallback
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback) = 0;
+
+    /**
+     * Unregister callback for recevie intercept event
+     *
+     * @param callback register callback for recevie intercept event
+     * @return 0 if success or -1 if an error occurred
+     */
+    virtual int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback) = 0;
+#endif
+
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
 
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
@@ -856,6 +970,29 @@ public:
     virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
     virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
     virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
+
+    virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
+    virtual int32_t StopClat(const std::string &interfaceName) = 0;
+
+    /**
+     * Set Ip And Uid iptables Rule
+     *
+     * @param ip ip
+     * @param ipType 1 for ipv4, 2 for ipv6
+     * @param uids uid list
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
+                                            const std::vector<uint32_t> &uids) = 0;
+
+    /**
+     * Clear Ip And Uid iptables Rule
+     *
+     * @param ip ip
+     * @param ipType 1 for ipv4, 2 for ipv6
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

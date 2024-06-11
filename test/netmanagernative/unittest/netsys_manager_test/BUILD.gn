@@ -64,6 +64,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",

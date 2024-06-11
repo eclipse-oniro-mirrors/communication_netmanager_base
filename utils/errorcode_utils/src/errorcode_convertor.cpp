@@ -161,6 +161,17 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKVPN_ERROR_REFUSE_CREATE_VPN, "VPN creation denied, please check the user type"},
     {NETWORKVPN_ERROR_VPN_EXIST, "VPN exist already, please execute destroy first"},
     {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Net firewall Manager */
+    {FIREWALL_ERR_NO_USER, "The specified user does not exist"},
+    {FIREWALL_ERR_EXCEED_MAX_RULE, "The number of firewall rules exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_IP, "The number of IP address rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_PORT, "The number of port rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_DOMAIN, "The number of domain rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_ALL_MAX_DOMAIN, "The number of domain rules exceeds the maximum"},
+    {FIREWALL_ERR_NO_RULE, "The specified rule does not exist"},
+    {FIREWALL_ERR_DNS_RULE_DUPLICATION, "The dns rule is duplication"},
+#endif
 };
 } // namespace
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)

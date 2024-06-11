@@ -136,11 +136,28 @@ private:
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t CmdAddFirewallIpRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateFirewallIpRule(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteFirewallRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallDnsRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
+#endif
     int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStartClat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStopClat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallSetIpAndUidRule(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallClearIpAndUidRule(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

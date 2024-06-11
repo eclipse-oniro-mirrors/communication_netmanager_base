@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023 Huawei Device Co., Ltd.
+* Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -27,7 +27,8 @@ using NetCapMap = std::map<NetCap, NetConn_NetCap>;
 
 static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_WIFI, NETCONN_BEARER_WIFI},
-                                  {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET}};
+                                  {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET},
+                                  {BEARER_VPN, NETCONN_BEARER_VPN}};
 
 static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILITY_MMS},
                               {NET_CAPABILITY_SUPL,         NETCONN_NET_CAPABILITY_SUPL},
@@ -186,7 +187,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
         }
         netAllCaps->netCaps[i++] = iterMap->second;
     }
-    netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
+    netAllCaps->netCapsSize = static_cast<int32_t>(netAllCapsObj.netCaps_.size());
 
     i = 0;
     for (const auto& bearType : netAllCapsObj.bearerTypes_) {
@@ -206,5 +207,4 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
 
     return NETMANAGER_SUCCESS;
 }
-
 } // namespace OHOS::NetManagerStandard

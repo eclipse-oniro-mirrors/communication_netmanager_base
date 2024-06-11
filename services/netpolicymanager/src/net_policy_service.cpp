@@ -281,7 +281,7 @@ int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string 
 
 int32_t NetPolicyService::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    NETMGR_LOG_I("SetDeviceIdleTrustlist start");
+    NETMGR_LOG_D("SetDeviceIdleTrustlist start");
     if (netPolicyFirewall_ == nullptr) {
         NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -555,6 +555,26 @@ int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
     dlclose(handler);
 
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyService::SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->PolicySetIpAndUidRule(ip, ipType, uids);
+}
+
+int32_t NetPolicyService::ClearIpAndUidRule(const std::string &ip, uint32_t ipType)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->PolicyClearIpAndUidRule(ip, ipType);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
