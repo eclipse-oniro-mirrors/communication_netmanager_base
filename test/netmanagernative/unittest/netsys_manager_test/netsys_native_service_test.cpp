@@ -30,6 +30,7 @@
 #include "dns_config_client.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
+#include "bpf_path.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -38,6 +39,7 @@ using namespace NetManagerStandard;
 using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
+static constexpr uint32_t TEST_BYTES0 = 11;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
