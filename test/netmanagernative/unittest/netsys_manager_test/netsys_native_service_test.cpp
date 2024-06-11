@@ -30,7 +30,6 @@
 #include "dns_config_client.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
-#include "bpf_path.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -39,7 +38,6 @@ using namespace NetManagerStandard;
 using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
-static constexpr uint32_t TEST_BYTES0 = 11;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
@@ -633,15 +631,8 @@ HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
 {
     BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(appCookieStatsMap.IsValid());
-    app_cookie_stats_value value;
-    value.rxBytes = TEST_BYTES0;
-    value.rxPackets = TEST_BYTES0;
-    value.txBytes = TEST_BYTES0;
-    value.txPackets = TEST_BYTES0;
-    appCookieStatsMap.Write(TEST_COOKIE, value, BPF_ANY);
-
     uint64_t stats = 0;
-    int32_t ret = instance_->GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), TEST_COOKIE);
+    int32_t ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
