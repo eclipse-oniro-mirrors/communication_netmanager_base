@@ -630,9 +630,9 @@ HWTEST_F(NetsysNativeServiceTest, StaticArpTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
 {
-	BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(appCookieStatsMap.IsValid());
-	app_cookie_stats_value value;
+    app_cookie_stats_value value;
     int32_t ret = appCookieStatsMap.Write(TEST_COOKIE, value, BPF_ANY);
     uint64_t stats = 0;
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
