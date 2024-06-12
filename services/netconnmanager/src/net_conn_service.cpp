@@ -61,7 +61,9 @@ constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier b
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
-constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
+constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
+constexpr const char NEW_LINE_STR = '\n';
 const uint32_t SYS_PARAMETER_SIZE = 256;
 constexpr const char *CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES = "persist.network.pre_airplane_mode_wait_times";
 constexpr const char *NO_DELAY_TIME_CONFIG = "100";
@@ -1794,8 +1796,14 @@ void NetConnService::ActiveHttpProxy()
         }
         auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
+            std::string httpUrl;
+            GetHttpUrlFromConfig(httpUrl);
+            if (httpUrl.empty()) {
+                NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
+                continue;
+            }
             curl = curl_easy_init();
-            curl_easy_setopt(curl, CURLOPT_URL, NET_HTTP_PROBE_URL);
+            curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
             curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
             curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
             curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
@@ -1815,6 +1823,30 @@ void NetConnService::ActiveHttpProxy()
             httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
         }
     }
+}
+
+void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
+{
+    if (!std::filesystem::exists(URL_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
+        return;
+    }
+
+    std::ifstream file(URL_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(HTTP_URL_HEADER);
+    if (pos != std::string::npos) {
+        pos += strlen(HTTP_URL_HEADER);
+        httpUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    NETMGR_LOG_D("Get net detection http url:[%{public}s]", httpUrl.c_str());
 }
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
