@@ -398,6 +398,7 @@ private:
         REQUEST,
     };
     bool Init();
+    void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                              const std::set<NetCap> &netCaps);
