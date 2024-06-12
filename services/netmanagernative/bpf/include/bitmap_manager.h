@@ -16,6 +16,7 @@
 #ifndef NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H
 #define NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H
 
+#include <securec.h>
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
@@ -83,6 +84,8 @@ public:
 
     bool operator == (const Bitmap &other) const;
 
+    Bitmap &operator = (const Bitmap &other);
+
 private:
     /**
      * get uin32_t hash, use thomas Wang's 32 bit Mix Function
@@ -95,7 +98,6 @@ private:
 private:
     bitmap_t bitmap_;
 };
-
 
 template <class T> class BpfUnorderedMap {
 public:
@@ -164,11 +166,8 @@ const int32_t IPV6_BIT_COUNT = 128;
 const int32_t IPV4_BIT_COUNT = 32;
 const int32_t IPV6_BYTE_COUNT = 16;
 const int32_t IPV6_SEGMENT_COUNT = 8;
-const uint8_t MASK_MIN = 16;
-const uint8_t MASK_MAX = 32;
 const int32_t IPV4_MAX_PREFIXLEN = 32;
 const int32_t IPV6_MAX_PREFIXLEN = 128;
-const uint32_t IP6_BYTES = 16;
 const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {
@@ -363,23 +362,23 @@ public:
      */
     void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
     {
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            uint32_t maskUint32 = GetMaskUInt32(it->data, it->mask);
-            uint32_t inMaskUint32 = GetMaskUInt32(addr, mask);
-            if (maskUint32 == inMaskUint32) {
-                break;
+        std::vector<Ip4RuleBitmapVector::iterator> matches;
+        uint32_t networkAddr = GetNetworkAddress(addr, mask);
+        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
+            if (it->data == addr || GetNetworkAddress(it->data, it->mask) == networkAddr) {
+                matches.emplace_back(it);
             }
         }
-        Ip4RuleBitmap ruleBitmap;
-        ruleBitmap.data = addr;
-        ruleBitmap.mask = mask;
-        ruleBitmap.bitmap = bitmap;
-
-        if (it == ruleBitmapVec_.end()) {
-            ruleBitmapVec_.push_back(std::move(ruleBitmap));
+        if (matches.empty()) {
+            Ip4RuleBitmap ruleBitmap;
+            ruleBitmap.data = addr;
+            ruleBitmap.mask = mask;
+            ruleBitmap.bitmap = bitmap;
+            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
         } else {
-            it->bitmap.Or(ruleBitmap.bitmap);
+            for (const auto &it : matches) {
+                it->bitmap.Or(bitmap);
+            }
         }
     }
 
@@ -401,9 +400,9 @@ private:
      * @param mask ip mask
      * @return mask uint32 value by network byte order
      */
-    inline uint32_t GetMaskUInt32(uint32_t addr, uint32_t mask)
+    inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
     {
-        return (addr & (0xFFFFFFFF >> (MASK_MAX - mask)));
+        return (addr & (0xFFFFFFFF >> (IPV4_MAX_PREFIXLEN - mask)));
     }
 
 private:
@@ -434,22 +433,27 @@ public:
      */
     void OrInsert(const in6_addr &addr, uint32_t prefixlen, Bitmap &bitmap)
     {
-        Ip6RuleBitmap ruleBitmap;
-        ruleBitmap.data = addr;
-        ruleBitmap.prefixlen = prefixlen;
-
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            if (IsSameMask(*it, ruleBitmap)) {
-                break;
+        std::vector<Ip6RuleBitmapVector::iterator> matches;
+        in6_addr networkAddr = {};
+        GetNetworkAddress(addr, prefixlen, networkAddr);
+        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
+            in6_addr otherNetworkAddr = {};
+            GetNetworkAddress(it->data, it->prefixlen, otherNetworkAddr);
+            if (!memcmp(&addr, &(it->data), sizeof(in6_addr)) ||
+                !memcmp(&networkAddr, &otherNetworkAddr, sizeof(in6_addr))) {
+                matches.emplace_back(it);
             }
         }
-
-        ruleBitmap.bitmap = bitmap;
-        if (it == ruleBitmapVec_.end()) {
-            ruleBitmapVec_.push_back(std::move(ruleBitmap));
+        if (matches.empty()) {
+            Ip6RuleBitmap ruleBitmap;
+            ruleBitmap.data = addr;
+            ruleBitmap.prefixlen = prefixlen;
+            ruleBitmap.bitmap = bitmap;
+            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
         } else {
-            it->bitmap.Or(ruleBitmap.bitmap);
+            for (const auto &it : matches) {
+                it->bitmap.Or(bitmap);
+            }
         }
     }
 
@@ -464,36 +468,16 @@ public:
     }
 
 private:
-    /**
-     * judge if ip6 has same prifix
-     *
-     * @param a one ip6 and rule bitmap info
-     * @param b the other ip6 and rule bitmap info
-     * @return true: has save prifix; otherwise return false
-     */
-    bool IsSameMask(const Ip6RuleBitmap &a, const Ip6RuleBitmap &b)
+    void GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out)
     {
-        if (a.prefixlen != b.prefixlen) {
-            return false;
+        int quotient = prefixLen / 8;
+        int remainder = prefixLen % 8;
+        for (int i = 0; i < quotient; i++) {
+            out.s6_addr[i] = addr.s6_addr[i] & 0xff;
         }
-
-        uint32_t byteNum = a.prefixlen / BIT_PER_BYTE;
-        for (size_t i = 0; i < byteNum; ++i) {
-            if (a.data.s6_addr[i] != b.data.s6_addr[i]) {
-                return false;
-            }
+        if (remainder) {
+            out.s6_addr[quotient] = addr.s6_addr[quotient] & (~(0xff >> remainder));
         }
-        uint32_t bitOff = a.prefixlen % BIT_PER_BYTE;
-        if (!bitOff) {
-            return true;
-        }
-
-        uint8_t value = (0xFF >> (BIT_PER_BYTE - bitOff));
-        if ((a.data.s6_addr[byteNum] & value) == (b.data.s6_addr[byteNum] & value)) {
-            return true;
-        }
-
-        return false;
     }
 
 private:

@@ -96,6 +96,12 @@ bool Bitmap::operator == (const Bitmap &other) const
     return (memcmp(bitmap_, other.bitmap_, sizeof(bitmap_)) == 0);
 }
 
+Bitmap &Bitmap::operator = (const Bitmap &other)
+{
+    memcpy_s(bitmap_, sizeof(bitmap_), other.bitmap_, sizeof(bitmap_));
+    return *this;
+}
+
 // Thomas Wang's 32 bit Mix Function
 uint32_t Bitmap::GetHash(uint32_t key) const
 {
@@ -490,7 +496,7 @@ int32_t IpParamParser::GetIp4AndMask(const std::string &startIp, const std::stri
     if (startIpInt > endIpInt) {
         return NETFIREWALL_ERR;
     } else if (startIpInt == endIpInt) {
-        AddIp(startIpInt, MASK_MAX, list);
+        AddIp(startIpInt, IPV4_MAX_PREFIXLEN, list);
         return NETFIREWALL_SUCCESS;
     }
     uint32_t mask = GetMask(startIpInt, endIpInt);
