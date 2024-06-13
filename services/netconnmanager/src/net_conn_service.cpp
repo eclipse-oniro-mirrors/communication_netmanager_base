@@ -452,7 +452,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     supplier->SetNetwork(network);
     supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
     networks_[netId] = network;
     locker.unlock();
@@ -556,7 +556,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     NET_NETWORK_MAP::iterator iterNetwork = networks_.find(netId);
     if (iterNetwork != networks_.end()) {
         NETMGR_LOG_I("the iterNetwork already exists.");
-        std::unique_lock<std::mutex> locker(netManagerMutex_);
+        std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         networks_.erase(iterNetwork);
         locker.unlock();
     }
@@ -567,7 +567,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     }
     NetSupplierInfo info;
     supplier->UpdateNetSupplierInfo(info);
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_.erase(supplierId);
     locker.unlock();
     FindBestNetworkForAllRequest();
@@ -761,7 +761,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     HttpProxy oldHttpProxy;
     supplier->GetHttpProxy(oldHttpProxy);
     // According to supplier id, get network from the list
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (supplier->UpdateNetLinkInfo(*netLinkInfo) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UpdateNetLinkInfo fail");
         eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_FAILED);
@@ -1277,7 +1277,7 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     if (newSupplier != nullptr) {
         newSupplier->SetDefault();
     }
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     oldSupplier = newSupplier;
 }
 
@@ -1307,7 +1307,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
 
 std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     std::list<sptr<NetSupplier>> ret;
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr) {
@@ -1327,7 +1327,7 @@ std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType 
 sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                                          const std::set<NetCap> &netCaps)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr) {
             continue;
@@ -1342,7 +1342,7 @@ sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType,
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
         return NETMANAGER_SUCCESS;
@@ -1379,7 +1379,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
     }
 
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second == nullptr) {
@@ -1396,7 +1396,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto currentUid = IPCSkeleton::GetCallingUid();
     for (const auto &network : networks_) {
         if (network.second != nullptr && network.second->IsConnected()) {
@@ -1424,7 +1424,7 @@ bool NetConnService::IsInRequestNetUids(int32_t uid)
 int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 {
     NETMGR_LOG_D("Enter GetSpecificUidNet, uid is [%{public}d].", uid);
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     netId = INVALID_NET_ID;
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
@@ -1443,7 +1443,7 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         return NET_CONN_ERR_INVALID_NETWORK;
@@ -1458,7 +1458,7 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
 
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if ((iterSupplier->second != nullptr) && (netId == iterSupplier->second->GetNetId())) {
@@ -1571,7 +1571,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         return NETMANAGER_SUCCESS;
     }
 
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iter = networks_.find(bindNetId);
     if ((iter != networks_.end()) && (iter->second != nullptr)) {
         httpProxy = iter->second->GetNetLinkInfo().httpProxy_;
@@ -1596,7 +1596,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list
         NETMGR_LOG_E("The identifier in service is null");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (auto iterSupplier : netSuppliers_) {
         if (iterSupplier.second == nullptr) {
             continue;
@@ -1612,7 +1612,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list
 void NetConnService::GetDumpMessage(std::string &message)
 {
     message.append("Net connect Info:\n");
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         message.append("\tSupplierId: " + std::to_string(defaultNetSupplier_->GetSupplierId()) + "\n");
         std::shared_ptr<Network> network = defaultNetSupplier_->GetNetwork();
@@ -1651,7 +1651,7 @@ void NetConnService::GetDumpMessage(std::string &message)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         flag = false;
         return NETMANAGER_SUCCESS;
@@ -1662,7 +1662,7 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 
 int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     } else {
@@ -2309,7 +2309,7 @@ void NetConnService::OnNetSysRestart()
 
         iter->second->ResumeNetworkInfo();
     }
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
@@ -2328,7 +2328,7 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
 
 bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &network : networks_) {
         if (network.second->GetNetId() == netId) {
             continue;
@@ -2345,7 +2345,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
 
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
@@ -2441,7 +2441,7 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
 {
     std::vector<sptr<NetSupplier>> result;
     NET_SUPPLIER_MAP::iterator iterSupplier;
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second == nullptr) {
             continue;

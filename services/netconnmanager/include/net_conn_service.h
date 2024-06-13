@@ -491,7 +491,7 @@ private:
     std::atomic<bool> isDataShareReady_ = false;
     HttpProxy globalHttpProxy_;
     std::mutex globalHttpProxyMutex_;
-    std::mutex netManagerMutex_;
+    std::recursive_mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
     std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
