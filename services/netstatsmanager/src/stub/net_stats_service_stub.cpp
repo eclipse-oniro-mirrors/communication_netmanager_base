@@ -409,13 +409,13 @@ int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &
         if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
-        return NETMANAGER_SUCCESS;
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
-        return NETMANAGER_SUCCESS;
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     int32_t ret = ResetFactory();
