@@ -30,6 +30,7 @@ static constexpr const uint32_t CHAR_ARRAY_LENGTH_FOUR = 4;
 enum BASE64_ENCODE_CONSTANT : uint8_t {
     BASE64_ENCODE_MASK1 = 0xfc,
     BASE64_ENCODE_MASK2 = 0x03,
+    // text
     BASE64_ENCODE_MASK3 = 0x0f,
     BASE64_ENCODE_MASK4 = 0x3f,
     BASE64_ENCODE_MASK5 = 0xf0,
