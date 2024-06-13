@@ -64,6 +64,8 @@ private:
 
     std::mutex cacheMutex_;
 
+    std::mutex resultListenersMutex_;
+
     std::atomic_uint defaultNetId_;
 
     uint32_t monitor_loop_delay;
