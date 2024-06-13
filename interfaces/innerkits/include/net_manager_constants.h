@@ -154,11 +154,11 @@ enum class NetSlotTech {
     SLOT_TYPE_LTE_CA = 10,
 };
 
-enum RegsiterType {
+enum RegisterType {
     INVALID_TYPE,
     REGISTER,
     REQUEST
-}
+};
 // Error code for netmanager dns resolver
 constexpr ErrCode DNS_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_DNS_RESOLVER_MANAGER);
 // Error code for netmanager conn manager

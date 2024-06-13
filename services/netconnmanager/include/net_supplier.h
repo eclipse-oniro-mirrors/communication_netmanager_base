@@ -81,7 +81,7 @@ public:
     bool SupplierDisconnection(const std::set<NetCap> &netCaps);
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
-    bool RequestToConnect(uint32_t reqId, const int32_t registerType = REGSITER);
+    bool RequestToConnect(uint32_t reqId, const int32_t registerType = REGISTER);
     int32_t SelectAsBestNetwork(uint32_t reqId);
     void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     int32_t CancelRequest(uint32_t reqId);
@@ -125,7 +125,7 @@ private:
         INVALID_TYPE,
         REGISTER,
         REQUEST,
-    }
+    };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

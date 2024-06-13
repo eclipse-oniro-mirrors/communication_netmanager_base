@@ -110,8 +110,11 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
     const int32_t registerType)
 {
     if (callback_ != nullptr) {
-        NETMGR_LOG_I("RequestNetwork[%{public}s]", ident.c_str());
+        auto startTime = std::chrono::steady_clock::now();
         callback_->RequestNetwork(ident, netCaps, registerType);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
     }
     return 0;
 }

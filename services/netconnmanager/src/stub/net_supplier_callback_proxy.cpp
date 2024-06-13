@@ -24,8 +24,8 @@ NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &im
 
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 
-int32_t NetSupplierCallbackProxy::RequestNetwork(
-        const std::string &ident, const std::set<NetCap> &netCaps, const int32_t registerType)
+int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+                                                 const int32_t registerType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

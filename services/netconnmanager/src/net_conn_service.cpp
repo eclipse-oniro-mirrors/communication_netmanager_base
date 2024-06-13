@@ -1089,10 +1089,10 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const i
         if (iter->second == nullptr) {
             continue;
         }
-        if (!iter->second->MatchRequestAndNetwork(supplier, registerType)) {
+        if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        bool result = supplier->RequestToConnect(iter->first);
+        bool result = supplier->RequestToConnect(iter->first, registerType);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());

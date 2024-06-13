@@ -22,6 +22,7 @@
 #include "refbase.h"
 
 #include "net_all_capabilities.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
