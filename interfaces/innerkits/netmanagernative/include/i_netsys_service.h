@@ -150,17 +150,11 @@ public:
     virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    virtual int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish) = 0;
-    virtual int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule) = 0;
-    virtual int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList) = 0;
+    virtual int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                     bool isFinish) = 0;
     virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
     virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
-    virtual int32_t DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds) = 0;
     virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
-    virtual int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList) = 0;
-    virtual int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool finish) = 0;
-    virtual int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
-    virtual int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) = 0;
     virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
     virtual int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
 #endif

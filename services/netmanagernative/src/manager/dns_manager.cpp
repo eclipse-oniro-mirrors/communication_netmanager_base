@@ -226,24 +226,10 @@ int32_t DnsManager::SetFirewallCurrentUserId(int32_t userId)
     return DnsParamCache::GetInstance().SetFirewallCurrentUserId(userId);
 }
 
-int32_t DnsManager::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
+int32_t DnsManager::SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                     bool isFinish)
 {
-    return DnsParamCache::GetInstance().SetFirewallDnsRules(ruleList);
-}
-
-int32_t DnsManager::DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds)
-{
-    return DnsParamCache::GetInstance().DeleteFirewallDomainRules(ruleIds);
-}
-
-int32_t DnsManager::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish)
-{
-    return DnsParamCache::GetInstance().AddFirewallDomainRules(ruleList, isFinish);
-}
-
-int32_t DnsManager::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    return DnsParamCache::GetInstance().UpdateFirewallDomainRules(ruleList);
+    return DnsParamCache::GetInstance().SetFirewallRules(type, ruleList, isFinish);
 }
 
 int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)

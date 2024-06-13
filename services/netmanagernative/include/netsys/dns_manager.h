@@ -137,12 +137,15 @@ public:
     int32_t SetFirewallCurrentUserId(int32_t userId);
 
     /**
-     * Set the Firewall DNS rules
+     * Set firewall rules to native
      *
-     * @param ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
+     * @param type ip, dns, domain
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
     /**
      * Clear the Firewall rules
@@ -150,31 +153,6 @@ public:
      * @return 0 if success or-1 if an error occurred
      */
     int32_t ClearFirewallRules(NetFirewallRuleType type);
-
-    /**
-     * Add firewall domain rules
-     *
-     * @param ruleList list of NetFirewallIpRule
-     * @param isFinish transmit finish or not
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish);
-
-    /**
-     * Update firewall domain rules
-     *
-     * @param ruleList list of NetFirewallIpRule
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
-
-    /**
-     * Delete firewall domain rules
-     *
-     * @param ruleIds list of NetFirewall Rule ids
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds);
 
     /**
      * Register callback for recevie intercept event

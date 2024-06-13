@@ -49,14 +49,20 @@ static sptr<NetFirewallIpRule> GeIpFirewallRule(NetFirewallRuleDirection dir, st
     NetFirewallIpParam remoteIpParam;
     remoteIpParam.family = 1;
     remoteIpParam.type = 1;
-    remoteIpParam.address = addr;
-    remoteIpParam.mask = MASK_MAX;
-    remoteIpParam.startIp = "";
-    remoteIpParam.endIp = "";
+    inet_pton(AF_INET, addr.c_str(), &remoteIpParam.ipv4.startIp);
+    remoteIpParam.mask = IPV4_MAX_PREFIXLEN;
     remoteIp.push_back(remoteIpParam);
     rule->remoteIps = remoteIp;
 
-    rule->protocol = NetworkProtocol::ICMP;
+    rule->protocol = NetworkProtocol::TCP;
+
+    std::vector<NetFirewallPortParam> ports;
+    NetFirewallPortParam remotePort;
+    remotePort.startPort = 80;
+    remotePort.endPort = 80;
+    ports.emplace_back(remotePort);
+    rule->localPorts = ports;
+    rule->remotePorts = ports;
 
     return rule;
 }
@@ -195,8 +201,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest004, TestSize.Level0)
     std::vector<sptr<NetFirewallIpRule>> ruleList;
     sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
     ruleList.push_back(rule);
-    rule->remoteIps.front().address = "153.3.238.102";
-    ruleList.push_back(rule);
+    sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102");
+    ruleList.push_back(rule2);
 
     BitmapManager manager;
     int ret = manager.BuildBitmapMap(ruleList);
@@ -206,8 +212,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest004, TestSize.Level0)
     EXPECT_FALSE(manager.GetSrcIp6Map().empty());
     EXPECT_FALSE(manager.GetDstIp4Map().empty());
     EXPECT_FALSE(manager.GetDstIp6Map().empty());
-    EXPECT_FALSE(manager.GetSrcPortMap().Empty());
-    EXPECT_FALSE(manager.GetDstPortMap().Empty());
+    EXPECT_FALSE(manager.GetSrcPortMap().empty());
+    EXPECT_FALSE(manager.GetDstPortMap().empty());
     EXPECT_FALSE(manager.GetProtoMap().Empty());
     EXPECT_FALSE(manager.GetActionMap().empty());
     EXPECT_FALSE(manager.GetAppIdMap().Empty());
@@ -218,8 +224,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest005, TestSize.Level0)
     std::vector<sptr<NetFirewallIpRule>> ruleList;
     sptr<NetFirewallIpRule> rule = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.110");
     ruleList.push_back(rule);
-    rule->remoteIps.front().address = "153.3.238.102";
-    ruleList.push_back(rule);
+    sptr<NetFirewallIpRule> rule2 = GeIpFirewallRule(NetFirewallRuleDirection::RULE_IN, "153.3.238.102");
+    ruleList.push_back(rule2);
 
     shared_ptr<NetsysBpfNetFirewall> bpfNetFirewall = NetsysBpfNetFirewall::GetInstance();
     int32_t ret = bpfNetFirewall->SetFirewallIpRules(ruleList);

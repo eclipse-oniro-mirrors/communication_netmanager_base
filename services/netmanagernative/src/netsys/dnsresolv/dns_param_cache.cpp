@@ -362,10 +362,45 @@ bool DnsParamCache::GetDnsServersByAppUid(int32_t appUid, std::vector<std::strin
     return false;
 }
 
+int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
+                                        const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+{
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    NETNATIVE_LOGI("SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(), isFinish);
+    if (ruleList.empty()) {
+        NETNATIVE_LOGE("SetFirewallRules: rules is empty");
+        return -1;
+    }
+    int32_t ret = 0;
+    switch (type) {
+        case NetFirewallRuleType::RULE_DNS: {
+            for (const auto &rule : ruleList) {
+                firewallDnsRules_.emplace_back(firewall_rule_cast<NetFirewallDnsRule>(rule));
+            }
+            if (isFinish) {
+                ret = SetFirewallDnsRules(firewallDnsRules_);
+                firewallDnsRules_.clear();
+            }
+            break;
+        }
+        case NetFirewallRuleType::RULE_DOMAIN: {
+            for (const auto &rule : ruleList) {
+                firewallDomainRules_.emplace_back(firewall_rule_cast<NetFirewallDomainRule>(rule));
+            }
+            if (isFinish) {
+                ret = SetFirewallDomainRules(firewallDomainRules_);
+                firewallDomainRules_.clear();
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return ret;
+}
+
 int32_t DnsParamCache::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
 {
-    ClearFirewallRules(NetFirewallRuleType::RULE_DNS);
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     for (const auto &rule : ruleList) {
         std::vector<sptr<NetFirewallDnsRule>> rules;
         auto it = netFirewallDnsRuleMap_.find(rule->appUid);
@@ -464,10 +499,10 @@ int32_t DnsParamCache::SetFirewallDefaultAction(FirewallRuleAction inDefault, Fi
     return 0;
 }
 
-void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule)
+void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule, const std::string &domain)
 {
     std::vector<sptr<NetFirewallDomainRule>> rules;
-    std::string suffix = rule->domain;
+    std::string suffix(domain);
     auto wildcardCharIndex = suffix.find('*');
     if (wildcardCharIndex != std::string::npos) {
         suffix = suffix.substr(wildcardCharIndex + 1);
@@ -493,11 +528,11 @@ void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule>
     }
 }
 
-void DnsParamCache::BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule)
+void DnsParamCache::BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule, const std::string &raw)
 {
-    std::string domain = rule->domain;
+    DNS_CONFIG_PRINT("BuildFirewallDomainMap: domain: %{public}s", raw.c_str());
+    std::string domain(raw);
     std::vector<sptr<NetFirewallDomainRule>> rules;
-    DNS_CONFIG_PRINT("BuildFirewallDomainMap: domain: %{public}s", domain.c_str());
     std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
     if (rule->ruleAction == FirewallRuleAction::RULE_DENY) {
         auto it = netFirewallDomainRulesDenyMap_.find(domain);
@@ -529,53 +564,16 @@ int32_t DnsParamCache::SetFirewallDomainRules(const std::vector<sptr<NetFirewall
             std::make_shared<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>>();
     }
     for (const auto &rule : ruleList) {
-        DNS_CONFIG_PRINT("SetFirewallDomainRules: %{public}s", rule->ToString().c_str());
-
-        if (rule->isWildcard) {
-            BuildFirewallDomainLsmTrie(rule);
-        } else {
-            BuildFirewallDomainMap(rule);
+        for (const auto &param: rule->domains) {
+            if (param.isWildcard) {
+                BuildFirewallDomainLsmTrie(rule, param.domain);
+            } else {
+                BuildFirewallDomainMap(rule, param.domain);
+            }
         }
+
     }
     return 0;
-}
-
-int32_t DnsParamCache::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish)
-{
-    NETNATIVE_LOG_D("AddFirewallDomainRules");
-    if (ruleList.empty()) {
-        NETNATIVE_LOGE("AddFirewallDomainRules: rules is empty");
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    firewallDomainRules_.insert(firewallDomainRules_.end(), std::make_move_iterator(ruleList.begin()),
-                                std::make_move_iterator(ruleList.end()));
-
-    if (isFinish) {
-        return SetFirewallDomainRules(firewallDomainRules_);
-    }
-    return 0;
-}
-
-int32_t DnsParamCache::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    NETNATIVE_LOG_D("UpdateFirewallDomainRule");
-    if (ruleList.empty()) {
-        NETNATIVE_LOGE("UpdateFirewallDomainRules: rules is empty");
-        return -1;
-    }
-
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    int32_t ruleIdToDelete = ruleList.front()->ruleId;
-    firewallDomainRules_.erase(
-        std::remove_if(firewallDomainRules_.begin(), firewallDomainRules_.end(),
-                       [&](const sptr<NetFirewallDomainRule> &r) { return r->ruleId == ruleIdToDelete; }),
-        firewallDomainRules_.end());
-
-    firewallDomainRules_.insert(firewallDomainRules_.end(), std::make_move_iterator(ruleList.begin()),
-                                std::make_move_iterator(ruleList.end()));
-    return SetFirewallDomainRules(firewallDomainRules_);
 }
 
 int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
@@ -583,9 +581,11 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     switch (type) {
         case NetFirewallRuleType::RULE_DNS:
+            firewallDnsRules_.clear();
             netFirewallDnsRuleMap_.clear();
             break;
         case NetFirewallRuleType::RULE_DOMAIN: {
+            firewallDomainRules_.clear();
             netFirewallDomainRulesAllowMap_.clear();
             netFirewallDomainRulesDenyMap_.clear();
             if (domainAllowLsmTrie_) {
@@ -597,7 +597,9 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             break;
         }
         case NetFirewallRuleType::RULE_ALL: {
+            firewallDnsRules_.clear();
             netFirewallDnsRuleMap_.clear();
+            firewallDomainRules_.clear();
             netFirewallDomainRulesAllowMap_.clear();
             netFirewallDomainRulesDenyMap_.clear();
             if (domainAllowLsmTrie_) {
@@ -612,27 +614,6 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             break;
     }
     return 0;
-}
-
-int32_t DnsParamCache::DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds)
-{
-    NETNATIVE_LOGI("DnsParamCache::DeleteFirewallRules: size=%{public}zu", ruleIds.size());
-    if (ruleIds.empty()) {
-        NETNATIVE_LOGE("DeleteFirewallRules: ruleIds is empty");
-        return -1;
-    }
-    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-    for (const auto &ruleId : ruleIds) {
-        firewallDomainRules_.erase(
-            std::remove_if(firewallDomainRules_.begin(), firewallDomainRules_.end(),
-                           [&](const sptr<NetFirewallDomainRule> &r) { return r->ruleId == ruleId; }),
-            firewallDomainRules_.end());
-    }
-    if (firewallDomainRules_.empty()) {
-        return ClearFirewallRules(NetFirewallRuleType::RULE_DOMAIN);
-    } else {
-        return SetFirewallDomainRules(firewallDomainRules_);
-    }
 }
 
 void DnsParamCache::NotifyDomianIntercept(int32_t appUid, const std::string &hostName)

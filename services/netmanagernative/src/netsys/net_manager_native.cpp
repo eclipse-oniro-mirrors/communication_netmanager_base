@@ -451,31 +451,16 @@ int32_t NetManagerNative::SetFirewallCurrentUserId(int32_t userId)
     return dnsManager_->SetFirewallCurrentUserId(userId);
 }
 
-int32_t NetManagerNative::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
+int32_t NetManagerNative::SetFirewallRules(NetFirewallRuleType type,
+                                           const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
-    return dnsManager_->SetFirewallDnsRules(ruleList);
-}
-
-int32_t NetManagerNative::DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds)
-{
-    return dnsManager_->DeleteFirewallDomainRules(ruleIds);
+    return dnsManager_->SetFirewallRules(type, ruleList, isFinish);
 }
 
 int32_t NetManagerNative::ClearFirewallRules(NetFirewallRuleType type)
 {
     NETNATIVE_LOG_D("NetManagerNative, ClearFirewallRules");
     return dnsManager_->ClearFirewallRules(type);
-}
-
-int32_t NetManagerNative::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
-                                                 bool isFinish)
-{
-    return dnsManager_->AddFirewallDomainRules(ruleList, isFinish);
-}
-
-int32_t NetManagerNative::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    return dnsManager_->UpdateFirewallDomainRules(ruleList);
 }
 
 int32_t NetManagerNative::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)

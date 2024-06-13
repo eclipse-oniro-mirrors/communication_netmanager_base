@@ -137,9 +137,22 @@ bpf_map_def SEC("maps") app_uid_access_policy_map = {
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (skb == NULL) {
+        return 1;
+    }
+    if (netfirewall_policy_ingress(skb) != SK_PASS) {
+        return SK_DROP;
+    }
+    if (skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
+    }
+#else
     if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
+#endif
+
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     uid_access_policy_value *netAccessPolicyValue = bpf_map_lookup_elem(&app_uid_access_policy_map, &sock_uid);
     if (netAccessPolicyValue != NULL) {
@@ -151,13 +164,6 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
             return 0;
         }
     }
-
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    if (netfirewall_policy_ingress(skb) != SK_PASS) {
-        return SK_DROP;
-    }
-#endif
-
     app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
         app_uid_stats_value newValue = {};
@@ -215,13 +221,19 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 SEC("cgroup_skb/uid/egress")
 int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 {
-    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (skb == NULL) {
         return 1;
     }
-
-#ifdef FEATURE_NET_FIREWALL_ENABLE
     if (netfirewall_policy_egress(skb) != SK_PASS) {
         return SK_DROP;
+    }
+    if (skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
+    }
+#else
+    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
     }
 #endif
 

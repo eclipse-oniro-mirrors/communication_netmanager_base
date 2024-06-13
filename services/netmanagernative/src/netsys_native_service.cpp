@@ -842,39 +842,24 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-int32_t NetsysNativeService::AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool isFinish)
+int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish)
 {
-    NETNATIVE_LOGI("NetsysNativeService::AddFirewallIpRules: size=%{public}zu", ruleList.size());
-    return bpfNetFirewall_->AddFirewallIpRules(ruleList, isFinish);
-}
-
-int32_t NetsysNativeService::UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule)
-{
-    NETNATIVE_LOGI("NetsysNativeService::UpdateFirewallIpRule");
-    return bpfNetFirewall_->UpdateFirewallIpRule(rule);
-}
-
-int32_t NetsysNativeService::DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds)
-{
-    NETNATIVE_LOGI("NetsysNativeService::DeleteFirewallRules: size=%{public}zu", ruleIds.size());
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
+                   isFinish);
     int32_t ret = NETSYS_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP:
-            ret = bpfNetFirewall_->DeleteFirewallIpRules(ruleIds);
+            ret = bpfNetFirewall_->SetFirewallRules(ruleList, isFinish);
             break;
         case NetFirewallRuleType::RULE_DOMAIN:
-            ret = netsysService_->DeleteFirewallDomainRules(ruleIds);
+        case NetFirewallRuleType::RULE_DNS:
+            ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
             break;
         default:
             break;
     }
     return ret;
-}
-
-int32_t NetsysNativeService::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
-{
-    NETNATIVE_LOGI("NetsysNativeService::SetFirewallIpRules: size=%{public}zu", ruleList.size());
-    return bpfNetFirewall_->AddFirewallIpRules(ruleList, true);
 }
 
 int32_t NetsysNativeService::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
@@ -893,45 +878,20 @@ int32_t NetsysNativeService::SetFirewallCurrentUserId(int32_t userId)
     return ret;
 }
 
-int32_t NetsysNativeService::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
-{
-    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDnsRuleslist: size=%{public}zu", ruleList.size());
-    return netsysService_->SetFirewallDnsRules(ruleList);
-}
-
-int32_t NetsysNativeService::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
-                                                    bool isFinish)
-{
-    NETNATIVE_LOGI("NetsysNativeService::AddFirewallDomainRules: size=%{public}zu", ruleList.size());
-    return netsysService_->AddFirewallDomainRules(ruleList, isFinish);
-}
-
-int32_t NetsysNativeService::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    NETNATIVE_LOGI("NetsysNativeService::UpdateFirewallDomainRule");
-    return netsysService_->UpdateFirewallDomainRules(ruleList);
-}
-
-int32_t NetsysNativeService::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDomainRules: size=%{public}zu", ruleList.size());
-    return netsysService_->AddFirewallDomainRules(ruleList, true);
-}
-
 int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
 {
     NETNATIVE_LOGI("NetsysNativeService::ClearFirewallRules");
     int32_t ret = NETSYS_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP:
-            ret = bpfNetFirewall_->ClearFirewallIpRules();
+            ret = bpfNetFirewall_->ClearFirewallRules();
             break;
         case NetFirewallRuleType::RULE_DNS:
         case NetFirewallRuleType::RULE_DOMAIN:
             ret = netsysService_->ClearFirewallRules(type);
             break;
         case NetFirewallRuleType::RULE_ALL:
-            ret = bpfNetFirewall_->ClearFirewallIpRules();
+            ret = bpfNetFirewall_->ClearFirewallRules();
             ret += netsysService_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
             break;
         default:
