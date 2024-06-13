@@ -370,7 +370,7 @@ __attribute__((no_sanitize("cfi"))) std::string NetworkSecurityConfig::GetJsonPr
     return jsonProfile;
 }
 
-int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
+__attribute__((no_sanitize("cfi"))) int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
 {
     static std::string json = GetJsonProfile();
     if (json.empty()) {
