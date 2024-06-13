@@ -842,8 +842,8 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
-                             bool isFinish)
+int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
+                                              const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
                    isFinish);

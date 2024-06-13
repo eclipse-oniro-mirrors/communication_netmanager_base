@@ -217,7 +217,7 @@ static __always_inline bool match_port(void *map, void *key, __be16 kport)
     struct port_segment *segment = bpf_map_lookup_elem(map, key);
     if (segment) {
         __u16 port = bpf_ntohs(kport);
-        if ((port >= segment->start ) && (port <= segment->end)) {
+        if (port >= segment->start && port <= segment->end) {
             return true;
         } else {
             return false;
@@ -359,7 +359,7 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, ac
     enum sk_action default_act = default_action ? *default_action : SK_PASS;
 
     int set_bits = bitmap_count(key->val);
-    if ( set_bits > 1 ) {
+    if (set_bits > 1) {
         log_dbg(DBG_MATCH_ACTION, tuple->dir, default_act);
         return default_act;
     }

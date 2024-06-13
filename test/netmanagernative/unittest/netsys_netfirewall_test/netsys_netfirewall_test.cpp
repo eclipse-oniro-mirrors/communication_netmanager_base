@@ -58,8 +58,9 @@ static sptr<NetFirewallIpRule> GeIpFirewallRule(NetFirewallRuleDirection dir, st
 
     std::vector<NetFirewallPortParam> ports;
     NetFirewallPortParam remotePort;
-    remotePort.startPort = 80;
-    remotePort.endPort = 80;
+    const int32_t defaultPort = 80;
+    remotePort.startPort = defaultPort;
+    remotePort.endPort = defaultPort;
     ports.emplace_back(remotePort);
     rule->localPorts = ports;
     rule->remotePorts = ports;

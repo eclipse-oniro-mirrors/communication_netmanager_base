@@ -564,14 +564,13 @@ int32_t DnsParamCache::SetFirewallDomainRules(const std::vector<sptr<NetFirewall
             std::make_shared<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>>();
     }
     for (const auto &rule : ruleList) {
-        for (const auto &param: rule->domains) {
+        for (const auto &param : rule->domains) {
             if (param.isWildcard) {
                 BuildFirewallDomainLsmTrie(rule, param.domain);
             } else {
                 BuildFirewallDomainMap(rule, param.domain);
             }
         }
-
     }
     return 0;
 }
