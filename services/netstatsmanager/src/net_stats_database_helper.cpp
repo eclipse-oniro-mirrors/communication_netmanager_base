@@ -87,6 +87,7 @@ int32_t NetStatsDatabaseHelper::CreateTable(const std::string &tableName, const 
     if (ret != NETMANAGER_SUCCESS) {
         return STATS_ERR_CREATE_TABLE_FAIL;
     }
+    UpgradeTableVersion(tableName);
     return NETMANAGER_SUCCESS;
 }
 
@@ -375,6 +376,39 @@ int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t 
     }
 
     return ret;
+}
+
+int32_t NetStatsDatabaseHelper::UpgradeTableVersion(const std::string &tableName)
+{
+    if (tableName == UID_TABLE) {
+        std::string sql = "SELECT COUNT(*) AS num FROM sqlite_master WHERE name = '" + tableName + "' "
+                          "and sql like '%Ident%';";
+        int32_t ret = statement_.Prepare(sqlite_, sql);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+            return STATS_ERR_READ_DATA_FAIL;
+        }
+        int32_t rc = statement_.Step();
+        uint32_t count = 1;
+        while (rc != SQLITE_DONE) {
+            int32_t i = 0;
+            statement_.GetColumnInt(i, count);
+            rc = statement_.Step();
+        }
+        statement_.ResetStatementAndClearBindings();
+        if (count != 0) {
+            NETMGR_LOG_I("alter table unnecessarily");
+            return NETMANAGER_SUCCESS;
+        }
+        std::string alterSql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) DEFAULT '' "
+                               "NOT NULL AFTER TxPackets";
+        ret = ExecSql(alterSql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("alter table failed. ret:%{public}d", ret);
+            return STATS_ERR_WRITE_DATA_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
