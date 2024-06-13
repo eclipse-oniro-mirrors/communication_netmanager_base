@@ -2328,6 +2328,7 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
 
 bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
 {
+    std::lock_guard<std::mutex> locker(netManagerMutex_);
     for (const auto &network : networks_) {
         if (network.second->GetNetId() == netId) {
             continue;
@@ -2344,6 +2345,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
 
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
+    std::lock_guard<std::mutex> locker(netManagerMutex_);
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
@@ -2439,6 +2441,7 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
 {
     std::vector<sptr<NetSupplier>> result;
     NET_SUPPLIER_MAP::iterator iterSupplier;
+    std::lock_guard<std::mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second == nullptr) {
             continue;
