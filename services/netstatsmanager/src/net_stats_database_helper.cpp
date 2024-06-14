@@ -397,14 +397,14 @@ int32_t NetStatsDatabaseHelper::UpgradeTableVersion(const std::string &tableName
         }
         statement_.ResetStatementAndClearBindings();
         if (count != 0) {
-            NETMGR_LOG_I("alter table unnecessarily");
+            NETMGR_LOG_D("upgrade db unnecessarily");
             return NETMANAGER_SUCCESS;
         }
-        std::string alterSql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) DEFAULT '' "
-                               "NOT NULL AFTER TxPackets";
+        NETMGR_LOG_I("upgrade db version enter");
+        std::string alterSql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
         ret = ExecSql(alterSql, nullptr, sqlCallback);
         if (ret != SQLITE_OK) {
-            NETMGR_LOG_E("alter table failed. ret:%{public}d", ret);
+            NETMGR_LOG_E("upgrade db version failed. ret:%{public}d", ret);
             return STATS_ERR_WRITE_DATA_FAIL;
         }
     }
