@@ -137,12 +137,7 @@ private:
     int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t CmdAddFirewallIpRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdUpdateFirewallIpRule(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdDeleteFirewallRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetFirewallDnsRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdAddFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdUpdateFirewallDomainRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply);
     int32_t CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply);

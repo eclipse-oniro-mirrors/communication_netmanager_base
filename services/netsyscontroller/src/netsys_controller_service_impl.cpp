@@ -764,29 +764,12 @@ int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, boo
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-int32_t NetsysControllerServiceImpl::AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
-                                                        bool isFinish)
+int32_t NetsysControllerServiceImpl::SetFirewallRules(NetFirewallRuleType type,
+                                                      const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                                      bool isFinish)
 {
-    NETMGR_LOG_D("NetsysControllerServiceImpl::AddFirewallIpRules");
-    return netsysClient_.AddFirewallIpRules(ruleList, isFinish);
-}
-
-int32_t NetsysControllerServiceImpl::UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::UpdateFirewallIpRule");
-    return netsysClient_.UpdateFirewallIpRule(rule);
-}
-
-int32_t NetsysControllerServiceImpl::DeleteFirewallRules(NetFirewallRuleType type, const std::vector<int32_t> &ruleIds)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::DeleteFirewallRules");
-    return netsysClient_.DeleteFirewallRules(type, ruleIds);
-}
-
-int32_t NetsysControllerServiceImpl::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallIpRules");
-    return netsysClient_.SetFirewallIpRules(ruleList);
+    NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallRules");
+    return netsysClient_.SetFirewallRules(type, ruleList, isFinish);
 }
 
 int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(FirewallRuleAction inDefault,
@@ -800,31 +783,6 @@ int32_t NetsysControllerServiceImpl::SetFirewallCurrentUserId(int32_t userId)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallCurrentUserId");
     return netsysClient_.SetFirewallCurrentUserId(userId);
-}
-
-int32_t NetsysControllerServiceImpl::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
-{
-    NETMGR_LOG_I("NetsysControllerServiceImpl, SetFirewallDnsRules");
-    return netsysClient_.SetFirewallDnsRules(ruleList);
-}
-
-int32_t NetsysControllerServiceImpl::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList,
-                                                            bool isFinish)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::AddFirewallDomainRules");
-    return netsysClient_.AddFirewallDomainRules(ruleList, isFinish);
-}
-
-int32_t NetsysControllerServiceImpl::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::UpdateFirewallDomainRules");
-    return netsysClient_.UpdateFirewallDomainRules(ruleList);
-}
-
-int32_t NetsysControllerServiceImpl::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    NETMGR_LOG_I("NetsysControllerServiceImpl, SetFirewallDomainRules");
-    return netsysClient_.SetFirewallDomainRules(ruleList);
 }
 
 int32_t NetsysControllerServiceImpl::ClearFirewallRules(NetFirewallRuleType type)

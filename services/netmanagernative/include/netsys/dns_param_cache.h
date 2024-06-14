@@ -94,15 +94,10 @@ public:
         return 0;
     }
 
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
     int32_t ClearFirewallRules(NetFirewallRuleType type);
-
-    int32_t AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish);
-
-    int32_t UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
-
-    int32_t DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds);
 
     void SetCallingUid(uint32_t callingUid)
     {
@@ -141,9 +136,11 @@ private:
 
     bool GetDnsServersByAppUid(int32_t appUid, std::vector<std::string> &servers);
 
-    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule);
+    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
 
-    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule);
+    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
+
+    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
 
     int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
 
@@ -156,6 +153,8 @@ private:
     void NotifyDomianIntercept(int32_t appUid, const std::string &host);
 
     std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
+
+    std::vector<sptr<NetFirewallDnsRule>> firewallDnsRules_;
 
     sptr<NetManagerStandard::InterceptRecord> oldRecord_ = nullptr;
 

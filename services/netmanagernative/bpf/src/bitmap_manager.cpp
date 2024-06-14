@@ -125,11 +125,6 @@ uint32_t *Bitmap::Get()
     return bitmap_;
 }
 
-const uint8_t FAMILY_IPV4 = 1;
-const uint8_t FAMILY_IPV6 = 2;
-const uint8_t IP_PARAM_SINGLE = 1;
-const uint8_t IP_PARAM_SEGMENT = 2;
-
 uint16_t BitmapManager::Hltons(int32_t n)
 {
     return htons((uint16_t)(n & 0x0000ffff));
@@ -156,8 +151,6 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
     memset_s(&otherIp6Key, sizeof(in6_addr), 0xff, sizeof(in6_addr));
     srcIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
     dstIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    srcPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
-    dstPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
     protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
     appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
@@ -172,8 +165,8 @@ void BitmapManager::Clear()
     srcIp6Map_.Clear();
     dstIp4Map_.Clear();
     dstIp6Map_.Clear();
-    srcPortMap_.Clear();
-    dstPortMap_.Clear();
+    srcPortMap_.clear();
+    dstPortMap_.clear();
     protoMap_.Clear();
     appUidMap_.Clear();
     uidMap_.Clear();
@@ -185,24 +178,20 @@ int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap
     if (ip4Map == nullptr) {
         return NETFIREWALL_ERR;
     }
-    if (item.type == IP_PARAM_SINGLE) {
-        uint32_t ipInt = 0;
-        int32_t ret = IpParamParser::GetIpUint32(item.address, ipInt);
-        if (ret != NETFIREWALL_SUCCESS) {
-            return ret;
-        }
-
+    if (item.type == SINGLE_IP) {
+        uint32_t ipInt = item.ipv4.startIp.s_addr;
         ip4Map->OrInsert(ipInt, static_cast<uint32_t>(item.mask), bitmap);
-        NETNATIVE_LOG_D("InsertIpBitmap ip[%{public}u], mask[%{public}u]", ipInt, item.mask);
-    } else if (item.type == IP_PARAM_SEGMENT) {
+        NETNATIVE_LOG_D("InsertIpBitmap ipp[%{public}u] ipn[%{public}s] mask[%{public}u]", ipInt,
+            item.GetStartIp().c_str(), item.mask);
+    } else if (item.type == MULTIPLE_IP) {
         std::vector<Ip4Data> ips;
-        int32_t ret = IpParamParser::GetIp4AndMask(item.startIp, item.endIp, ips);
+        int32_t ret = IpParamParser::GetIp4AndMask(item.ipv4.startIp, item.ipv4.endIp, ips);
         if (ret != NETFIREWALL_SUCCESS) {
             return ret;
         }
-        for (auto &item : ips) {
-            ip4Map->OrInsert(htonl(item.data), item.mask, bitmap);
-            NETNATIVE_LOG_D("InsertIpBitmap ip[%{public}u], mask[%{public}u]", htonl(item.data), item.mask);
+        for (auto &ipData : ips) {
+            ip4Map->OrInsert(htonl(ipData.data), ipData.mask, bitmap);
+            NETNATIVE_LOG_D("InsertIpBitmap ip[%{public}u], mask[%{public}u]", htonl(ipData.data), ipData.mask);
         }
     }
     return NETFIREWALL_SUCCESS;
@@ -214,24 +203,19 @@ int32_t BitmapManager::InsertIp6SegBitmap(const NetFirewallIpParam &item, Bitmap
     if (ip6Map == nullptr) {
         return NETFIREWALL_ERR;
     }
-    if (item.type == IP_PARAM_SINGLE) {
-        in6_addr addr;
-        memset_s(&addr, sizeof(addr), 0, sizeof(addr));
-        int32_t ret = IpParamParser::GetInAddr6(item.address, addr);
-        if (ret != NETFIREWALL_SUCCESS) {
-            return ret;
-        }
-        ip6Map->OrInsert(addr, static_cast<uint32_t>(item.mask), bitmap);
-        std::string addrStr = IpParamParser::Addr6ToStr(addr);
+    if (item.type == SINGLE_IP) {
+        ip6Map->OrInsert(item.ipv6.startIp, static_cast<uint32_t>(item.mask), bitmap);
+        std::string addrStr = IpParamParser::Addr6ToStr(item.ipv6.startIp);
         NETNATIVE_LOG_D("InsertIp6SegBitmap ip[%{public}s], mask[%{public}u]", addrStr.c_str(), item.mask);
-    } else if (item.type == IP_PARAM_SEGMENT) {
+    } else if (item.type == MULTIPLE_IP) {
         std::vector<Ip6Data> ips;
-        int32_t ret = IpParamParser::GetIp6AndMask(item.startIp, item.endIp, ips);
+        int32_t ret = IpParamParser::GetIp6AndMask(item.ipv6.startIp, item.ipv6.endIp, ips);
         if (ret != NETFIREWALL_SUCCESS) {
+            NETNATIVE_LOGW("InsertIp6SegBitmap GetIp6AndMask fail ret=%{public}d", ret);
             return ret;
         }
-        for (auto &item : ips) {
-            ip6Map->OrInsert(item.data, item.prefixlen, bitmap);
+        for (auto &ipData : ips) {
+            ip6Map->OrInsert(ipData.data, ipData.prefixlen, bitmap);
         }
     }
     return NETFIREWALL_SUCCESS;
@@ -272,52 +256,38 @@ int32_t BitmapManager::InsertIpBitmap(const std::vector<NetFirewallIpParam> &ipI
     return NETFIREWALL_SUCCESS;
 }
 
-void BitmapManager::OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnorderedMap<PortKey> &portMap)
+void BitmapManager::ProcessPorts(const std::vector<NetFirewallPortParam> &ports, Bitmap &bitmap, BpfPortMap &map)
 {
-    auto &segMap = portSegMap.GetMap();
-    for (auto &item : segMap) {
-        uint32_t start = item.start;
-        while (start <= item.end) {
-            if (start == 0) {
-                continue;
-            }
-            PortKey key = (PortKey)Hltons(start);
-            portMap.OrInsert(key, item.bitmap);
-            start++;
-        }
-    }
-}
-
-void BitmapManager::AddPortBitmap(const std::vector<NetFirewallPortParam> &port, Bitmap &bitmap,
-    SegmentBitmapMap &portMap)
-{
-    for (const NetFirewallPortParam &item : port) {
-        uint16_t startPort = item.startPort;
-        if (startPort == 0) {
-            continue;
-        }
-        if (item.startPort <= item.endPort) {
-            portMap.AddMap(item.startPort, item.endPort, bitmap);
+    for (const auto &port : ports) {
+        if (port.startPort <= port.endPort) {
+            PortSegment portSeg = {
+                .start = port.startPort,
+                .end = port.endPort,
+            };
+            map.insert(std::make_pair(Bitmap(bitmap), portSeg));
         }
     }
 }
 
 int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
 {
-    SegmentBitmapMap srcPortMap;
-    SegmentBitmapMap dstPortMap;
     uint32_t index = 0;
+    int32_t ret;
     for (const auto &rule : ruleList) {
         Bitmap bitmap(index);
-        if (InsertIpBitmap(rule->remoteIps, true, bitmap)) {
+        ret = InsertIpBitmap(rule->remoteIps, true, bitmap);
+        if (ret) {
+            NETNATIVE_LOGW("BuildMarkBitmap InsertIpBitmap remoteIps fail ret=%{public}d", ret);
             return NETFIREWALL_ERR;
         }
-        if (InsertIpBitmap(rule->localIps, false, bitmap)) {
+        ret = InsertIpBitmap(rule->localIps, false, bitmap);
+        if (ret) {
+            NETNATIVE_LOGW("BuildMarkBitmap InsertIpBitmap localIps fail ret=%{public}d", ret);
             return NETFIREWALL_ERR;
         }
-        if (!IsNotNeedPort(rule->protocol)) {
-            AddPortBitmap(rule->remotePorts, bitmap, srcPortMap);
-            AddPortBitmap(rule->localPorts, bitmap, dstPortMap);
+        if (!IsNoPortProtocol(rule->protocol)) {
+            ProcessPorts(rule->remotePorts, bitmap, srcPortMap_);
+            ProcessPorts(rule->localPorts, bitmap, dstPortMap_);
         }
 
         if (rule->protocol != (NetworkProtocol)0) {
@@ -338,8 +308,6 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
         index++;
     }
 
-    OrInsertPortBitmap(srcPortMap, srcPortMap_);
-    OrInsertPortBitmap(dstPortMap, dstPortMap_);
     return NETFIREWALL_SUCCESS;
 }
 
@@ -356,12 +324,6 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
             dstIp4Map_.OrForEach(bitmap);
             dstIp6Map_.OrForEach(bitmap);
         }
-        if (rule->remotePorts.empty() || IsNotNeedPort(rule->protocol)) {
-            srcPortMap_.OrForEach(bitmap);
-        }
-        if (rule->localPorts.empty() || IsNotNeedPort(rule->protocol)) {
-            dstPortMap_.OrForEach(bitmap);
-        }
         if (rule->protocol == (NetworkProtocol)0) {
             protoMap_.OrForEach(bitmap);
         }
@@ -375,7 +337,7 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
     }
 }
 
-bool BitmapManager::IsNotNeedPort(NetworkProtocol protocol)
+bool BitmapManager::IsNoPortProtocol(NetworkProtocol protocol)
 {
     if (protocol == NetworkProtocol::ICMPV6 || protocol == NetworkProtocol::ICMP) {
         return true;
@@ -479,18 +441,8 @@ void IpParamParser::ChangeStart(uint32_t mask, uint32_t &ip)
     }
 }
 
-int32_t IpParamParser::GetIp4AndMask(const std::string &startIp, const std::string &endIp, std::vector<Ip4Data> &list)
+int32_t IpParamParser::GetIp4AndMask(const in_addr &startAddr, const in_addr &endAddr, std::vector<Ip4Data> &list)
 {
-    in_addr startAddr = { 0 };
-    in_addr endAddr = { 0 };
-    int ret = inet_pton(AF_INET, startIp.c_str(), &startAddr);
-    if (ret != 1) {
-        return NETFIREWALL_IP_STR_ERR;
-    }
-    ret = inet_pton(AF_INET, endIp.c_str(), &endAddr);
-    if (ret != 1) {
-        return NETFIREWALL_IP_STR_ERR;
-    }
     uint32_t startIpInt = ntohl(startAddr.s_addr);
     uint32_t endIpInt = ntohl(endAddr.s_addr);
     if (startIpInt > endIpInt) {
@@ -656,16 +608,11 @@ void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)
     }
 }
 
-int32_t IpParamParser::GetIp6AndMask(const std::string &startIp, const std::string &endIp, std::vector<Ip6Data> &list)
+int32_t IpParamParser::GetIp6AndMask(const in6_addr &addr6Start, const in6_addr &addr6End, std::vector<Ip6Data> &list)
 {
-    in6_addr addr6Start;
-    in6_addr addr6End;
-    if ((GetInAddr6(startIp, addr6Start) != NETFIREWALL_SUCCESS) ||
-        (GetInAddr6(endIp, addr6End) != NETFIREWALL_SUCCESS)) {
-        return NETFIREWALL_IP_STR_ERR;
-    }
     int32_t ret = memcmp(&addr6Start, &addr6End, sizeof(addr6Start));
     if (ret > 0) {
+        NETNATIVE_LOGW("GetIp6AndMask fail ret=%{public}d", ret);
         return NETFIREWALL_ERR;
     } else if (ret == 0) {
         AddIp6(addr6Start, IPV6_MAX_PREFIXLEN, list);
@@ -687,11 +634,12 @@ int32_t IpParamParser::GetIp6AndMask(const std::string &startIp, const std::stri
     } else if (off == IPV6_BIT_COUNT) {
         if (RfindIp6(addr6End, prefixlen, IPV6_BIT_COUNT - 1, 0) == IPV6_BIT_COUNT) {
             AddIp6(addr6Start, prefixlen, list);
-            return true;
+            return NETFIREWALL_SUCCESS;
         }
     }
     off = FindIp6(addr6End, prefixlen, 1);
     if (off == IPV6_BIT_COUNT) {
+        NETNATIVE_LOGW("GetIp6AndMask off equal 128");
         return NETFIREWALL_ERR;
     }
     off = FindIp6(addr6End, off + 1, 1);

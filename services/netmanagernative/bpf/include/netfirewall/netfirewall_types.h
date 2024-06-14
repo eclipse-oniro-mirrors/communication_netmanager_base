@@ -132,7 +132,6 @@ typedef __be32 ip4_key;
 typedef struct in6_addr ip6_key;
 typedef struct bitmap action_key;
 typedef enum sk_action action_val;
-typedef __be16 port_key;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
@@ -154,6 +153,11 @@ struct ipv4_lpm_key {
 struct ipv6_lpm_key {
         __u32 prefixlen;
         ip6_key data;
+};
+
+struct port_segment {
+    __u16 start;
+    __u16 end;
 };
 
 #endif // NET_FIREWALL_TYPES_H

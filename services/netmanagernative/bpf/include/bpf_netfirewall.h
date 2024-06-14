@@ -44,7 +44,6 @@ using Ip4Key = ip4_key;
 using Ip6Key = ip6_key;
 using Ipv4LpmKey = struct ipv4_lpm_key;
 using Ipv6LpmKey = struct ipv6_lpm_key;
-using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
 using DefaultActionKey = default_action_key;
@@ -106,29 +105,13 @@ public:
     int32_t StopListener();
 
     /**
-     * Add firewall rules to bpf maps
+     * Set firewall rules to native
      *
      * @param ruleList list of NetFirewallIpRule
      * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool isFinish);
-
-    /**
-     * Update firewall rules to bpf maps
-     *
-     * @param rule list of NetFirewallIpRule
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule);
-
-    /**
-     * Delete firewall rules of bpf maps
-     *
-     * @param ruleIds list of NetFirewallIpRule ids
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t DeleteFirewallIpRules(const std::vector<int32_t> &ruleIds);
+    int32_t SetFirewallRules(const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish);
 
     /**
      * Set firewall default action
@@ -148,11 +131,11 @@ public:
     int32_t SetFirewallCurrentUserId(int32_t userId);
 
     /**
-     * Clear firewall all ip rules and clear all bpf maps
+     * Clear all bpf maps
      *
      * @return  0 if success or -1 if an error occurred
      */
-    int32_t ClearFirewallIpRules();
+    int32_t ClearFirewallRules();
 
     /**
      * Register callback for recevie intercept event
