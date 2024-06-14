@@ -38,6 +38,9 @@ config("net_native_manager_if_config") {
   if (defined(build_public_version) && build_public_version) {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
+  if (enable_feature_net_firewall) {
+    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
 }
 
 ohos_source_set("net_native_parcel") {
@@ -53,6 +56,10 @@ ohos_source_set("net_native_parcel") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
   ]
+
+  if (enable_feature_net_firewall) {
+    sources += [ "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_parcel.cpp" ]
+  }
 
   include_dirs = [ "$INNERKITS_ROOT/netmanagernative/include" ]
 
@@ -97,6 +104,15 @@ ohos_shared_library("net_native_manager_if") {
   ]
 
   public_configs = [ ":net_native_manager_if_config" ]
+
+  if (enable_feature_net_firewall) {
+    sources += [
+      "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_callback_proxy.cpp",
+      "$NETSYSNATIVE_SOURCE_DIR/src/netfirewall_callback_stub.cpp",
+    ]
+
+    public_configs += [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
+  }
 
   deps = [
     ":net_native_parcel",

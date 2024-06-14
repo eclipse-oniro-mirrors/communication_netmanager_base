@@ -214,5 +214,51 @@ int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
     NETNATIVE_LOGI("FillAddrInfo %{public}d", resNum);
     return 0;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t DnsManager::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    return DnsParamCache::GetInstance().SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t DnsManager::SetFirewallCurrentUserId(int32_t userId)
+{
+    return DnsParamCache::GetInstance().SetFirewallCurrentUserId(userId);
+}
+
+int32_t DnsManager::SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList)
+{
+    return DnsParamCache::GetInstance().SetFirewallDnsRules(ruleList);
+}
+
+int32_t DnsManager::DeleteFirewallDomainRules(const std::vector<int32_t> &ruleIds)
+{
+    return DnsParamCache::GetInstance().DeleteFirewallDomainRules(ruleIds);
+}
+
+int32_t DnsManager::AddFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList, bool isFinish)
+{
+    return DnsParamCache::GetInstance().AddFirewallDomainRules(ruleList, isFinish);
+}
+
+int32_t DnsManager::UpdateFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
+{
+    return DnsParamCache::GetInstance().UpdateFirewallDomainRules(ruleList);
+}
+
+int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)
+{
+    return DnsParamCache::GetInstance().ClearFirewallRules(type);
+}
+
+int32_t DnsManager::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    return DnsParamCache::GetInstance().RegisterNetFirewallCallback(callback);
+}
+int32_t DnsManager::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    return DnsParamCache::GetInstance().UnRegisterNetFirewallCallback(callback);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

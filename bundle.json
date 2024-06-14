@@ -22,7 +22,7 @@
         "syscap": [
             "SystemCapability.Communication.NetManager.Core"
         ],
-        "features": [],
+        "features": ["netmanager_base_feature_coverage = false"],
         "adapted_system_type": [
             "standard"
         ],

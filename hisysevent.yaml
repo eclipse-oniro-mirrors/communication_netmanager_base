@@ -112,3 +112,43 @@ NET_REMOTE_DEVICE_INFO_FAULT:
 
 NET_REMOTE_DEVICE_INFO_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: get remote device info behavior event}
+
+NET_FIREWALL_CONF_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: net firewall policy configuration and issuance failed}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_RULE_INFO: {type: STRING, desc: net firewall rule information}
+  FIREWALL_ERROR_TYPE: {type: INT32, desc: the error code}
+  FIREWALL_ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_FIREWALL_REQ_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: net firewall policy acquisition failed}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_RULE_INFO: {type: STRING, desc: query parameters}
+  FIREWALL_ERROR_TYPE: {type: INT32, desc: the error code}
+  FIREWALL_ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_FIREWALL_LOG_REQ_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: net firewall interception log query failed}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_ERROR_TYPE: {type: INT32, desc: the error code}
+  FIREWALL_ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_FIREWALL_INIT_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: built in firewall policy failed}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_ERROR_TYPE: {type: INT32, desc: the error code}
+  FIREWALL_ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_FIREWALL_CONF_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: net firewall policy configuration behavior management}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_RULE_INFO: {type: STRING, desc: net firewall rule information}
+
+NET_FIREWALL_REQ_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: net firewall policy query behavior management}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}
+  FIREWALL_RULE_INFO: {type: STRING, desc: query parameters}
+
+NET_FIREWALL_LOG_REQ_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: net firewall interception log query behavior management}
+  FIREWALL_USER_ID: {type: INT32, desc: user id}

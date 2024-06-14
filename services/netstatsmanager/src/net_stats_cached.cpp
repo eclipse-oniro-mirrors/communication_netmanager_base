@@ -34,6 +34,7 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
+constexpr const uint32_t CONTAINER_UID = 0xFFFFFFFF;
 } // namespace
 
 int32_t NetStatsCached::StartCached()
@@ -104,6 +105,9 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
     NetsysController::GetInstance().GetAllStatsInfo(allInfos);
     std::vector<NetStatsInfo> containerInfos;
     NetsysController::GetInstance().GetAllContainerStatsInfo(containerInfos);
+    std::for_each(containerInfos.begin(), containerInfos.end(), [](NetStatsInfo &info) {
+       info.uid_ = CONTAINER_UID;
+    });
     allInfos.insert(allInfos.end(), containerInfos.begin(), containerInfos.end());
 
     LoadIfaceNameIdentMaps();
@@ -183,10 +187,11 @@ void NetStatsCached::CacheUidSimStats()
             return;
         }
         info.ident_ = ifaceNameIdentMap_[info.iface_];
+        info.uid_ = CONTAINER_UID;
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
-            stats_.PushUidStats(info);
+            stats_.PushUidSimStats(info);
             return;
         }
         auto currentStats = info - *findRet;

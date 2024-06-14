@@ -29,7 +29,8 @@ constexpr const int32_t INTERCEPT_BUFF_INTERVAL_SEC = 60;
 constexpr int32_t FIREWALL_RULE_SIZE_MAX = 1000;
 // Maximum number of domain for all users
 constexpr int32_t FIREWALL_DOMAIN_RULE_SIZE_MAX = 20000;
-constexpr int32_t FIREWALL_IPC_PAGE_SIZE = 150;
+constexpr int32_t FIREWALL_IPC_IP_RULE_PAGE_SIZE = 150;
+constexpr int32_t FIREWALL_IPC_DOMAIN_RULE_PAGE_SIZE = 6000;
 
 constexpr const char *COMMA = ",";
 constexpr const char *NET_FIREWALL_IS_OPEN = "isOpen";
@@ -37,12 +38,12 @@ constexpr const char *NET_FIREWALL_IN_ACTION = "inAction";
 constexpr const char *NET_FIREWALL_OUT_ACTION = "outAction";
 
 namespace {
-const std::string NET_FIREWALL_RULE_ID = "ruleId";
-const std::string NET_FIREWALL_RULE_NAME = "ruleName";
-const std::string NET_FIREWALL_RULE_DESC = "ruleDescription";
-const std::string NET_FIREWALL_RULE_DIR = "ruleDirection";
-const std::string NET_FIREWALL_RULE_ACTION = "ruleAction";
-const std::string NET_FIREWALL_RULE_TYPE = "ruleType";
+const std::string NET_FIREWALL_RULE_ID = "id";
+const std::string NET_FIREWALL_RULE_NAME = "name";
+const std::string NET_FIREWALL_RULE_DESC = "description";
+const std::string NET_FIREWALL_RULE_DIR = "direction";
+const std::string NET_FIREWALL_RULE_ACTION = "action";
+const std::string NET_FIREWALL_RULE_TYPE = "type";
 const std::string NET_FIREWALL_IS_ENABLED = "isEnabled";
 const std::string NET_FIREWALL_APP_ID = "appUid";
 const std::string NET_FIREWALL_LOCAL_IP = "localIps";
@@ -113,26 +114,24 @@ enum class NetworkProtocol {
 
 // Firewall IP parameters
 struct NetFirewallIpParam : public Parcelable {
-    int32_t family;      // IPv4=1, IPv6=2, default IPv4, not currently supported for others, optional
-    int32_t type;        // 1：IP address or subnet, when using a single IP, the mask is 32,2: IP segment. Optional
+    uint8_t family;      // IPv4=1, IPv6=2, default IPv4, not currently supported for others, optional
+    uint8_t type;        // 1：IP address or subnet, when using a single IP, the mask is 32,2: IP segment. Optional
+    uint8_t mask;        // IPv4: subnet mask, IPv6: prefix. Optional
     std::string address; // IP address, optional
-    int32_t mask;        // IPv4: subnet mask, IPv6: prefix. Optional
     std::string startIp; // Starting IP, optional
     std::string endIp;   // End IP, optional
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallIpParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall port parameters
 struct NetFirewallPortParam : public Parcelable {
-    int32_t startPort; // When there is only one port, the starting port is the same as the ending port. Optional
-    int32_t endPort;   // When there is only one end port, the start port is the same as the end port. Optional
+    uint16_t startPort; // When there is only one port, the starting port is the same as the ending port. Optional
+    uint16_t endPort;   // When there is only one end port, the start port is the same as the end port. Optional
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallPortParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall domain name parameters
@@ -142,7 +141,6 @@ struct NetFirewallDomainParam : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallDomainParam> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 // Firewall DNS parameters
@@ -155,6 +153,8 @@ struct NetFirewallDnsParam : public Parcelable {
 };
 
 struct NetFirewallDomainRule : public Parcelable {
+    int32_t userId;
+    int32_t ruleId;
     int32_t appUid;
     FirewallRuleAction ruleAction;
     std::string domain;
@@ -162,10 +162,10 @@ struct NetFirewallDomainRule : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetFirewallDomainRule> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 struct NetFirewallIpRule : public Parcelable {
+    int32_t userId;
     int32_t ruleId;
     int32_t appUid;
     NetFirewallRuleDirection ruleDirection;
@@ -178,10 +178,10 @@ struct NetFirewallIpRule : public Parcelable {
 
     static sptr<NetFirewallIpRule> Unmarshalling(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
-    std::string ToString() const;
 };
 
 struct NetFirewallDnsRule : public Parcelable {
+    int32_t userId;
     int32_t appUid;
     std::string primaryDns;
     std::string standbyDns;
@@ -216,18 +216,17 @@ struct NetFirewallRule : public Parcelable {
 
 // Interception Record
 struct InterceptRecord : public Parcelable {
+    uint16_t localPort;   // Local Port
+    uint16_t remotePort;  // Destination Port
+    uint16_t protocol;    // Transport Layer Protocol
     int32_t time;         // time stamp
     std::string localIp;  // Local IP
     std::string remoteIp; // Remote IP
-    int32_t localPort;    // Local Port
-    int32_t remotePort;   // Destination Port
-    int32_t protocol;     // Transport Layer Protocol
     int32_t appUid;       // Application or Service ID
     std::string domain;   // domain name
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<InterceptRecord> Unmarshalling(Parcel &parcel);
-    std::string ToString() const;
 };
 
 class NetFirewallUtils {

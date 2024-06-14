@@ -24,14 +24,25 @@
 #include "netfirewall_def.h"
 
 /**
- * @brief Get the appuid from skb
+ * @brief Get the user id from sock_uid
  *
- * @param skb struct __sk_buff
- * @return appid with type __u32
+ * @param sock_uid bpf_get_socket_uid
+ * @return user id with type __u32
  */
-static __always_inline __u32 get_appuid(struct __sk_buff *skb)
+static __always_inline __u32 get_user_id(__u32 sock_uid)
 {
-    return bpf_get_socket_uid(skb);
+    __u32 user_id = sock_uid / USER_ID_DIVIDOR;
+    if (user_id > 0) {
+        return user_id;
+    }
+
+    current_user_id_key key = CURRENT_USER_ID_KEY;
+    uid_key *current_user_id = bpf_map_lookup_elem(&CURRENT_UID_MAP, &key);
+    if (!current_user_id) {
+        return DEFAULT_USER_ID;
+    }
+
+    return *current_user_id;
 }
 
 /**
@@ -91,7 +102,9 @@ static __always_inline bool get_match_tuple(struct __sk_buff *skb, struct match_
     }
     tuple->dir = dir;
     tuple->family = skb->family;
-    tuple->appuid = get_appuid(skb);
+    __u32 sock_uid = bpf_get_socket_uid(skb);
+    tuple->appuid = sock_uid;
+    tuple->uid = get_user_id(sock_uid);
     tuple->protocol = protocol;
 
     if (protocol == IPPROTO_TCP || protocol == IPPROTO_UDP) {
@@ -266,7 +279,33 @@ static __always_inline bool match_appuid(struct match_tuple *tuple, action_key *
 
     result = lookup_map(GET_MAP(ingress, appuid), &(tuple->appuid), &other_appuid_key);
     if (result) {
-        log_dbg2(DBG_MATCH_APPUID, tuple->dir, (__u32)tuple->appuid, result->val[0]);
+        log_dbg2(DBG_MATCH_APPUID, tuple->dir, tuple->appuid, result->val[0]);
+        bitmap_and(key->val, result->val);
+    }
+
+    return true;
+}
+
+/**
+ * @brief lookup user_id bitmap use the given tuple
+ *
+ * @param tuple struct match_tuple get from skb
+ * @param key out param for lookup result
+ * @return true if success or false if an error occurred
+ */
+static __always_inline bool match_uid(struct match_tuple *tuple, action_key *key)
+{
+    if (!tuple || !key) {
+        return false;
+    }
+
+    uid_key other_uid_key = OTHER_UID_KEY;
+    bool ingress = tuple->dir == INGRESS;
+    struct bitmap *result = NULL;
+
+    result = lookup_map(GET_MAP(ingress, uid), &(tuple->uid), &other_uid_key);
+    if (result) {
+        log_dbg2(DBG_MATCH_UID, tuple->dir, tuple->uid, result->val[0]);
         bitmap_and(key->val, result->val);
     }
 
@@ -301,6 +340,10 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, action_k
     }
 
     if (!match_appuid(tuple, key)) {
+        return false;
+    }
+
+    if (!match_uid(tuple, key)) {
         return false;
     }
 
