@@ -177,5 +177,10 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, NetStatsInfo &stats)
     }
     return true;
 }
+
+bool StatsInfoUnmarshallingVector(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos)
+{
+    return NetManagerStandard::NetStatsInfo::Unmarshalling(parcel, statsInfos);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

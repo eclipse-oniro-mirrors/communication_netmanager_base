@@ -114,6 +114,7 @@
       "OHOS::NetManagerStandard::NetStatsServiceProxy::GetUidStatsDetail(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, unsigned long, unsigned long, OHOS::NetManagerStandard::NetStatsInfo&)";
       "OHOS::NetManagerStandard::NetStatsServiceProxy::UpdateIfacesStats(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long, unsigned long, OHOS::NetManagerStandard::NetStatsInfo const&)";
       "OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(OHOS::Parcel&, std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
+      "OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(OHOS::Parcel&, std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
       "OHOS::NetManagerStandard::PushStatsInfo::Unmarshalling(OHOS::Parcel&, OHOS::NetManagerStandard::PushStatsInfo&)";
     };
     *GetUidTxBytesEx*;

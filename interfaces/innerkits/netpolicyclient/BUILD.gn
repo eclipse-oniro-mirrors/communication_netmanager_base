@@ -19,7 +19,6 @@ config("net_policy_manager_if_config") {
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netpolicyclient/include",
-    "$INNERKITS_ROOT/netpolicyclient/include/proxy",
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
@@ -95,9 +94,9 @@ ohos_shared_library("net_policy_manager_if") {
   include_dirs = [ "$NETMANAGER_BASE_ROOT/utils/log/include" ]
 
   sources = [
+    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_callback_stub.cpp",
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_client.cpp",
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_policy_callback_stub.cpp",
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_policy_service_proxy.cpp",
+    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_service_proxy.cpp",
   ]
 
   version_script = "libnetpolicy_kits.map"

@@ -52,7 +52,6 @@ ohos_unittest("net_policy_manager_test") {
 
   include_dirs = [
     "$INNERKITS_ROOT/netpolicyclient/include",
-    "$INNERKITS_ROOT/netpolicyclient/include/proxy",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netconnclient/include",

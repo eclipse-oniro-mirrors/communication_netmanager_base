@@ -47,6 +47,7 @@ static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/pub
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 static constexpr uint32_t UID_BROKER_SERVICE = 5557;
+static constexpr uint32_t IPV4_MAX_LENGTH = 32;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -996,7 +997,7 @@ int32_t NetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ip
         NETMGR_LOG_E("The SIOCSIFADDR of ioctl failed.");
         return NETSYS_ERR_VPN;
     }
-    in_addr_t addressPrefixLength = prefixLen ? (~0 << (MAX_IPV4_ADDRESS_LEN - prefixLen)) : 0;
+    in_addr_t addressPrefixLength = prefixLen ? (~0 << (IPV4_MAX_LENGTH - prefixLen)) : 0;
     *AsInAddr(&ifRequest.ifr_netmask) = htonl(addressPrefixLength);
     if (ioctl(socketFd, SIOCSIFNETMASK, &ifRequest)) {
         NETMGR_LOG_E("The SIOCSIFNETMASK of ioctl failed.");
