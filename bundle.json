@@ -91,7 +91,7 @@
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative:net_native_manager_if",
                     "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                     "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
-                    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client"
+                    "//foundation/communication/netmanager_base/services/netmanagernative:netsys_client"
                 ],
                 "service_group": [
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
@@ -259,7 +259,7 @@
                 },
                 {
                     "type": "so",
-                    "name": "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
+                    "name": "//foundation/communication/netmanager_base/services/netmanagernative:netsys_client",
                     "header": {
                         "header_files": [
                             "netsys_client.h"

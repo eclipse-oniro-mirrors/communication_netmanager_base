@@ -19,7 +19,6 @@ config("policy_config") {
 
   include_dirs = [
     "include",
-    "include/context",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
@@ -53,24 +52,24 @@ ohos_shared_library("policy") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "src/context/get_net_quota_policies_context.cpp",
-    "src/context/get_network_access_policy_context.cpp",
-    "src/context/get_policy_by_uid_context.cpp",
-    "src/context/get_uids_by_policy_context.cpp",
-    "src/context/is_uid_net_allowed_context.cpp",
-    "src/context/restore_all_policies_context.cpp",
-    "src/context/set_bg_policy_context.cpp",
-    "src/context/set_device_idle_allow_list_context.cpp",
-    "src/context/set_net_quota_policies_context.cpp",
-    "src/context/set_network_access_policy_context.cpp",
-    "src/context/set_policy_by_uid_context.cpp",
-    "src/context/set_power_save_allow_list_context.cpp",
-    "src/context/update_remind_policy_context.cpp",
+    "src/get_net_quota_policies_context.cpp",
+    "src/get_network_access_policy_context.cpp",
+    "src/get_policy_by_uid_context.cpp",
+    "src/get_uids_by_policy_context.cpp",
+    "src/is_uid_net_allowed_context.cpp",
     "src/net_policy_callback_observer.cpp",
     "src/netpolicy_async_work.cpp",
     "src/netpolicy_exec.cpp",
     "src/netpolicy_module.cpp",
     "src/policy_observer_wrapper.cpp",
+    "src/restore_all_policies_context.cpp",
+    "src/set_bg_policy_context.cpp",
+    "src/set_device_idle_allow_list_context.cpp",
+    "src/set_net_quota_policies_context.cpp",
+    "src/set_network_access_policy_context.cpp",
+    "src/set_policy_by_uid_context.cpp",
+    "src/set_power_save_allow_list_context.cpp",
+    "src/update_remind_policy_context.cpp",
   ]
 
   configs = [ ":policy_config" ]

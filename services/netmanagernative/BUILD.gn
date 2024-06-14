@@ -96,7 +96,7 @@ netsys_native_manager_sources = [
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-  "$NETMANAGERNATIVE_ROOT/netsys_client",
+  "$NETMANAGERNATIVE_ROOT:netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   "bpf:netsys",
   "bpf:netsys_bpf_utils",
@@ -252,6 +252,53 @@ ohos_static_library("netsys_native_manager_static") {
     "hilog:libhilog",
   ]
 
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_shared_library("netsys_client") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "src/netsys/netsys_client.c",
+    "src/netsys/netsys_tcp_client.c",
+  ]
+
+  include_dirs = [
+    "$NETMANAGERNATIVE_ROOT/include/netsys",
+    "$FWMARK_CLIENT_DIR/include",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
+
+  external_deps = [ "c_utils:utils" ]
+
+  defines = [
+    "NETSYS_CONFIG_DEBUG=0",
+    "NETSYS_CLIENT_DEBUG=0",
+  ]
+
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

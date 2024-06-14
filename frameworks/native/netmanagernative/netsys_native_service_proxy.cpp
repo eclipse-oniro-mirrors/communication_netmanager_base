@@ -22,6 +22,10 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
+namespace NetManagerStandard {
+bool StatsInfoUnmarshallingVector(Parcel &parcel, std::vector<NetStatsInfo> &stats);
+} // namespace NetManagerStandard
+
 namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
@@ -1637,7 +1641,7 @@ int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::Net
         NETNATIVE_LOGE("fail to GetAllContainerStatsInfo ret= %{public}d", ret);
         return ret;
     }
-    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1668,7 +1672,7 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
         NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
         return ret;
     }
-    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
         return ERR_FLATTEN_OBJECT;
     }

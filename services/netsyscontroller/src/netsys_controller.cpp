@@ -26,6 +26,8 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t IPV4_MAX_LENGTH = 32;
+
 void NetsysController::Init()
 {
     NETMGR_LOG_I("netsys Init");
@@ -666,8 +668,8 @@ int32_t NetsysController::SetIpAddress(int32_t socketFd, const std::string &ipAd
                                        struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysController::set addr");
-    if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > MAX_IPV4_ADDRESS_LEN) ||
-        (prefixLen <= 0) || (prefixLen > MAX_IPV4_ADDRESS_LEN)) {
+    if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > IPV4_MAX_LENGTH) || (prefixLen <= 0) ||
+        (prefixLen > IPV4_MAX_LENGTH)) {
         NETMGR_LOG_E(
             "The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
             "ipAddress[%{public}s], prefixLen[%{public}d].",
