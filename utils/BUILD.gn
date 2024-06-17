@@ -163,6 +163,7 @@ ohos_shared_library("net_bundle_utils") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./bundle_utils/net_bundle_utils_blocklist.txt"
   }
 
   include_dirs = [
