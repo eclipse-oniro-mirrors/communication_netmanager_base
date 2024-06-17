@@ -40,11 +40,6 @@
 #define L3_NHOFF 0
 #define L4_NHOFF(ipv4) (L3_NHOFF + ((ipv4) ? sizeof(struct iphdr) : sizeof(struct ipv6hdr)))
 
-struct grehdr {
-    __be16 flags;
-    __be16 proto;
-};
-
 union tcp_flags {
     struct {
         __u8 upper_bits;
@@ -81,42 +76,7 @@ static __always_inline bool is_l4_protocol(struct __sk_buff *skb, __u32 l3_nhoff
 }
 
 /**
- * @brief load gre info from given skb
- *
- * @param skb struct __sk_buff
- * @param inner_l3_nhoff layer 3 network header offset
- * @param eth_proto gre inner layer3 protocol
- * @return true if success or false if an error occurred
- */
-static __always_inline bool load_gre_info(struct __sk_buff *skb, __u32 *inner_l3_nhoff, __u16 *eth_proto)
-{
-    if (!is_l4_protocol(skb, L3_NHOFF, IPPROTO_GRE)) {
-        return false;
-    }
-
-    __u32 nh_off = L4_NHOFF(skb->family == AF_INET);
-    struct grehdr greh = { 0 };
-    bpf_skb_load_bytes(skb, nh_off, &greh, sizeof(struct grehdr));
-
-    *eth_proto = bpf_ntohs(greh.proto);
-    __u16 gre_flags = bpf_ntohs(greh.flags);
-
-    nh_off += sizeof(struct grehdr);
-    if (gre_flags & GRE_CSUM) {
-        nh_off += 4;
-    }
-    if (gre_flags & GRE_KEY) {
-        nh_off += 4;
-    }
-    if (gre_flags & GRE_SEQ) {
-        nh_off += 4;
-    }
-    *inner_l3_nhoff = nh_off;
-    return true;
-}
-
-/**
- * Get the layer 3 network header offset and if first layer 3 is gre protocol then get gre inner layer 3 network header
+ * Get the layer 3 network header offset
  * offset
  *
  * @param skb struct __sk_buff
@@ -124,18 +84,11 @@ static __always_inline bool load_gre_info(struct __sk_buff *skb, __u32 *inner_l3
  */
 static __always_inline __u32 get_l3_nhoff(struct __sk_buff *skb)
 {
-    __u32 inner_l3_nhoff = 0;
-    __u16 inner_eth_proto = 0;
-    bool is_gre = load_gre_info(skb, &inner_l3_nhoff, &inner_eth_proto);
-    if (is_gre) {
-        return inner_l3_nhoff;
-    }
-
     return L3_NHOFF;
 }
 
 /**
- * Get the layer 4 network header offset and if first layer 4 is gre protocol then get gre inner layer 4 network header
+ * Get the layer 4 network header offset
  * offset
  *
  * @param skb struct __sk_buff
@@ -143,19 +96,6 @@ static __always_inline __u32 get_l3_nhoff(struct __sk_buff *skb)
  */
 static __always_inline __u32 get_l4_nhoff(struct __sk_buff *skb)
 {
-    __u32 l4_nhoff = 0;
-    __u32 inner_l3_nhoff = 0;
-    __u16 inner_eth_proto = 0;
-    bool is_gre = load_gre_info(skb, &inner_l3_nhoff, &inner_eth_proto);
-    if (is_gre) {
-        if (inner_eth_proto == ETH_P_IP) {
-            l4_nhoff = inner_l3_nhoff + sizeof(struct iphdr);
-        } else if (inner_eth_proto == ETH_P_IPV6) {
-            l4_nhoff = inner_l3_nhoff + sizeof(struct ipv6hdr);
-        }
-        return l4_nhoff;
-    }
-
     return L4_NHOFF(skb->family == AF_INET);
 }
 
