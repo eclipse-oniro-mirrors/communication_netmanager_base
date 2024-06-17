@@ -155,7 +155,7 @@ enum class NetSlotTech {
 };
 
 enum RegisterType {
-    INVALID_TYPE,
+    UNKOWN,
     REGISTER,
     REQUEST
 };

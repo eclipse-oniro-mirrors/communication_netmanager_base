@@ -122,7 +122,7 @@ private:
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
     bool alreadyReduceScore_ = false;
     enum RegisterType {
-        INVALID_TYPE,
+        UNKOWN,
         REGISTER,
         REQUEST,
     };
