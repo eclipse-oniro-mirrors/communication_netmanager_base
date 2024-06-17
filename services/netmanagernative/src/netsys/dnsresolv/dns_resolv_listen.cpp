@@ -38,7 +38,6 @@ static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
-    dnsResolvListenFfrtQueue_ = std::make_shared<ffrt::queue>("DnsResolvListen");
 }
 
 DnsResolvListen::~DnsResolvListen()
@@ -406,14 +405,7 @@ void DnsResolvListen::StartListen()
             close(clientSockFd);
             continue;
         }
-        if (!dnsResolvListenFfrtQueue_) {
-            NETNATIVE_LOGE("FFRT Init Fail");
-            return;
-        }
-        ffrt::task_handle StartListenTask = dnsResolvListenFfrtQueue_->submit_h([this, &clientSockFd]() {
-            this->ProcCommand(clientSockFd);
-        });
-        dnsResolvListenFfrtQueue_->wait(StartListenTask);
+        this->ProcCommand(clientSockFd);
     }
 }
 } // namespace OHOS::nmd

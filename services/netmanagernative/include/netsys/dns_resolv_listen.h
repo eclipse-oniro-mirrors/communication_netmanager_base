@@ -47,7 +47,6 @@ private:
     static bool ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid);
 
     int32_t serverSockFd_;
-    std::shared_ptr<ffrt::queue> dnsResolvListenFfrtQueue_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS
