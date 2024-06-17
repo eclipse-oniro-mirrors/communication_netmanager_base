@@ -73,7 +73,8 @@ class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
 public:
     virtual ~NetSupplierCallbackBaseTestCb() = default;
 
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps, const int32_t registerType = REGISTER) override
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+        const int32_t registerType = REGISTER) override
     {
         return NETMANAGER_SUCCESS;
     };
