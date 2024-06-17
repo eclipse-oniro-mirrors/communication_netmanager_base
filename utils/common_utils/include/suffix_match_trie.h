@@ -17,13 +17,15 @@
 #define NETMANAGER_BASE_SUFFIX_MATCH_TRIE_H
 
 #include <string>
+#include <cctype>
 
 #include <securec.h>
 
 namespace OHOS::NetManagerStandard {
-static constexpr const char VISIBLE_CHAR_START = 0x21; // SPACE
-static constexpr const char VISIBLE_CHAR_END = 0x7f;   // DEL
-static constexpr const int VISIBLE_CHAR_RANGE = VISIBLE_CHAR_END - VISIBLE_CHAR_START;
+static constexpr const int DOMAIN_NUM_SIZE = 10;     // [0-9]
+static constexpr const int DOMAIN_DOT_INDEX = 36;    // [.]
+static constexpr const int DOMAIN_DASH_INDEX = 37;   // [-]
+static constexpr const int DOMAIN_CHAR_RANGE = 38;   // [a-z][0-9][-][.]
 
 /**
  * @brief Longest suffix match trie
@@ -39,7 +41,7 @@ private:
         // suffix terminal flag
         bool terminal;
         // children pointers
-        struct TrieNode *children[VISIBLE_CHAR_RANGE];
+        struct TrieNode *children[DOMAIN_CHAR_RANGE];
         // node value
         T val;
     };
@@ -70,16 +72,19 @@ public:
      *
      * @param key tire node key
      * @param val tire node value
+     * @return true if success, otherwise false
      */
-    void Insert(const std::string &key, const T &val)
+    bool Insert(const std::string &key, const T &val)
     {
         if (key.empty()) {
-            return;
+            return false;
         }
         TrieNode *pCrawl = root_;
         for (auto it = key.rbegin(); it != key.rend(); it++) {
-            char ch = *it;
-            int i = ch - VISIBLE_CHAR_START;
+            int i = GetChildIndex(*it);
+            if (i < 0) {
+                return false;
+            }
             if (!pCrawl->children[i])
                 pCrawl->children[i] = CreateNode();
             pCrawl = pCrawl->children[i];
@@ -87,6 +92,7 @@ public:
         pCrawl->terminal = true;
         pCrawl->val = val;
         size_++;
+        return true;
     }
 
     /**
@@ -94,6 +100,7 @@ public:
      *
      * @param key tire node key
      * @param val tire node value to be update
+     * @return true if success, otherwise false
      */
     bool Update(const std::string &key, const T &val)
     {
@@ -103,8 +110,10 @@ public:
         TrieNode *pCrawl = root_;
         TrieNode *found = nullptr;
         for (auto it = key.rbegin(); pCrawl && it != key.rend(); it++) {
-            char ch = *it;
-            int i = ch - VISIBLE_CHAR_START;
+            int i = GetChildIndex(*it);
+            if (i < 0) {
+                return false;
+            }
             pCrawl = pCrawl->children[i];
             if (pCrawl && pCrawl->terminal) {
                 found = pCrawl;
@@ -122,6 +131,7 @@ public:
      *
      * @param key tire node key
      * @param out tire node value
+     * @return >0 if success, otherwise =0
      */
     int LongestSuffixMatch(const std::string &key, T &out)
     {
@@ -133,8 +143,10 @@ public:
         int index = 0;
         int matchLen = 0;
         for (auto it = key.rbegin(); pCrawl && it != key.rend(); it++) {
-            char ch = *it;
-            int i = ch - VISIBLE_CHAR_START;
+            int i = GetChildIndex(*it);
+            if (i < 0) {
+                return matchLen;
+            }
             pCrawl = pCrawl->children[i];
             index++;
 
@@ -161,13 +173,30 @@ private:
     void FreeTrie(TrieNode *root)
     {
         if (root) {
-            for (int i = 0; i < VISIBLE_CHAR_RANGE; i++) {
+            for (int i = 0; i < DOMAIN_CHAR_RANGE; i++) {
                 FreeTrie(root->children[i]);
             }
 
             delete root;
             root = nullptr;
         }
+    }
+    int GetChildIndex(char c)
+    {
+        int ch = c;
+        if (isupper(c)) {
+            ch = tolower(c);
+        }
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
+        } else if (ch >= 'a' && ch <= 'z') {
+            return ch - 'a' + DOMAIN_NUM_SIZE;
+        } else if (ch == '.') {
+            return DOMAIN_DOT_INDEX;
+        } else if (ch == '-') {
+            return DOMAIN_DASH_INDEX;
+        }
+        return -1;
     }
 };
 } // namespace OHOS::NetManagerStandard

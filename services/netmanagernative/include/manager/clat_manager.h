@@ -49,8 +49,6 @@ private:
     int32_t CreateAndConfigureClatSocket(const std::string &v6Iface, const INetAddr &v6Addr, uint32_t fwmark,
                                          int &readSock6, int &writeSock6);
 
-    int AdjustMtu(int mtu);
-
     std::map<std::string, Clatd> clatds_;
 
     std::map<std::string, ClatdTracker> clatdTrackers_;

@@ -19,6 +19,14 @@ ohos_bpf("netsys") {
 
   include_dirs = [ "include" ]
 
+  if (enable_feature_net_firewall) {
+    defines = [
+      "FEATURE_NET_FIREWALL_ENABLE",
+      "NET_FIREWALL_DEBUG=0",
+      "NET_FIREWALL_DEBUG_TUPLE=0",
+    ]
+  }
+
   subsystem_name = "communication"
   part_name = "netmanager_base"
 }
@@ -28,7 +36,7 @@ ohos_shared_library("netsys_bpf_utils") {
     cfi = true
     cfi_cross_dso = true
     boundary_sanitize = true
-    all_ubsan = true
+    ubsan = true
     debug = false
   }
 
@@ -76,6 +84,24 @@ ohos_shared_library("netsys_bpf_utils") {
   ]
 
   deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
+
+  if (enable_feature_net_firewall) {
+    public_configs = [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
+    sources += [
+      "src/bitmap_manager.cpp",
+      "src/bpf_netfirewall.cpp",
+    ]
+
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+
+    deps += [ "$INNERKITS_ROOT/netmanagernative:net_native_parcel" ]
+
+    external_deps += [
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
 
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"

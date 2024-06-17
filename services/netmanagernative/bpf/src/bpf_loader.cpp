@@ -103,6 +103,7 @@ static const constexpr struct {
     bool needExpectedAttach;
 } PROG_ATTACH_TYPES[] = {
     DEFINE_ATTACH_TYPE("cgroup_sock_inet_create_socket", BPF_CGROUP_INET_SOCK_CREATE, false),
+    DEFINE_ATTACH_TYPE("cgroup_sock_inet_release_socket", BPF_CGROUP_INET_SOCK_RELEASE, true),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS, false),
     DEFINE_ATTACH_TYPE("cgroup_addr_bind4", BPF_CGROUP_INET4_BIND, true),
@@ -111,8 +112,6 @@ static const constexpr struct {
     DEFINE_ATTACH_TYPE("cgroup_addr_connect6", BPF_CGROUP_INET6_CONNECT, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg4", BPF_CGROUP_UDP4_SENDMSG, true),
     DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg6", BPF_CGROUP_UDP6_SENDMSG, true),
-    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg4", BPF_CGROUP_UDP4_RECVMSG, true),
-    DEFINE_ATTACH_TYPE("cgroup_addr_recvmsg6", BPF_CGROUP_UDP6_RECVMSG, true),
 };
 
 int32_t g_sockFd = -1;
