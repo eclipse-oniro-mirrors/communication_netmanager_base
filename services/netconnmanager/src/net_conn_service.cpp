@@ -1877,6 +1877,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
             NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
             return ret;
         }
+        NETMGR_LOG_I("GlobalHttpProxy userId is %{public}d", userId);
         NetHttpProxyTracker httpProxyTracker;
         if (IsPrimaryUserId(userId)) {
             if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
@@ -1897,11 +1898,17 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 
 int32_t NetConnService::GetCallingUserId(int32_t &userId)
 {
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, uid: %{public}d.", uid);
+    std::vector<int> activeIds;
+    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
+    if (ret != 0) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds failed. ret is %{public}d", ret);
         return NETMANAGER_ERR_INTERNAL;
     }
+    if (activeIds.empty()) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds is empty");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    userId = activeIds[0];
     return NETMANAGER_SUCCESS;
 }
 
