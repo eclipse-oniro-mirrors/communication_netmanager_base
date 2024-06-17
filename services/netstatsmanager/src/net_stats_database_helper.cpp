@@ -410,5 +410,75 @@ int32_t NetStatsDatabaseHelper::UpgradeTableVersion(const std::string &tableName
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetStatsDatabaseHelper::Upgrade()
+{
+    auto ret = ExecTableUpgrade(UID_TABLE, Version_1);
+    return ret;
+}
+
+int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, TableVersion newVersion)
+{
+    TableVersion oldVersion;
+    auto ret = GetTableVersion(oldVersion, tableName);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("execUpgrade getTableVersion failed. ret = %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
+    NETMGR_LOG_I("execUpgrade params: tableName = %{public}s, oldVersion = %{public}d, newVersion = %{public}d",
+                 tableName.c_str(), oldVersion, newVersion);
+    if (oldVersion < Version_1 && newVersion >= Version_1) {
+        std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
+        ret = ExecSql(sql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("execUpgrade version_1 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_1;
+    }
+    if (oldVersion != newVersion) {
+        NETMGR_LOG_E("execUpgrade error. oldVersion = %{public}d, newVersion = %{public}d", oldVersion, newVersion);
+        return NETMANAGER_ERROR;
+    }
+    NETMGR_LOG_I("execUpgrade oldVersion = %{public}d, newVersion = %{public}d", oldVersion, newVersion);
+    ret = UpdateTableVersion(tableName, oldVersion);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("execUpgrade updateVersion failed. ret = %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std::string &tableName)
+{
+    std::string sql = "SELECT * FROM " + tableName + " WHERE Name = ?;";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, tableName);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t rc = statement_.Step();
+    auto v = static_cast<uint32_t>(Version_0);
+    while (rc != SQLITE_DONE) {
+        int32_t i = 0;
+        statement_.GetColumnInt(i, v);
+        rc = statement_.Step();
+    }
+    statement_.ResetStatementAndClearBindings();
+    version = static_cast<TableVersion>(v);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::UpdateTableVersion(TableVersion version, const std::&tableName)
+{
+    std::string sql = "INSERT OR REPLACE INTO T_version(Name, Version) VALUES('" +
+                      tableName + "', " + std::to_string(version) + ");";
+    return ExecSql(sql, nullptr, sqlCallback);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

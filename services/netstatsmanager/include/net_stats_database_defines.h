@@ -25,6 +25,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace NetStatsDatabaseDefines {
 constexpr const char *NET_STATS_DATABASE_PATH = "/data/service/el1/public/netmanager/net_stats_data.db";
+constexpr const char *VERSION_TABLE_CREATE_PARAM =
+    "Name CHAR(20) NOT NULL UNIQUE,"
+    "Version INTEGER NOT NULL DEFAULT 0";
 constexpr const char *UID_TABLE_CREATE_PARAM =
     "UID INTEGER NOT NULL,"
     "IFace CHAR(50) NOT NULL,"
@@ -53,6 +56,7 @@ constexpr const char *IFACE_TABLE_CREATE_PARAM =
 constexpr const char *UID_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
 constexpr const char *UID_SIM_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
 constexpr const char *IFACE_TABLE_PARAM_LIST = "IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets";
+constexpr const char *VWESION_TABLE = "T_version";
 constexpr const char *IFACE_TABLE = "T_iface";
 constexpr const char *UID_TABLE = "T_uid";
 constexpr const char *UID_SIM_TABLE = "T_uid_sim";
