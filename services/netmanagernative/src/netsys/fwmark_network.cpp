@@ -118,7 +118,7 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
     }
     ret = setsockopt(*socketFd, SOL_SOCKET, SO_MARK, &fwmark.intValue, sizeof(fwmark.intValue));
     if (ret != 0) {
-	NETNATIVE_LOGE("FwmarkNetwork: SetMark failed, ret %{public}d.", ret);
+        NETNATIVE_LOGE("FwmarkNetwork: SetMark failed, ret %{public}d.", ret);
         CloseSocket(socketFd, ret, ERROR_CODE_SETSOCKOPT_FAILED);
         return ret;
     }
