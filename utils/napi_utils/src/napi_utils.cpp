@@ -203,6 +203,10 @@ std::string GetStringFromValueUtf8(napi_env env, napi_value value)
     char str[MAX_STRING_LENGTH] = {0};
     size_t length = 0;
     NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, str, MAX_STRING_LENGTH, &length), result);
+    if (length > MAX_STRING_LENGTH) {
+        result.append(str, MAX_STRING_LENGTH);
+        return result;
+    }
     if (length > 0) {
         return result.append(str, length);
     }
