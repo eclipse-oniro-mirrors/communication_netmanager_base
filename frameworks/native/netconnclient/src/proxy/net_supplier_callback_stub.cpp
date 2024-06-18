@@ -75,8 +75,9 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
-
-    RequestNetwork(ident, netCaps);
+    int32_t registerType = 0;
+    data.ReadInt32(registerType);
+    RequestNetwork(ident, netCaps, registerType);
 
     reply.WriteInt32(0);
     return NETMANAGER_SUCCESS;
@@ -105,11 +106,12 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
+int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+    const int32_t registerType)
 {
     if (callback_ != nullptr) {
         auto startTime = std::chrono::steady_clock::now();
-        callback_->RequestNetwork(ident, netCaps);
+        callback_->RequestNetwork(ident, netCaps, registerType);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());

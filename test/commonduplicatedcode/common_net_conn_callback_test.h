@@ -22,6 +22,7 @@
 #include "net_manager_constants.h"
 #include "net_supplier_callback_base.h"
 #include "net_supplier_callback_stub.h"
+#include "net_manager_constants.h"
 #include <iostream>
 
 namespace OHOS {
@@ -72,7 +73,8 @@ class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
 public:
     virtual ~NetSupplierCallbackBaseTestCb() = default;
 
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+        const int32_t registerType = REGISTER) override
     {
         return NETMANAGER_SUCCESS;
     };
@@ -88,7 +90,8 @@ public:
     NetSupplierCallbackStubTestCb() = default;
     ~NetSupplierCallbackStubTestCb() {}
 
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+                           const int32_t registerType = REGISTER) override
     {
         return NETMANAGER_SUCCESS;
     }
