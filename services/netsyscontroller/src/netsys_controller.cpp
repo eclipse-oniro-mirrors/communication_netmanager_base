@@ -902,6 +902,15 @@ int32_t NetsysController::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerS
     return netsysService_->GetAllContainerStatsInfo(stats);
 }
 
+int32_t NetsysController::DeleteContainerStatsInfo(uint32_t uid)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DeleteContainerStatsInfo(uid);
+}
+
 int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (netsysService_ == nullptr) {
@@ -909,6 +918,15 @@ int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysController::DeleteStatsInfo(uint32_t uid)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DeleteStatsInfo(uid);
 }
 
 int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)

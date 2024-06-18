@@ -38,6 +38,7 @@ enum NetStatsResultCode {
     STATS_ERR_DATABASE_RECV_NO_DATA,
     STATS_ERR_WRITE_DATA_FAIL,
     STATS_ERR_READ_DATA_FAIL,
+    STATS_ERR_WRITE_BPF_FAIL,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

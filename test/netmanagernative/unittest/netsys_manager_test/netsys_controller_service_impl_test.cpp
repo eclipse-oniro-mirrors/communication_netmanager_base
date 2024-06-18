@@ -34,6 +34,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 } // namespace
+static constexpr uint32_t TEST_UID = 1;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
@@ -585,6 +586,12 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetUidStats(stats, type, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DeleteStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DeleteContainerStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};

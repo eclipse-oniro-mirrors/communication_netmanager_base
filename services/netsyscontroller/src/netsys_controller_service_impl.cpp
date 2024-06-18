@@ -653,10 +653,22 @@ int32_t NetsysControllerServiceImpl::GetAllContainerStatsInfo(
     return netsysClient_.GetAllContainerStatsInfo(stats);
 }
 
+int32_t NetsysControllerServiceImpl::DeleteContainerStatsInfo(uint32_t uid)
+{
+    NETMGR_LOG_D("DeleteContainerStatsInfo");
+    return netsysClient_.DeleteContainerStatsInfo(stats);
+}
+
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     NETMGR_LOG_D("GetAllStatsInfo");
     return netsysClient_.GetAllStatsInfo(stats);
+}
+
+int32_t NetsysControllerServiceImpl::DeleteStatsInfo(uint32_t uid)
+{
+    NETMGR_LOG_D("DeleteStatsInfo");
+    return netsysClient_.DeleteStatsInfo(stats);
 }
 
 int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)

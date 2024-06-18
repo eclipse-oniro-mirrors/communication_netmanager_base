@@ -119,7 +119,9 @@ private:
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply);

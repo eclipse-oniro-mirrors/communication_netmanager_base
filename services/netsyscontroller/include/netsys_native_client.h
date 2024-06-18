@@ -733,12 +733,28 @@ public:
     int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
     /**
+     * Delete the container Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteContainerStatsInfo(uint32_t uid);
+
+    /**
      * Get all stats info
      *
      * @param stats stats
      * @return returns the all info of the stats
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Delete the Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteStatsInfo(uint32_t uid);
 
     /**
      * Set iptables for result

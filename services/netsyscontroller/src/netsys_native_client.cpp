@@ -1274,6 +1274,16 @@ int32_t NetsysNativeClient::GetAllContainerStatsInfo(std::vector<OHOS::NetManage
     return proxy->GetAllContainerStatsInfo(stats);
 }
 
+int32_t NetsysNativeClient::DeleteContainerStatsInfo(uint32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DeleteContainerStatsInfo(uid);
+}
+
 int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     auto proxy = GetProxy();
@@ -1282,6 +1292,16 @@ int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysNativeClient::DeleteStatsInfo(uint32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DeleteStatsInfo(uid);
 }
 
 int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)

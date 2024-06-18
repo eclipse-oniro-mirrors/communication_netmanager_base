@@ -662,6 +662,15 @@ int32_t NetsysNativeService::GetAllContainerStatsInfo(std::vector<OHOS::NetManag
     return bpfStats_->GetAllContainerStatsInfo(stats);
 }
 
+int32_t NetsysNativeService::DeleteContainerStatsInfo(uint32_t uid)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteContainerStatsInfo(uid);
+}
+
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {
@@ -670,6 +679,15 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     }
 
     return bpfStats_->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysNativeService::DeleteStatsInfo(uint32_t uid)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteStatsInfo(uid);
 }
 
 int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)

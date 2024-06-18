@@ -31,6 +31,7 @@ namespace OHOS {
 namespace NetsysNative {
 namespace {
 using namespace testing::ext;
+constexpr uint32_t TEST_UID = 1;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
@@ -392,7 +393,17 @@ public:
         return 0;
     }
 
+    int32_t DeleteContainerStatsInfo(uint32_t uid) override
+    {
+        return 0;
+    }
+
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    {
+        return 0;
+    }
+
+    int32_t DeleteStatsInfo(uint32_t uid) override
     {
         return 0;
     }
@@ -1430,6 +1441,15 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint32(TEST_UID));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDeleteStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllContainerStatsInfoTest001, TestSize.Level1)
 {
     MessageParcel data;
@@ -1438,6 +1458,14 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllContainerStatsInfoTest001, TestSi
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteContainerStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint32(TEST_UID));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDeleteContainerStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 
 HWTEST_F(NetsysNativeServiceStubTest, NetsysFreeAddrinfoTest001, TestSize.Level1)
 {

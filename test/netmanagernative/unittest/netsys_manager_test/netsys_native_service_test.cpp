@@ -36,6 +36,7 @@ namespace NetsysNative {
 namespace {
 using namespace NetManagerStandard;
 using namespace testing::ext;
+static constexpr uint32_t TEST_UID = 1;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
@@ -572,10 +573,22 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeServiceTest, DeleteStatsInfo001, TestSize.Level1)
+{
+    int32_t ret = instance_->DeleteStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, GetAllContainerStatsInfo001, TestSize.Level1)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     int32_t ret = instance_->GetAllContainerStatsInfo(stats);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DeleteContainerStatsInfo001, TestSize.Level1)
+{
+    int32_t ret = instance_->DeleteContainerStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

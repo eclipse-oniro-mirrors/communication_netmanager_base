@@ -321,6 +321,20 @@ void NetStatsCached::ForceUpdateStats()
     ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
 }
 
+void NetStatsCached::ForceDeleteStats(uint32_t uid)
+{
+    stats_.ResetUidStats(uid);
+    stats_.ResetUidSimStats(uid);
+    auto ret = NetsysController::GetInstance().DeleteStatsInfo(uid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ForceDeleteStats failed. ret is %{public}d", ret);
+    }
+    auto ret = NetsysController::GetInstance().DeleteContainerStatsInfo(uid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ForceDeleteStats failed. ret is %{public}d", ret);
+    }
+}
+
 void NetStatsCached::Reset() {}
 
 } // namespace NetManagerStandard
