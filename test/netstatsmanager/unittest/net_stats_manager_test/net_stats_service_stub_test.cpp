@@ -454,6 +454,66 @@ HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateIfacesStatsTest002
+ * @tc.desc: Test NetConnCallbackStub UpdateIfacesStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest002, TestSize.Level1)
+{
+    NetManagerBaseNotSystemToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    NetStatsInfo stats;
+    stats.Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+}
+
+/**
+ * @tc.name: UpdateIfacesStatsTest003
+ * @tc.desc: Test NetConnCallbackStub UpdateIfacesStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest003, TestSize.Level1)
+{
+    NetManagerBaseNoPermissionToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    NetStatsInfo stats;
+    stats.Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: UpdateStatsDataTest001
  * @tc.desc: Test NetConnCallbackStub UpdateStatsData.
  * @tc.type: FUNC
@@ -466,6 +526,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
+
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), data,
                                              reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -487,6 +548,44 @@ HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest001, TestSize.Level1)
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
                                              reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: ResetFactoryTest002
+ * @tc.desc: Test NetConnCallbackStub ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest002, TestSize.Level1)
+{
+    NetManagerBaseNotSystemToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+}
+
+/**
+ * @tc.name: ResetFactoryTest003
+ * @tc.desc: Test NetConnCallbackStub ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest003, TestSize.Level1)
+{
+    NetManagerBaseNoPermissionToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
