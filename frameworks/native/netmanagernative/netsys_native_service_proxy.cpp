@@ -2757,7 +2757,7 @@ int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType
     MessageOption option;
     int result =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE),
-                data, reply, option);
+            data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
         return IPC_INVOKER_ERR;
