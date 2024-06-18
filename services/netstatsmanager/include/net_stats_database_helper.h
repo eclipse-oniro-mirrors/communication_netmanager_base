@@ -55,11 +55,21 @@ public:
     int32_t ClearData(const std::string &tableName);
     int32_t Step(std::vector<NetStatsInfo> &infos);
     int32_t ExecSql(const std::string &sql, void *recv, SqlCallback callback);
+    int32_t Upgrade();
+
+private:
+    enum TableVersion : int32_t {
+        Version_0 = 0,
+        Version_1,
+    };
 
 private:
     int32_t Open(const std::string &path);
     int32_t Close();
     int32_t BindInt64(int32_t idx, uint64_t start, uint64_t end);
+    int32_t GetTableVersion(TableVersion &version, const std::string &tableName);
+    int32_t UpdateTableVersion(TableVersion version, const std::string &tableName);
+    int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
 };
