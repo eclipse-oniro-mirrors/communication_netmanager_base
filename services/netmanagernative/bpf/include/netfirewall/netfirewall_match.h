@@ -214,14 +214,20 @@ static __always_inline bool match_port(void *map, void *key, __be16 kport)
     if (!map || !key) {
         return false;
     }
-    struct port_segment *segment = bpf_map_lookup_elem(map, key);
-    if (segment) {
+    struct port_array *res = bpf_map_lookup_elem(map, key);
+    if (res) {
         __u16 port = bpf_ntohs(kport);
-        if (port >= segment->start && port <= segment->end) {
-            return true;
-        } else {
-            return false;
+
+        for (int i = 0; i < PORT_NUM_MAX; i++) {
+            if (!res->ports[i].start) {
+                break;
+            }
+            if (port >= res->ports[i].start && port <= res->ports[i].end) {
+                return true;
+            }
         }
+
+        return false;
     }
 
     // not found means firewall rule not set port param

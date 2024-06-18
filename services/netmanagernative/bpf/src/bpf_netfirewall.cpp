@@ -198,7 +198,7 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     NETNATIVE_LOG_D("ClearBpfFirewallRules: direction=%{public}d", direction);
     Ipv4LpmKey ip4Key = {};
     Ipv6LpmKey ip6Key = {};
-    PortSegment portVal = {};
+    PortArray portVal = {};
     ProtoKey protoKey = 0;
     AppUidKey appIdKey = 0;
     UidKey uidKey = 0;
@@ -422,7 +422,7 @@ void NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewal
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
         for (const auto &pair : srcPortMap) {
             Bitmap key = pair.first;
-            PortSegment val = pair.second;
+            PortArray val = pair.second;
             ActionKey rule;
             memcpy_s(rule.val, sizeof(RuleCode), key.Get(), sizeof(RuleCode));
             WriteBpfMap(GET_MAP_PATH(ingress, sport), rule, val);
@@ -439,7 +439,7 @@ void NetsysBpfNetFirewall::WriteDstPortBpfMap(BitmapManager &manager, NetFirewal
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
         for (const auto &pair : dstPortMap) {
             Bitmap key = pair.first;
-            PortSegment val = pair.second;
+            PortArray val = pair.second;
             ActionKey rule;
             memcpy_s(rule.val, sizeof(RuleCode), key.Get(), sizeof(RuleCode));
             WriteBpfMap(GET_MAP_PATH(ingress, dport), rule, val);
