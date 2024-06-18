@@ -67,9 +67,8 @@ private:
     int32_t Open(const std::string &path);
     int32_t Close();
     int32_t BindInt64(int32_t idx, uint64_t start, uint64_t end);
-    int32_t UpgradeTableVersion(const std::string &tableName);
     int32_t GetTableVersion(TableVersion &version, const std::string &tableName);
-    int32_t UpdateTableVersion(TableVersion version, const std::&tableName);
+    int32_t UpdateTableVersion(TableVersion version, const std::string &tableName);
     int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
