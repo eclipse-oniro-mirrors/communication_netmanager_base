@@ -21,14 +21,14 @@
 #define protected public
 #endif
 
+#include "common_net_stats_callback_test.h"
 #include "i_net_stats_callback.h"
 #include "net_all_capabilities.h"
-
 #include "net_push_stats_info.h"
 #include "net_stats_info_sequence.h"
 #include "net_stats_network.h"
 #include "net_stats_service_stub.h"
-#include "common_net_stats_callback_test.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -215,6 +215,7 @@ HWTEST_F(TestNetStatsServiceStub, OnRemoteRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -237,6 +238,7 @@ HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, UnregisterNetStatsCallbackTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -415,6 +417,7 @@ HWTEST_F(TestNetStatsServiceStub, GetUidTxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetIfaceStatsDetailTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -442,6 +445,7 @@ HWTEST_F(TestNetStatsServiceStub, GetIfaceStatsDetailTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetUidStatsDetailTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -472,6 +476,7 @@ HWTEST_F(TestNetStatsServiceStub, GetUidStatsDetailTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -519,6 +524,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -537,6 +543,7 @@ HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -555,6 +562,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -573,6 +581,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -595,6 +604,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -621,6 +631,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.L
  */
 HWTEST_F(TestNetStatsServiceStub, SetAppStats001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
