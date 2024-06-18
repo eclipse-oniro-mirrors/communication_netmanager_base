@@ -1777,6 +1777,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
             BroadcastManager::GetInstance().SendBroadcast(info, param);
         },
         "delay airplane mode", delayTime);
+    NETMGR_LOG_I("SetAirplaneMode out");
 
     return NETMANAGER_SUCCESS;
 }
