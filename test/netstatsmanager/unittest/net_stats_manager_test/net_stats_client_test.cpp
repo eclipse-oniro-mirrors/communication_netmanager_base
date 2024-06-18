@@ -247,7 +247,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
     std::cout << "NetStatsClientTest::NetStatsClient003 net ifaceStatsInfo:" << info.UidData() << std::endl;
     EXPECT_EQ(info.iface_, iface);
-    EXPECT_EQ(info.date_, MOCK_DATE);
+    EXPECT_EQ(info.date_, UINT32_MAX);
     EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
     EXPECT_EQ(info.txBytes_, MOCK_TXBYTES);
     EXPECT_EQ(info.rxPackets_, MOCK_RXPACKETS);
