@@ -1298,7 +1298,8 @@ int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string 
 
     MessageParcel reply;
     MessageOption option;
-    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD),
+    int result =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD),
             data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
@@ -2643,7 +2644,7 @@ int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &in
     MessageOption option;
     int result =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
-                          data, reply, option);
+            data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
         return IPC_INVOKER_ERR;
@@ -2668,7 +2669,7 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     MessageParcel reply;
     MessageOption option;
     int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
-                          data, reply, option);
+        data, reply, option);
     if (result != ERR_NONE) {
         NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
         return IPC_INVOKER_ERR;
@@ -2754,7 +2755,7 @@ int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType
 
     MessageParcel reply;
     MessageOption option;
-    int result = 
+    int result =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE),
                 data, reply, option);
     if (result != ERR_NONE) {
