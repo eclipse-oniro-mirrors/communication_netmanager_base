@@ -51,7 +51,7 @@ void NetPolicyFileEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer 
     auto eventId = event->GetInnerEventId();
     auto eventData = event->GetSharedObject<PolicyFileEvent>();
     netPolicyFileEventQueue_.submit([this, eventId, eventData] { ProcessEvent(eventId, eventData); },
-                                    ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)));
+                                    ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)).name("FfrtSendEvent"));
 }
 
 void NetPolicyFileEventHandler::ProcessEvent(uint32_t eventId, std::shared_ptr<PolicyFileEvent> eventData)

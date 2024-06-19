@@ -41,7 +41,7 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr
     }
     ffrt::task_handle ResetCallbackAsyncTask = factoryResetCallFfrtQueue_->submit_h([this, &callback, &ret]() {
         ret = RegisterNetFactoryResetCallback(callback);
-    });
+    }, ffrt::task_attr().name("FfrtRegisterNetFactoryResetCallbackAsync"));
     factoryResetCallFfrtQueue_->wait(ResetCallbackAsyncTask);
     return ret;
 }
@@ -81,7 +81,7 @@ int32_t NetFactoryResetCallback::UnregisterNetFactoryResetCallbackAsync(const sp
     ffrt::task_handle UnregisterNetFactoryResetCallbackAsync =
         factoryResetCallFfrtQueue_->submit_h([this, &callback, &ret]() {
             ret = UnregisterNetFactoryResetCallback(callback);
-        });
+        }, ffrt::task_attr().name("FfrtUnregisterNetFactoryResetCallbackAsync"));
     factoryResetCallFfrtQueue_->wait(UnregisterNetFactoryResetCallbackAsync);
 
     return ret;
@@ -114,7 +114,7 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryResetAsync()
     }
     ffrt::task_handle  NotifyNetFactoryResetAsyncTask = factoryResetCallFfrtQueue_->submit_h([this, &ret]() {
            ret = NotifyNetFactoryReset();
-    });
+    }, ffrt::task_attr().name("FfrtNotifyNetFactoryResetAsync"));
     factoryResetCallFfrtQueue_->wait(NotifyNetFactoryResetAsyncTask);
     return ret;
 }
