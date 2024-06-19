@@ -1678,7 +1678,7 @@ int32_t NetsysNativeServiceProxy::DeleteStatsInfo(uint32_t uid)
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceProxy::DeleteStatsInfo(uint32_t uid)
+int32_t NetsysNativeServiceProxy::DeleteContainerStatsInfo(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

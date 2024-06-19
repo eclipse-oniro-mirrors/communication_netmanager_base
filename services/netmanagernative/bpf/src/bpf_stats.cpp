@@ -139,6 +139,7 @@ int32_t NetsysBpfStats::DeleteContainerStatsInfo(uint32_t uid)
             }
         }
     }
+    return NETSYS_SUCCESS;
 }
 
 int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
@@ -193,6 +194,7 @@ int32_t NetsysBpfStats::DeleteStatsInfo(uint32_t uid)
             }
         }
     }
+    return NETSYS_SUCCESS;
 }
 
 int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName)
