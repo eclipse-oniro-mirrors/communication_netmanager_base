@@ -1701,7 +1701,7 @@ int32_t NetsysNativeServiceProxy::DeleteContainerStatsInfo(uint32_t uid)
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to DeleteStatsInfo ret= %{public}d", ret);
+        NETNATIVE_LOGE("fail to DeleteContainerStatsInfo ret= %{public}d", ret);
         return ret;
     }
     return ERR_NONE;

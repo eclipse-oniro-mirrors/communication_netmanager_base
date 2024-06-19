@@ -325,13 +325,27 @@ void NetStatsCached::ForceDeleteStats(uint32_t uid)
 {
     stats_.ResetUidStats(uid);
     stats_.ResetUidSimStats(uid);
+    for (auto it = lastUidStatsInfo_.begin(); it != lastUidStatsInfo_.end();) {
+        if (it->uid_ == uid) {
+            it = lastUidStatsInfo_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto it = lastUidSimStatsInfo_.begin(); it != lastUidSimStatsInfo_.end();) {
+        if (it->uid_ == uid) {
+            it = lastUidSimStatsInfo_.erase(it);
+        } else {
+            ++it;
+        }
+    }
     auto ret = NetsysController::GetInstance().DeleteStatsInfo(uid);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ForceDeleteStats failed. ret is %{public}d", ret);
+        NETMGR_LOG_E("ForceDeleteStats DeleteStatsInfo failed. ret is %{public}d", ret);
     }
-    auto ret = NetsysController::GetInstance().DeleteContainerStatsInfo(uid);
+    ret = NetsysController::GetInstance().DeleteContainerStatsInfo(uid);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ForceDeleteStats failed. ret is %{public}d", ret);
+        NETMGR_LOG_E("ForceDeleteStats DeleteContainerStatsInfo failed. ret is %{public}d", ret);
     }
 }
 

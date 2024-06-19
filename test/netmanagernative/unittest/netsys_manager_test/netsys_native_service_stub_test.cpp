@@ -31,10 +31,10 @@ namespace OHOS {
 namespace NetsysNative {
 namespace {
 using namespace testing::ext;
-constexpr uint32_t TEST_UID = 1;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint64_t TEST_UID = 1;
 
 class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
 public:
