@@ -488,14 +488,14 @@ using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
 using UidKey = uid_key;
 using ActionValue = action_val;
-using PortSegment = port_segment;
+using PortArray = port_array;
 
 using BpfStrMap = BpfUnorderedMap<std::string>;
 using BpfProtoMap = BpfUnorderedMap<ProtoKey>;
 using BpfAppUidMap = BpfUnorderedMap<AppUidKey>;
 using BpfUidMap = BpfUnorderedMap<UidKey>;
 using BpfActionMap = std::unordered_map<Bitmap, ActionValue, BitmapHash>;
-using BpfPortMap = std::unordered_map<Bitmap, PortSegment, BitmapHash>;
+using BpfPortMap = std::unordered_map<Bitmap, PortArray, BitmapHash>;
 
 class BitmapManager {
 public:

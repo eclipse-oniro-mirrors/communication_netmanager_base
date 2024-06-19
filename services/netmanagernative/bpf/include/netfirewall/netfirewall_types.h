@@ -160,4 +160,9 @@ struct port_segment {
     __u16 end;
 };
 
+#define PORT_NUM_MAX 10
+struct port_array {
+    struct port_segment ports[PORT_NUM_MAX];
+};
+
 #endif // NET_FIREWALL_TYPES_H
