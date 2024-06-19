@@ -25,6 +25,8 @@
 #include <vector>
 #include <pthread.h>
 
+#include "ffrt.h"
+#include "ffrt_inner.h"
 #include "netlink_define.h"
 #include "netnative_log_wrapper.h"
 
@@ -57,9 +59,7 @@ int32_t WrapperListener::Start()
                        strerror(errno));
         return NetlinkResult::ERROR;
     }
-    thread_ = std::thread(WrapperListener::ListenThread, this);
-    std::string threadName = "WrapListen";
-    pthread_setname_np(thread_.native_handle(), threadName.c_str());
+    ffrt::submit([this]() { WrapperListener::ListenThread(this); }, ffrt::task_attr().name("WrapListen"));
     return NetlinkResult::OK;
 }
 
@@ -72,9 +72,6 @@ int32_t WrapperListener::Stop()
         return NetlinkResult::ERROR;
     }
 
-    if (thread_.joinable()) {
-        thread_.join();
-    }
     for (auto &pi : pipe_) {
         if (pi > 0) {
             close(pi);
@@ -101,7 +98,7 @@ void WrapperListener::Listen()
     }
     while (true) {
         std::vector<pollfd> pollFds;
-        std::unique_lock<std::mutex> lock(clientsLock_);
+        std::lock_guard<ffrt::mutex> lock(clientsLock_);
         pollFds.reserve(PRET_SIZE + 1);
         pollfd polfd;
         polfd.fd = pipe_[0];
@@ -110,9 +107,10 @@ void WrapperListener::Listen()
         polfd.fd = socket_;
         polfd.events = POLLIN;
         pollFds.emplace_back(polfd);
+		ffrt::sync_io(socket_);
         int32_t ret = TEMP_FAILURE_RETRY(poll(pollFds.data(), pollFds.size(), -1));
         if (ret < 0) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            ffrt::this_task::sleep_for(std::chrono::seconds(1));
         }
 
         if (pollFds[0].revents & (POLLIN | POLLERR)) {

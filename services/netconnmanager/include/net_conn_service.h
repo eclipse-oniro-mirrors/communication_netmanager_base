@@ -494,8 +494,6 @@ private:
     std::recursive_mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
     sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
