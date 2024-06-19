@@ -155,7 +155,7 @@ bool NetConnService::Init()
         return false;
     }
     netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnEventRunner_);
-
+    CreateDefaultRequest();
     if (!registerToService_) {
         if (!Publish(NetConnService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");

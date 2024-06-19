@@ -107,7 +107,7 @@ void WrapperListener::Listen()
         polfd.fd = socket_;
         polfd.events = POLLIN;
         pollFds.emplace_back(polfd);
-		ffrt::sync_io(socket_);
+        ffrt::sync_io(socket_);
         int32_t ret = TEMP_FAILURE_RETRY(poll(pollFds.data(), pollFds.size(), -1));
         if (ret < 0) {
             ffrt::this_task::sleep_for(std::chrono::seconds(1));
