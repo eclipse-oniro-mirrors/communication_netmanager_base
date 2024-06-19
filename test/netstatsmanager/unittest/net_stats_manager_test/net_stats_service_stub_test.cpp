@@ -21,14 +21,14 @@
 #define protected public
 #endif
 
+#include "common_net_stats_callback_test.h"
 #include "i_net_stats_callback.h"
 #include "net_all_capabilities.h"
-
 #include "net_push_stats_info.h"
 #include "net_stats_info_sequence.h"
 #include "net_stats_network.h"
 #include "net_stats_service_stub.h"
-#include "common_net_stats_callback_test.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -215,6 +215,7 @@ HWTEST_F(TestNetStatsServiceStub, OnRemoteRequestTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -237,6 +238,7 @@ HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, UnregisterNetStatsCallbackTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -415,6 +417,7 @@ HWTEST_F(TestNetStatsServiceStub, GetUidTxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetIfaceStatsDetailTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -442,6 +445,7 @@ HWTEST_F(TestNetStatsServiceStub, GetIfaceStatsDetailTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetUidStatsDetailTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -472,6 +476,7 @@ HWTEST_F(TestNetStatsServiceStub, GetUidStatsDetailTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -495,6 +500,66 @@ HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateIfacesStatsTest002
+ * @tc.desc: Test NetConnCallbackStub UpdateIfacesStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest002, TestSize.Level1)
+{
+    NetManagerBaseNotSystemToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    NetStatsInfo stats;
+    stats.Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+}
+
+/**
+ * @tc.name: UpdateIfacesStatsTest003
+ * @tc.desc: Test NetConnCallbackStub UpdateIfacesStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest003, TestSize.Level1)
+{
+    NetManagerBaseNoPermissionToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
+        return;
+    }
+    NetStatsInfo stats;
+    stats.Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: UpdateStatsDataTest001
  * @tc.desc: Test NetConnCallbackStub UpdateStatsData.
  * @tc.type: FUNC
@@ -507,6 +572,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
+
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), data,
                                              reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -519,6 +585,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -531,12 +598,51 @@ HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetFactoryTest002
+ * @tc.desc: Test NetConnCallbackStub ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest002, TestSize.Level1)
+{
+    NetManagerBaseNotSystemToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+}
+
+/**
+ * @tc.name: ResetFactoryTest003
+ * @tc.desc: Test NetConnCallbackStub ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest003, TestSize.Level1)
+{
+    NetManagerBaseNoPermissionToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
+                                             reply, option);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: GetAllStatsInfoTest001
  * @tc.desc: Test NetConnCallbackStub GetAllStatsInfo.
  * @tc.type: FUNC
  */
 HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -555,6 +661,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -573,6 +680,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -595,6 +703,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Leve
  */
 HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
@@ -621,6 +730,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.L
  */
 HWTEST_F(TestNetStatsServiceStub, SetAppStats001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
