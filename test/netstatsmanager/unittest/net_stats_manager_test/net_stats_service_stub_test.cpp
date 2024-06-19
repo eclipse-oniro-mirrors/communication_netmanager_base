@@ -105,7 +105,7 @@ public:
         return 0;
     }
 
-    int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos) override
+    int32_t GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos) override
     {
         return 0;
     }
@@ -549,11 +549,11 @@ HWTEST_F(TestNetStatsServiceStub, GetAllStatsInfoTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest001
- * @tc.desc: Test NetConnCallbackStub GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest001
+ * @tc.desc: Test NetConnCallbackStub GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(TestNetStatsServiceStub, GetAllSimStatsInfoTest001, TestSize.Level1)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
@@ -562,7 +562,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllContainerStatsInfoTest001, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO), data, reply, option);
+        static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO), data, reply, option);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

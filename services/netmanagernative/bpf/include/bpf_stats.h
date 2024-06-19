@@ -68,20 +68,12 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
 
     /**
-     * Get the container uid Stats
+     * Get the sim Stats of uid
      *
      * @param stats Stats data.
      * @return returns 0 for success other as failed.
      */
-    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
-
-    /**
-     * Delete the container Iface Stats with uid
-     *
-     * @param uid the uid of application
-     * @return returns 0 for success other as failed.
-     */
-    int32_t DeleteContainerStatsInfo(uint32_t uid);
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
     /**
      * Get the Iface with uid Stats
@@ -97,7 +89,7 @@ public:
      * @param uid the uid of application
      * @return returns 0 for success other as failed.
      */
-    int32_t DeleteStatsInfo(uint32_t uid);
+    int32_t DeleteStatsInfo(const std::string &path, uint32_t uid);
 
     int32_t GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie);
 

@@ -1264,24 +1264,24 @@ int32_t NetsysNativeClient::GetIfaceStats(uint64_t &stats, uint32_t type, const 
     return proxy->GetIfaceStats(stats, type, interfaceName);
 }
 
-int32_t NetsysNativeClient::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysNativeClient::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->GetAllContainerStatsInfo(stats);
+    return proxy->GetAllSimStatsInfo(stats);
 }
 
-int32_t NetsysNativeClient::DeleteContainerStatsInfo(uint32_t uid)
+int32_t NetsysNativeClient::DeleteSimStatsInfo(uint32_t uid)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->DeleteContainerStatsInfo(uid);
+    return proxy->DeleteSimStatsInfo(uid);
 }
 
 int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)

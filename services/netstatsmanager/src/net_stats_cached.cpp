@@ -34,7 +34,7 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
-constexpr const uint32_t CONTAINER_UID = 0xFFFFFFFF;
+constexpr const uint32_t Sim_UID = 0xFFFFFFFF;
 } // namespace
 
 int32_t NetStatsCached::StartCached()
@@ -109,12 +109,12 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
     std::vector<NetStatsInfo> allInfos;
     NetsysController::GetInstance().GetAllStatsInfo(allInfos);
-    std::vector<NetStatsInfo> containerInfos;
-    NetsysController::GetInstance().GetAllContainerStatsInfo(containerInfos);
-    std::for_each(containerInfos.begin(), containerInfos.end(), [](NetStatsInfo &info) {
-       info.uid_ = CONTAINER_UID;
+    std::vector<NetStatsInfo> SimInfos;
+    NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
+    std::for_each(SimInfos.begin(), SimInfos.end(), [](NetStatsInfo &info) {
+       info.uid_ = Sim_UID;
     });
-    allInfos.insert(allInfos.end(), containerInfos.begin(), containerInfos.end());
+    allInfos.insert(allInfos.end(), SimInfos.begin(), SimInfos.end());
 
     LoadIfaceNameIdentMaps();
     std::for_each(allInfos.begin(), allInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
@@ -180,7 +180,7 @@ void NetStatsCached::CacheUidStats()
 void NetStatsCached::CacheUidSimStats()
 {
     std::vector<NetStatsInfo> statsInfos;
-    NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfos);
+    NetsysController::GetInstance().GetAllSimStatsInfo(statsInfos);
     if (statsInfos.empty()) {
         NETMGR_LOG_W("No stats need to save");
         return;
@@ -193,7 +193,7 @@ void NetStatsCached::CacheUidSimStats()
             return;
         }
         info.ident_ = ifaceNameIdentMap_[info.iface_];
-        info.uid_ = CONTAINER_UID;
+        info.uid_ = Sim_UID;
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
@@ -343,9 +343,9 @@ void NetStatsCached::ForceDeleteStats(uint32_t uid)
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("ForceDeleteStats DeleteStatsInfo failed. ret is %{public}d", ret);
     }
-    ret = NetsysController::GetInstance().DeleteContainerStatsInfo(uid);
+    ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ForceDeleteStats DeleteContainerStatsInfo failed. ret is %{public}d", ret);
+        NETMGR_LOG_E("ForceDeleteStats DeleteSimStatsInfo failed. ret is %{public}d", ret);
     }
 }
 

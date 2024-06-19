@@ -87,7 +87,7 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     return GetNumberFromStatsValue(stats, statsType, uidStats);
 }
 
-int32_t NetsysBpfStats::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!uidSimStatsMap.IsValid()) {
@@ -121,24 +121,6 @@ int32_t NetsysBpfStats::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerSta
         stats.emplace_back(tempStats);
     }
 
-    return NETSYS_SUCCESS;
-}
-
-int32_t NetsysBpfStats::DeleteContainerStatsInfo(uint32_t uid)
-{
-    BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
-    if (!uidSimStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
-    }
-    auto keys = uidSimStatsMap.GetAllKeys();
-    for (const auto &k : keys) {
-        if (k.uId == uid) {
-            if (uidSimStatsMap.Delete(k) < 0) {
-                NETNATIVE_LOGE("Delete uid_sim_map err");
-                return STATS_ERR_WRITE_BPF_FAIL;
-            }
-        }
-    }
     return NETSYS_SUCCESS;
 }
 
@@ -179,17 +161,21 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
     return NETSYS_SUCCESS;
 }
 
-int32_t NetsysBpfStats::DeleteStatsInfo(uint32_t uid)
+int32_t NetsysBpfStats::DeleteStatsInfo(const std::string &path, uint32_t uid)
 {
-    BpfMapper<stats_key, stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_ANY);
-    if (!uidIfaceStatsMap.IsValid()) {
+    if (path != APP_UID_IF_STATS_MAP_PATH && path != APP_UID_SIM_STATS_MAP_PATH) {
+        NETNATIVE_LOGI("DeleteStatsInfo invalid path");
+        return NETSYS_SUCCESS;
+    }
+    BpfMapper<stats_key, stats_value> uidStatsMap(path, BPF_ANY);
+    if (!uidStatsMap.IsValid()) {
         return STATS_ERR_INVALID_IFACE_NAME_MAP;
     }
-    auto keys = uidIfaceStatsMap.GetAllKeys();
+    auto keys = uidStatsMap.GetAllKeys();
     for (const auto &k : keys) {
         if (k.uId == uid) {
-            if (uidIfaceStatsMap.Delete(k) < 0) {
-                NETNATIVE_LOGE("Delete ifaceStatsMap err");
+            if (uidStatsMap.Delete(k) < 0) {
+                NETNATIVE_LOGE("Delete uidStatsMap err");
                 return STATS_ERR_WRITE_BPF_FAIL;
             }
         }

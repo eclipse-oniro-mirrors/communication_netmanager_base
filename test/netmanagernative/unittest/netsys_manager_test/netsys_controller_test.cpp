@@ -416,7 +416,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     ret = NetsysController::GetInstance().DeleteStatsInfo(TEST_UID_32);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = NetsysController::GetInstance().DeleteContainerStatsInfo(TEST_UID_32);
+    ret = NetsysController::GetInstance().DeleteSimStatsInfo(TEST_UID_32);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     stats = 0;
@@ -424,7 +424,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfo);
+    ret = NetsysController::GetInstance().GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

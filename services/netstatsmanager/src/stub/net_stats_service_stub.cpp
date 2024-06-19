@@ -56,8 +56,8 @@ NetStatsServiceStub::NetStatsServiceStub()
         &NetStatsServiceStub::OnResetFactory;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
         &NetStatsServiceStub::OnGetAllStatsInfo;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO)] =
-        &NetStatsServiceStub::OnGetAllContainerStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllSimStatsInfo;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK)] =
         &NetStatsServiceStub::OnGetTrafficStatsByNetwork;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)] =
@@ -421,14 +421,14 @@ int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParce
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetStatsServiceStub::OnGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+int32_t NetStatsServiceStub::OnGetAllSimStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
     int32_t ret = CheckNetManagerAvailable(reply);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
     std::vector<NetStatsInfo> infos;
-    int32_t result = GetAllContainerStatsInfo(infos);
+    int32_t result = GetAllSimStatsInfo(infos);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

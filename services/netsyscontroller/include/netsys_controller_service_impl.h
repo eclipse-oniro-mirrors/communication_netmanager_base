@@ -683,19 +683,19 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
 
     /**
-     * Get all container stats info
+     * Get all Sim stats info
      * @param stats stats
      * @return returns the all info of the stats
      */
-    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
 
     /**
-     * Delete the container Iface Stats with uid
+     * Delete the Sim Iface Stats with uid
      *
      * @param uid the uid of application
      * @return returns 0 for success other as failed.
      */
-    int32_t DeleteContainerStatsInfo(uint32_t uid) override;
+    int32_t DeleteSimStatsInfo(uint32_t uid) override;
 
     /**
      * Get all stats info

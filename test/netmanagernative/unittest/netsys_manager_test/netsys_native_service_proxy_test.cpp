@@ -151,16 +151,16 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetDefaultNetworkTest001, TestSize.Level1
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest001
- * @tc.desc: Test NetsysNativeServiceProxy GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest001
+ * @tc.desc: Test NetsysNativeServiceProxy GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(NetsysNativeServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceProxyTest, GetAllSimStatsInfoTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
-    int32_t ret = netsysNativeService->GetAllContainerStatsInfo(stats);
+    int32_t ret = netsysNativeService->GetAllSimStatsInfo(stats);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

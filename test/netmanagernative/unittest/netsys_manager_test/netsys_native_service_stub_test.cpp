@@ -388,12 +388,12 @@ public:
         return 0;
     }
 
-    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
     {
         return 0;
     }
 
-    int32_t DeleteContainerStatsInfo(uint32_t uid) override
+    int32_t DeleteSimStatsInfo(uint32_t uid) override
     {
         return 0;
     }
@@ -1450,20 +1450,20 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteStatsInfoTest001, TestSize.Level1
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllSimStatsInfoTest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t ret = notifyStub_->CmdGetAllContainerStatsInfo(data, reply);
+    int32_t ret = notifyStub_->CmdGetAllSimStatsInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteSimStatsInfoTest001, TestSize.Level1)
 {
     MessageParcel data;
     EXPECT_TRUE(data.WriteUint32(TEST_UID));
     MessageParcel reply;
-    int32_t ret = notifyStub_->CmdDeleteContainerStatsInfo(data, reply);
+    int32_t ret = notifyStub_->CmdDeleteSimStatsInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

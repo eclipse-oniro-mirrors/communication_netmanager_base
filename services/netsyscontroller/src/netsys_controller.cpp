@@ -893,22 +893,22 @@ int32_t NetsysController::GetIfaceStats(uint64_t &stats, uint32_t type, const st
     return netsysService_->GetIfaceStats(stats, static_cast<uint32_t>(type), interfaceName);
 }
 
-int32_t NetsysController::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysController::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->GetAllContainerStatsInfo(stats);
+    return netsysService_->GetAllSimStatsInfo(stats);
 }
 
-int32_t NetsysController::DeleteContainerStatsInfo(uint32_t uid)
+int32_t NetsysController::DeleteSimStatsInfo(uint32_t uid)
 {
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->DeleteContainerStatsInfo(uid);
+    return netsysService_->DeleteSimStatsInfo(uid);
 }
 
 int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)

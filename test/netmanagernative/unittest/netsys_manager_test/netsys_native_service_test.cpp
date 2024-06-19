@@ -579,16 +579,16 @@ HWTEST_F(NetsysNativeServiceTest, DeleteStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, GetAllContainerStatsInfo001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
-    int32_t ret = instance_->GetAllContainerStatsInfo(stats);
+    int32_t ret = instance_->GetAllSimStatsInfo(stats);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, DeleteContainerStatsInfo001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, DeleteSimStatsInfo001, TestSize.Level1)
 {
-    int32_t ret = instance_->DeleteContainerStatsInfo(TEST_UID);
+    int32_t ret = instance_->DeleteSimStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

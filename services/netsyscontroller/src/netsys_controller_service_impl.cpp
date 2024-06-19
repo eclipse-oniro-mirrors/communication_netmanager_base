@@ -646,17 +646,17 @@ int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t typ
     return netsysClient_.GetIfaceStats(stats, type, interfaceName);
 }
 
-int32_t NetsysControllerServiceImpl::GetAllContainerStatsInfo(
+int32_t NetsysControllerServiceImpl::GetAllSimStatsInfo(
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
-    NETMGR_LOG_D("GetAllContainerStatsInfo");
-    return netsysClient_.GetAllContainerStatsInfo(stats);
+    NETMGR_LOG_D("GetAllSimStatsInfo");
+    return netsysClient_.GetAllSimStatsInfo(stats);
 }
 
-int32_t NetsysControllerServiceImpl::DeleteContainerStatsInfo(uint32_t uid)
+int32_t NetsysControllerServiceImpl::DeleteSimStatsInfo(uint32_t uid)
 {
-    NETMGR_LOG_D("DeleteContainerStatsInfo");
-    return netsysClient_.DeleteContainerStatsInfo(uid);
+    NETMGR_LOG_D("DeleteSimStatsInfo");
+    return netsysClient_.DeleteSimStatsInfo(uid);
 }
 
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)

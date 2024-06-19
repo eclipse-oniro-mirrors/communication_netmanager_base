@@ -591,7 +591,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->DeleteStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->DeleteContainerStatsInfo(TEST_UID);
+    ret = instance_->DeleteSimStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
@@ -603,10 +603,10 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysControllerServiceImplTest, GetAllContainerStatsInfo001, TestSize.Level1)
+HWTEST_F(NetsysControllerServiceImplTest, GetAllSimStatsInfo001, TestSize.Level1)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
-    auto ret = instance_->GetAllContainerStatsInfo(statsInfo);
+    auto ret = instance_->GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

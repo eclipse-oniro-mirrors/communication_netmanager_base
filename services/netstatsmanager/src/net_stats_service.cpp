@@ -386,10 +386,10 @@ int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
 
-int32_t NetStatsService::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+int32_t NetStatsService::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
 {
-    NETMGR_LOG_D("Enter GetAllContainerStatsInfo.");
-    return NetsysController::GetInstance().GetAllContainerStatsInfo(infos);
+    NETMGR_LOG_D("Enter GetAllSimStatsInfo.");
+    return NetsysController::GetInstance().GetAllSimStatsInfo(infos);
 }
 
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,

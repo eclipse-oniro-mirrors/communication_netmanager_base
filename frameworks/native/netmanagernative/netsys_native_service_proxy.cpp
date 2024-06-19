@@ -1615,7 +1615,7 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysNativeServiceProxy::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1623,7 +1623,7 @@ int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::Net
     }
     MessageParcel reply;
     MessageOption option;
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO),
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO),
                                         data,
                                         reply,
                                         option);
@@ -1638,7 +1638,67 @@ int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::Net
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetAllContainerStatsInfo ret= %{public}d", ret);
+        NETNATIVE_LOGE("fail to GetAllSimStatsInfo ret= %{public}d", ret);
+        return ret;
+    }
+    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::DeleteSimStatsInfo(uint32_t uid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_SIM_STATS_INFO),
+                                        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to DeleteSimStatsInfo ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data,
+                                          reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
         return ret;
     }
     if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
@@ -1675,66 +1735,6 @@ int32_t NetsysNativeServiceProxy::DeleteStatsInfo(uint32_t uid)
         NETNATIVE_LOGE("fail to DeleteStatsInfo ret= %{public}d", ret);
         return ret;
     }
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceProxy::DeleteContainerStatsInfo(uint32_t uid)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_CONTAINER_STATS_INFO),
-                                        data, reply, option);
-    if (result != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        NETNATIVE_LOGE("get ret falil");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to DeleteContainerStatsInfo ret= %{public}d", ret);
-        return ret;
-    }
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data,
-                                          reply, option)) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        NETNATIVE_LOGE("get ret falil");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
-        return ret;
-    }
-    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
-        NETNATIVE_LOGE("Read stats info failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
     return ERR_NONE;
 }
 
