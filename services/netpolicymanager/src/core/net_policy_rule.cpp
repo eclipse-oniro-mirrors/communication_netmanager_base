@@ -16,6 +16,7 @@
 #include "net_policy_rule.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "iptables_type.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -158,7 +159,7 @@ void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
 {
     switch (netsysCtrl) {
         case POLICY_TRANS_CTRL_NONE:
-            NETMGR_LOG_D("Don't need to do anything,keep now status.");
+            ProcessCtrlNone(uid);
             break;
         case POLICY_TRANS_CTRL_REMOVE_ALL:
             GetNetsysInst()->BandwidthRemoveAllowedList(uid);
@@ -169,14 +170,31 @@ void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
             GetNetsysInst()->BandwidthRemoveAllowedList(uid);
             break;
         case POLICY_TRANS_CTRL_ADD_ALLOWEDLIST:
-            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-            GetNetsysInst()->BandwidthAddAllowedList(uid);
+            ProcessCtrlAddAllowedList(uid);
             break;
         default:
             NETMGR_LOG_E("Error netsysCtrl value, need to check");
             break;
     }
     NETMGR_LOG_D("uid:[%{public}u]   netsysCtrl: [%{public}u]", uid, netsysCtrl);
+}
+
+void NetPolicyRule::ProcessCtrlNone(uint32_t uid)
+{
+    if (IsPowerSave()) {
+        GetNetsysInst()->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_DENY);
+    } else {
+        NETMGR_LOG_D("Don't need to do anything,keep now status.");
+    }
+}
+
+void NetPolicyRule::ProcessCtrlAddAllowedList(uint32_t uid)
+{
+    GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+    GetNetsysInst()->BandwidthAddAllowedList(uid);
+    if (IsPowerSave()) {
+        GetNetsysInst()->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_ALLOW);
+    }
 }
 
 uint32_t NetPolicyRule::MoveToConditionBit(uint32_t value)

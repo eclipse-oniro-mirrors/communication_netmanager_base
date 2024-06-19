@@ -195,6 +195,8 @@ private:
     uint32_t ChangePolicyToPolicyTransitionCondition(uint32_t policy);
     uint32_t BuildTransCondition(uint32_t uid, uint32_t policy);
     uint32_t GetMatchTransCondition(uint32_t policyCondition);
+    void ProcessCtrlNone(uint32_t uid);
+    void ProcessCtrlAddAllowedList(uint32_t uid);
 
     // When a uid add into some forbidden list, do this function.
     void TransPolicyToRule(uint32_t uid);

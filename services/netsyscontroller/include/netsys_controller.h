@@ -953,6 +953,11 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
+
+    /**
+     * Clear Firewall All Rules
+     */
+    int32_t ClearFirewallAllRules();
 private:
     NetsysController() = default;
 

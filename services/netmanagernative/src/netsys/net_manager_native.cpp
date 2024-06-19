@@ -532,5 +532,10 @@ int32_t NetManagerNative::NativeClearIpAndUidRule(const std::string &ip, uint32_
 {
     return firewallManager_->ClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetManagerNative::ClearFirewallAllRules()
+{
+    return firewallManager_->ClearAllRules();
+}
 } // namespace nmd
 } // namespace OHOS

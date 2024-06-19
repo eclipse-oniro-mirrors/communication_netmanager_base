@@ -861,5 +861,10 @@ int32_t NetsysNativeService::FirewallClearIpAndUidRule(const std::string &ip, ui
     return netsysService_->NativeClearIpAndUidRule(ip, ipType);
 }
 
+int32_t NetsysNativeService::ClearFirewallAllRules()
+{
+    NETNATIVE_LOG_D("ClearFirewallAllRules");
+    return netsysService_->ClearFirewallAllRules();
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -155,6 +155,8 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
     }
     if (enable) {
         powerSaveFirewallRule_->SetAllowedList();
+    } else {
+        powerSaveFirewallRule_->ClearFirewallAllRules();  // power save mode off, clear firewall all reules
     }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Update power save firewall status start");
     powerSaveFirewallRule_->EnableFirewall(enable);
@@ -164,7 +166,7 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
     auto policyEvent = std::make_shared<PolicyEvent>();
     policyEvent->powerSaveMode = enable;
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class power save status start");
-    SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
+    SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class power save status end");
     NETMGR_LOG_I("NetPolicyFirewall::UpdatePowerSavePolicy End");
     return NETMANAGER_SUCCESS;

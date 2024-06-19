@@ -145,6 +145,7 @@ public:
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t NativeSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
     int32_t NativeClearIpAndUidRule(const std::string &ip, uint32_t ipType);
+    int32_t ClearFirewallAllRules();
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

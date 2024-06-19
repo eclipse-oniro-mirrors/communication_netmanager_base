@@ -786,6 +786,11 @@ int32_t NetsysControllerServiceImpl::DeleteNetworkAccessPolicy(uint32_t uid)
     return netsysClient_.DeleteNetworkAccessPolicy(uid);
 }
 
+int32_t NetsysControllerServiceImpl::ClearFirewallAllRules()
+{
+    return netsysClient_.ClearFirewallAllRules();
+}
+
 int32_t NetsysControllerServiceImpl::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
 {
     return netsysClient_.NotifyNetBearerTypeChange(bearerTypes);

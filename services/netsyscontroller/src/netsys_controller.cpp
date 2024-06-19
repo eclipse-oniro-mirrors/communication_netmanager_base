@@ -1110,6 +1110,15 @@ int32_t NetsysController::DeleteNetworkAccessPolicy(uint32_t uid)
     return netsysService_->DeleteNetworkAccessPolicy(uid);
 }
 
+int32_t NetsysController::ClearFirewallAllRules()
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->ClearFirewallAllRules();
+}
+
 int32_t NetsysController::StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr)
 {
     if (netsysService_ == nullptr) {
