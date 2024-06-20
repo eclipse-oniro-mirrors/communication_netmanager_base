@@ -763,6 +763,48 @@ int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, boo
     return netsysClient_.UpdateNetworkSharingType(type, isOpen);
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysControllerServiceImpl::SetFirewallRules(NetFirewallRuleType type,
+                                                      const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                                      bool isFinish)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallRules");
+    return netsysClient_.SetFirewallRules(type, ruleList, isFinish);
+}
+
+int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(FirewallRuleAction inDefault,
+                                                              FirewallRuleAction outDefault)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallDefaultAction");
+    return netsysClient_.SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t NetsysControllerServiceImpl::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallCurrentUserId");
+    return netsysClient_.SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetsysControllerServiceImpl::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::ClearFirewallRules");
+    return netsysClient_.ClearFirewallRules(type);
+}
+int32_t NetsysControllerServiceImpl::RegisterNetFirewallCallback(
+    const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::RegisterNetFirewallCallback");
+    return netsysClient_.RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetsysControllerServiceImpl::UnRegisterNetFirewallCallback(
+    const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::UnRegisterNetFirewallCallback");
+    return netsysClient_.UnRegisterNetFirewallCallback(callback);
+}
+#endif
+
 int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_I("SetIpv6PrivacyExtensions: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);

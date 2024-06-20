@@ -412,7 +412,6 @@ public:
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
     int32_t GetSlotType(std::string &type);
-
     int32_t FactoryResetNetwork();
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
@@ -471,6 +470,7 @@ private:
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
+    std::mutex registerConnTupleListMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

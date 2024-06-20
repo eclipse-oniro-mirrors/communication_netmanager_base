@@ -26,16 +26,15 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
 #include "bpf_ring_buffer.h"
-#include "parameters.h"
+#endif
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
-const std::string DEVICETYPE_KEY = "const.product.devicetype";
-const std::string PHONE_TYPE = "phone";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -68,6 +67,9 @@ void NetsysNativeService::OnStart()
     state_ = ServiceRunningState::STATE_RUNNING;
     NETNATIVE_LOGI("start listener");
     manager_->StartListener();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_->StartListener();
+#endif
     NETNATIVE_LOGI("start listener end on start end");
 }
 
@@ -77,8 +79,18 @@ void NetsysNativeService::OnStop()
     state_ = ServiceRunningState::STATE_STOPPED;
     NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_->StopListener();
+    auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
+    NETNATIVE_LOGI("UnloadElf is %{public}d", ret);
+    if (ret == ElfLoadError::ELF_LOAD_ERR_NONE) {
+        bpfNetFirewall_->SetBpfLoaded(false);
+    }
+#endif
     NETNATIVE_LOGI("stop listener end on stop end");
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
     NetsysBpfRingBuffer::ExistRingBufferPoll();
+#endif
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -129,9 +141,18 @@ bool NetsysNativeService::Init()
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
 
-    if (OHOS::system::GetParameter(DEVICETYPE_KEY, "") == PHONE_TYPE) {
-        NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_ = NetsysBpfNetFirewall::GetInstance();
+    if (ret == ElfLoadError::ELF_LOAD_ERR_NONE) {
+        bpfNetFirewall_->SetBpfLoaded(true);
     }
+    AddSystemAbilityListener(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+    bpfNetFirewall_->LoadSystemAbility(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+#endif
+
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
+    NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
+#endif
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
@@ -595,6 +616,10 @@ void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const s
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         OnNetManagerRestart();
         hasSARemoved_ = true;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    } else if (systemAbilityId == COMM_FIREWALL_MANAGER_SYS_ABILITY_ID) {
+        bpfNetFirewall_->LoadSystemAbility(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+#endif
     }
 }
 
@@ -815,6 +840,82 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
     }
     return NETSYS_SUCCESS;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
+                                              const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
+                   isFinish);
+    int32_t ret = NETSYS_SUCCESS;
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP:
+            ret = bpfNetFirewall_->SetFirewallRules(ruleList, isFinish);
+            break;
+        case NetFirewallRuleType::RULE_DOMAIN:
+        case NetFirewallRuleType::RULE_DNS:
+            ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeService::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDefaultAction");
+    int32_t ret = netsysService_->SetFirewallDefaultAction(inDefault, outDefault);
+    ret += bpfNetFirewall_->SetFirewallDefaultAction(inDefault, outDefault);
+    return ret;
+}
+
+int32_t NetsysNativeService::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallCurrentUserId");
+    int32_t ret = netsysService_->SetFirewallCurrentUserId(userId);
+    ret += bpfNetFirewall_->SetFirewallCurrentUserId(userId);
+    return ret;
+}
+
+int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETNATIVE_LOGI("NetsysNativeService::ClearFirewallRules");
+    int32_t ret = NETSYS_SUCCESS;
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP:
+            ret = bpfNetFirewall_->ClearFirewallRules();
+            break;
+        case NetFirewallRuleType::RULE_DNS:
+        case NetFirewallRuleType::RULE_DOMAIN:
+            ret = netsysService_->ClearFirewallRules(type);
+            break;
+        case NetFirewallRuleType::RULE_ALL:
+            ret = bpfNetFirewall_->ClearFirewallRules();
+            ret += netsysService_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeService::RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("NetsysNativeService::RegisterNetFirewallCallback");
+    int32_t ret = netsysService_->RegisterNetFirewallCallback(callback);
+    ret += bpfNetFirewall_->RegisterCallback(callback);
+    return ret;
+}
+
+int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("NetsysNativeService::UnRegisterNetFirewallCallback");
+    int32_t ret = netsysService_->UnRegisterNetFirewallCallback(callback);
+    ret += bpfNetFirewall_->UnregisterCallback(callback);
+    return ret;
+}
+#endif
 
 int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {

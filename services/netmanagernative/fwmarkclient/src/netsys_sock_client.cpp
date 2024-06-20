@@ -71,10 +71,7 @@ void ohos_socket_hook_finalize(void)
 
 int ohos_socket_hook_socket(int domain, int type, int protocol)
 {
-    g_hookFlag = false;
-    int ret = HookSocket(GetDispatch()->socket, domain, type, protocol);
-    g_hookFlag = true;
-    return ret;
+    return HookSocket(GetDispatch()->socket, domain, type, protocol);
 }
 
 bool ohos_socket_hook_get_hook_flag(void)

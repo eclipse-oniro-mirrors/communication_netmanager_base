@@ -129,34 +129,30 @@ public:
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
-     * Set the Firewall DNS rules
+     * Set firewall current user id
      *
-     * @param ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+    int32_t SetFirewallCurrentUserId(int32_t userId);
 
     /**
-     * Clear the Firewall DNS rules
+     * Set firewall rules to native
      *
-     * @return 0 if success or-1 if an error occurred
+     * @param type ip, dns, domain
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
      */
-    int32_t ClearFirewallDnsRules();
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
     /**
-     * Set the Firewall domain rules
-     *
-     * @param ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
-     */
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
-
-    /**
-     * Clear the Firewall domain rules
+     * Clear the Firewall rules
      *
      * @return 0 if success or-1 if an error occurred
      */
-    int32_t ClearFirewallDomainRules();
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
 
     /**
      * Register callback for recevie intercept event

@@ -151,13 +151,10 @@ public:
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish) override;
-    int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule) override;
-    int32_t DeleteFirewallIpRules(const std::vector<int32_t> &ruleIds) override;
-    int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList) override;
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish) override;
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList) override;
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList) override;
+    int32_t SetFirewallCurrentUserId(int32_t userId) override;
     int32_t ClearFirewallRules(NetFirewallRuleType type) override;
     int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
     int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;

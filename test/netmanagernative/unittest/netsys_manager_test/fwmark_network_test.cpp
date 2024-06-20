@@ -130,24 +130,25 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest003, TestSize.Level1)
 HWTEST_F(UnitTestFwmarkClient, HandleErrorTest, TestSize.Level1)
 {
     int32_t ret = -1;
+    int32_t sock = -1;
     int32_t errorCode = ERROR_CODE_SOCKETFD_INVALID;
-    ret = fwmarkClient->HandleError(ret, errorCode);
+    ret = fwmarkClient->HandleError(ret, errorCode, sock);
     EXPECT_EQ(ret, -1);
 
     errorCode = ERROR_CODE_CONNECT_FAILED;
-    ret = fwmarkClient->HandleError(ret, errorCode);
+    ret = fwmarkClient->HandleError(ret, errorCode, sock);
     EXPECT_EQ(ret, -1);
 
     errorCode = ERROR_CODE_SENDMSG_FAILED;
-    ret = fwmarkClient->HandleError(ret, errorCode);
+    ret = fwmarkClient->HandleError(ret, errorCode, sock);
     EXPECT_EQ(ret, -1);
 
     errorCode = ERROR_CODE_READ_FAILED;
-    ret = fwmarkClient->HandleError(ret, errorCode);
+    ret = fwmarkClient->HandleError(ret, errorCode, sock);
     EXPECT_EQ(ret, -1);
 
     errorCode = 100;
-    ret = fwmarkClient->HandleError(ret, errorCode);
+    ret = fwmarkClient->HandleError(ret, errorCode, sock);
     EXPECT_EQ(ret, -1);
 }
 

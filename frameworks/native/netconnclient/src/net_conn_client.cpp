@@ -128,6 +128,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> call
     int32_t ret = proxy->RegisterNetConnCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save callback.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
         registerConnTupleList_.push_back(std::make_tuple(nullptr, callback, 0));
     }
 
@@ -150,6 +151,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
     int32_t ret = proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save netSpecifier and callback and timeoutMS.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
         registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
@@ -172,6 +174,7 @@ int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifie
     int32_t ret = proxy->RequestNetConnection(netSpecifier, callback, timeoutMS);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RequestNetConnection success, save netSpecifier and callback and timeoutMS.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
         registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
@@ -189,6 +192,7 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     int32_t ret = proxy->UnregisterNetConnCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnregisterNetConnCallback success, delete callback.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
         for (auto it = registerConnTupleList_.begin(); it != registerConnTupleList_.end(); ++it) {
             if (std::get<1>(*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
                 registerConnTupleList_.erase(it);

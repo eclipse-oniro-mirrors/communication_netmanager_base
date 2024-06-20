@@ -150,6 +150,10 @@ NetHttpProbeResult NetMonitor::SendHttpProbe(ProbeType probeType)
     std::string httpProbeUrl;
     std::string httpsProbeUrl;
     GetHttpProbeUrlFromConfig(httpProbeUrl, httpsProbeUrl);
+    if (httpProbeUrl.empty() || httpsProbeUrl.empty()) {
+        NETMGR_LOG_E("Net:[%{public}d] httpProbeUrl is nullptr", netId_);
+        return NetHttpProbeResult(NetMonitorResponseCode::NO_CONTENT, nullptr);
+    }
 
     if (httpProbe_ == nullptr) {
         NETMGR_LOG_E("Net:[%{public}d] httpProbe_ is nullptr", netId_);
@@ -202,14 +206,12 @@ void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &ht
         pos += strlen(HTTP_URL_HEADER);
         httpUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
-    httpUrl = httpUrl.empty() ? NET_HTTP_PROBE_URL : httpUrl;
 
     pos = content.find(HTTPS_URL_HEADER);
     if (pos != std::string::npos) {
         pos += strlen(HTTPS_URL_HEADER);
         httpsUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
-    httpsUrl = httpsUrl.empty() ? NET_HTTPS_PROBE_URL : httpsUrl;
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s]", httpUrl.c_str(), httpsUrl.c_str());
 }
 

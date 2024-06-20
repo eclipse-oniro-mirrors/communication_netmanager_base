@@ -933,8 +933,6 @@ HWTEST_F(NetConnServiceTest, RegisterNetFactoryResetCallbackTest001, TestSize.Le
 
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
 {
-    NetConnService::GetInstance()->RecoverInfo();
-
     HttpProxy proxy;
     uint32_t supplierId = 0;
     std::string testString = "test";

@@ -16,6 +16,7 @@
 #ifndef NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H
 #define NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H
 
+#include <securec.h>
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
@@ -83,6 +84,8 @@ public:
 
     bool operator == (const Bitmap &other) const;
 
+    Bitmap &operator = (const Bitmap &other);
+
 private:
     /**
      * get uin32_t hash, use thomas Wang's 32 bit Mix Function
@@ -95,7 +98,6 @@ private:
 private:
     bitmap_t bitmap_;
 };
-
 
 template <class T> class BpfUnorderedMap {
 public:
@@ -164,11 +166,8 @@ const int32_t IPV6_BIT_COUNT = 128;
 const int32_t IPV4_BIT_COUNT = 32;
 const int32_t IPV6_BYTE_COUNT = 16;
 const int32_t IPV6_SEGMENT_COUNT = 8;
-const int32_t MASK_MIN = 16;
-const int32_t MASK_MAX = 32;
 const int32_t IPV4_MAX_PREFIXLEN = 32;
 const int32_t IPV6_MAX_PREFIXLEN = 128;
-const uint32_t IP6_BYTES = 16;
 const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {
@@ -188,12 +187,12 @@ public:
     /**
      * convert ip4segment to ip4 and mask list
      *
-     * @param startIp start ip string
-     * @param endIp end ip string
+     * @param startAddr start ip
+     * @param endAddr end ip
      * @param list output vector
      * @return success:return NETFIREWALL_SUCCESS, otherwise return error code
      */
-    static int32_t GetIp4AndMask(const std::string &startIp, const std::string &endIp, std::vector<Ip4Data> &list);
+    static int32_t GetIp4AndMask(const in_addr &startAddr, const in_addr &endAddr, std::vector<Ip4Data> &list);
 
     /**
      * convert ip4 string to uint32_t of network byte order
@@ -258,12 +257,12 @@ public:
     /**
      * convert ip6segment to ip6 and mask list
      *
-     * @param startIp start ip string
-     * @param endIp end ip string
+     * @param addr6Start start ip
+     * @param addr6End end ip
      * @param list output vector
      * @return if successed:return NETFIREWALL_SUCCESS, otherwise return error code
      */
-    static int32_t GetIp6AndMask(const std::string &startIp, const std::string &endIp, std::vector<Ip6Data> &list);
+    static int32_t GetIp6AndMask(const in6_addr &addr6Start, const in6_addr &addr6End, std::vector<Ip6Data> &list);
 
     static std::string Addr6ToStr(const in6_addr &v6Addr);
 
@@ -363,23 +362,23 @@ public:
      */
     void OrInsert(uint32_t addr, uint32_t mask, Bitmap &bitmap)
     {
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            uint32_t maskUint32 = GetMaskUInt32(it->data, it->mask);
-            uint32_t inMaskUint32 = GetMaskUInt32(addr, mask);
-            if (maskUint32 == inMaskUint32) {
-                break;
+        std::vector<Ip4RuleBitmapVector::iterator> matches;
+        uint32_t networkAddr = GetNetworkAddress(addr, mask);
+        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
+            if (it->data == addr || GetNetworkAddress(it->data, it->mask) == networkAddr) {
+                matches.emplace_back(it);
             }
         }
-        Ip4RuleBitmap ruleBitmap;
-        ruleBitmap.data = addr;
-        ruleBitmap.mask = mask;
-        ruleBitmap.bitmap = bitmap;
-
-        if (it == ruleBitmapVec_.end()) {
-            ruleBitmapVec_.push_back(std::move(ruleBitmap));
+        if (matches.empty()) {
+            Ip4RuleBitmap ruleBitmap;
+            ruleBitmap.data = addr;
+            ruleBitmap.mask = mask;
+            ruleBitmap.bitmap = bitmap;
+            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
         } else {
-            it->bitmap.Or(ruleBitmap.bitmap);
+            for (const auto &it : matches) {
+                it->bitmap.Or(bitmap);
+            }
         }
     }
 
@@ -401,9 +400,9 @@ private:
      * @param mask ip mask
      * @return mask uint32 value by network byte order
      */
-    inline uint32_t GetMaskUInt32(uint32_t addr, uint32_t mask)
+    inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
     {
-        return (addr & (0xFFFFFFFF >> (MASK_MAX - mask)));
+        return (addr & (0xFFFFFFFF >> (IPV4_MAX_PREFIXLEN - mask)));
     }
 
 private:
@@ -434,22 +433,27 @@ public:
      */
     void OrInsert(const in6_addr &addr, uint32_t prefixlen, Bitmap &bitmap)
     {
-        Ip6RuleBitmap ruleBitmap;
-        ruleBitmap.data = addr;
-        ruleBitmap.prefixlen = prefixlen;
-
-        auto it = ruleBitmapVec_.begin();
-        for (; it != ruleBitmapVec_.end(); ++it) {
-            if (IsSameMask(*it, ruleBitmap)) {
-                break;
+        std::vector<Ip6RuleBitmapVector::iterator> matches;
+        in6_addr networkAddr = {};
+        GetNetworkAddress(addr, prefixlen, networkAddr);
+        for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
+            in6_addr otherNetworkAddr = {};
+            GetNetworkAddress(it->data, it->prefixlen, otherNetworkAddr);
+            if (!memcmp(&addr, &(it->data), sizeof(in6_addr)) ||
+                !memcmp(&networkAddr, &otherNetworkAddr, sizeof(in6_addr))) {
+                matches.emplace_back(it);
             }
         }
-
-        ruleBitmap.bitmap = bitmap;
-        if (it == ruleBitmapVec_.end()) {
-            ruleBitmapVec_.push_back(std::move(ruleBitmap));
+        if (matches.empty()) {
+            Ip6RuleBitmap ruleBitmap;
+            ruleBitmap.data = addr;
+            ruleBitmap.prefixlen = prefixlen;
+            ruleBitmap.bitmap = bitmap;
+            ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
         } else {
-            it->bitmap.Or(ruleBitmap.bitmap);
+            for (const auto &it : matches) {
+                it->bitmap.Or(bitmap);
+            }
         }
     }
 
@@ -464,224 +468,34 @@ public:
     }
 
 private:
-    /**
-     * judge if ip6 has same prifix
-     *
-     * @param a one ip6 and rule bitmap info
-     * @param b the other ip6 and rule bitmap info
-     * @return true: has save prifix; otherwise return false
-     */
-    bool IsSameMask(const Ip6RuleBitmap &a, const Ip6RuleBitmap &b)
+    void GetNetworkAddress(in6_addr addr, int prefixLen, in6_addr &out)
     {
-        if (a.prefixlen != b.prefixlen) {
-            return false;
+        int quotient = prefixLen / 8;
+        int remainder = prefixLen % 8;
+        for (int i = 0; i < quotient; i++) {
+            out.s6_addr[i] = addr.s6_addr[i] & 0xff;
         }
-
-        uint32_t byteNum = a.prefixlen / BIT_PER_BYTE;
-        for (size_t i = 0; i < byteNum; ++i) {
-            if (a.data.s6_addr[i] != b.data.s6_addr[i]) {
-                return false;
-            }
+        if (remainder) {
+            out.s6_addr[quotient] = addr.s6_addr[quotient] & (~(0xff >> remainder));
         }
-        uint32_t bitOff = a.prefixlen % BIT_PER_BYTE;
-        if (!bitOff) {
-            return true;
-        }
-
-        uint8_t value = (0xFF >> (BIT_PER_BYTE - bitOff));
-        if ((a.data.s6_addr[byteNum] & value) == (b.data.s6_addr[byteNum] & value)) {
-            return true;
-        }
-
-        return false;
     }
 
 private:
     std::vector<Ip6RuleBitmap> ruleBitmapVec_;
 };
 
-struct SegmentBitmap {
-    uint32_t start;
-    uint32_t end;
-    Bitmap bitmap;
-};
-
-class SegmentBitmapMap {
-public:
-    SegmentBitmapMap() = default;
-
-    /**
-     * add segment and rule bitmap map
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule itmap
-     */
-    void AddMap(uint32_t start, uint32_t end, const Bitmap &bitmap)
-    {
-        std::vector<uint32_t> indexs;
-        SearchIntersection(start, end, indexs);
-        if (indexs.empty()) {
-            Insert(start, end, bitmap);
-            return;
-        }
-        std::vector<SegmentBitmap> list;
-        GetMapList(start, end, bitmap, indexs, list);
-        DeleteSegBitmap(indexs);
-        AddSegBitmapMap(list);
-    }
-
-    std::vector<SegmentBitmap> &GetMap()
-    {
-        return mapList_;
-    }
-
-private:
-    /**
-     * search input segment intersection in exist map list
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param indexs has intersection index value in exist map
-     */
-    void SearchIntersection(uint32_t start, uint32_t end, std::vector<uint32_t> &indexs)
-    {
-        for (size_t i = 0; i < mapList_.size(); ++i) {
-            if (((start >= mapList_[i].start) && (start <= mapList_[i].end)) ||
-                ((mapList_[i].start >= start) && (mapList_[i].start <= end))) {
-                indexs.push_back(i);
-            }
-        }
-    }
-
-    void DeleteSegBitmap(std::vector<uint32_t> &indexs)
-    {
-        if (indexs.empty()) {
-            return;
-        }
-        auto it = indexs.rbegin();
-        for (; it != indexs.rend(); ++it) {
-            mapList_.erase(mapList_.begin() + *it);
-        }
-    }
-
-    /**
-     * insert segment and bitmap into map lsit
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     */
-    void Insert(uint32_t start, uint32_t end, const Bitmap &bitmap)
-    {
-        SegmentBitmap segBitmap;
-        segBitmap.start = start;
-        segBitmap.end = end;
-        segBitmap.bitmap = bitmap;
-        std::vector<SegmentBitmap>::iterator it = mapList_.begin();
-        for (; it != mapList_.end(); ++it) {
-            if (start < it->start) {
-                mapList_.insert(it, segBitmap);
-                return;
-            }
-        }
-        mapList_.insert(mapList_.end(), segBitmap);
-    }
-
-    /**
-     * add segment and bitmap map to vector
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     * @param mapList map list
-     */
-    void AddSegBitmap(uint32_t start, uint32_t end, const Bitmap &bitmap, std::vector<SegmentBitmap> &mapList)
-    {
-        if (start > end) {
-            return;
-        }
-        SegmentBitmap tmpSegBitmap;
-        tmpSegBitmap.start = start;
-        tmpSegBitmap.end = end;
-        tmpSegBitmap.bitmap = bitmap;
-        mapList.emplace_back(tmpSegBitmap);
-    }
-
-    void AddSegBitmapMap(const std::vector<SegmentBitmap> &mapList)
-    {
-        auto it = mapList.begin();
-        for (; it != mapList.end(); ++it) {
-            Insert(it->start, it->end, it->bitmap);
-        }
-    }
-
-    /**
-     * merge segment and bitmap map with exit map into new maps
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     * @param indexs intersection indexs
-     * @param list segment and rule bitmap map list
-     */
-    void GetMapList(uint32_t start, uint32_t end, const Bitmap &bitmap, std::vector<uint32_t> &indexs,
-        std::vector<SegmentBitmap> &list)
-    {
-        uint32_t tmpStart = start;
-        for (auto index : indexs) {
-            SegmentBitmap &segBitmap = mapList_[index];
-            if (tmpStart < segBitmap.start) {
-                AddSegBitmap(tmpStart, segBitmap.start - 1, bitmap, list);
-                Bitmap bmap(bitmap);
-                if (end <= segBitmap.end) {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(segBitmap.start, end, bmap, list);
-                    AddSegBitmap(end + 1, segBitmap.end, segBitmap.bitmap, list);
-                    tmpStart = end + 1;
-                    break;
-                } else {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(segBitmap.start, segBitmap.end, bmap, list);
-                    tmpStart = segBitmap.end + 1;
-                }
-            } else {
-                if (tmpStart > segBitmap.start) {
-                    AddSegBitmap(segBitmap.start, tmpStart - 1, segBitmap.bitmap, list);
-                }
-                Bitmap bmap(bitmap);
-                if (end <= segBitmap.end) {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(tmpStart, end, bmap, list);
-                    AddSegBitmap(end + 1, segBitmap.end, segBitmap.bitmap, list);
-                    tmpStart = end + 1;
-                    break;
-                } else {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(tmpStart, segBitmap.end, bmap, list);
-                    tmpStart = segBitmap.end + 1;
-                }
-            }
-        }
-        if (tmpStart <= end) {
-            AddSegBitmap(tmpStart, end, bitmap, list);
-        }
-    }
-
-private:
-    std::vector<SegmentBitmap> mapList_;
-};
-
-using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
+using UidKey = uid_key;
 using ActionValue = action_val;
+using PortArray = port_array;
 
 using BpfStrMap = BpfUnorderedMap<std::string>;
-using BpfPortMap = BpfUnorderedMap<PortKey>;
 using BpfProtoMap = BpfUnorderedMap<ProtoKey>;
 using BpfAppUidMap = BpfUnorderedMap<AppUidKey>;
+using BpfUidMap = BpfUnorderedMap<UidKey>;
 using BpfActionMap = std::unordered_map<Bitmap, ActionValue, BitmapHash>;
+using BpfPortMap = std::unordered_map<Bitmap, PortArray, BitmapHash>;
 
 class BitmapManager {
 public:
@@ -737,6 +551,11 @@ public:
         return appUidMap_;
     }
 
+    BpfUidMap &GetUidMap()
+    {
+        return uidMap_;
+    }
+
     BpfActionMap &GetActionMap()
     {
         return actionMap_;
@@ -744,7 +563,7 @@ public:
 
     static uint16_t Hltons(int32_t n);
 
-    static int32_t Nstohl(uint16_t n);
+    static uint16_t Nstohl(uint16_t n);
 
 private:
     void Clear();
@@ -776,21 +595,12 @@ private:
     int32_t InsertIpBitmap(const std::vector<NetFirewallIpParam> &ipInfo, bool isSrc, Bitmap &bitmap);
 
     /**
-     * convect port segement map to single port map
-     *
-     * @param portSegMap segment port and rule bitmap map
-     * @param portMap output single port and rule bitmap map
-     * @return success: return NETFIREWALL_SUCCESS, otherwise return error code
-     */
-    void OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnorderedMap<PortKey> &portMap);
-
-    /**
      * judge protocols if need port map
      *
      * @param protocol transform protoco
      * @return true: not need; false: needed
      */
-    bool IsNotNeedPort(NetworkProtocol protocol);
+    bool IsNoPortProtocol(NetworkProtocol protocol);
 
     /**
      * insert ip6 segment and bitmap map
@@ -813,14 +623,13 @@ private:
     int32_t InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap &bitmap, Ip4RuleMap *ip4Map);
 
     /**
-     * save port segment and bitmap map to map list
+     * Process ports
      *
-     * @param port port info
+     * @param ports NetFirewallPortParam vector
      * @param bitmap rule bitmap
-     * @param portMap port segment and bitmap map list
-     * @return success: return NETFIREWALL_SUCCESS, otherwise return error code
+     * @param map port rule bitmap map
      */
-    void AddPortBitmap(const std::vector<NetFirewallPortParam> &port, Bitmap &bitmap, SegmentBitmapMap &portMap);
+    void ProcessPorts(const std::vector<NetFirewallPortParam> &ports, Bitmap &bitmap, BpfPortMap &map);
 
 private:
     Ip4RuleMap srcIp4Map_;
@@ -831,6 +640,7 @@ private:
     BpfPortMap dstPortMap_;
     BpfProtoMap protoMap_;
     BpfAppUidMap appUidMap_;
+    BpfUidMap uidMap_;
     BpfActionMap actionMap_;
 };
 } // namespace OHOS::NetManagerStandard

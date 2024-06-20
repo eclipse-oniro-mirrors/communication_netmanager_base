@@ -34,15 +34,9 @@ static constexpr const int32_t ERROR_CODE_CONNECT_FAILED = -2;
 static constexpr const int32_t ERROR_CODE_SENDMSG_FAILED = -3;
 static constexpr const int32_t ERROR_CODE_READ_FAILED = -4;
 
-FwmarkClient::FwmarkClient() : socketFd_(-1) {}
+FwmarkClient::FwmarkClient() {}
 
-FwmarkClient::~FwmarkClient()
-{
-    if (socketFd_ >= 0) {
-        close(socketFd_);
-        socketFd_ = -1;
-    }
-}
+FwmarkClient::~FwmarkClient() {}
 
 int32_t FwmarkClient::BindSocket(int32_t fd, uint32_t netId)
 {
@@ -53,7 +47,7 @@ int32_t FwmarkClient::BindSocket(int32_t fd, uint32_t netId)
 int32_t FwmarkClient::ProtectFromVpn(int32_t socketFd)
 {
     if (socketFd < 0) {
-        return HandleError(-1, ERROR_CODE_SOCKETFD_INVALID);
+        return HandleError(-1, ERROR_CODE_SOCKETFD_INVALID, socketFd);
     }
     FwmarkCommand command = {FwmarkCommand::PROTECT_FROM_VPN, 0};
     return Send(&command, socketFd);
@@ -61,13 +55,12 @@ int32_t FwmarkClient::ProtectFromVpn(int32_t socketFd)
 
 int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
 {
-    socketFd_ = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
-    if (socketFd_ == -1) {
-        return HandleError(-1, ERROR_CODE_SOCKETFD_INVALID);
+    auto socketFd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+    if (socketFd == -1) {
+        return HandleError(-1, ERROR_CODE_SOCKETFD_INVALID, socketFd);
     }
-    NETNATIVE_LOGI("FwmarkClient: socketFd_: %{public}d", socketFd_);
-    if (connect(socketFd_, reinterpret_cast<const sockaddr *>(&FWMARK_SERVER_PATH), sizeof(FWMARK_SERVER_PATH)) == -1) {
-        return HandleError(-1, ERROR_CODE_CONNECT_FAILED);
+    if (connect(socketFd, reinterpret_cast<const sockaddr *>(&FWMARK_SERVER_PATH), sizeof(FWMARK_SERVER_PATH)) == -1) {
+        return HandleError(-1, ERROR_CODE_CONNECT_FAILED, socketFd);
     }
 
     iovec iov;
@@ -90,22 +83,21 @@ int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
     cmsgh->cmsg_level = SOL_SOCKET;
     cmsgh->cmsg_type = SCM_RIGHTS;
     (void)memcpy_s(CMSG_DATA(cmsgh), sizeof(fd), &fd, sizeof(fd));
-    int32_t ret = sendmsg(socketFd_, &message, 0);
+    int32_t ret = sendmsg(socketFd, &message, 0);
     if (ret < 0) {
-        return HandleError(ret, ERROR_CODE_SENDMSG_FAILED);
+        return HandleError(ret, ERROR_CODE_SENDMSG_FAILED, socketFd);
     }
     int32_t error = 0;
-    ret = read(socketFd_, &error, sizeof(error));
+    ret = read(socketFd, &error, sizeof(error));
     if (ret < 0) {
-        return HandleError(ret, ERROR_CODE_READ_FAILED);
+        return HandleError(ret, ERROR_CODE_READ_FAILED, socketFd);
     }
 
-    close(socketFd_);
-    socketFd_ = -1;
+    close(socketFd);
     return NETMANAGER_SUCCESS;
 }
 
-int32_t FwmarkClient::HandleError(int32_t ret, int32_t errorCode)
+int32_t FwmarkClient::HandleError(int32_t ret, int32_t errorCode, int32_t sock)
 {
     switch (errorCode) {
         case ERROR_CODE_SOCKETFD_INVALID:
@@ -123,8 +115,9 @@ int32_t FwmarkClient::HandleError(int32_t ret, int32_t errorCode)
         default:
             break;
     }
-    close(socketFd_);
-    socketFd_ = -1;
+    if (sock > 0) {
+        close(sock);
+    }
     return NETMANAGER_ERROR;
 }
 

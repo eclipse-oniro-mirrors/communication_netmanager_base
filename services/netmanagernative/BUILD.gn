@@ -31,6 +31,10 @@ config("netsys_native_manager_config") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
+
+  if (enable_feature_net_firewall) {
+    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
 }
 
 netsys_native_manager_sources = [
@@ -92,11 +96,18 @@ netsys_native_manager_sources = [
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-  "$NETMANAGERNATIVE_ROOT/netsys_client",
+  "$NETMANAGERNATIVE_ROOT:netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   "bpf:netsys",
   "bpf:netsys_bpf_utils",
 ]
+
+if (enable_feature_net_firewall) {
+  netsys_native_manager_sources += [
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_callback_proxy.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netfirewall_callback_stub.cpp",
+  ]
+}
 
 ohos_shared_library("netsys_native_manager") {
   sanitize = {
@@ -163,6 +174,10 @@ ohos_shared_library("netsys_native_manager") {
     defines += [ "USE_SELINUX" ]
   }
 
+  if (enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
+  }
+
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
   if (enable_sys_func) {
@@ -218,6 +233,10 @@ ohos_static_library("netsys_native_manager_static") {
     defines += [ "USE_SELINUX" ]
   }
 
+  if (enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
+  }
+
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
   if (enable_sys_func) {
@@ -233,6 +252,53 @@ ohos_static_library("netsys_native_manager_static") {
     "hilog:libhilog",
   ]
 
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_shared_library("netsys_client") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "src/netsys/netsys_client.c",
+    "src/netsys/netsys_tcp_client.c",
+  ]
+
+  include_dirs = [
+    "$NETMANAGERNATIVE_ROOT/include/netsys",
+    "$FWMARK_CLIENT_DIR/include",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
+
+  external_deps = [ "c_utils:utils" ]
+
+  defines = [
+    "NETSYS_CONFIG_DEBUG=0",
+    "NETSYS_CLIENT_DEBUG=0",
+  ]
+
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

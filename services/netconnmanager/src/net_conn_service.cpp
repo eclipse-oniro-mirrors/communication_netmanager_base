@@ -19,10 +19,18 @@
 #include <sys/time.h>
 #include <utility>
 #include <regex>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 #include "common_event_support.h"
 #include "network.h"
 #include "system_ability_definition.h"
+#include "common_event_data.h"
+#include "common_event_manager.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
+#include "want.h"
 
 #include "broadcast_manager.h"
 #include "event_report.h"
@@ -53,13 +61,19 @@ constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier b
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
-constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
+constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
+constexpr const char NEW_LINE_STR = '\n';
 const uint32_t SYS_PARAMETER_SIZE = 256;
 constexpr const char *CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES = "persist.network.pre_airplane_mode_wait_times";
 constexpr const char *NO_DELAY_TIME_CONFIG = "100";
+constexpr const char *SETTINGS_DATASHARE_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
+constexpr uint16_t DATA_SHARE_WAIT_TIME = 3;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -136,6 +150,9 @@ bool NetConnService::Init()
 
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
+    SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
         NETMGR_LOG_E("Create event runner failed.");
@@ -165,21 +182,49 @@ bool NetConnService::Init()
     if (netFactoryResetCallback_ == nullptr) {
         NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
     }
-
-    RecoverInfo();
     NETMGR_LOG_I("Init end");
     return true;
 }
 
-void NetConnService::RecoverInfo()
+bool NetConnService::CheckIfSettingsDataReady()
 {
-    // recover httpproxy
-    LoadGlobalHttpProxy();
-    if (!globalHttpProxy_.GetHost().empty()) {
-        NETMGR_LOG_D("globalHttpProxy_ not empty, send broadcast");
-        SendHttpProxyChangeBroadcast(globalHttpProxy_);
-        UpdateGlobalHttpProxy(globalHttpProxy_);
+    if (isDataShareReady_.load()) {
+        return true;
     }
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("GetSystemAbilityManager failed.");
+        return false;
+    }
+    sptr<IRemoteObject> dataShareSa = saManager->GetSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    if (dataShareSa == nullptr) {
+        NETMGR_LOG_E("Get dataShare SA Failed.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return false;
+    }
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+            DataShare::DataShareHelper::Create(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    NETMGR_LOG_I("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == DataShare::E_OK) {
+        NETMGR_LOG_I("create data_share helper success");
+        auto helper = ret.second;
+        if (helper != nullptr) {
+            bool releaseRet = helper->Release();
+            NETMGR_LOG_I("release data_share helper, releaseRet=%{public}d", releaseRet);
+        }
+        isDataShareReady_ = true;
+        return true;
+    } else if (ret.first == DataShare::E_DATA_SHARE_NOT_READY) {
+        NETMGR_LOG_E("create data_share helper failed");
+        isDataShareReady_ = false;
+        return false;
+    }
+    NETMGR_LOG_E("data_share unknown.");
+    return true;
 }
 
 int32_t NetConnService::SystemReady()
@@ -407,7 +452,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     supplier->SetNetwork(network);
     supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
     networks_[netId] = network;
     locker.unlock();
@@ -485,7 +530,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
         return ret;
     }
     AddClientDeathRecipient(callback);
-    return ActivateNetwork(netSpecifier, callback, timeoutMS);
+    return ActivateNetwork(netSpecifier, callback, timeoutMS, REQUEST);
 }
 
 int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
@@ -511,7 +556,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     NET_NETWORK_MAP::iterator iterNetwork = networks_.find(netId);
     if (iterNetwork != networks_.end()) {
         NETMGR_LOG_I("the iterNetwork already exists.");
-        std::unique_lock<std::mutex> locker(netManagerMutex_);
+        std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         networks_.erase(iterNetwork);
         locker.unlock();
     }
@@ -522,7 +567,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     }
     NetSupplierInfo info;
     supplier->UpdateNetSupplierInfo(info);
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_.erase(supplierId);
     locker.unlock();
     FindBestNetworkForAllRequest();
@@ -716,7 +761,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     HttpProxy oldHttpProxy;
     supplier->GetHttpProxy(oldHttpProxy);
     // According to supplier id, get network from the list
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (supplier->UpdateNetLinkInfo(*netLinkInfo) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UpdateNetLinkInfo fail");
         eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_FAILED);
@@ -804,7 +849,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                        const uint32_t &timeoutMS)
+                                        const uint32_t &timeoutMS, const int32_t registerType)
 {
     NETMGR_LOG_D("ActivateNetwork Enter");
     if (netSpecifier == nullptr || callback == nullptr) {
@@ -840,7 +885,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
-    SendRequestToAllNetwork(request);
+    SendRequestToAllNetwork(request, registerType);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1076,7 +1121,7 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
     }
 }
 
-void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
+void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const int32_t registerType)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
@@ -1092,7 +1137,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        bool result = supplier->RequestToConnect(iter->first);
+        bool result = supplier->RequestToConnect(iter->first, registerType);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());
@@ -1100,7 +1145,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const int32_t registerType)
 {
     if (request == nullptr) {
         NETMGR_LOG_E("request is null");
@@ -1117,7 +1162,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second)) {
             continue;
         }
-        bool result = iter->second->RequestToConnect(reqId);
+        bool result = iter->second->RequestToConnect(reqId, registerType);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
                          iter->second->GetNetSupplierIdent().c_str());
@@ -1232,7 +1277,7 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     if (newSupplier != nullptr) {
         newSupplier->SetDefault();
     }
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     oldSupplier = newSupplier;
 }
 
@@ -1262,7 +1307,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
 
 std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     std::list<sptr<NetSupplier>> ret;
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr) {
@@ -1282,7 +1327,7 @@ std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType 
 sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                                          const std::set<NetCap> &netCaps)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr) {
             continue;
@@ -1297,7 +1342,7 @@ sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType,
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
         return NETMANAGER_SUCCESS;
@@ -1334,7 +1379,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
     }
 
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second == nullptr) {
@@ -1351,7 +1396,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto currentUid = IPCSkeleton::GetCallingUid();
     for (const auto &network : networks_) {
         if (network.second != nullptr && network.second->IsConnected()) {
@@ -1379,7 +1424,7 @@ bool NetConnService::IsInRequestNetUids(int32_t uid)
 int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 {
     NETMGR_LOG_D("Enter GetSpecificUidNet, uid is [%{public}d].", uid);
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     netId = INVALID_NET_ID;
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
@@ -1398,7 +1443,7 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         return NET_CONN_ERR_INVALID_NETWORK;
@@ -1413,7 +1458,7 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
 
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if ((iterSupplier->second != nullptr) && (netId == iterSupplier->second->GetNetId())) {
@@ -1518,6 +1563,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
+    auto startTime = std::chrono::steady_clock::now();
     LoadGlobalHttpProxy();
     if (!globalHttpProxy_.GetHost().empty()) {
         httpProxy = globalHttpProxy_;
@@ -1525,7 +1571,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         return NETMANAGER_SUCCESS;
     }
 
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iter = networks_.find(bindNetId);
     if ((iter != networks_.end()) && (iter->second != nullptr)) {
         httpProxy = iter->second->GetNetLinkInfo().httpProxy_;
@@ -1535,7 +1581,9 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
 
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
-        NETMGR_LOG_I("Return default network's http proxy as default.");
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("Return default network's http proxy as default, cost=%{public}lld",  durationNs.count());
         return NETMANAGER_SUCCESS;
     }
     NETMGR_LOG_I("No default http proxy.");
@@ -1548,7 +1596,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list
         NETMGR_LOG_E("The identifier in service is null");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (auto iterSupplier : netSuppliers_) {
         if (iterSupplier.second == nullptr) {
             continue;
@@ -1564,7 +1612,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list
 void NetConnService::GetDumpMessage(std::string &message)
 {
     message.append("Net connect Info:\n");
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         message.append("\tSupplierId: " + std::to_string(defaultNetSupplier_->GetSupplierId()) + "\n");
         std::shared_ptr<Network> network = defaultNetSupplier_->GetNetwork();
@@ -1603,7 +1651,7 @@ void NetConnService::GetDumpMessage(std::string &message)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         flag = false;
         return NETMANAGER_SUCCESS;
@@ -1614,7 +1662,7 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 
 int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     } else {
@@ -1729,6 +1777,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
             BroadcastManager::GetInstance().SendBroadcast(info, param);
         },
         "delay airplane mode", delayTime);
+    NETMGR_LOG_I("SetAirplaneMode out");
 
     return NETMANAGER_SUCCESS;
 }
@@ -1748,8 +1797,14 @@ void NetConnService::ActiveHttpProxy()
         }
         auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
+            std::string httpUrl;
+            GetHttpUrlFromConfig(httpUrl);
+            if (httpUrl.empty()) {
+                NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
+                continue;
+            }
             curl = curl_easy_init();
-            curl_easy_setopt(curl, CURLOPT_URL, NET_HTTP_PROBE_URL);
+            curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
             curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
             curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
             curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
@@ -1769,6 +1824,30 @@ void NetConnService::ActiveHttpProxy()
             httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
         }
     }
+}
+
+void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
+{
+    if (!std::filesystem::exists(URL_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
+        return;
+    }
+
+    std::ifstream file(URL_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(HTTP_URL_HEADER);
+    if (pos != std::string::npos) {
+        pos += strlen(HTTP_URL_HEADER);
+        httpUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    NETMGR_LOG_D("Get net detection http url:[%{public}s]", httpUrl.c_str());
 }
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
@@ -1799,6 +1878,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
             NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
             return ret;
         }
+        NETMGR_LOG_I("GlobalHttpProxy userId is %{public}d", userId);
         NetHttpProxyTracker httpProxyTracker;
         if (IsPrimaryUserId(userId)) {
             if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
@@ -1819,11 +1899,17 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 
 int32_t NetConnService::GetCallingUserId(int32_t &userId)
 {
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, uid: %{public}d.", uid);
+    std::vector<int> activeIds;
+    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
+    if (ret != 0) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds failed. ret is %{public}d", ret);
         return NETMANAGER_ERR_INTERNAL;
     }
+    if (activeIds.empty()) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds is empty");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    userId = activeIds[0];
     return NETMANAGER_SUCCESS;
 }
 
@@ -1875,6 +1961,16 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
+    if (!isDataShareReady_.load()) {
+        std::thread checkSettingsDataReady([this]() { return CheckIfSettingsDataReady(); });
+        std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
+        dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
+        checkSettingsDataReady.join();
+        if (!isDataShareReady_.load()) {
+            NETMGR_LOG_E("data share is not ready.");
+            return;
+        }
+    }
     if (isGlobalProxyLoaded_.load()) {
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database.");
         return;
@@ -2154,6 +2250,33 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
+void NetConnService::SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver)
+{
+    NETMGR_LOG_I("eventName=%{public}s", eventName.c_str());
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(eventName);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+
+    auto subscriberPtr = std::make_shared<NetConnListener>(subscribeInfo, receiver);
+    if (subscriberPtr == nullptr) {
+        NETMGR_LOG_E("subscriberPtr is nullptr");
+        return;
+    }
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+}
+
+void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
+{
+    auto const &want = data.GetWant();
+    std::string action = want.GetAction();
+    if (action == "usual.event.DATA_SHARE_READY") {
+        NETMGR_LOG_I("on receive data_share ready.");
+        isDataShareReady_ = true;
+        LoadGlobalHttpProxy();
+        UpdateGlobalHttpProxy(globalHttpProxy_);
+    }
+}
+
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 {
     if (ns == nullptr) {
@@ -2194,7 +2317,7 @@ void NetConnService::OnNetSysRestart()
 
         iter->second->ResumeNetworkInfo();
     }
-    std::unique_lock<std::mutex> locker(netManagerMutex_);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
@@ -2213,6 +2336,7 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
 
 bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
 {
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &network : networks_) {
         if (network.second->GetNetId() == netId) {
             continue;
@@ -2229,6 +2353,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
 
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
@@ -2324,6 +2449,7 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
 {
     std::vector<sptr<NetSupplier>> result;
     NET_SUPPLIER_MAP::iterator iterSupplier;
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second == nullptr) {
             continue;
@@ -2405,6 +2531,20 @@ uint32_t NetConnService::FindSupplierToIncreaseScore(std::vector<sptr<NetSupplie
         }
     }
     return ret;
+}
+
+NetConnService::NetConnListener::NetConnListener(const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
+    EventReceiver receiver) : EventFwk::CommonEventSubscriber(subscribeInfo), eventReceiver_(receiver) {}
+
+void NetConnService::NetConnListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
+{
+    if (eventReceiver_ == nullptr) {
+        NETMGR_LOG_E("eventReceiver is nullptr");
+        return;
+    }
+    NETMGR_LOG_I("NetConnListener::OnReceiveEvent(), event:[%{public}s], data:[%{public}s], code:[%{public}d]",
+                 eventData.GetWant().GetAction().c_str(), eventData.GetData().c_str(), eventData.GetCode());
+    eventReceiver_(eventData);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

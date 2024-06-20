@@ -81,8 +81,8 @@ uint16_t AdjustChecksum(uint16_t oldSum16, uint32_t oldSumHdr, uint32_t newSumHd
 int32_t CreateTunInterface(const std::string &tunIface, int &fd);
 int32_t OpenPacketSocket(int &readSock6);
 int32_t OpenRawSocket6(const uint32_t mark, int &writeSock6);
-int32_t AddAnycastSetsockopt(const int sockFd, const std::string &addrStr, int ifIndex);
-int32_t ConfigurePacketSocket(const int sockFd, const std::string &addrStr, int ifIndex);
+int32_t ConfigureWriteSocket(const int sockFd, const std::string &v6Iface);
+int32_t ConfigureReadSocket(const int sockFd, const std::string &addrStr, int ifIndex);
 int32_t SetTunInterfaceAddress(const std::string &ifName, const std::string &tunAddr, int32_t prefix);
 
 } // namespace nmd

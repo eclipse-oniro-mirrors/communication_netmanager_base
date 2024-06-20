@@ -88,13 +88,16 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+    int32_t SetFirewallCurrentUserId(int32_t userId)
+    {
+        currentUserId_ = userId;
+        return 0;
+    }
 
-    int32_t ClearFirewallDnsRules();
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
-
-    int32_t ClearFirewallDomainRules();
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
 
     void SetCallingUid(uint32_t callingUid)
     {
@@ -129,21 +132,33 @@ private:
     static std::vector<std::string> SelectNameservers(const std::vector<std::string> &servers);
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t GetUserId(int32_t appUid);
+
     bool GetDnsServersByAppUid(int32_t appUid, std::vector<std::string> &servers);
 
-    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule);
+    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
 
-    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule);
+    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
+
+    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
+
+    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
 
     FirewallRuleAction GetFirewallRuleAction(int32_t appUid, const std::vector<sptr<NetFirewallDomainRule>> &rules);
+
+    bool checkEmpty4InterceptDomain(const std::string &hostName);
 
     bool IsInterceptDomain(int32_t appUid, const std::string &host);
 
     void NotifyDomianIntercept(int32_t appUid, const std::string &host);
 
+    std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
+
+    std::vector<sptr<NetFirewallDnsRule>> firewallDnsRules_;
+
     sptr<NetManagerStandard::InterceptRecord> oldRecord_ = nullptr;
 
-    std::unordered_map<int32_t, std::vector<std::string>> netFirewallDnsRuleMap_;
+    std::unordered_map<int32_t, std::vector<sptr<NetFirewallDnsRule>>> netFirewallDnsRuleMap_;
 
     std::unordered_map<std::string, std::vector<sptr<NetFirewallDomainRule>>> netFirewallDomainRulesAllowMap_;
 
@@ -156,6 +171,8 @@ private:
         nullptr;
 
     uint32_t callingUid_;
+
+    int32_t currentUserId_ = 0;
 
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
 

@@ -44,10 +44,10 @@ using Ip4Key = ip4_key;
 using Ip6Key = ip6_key;
 using Ipv4LpmKey = struct ipv4_lpm_key;
 using Ipv6LpmKey = struct ipv6_lpm_key;
-using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
 using DefaultActionKey = default_action_key;
+using CurrentUserIdKey = current_user_id_key;
 using ActionKey = action_key;
 using ActionValue = action_val;
 using RuleCode = struct bitmap;
@@ -56,7 +56,7 @@ using EventType = enum event_type;
 using Event = struct event;
 using InterceptEvent = struct intercept_event;
 using DebugEvent = struct debug_event;
-using MatchEvent = struct match_tuple;
+using TupleEvent = struct match_tuple;
 using DebugType = enum debug_type;
 
 using CtKey = struct ct_tuple;
@@ -105,29 +105,13 @@ public:
     int32_t StopListener();
 
     /**
-     * Add firewall rules to bpf maps
+     * Set firewall rules to native
      *
      * @param ruleList list of NetFirewallIpRule
-     * @param finish transmit finish or not
+     * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish);
-
-    /**
-     * Update firewall rules to bpf maps
-     *
-     * @param rule list of NetFirewallIpRule
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule);
-
-    /**
-     * Delete firewall rules of bpf maps
-     *
-     * @param ruleIds list of NetFirewallIpRule ids
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t DeleteFirewallIpRules(const std::vector<int32_t> &ruleIds);
+    int32_t SetFirewallRules(const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish);
 
     /**
      * Set firewall default action
@@ -139,11 +123,19 @@ public:
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
-     * Clear firewall all ip rules and clear all bpf maps
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+
+    /**
+     * Clear all bpf maps
      *
      * @return  0 if success or -1 if an error occurred
      */
-    int32_t ClearFirewallIpRules();
+    int32_t ClearFirewallRules();
 
     /**
      * Register callback for recevie intercept event
@@ -237,7 +229,7 @@ private:
 
     static int HandleEvent(void *ctx, void *data, size_t len);
 
-    static void HandleMatchEvent(MatchEvent *ev);
+    static void HandleTupleEvent(TupleEvent *ev);
 
     static void HandleInterceptEvent(InterceptEvent *ev);
 
@@ -266,6 +258,8 @@ private:
     void WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     void WriteAppUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+
+    void WriteUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     void WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 

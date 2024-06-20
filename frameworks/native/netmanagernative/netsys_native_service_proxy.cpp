@@ -22,6 +22,10 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
+namespace NetManagerStandard {
+bool StatsInfoUnmarshallingVector(Parcel &parcel, std::vector<NetStatsInfo> &stats);
+} // namespace NetManagerStandard
+
 namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
@@ -1637,7 +1641,7 @@ int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::Net
         NETNATIVE_LOGE("fail to GetAllContainerStatsInfo ret= %{public}d", ret);
         return ret;
     }
-    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1668,7 +1672,7 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
         NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
         return ret;
     }
-    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+    if (!OHOS::NetManagerStandard::StatsInfoUnmarshallingVector(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -2262,6 +2266,166 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool i
 
     return ret;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
+                                                   const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                                   bool isFinish)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallRules: ruleList size=%{public}zu isFinish=%{public}d",
+                   ruleList.size(), isFinish);
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(ruleList.size())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isFinish)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto &rule : ruleList) {
+        if (!rule->Marshalling(data)) {
+            return NETMANAGER_EXT_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES), data,
+                                        reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("AddFirewallIpRules SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction in=%{public}d out=%{public}d", inDefault,
+                   outDefault);
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(inDefault))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(outDefault))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SetFirewallDefaultAction SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallCurrentUserId userId=%{public}d", userId);
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_USER_ID), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SetFirewallCurrentUserId SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::ClearFirewallRules type=%{public}d", type);
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_CLEAR_RULES),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("ClearFirewallRules SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to RegisterFirewallCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("FirewallCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_REGISTER), data,
+        reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("RegisterFirewallCallback SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to UnRegisterNetFirewallCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("FirewallCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("UnRegisterNetFirewallCallback SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+#endif
 
 int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {

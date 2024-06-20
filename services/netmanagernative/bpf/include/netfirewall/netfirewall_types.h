@@ -25,7 +25,9 @@
 #include <linux/in6.h>
 #endif
 
-#define BITMAP_LEN 32
+#define USER_ID_DIVIDOR 200000
+#define DEFAULT_USER_ID 100
+#define BITMAP_LEN 64
 
 struct bitmap {
     __u32 val[BITMAP_LEN];
@@ -58,6 +60,7 @@ enum debug_type {
     DBG_MATCH_DPORT,
     DBG_MATCH_PROTO,
     DBG_MATCH_APPUID,
+    DBG_MATCH_UID,
     DBG_ACTION_KEY,
     DBG_MATCH_ACTION,
     DBG_TCP_FLAGS,
@@ -110,6 +113,7 @@ struct match_tuple {
     __be16 sport;
     __be16 dport;
     __u32 appuid;
+    __u32 uid;
     __u16 rst;
 };
 
@@ -128,9 +132,13 @@ typedef __be32 ip4_key;
 typedef struct in6_addr ip6_key;
 typedef struct bitmap action_key;
 typedef enum sk_action action_val;
-typedef __be16 port_key;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
+typedef __u32 uid_key;
+
+typedef enum {
+    CURRENT_USER_ID_KEY = 1,
+} current_user_id_key;
 
 typedef enum {
     DEFAULT_ACT_IN_KEY = 1,
@@ -145,6 +153,16 @@ struct ipv4_lpm_key {
 struct ipv6_lpm_key {
         __u32 prefixlen;
         ip6_key data;
+};
+
+struct port_segment {
+    __u16 start;
+    __u16 end;
+};
+
+#define PORT_NUM_MAX 10
+struct port_array {
+    struct port_segment ports[PORT_NUM_MAX];
 };
 
 #endif // NET_FIREWALL_TYPES_H

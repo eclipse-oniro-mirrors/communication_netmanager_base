@@ -862,37 +862,15 @@ public:
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**
-     * Add firewall rules to bpf maps
+     * Set firewall rules to native
      *
+     * @param type ip, dns, domain
      * @param ruleList list of NetFirewallIpRule
-     * @param finish transmit finish or not
+     * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t AddFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList, bool finish);
-
-    /**
-     * Update firewall rules to bpf maps
-     *
-     * @param rule list of NetFirewallIpRule
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t UpdateFirewallIpRule(const sptr<NetFirewallIpRule> &rule);
-
-    /**
-     * Delete firewall rules of bpf maps
-     *
-     * @param ruleIds list of NetFirewallIpRule ids
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t DeleteFirewallIpRules(const std::vector<int32_t> &ruleIds);
-
-    /**
-     * Set firewall rules to bpf maps
-     *
-     * @param ruleList list of NetFirewallIpRule
-     * @return 0 if success or -1 if an error occurred
-     */
-    int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList);
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
     /**
      * Set firewall default action
@@ -904,28 +882,20 @@ public:
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+
+    /**
      * Clear firewall rules by type
      *
      * @param type type
      * @return 0 if success or -1 if an error occurred
      */
     int32_t ClearFirewallRules(NetFirewallRuleType type);
-
-    /**
-     * Set the Firewall DNS rules
-     *
-     * @param ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
-     */
-    int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
-
-    /**
-     *  Set the Firewall domain rules
-     *
-     * @param  ruleList firewall rules
-     * @return 0 if success or-1 if an error occurred
-     */
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
 
     /**
      * Register callback for recevie intercept event

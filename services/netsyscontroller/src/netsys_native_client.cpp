@@ -47,6 +47,7 @@ static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/pub
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 static constexpr uint32_t UID_BROKER_SERVICE = 5557;
+static constexpr uint32_t IPV4_MAX_LENGTH = 32;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -996,7 +997,7 @@ int32_t NetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ip
         NETMGR_LOG_E("The SIOCSIFADDR of ioctl failed.");
         return NETSYS_ERR_VPN;
     }
-    in_addr_t addressPrefixLength = prefixLen ? (~0 << (MAX_IPV4_ADDRESS_LEN - prefixLen)) : 0;
+    in_addr_t addressPrefixLength = prefixLen ? (~0 << (IPV4_MAX_LENGTH - prefixLen)) : 0;
     *AsInAddr(&ifRequest.ifr_netmask) = htonl(addressPrefixLength);
     if (ioctl(socketFd, SIOCSIFNETMASK, &ifRequest)) {
         NETMGR_LOG_E("The SIOCSIFNETMASK of ioctl failed.");
@@ -1454,6 +1455,75 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
     }
     return proxy->UpdateNetworkSharingType(type, isOpen);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeClient::SetFirewallRules(NetFirewallRuleType type,
+                                             const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+{
+    NETMGR_LOG_D("NetsysNativeClient::SetFirewallRules");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetFirewallRules(type, ruleList, isFinish);
+}
+
+int32_t NetsysNativeClient::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETMGR_LOG_D("NetsysNativeClient::SetFirewallDefaultAction");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t NetsysNativeClient::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETMGR_LOG_D("NetsysNativeClient::SetFirewallCurrentUserId");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetsysNativeClient::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETMGR_LOG_D("NetsysNativeClient::ClearFirewallRules");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->ClearFirewallRules(type);
+}
+
+int32_t NetsysNativeClient::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysNativeClient::RegisterNetFirewallCallback");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysNativeClient::UnRegisterNetFirewallCallback");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UnRegisterNetFirewallCallback(callback);
+}
+#endif
 
 int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {

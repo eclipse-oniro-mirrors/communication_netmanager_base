@@ -34,12 +34,18 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
+constexpr const uint32_t CONTAINER_UID = 0xFFFFFFFF;
 } // namespace
 
 int32_t NetStatsCached::StartCached()
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    auto ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
+    auto ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Create version table failed");
+        return STATS_ERR_CREATE_TABLE_FAIL;
+    }
+    ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Create uid table failed");
         return STATS_ERR_CREATE_TABLE_FAIL;
@@ -54,6 +60,7 @@ int32_t NetStatsCached::StartCached()
         NETMGR_LOG_E("Create uid_sim table failed");
         return STATS_ERR_CREATE_TABLE_FAIL;
     }
+    helper->Upgrade();
     cacheTimer_ = std::make_unique<FfrtTimer>();
     writeTimer_ = std::make_unique<FfrtTimer>();
     cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
@@ -104,6 +111,9 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
     NetsysController::GetInstance().GetAllStatsInfo(allInfos);
     std::vector<NetStatsInfo> containerInfos;
     NetsysController::GetInstance().GetAllContainerStatsInfo(containerInfos);
+    std::for_each(containerInfos.begin(), containerInfos.end(), [](NetStatsInfo &info) {
+       info.uid_ = CONTAINER_UID;
+    });
     allInfos.insert(allInfos.end(), containerInfos.begin(), containerInfos.end());
 
     LoadIfaceNameIdentMaps();
@@ -183,10 +193,11 @@ void NetStatsCached::CacheUidSimStats()
             return;
         }
         info.ident_ = ifaceNameIdentMap_[info.iface_];
+        info.uid_ = CONTAINER_UID;
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
-            stats_.PushUidStats(info);
+            stats_.PushUidSimStats(info);
             return;
         }
         auto currentStats = info - *findRet;

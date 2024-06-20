@@ -24,14 +24,25 @@
 #include "netfirewall_def.h"
 
 /**
- * @brief Get the appuid from skb
+ * @brief Get the user id from sock_uid
  *
- * @param skb struct __sk_buff
- * @return appid with type __u32
+ * @param sock_uid bpf_get_socket_uid
+ * @return user id with type __u32
  */
-static __always_inline __u32 get_appuid(struct __sk_buff *skb)
+static __always_inline __u32 get_user_id(__u32 sock_uid)
 {
-    return bpf_get_socket_uid(skb);
+    __u32 user_id = sock_uid / USER_ID_DIVIDOR;
+    if (user_id > 0) {
+        return user_id;
+    }
+
+    current_user_id_key key = CURRENT_USER_ID_KEY;
+    uid_key *current_user_id = bpf_map_lookup_elem(&CURRENT_UID_MAP, &key);
+    if (!current_user_id) {
+        return DEFAULT_USER_ID;
+    }
+
+    return *current_user_id;
 }
 
 /**
@@ -91,7 +102,9 @@ static __always_inline bool get_match_tuple(struct __sk_buff *skb, struct match_
     }
     tuple->dir = dir;
     tuple->family = skb->family;
-    tuple->appuid = get_appuid(skb);
+    __u32 sock_uid = bpf_get_socket_uid(skb);
+    tuple->appuid = sock_uid;
+    tuple->uid = get_user_id(sock_uid);
     tuple->protocol = protocol;
 
     if (protocol == IPPROTO_TCP || protocol == IPPROTO_UDP) {
@@ -189,35 +202,35 @@ static __always_inline bool match_addrs(struct match_tuple *tuple, action_key *k
 }
 
 /**
- * @brief lookup port bitmap use the given tuple
+ * @brief lookup port segment by bitmap
  *
- * @param tuple struct match_tuple get from skb
- * @param key out param for lookup result
+ * @param map port bpf map
+ * @param key rule index
+ * @param kport port in skb
  * @return true if success or false if an error occurred
  */
-static __always_inline bool match_ports(struct match_tuple *tuple, action_key *key)
+static __always_inline bool match_port(void *map, void *key, __be16 kport)
 {
-    if (!tuple || !key) {
+    if (!map || !key) {
+        return false;
+    }
+    struct port_array *res = bpf_map_lookup_elem(map, key);
+    if (res) {
+        __u16 port = bpf_ntohs(kport);
+
+        for (int i = 0; i < PORT_NUM_MAX; i++) {
+            if (!res->ports[i].start) {
+                break;
+            }
+            if (port >= res->ports[i].start && port <= res->ports[i].end) {
+                return true;
+            }
+        }
+
         return false;
     }
 
-    __u8 protocol = tuple->protocol;
-    port_key other_port_key = OTHER_PORT_KEY;
-    bool ingress = tuple->dir == INGRESS;
-    struct bitmap *result = NULL;
-
-    result = lookup_map(GET_MAP(ingress, sport), &(tuple->sport), &other_port_key);
-    if (result) {
-        log_dbg2(DBG_MATCH_SPORT, tuple->dir, (__u32)tuple->sport, result->val[0]);
-        bitmap_and(key->val, result->val);
-        result = NULL;
-    }
-
-    result = lookup_map(GET_MAP(ingress, dport), &(tuple->dport), &other_port_key);
-    if (result) {
-        log_dbg2(DBG_MATCH_DPORT, tuple->dir, (__u32)tuple->dport, result->val[0]);
-        bitmap_and(key->val, result->val);
-    }
+    // not found means firewall rule not set port param
     return true;
 }
 
@@ -266,7 +279,33 @@ static __always_inline bool match_appuid(struct match_tuple *tuple, action_key *
 
     result = lookup_map(GET_MAP(ingress, appuid), &(tuple->appuid), &other_appuid_key);
     if (result) {
-        log_dbg2(DBG_MATCH_APPUID, tuple->dir, (__u32)tuple->appuid, result->val[0]);
+        log_dbg2(DBG_MATCH_APPUID, tuple->dir, tuple->appuid, result->val[0]);
+        bitmap_and(key->val, result->val);
+    }
+
+    return true;
+}
+
+/**
+ * @brief lookup user_id bitmap use the given tuple
+ *
+ * @param tuple struct match_tuple get from skb
+ * @param key out param for lookup result
+ * @return true if success or false if an error occurred
+ */
+static __always_inline bool match_uid(struct match_tuple *tuple, action_key *key)
+{
+    if (!tuple || !key) {
+        return false;
+    }
+
+    uid_key other_uid_key = OTHER_UID_KEY;
+    bool ingress = tuple->dir == INGRESS;
+    struct bitmap *result = NULL;
+
+    result = lookup_map(GET_MAP(ingress, uid), &(tuple->uid), &other_uid_key);
+    if (result) {
+        log_dbg2(DBG_MATCH_UID, tuple->dir, tuple->uid, result->val[0]);
         bitmap_and(key->val, result->val);
     }
 
@@ -292,15 +331,15 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, action_k
         return false;
     }
 
-    if (!match_ports(tuple, key)) {
-        return false;
-    }
-
     if (!match_protocol(tuple, key)) {
         return false;
     }
 
     if (!match_appuid(tuple, key)) {
+        return false;
+    }
+
+    if (!match_uid(tuple, key)) {
         return false;
     }
 
@@ -320,20 +359,34 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, ac
     if (!tuple || !key) {
         return SK_PASS;
     }
-
-    enum sk_action sk_act = SK_PASS;
     bool ingress = tuple->dir == INGRESS;
     default_action_key default_key = ingress ? DEFAULT_ACT_IN_KEY : DEFAULT_ACT_OUT_KEY;
     action_val *default_action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &default_key);
-    action_val *action = bpf_map_lookup_elem(GET_MAP(ingress, action), key);
+    enum sk_action default_act = default_action ? *default_action : SK_PASS;
 
     int set_bits = bitmap_count(key->val);
-    if ((set_bits > 1 || !action) && default_action) {
-        sk_act = *default_action;
-    } else if (action) {
-        sk_act = *action;
+    if (set_bits > 1) {
+        log_dbg(DBG_MATCH_ACTION, tuple->dir, default_act);
+        return default_act;
     }
-    log_dbg(DBG_MATCH_ACTION, tuple->dir, sk_act);
-    return sk_act;
+
+    action_val *action = bpf_map_lookup_elem(GET_MAP(ingress, action), key);
+    enum sk_action matched_act = action ? *action : default_act;
+    __u8 protocol = tuple->protocol;
+    if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6) {
+        log_dbg(DBG_MATCH_ACTION, tuple->dir, matched_act);
+        return matched_act;
+    }
+    bool is_sport_match = match_port(GET_MAP(ingress, sport), key, tuple->sport);
+    bool is_dport_match = match_port(GET_MAP(ingress, dport), key, tuple->dport);
+    log_dbg2(DBG_MATCH_SPORT, tuple->dir, (__u32)tuple->sport, (__u32)is_sport_match);
+    log_dbg2(DBG_MATCH_DPORT, tuple->dir, (__u32)tuple->dport, (__u32)is_dport_match);
+    if (is_sport_match && is_dport_match) {
+        log_dbg(DBG_MATCH_ACTION, tuple->dir, matched_act);
+        return matched_act;
+    }
+
+    log_dbg(DBG_MATCH_ACTION, tuple->dir, default_act);
+    return default_act;
 }
 #endif // NET_FIREWALL_MATCH_H

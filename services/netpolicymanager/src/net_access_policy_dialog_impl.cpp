@@ -96,7 +96,7 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityDisconnectDone
     g_remoteObject = nullptr;
 }
 
-INetAccessPolicyDialog *GetNetAccessPolicyDialogImpl()
+INetAccessPolicyDialog *GetNetAccessPolicyDialog()
 {
     static NetAccessPolicyDialogImpl impl;
     return &impl;

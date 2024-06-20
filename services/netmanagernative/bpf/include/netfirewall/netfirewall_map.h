@@ -62,8 +62,8 @@ bpf_map_def SEC("maps") INGRESS_DADDR6_MAP = {
 
 bpf_map_def SEC("maps") INGRESS_SPORT_MAP = {
     .type = BPF_MAP_TYPE_LRU_HASH,
-    .key_size = sizeof(port_key),
-    .value_size = sizeof(struct bitmap),
+    .key_size = sizeof(action_key),
+    .value_size = sizeof(struct port_array),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -72,8 +72,8 @@ bpf_map_def SEC("maps") INGRESS_SPORT_MAP = {
 
 bpf_map_def SEC("maps") INGRESS_DPORT_MAP = {
     .type = BPF_MAP_TYPE_LRU_HASH,
-    .key_size = sizeof(port_key),
-    .value_size = sizeof(struct bitmap),
+    .key_size = sizeof(action_key),
+    .value_size = sizeof(struct port_array),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -100,6 +100,15 @@ bpf_map_def SEC("maps") INGRESS_ACTION_MAP = {
 bpf_map_def SEC("maps") INGRESS_APPUID_MAP = {
     .type = BPF_MAP_TYPE_LRU_HASH,
     .key_size = sizeof(appuid_key),
+    .value_size = sizeof(struct bitmap),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+bpf_map_def SEC("maps") INGRESS_UID_MAP = {
+    .type = BPF_MAP_TYPE_LRU_HASH,
+    .key_size = sizeof(uid_key),
     .value_size = sizeof(struct bitmap),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = 0,
@@ -147,8 +156,8 @@ bpf_map_def SEC("maps") EGRESS_DADDR6_MAP = {
 };
 bpf_map_def SEC("maps") EGRESS_SPORT_MAP = {
     .type = BPF_MAP_TYPE_LRU_HASH,
-    .key_size = sizeof(port_key),
-    .value_size = sizeof(struct bitmap),
+    .key_size = sizeof(action_key),
+    .value_size = sizeof(struct port_array),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -156,8 +165,8 @@ bpf_map_def SEC("maps") EGRESS_SPORT_MAP = {
 };
 bpf_map_def SEC("maps") EGRESS_DPORT_MAP = {
     .type = BPF_MAP_TYPE_LRU_HASH,
-    .key_size = sizeof(port_key),
-    .value_size = sizeof(struct bitmap),
+    .key_size = sizeof(action_key),
+    .value_size = sizeof(struct port_array),
     .max_entries = MAP_MAX_ENTRIES,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -190,12 +199,29 @@ bpf_map_def SEC("maps") EGRESS_APPUID_MAP = {
     .inner_map_idx = 0,
     .numa_node = 0,
 };
-
+bpf_map_def SEC("maps") EGRESS_UID_MAP = {
+    .type = BPF_MAP_TYPE_LRU_HASH,
+    .key_size = sizeof(uid_key),
+    .value_size = sizeof(struct bitmap),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
 bpf_map_def SEC("maps") DEFAULT_ACTION_MAP = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(default_action_key),
     .value_size = sizeof(action_val),
     .max_entries = 2,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+bpf_map_def SEC("maps") CURRENT_UID_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(current_user_id_key),
+    .value_size = sizeof(uid_key),
+    .max_entries = 1,
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,

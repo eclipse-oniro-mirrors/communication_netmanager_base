@@ -24,7 +24,8 @@ NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &im
 
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 
-int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
+int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+                                                 const int32_t registerType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -37,7 +38,7 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     for (auto netCap : netCaps) {
         data.WriteUint32(static_cast<uint32_t>(netCap));
     }
-
+    data.WriteInt32(registerType);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");

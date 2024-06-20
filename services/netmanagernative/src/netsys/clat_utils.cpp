@@ -323,23 +323,17 @@ int32_t OpenRawSocket6(const uint32_t mark, int &writeSock6)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t AddAnycastSetsockopt(int sockFd, const std::string &addrStr, int ifIndex)
+int32_t ConfigureWriteSocket(int sockFd, const std::string &v6Iface)
 {
     if (sockFd < 0) {
         NETNATIVE_LOGW("Invalid file descriptor");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
 
-    in6_addr addr;
-    if (inet_pton(AF_INET6, addrStr.c_str(), &addr) != 1) {
-        NETNATIVE_LOGW("Invalid IPv6 address %{public}s", addrStr.c_str());
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
-
-    ipv6_mreq mreq = {addr, ifIndex};
-    int ret = setsockopt(sockFd, SOL_IPV6, IPV6_JOIN_ANYCAST, &mreq, sizeof(mreq));
+    int ret = setsockopt(sockFd, SOL_SOCKET, SO_BINDTODEVICE, v6Iface.c_str(),
+                         static_cast<socklen_t>(strlen(v6Iface.c_str())));
     if (ret) {
-        NETNATIVE_LOGW("setsockopt IPV6_JOIN_ANYCAST failed: %{public}s", strerror(errno));
+        NETNATIVE_LOGW("setsockopt SO_BINDTODEVICE failed: %{public}s", strerror(errno));
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;
@@ -348,16 +342,16 @@ int32_t AddAnycastSetsockopt(int sockFd, const std::string &addrStr, int ifIndex
 int AddFilterAndBindPacketSocket(const int sock, const in6_addr *const addr, const int ifIndex)
 {
     sock_filter filter[] = {
-        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, (__u32)SKF_NET_OFF + offsetof(ipv6hdr, daddr.s6_addr32[0])),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, static_cast<__u32>(SKF_NET_OFF) + offsetof(ipv6hdr, daddr.s6_addr32[0])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ntohl(addr->s6_addr32[0]), 1, 0),
         BPF_STMT(BPF_RET | BPF_K, 0),
-        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, (__u32)SKF_NET_OFF + offsetof(ipv6hdr, daddr.s6_addr32[1])),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, static_cast<__u32>(SKF_NET_OFF) + offsetof(ipv6hdr, daddr.s6_addr32[1])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ntohl(addr->s6_addr32[1]), 1, 0),
         BPF_STMT(BPF_RET | BPF_K, 0),
-        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, (__u32)SKF_NET_OFF + offsetof(ipv6hdr, daddr.s6_addr32[2])),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, static_cast<__u32>(SKF_NET_OFF) + offsetof(ipv6hdr, daddr.s6_addr32[2])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ntohl(addr->s6_addr32[2]), 1, 0),
         BPF_STMT(BPF_RET | BPF_K, 0),
-        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, (__u32)SKF_NET_OFF + offsetof(ipv6hdr, daddr.s6_addr32[3])),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, static_cast<__u32>(SKF_NET_OFF) + offsetof(ipv6hdr, daddr.s6_addr32[3])),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, ntohl(addr->s6_addr32[3]), 1, 0),
         BPF_STMT(BPF_RET | BPF_K, 0),
         BPF_STMT(BPF_RET | BPF_K, 0xFFFFFFFF),
@@ -384,7 +378,7 @@ int AddFilterAndBindPacketSocket(const int sock, const in6_addr *const addr, con
     return 0;
 }
 
-int32_t ConfigurePacketSocket(int sockFd, const std::string &addrStr, int ifIndex)
+int32_t ConfigureReadSocket(int sockFd, const std::string &addrStr, int ifIndex)
 {
     if (sockFd < 0) {
         NETNATIVE_LOGW("Invalid file descriptor");

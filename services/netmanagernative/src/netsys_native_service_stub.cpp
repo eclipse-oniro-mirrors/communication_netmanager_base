@@ -176,6 +176,20 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallClearIpAndUidRule;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE)] =
         &NetsysNativeServiceStub::CmdClearFirewallAllRules;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES)] =
+        &NetsysNativeServiceStub::CmdSetFirewallRules;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION)] =
+        &NetsysNativeServiceStub::CmdSetFirewallDefaultAction;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_USER_ID)] =
+        &NetsysNativeServiceStub::CmdSetFirewallCurrentUserId;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_CLEAR_RULES)] =
+        &NetsysNativeServiceStub::CmdClearFirewallRules;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_REGISTER)] =
+        &NetsysNativeServiceStub::CmdRegisterNetFirewallCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER)] =
+        &NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback;
+#endif
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
@@ -296,6 +310,18 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Check remote descriptor failed");
         return IPC_STUB_INVALID_DATA_ERR;
     }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (code >= static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION) &&
+        code <= static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER) &&
+        !NetManagerPermission::CheckPermission(Permission::NETSYS_INTERNAL)) {
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+#endif
+
     return (this->*(interfaceIndex->second))(data, reply);
 }
 
@@ -1657,6 +1683,126 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data
 
     return ret;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules");
+    int32_t size = 0;
+    if (!data.ReadInt32(size)) {
+        NETNATIVE_LOGE("Read size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > FIREWALL_IPC_IP_RULE_PAGE_SIZE) {
+        return FIREWALL_ERR_EXCEED_MAX_IP;
+    }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        NETNATIVE_LOGE("Read rule type failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetFirewallRuleType ruleType = static_cast<NetFirewallRuleType>(type);
+    bool isFinish = false;
+    if (!data.ReadBool(isFinish)) {
+        NETNATIVE_LOGE("Read isFinish failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    for (int i = 0; i < size; i++) {
+        sptr<NetFirewallBaseRule> rule = nullptr;
+        if (ruleType == NetFirewallRuleType::RULE_IP) {
+            rule = NetFirewallIpRule::Unmarshalling(data);
+        } else if (ruleType == NetFirewallRuleType::RULE_DOMAIN) {
+            rule = NetFirewallDomainRule::Unmarshalling(data);
+        } else if (ruleType == NetFirewallRuleType::RULE_DNS) {
+            rule = NetFirewallDnsRule::Unmarshalling(data);
+        }
+        if (rule != nullptr) {
+            ruleList.emplace_back(std::move(rule));
+        }
+    }
+    return SetFirewallRules(ruleType, ruleList, isFinish);
+}
+
+int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallDefaultAction");
+    int32_t inDefault = 0;
+    if (!data.ReadInt32(inDefault)) {
+        NETNATIVE_LOGE("Read inDefault failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t outDefault = 0;
+    if (!data.ReadInt32(outDefault)) {
+        NETNATIVE_LOGE("Read outDefault failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return SetFirewallDefaultAction(static_cast<FirewallRuleAction>(inDefault),
+                                    static_cast<FirewallRuleAction>(outDefault));
+}
+
+int32_t NetsysNativeServiceStub::CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallCurrentUserId");
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        NETNATIVE_LOGE("Read userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetsysNativeServiceStub::CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdClearFirewallRules");
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        NETNATIVE_LOGE("Read clear type failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    NetFirewallRuleType clearType = static_cast<NetFirewallRuleType>(type);
+    return ClearFirewallRules(clearType);
+}
+
+int32_t NetsysNativeServiceStub::CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        return result;
+    }
+
+    sptr<INetFirewallCallback> callback = iface_cast<INetFirewallCallback>(remote);
+    if (callback == nullptr) {
+        result = ERR_FLATTEN_OBJECT;
+        return result;
+    }
+
+    return RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        return result;
+    }
+
+    sptr<INetFirewallCallback> callback = iface_cast<INetFirewallCallback>(remote);
+    if (callback == nullptr) {
+        result = ERR_FLATTEN_OBJECT;
+        return result;
+    }
+
+    return UnRegisterNetFirewallCallback(callback);
+}
+#endif
 
 int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply)
 {

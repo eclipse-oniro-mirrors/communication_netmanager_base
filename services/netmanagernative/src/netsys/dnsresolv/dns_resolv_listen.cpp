@@ -38,7 +38,6 @@ static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
-    dnsResolvListenFfrtQueue_ = std::make_shared<ffrt::queue>("DnsResolvListen");
 }
 
 DnsResolvListen::~DnsResolvListen()
@@ -57,6 +56,10 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uin
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(uid);
+#endif
 
     int status = -1;
     if (DnsParamCache::GetInstance().IsVpnOpen()) {
@@ -114,6 +117,13 @@ int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
 
 void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ProcGetCacheCommand(clientSockFd, netId, 0);
+}
+
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
+{
+#endif
     DNS_CONFIG_PRINT("ProcGetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
     int32_t res = ProcGetKeyForCache(clientSockFd, name);
@@ -121,6 +131,9 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+#endif
     auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
 
     uint32_t resNum = std::min<uint32_t>(MAX_RESULTS, static_cast<uint32_t>(cacheRes.size()));
@@ -151,6 +164,13 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 
 void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ProcSetCacheCommand(clientSockFd, netId, 0);
+}
+
+void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
+{
+#endif
     DNS_CONFIG_PRINT("ProcSetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
     int32_t res = ProcGetKeyForCache(clientSockFd, name);
@@ -177,6 +197,9 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+#endif
     for (size_t i = 0; i < resNum; ++i) {
         DnsParamCache::GetInstance().SetDnsCache(netId, name, addrInfo[i]);
     }
@@ -316,10 +339,18 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
             ProcGetConfigCommand(clientSockFd, netId, uid);
             break;
         case GET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcGetCacheCommand(clientSockFd, netId, uid);
+#else
             ProcGetCacheCommand(clientSockFd, netId);
+#endif
             break;
         case SET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcSetCacheCommand(clientSockFd, netId, uid);
+#else
             ProcSetCacheCommand(clientSockFd, netId);
+#endif
             break;
         case JUDGE_IPV6:
             ProcJudgeIpv6Command(clientSockFd, netId);
@@ -374,14 +405,7 @@ void DnsResolvListen::StartListen()
             close(clientSockFd);
             continue;
         }
-        if (!dnsResolvListenFfrtQueue_) {
-            NETNATIVE_LOGE("FFRT Init Fail");
-            return;
-        }
-        ffrt::task_handle StartListenTask = dnsResolvListenFfrtQueue_->submit_h([this, &clientSockFd]() {
-            this->ProcCommand(clientSockFd);
-        });
-        dnsResolvListenFfrtQueue_->wait(StartListenTask);
+        this->ProcCommand(clientSockFd);
     }
 }
 } // namespace OHOS::nmd
