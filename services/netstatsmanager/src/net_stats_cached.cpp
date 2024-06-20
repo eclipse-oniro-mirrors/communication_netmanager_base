@@ -323,6 +323,7 @@ void NetStatsCached::ForceUpdateStats()
 
 void NetStatsCached::ForceDeleteStats(uint32_t uid)
 {
+    NETMGR_LOG_I("ForceDeleteStats Enter uid[%{public}u]", uid);
     stats_.ResetUidStats(uid);
     stats_.ResetUidSimStats(uid);
     for (auto it = lastUidStatsInfo_.begin(); it != lastUidStatsInfo_.end();) {

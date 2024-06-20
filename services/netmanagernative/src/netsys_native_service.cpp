@@ -665,6 +665,7 @@ int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStan
 
 int32_t NetsysNativeService::DeleteSimStatsInfo(uint32_t uid)
 {
+    NETNATIVE_LOGI("DeleteSimStatsInfo uid[%{public}u]", uid);
     if (bpfStats_ == nullptr) {
         NETNATIVE_LOGE("bpfStats is null.");
         return NetManagerStandard::NETMANAGER_ERROR;
@@ -684,6 +685,7 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
 
 int32_t NetsysNativeService::DeleteStatsInfo(uint32_t uid)
 {
+    NETNATIVE_LOGI("DeleteStatsInfo uid[%{public}u]", uid);
     if (bpfStats_ == nullptr) {
         NETNATIVE_LOGE("bpfStats is null.");
         return NetManagerStandard::NETMANAGER_ERROR;

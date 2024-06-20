@@ -1261,6 +1261,7 @@ int32_t NetsysNativeServiceStub::CmdDeleteSimStatsInfo(MessageParcel &data, Mess
 {
     uint32_t uid = data.ReadUint32();
     int32_t ret = DeleteSimStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteSimStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
     if (!reply.WriteInt32(ret)) {
         NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;
@@ -1287,6 +1288,7 @@ int32_t NetsysNativeServiceStub::CmdDeleteStatsInfo(MessageParcel &data, Message
 {
     uint32_t uid = data.ReadUint32();
     int32_t ret = DeleteStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
     if (!reply.WriteInt32(ret)) {
         NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;
