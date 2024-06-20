@@ -78,5 +78,3 @@ HWTEST_F(IptablesWrapperTest, RunCommandForResTest001, TestSize.Level1)
 }
 } // namespace NetsysNative
 } // namespace OHOS
-} // namespace NetsysNative
-} // namespace OHOS
