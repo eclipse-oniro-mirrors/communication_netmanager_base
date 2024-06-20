@@ -134,6 +134,11 @@ public:
      */
     virtual void RemoveFromDeniedList(uint32_t uid);
 
+    /**
+     * Clear Firewall All Rules
+     */
+    virtual int32_t ClearFirewallAllRules();
+
 protected:
     explicit FirewallRule(uint32_t chainType);
     virtual ~FirewallRule();

@@ -722,6 +722,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr006, TestSize.Level1)
     ret = instance_->FirewallSetUidRule(0, uids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
+    ret = instance_->ClearFirewallAllRules();
+    EXPECT_NE(ret, 0);
+
     ret = instance_->GetTotalStats(stats, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 

@@ -170,6 +170,7 @@ public:
     virtual int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
                                             const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
+    virtual int32_t ClearFirewallAllRules() = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

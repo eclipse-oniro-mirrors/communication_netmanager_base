@@ -14,6 +14,7 @@
  */
 
 #include "netsys_policy_wrapper.h"
+#include "iptables_type.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -83,6 +84,16 @@ int32_t NetsysPolicyWrapper::BandwidthRemoveAllowedList(uint32_t uid)
     return netsysReturnValue;
 }
 
+int32_t NetsysPolicyWrapper::PowerSaveUpdataAllowedList(uint32_t uid, uint32_t firewallRule)
+{
+    std::vector<uint32_t> uids{ uid };
+    uint32_t chain = ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX;
+    auto netsysReturnValue = NetsysController::GetInstance().FirewallSetUidRule(chain, uids, firewallRule);
+    NETMGR_LOG_D("NetsysPolicyWrapper:PowerSaveUpdataAllowedList uid[%{public}u] netsys return[%{public}d]", uid,
+                 netsysReturnValue);
+    return netsysReturnValue;
+}
+
 int32_t NetsysPolicyWrapper::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     auto netsysReturnValue = NetsysController::GetInstance().FirewallSetUidsAllowedListChain(chain, uids);
@@ -127,6 +138,12 @@ int32_t NetsysPolicyWrapper::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessP
 int32_t NetsysPolicyWrapper::DeleteNetworkAccessPolicy(uint32_t uid)
 {
     auto netsysReturnValue = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
+    return netsysReturnValue;
+}
+
+int32_t NetsysPolicyWrapper::ClearFirewallAllRules()
+{
+    auto netsysReturnValue = NetsysController::GetInstance().ClearFirewallAllRules();
     return netsysReturnValue;
 }
 

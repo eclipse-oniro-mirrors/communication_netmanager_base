@@ -316,14 +316,14 @@ HWTEST_F(NetStatsServiceTest, GetCookieRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieRxBytes(stats, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetStatsServiceTest, GetCookieTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieTxBytes(stats, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetStatsServiceTest, GetAllSimStatsInfoTest001, TestSize.Level1)

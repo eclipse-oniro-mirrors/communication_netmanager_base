@@ -258,15 +258,16 @@ int32_t BitmapManager::InsertIpBitmap(const std::vector<NetFirewallIpParam> &ipI
 
 void BitmapManager::ProcessPorts(const std::vector<NetFirewallPortParam> &ports, Bitmap &bitmap, BpfPortMap &map)
 {
+    PortArray portArr = {};
+    int i = 0;
     for (const auto &port : ports) {
-        if (port.startPort <= port.endPort) {
-            PortSegment portSeg = {
-                .start = port.startPort,
-                .end = port.endPort,
-            };
-            map.insert(std::make_pair(Bitmap(bitmap), portSeg));
+        if (port.startPort <= port.endPort && i < PORT_NUM_MAX) {
+            portArr.ports[i].start = port.startPort;
+            portArr.ports[i].end = port.endPort;
+            i++;
         }
     }
+    map.insert(std::make_pair(Bitmap(bitmap), portArr));
 }
 
 int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>> &ruleList)

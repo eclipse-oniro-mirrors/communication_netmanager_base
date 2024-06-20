@@ -58,6 +58,7 @@ FirewallManager::FirewallManager() : chainInitFlag_(false), firewallType_(Firewa
     firewallChainStatus_[ChainType::CHAIN_OHFW_DOZABLE] = status;
     firewallChainStatus_[ChainType::CHAIN_OHFW_POWERSAVING] = status;
     firewallChainStatus_[ChainType::CHAIN_OHFW_UNDOZABLE] = status;
+    firewallChainStatus_[ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX] = status;
 }
 
 FirewallManager::~FirewallManager()
@@ -101,7 +102,7 @@ std::string FirewallManager::ReadMaxUidConfig()
 int32_t FirewallManager::IsFirewallChian(ChainType chain)
 {
     if (chain != ChainType::CHAIN_OHFW_DOZABLE && chain != ChainType::CHAIN_OHFW_POWERSAVING
-        && chain != ChainType::CHAIN_OHFW_UNDOZABLE) {
+        && chain != ChainType::CHAIN_OHFW_UNDOZABLE && chain != ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) {
         return NETMANAGER_ERROR;
     }
     return NETMANAGER_SUCCESS;
@@ -123,6 +124,9 @@ std::string FirewallManager::FetchChainName(ChainType chain)
             break;
         case ChainType::CHAIN_OHFW_DOZABLE:
             chainName = "ohfw_dozable";
+            break;
+        case ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX:
+            chainName = "ohfw_allowed_list_box";
             break;
         case ChainType::CHAIN_OHFW_POWERSAVING:
             chainName = "ohfw_powersaving";
@@ -168,6 +172,7 @@ int32_t FirewallManager::InitChain()
           (IptablesNewChain(ChainType::CHAIN_OHFW_OUTPUT) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_FORWARD) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
+          (IptablesNewChain(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_DES_FILTER) == NETMANAGER_ERROR);
@@ -183,6 +188,7 @@ int32_t FirewallManager::DeInitChain()
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_OUTPUT) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_FORWARD) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
+          (IptablesDeleteChain(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_DES_FILTER) == NETMANAGER_ERROR);
@@ -243,6 +249,10 @@ int32_t FirewallManager::ClearAllRules()
     command = "-t filter -F " + chainName;
     ret = ret ||
           (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
+    chainName = FetchChainName(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX);
+    command = "-t filter -F " + chainName;
+    ret = ret ||
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
@@ -293,6 +303,10 @@ int32_t FirewallManager::SetUidsAllowedListChain(ChainType chain, const std::vec
     ret = ret ||
           (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
 
+    std::string  allowedListChainName = FetchChainName(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX);
+    command = "-t filter -A " + chainName + " -j " + allowedListChainName;
+    ret = ret ||
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
     std::for_each(uids.begin(), uids.end(), [&command, &chainName, &ret](uint32_t uid) {
         std::string strUid = std::to_string(uid);
         command = "-t filter -A " + chainName + " -m owner --uid-owner " + strUid + " -j RETURN";
@@ -414,7 +428,11 @@ int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule 
         target = "DROP";
         op = (firewallRule == FirewallRule::RULE_DENY) ? "-A" : "-D";
     } else {
-        target = "RETURN";
+        if (chain != ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) {
+            target = "RETURN";
+        } else {
+            target = "ACCEPT";
+        }
         op = (firewallRule == FirewallRule::RULE_ALLOW) ? "-I" : "-D";
     }
 

@@ -533,6 +533,11 @@ public:
     {
         return 0;
     }
+
+    int32_t ClearFirewallAllRules() override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1320,6 +1325,21 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidRule001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFirewallSetUidRule(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdClearFirewallAllRules001, TestSize.Level1)
+{
+    uint32_t chain = 0;
+    bool enable = true;
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdClearFirewallAllRules(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
