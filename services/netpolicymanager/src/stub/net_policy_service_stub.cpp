@@ -164,7 +164,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         if (requestFunc != nullptr) {
             auto task = ffrtQueue_.submit_h([this, &data, &reply, &requestFunc, &result]() {
                           result = (this->*requestFunc)(data, reply);
-                      });
+            }, ffrt::task_attr().name("FfrtOnRemoteRequest"));
             ffrtQueue_.wait(task);
             NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, result);
             return result;

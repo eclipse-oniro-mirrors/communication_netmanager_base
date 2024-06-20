@@ -43,7 +43,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallbackAsync(const sptr<INetPolicyC
     ffrt::task_handle RegisterNetPolicyCallbackAsyncTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, callback, &ret]() {
             ret = this->RegisterNetPolicyCallback(callback);
-        });
+        }, ffrt::task_attr().name("FfrtRegisterNetPolicyCallbackAsync"));
     netPolicyCallbackFfrtQueue_->wait(RegisterNetPolicyCallbackAsyncTask);
 
     return ret;
@@ -84,7 +84,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallbackAsync(const sptr<INetPolic
     ffrt::task_handle UnregisterNetPolicyCallbackAsyncTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, callback, &ret]() {
             ret = this->UnregisterNetPolicyCallback(callback);
-        });
+        }, ffrt::task_attr().name("FfrtUnregisterNetPolicyCallbackAsync"));
     netPolicyCallbackFfrtQueue_->wait(UnregisterNetPolicyCallbackAsyncTask);
 
     return ret;
@@ -117,7 +117,7 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChangeAsync(uint32_t uid, uint32_t 
     ffrt::task_handle NotifyNetUidPolicyChangeAsyncTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, uid, policy, &ret]() {
             ret = this->NotifyNetUidPolicyChange(uid, policy);
-        });
+        }, ffrt::task_attr().name("FfrtNotifyNetUidPolicyChangeAsync"));
     netPolicyCallbackFfrtQueue_->wait(NotifyNetUidPolicyChangeAsyncTask);
 
     return ret;
@@ -146,7 +146,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t ru
     ffrt::task_handle NotifyNetUidRuleChangeAsyncTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, uid, rule, &ret]() {
             ret = this->NotifyNetUidRuleChange(uid, rule);
-        });
+        }, ffrt::task_attr().name("FfrtNotifyNetUidRuleChangeAsync"));
     netPolicyCallbackFfrtQueue_->wait(NotifyNetUidRuleChangeAsyncTask);
     return ret;
 }
@@ -174,7 +174,7 @@ int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChangeAsync(bool isAllowed)
     ffrt::task_handle NotifyNetBackgroundPolicyChangeAsyncTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, isAllowed, &ret]() {
             ret = this->NotifyNetBackgroundPolicyChange(isAllowed);
-        });
+        }, ffrt::task_attr().name("FfrtNotifyNetBackgroundPolicyChangeAsync"));
     netPolicyCallbackFfrtQueue_->wait(NotifyNetBackgroundPolicyChangeAsyncTask);
     return ret;
 }
@@ -205,7 +205,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChangeAsync(const std::vector<Net
     ffrt::task_handle NotifyNetQuotaPolicyChangeTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, &quotaPolicies, &ret]() {
             ret = this->NotifyNetQuotaPolicyChange(quotaPolicies);
-        });
+        }, ffrt::task_attr().name("FfrtNotifyNetQuotaPolicyChangeAsync"));
     netPolicyCallbackFfrtQueue_->wait(NotifyNetQuotaPolicyChangeTask);
     return ret;
 }
@@ -232,7 +232,7 @@ int32_t NetPolicyCallback::NotifyNetMeteredIfacesChangeAsync(std::vector<std::st
     ffrt::task_handle NotifyNetMeteredIfacesChangeTask =
         netPolicyCallbackFfrtQueue_->submit_h([this, &ifaces, &ret]() {
             ret = this->NotifyNetMeteredIfacesChange(ifaces);
-        });
+        }, ffrt::task_attr().name("FfrtNotifyNetMeteredIfacesChangeAsync"));
     netPolicyCallbackFfrtQueue_->wait(NotifyNetMeteredIfacesChangeTask);
     return ret;
 }

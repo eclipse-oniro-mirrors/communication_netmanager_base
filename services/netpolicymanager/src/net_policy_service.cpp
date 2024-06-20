@@ -119,7 +119,7 @@ void NetPolicyService::Init()
             RegisterFactoryResetCallback();
             netAccessPolicy_.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
-        });
+        }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
