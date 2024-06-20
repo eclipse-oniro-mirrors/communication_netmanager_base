@@ -60,7 +60,7 @@ public:
             }
         } else if (code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL) ||
                    code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO) ||
+                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO) ||
                    code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK) ||
                    code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)) {
             if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
@@ -695,54 +695,54 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidStatsDetailTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest001
- * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest001
+ * @tc.desc: Test NetStatsServiceProxy GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(NetStatsServiceProxyTest, GetAllSimStatsInfoTest001, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
     std::vector<NetStatsInfo> infos;
-    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetAllSimStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest002
- * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest002
+ * @tc.desc: Test NetStatsServiceProxy GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest002, TestSize.Level1)
+HWTEST_F(NetStatsServiceProxyTest, GetAllSimStatsInfoTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfo> infos;
-    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetAllSimStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest003
- * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest003
+ * @tc.desc: Test NetStatsServiceProxy GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest003, TestSize.Level1)
+HWTEST_F(NetStatsServiceProxyTest, GetAllSimStatsInfoTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfo> infos;
-    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_READ_REPLY_FAIL);
+    EXPECT_EQ(instance_.GetAllSimStatsInfo(infos), NETMANAGER_ERR_READ_REPLY_FAIL);
 }
 
 /**
- * @tc.name: GetAllContainerStatsInfoTest004
- * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.name: GetAllSimStatsInfoTest004
+ * @tc.desc: Test NetStatsServiceProxy GetAllSimStatsInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest004, TestSize.Level1)
+HWTEST_F(NetStatsServiceProxyTest, GetAllSimStatsInfoTest004, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfo> infos;
-    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETSYS_SUCCESS);
+    EXPECT_EQ(instance_.GetAllSimStatsInfo(infos), NETSYS_SUCCESS);
 }
 
 /**

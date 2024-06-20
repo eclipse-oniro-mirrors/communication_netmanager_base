@@ -36,6 +36,8 @@ public:
     ~NetStatsCached() = default;
     void ForceUpdateStats();
 
+    void ForceDeleteStats(uint32_t uid);
+
     int32_t StartCached();
 
     void SetCycleThreshold(uint32_t threshold);
@@ -147,10 +149,34 @@ private:
             currentUidStats_ = 0;
         }
 
+        void ResetUidStats(uint32_t uid)
+        {
+            for (auto it = uidStatsInfo_.begin(); it != uidStatsInfo_.end();) {
+                if (it->uid_ == uid) {
+                    currentUidStats_ -= it->GetStats();
+                    it = uidStatsInfo_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
         void ResetUidSimStats()
         {
             uidSimStatsInfo_.clear();
-            currentUidStats_ = 0;
+            currentUidSimStats_ = 0;
+        }
+
+        void ResetUidSimStats(uint32_t uid)
+        {
+            for (auto it = uidSimStatsInfo_.begin(); it != uidSimStatsInfo_.end();) {
+                if (it->uid_ == uid) {
+                    currentUidSimStats_ -= it->GetStats();
+                    it = uidSimStatsInfo_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
         }
 
         void ResetIfaceStats()

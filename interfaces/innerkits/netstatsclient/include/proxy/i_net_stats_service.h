@@ -43,7 +43,7 @@ public:
     virtual int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &info) = 0;
-    virtual int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos) = 0;
+    virtual int32_t GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos) = 0;
     virtual int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
                                              const sptr<NetStatsNetwork> &network) = 0;
     virtual int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,

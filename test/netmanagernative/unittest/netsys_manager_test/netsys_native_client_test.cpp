@@ -262,7 +262,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     ret = nativeClient_.GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
 
-    ret = nativeClient_.GetAllContainerStatsInfo(statsInfo);
+    ret = nativeClient_.GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
 }
 

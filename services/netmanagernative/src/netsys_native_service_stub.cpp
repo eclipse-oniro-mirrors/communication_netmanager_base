@@ -120,10 +120,14 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
         &NetsysNativeServiceStub::CmdGetIfaceStats;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO)] =
-        &NetsysNativeServiceStub::CmdGetAllContainerStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllSimStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_SIM_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdDeleteSimStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdDeleteStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
         &NetsysNativeServiceStub::CmdGetCookieStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_VIRTUAL)] =
@@ -1240,10 +1244,10 @@ int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessagePa
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdGetAllSimStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
-    int32_t result = GetAllContainerStatsInfo(stats);
+    int32_t result = GetAllSimStatsInfo(stats);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;
@@ -1255,6 +1259,17 @@ int32_t NetsysNativeServiceStub::CmdGetAllContainerStatsInfo(MessageParcel &data
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdDeleteSimStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    int32_t ret = DeleteSimStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteSimStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
@@ -1269,6 +1284,18 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
         return ERR_FLATTEN_OBJECT;
     }
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDeleteStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    int32_t ret = DeleteStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)

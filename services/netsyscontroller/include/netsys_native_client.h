@@ -726,11 +726,19 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName);
 
     /**
-     * Get all container stats info
+     * Get all Sim stats info
      * @param stats stats
      * @return returns the all info of the stats
      */
-    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Delete the Sim Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteSimStatsInfo(uint32_t uid);
 
     /**
      * Get all stats info
@@ -739,6 +747,14 @@ public:
      * @return returns the all info of the stats
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Delete the Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteStatsInfo(uint32_t uid);
 
     /**
      * Set iptables for result

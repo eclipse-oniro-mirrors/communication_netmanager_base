@@ -189,7 +189,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
     sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
-    if (sock_uid < CONTAINER_UID_MAX ||
+    if (sock_uid < SIM_UID_MAX ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -274,7 +274,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
     sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
-    if (sock_uid < CONTAINER_UID_MAX ||
+    if (sock_uid < SIM_UID_MAX ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);

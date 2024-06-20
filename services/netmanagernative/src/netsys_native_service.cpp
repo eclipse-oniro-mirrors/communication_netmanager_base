@@ -22,6 +22,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "bpf_loader.h"
+#include "bpf_path.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
@@ -653,13 +654,23 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
-int32_t NetsysNativeService::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {
         NETNATIVE_LOGE("bpfStats is null.");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    return bpfStats_->GetAllContainerStatsInfo(stats);
+    return bpfStats_->GetAllSimStatsInfo(stats);
+}
+
+int32_t NetsysNativeService::DeleteSimStatsInfo(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteSimStatsInfo uid[%{public}u]", uid);
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteStatsInfo(APP_UID_SIM_STATS_MAP_PATH, uid);
 }
 
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
@@ -670,6 +681,16 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     }
 
     return bpfStats_->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysNativeService::DeleteStatsInfo(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteStatsInfo uid[%{public}u]", uid);
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteStatsInfo(APP_UID_IF_STATS_MAP_PATH, uid);
 }
 
 int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)

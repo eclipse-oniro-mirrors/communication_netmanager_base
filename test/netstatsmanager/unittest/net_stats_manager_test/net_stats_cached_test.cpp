@@ -29,6 +29,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr int32_t TEST_UID = 1;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
@@ -156,6 +157,11 @@ HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfo> infos;
     instance_->GetKernelStats(infos);
+}
+
+HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
+{
+    instance_->ForceDeleteStats(TEST_UID);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

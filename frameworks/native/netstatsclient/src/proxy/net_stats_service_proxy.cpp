@@ -414,7 +414,7 @@ int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return result;
 }
 
-int32_t NetStatsServiceProxy::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+int32_t NetStatsServiceProxy::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -424,7 +424,7 @@ int32_t NetStatsServiceProxy::GetAllContainerStatsInfo(std::vector<NetStatsInfo>
 
     MessageParcel reply;
     int32_t result =
-        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO), data, reply);
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO), data, reply);
     if (result != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
         return result;

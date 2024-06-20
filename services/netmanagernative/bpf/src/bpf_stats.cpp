@@ -87,7 +87,7 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     return GetNumberFromStatsValue(stats, statsType, uidStats);
 }
 
-int32_t NetsysBpfStats::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!uidSimStatsMap.IsValid()) {
@@ -158,6 +158,28 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         stats.emplace_back(tempStats);
     }
 
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysBpfStats::DeleteStatsInfo(const std::string &path, uint32_t uid)
+{
+    if (path != APP_UID_IF_STATS_MAP_PATH && path != APP_UID_SIM_STATS_MAP_PATH) {
+        NETNATIVE_LOGI("DeleteStatsInfo invalid path");
+        return NETSYS_SUCCESS;
+    }
+    BpfMapper<stats_key, stats_value> uidStatsMap(path, BPF_ANY);
+    if (!uidStatsMap.IsValid()) {
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+    }
+    auto keys = uidStatsMap.GetAllKeys();
+    for (const auto &k : keys) {
+        if (k.uId == uid) {
+            if (uidStatsMap.Delete(k) < 0) {
+                NETNATIVE_LOGE("Delete uidStatsMap err");
+                return STATS_ERR_WRITE_BPF_FAIL;
+            }
+        }
+    }
     return NETSYS_SUCCESS;
 }
 

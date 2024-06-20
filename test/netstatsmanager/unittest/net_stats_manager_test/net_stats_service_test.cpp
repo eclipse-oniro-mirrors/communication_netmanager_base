@@ -326,10 +326,10 @@ HWTEST_F(NetStatsServiceTest, GetCookieTxBytesTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
-HWTEST_F(NetStatsServiceTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+HWTEST_F(NetStatsServiceTest, GetAllSimStatsInfoTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfo> infos;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetAllContainerStatsInfo(infos);
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetAllSimStatsInfo(infos);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

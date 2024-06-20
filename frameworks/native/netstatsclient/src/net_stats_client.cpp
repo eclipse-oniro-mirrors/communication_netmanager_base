@@ -303,7 +303,7 @@ int32_t NetStatsClient::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &info
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->GetAllContainerStatsInfo(infos);
+    return proxy->GetAllSimStatsInfo(infos);
 }
 
 int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,

@@ -26,7 +26,7 @@ static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
 static const int32_t NET_NS_MAP_SIZE = 65535;
 static const uint64_t SOCK_COOKIE_ID_NULL = UINT64_MAX;
-static const int32_t CONTAINER_UID_MAX = 20000;
+static const int32_t SIM_UID_MAX = 20000;
 enum { IFNAME_SIZE = 32 };
 enum { DEFAULT_NETWORK_BEARER_MAP_KEY = 0 };
 

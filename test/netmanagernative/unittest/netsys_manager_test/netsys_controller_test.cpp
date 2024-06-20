@@ -62,6 +62,7 @@ const int PREFIX_LENGTH = 23;
 const int TEST_MTU = 111;
 uint16_t g_baseTimeoutMsec = 200;
 uint8_t g_retryCount = 3;
+const int32_t TEST_UID_32 = 1;
 const int64_t TEST_UID = 1010;
 const int32_t SOCKET_FD = 5;
 const int32_t TEST_STATS_UID = 11111;
@@ -412,12 +413,18 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     ret = NetsysController::GetInstance().GetIfaceStats(stats, 0, IFACE);
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_GET_IFACE_NAME_FAILED);
 
+    ret = NetsysController::GetInstance().DeleteStatsInfo(TEST_UID_32);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().DeleteSimStatsInfo(TEST_UID_32);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     stats = 0;
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfo);
+    ret = NetsysController::GetInstance().GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
