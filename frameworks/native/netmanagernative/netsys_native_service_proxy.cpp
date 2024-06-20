@@ -2522,6 +2522,22 @@ int32_t NetsysNativeServiceProxy::DeleteNetworkAccessPolicy(uint32_t uid)
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::ClearFirewallAllRules()
+{
+    NETNATIVE_LOGI("ClearFirewallAllRules");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE), data, reply,
+                          option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
 {
     NETNATIVE_LOGI("NotifyNetBearerTypeChange");

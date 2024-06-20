@@ -38,6 +38,7 @@ public:
     int32_t BandwidthRemoveDeniedList(uint32_t uid);
     int32_t BandwidthAddAllowedList(uint32_t uid);
     int32_t BandwidthRemoveAllowedList(uint32_t uid);
+    int32_t PowerSaveUpdataAllowedList(uint32_t uid, uint32_t firewallRule);
     int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule);
@@ -46,6 +47,7 @@ public:
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
+    int32_t ClearFirewallAllRules();
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

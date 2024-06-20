@@ -174,6 +174,8 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallSetIpAndUidRule;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_IP_AN_UID_RULE)] =
         &NetsysNativeServiceStub::CmdFirewallClearIpAndUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE)] =
+        &NetsysNativeServiceStub::CmdClearFirewallAllRules;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES)] =
         &NetsysNativeServiceStub::CmdSetFirewallRules;
@@ -1968,6 +1970,14 @@ int32_t NetsysNativeServiceStub::CmdFirewallClearIpAndUidRule(MessageParcel &dat
     std::string ip = data.ReadString();
     uint32_t ipType = (unsigned)data.ReadUint32();
     int32_t result = FirewallClearIpAndUidRule(ip, ipType);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdClearFirewallAllRules(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdClearFirewallAllRules");
+    int32_t result = ClearFirewallAllRules();
     reply.WriteInt32(result);
     return result;
 }

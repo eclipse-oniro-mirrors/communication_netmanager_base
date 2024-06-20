@@ -937,6 +937,11 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
+
+    /**
+     * Clear Firewall All Rules
+     */
+    virtual int32_t ClearFirewallAllRules() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

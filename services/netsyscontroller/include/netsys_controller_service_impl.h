@@ -911,6 +911,11 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
+
+    /**
+     * Clear firewall All Rules
+     */
+    int32_t ClearFirewallAllRules() override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

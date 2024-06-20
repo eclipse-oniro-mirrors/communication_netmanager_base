@@ -171,6 +171,7 @@ public:
     int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
                                     const std::vector<uint32_t> &uids) override;
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
+    int32_t ClearFirewallAllRules() override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

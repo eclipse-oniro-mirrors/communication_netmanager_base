@@ -96,13 +96,17 @@ public:
      */
     int32_t ClearIpAndUidRule(const std::string &ip, uint32_t ipType);
 
+    /**
+     * Clear firewall all rules
+     */
+    int32_t ClearAllRules();
+
 private:
     std::string FetchChainName(NetManagerStandard::ChainType chain);
     NetManagerStandard::FirewallType FetchChainType(NetManagerStandard::ChainType chain);
     int32_t InitChain();
     int32_t DeInitChain();
     int32_t InitDefaultRules();
-    int32_t ClearAllRules();
     int32_t IptablesNewChain(NetManagerStandard::ChainType chain);
     int32_t IptablesDeleteChain(NetManagerStandard::ChainType chain);
     int32_t IptablesSetRule(const std::string &chainName, const std::string &option, const std::string &target,

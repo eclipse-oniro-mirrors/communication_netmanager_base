@@ -387,6 +387,17 @@ HWTEST_F(FirewallManagerTest, IsFirewallChian4, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFirewallChian5
+ * @tc.desc: Test FirewallManager IsFirewallChian5.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IsFirewallChian5, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->IsFirewallChian(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: FetchChainName
  * @tc.desc: Test FirewallManager FetchChainName.
  * @tc.type: FUNC
@@ -401,6 +412,8 @@ HWTEST_F(FirewallManagerTest, FetchChainName, TestSize.Level1)
     EXPECT_EQ(ret, "ohfw_FORWARD");
     ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
     EXPECT_EQ(ret, "ohfw_dozable");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX);
+    EXPECT_EQ(ret, "ohfw_allowed_list_box");
     ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_POWERSAVING);
     EXPECT_EQ(ret, "ohfw_powersaving");
     ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_UNDOZABLE);

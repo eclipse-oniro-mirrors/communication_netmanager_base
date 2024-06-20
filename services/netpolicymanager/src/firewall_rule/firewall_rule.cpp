@@ -159,6 +159,11 @@ void FirewallRule::RemoveFromAllowedList(uint32_t uid)
     netsys_->FirewallSetUidsAllowedListChain(chainType_, allowedList_);
 }
 
+int32_t FirewallRule::ClearFirewallAllRules()
+{
+    return netsys_->ClearFirewallAllRules();
+}
+
 void FirewallRule::RemoveFromDeniedList(uint32_t uid)
 {
     for (auto iter = deniedList_.begin(); iter != deniedList_.end(); ++iter) {

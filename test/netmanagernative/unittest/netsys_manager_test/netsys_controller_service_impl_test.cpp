@@ -549,6 +549,9 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     int32_t ret = instance_->FirewallSetUidRule(chain, uidsParam, firewallRule);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = instance_->ClearFirewallAllRules();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     int32_t socketFd = 0;
     ret = instance_->SetBlocking(socketFd, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);

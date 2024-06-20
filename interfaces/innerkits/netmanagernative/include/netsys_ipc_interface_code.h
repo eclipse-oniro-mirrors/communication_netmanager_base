@@ -121,6 +121,7 @@ enum class NetsysInterfaceCode {
     NETSYS_NETWORK_STOP_CLAT,
     NETSYS_SET_IP_AN_UID_RULE,
     NETSYS_CLEAR_IP_AN_UID_RULE,
+    NETSYS_CLEAR_FIREWALL_RULE,
 };
 
 enum class NotifyInterfaceCode {
