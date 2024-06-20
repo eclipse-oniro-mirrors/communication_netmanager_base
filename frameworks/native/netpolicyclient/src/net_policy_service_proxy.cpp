@@ -680,7 +680,12 @@ int32_t NetPolicyServiceProxy::CheckPermission()
 
     MessageParcel reply;
     MessageOption option;
-    remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), data, reply, option);
+    int ret = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, ret code: [%{public}d]", ret);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         NETMGR_LOG_E("Read int32 reply failed.");
