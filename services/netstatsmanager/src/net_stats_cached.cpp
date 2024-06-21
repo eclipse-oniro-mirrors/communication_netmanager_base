@@ -98,8 +98,8 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.date_ = info.endTime_;
     stats.rxBytes_ = info.rxBytes_;
     stats.txBytes_ = info.txBytes_;
-    stats.rxPackets_ = 1;
-    stats.txPackets_ = 1;
+    stats.rxPackets_ = info.rxBytes_ > 0 ? 1 : 0;
+    stats.txPackets_ = info.txBytes_ > 0 ? 1 : 0;
     stats.ident_ = std::to_string(info.simId_);
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
     uidPushStatsInfo_.push_back(std::move(stats));
@@ -336,6 +336,13 @@ void NetStatsCached::ForceDeleteStats(uint32_t uid)
     for (auto it = lastUidSimStatsInfo_.begin(); it != lastUidSimStatsInfo_.end();) {
         if (it->uid_ == uid) {
             it = lastUidSimStatsInfo_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto it = uidPushStatsInfo_.begin(); it != uidPushStatsInfo_.end();) {
+        if (it->uid_ == uid) {
+            it = uidPushStatsInfo_.erase(it);
         } else {
             ++it;
         }
