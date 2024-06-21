@@ -106,6 +106,7 @@ ohos_shared_library("net_policy_manager_if") {
   deps = [ ":net_policy_parcel" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "ipc:ipc_single",
