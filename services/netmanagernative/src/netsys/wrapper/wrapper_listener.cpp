@@ -59,7 +59,7 @@ int32_t WrapperListener::Start()
                        strerror(errno));
         return NetlinkResult::ERROR;
     }
-    ffrt::submit([this]() { WrapperListener::ListenThread(this); }, ffrt::task_attr().name("WrapListen"));
+    ffrt::submit([this]() { WrapperListener::ListenThread(this); }, {}, {}, ffrt::task_attr().name("WrapListen"));
     return NetlinkResult::OK;
 }
 
