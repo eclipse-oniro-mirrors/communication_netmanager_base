@@ -30,7 +30,7 @@ constexpr const int32_t INTERCEPT_BUFF_INTERVAL_SEC = 60;
 constexpr int32_t FIREWALL_RULE_SIZE_MAX = 1000;
 // Maximum number of domain for all users
 constexpr int32_t FIREWALL_DOMAIN_RULE_SIZE_MAX = 2000;
-constexpr int32_t FIREWALL_IPC_IP_RULE_PAGE_SIZE = 1000;
+constexpr int32_t FIREWALL_IPC_IP_RULE_PAGE_SIZE = 300;
 constexpr int32_t FIREWALL_IPC_DOMAIN_RULE_PAGE_SIZE = 2000;
 constexpr uint8_t FAMILY_IPV4 = 1;
 constexpr uint8_t FAMILY_IPV6 = 2;
