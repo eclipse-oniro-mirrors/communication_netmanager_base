@@ -16,7 +16,7 @@
 #ifndef WRAPPER_LISTENER_H
 #define WRAPPER_LISTENER_H
 
-#include <thread>
+#include "ffrt.h"
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 
 namespace OHOS {
@@ -46,8 +46,7 @@ private:
     static constexpr int32_t PIPE_WAKEUP = 1;
     static constexpr uint32_t PIPE_SIZE = 2;
     int32_t socket_;
-    std::thread thread_;
-    std::mutex clientsLock_;
+    ffrt::mutex clientsLock_;
     int32_t pipe_[PIPE_SIZE] = {0};
     RecvFunc startReceiveFunc_;
 

@@ -60,7 +60,6 @@ constexpr const char *ERROR_MSG_NULL_NET_SPECIFIER = "The parameter of netSpecif
 constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier by id:";
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
-constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char NEW_LINE_STR = '\n';
@@ -82,9 +81,6 @@ const bool REGISTER_LOCAL_RESULT =
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
-    netActEventRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
-    netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
-    CreateDefaultRequest();
 }
 
 NetConnService::~NetConnService()
@@ -117,7 +113,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
         std::weak_ptr<INetActivateCallback> timeoutCb;
         defaultNetActivate_ =
-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netActEventHandler_);
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
@@ -159,7 +155,7 @@ bool NetConnService::Init()
         return false;
     }
     netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnEventRunner_);
-
+    CreateDefaultRequest();
     if (!registerToService_) {
         if (!Publish(NetConnService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
@@ -858,7 +854,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request =
-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("Make a new request, request id:[%{public}u]", reqId);
