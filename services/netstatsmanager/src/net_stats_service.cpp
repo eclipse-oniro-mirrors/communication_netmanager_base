@@ -104,14 +104,15 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
                                        [this](const EventFwk::Want &want) { return UpdateStatsData(); });
-    subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
-                                       [this](const EventFwk::Want &want) {
-                                           uint32_t uid = want.GetIntParam(UID, 0);
-                                           netStatsCached_->ForceDeleteStats(uid);
-                                           auto handler = std::make_unique<NetStatsDataHandler>();
-                                           NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
-                                           return handler->DeleteByUid(uid);
-                                       });
+    subscriber_->RegisterStatsCallback(
+        EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
+        [this](const EventFwk::Want &want) {
+            uint32_t uid = want.GetIntParam(UID, 0);
+            netStatsCached_->ForceDeleteStats(uid);
+            auto handler = std::make_unique<NetStatsDataHandler>();
+            NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
+            return handler->DeleteByUid(uid);
+        });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
 

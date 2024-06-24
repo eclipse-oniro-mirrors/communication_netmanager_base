@@ -100,7 +100,9 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.txBytes_ = info.txBytes_;
     stats.rxPackets_ = info.rxBytes_ > 0 ? 1 : 0;
     stats.txPackets_ = info.txBytes_ > 0 ? 1 : 0;
-    stats.ident_ = std::to_string(info.simId_);
+    if (info.netBearType_ == 0) {
+        stats.ident_ = std::to_string(info.simId_);
+    }
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
     uidPushStatsInfo_.push_back(std::move(stats));
 }
