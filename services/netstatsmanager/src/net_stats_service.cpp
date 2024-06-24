@@ -105,7 +105,7 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
                                        [this](const EventFwk::Want &want) { return UpdateStatsData(); });
     subscriber_->RegisterStatsCallback(
-        EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
         [this](const EventFwk::Want &want) {
             uint32_t uid = want.GetIntParam(UID, 0);
             netStatsCached_->ForceDeleteStats(uid);
