@@ -91,7 +91,7 @@ void NetStatsCached::GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsIn
 
 void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 {
-    std::lock_guard<ffrt::mutex> lock(pushLock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     NetStatsInfo stats;
     stats.uid_ = info.uid_;
     stats.iface_ = info.iface_;
@@ -100,7 +100,7 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.txBytes_ = info.txBytes_;
     stats.rxPackets_ = info.rxBytes_ > 0 ? 1 : 0;
     stats.txPackets_ = info.txBytes_ > 0 ? 1 : 0;
-    if (info.netBearType_ == 0) {
+    if (info.netBearType_ == BEARER_CELLULAR) {
         stats.ident_ = std::to_string(info.simId_);
     }
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
@@ -160,11 +160,6 @@ void NetStatsCached::CacheUidStats()
             return;
         }
         info.ident_ = ifaceNameIdentMap_[info.iface_];
-        std::for_each(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(), [&info](const NetStatsInfo &pushInfo) {
-            if (pushInfo.Equals(info)) {
-                info += pushInfo;
-            }
-        });
         auto findRet = std::find_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidStatsInfo_.end()) {
@@ -176,6 +171,20 @@ void NetStatsCached::CacheUidStats()
     });
     lastUidStatsInfo_.clear();
     lastUidStatsInfo_ = std::move(statsInfos);
+
+    std::vector<NetStatsInfo> pushInfos;
+    std::for_each(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(), [&pushInfos](NetStatsInfo &info) {
+        auto findRet = std::find_if(pushInfos.begin(), pushInfos.end(),
+                                    [&info](const NetStatsInfo &item) { return info.Equals(item); });
+        if (findRet == pushInfos.end()) {
+            pushInfos.push_back(info);
+            return;
+        }
+        *findRet += info;
+    });
+    std::for_each(pushInfos.begin(), pushInfos.end(), [this](auto &item) {
+        stats_.PushUidStats(item);
+    });
     uidPushStatsInfo_.clear();
 }
 
@@ -326,29 +335,6 @@ void NetStatsCached::ForceUpdateStats()
 void NetStatsCached::ForceDeleteStats(uint32_t uid)
 {
     NETMGR_LOG_I("ForceDeleteStats Enter uid[%{public}u]", uid);
-    stats_.ResetUidStats(uid);
-    stats_.ResetUidSimStats(uid);
-    for (auto it = lastUidStatsInfo_.begin(); it != lastUidStatsInfo_.end();) {
-        if (it->uid_ == uid) {
-            it = lastUidStatsInfo_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    for (auto it = lastUidSimStatsInfo_.begin(); it != lastUidSimStatsInfo_.end();) {
-        if (it->uid_ == uid) {
-            it = lastUidSimStatsInfo_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    for (auto it = uidPushStatsInfo_.begin(); it != uidPushStatsInfo_.end();) {
-        if (it->uid_ == uid) {
-            it = uidPushStatsInfo_.erase(it);
-        } else {
-            ++it;
-        }
-    }
     auto ret = NetsysController::GetInstance().DeleteStatsInfo(uid);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("ForceDeleteStats DeleteStatsInfo failed. ret is %{public}d", ret);
@@ -357,6 +343,19 @@ void NetStatsCached::ForceDeleteStats(uint32_t uid)
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("ForceDeleteStats DeleteSimStatsInfo failed. ret is %{public}d", ret);
     }
+
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    stats_.ResetUidStats(uid);
+    stats_.ResetUidSimStats(uid);
+    lastUidStatsInfo_.erase(std::remove_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
+                                           [uid](const auto &item) { return item.uid_ == uid; }),
+                            lastUidStatsInfo_.end());
+    lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
+                                              [uid](const auto &item) { return item.uid_ == uid; }),
+                               lastUidSimStatsInfo_.end());
+    uidPushStatsInfo_.erase(std::remove_if(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(),
+                                           [uid](const auto &item) { return item.uid_ == uid; }),
+                            uidPushStatsInfo_.end());
 }
 
 void NetStatsCached::Reset() {}

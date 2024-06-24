@@ -16,6 +16,7 @@
 #ifndef NET_STATS_CACHED_H
 #define NET_STATS_CACHED_H
 
+#include <algorithm>
 #include <map>
 #include <mutex>
 #include <vector>
@@ -151,14 +152,14 @@ private:
 
         void ResetUidStats(uint32_t uid)
         {
-            for (auto it = uidStatsInfo_.begin(); it != uidStatsInfo_.end();) {
-                if (it->uid_ == uid) {
-                    currentUidStats_ -= it->GetStats();
-                    it = uidStatsInfo_.erase(it);
-                } else {
-                    ++it;
+            for (const auto &item : uidStatsInfo_) {
+                if (item.uid_ == uid) {
+                    currentUidStats_ -= item.GetStats();
                 }
             }
+            uidStatsInfo_.erase(std::remove_if(uidStatsInfo_.begin(), uidStatsInfo_.end(),
+                                               [uid](const auto &item) { return item.uid_ == uid; }),
+                                uidStatsInfo_.end());
         }
 
         void ResetUidSimStats()
@@ -169,14 +170,14 @@ private:
 
         void ResetUidSimStats(uint32_t uid)
         {
-            for (auto it = uidSimStatsInfo_.begin(); it != uidSimStatsInfo_.end();) {
-                if (it->uid_ == uid) {
-                    currentUidSimStats_ -= it->GetStats();
-                    it = uidSimStatsInfo_.erase(it);
-                } else {
-                    ++it;
+            for (const auto &item : uidSimStatsInfo_) {
+                if (item.uid_ == uid) {
+                    currentUidSimStats_ -= item.GetStats();
                 }
             }
+            uidSimStatsInfo_.erase(std::remove_if(uidSimStatsInfo_.begin(), uidSimStatsInfo_.end(),
+                                                  [uid](const auto &item) { return item.uid_ == uid; }),
+                                   uidSimStatsInfo_.end());
         }
 
         void ResetIfaceStats()
@@ -208,7 +209,6 @@ private:
 
     CachedInfo stats_;
     ffrt::mutex lock_;
-    ffrt::mutex pushLock_;
     bool isForce_ = false;
     std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
     std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
