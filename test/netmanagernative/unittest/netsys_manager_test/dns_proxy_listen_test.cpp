@@ -121,28 +121,5 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     EXPECT_EQ(listener.proxySockFd_, -1);
     EXPECT_FALSE(listener.proxyListenSwitch_);
 }
-
-HWTEST_F(DnsProxyListenTest, DnsProxyGetPacket, TestSize.Level1)
-{
-    char requesData[MAX_REQUESTDATA_LEN] = {0};
-    char recBuff[MAX_REQUESTDATA_LEN] = {0};
-    nmd::DnsProxyListen::RecvBuff recvBuff;
-    std::vector<std::string> servers;
-    sockaddr_in proxyAddr;
-    int32_t resLen = 0;
-    instance_->netId_ = 0;
-    instance_->DnsProxyGetPacket(CLIENT_SOCKET, recvBuff, proxyAddr);
-    instance_->DnsParseBySocket(CLIENT_SOCKET, servers, recvBuff, proxyAddr);
-    instance_->DnsSendRecvParseData(CLIENT_SOCKET, requesData, resLen, proxyAddr);
-    bool ret = instance_->CheckDnsResponse(recBuff, resLen);
-    EXPECT_FALSE(ret);
-    char checkBuff[] = "test in response";
-    resLen = 5;
-    ret = instance_->CheckDnsResponse(checkBuff, resLen);
-    EXPECT_FALSE(ret);
-    checkBuff[2] = checkBuff[2] | RESPONSE_FLAG;
-    ret = instance_->CheckDnsResponse(checkBuff, resLen);
-    EXPECT_TRUE(ret);
-}
 } // namespace NetsysNative
 } // namespace OHOS

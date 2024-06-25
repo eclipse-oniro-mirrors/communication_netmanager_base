@@ -60,6 +60,7 @@ netsys_native_manager_sources = [
   "src/netsys/clatd_packet_converter.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
   "src/netsys/dnsresolv/dns_proxy_listen.cpp",
+  "src/netsys/dnsresolv/dns_proxy_request_socket.cpp",
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
   "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
   "src/netsys/dnsresolv/dns_resolv_config.cpp",
