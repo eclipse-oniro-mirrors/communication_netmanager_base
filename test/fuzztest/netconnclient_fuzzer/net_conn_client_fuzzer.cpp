@@ -493,7 +493,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), 
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK),
                     dataParcelNoRemoteObject);
 }
 
@@ -1013,15 +1013,6 @@ void AddNetworkRouteFuzzTest(const uint8_t *data, size_t size)
     dataParcelNoDest.WriteString(ifName);
     dataParcelNoDest.WriteString(nextHop);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE), dataParcelNoDest);
-    MessageParcel dataParcelNoNextHop;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNextHop)) {
-        NETMGR_LOG_D("AddNetworkRouteFuzzTest write token failed or invalid parameter.");
-        return;
-    }
-    dataParcelNoNextHop.WriteInt32(netId);
-    dataParcelNoNextHop.WriteString(ifName);
-    dataParcelNoNextHop.WriteString(destination);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE), dataParcelNoNextHop);
 }
 
 void RemoveNetworkRouteFuzzTest(const uint8_t *data, size_t size)
@@ -1067,15 +1058,6 @@ void RemoveNetworkRouteFuzzTest(const uint8_t *data, size_t size)
     dataParcelNoDest.WriteString(ifName);
     dataParcelNoDest.WriteString(nextHop);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE), dataParcelNoDest);
-    MessageParcel dataParcelNoNextHop;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNextHop)) {
-        NETMGR_LOG_D("RemoveNetworkRouteFuzzTest write token failed or invalid parameter.");
-        return;
-    }
-    dataParcelNoNextHop.WriteInt32(netId);
-    dataParcelNoNextHop.WriteString(ifName);
-    dataParcelNoNextHop.WriteString(destination);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE), dataParcelNoNextHop);
 }
 
 void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
