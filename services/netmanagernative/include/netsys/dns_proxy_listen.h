@@ -20,6 +20,10 @@
 #include <mutex>
 #include <netinet/in.h>
 #include <vector>
+#include <map>
+#include <sys/eventfd.h>
+
+#include "dns_proxy_request_socket.h"
 
 namespace OHOS {
 namespace nmd {
@@ -53,22 +57,25 @@ public:
     void SetParseNetId(uint16_t netId);
 
 private:
-    static constexpr const uint32_t MAX_REQUESTDATA_LEN = 512;
-    struct RecvBuff {
-        char questionsBuff[MAX_REQUESTDATA_LEN];
-        int32_t questionLen;
-    };
-    static void DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr);
-    static void DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
-                                 sockaddr_in proxyAddr);
-    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
+    void DnsParseBySocket(std::unique_ptr<RecvBuff>& recvBuff, std::unique_ptr<sockaddr_in>& clientSock);
+    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in& proxyAddr);
     static bool CheckDnsResponse(char* recBuff, size_t recLen);
     static bool CheckDnsQuestion(char *recBuff, size_t recLen);
-    static bool DnsThreadClose();
+    void SendDnsBack2Client(int32_t socketFd);
+    void clearResource();
+    void SendRequest2Server(int32_t socketFd);
+
     int32_t proxySockFd_;
+    int32_t epollFd_ = -1;
     static uint16_t netId_;
-    static bool proxyListenSwitch_;
+    static std::atomic_bool proxyListenSwitch_;
     static std::mutex listenerMutex_;
+    std::map<int32_t, DnsProxyRequestSocket> serverIdxOfSocket;
+    std::chrono::system_clock::time_point collectTime;
+    void EpollTimeout();
+    void CollectSocks();
+    bool InitForListening(sockaddr_in &proxyAddr, epoll_event &proxyEvent);
+    void GetRequestAndTransmit();
 };
 } // namespace nmd
 } // namespace OHOS

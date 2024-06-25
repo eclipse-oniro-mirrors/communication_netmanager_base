@@ -14,7 +14,7 @@
  */
 
 #include "netsys_udp_transfer.h"
-
+#include "netnative_log_wrapper.h"
 #include "netsys_client.h"
 
 namespace OHOS {
@@ -35,13 +35,6 @@ int32_t ProcUdpData(UdpBuffer udpBuffer, char *data, socklen_t &lenAddr,
     int64_t length = -1;
     int retry = 0;
     while (leftSize > 0) {
-        int32_t resPoll = Poll(udpBuffer.sock, udpBuffer.event, &retry);
-        if (resPoll < 0) {
-            return -1;
-        } else if (resPoll == 0) {
-            continue;
-        }
-
         length = func(udpBuffer.sock, curPos, leftSize, udpBuffer.addr, lenAddr);
         if (length <= 0) {
             if (errno == EAGAIN && retry < MAX_POLL_RETRY) {
