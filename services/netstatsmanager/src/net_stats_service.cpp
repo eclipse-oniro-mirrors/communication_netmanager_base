@@ -45,6 +45,7 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
 };
+constexpr const char* UID = "uid";
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -103,6 +104,15 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
                                        [this](const EventFwk::Want &want) { return UpdateStatsData(); });
+    subscriber_->RegisterStatsCallback(
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
+        [this](const EventFwk::Want &want) {
+            uint32_t uid = want.GetIntParam(UID, 0);
+            netStatsCached_->ForceDeleteStats(uid);
+            auto handler = std::make_unique<NetStatsDataHandler>();
+            NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
+            return handler->DeleteByUid(uid);
+        });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
 
