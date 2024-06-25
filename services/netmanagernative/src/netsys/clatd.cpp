@@ -208,7 +208,7 @@ void Clatd::ProcessV6Packet()
         }
     }
 
-    if (readLen < offsetof(ClatdReadV6Buf, payload) + tpNet) {
+    if (static_cast<size_t>(readLen) < offsetof(ClatdReadV6Buf, payload) + tpNet) {
         NETNATIVE_LOGW("%{public}zd read packet len shorter than %{public}u L2 header", readLen, tpNet);
         return;
     }
@@ -282,7 +282,7 @@ int32_t Clatd::ReadV6Packet(msghdr &msgHdr, ssize_t &readLen)
         NETNATIVE_LOGW("recvmsg failed: socket closed");
         isSocketClosed_ = true;
         return NETMANAGER_ERR_OPERATION_FAILED;
-    } else if (readLen >= sizeof(ClatdReadTunBuf)) {
+    } else if (static_cast<size_t>(readLen) >= sizeof(ClatdReadTunBuf)) {
         NETNATIVE_LOGW("recvmsg failed: packet oversize");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
@@ -299,7 +299,7 @@ int32_t Clatd::ReadV4Packet(ClatdReadTunBuf &readBuf, ssize_t &readLen)
         NETNATIVE_LOGW("read failed: socket closed");
         isSocketClosed_ = true;
         return NETMANAGER_ERR_OPERATION_FAILED;
-    } else if (readLen >= sizeof(readBuf)) {
+    } else if (static_cast<size_t>(readLen) >= sizeof(readBuf)) {
         NETNATIVE_LOGW("read failed: packet oversize");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }

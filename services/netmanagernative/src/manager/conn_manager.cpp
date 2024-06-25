@@ -438,7 +438,8 @@ int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetB
 
     net_bear_id_key key = DEFAULT_NETWORK_BEARER_MAP_KEY;
     // -1 means current bearer independent network access.
-    if (netbearerType != -1 && (((ret == NETSYS_SUCCESS) && (v != netbearerType)) || (ret != NETSYS_SUCCESS))) {
+    if (netbearerType != -1 &&
+        (((ret == NETSYS_SUCCESS) && (static_cast<int32_t>(v) != netbearerType)) || (ret != NETSYS_SUCCESS))) {
         v = netbearerType;
         if (NetBearerTypeMap.Write(key, v, 0) != 0) {
             NETNATIVE_LOGE("Could not update NetBearerTypeMap");

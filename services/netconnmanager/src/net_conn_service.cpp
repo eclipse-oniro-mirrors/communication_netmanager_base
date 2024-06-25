@@ -1710,7 +1710,7 @@ int32_t NetConnService::GetDelayNotifyTime()
         delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
     } else {
         auto tmp = std::stoi(time);
-        delayTime = tmp > MAX_DELAY_TIME ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
     }
     NETMGR_LOG_D("delay time is %{public}d", delayTime);
     return delayTime;
