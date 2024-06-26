@@ -940,9 +940,10 @@ public:
      * @param uid - The specified UID of application.
      * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
      * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @param isBroker true means the broker application.
      * @return return 0 if OK, return error number if not OK
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
 
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);

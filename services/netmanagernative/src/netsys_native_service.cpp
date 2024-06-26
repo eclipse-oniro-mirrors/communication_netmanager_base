@@ -938,11 +938,12 @@ int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewa
 }
 #endif
 
-int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                                    bool isBroker)
 {
     NETNATIVE_LOGI("SetNetworkAccessPolicy");
 
-    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
 }
 
 int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)

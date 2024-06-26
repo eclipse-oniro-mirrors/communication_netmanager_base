@@ -2735,7 +2735,8 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                                         bool isBroker)
 {
     NETNATIVE_LOGI("SetNetworkAccessPolicy");
     MessageParcel data;
@@ -2756,6 +2757,10 @@ int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAc
     }
 
     if (!data.WriteBool(reconfirmFlag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(isBroker)) {
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;

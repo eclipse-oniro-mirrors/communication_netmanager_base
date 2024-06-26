@@ -432,7 +432,8 @@ void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
         policy.cellularAllow = result[i].cellularPolicy;
-        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
+        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag,
+                                                     result[i].isBroker);
     }
 }
 
@@ -445,13 +446,15 @@ int32_t NetPolicyService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPoli
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
+    bool isBroker = CheckNetworkAccessIsBroker(uid);
     NetAccessPolicyData data;
     data.uid = uid;
     data.wifiPolicy = policy.wifiAllow;
     data.cellularPolicy = policy.cellularAllow;
     data.setFromConfigFlag = !reconfirmFlag;
+    data.isBroker = isBroker;
     netAccessPolicy_.InsertData(data);
-    return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag);
+    return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag, isBroker);
 }
 
 int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
@@ -555,6 +558,37 @@ int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
     dlclose(handler);
 
     return NETMANAGER_SUCCESS;
+}
+
+bool NetPolicyService::CheckNetworkAccessIsBroker(uint32_t uid)
+{
+    NETMGR_LOG_I("CheckNetworkAccessIsBroker");
+
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        NETMGR_LOG_E("fail to get system ability mgr.");
+        return false;
+    }
+
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        NETMGR_LOG_E("fail to get bundle manager proxy.");
+        return false;
+    }
+
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return false;
+    }
+
+    std::string bundleName = "";
+    bool ret = bundleMgrProxy->GetBundleNameForUid(uid, bundleName);
+    if (bundleName == "myappliction.apps") {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return true;
+    }
+    return false;
 }
 
 int32_t NetPolicyService::SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)

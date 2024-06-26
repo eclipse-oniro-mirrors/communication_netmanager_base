@@ -134,6 +134,16 @@ bpf_map_def SEC("maps") app_uid_access_policy_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") broker_uid_access_policy_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(app_uid_key),
+    .value_size = sizeof(app_uid_key),
+    .max_entries = 1,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
@@ -153,8 +163,23 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     }
 #endif
 
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
     uint64_t sock_uid = bpf_get_socket_uid(skb);
-    uid_access_policy_value *netAccessPolicyValue = bpf_map_lookup_elem(&app_uid_access_policy_map, &sock_uid);
+    uint64_t network_access_uid = sock_uid;
+    if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            network_access_uid = *broker_uid_value;
+        }
+    }
+
+    uid_access_policy_value *netAccessPolicyValue =
+        bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
         if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR) &&
             (!netAccessPolicyValue->cellularPolicy)) {
@@ -185,10 +210,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->rxPackets, 1);
         __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
     }
-    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
-    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
-    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
-    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
+
     if (sock_uid < SIM_UID_MAX ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
@@ -237,8 +259,22 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     }
 #endif
 
+    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
+    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
+    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
     uint64_t sock_uid = bpf_get_socket_uid(skb);
-    uid_access_policy_value *netAccessPolicyValue = bpf_map_lookup_elem(&app_uid_access_policy_map, &sock_uid);
+    uint64_t network_access_uid = sock_uid;
+    if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            network_access_uid = *broker_uid_value;
+        }
+    }
+    uid_access_policy_value *netAccessPolicyValue =
+        bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
         if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR) &&
             (!netAccessPolicyValue->cellularPolicy)) {
@@ -270,10 +306,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->txPackets, 1);
         __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
     }
-    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
-    sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
-    sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
-    sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
+
     if (sock_uid < SIM_UID_MAX ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
@@ -379,9 +412,17 @@ SEC("cgroup_addr/bind4")
 static int inet_check_bind4(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {
@@ -427,9 +468,17 @@ SEC("cgroup_addr/bind6")
 static int inet_check_bind6(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {
@@ -475,9 +524,17 @@ SEC("cgroup_addr/connect4")
 static int inet_check_connect4(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {
@@ -524,9 +581,17 @@ SEC("cgroup_addr/connect6")
 static int inet_check_connect6(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {
@@ -572,9 +637,17 @@ SEC("cgroup_addr/sendmsg4")
 static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {
@@ -620,9 +693,17 @@ SEC("cgroup_addr/sendmsg6")
 static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
 {
     void *map_ptr = &app_uid_access_policy_map;
-
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
+        void* broker_map_ptr = &broker_uid_access_policy_map;
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_uid_value != NULL) {
+            uid = *broker_uid_value;
+        }
+    }
+
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which has a default configuration
     if (value == NULL) {

@@ -280,6 +280,7 @@ private:
 
     void OnNetSysRestart();
     void UpdateNetAccessPolicyToMapFromDB();
+    bool CheckNetworkAccessIsBroker(uint32_t uid);
 
 private:
     enum ServiceRunningState {

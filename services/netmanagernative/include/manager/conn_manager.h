@@ -238,7 +238,8 @@ public:
      * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
      * @return Returns 0, successfully set the network access policy for application, otherwise it will fail
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy, bool reconfirmFlag);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy, bool reconfirmFlag,
+                                   bool isBroker);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes);
 

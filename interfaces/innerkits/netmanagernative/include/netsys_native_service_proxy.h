@@ -138,7 +138,8 @@ public:
     int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
     int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
 #endif
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                   bool isBroker) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
