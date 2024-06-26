@@ -16,6 +16,7 @@
 #ifndef NETSYS_DNS_PROXY_REQUEST_SOCKET_H
 #define NETSYS_DNS_PROXY_REQUEST_SOCKET_H
 
+#include "dns_config_client.h"
 #include <chrono>
 #include <cstdint>
 #include <cstddef>
@@ -34,31 +35,32 @@ struct RecvBuff {
 
 class DnsProxyRequestSocket final {
 public:
-    DnsProxyRequestSocket(int32_t sock, std::unique_ptr<sockaddr_in>&& clientSock,
-                          std::unique_ptr<RecvBuff>&& recvBuff);
-    DnsProxyRequestSocket(const DnsProxyRequestSocket&) = delete;
-    DnsProxyRequestSocket& operator=(const DnsProxyRequestSocket&) = delete;
-    DnsProxyRequestSocket(DnsProxyRequestSocket&& other) = delete;
-    DnsProxyRequestSocket& operator=(DnsProxyRequestSocket&& other) = delete;
+    DnsProxyRequestSocket(int32_t sock, std::unique_ptr<AlignedSockAddr> &&clientSock,
+                          std::unique_ptr<RecvBuff> &&recvBuff);
+    DnsProxyRequestSocket(const DnsProxyRequestSocket &) = delete;
+    DnsProxyRequestSocket &operator=(const DnsProxyRequestSocket &) = delete;
+    DnsProxyRequestSocket(DnsProxyRequestSocket &&other) = delete;
+    DnsProxyRequestSocket &operator=(DnsProxyRequestSocket &&other) = delete;
     [[nodiscard]] int32_t GetSock() const;
     [[nodiscard]] size_t GetIdx() const;
-    [[nodiscard]] sockaddr_in& GetAddr();
+    [[nodiscard]] AlignedSockAddr &GetAddr();
     void IncreaseIdx();
     void ResetIdx();
-    epoll_event* GetEventPtr();
-    sockaddr_in& GetClientSock();
-    RecvBuff& GetRecvBuff();
+    epoll_event *GetEventPtr();
+    AlignedSockAddr &GetClientSock();
+    RecvBuff &GetRecvBuff();
     ~DnsProxyRequestSocket();
 
     std::chrono::system_clock::time_point endTime;
+
 private:
     int32_t sock;
     size_t dnsServerIdx = 0;
     epoll_event event{};
-    sockaddr_in addrParse{0};
-    sockaddr_in srcAddr{0};
-    std::unique_ptr<sockaddr_in> clientSock;
+    AlignedSockAddr addrParse{};
+    AlignedSockAddr srcAddr{};
+    std::unique_ptr<AlignedSockAddr> clientSock;
     std::unique_ptr<RecvBuff> recvBuff;
 };
 } // namespace OHOS::nmd
-#endif //NETSYS_DNS_PROXY_REQUEST_SOCKET_H
+#endif // NETSYS_DNS_PROXY_REQUEST_SOCKET_H
