@@ -267,9 +267,9 @@ int32_t CreateTunInterface(const std::string &tunIface, int &fd)
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    ifreq ifr = {
-        .ifr_flags = static_cast<short>(IFF_TUN | IFF_TUN_EXCL),
-    };
+    struct ifreq ifr = {};
+    ifr.ifr_flags = static_cast<short>(IFF_TUN | IFF_TUN_EXCL);
+
     if (strncpy_s(ifr.ifr_name, IFNAMSIZ, tunIface.c_str(), tunIface.length()) != EOK) {
         close(fd);
         return NETMANAGER_ERR_OPERATION_FAILED;
