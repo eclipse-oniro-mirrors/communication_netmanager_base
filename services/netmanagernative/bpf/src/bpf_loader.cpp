@@ -210,6 +210,7 @@ inline int32_t SysBpfObjAttach(bpf_attach_type type, const int progFd, const int
     attr.target_fd = cgFd;
     attr.attach_bpf_fd = progFd;
     attr.attach_type = type;
+    attr.attach_flags = BPF_F_ALLOW_MULTI;
 
     return SysBpf(BPF_PROG_ATTACH, &attr, sizeof(attr));
 }
