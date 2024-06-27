@@ -830,9 +830,9 @@ int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceN
 }
 
 int32_t NetsysControllerServiceImpl::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy,
-                                                            bool reconfirmFlag)
+                                                            bool reconfirmFlag, bool isBroker)
 {
-    return netsysClient_.SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    return netsysClient_.SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
 }
 
 int32_t NetsysControllerServiceImpl::DeleteNetworkAccessPolicy(uint32_t uid)

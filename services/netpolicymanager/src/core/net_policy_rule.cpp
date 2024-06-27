@@ -473,9 +473,10 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
 }
 
-int32_t NetPolicyRule::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+int32_t NetPolicyRule::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                              bool isBroker)
 {
-    return GetNetsysInst()->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    return GetNetsysInst()->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
 }
 
 int32_t NetPolicyRule::DeleteNetworkAccessPolicy(uint32_t uid)

@@ -499,7 +499,7 @@ public:
         return 0;
     }
 
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker) override
     {
         return 0;
     }
@@ -1854,6 +1854,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Lev
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
+    bool isBroker = false;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
         return;
@@ -1871,6 +1872,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Lev
     }
 
     if (!data.WriteBool(reconfirmFlag)) {
+        return;
+    }
+
+    if (!data.WriteBool(isBroker)) {
         return;
     }
 

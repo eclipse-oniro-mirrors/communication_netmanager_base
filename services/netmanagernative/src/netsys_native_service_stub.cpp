@@ -1877,11 +1877,16 @@ int32_t NetsysNativeServiceStub::CmdSetNetworkAccessPolicy(MessageParcel &data, 
         NETNATIVE_LOGE("Read bool failed");
         return ERR_FLATTEN_OBJECT;
     }
+    bool isBroker = true;
+    if (!data.ReadBool(isBroker)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
 
     NetworkAccessPolicy policy;
     policy.wifiAllow = wifi_allow;
     policy.cellularAllow = cellular_allow;
-    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
     reply.WriteInt32(result);
     return result;
 }

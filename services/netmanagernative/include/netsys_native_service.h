@@ -165,7 +165,8 @@ public:
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                   bool isBroker) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;

@@ -162,7 +162,8 @@ public:
 #endif
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
-    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                           bool isBroker) = 0;
     virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
     virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
     virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
