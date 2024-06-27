@@ -172,7 +172,7 @@ const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {
     uint32_t mask;
-    uint32_t data;
+    uint32_t data;  // Host Long ip
 };
 
 struct Ip6Data {
@@ -325,7 +325,7 @@ public:
 
 struct Ip4RuleBitmap {
     uint32_t mask;
-    uint32_t data;
+    uint32_t data;  // Network ip
     Bitmap bitmap;
 };
 
@@ -356,7 +356,7 @@ public:
     /**
      * if addr and mask not exist in vector, save value to vector, otherwise or bitmap
      *
-     * @param addr ip
+     * @param addr Network ip
      * @param mask ip mask
      * @param bitmap rule bitmap
      */
@@ -402,7 +402,7 @@ private:
      */
     inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
     {
-        return (addr & (0xFFFFFFFF >> (IPV4_MAX_PREFIXLEN - mask)));
+        return ntohl(addr) & (0xFFFFFFFF >> (IPV4_MAX_PREFIXLEN - mask));
     }
 
 private:
