@@ -26,6 +26,13 @@
 
 namespace OHOS {
 namespace nmd {
+namespace {
+    enum class SocketDestroyType {
+        DESTROY_DEFAULT_CELLULAR,
+        DESTROY_SPECIAL_CELLULAR,
+        DESTROY_DEFAULT,
+    };
+}
 class NetLinkSocketDiag final {
 public:
     NetLinkSocketDiag() = default;
@@ -38,6 +45,14 @@ public:
      * @param excludeLoopback “true” to exclude loopback.
      */
     void DestroyLiveSockets(const char *ipAddr, bool excludeLoopback);
+
+    /**
+     * This method set the socketDestroyType_, which used to choose the correct socket.
+     * to destroy.
+     * @param netCapabilities Net capabilities in string format.
+     * @return The result of the method is returned.
+     */
+    int32_t SetSocketDestroyType(const std::string &netCapabilities);
 
 private:
     static bool InLookBack(uint32_t a);
@@ -75,6 +90,7 @@ private:
     int32_t dumpSock_ = -1;
     int32_t destroySock_ = -1;
     int32_t socketsDestroyed_ = 0;
+    SocketDestroyType socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
 };
 } // namespace nmd
 } // namespace OHOS

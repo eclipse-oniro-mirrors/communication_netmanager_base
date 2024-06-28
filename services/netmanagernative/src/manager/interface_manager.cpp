@@ -233,6 +233,15 @@ int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, in
     return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
 }
 
+int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, int prefixLen,
+                                 const std::string &netCapabilities)
+{
+    NetLinkSocketDiag socketDiag;
+    socketDiag.SetSocketDestroyType(netCapabilities);
+    socketDiag.DestroyLiveSockets(addr, true);
+    return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
+}
+
 int Ipv4NetmaskToPrefixLength(in_addr_t mask)
 {
     int prefixLength = 0;

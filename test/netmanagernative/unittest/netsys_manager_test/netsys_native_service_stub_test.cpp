@@ -202,6 +202,12 @@ public:
         return 0;
     }
 
+    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                int32_t prefixLength, const std::string &netCapabilities) override
+    {
+        return 0;
+    }
+
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override
     {
         return 0;

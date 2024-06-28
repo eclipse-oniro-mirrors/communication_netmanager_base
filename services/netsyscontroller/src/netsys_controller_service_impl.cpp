@@ -196,6 +196,17 @@ int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifNa
     return netsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                                         int32_t prefixLength, const std::string &netCapabilities)
+{
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
+        return mockNetsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    }
+    return netsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+}
+
 int32_t NetsysControllerServiceImpl::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETMGR_LOG_I("set ip address: ifName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),
