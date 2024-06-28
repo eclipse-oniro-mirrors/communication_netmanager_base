@@ -564,10 +564,17 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    if (context->host_.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
+        context->SetErrorCode(temp);
+        return false;
+    }
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo_ext errno %{public}d %{public}s", errno, strerror(errno));
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
         int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
@@ -626,7 +633,8 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno), status);
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
         int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
