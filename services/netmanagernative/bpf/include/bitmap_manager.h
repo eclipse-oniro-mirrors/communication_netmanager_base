@@ -172,7 +172,7 @@ const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {
     uint32_t mask;
-    uint32_t data;  // Host Long ip
+    uint32_t data; // Host Long ip
 };
 
 struct Ip6Data {
@@ -325,7 +325,7 @@ public:
 
 struct Ip4RuleBitmap {
     uint32_t mask;
-    uint32_t data;  // Network ip
+    uint32_t data; // Network ip
     Bitmap bitmap;
 };
 
