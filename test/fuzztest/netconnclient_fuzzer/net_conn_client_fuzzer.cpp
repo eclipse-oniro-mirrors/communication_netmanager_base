@@ -35,6 +35,10 @@ namespace NetManagerStandard {
 namespace {
 const uint8_t *g_baseFuzzData = nullptr;
 static constexpr uint32_t CREATE_NET_TYPE_VALUE = 7;
+static constexpr uint8_t WITH_ALL_PARM_MODEL = 0;
+static constexpr uint8_t WITHOUT_FIRST_PARM_MODEL = 1;
+static constexpr uint8_t WITHOUT_SECOND_PARM_MODEL = 2;
+static constexpr uint8_t WITHOUT_THIRD_PARM_MODEL = 3;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
@@ -125,10 +129,6 @@ bool WriteInterfaceToken(MessageParcel &data)
 
 bool IsConnClientDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
-    if ((data == nullptr) || (size == 0)) {
-        NETMGR_LOG_D("IsConnClientDataAndSizeValid data is nullptr or size is zero.");
-        return false;
-    }
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
@@ -1242,6 +1242,148 @@ void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
     MessageParcel dataParcelNoIfName;
     StaticArpProcessNoIfName(data, size, dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcelNoIfName);
+}
+
+void RegisterSlotTypeFuzzTest(const uint8_t *data, size_t size)
+{
+    int32_t supplierId = NetConnGetData<int32_t>();
+    int32_t type = NetConnGetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteInt32(supplierId);
+    dataParcel.WriteInt32(type);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE), dataParcel);
+
+    MessageParcel dataParcelNoSupplierId;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoSupplierId)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcelNoSupplierId.WriteInt32(type);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE), dataParcelNoSupplierId);
+
+    MessageParcel dataParcelNoType;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoType)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteInt32(supplierId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE), dataParcelNoType);
+}
+
+void GetSlotTypeFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE), dataParcel);
+}
+
+void IsPreferCellularUrlFuzzTest(const uint8_t *data, size_t size)
+{
+    std::string url = NetConnGetString(STR_LEN);
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteString(url);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL), dataParcel);
+
+    MessageParcel dataParcelNoUrl;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoUrl)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL), dataParcelNoUrl);
+}
+
+void StaticUpdateSupplierScoreProcess(const uint8_t *data, size_t size, MessageParcel &dataParcel, uint8_t paramsModel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    // ! without the first param.
+    if (paramsModel != WITHOUT_FIRST_PARM_MODEL) {
+        int32_t supplierId = NetConnGetData<int32_t>();
+        dataParcel.WriteInt32(supplierId);
+    }
+    // ! without the second param.
+    if (paramsModel != WITHOUT_SECOND_PARM_MODEL) {
+        bool isBetter = NetConnGetData<bool>();
+        dataParcel.WriteBool(isBetter);
+    }
+    // ! without the third param.
+    if (paramsModel != WITHOUT_THIRD_PARM_MODEL) {
+        int32_t type = NetConnGetData<int32_t>();
+        dataParcel.WriteInt32(type);
+    }
+}
+
+void UpdateSupplierScoreFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcelWithAllParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITH_ALL_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE), dataParcelWithAllParam);
+
+    MessageParcel dataParcelWithOutFirstParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutFirstParam);
+
+    MessageParcel dataParcelWithOutSecondParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutSecondParam);
+
+    MessageParcel dataParcelWithOutThirdParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutThirdParam);
+}
+
+void RegisterPreAirplaneCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IPreAirplaneCallbackStubTestCb> callback = new (std::nothrow) IPreAirplaneCallbackStubTestCb();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK), dataParcel);
+
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK), dataParcel);
+}
+
+void UnregisterPreAirplaneCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IPreAirplaneCallbackStubTestCb> callback = new (std::nothrow) IPreAirplaneCallbackStubTestCb();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel);
+
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

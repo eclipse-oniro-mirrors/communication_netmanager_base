@@ -102,6 +102,18 @@ public:
     }
 };
 
+class IPreAirplaneCallbackStubTestCb : public PreAirplaneCallbackStub {
+public:
+    IPreAirplaneCallbackStubTestCb() = default;
+    ~IPreAirplaneCallbackStubTestCb() = default;
+
+    int32_t PreAirplaneStart() override
+    {
+        std::cout << "fuzz test PreAirplaneStart" << std::endl;
+        return NETMANAGER_SUCCESS;
+    }
+};
+
 class NetConnCallbackStubCb : public NetConnCallbackStub {
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override
     {
