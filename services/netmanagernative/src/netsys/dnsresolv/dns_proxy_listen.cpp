@@ -113,7 +113,7 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
     epoll_ctl(epollFd_, EPOLL_CTL_DEL, socketFd, nullptr);
     socklen_t addrLen;
     AlignedSockAddr &addrParse = iter->second.GetAddr();
-    AlignedSockAddr clientSock = iter->second.GetClientSock();
+    AlignedSockAddr &clientSock = iter->second.GetClientSock();
     if (clientSock.sa.sa_family == AF_INET) {
         addrParse.sin.sin_family = AF_INET;
         addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
@@ -155,7 +155,7 @@ void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
         return;
     }
     AlignedSockAddr &addrParse = iter->second.GetAddr();
-    AlignedSockAddr clientSock = iter->second.GetClientSock();
+    AlignedSockAddr &clientSock = iter->second.GetClientSock();
     NETNATIVE_LOG_D("=====sa_family:[%{public}d]", clientSock.sa.sa_family);
     int32_t proxySocket = proxySockFd_;
     socklen_t addrLen = 0;
