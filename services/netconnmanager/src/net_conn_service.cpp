@@ -295,16 +295,17 @@ int32_t NetConnService::RequestNetConnection(const sptr<NetSpecifier> netSpecifi
 
     int32_t result = NETMANAGER_ERROR;
     std::set<NetCap> &netCaps = netSpecifier->netCapabilities_.netCaps_;
-    if (netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) == netCaps.end() &&
-        !NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-            NETMGR_LOG_I("Permission deny: Request without INTERNAL_DEFAULT But not has GET_NETWORK_INFO");
-            return result;
+    if (netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end()) {
+        if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+                NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
+                return NETMANAGER_ERR_PERMISSION_DENIED;
         }
-    if (netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end() &&
-        !NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
-            NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
-            return result;
+    } else {
+        if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+                NETMGR_LOG_I("Permission deny: request need GET_NETWORK_INFO permission");
+                return NETMANAGER_ERR_PERMISSION_DENIED;
         }
+    }
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, netSpecifier, callback, timeoutMS, callingUid, &result]() {
             result = this->RequestNetConnectionAsync(netSpecifier, callback, timeoutMS, callingUid);
