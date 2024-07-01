@@ -251,7 +251,6 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
         NETNATIVE_LOGE("read buff is not dns question");
         return;
     }
-    NETNATIVE_LOG_D("epoll got request from client sa_family:%{public}d", clientAddr->sa.sa_family);
     DnsParseBySocket(recvBuff, clientAddr);
 }
 
