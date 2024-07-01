@@ -156,13 +156,6 @@ bool NetConnService::Init()
     }
     netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnEventRunner_);
     CreateDefaultRequest();
-    if (!registerToService_) {
-        if (!Publish(NetConnService::GetInstance().get())) {
-            NETMGR_LOG_E("Register to sa manager failed");
-            return false;
-        }
-        registerToService_ = true;
-    }
     serviceIface_ = std::make_unique<NetConnServiceIface>().release();
     NetManagerCenter::GetInstance().RegisterConnService(serviceIface_);
 
@@ -178,6 +171,7 @@ bool NetConnService::Init()
     if (netFactoryResetCallback_ == nullptr) {
         NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
     }
+    AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
     NETMGR_LOG_I("Init end");
     return true;
 }
@@ -2246,6 +2240,13 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         if (hasSARemoved_) {
             OnNetSysRestart();
             hasSARemoved_ = false;
+        }
+    } else if (systemAbilityId == ACCESS_TOKEN_MANAGER_SERVICE_ID) {
+        if (!registerToService_) {
+            if (!Publish(NetConnService::GetInstance().get())) {
+                NETMGR_LOG_E("Register to sa manager failed");
+            }
+            registerToService_ = true;
         }
     }
 }
