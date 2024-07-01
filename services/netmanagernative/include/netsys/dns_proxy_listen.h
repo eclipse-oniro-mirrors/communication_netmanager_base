@@ -76,8 +76,8 @@ private:
     std::chrono::system_clock::time_point collectTime;
     void EpollTimeout();
     void CollectSocks();
-    bool InitListenForIpv4(sockaddr_in &proxyAddr);
-    bool InitListenForIpv6(sockaddr_in6 &proxyAddr6);
+    void InitListenForIpv4();
+    void InitListenForIpv6();
     bool InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event);
     void GetRequestAndTransmit(int32_t family);
 };

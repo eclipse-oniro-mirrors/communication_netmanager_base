@@ -254,72 +254,65 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
     DnsParseBySocket(recvBuff, clientAddr);
 }
 
-bool DnsProxyListen::InitListenForIpv4(sockaddr_in &proxyAddr)
+void DnsProxyListen::InitListenForIpv4()
 {
     if (proxySockFd_ < 0) {
         proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if (proxySockFd_ < 0) {
             NETNATIVE_LOGE("proxySockFd_ create socket failed %{public}d", errno);
-            return false;
+            return;
         }
     }
+    sockaddr_in proxyAddr{};
     proxyAddr.sin_family = AF_INET;
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     proxyAddr.sin_port = htons(DNS_PROXY_PORT);
-    return true;
+    if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
+        NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
+        close(proxySockFd_);
+        proxySockFd_ = -1;
+        return;
+    }
 }
 
-bool DnsProxyListen::InitListenForIpv6(sockaddr_in6 &proxyAddr6)
+void DnsProxyListen::InitListenForIpv6()
 {
     if (proxySockFd6_ < 0) {
         proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
         if (proxySockFd6_ < 0) {
             NETNATIVE_LOGE("proxySockFd_ create socket failed %{public}d", errno);
-            return false;
+            return;
         }
     }
+    sockaddr_in6 proxyAddr6{};
     proxyAddr6.sin6_family = AF_INET6;
     proxyAddr6.sin6_addr = in6addr_any;
     proxyAddr6.sin6_port = htons(DNS_PROXY_PORT);
-
     int on = 1;
     if (setsockopt(proxySockFd6_, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt failed");
-        return false;
+        return;
     }
-    return true;
+    if (bind(proxySockFd6_, (sockaddr *)&proxyAddr6, sizeof(proxyAddr6)) == -1) {
+        NETNATIVE_LOGE("bind6 errno %{public}d: %{public}s", errno, strerror(errno));
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+        return;
+    }
 }
 
 bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event)
 {
-    sockaddr_in proxyAddr{};
-    if (!InitListenForIpv4(proxyAddr)) {
-        NETNATIVE_LOGE("InitListenForIpv4 failed");
+    std::lock_guard<std::mutex> lock(listenerMutex_);
+    InitListenForIpv4();
+    InitListenForIpv6();
+    epollFd_ = epoll_create1(0);
+    if (epollFd_ < 0) {
+        NETNATIVE_LOGE("epoll_create1 errno %{public}d: %{public}s", errno, strerror(errno));
+        clearResource();
         return false;
     }
-    sockaddr_in6 proxyAddr6{};
-    if (!InitListenForIpv6(proxyAddr6)) {
-        NETNATIVE_LOGE("InitListenForIpv6 failed");
-        return false;
-    }
-    {
-        std::lock_guard<std::mutex> lock(listenerMutex_);
-        if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
-            NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
-            clearResource();
-            return false;
-        }
-        if (bind(proxySockFd6_, (sockaddr *)&proxyAddr6, sizeof(proxyAddr6)) == -1) {
-            NETNATIVE_LOGE("bind6 errno %{public}d: %{public}s", errno, strerror(errno));
-            clearResource();
-            return false;
-        }
-        epollFd_ = epoll_create1(0);
-        if (epollFd_ < 0) {
-            NETNATIVE_LOGE("epoll_create1 errno %{public}d: %{public}s", errno, strerror(errno));
-            clearResource();
-            return false;
-        }
+    if (proxySockFd_ > 0) {
         proxyEvent.data.fd = proxySockFd_;
         proxyEvent.events = EPOLLIN;
         if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, proxySockFd_, &proxyEvent) < 0) {
@@ -327,6 +320,8 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
             clearResource();
             return false;
         }
+    }
+    if (proxySockFd6_ > 0) {
         proxy6Event.data.fd = proxySockFd6_;
         proxy6Event.events = EPOLLIN;
         if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, proxySockFd6_, &proxy6Event) < 0) {
