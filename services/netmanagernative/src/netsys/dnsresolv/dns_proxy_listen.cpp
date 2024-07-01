@@ -256,6 +256,7 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
 
 void DnsProxyListen::InitListenForIpv4()
 {
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (proxySockFd_ < 0) {
         proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if (proxySockFd_ < 0) {
@@ -277,6 +278,7 @@ void DnsProxyListen::InitListenForIpv4()
 
 void DnsProxyListen::InitListenForIpv6()
 {
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (proxySockFd6_ < 0) {
         proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
         if (proxySockFd6_ < 0) {
@@ -291,6 +293,8 @@ void DnsProxyListen::InitListenForIpv6()
     int on = 1;
     if (setsockopt(proxySockFd6_, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt failed");
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
         return;
     }
     if (bind(proxySockFd6_, (sockaddr *)&proxyAddr6, sizeof(proxyAddr6)) == -1) {
@@ -303,7 +307,6 @@ void DnsProxyListen::InitListenForIpv6()
 
 bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event)
 {
-    std::lock_guard<std::mutex> lock(listenerMutex_);
     InitListenForIpv4();
     InitListenForIpv6();
     epollFd_ = epoll_create1(0);
@@ -329,6 +332,11 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
             clearResource();
             return false;
         }
+    }
+    if (proxySockFd_ < 0 && proxySockFd6_ < 0) {
+        NETNATIVE_LOGE("InitForListening ipv4/ipv6 error!");
+        clearResource();
+        return false;
     }
     collectTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
     return true;
