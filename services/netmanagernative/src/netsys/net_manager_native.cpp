@@ -114,9 +114,9 @@ int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRan
     return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 
-int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName)
+int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName, NetBearType netBearerType)
 {
-    return connManager_->AddInterfaceToNetwork(netId, interfaceName);
+    return connManager_->AddInterfaceToNetwork(netId, interfaceName, netBearerType);
 }
 
 int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string interfaceName)

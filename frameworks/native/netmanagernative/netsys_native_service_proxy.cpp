@@ -862,7 +862,8 @@ int32_t NetsysNativeServiceProxy::InterfaceSetIffUp(const std::string &ifaceName
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::string &iface,
+                                                      NetBearType netBearerType)
 {
     NETNATIVE_LOGI("Begin to NetworkAddInterface");
     MessageParcel data;
@@ -873,6 +874,9 @@ int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(netBearerType)) {
         return ERR_FLATTEN_OBJECT;
     }
 

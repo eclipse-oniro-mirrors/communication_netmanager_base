@@ -89,7 +89,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     ret = nativeClient_.NetworkDestroy(NET_ID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = nativeClient_.NetworkAddInterface(NET_ID, IF_NAME);
+    ret = nativeClient_.NetworkAddInterface(NET_ID, IF_NAME, BEARER_DEFAULT);
     EXPECT_EQ(ret, -1);
 
     ret = nativeClient_.NetworkRemoveInterface(NET_ID, IF_NAME);

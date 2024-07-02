@@ -91,7 +91,7 @@ public:
                                 int32_t prefixLength) override;
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override;
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override;
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId) override;
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;

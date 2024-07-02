@@ -242,11 +242,11 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 {
     std::string iface = INTERFACENAME;
-    int32_t ret = instance_->AddInterfaceToNetwork(NETID, iface);
+    int32_t ret = instance_->AddInterfaceToNetwork(NETID, iface, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
 
     iface = INTERNAL_INTERFACENAME;
-    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface);
+    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
 }
 
@@ -258,10 +258,10 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
 {
     std::string testInterfaceName = "testName";
-    int32_t ret = instance_->AddInterfaceToNetwork(NETID, testInterfaceName);
+    int32_t ret = instance_->AddInterfaceToNetwork(NETID, testInterfaceName, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
 
-    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName);
+    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
 }
 

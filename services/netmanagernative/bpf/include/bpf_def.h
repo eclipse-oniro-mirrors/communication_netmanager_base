@@ -27,7 +27,7 @@ static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
 static const int32_t NET_NS_MAP_SIZE = 65535;
 static const uint64_t SOCK_COOKIE_ID_NULL = UINT64_MAX;
 static const int32_t SIM_UID_MAX = 20000;
-static const __u32 DEFAULT_BROKER_UID_KEY = 65536;
+static const uint64_t DEFAULT_BROKER_UID_KEY = 65536;
 enum { IFNAME_SIZE = 32 };
 enum { DEFAULT_NETWORK_BEARER_MAP_KEY = 0 };
 
@@ -98,6 +98,9 @@ typedef __u8 sock_permission_value;
 
 typedef __u32 net_bear_id_key;
 typedef __u32 net_bear_type_map_value;
+
+typedef __u16 net_index;
+typedef __u8 net_interface_name_id;
 
 typedef __u32 app_uid_key;
 #endif /* NETMANAGER_BASE_BPF_DEF_H */

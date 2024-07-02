@@ -374,10 +374,10 @@ int32_t NetsysNativeService::InterfaceSetIffUp(const std::string &ifaceName)
     return netsysService_->InterfaceSetIffUp(ifaceName);
 }
 
-int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
 {
     NETNATIVE_LOG_D("NetworkAddInterface");
-    int32_t result = netsysService_->NetworkAddInterface(netId, iface);
+    int32_t result = netsysService_->NetworkAddInterface(netId, iface, netBearerType);
     return result;
 }
 

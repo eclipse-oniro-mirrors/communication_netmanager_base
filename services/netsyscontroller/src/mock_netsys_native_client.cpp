@@ -124,7 +124,7 @@ int32_t MockNetsysNativeClient::NetworkDestroy(int32_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t MockNetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
 {
     NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
     return 0;
