@@ -798,8 +798,15 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
-
-    int32_t result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
+    std::string netCapabilities;
+    int32_t result = 0;
+    if (!data.ReadString(netCapabilities)) {
+        NETNATIVE_LOG_D("DelInterfaceAddress");
+        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
+    } else {
+        NETNATIVE_LOG_D("DelInterfaceAddress with netCapabilities %{public}s", netCapabilities.c_str());
+        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength, netCapabilities);
+    }
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("DelInterfaceAddress has recved result %{public}d", result);
 
@@ -833,8 +840,9 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddInterface(MessageParcel &data, Mes
 {
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
+    NetBearType netBearerType = static_cast<NetBearType>(data.ReadUint8());
 
-    int32_t result = NetworkAddInterface(netId, iface);
+    int32_t result = NetworkAddInterface(netId, iface, netBearerType);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddInterface has recved result %{public}d", result);
 

@@ -38,6 +38,7 @@ constexpr uint8_t ADDR_POSITION = 3U;
 constexpr int32_t DOMAIN_IP_ADDR_MAX_LEN = 128;
 constexpr uint32_t LOCKBACK_MASK = 0xff000000;
 constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
+constexpr uid_t PUSH_UID = 7023;
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
@@ -237,6 +238,14 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
         return;
     }
 
+    if (socketDestroyType_ == SocketDestroyType::DESTROY_SPECIAL_CELLULAR && msg->idiag_uid != PUSH_UID) {
+        return;
+    }
+
+    if (socketDestroyType_ == SocketDestroyType::DESTROY_DEFAULT_CELLULAR && msg->idiag_uid == PUSH_UID) {
+        return;
+    }
+
     if (excludeLoopback && IsLoopbackSocket(msg)) {
         NETNATIVE_LOGE("Loop back socket, no need to close.");
         return;
@@ -280,6 +289,20 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
     }
 
     NETNATIVE_LOG_D("Destroyed %{public}d sockets", socketsDestroyed_);
+}
+
+int32_t NetLinkSocketDiag::SetSocketDestroyType(const std::string &netCapabilities)
+{
+    const std::string capSpecialCellularStr = "NET_CAPABILITY_INTERNAL_DEFAULT";
+    const std::string bearerCellularStr = "BEARER_CELLULAR";
+    if (netCapabilities.find(capSpecialCellularStr) != std::string::npos) {
+        socketDestroyType_ = SocketDestroyType::DESTROY_SPECIAL_CELLULAR;
+    } else if (netCapabilities.find(bearerCellularStr) != std::string::npos) {
+        socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT_CELLULAR;
+    } else {
+        socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
+    }
+    return 0;
 }
 } // namespace nmd
 } // namespace OHOS

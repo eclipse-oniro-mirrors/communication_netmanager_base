@@ -74,5 +74,10 @@ bool NetConnServiceIface::IsIfaceNameInUse(const std::string &ifaceName, int32_t
 {
     return NetConnService::GetInstance()->IsIfaceNameInUse(ifaceName, netId);
 }
+
+std::string NetConnServiceIface::GetNetCapabilitiesAsString(const uint32_t supplierId) const
+{
+    return NetConnService::GetInstance()->GetNetCapabilitiesAsString(supplierId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

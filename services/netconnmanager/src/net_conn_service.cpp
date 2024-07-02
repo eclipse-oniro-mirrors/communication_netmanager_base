@@ -2377,6 +2377,16 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
     return false;
 }
 
+std::string NetConnService::GetNetCapabilitiesAsString(const uint32_t supplierId)
+{
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    const auto iterNetSuppliers = netSuppliers_.find(supplierId);
+    if (iterNetSuppliers != netSuppliers_.end() && iterNetSuppliers->second != nullptr) {
+        return iterNetSuppliers->second->GetNetCapabilities().ToString(" ");
+    }
+    return {};
+}
+
 std::vector<std::string> NetConnService::GetPreferredUrl()
 {
     std::vector<std::string> preferCellularUrlList;

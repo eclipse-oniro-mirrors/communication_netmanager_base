@@ -54,7 +54,7 @@ public:
     int32_t NetworkDestroy(int32_t netId);
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
-    int32_t NetworkAddInterface(int32_t netId, std::string iface);
+    int32_t NetworkAddInterface(int32_t netId, std::string iface, NetBearType netBearerType);
     int32_t NetworkRemoveInterface(int32_t netId, std::string iface);
 
     MarkMaskParcel GetFwmarkForNetwork(int32_t netId);
@@ -79,6 +79,8 @@ public:
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
     int32_t AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
+    int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength,
+                                const std::string &netCapabilities);
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
     int32_t InterfaceSetIffUp(std::string ifaceName);
     int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);

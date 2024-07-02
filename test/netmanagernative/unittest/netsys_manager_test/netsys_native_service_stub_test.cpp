@@ -202,6 +202,12 @@ public:
         return 0;
     }
 
+    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                int32_t prefixLength, const std::string &netCapabilities) override
+    {
+        return 0;
+    }
+
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override
     {
         return 0;
@@ -212,7 +218,7 @@ public:
         return 0;
     }
 
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override
     {
         return 0;
     }
@@ -985,6 +991,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
 {
     int32_t netId = 1001;
     std::string interfaceName = "testInterfaceName";
+    NetBearType bearerType = BEARER_DEFAULT;
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
@@ -994,6 +1001,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
         return;
     }
     if (!data.WriteUint32(netId)) {
+        return;
+    }
+    if (!data.WriteUint8(bearerType)) {
         return;
     }
 

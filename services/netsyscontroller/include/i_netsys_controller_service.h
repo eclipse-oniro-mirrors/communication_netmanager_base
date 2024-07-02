@@ -91,7 +91,7 @@ public:
      * @param iface Network port device name
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface) = 0;
+    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;
 
     /**
      * Delete network port device
@@ -209,6 +209,19 @@ public:
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) = 0;
+
+    /**
+     * Delete ip address
+     *
+     * @param ifName Network port device name
+     * @param ipAddr Ip address
+     * @param prefixLength subnet mask
+     * @param netCapabilities Net capabilities in string format
+     * @return Return the return value of the netsys interface call
+     */
+    virtual int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength,
+                                        const std::string &netCapabilities) = 0;
+
     /**
      * Set iface ip address
      *

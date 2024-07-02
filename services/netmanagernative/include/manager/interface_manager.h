@@ -68,6 +68,18 @@ public:
     static int DelAddress(const char *interfaceName, const char *addr, int prefixLen);
 
     /**
+     * Delete local IP address to network
+     *
+     * @param interfaceName Network device name
+     * @param addr Network IP address
+     * @param prefixLen Length of the network number of the subnet mask
+     * @param netCapabilities Net capabilities in string format
+     * @return Returns 0, delete local IP address to network successfully, otherwise it will fail
+     */
+    static int DelAddress(const char *interfaceName, const char *addr, int prefixLen,
+                          const std::string &netCapabilities);
+
+    /**
      * Get the network interface names
      *
      * @return Network interface names

@@ -85,6 +85,7 @@ private:
     bool IsAddrInOtherNetwork(const INetAddr &netAddr);
     bool IsIfaceNameInUse();
     bool IsNat464Prefered();
+    std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
 
 private:
     int32_t netId_ = 0;

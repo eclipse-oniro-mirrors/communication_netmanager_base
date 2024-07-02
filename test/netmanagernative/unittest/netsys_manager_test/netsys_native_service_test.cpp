@@ -269,7 +269,7 @@ HWTEST_F(NetsysNativeServiceTest, NetworkAddInterfaceTest001, TestSize.Level1)
 {
     int32_t netId = 1000;
     std::string iFName = "test0";
-    int32_t ret = instance_->NetworkAddInterface(netId, iFName);
+    int32_t ret = instance_->NetworkAddInterface(netId, iFName, BEARER_DEFAULT);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 

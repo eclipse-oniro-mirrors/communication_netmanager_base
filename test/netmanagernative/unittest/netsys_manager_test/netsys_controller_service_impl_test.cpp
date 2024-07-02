@@ -132,7 +132,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NoRegisterMockApi, TestSize.Level1)
     ret = instance_->NetworkDestroy(0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(0, testName);
+    ret = instance_->NetworkAddInterface(0, testName, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkRemoveInterface(0, testName);
@@ -460,7 +460,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetNetworkSharingTraffic(hostName, serverName, traffic);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(netId, testName);
+    ret = instance_->NetworkAddInterface(netId, testName, BEARER_DEFAULT);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkAddRoute(netId, testName, "", "");

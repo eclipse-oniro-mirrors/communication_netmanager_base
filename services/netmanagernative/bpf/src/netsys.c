@@ -144,6 +144,61 @@ bpf_map_def SEC("maps") broker_uid_access_policy_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") net_index_and_iface_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(net_index),
+    .value_size = sizeof(net_interface_name_id),
+    .max_entries = 5,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+static inline net_bear_type_map_value check_socket_fwmark(__u32 mark)
+{
+    __u8 explicitlySelected = (mark >> 16) & (0x1);
+    net_bear_type_map_value net_bear_mark_type = NETWORK_BEARER_TYPE_INITIAL;
+    // explicitlySelected == 1 means the socket fwmark is set
+    if (explicitlySelected == 1) {
+        void *ifaceC_map_ptr = &net_index_and_iface_map;
+        __u16 TmpnetId = mark & (0x0000FFFF);
+        net_interface_name_id *ifaceC = bpf_map_lookup_elem(ifaceC_map_ptr, &TmpnetId);
+        // ifaceC == NULL, default bear type (*net_bear_type) is used.
+        if (ifaceC != NULL) {
+            net_bear_mark_type = *ifaceC;
+        }
+    }
+    return net_bear_mark_type;
+}
+
+static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_type,
+                                        uid_access_policy_value *netAccessPolicyValue)
+{
+    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) ||
+         (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR)) &&
+        (!netAccessPolicyValue->cellularPolicy)) {
+        return 0;
+    }
+    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) ||
+         (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI)) &&
+        (!netAccessPolicyValue->wifiPolicy)) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline __u64 check_broker_policy(uint64_t uid)
+{
+    uint64_t network_access_uid = uid;
+    void* broker_map_ptr = &broker_uid_access_policy_map;
+    __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+    app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+    if (broker_uid_value != NULL) {
+        network_access_uid = *broker_uid_value;
+    }
+    return network_access_uid;
+}
+
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
@@ -170,22 +225,14 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     uint64_t network_access_uid = sock_uid;
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            network_access_uid = *broker_uid_value;
-        }
+        network_access_uid = check_broker_policy(sock_uid);
     }
 
     uid_access_policy_value *netAccessPolicyValue =
         bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
-        if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR) &&
-            (!netAccessPolicyValue->cellularPolicy)) {
-            return 0;
-        }
-        if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI) && (!netAccessPolicyValue->wifiPolicy)) {
+        net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(skb->mark);
+        if (check_network_policy(net_bear_mark_type, netAccessPolicyValue) == 0) {
             return 0;
         }
     }
@@ -271,21 +318,13 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     uint64_t network_access_uid = sock_uid;
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            network_access_uid = *broker_uid_value;
-        }
+        network_access_uid = check_broker_policy(sock_uid);
     }
     uid_access_policy_value *netAccessPolicyValue =
         bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
-        if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR) &&
-            (!netAccessPolicyValue->cellularPolicy)) {
-            return 0;
-        }
-        if ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI) && (!netAccessPolicyValue->wifiPolicy)) {
+        net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(skb->mark);
+        if (check_network_policy(net_bear_mark_type, netAccessPolicyValue) == 0) {
             return 0;
         }
     }
@@ -418,6 +457,30 @@ bpf_map_def SEC("maps") ringbuf_map = {
     .max_entries = 256 * 1024 /* 256 KB */,
 };
 
+static inline __u8 socket_check_network_policy(net_bear_type_map_value net_bear_mark_type,
+                                               net_bear_type_map_value *net_bear_type, uid_access_policy_value *value)
+{
+    if ((((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) || (*net_bear_type == NETWORK_BEARER_TYPE_WIFI)) &&
+         (!value->wifiPolicy)) ||
+        (((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) || (*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR)) &&
+         (!value->cellularPolicy))) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline __u8 socket_ringbuf_event_submit(__u32 uid)
+{
+    uint32_t *e;
+    e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
+    if (e) {
+        *e = uid;
+        bpf_ringbuf_submit(e, 0);
+        return 1;
+    }
+    return 0;
+}
+
 SEC("cgroup_addr/bind4")
 static int inet_check_bind4(struct bpf_sock_addr *ctx)
 {
@@ -425,12 +488,7 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -441,14 +499,14 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -456,11 +514,7 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
@@ -481,12 +535,7 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -497,14 +546,14 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -512,11 +561,7 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
@@ -537,12 +582,7 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -553,14 +593,14 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -568,11 +608,7 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
@@ -594,12 +630,7 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -610,14 +641,14 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -625,11 +656,7 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
@@ -650,12 +677,7 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -666,14 +688,14 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -681,11 +703,7 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
@@ -706,12 +724,7 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
     __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     if (bpf_get_netns_cookie(ctx) != bpf_get_netns_cookie(NULL)) {
-        void* broker_map_ptr = &broker_uid_access_policy_map;
-        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-        app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
-        if (broker_uid_value != NULL) {
-            uid = *broker_uid_value;
-        }
+        uid = check_broker_policy(uid);
     }
 
     uid_access_policy_value *value = bpf_map_lookup_elem(map_ptr, &uid);
@@ -722,14 +735,14 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
 
     void *net_bear_map_ptr = &net_bear_type_map;
     net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
-
     net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
     if (net_bear_type == NULL) {
         return 1;
     }
 
-    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
-        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+    struct bpf_sock *sk = ctx->sk;
+    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
         }
@@ -737,11 +750,7 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
         // the policy configuration needs to be reconfirmed or the network bearer changes
         if (value->configSetFromFlag ||
             ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
-            uint32_t *e;
-            e = bpf_ringbuf_reserve(&ringbuf_map, sizeof(*e), 0);
-            if (e) {
-                *e = uid;
-                bpf_ringbuf_submit(e, 0);
+            if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }

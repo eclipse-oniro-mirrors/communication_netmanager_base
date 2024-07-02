@@ -130,14 +130,15 @@ int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_
     return netsysService_->NetworkDelUids(netId, uidRanges);
 }
 
-int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
 {
-    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
+    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s, bearerType[%{public}u]]", netId,
+                 iface.c_str(), netBearerType);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->NetworkAddInterface(netId, iface);
+    return netsysService_->NetworkAddInterface(netId, iface, netBearerType);
 }
 
 int32_t NetsysController::NetworkRemoveInterface(int32_t netId, const std::string &iface)
@@ -276,6 +277,18 @@ int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const s
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+}
+
+int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                              int32_t prefixLength, const std::string &netCapabilities)
+{
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
 }
 
 int32_t NetsysController::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)

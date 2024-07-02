@@ -140,18 +140,24 @@ bool Network::IsIfaceNameInUse()
     return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
 }
 
+std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
+{
+    return NetConnServiceIface().GetNetCapabilitiesAsString(supplierId);
+}
+
 bool Network::ReleaseBasicNetwork()
 {
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        if (!IsIfaceNameInUse()) {
-            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                    prefixLen);
-            }
+        std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
+        NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
+            supplierId_, netId_, netCapabilities.c_str());
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen, netCapabilities);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
@@ -246,7 +252,7 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
     int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
     if (!newNetLinkInfo.ifaceName_.empty()) {
-        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_);
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_, netSupplierType_);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_INTERFACE_FAILED);
         }

@@ -103,7 +103,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
         return;
     }
 
-    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
+    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
