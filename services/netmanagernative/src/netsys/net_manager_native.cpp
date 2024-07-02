@@ -137,6 +137,12 @@ int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string ad
     return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
+int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength,
+                                              const std::string &netCapabilities)
+{
+    return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength, netCapabilities);
+}
+
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
                                           std::string nextHop)
 {

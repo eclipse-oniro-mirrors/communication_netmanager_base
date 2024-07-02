@@ -361,6 +361,7 @@ public:
     bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override;
+    std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

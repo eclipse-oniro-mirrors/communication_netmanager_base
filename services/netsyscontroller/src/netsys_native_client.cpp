@@ -442,6 +442,19 @@ int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const
     return proxy->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                                int32_t prefixLength, const std::string &netCapabilities)
+{
+    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+}
+
 int32_t NetsysNativeClient::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),

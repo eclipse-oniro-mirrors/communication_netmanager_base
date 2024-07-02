@@ -278,6 +278,18 @@ int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const s
     return netsysService_->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                              int32_t prefixLength, const std::string &netCapabilities)
+{
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+}
+
 int32_t NetsysController::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETMGR_LOG_D("Set Ip Address: ifName[%{public}s]", ifaceName.c_str());

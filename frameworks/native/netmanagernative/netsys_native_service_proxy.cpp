@@ -820,6 +820,27 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                                      int32_t prefixLength, const std::string &netCapabilities)
+{
+    NETNATIVE_LOGI("Begin to DelInterfaceAddress");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength) || !data.WriteString(netCapabilities)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
+        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("SendRequest failed, error code: [%{public}d]", result);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETNATIVE_LOGI("Begin to InterfaceSetIpAddress");
