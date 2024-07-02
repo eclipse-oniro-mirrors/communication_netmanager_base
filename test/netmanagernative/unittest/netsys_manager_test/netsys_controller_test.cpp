@@ -110,7 +110,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest001, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest002, TestSize.Level1)
 {
-    int32_t ret = NetsysController::GetInstance().NetworkAddInterface(NET_ID, WLAN);
+    int32_t ret = NetsysController::GetInstance().NetworkAddInterface(NET_ID, WLAN, BEARER_DEFAULT);
     EXPECT_EQ(ret, -1);
 
     ret = NetsysController::GetInstance().NetworkRemoveInterface(NET_ID, WLAN);
@@ -464,7 +464,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
     ret = instance_->NetworkDelUids(0, beginUids, endUids);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
-    ret = instance_->NetworkAddInterface(0, iface);
+    ret = instance_->NetworkAddInterface(0, iface, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
     ret = instance_->NetworkRemoveInterface(0, iface);

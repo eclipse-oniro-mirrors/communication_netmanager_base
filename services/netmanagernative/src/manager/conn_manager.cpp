@@ -225,10 +225,13 @@ int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfac
     return InterfaceId;
 }
 
-int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName)
+int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName,
+                                           NetManagerStandard::NetBearType netBearerType)
 {
-    NETNATIVE_LOG_D("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
-                    interfaceName.c_str());
+    NETNATIVE_LOG_D(
+        "Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s, netBearerType: "
+        "%{public}u",
+        netId, interfaceName.c_str(), netBearerType);
     int32_t alreadySetNetId = GetNetworkForInterface(netId, interfaceName);
     if ((alreadySetNetId != netId) && (alreadySetNetId != INTERFACE_UNSET)) {
         NETNATIVE_LOGE("AddInterfaceToNetwork failed alreadySetNetId:%{public}d", alreadySetNetId);
@@ -237,6 +240,23 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
+        // Create Map Table to establish the relationship betweet netId and the id about interfaceName.
+        BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+        if (netIdAndIfaceMap.IsValid()) {
+            net_interface_name_id v = {0};
+            if (netBearerType == BEARER_WIFI) {
+                v = NETWORK_BEARER_TYPE_WIFI;
+            } else if (netBearerType == BEARER_CELLULAR) {
+                v = NETWORK_BEARER_TYPE_CELLULAR;
+            } else {
+                v = NETWORK_BEARER_TYPE_INITIAL;
+            }
+
+            if (netIdAndIfaceMap.Write(netId, v, 0) != 0) {
+                NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, interfaceName:%{public}s", netId,
+                    interfaceName.c_str());
+            }
+        }
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (nw->IsPhysical()) {
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
@@ -260,6 +280,12 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
             if (nw->IsPhysical()) {
                 std::lock_guard<std::mutex> lock(interfaceNameMutex_);
                 physicalInterfaceName_.erase(netId);
+            }
+
+            BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+            if (netIdAndIfaceMap.IsValid() && netIdAndIfaceMap.Delete(netId) != 0) {
+                NETNATIVE_LOGE("netIdAndIfaceMap remove error: netId:%{public}d, interfaceName:%{public}s", netId,
+                               interfaceName.c_str());
             }
             return ret;
         }

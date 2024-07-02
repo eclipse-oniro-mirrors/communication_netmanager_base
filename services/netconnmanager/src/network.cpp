@@ -252,7 +252,7 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
     int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
     if (!newNetLinkInfo.ifaceName_.empty()) {
-        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_);
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_, netSupplierType_);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_INTERFACE_FAILED);
         }

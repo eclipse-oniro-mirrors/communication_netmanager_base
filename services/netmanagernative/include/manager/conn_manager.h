@@ -117,7 +117,8 @@ public:
      *
      * @return Returns 0, successfully add an interface to a network, otherwise it will fail
      */
-    int32_t AddInterfaceToNetwork(int32_t netId, std::string &interafceName);
+    int32_t AddInterfaceToNetwork(int32_t netId, std::string &interafceName,
+                                  NetManagerStandard::NetBearType netBearerType = NetManagerStandard::BEARER_DEFAULT);
 
     /**
      * Remove an interface to a network. The interface must be assigned to the specified network

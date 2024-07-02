@@ -75,9 +75,10 @@ public:
      *
      * @param netId
      * @param iface Network port device name
+     * @param netBearerType Network bearer type
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface);
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType = BEARER_DEFAULT);
 
     /**
      * Delete network port device

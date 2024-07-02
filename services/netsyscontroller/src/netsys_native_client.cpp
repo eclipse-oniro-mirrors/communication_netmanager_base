@@ -265,15 +265,16 @@ int32_t NetsysNativeClient::NetworkDelUids(int32_t netId, const std::vector<UidR
     return proxy->NetworkDelUids(netId, uidRanges);
 }
 
-int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
 {
-    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s]", netId, iface.c_str());
+    NETMGR_LOG_I("Add network interface: netId[%{public}d], iface[%{public}s, bearerType[%{public}u]]", netId,
+                 iface.c_str(), netBearerType);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->NetworkAddInterface(netId, iface);
+    return proxy->NetworkAddInterface(netId, iface, netBearerType);
 }
 
 int32_t NetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std::string &iface)

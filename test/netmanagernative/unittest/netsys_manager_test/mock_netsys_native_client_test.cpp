@@ -58,7 +58,7 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest001, TestSi
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::string iface = "";
-    ret = nativeClient_.NetworkAddInterface(netId, iface);
+    ret = nativeClient_.NetworkAddInterface(netId, iface, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.NetworkRemoveInterface(netId, iface);
