@@ -18,8 +18,8 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS::nmd {
-DnsProxyRequestSocket::DnsProxyRequestSocket(int32_t sock, std::unique_ptr<sockaddr_in>&& clientSock,
-                                             std::unique_ptr<RecvBuff>&& recvBuff)
+DnsProxyRequestSocket::DnsProxyRequestSocket(int32_t sock, std::unique_ptr<AlignedSockAddr> &&clientSock,
+                                             std::unique_ptr<RecvBuff> &&recvBuff)
 {
     NETNATIVE_LOG_D("dns_proxy_listen DnsProxyRequestSocket");
     this->sock = sock;
@@ -63,11 +63,11 @@ epoll_event *DnsProxyRequestSocket::GetEventPtr()
     return &event;
 }
 
-sockaddr_in &DnsProxyRequestSocket::GetAddr()
+AlignedSockAddr &DnsProxyRequestSocket::GetAddr()
 {
     return this->addrParse;
 }
-sockaddr_in &DnsProxyRequestSocket::GetClientSock()
+AlignedSockAddr &DnsProxyRequestSocket::GetClientSock()
 {
     return *clientSock;
 }

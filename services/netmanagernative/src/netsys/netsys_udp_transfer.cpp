@@ -24,11 +24,10 @@ struct UdpBuffer {
     size_t size;
     int32_t sock;
     int16_t event;
-    sockaddr_in addr;
+    AlignedSockAddr addr;
 };
-
 int32_t ProcUdpData(UdpBuffer udpBuffer, char *data, socklen_t &lenAddr,
-                    int64_t (*func)(int fd, char *buf, size_t len, sockaddr_in addr, socklen_t &lenAddr))
+                    int64_t (*func)(int fd, char *buf, size_t len, AlignedSockAddr &addr, socklen_t &lenAddr))
 {
     char *curPos = data;
     size_t leftSize = udpBuffer.size;
@@ -47,18 +46,17 @@ int32_t ProcUdpData(UdpBuffer udpBuffer, char *data, socklen_t &lenAddr,
     }
     return leftSize;
 }
-
-int64_t SendUdpWrapper(int32_t fd, char *buf, size_t len, sockaddr_in addr, socklen_t &lenAddr)
+int64_t SendUdpWrapper(int32_t fd, char *buf, size_t len, AlignedSockAddr &addr, socklen_t &lenAddr)
 {
     (void)lenAddr;
-    return sendto(fd, buf, len, 0, (sockaddr *)&addr, sizeof(sockaddr_in));
+    size_t addrLen = (addr.sa.sa_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+    return sendto(fd, buf, len, 0, (sockaddr *)&addr, addrLen);
 }
-
-int64_t RecvUdpWrapper(int32_t fd, char *buf, size_t len, sockaddr_in addr, socklen_t &lenAddr)
+int64_t RecvUdpWrapper(int32_t fd, char *buf, size_t len, AlignedSockAddr &addr, socklen_t &lenAddr)
 {
     return recvfrom(fd, buf, len, 0, (sockaddr *)&addr, &lenAddr);
 }
-}
+} // namespace
 
 bool PollUdpDataTransfer::MakeUdpNonBlock(int32_t sock)
 {
@@ -67,8 +65,7 @@ bool PollUdpDataTransfer::MakeUdpNonBlock(int32_t sock)
     }
     return MakeNonBlock(sock);
 }
-
-int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, char *data, size_t size, sockaddr_in addr,
+int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, char *data, size_t size, AlignedSockAddr &addr,
                                              socklen_t &lenAddr)
 {
     struct UdpBuffer udpBuffer;
@@ -78,8 +75,7 @@ int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, char *data, size_t si
     udpBuffer.addr = addr;
     return ProcUdpData(udpBuffer, data, lenAddr, SendUdpWrapper);
 }
-
-int32_t PollUdpDataTransfer::PollUdpRecvData(int32_t sock, char *data, size_t size, sockaddr_in addr,
+int32_t PollUdpDataTransfer::PollUdpRecvData(int32_t sock, char *data, size_t size, AlignedSockAddr &addr,
                                              socklen_t &lenAddr)
 {
     struct UdpBuffer udpBuffer;

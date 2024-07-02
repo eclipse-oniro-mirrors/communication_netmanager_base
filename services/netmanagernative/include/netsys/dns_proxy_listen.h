@@ -57,15 +57,17 @@ public:
     void SetParseNetId(uint16_t netId);
 
 private:
-    void DnsParseBySocket(std::unique_ptr<RecvBuff>& recvBuff, std::unique_ptr<sockaddr_in>& clientSock);
-    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in& proxyAddr);
-    static bool CheckDnsResponse(char* recBuff, size_t recLen);
+    void DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::unique_ptr<AlignedSockAddr> &clientSock);
+    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen,
+                                     AlignedSockAddr &proxyAddr);
+    static bool CheckDnsResponse(char *recBuff, size_t recLen);
     static bool CheckDnsQuestion(char *recBuff, size_t recLen);
     void SendDnsBack2Client(int32_t socketFd);
     void clearResource();
     void SendRequest2Server(int32_t socketFd);
-
+    bool GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx);
     int32_t proxySockFd_;
+    int32_t proxySockFd6_;
     int32_t epollFd_ = -1;
     static uint16_t netId_;
     static std::atomic_bool proxyListenSwitch_;
@@ -74,8 +76,10 @@ private:
     std::chrono::system_clock::time_point collectTime;
     void EpollTimeout();
     void CollectSocks();
-    bool InitForListening(sockaddr_in &proxyAddr, epoll_event &proxyEvent);
-    void GetRequestAndTransmit();
+    void InitListenForIpv4();
+    void InitListenForIpv6();
+    bool InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event);
+    void GetRequestAndTransmit(int32_t family);
 };
 } // namespace nmd
 } // namespace OHOS
