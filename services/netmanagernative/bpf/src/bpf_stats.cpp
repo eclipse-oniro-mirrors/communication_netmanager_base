@@ -24,6 +24,10 @@
 #include "net_stats_constants.h"
 
 namespace OHOS::NetManagerStandard {
+namespace {
+constexpr const char *CELLULAR_IFACE = "rmnet0";
+constexpr const char *WIFI_IFACE = "wlan0";
+}
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
 {
     switch (statsType) {
@@ -113,6 +117,11 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
         char *pName = if_indextoname(k.ifIndex, if_name);
         if (pName != nullptr) {
             tempStats.iface_ = pName;
+        }
+        if (k.ifIndex == SIM_WLAN_IF_INDEX) {
+            tempStats.iface_ = WIFI_IFACE;
+        } else if (k.ifIndex == SIM_CELLULAR_IF_INDEX) {
+            tempStats.iface_ = CELLULAR_IFACE;
         }
         tempStats.rxBytes_ = v.rxBytes;
         tempStats.txBytes_ = v.txBytes;
