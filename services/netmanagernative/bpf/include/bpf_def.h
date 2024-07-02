@@ -18,7 +18,7 @@
 
 #include <linux/bpf.h>
 
-#define GET_IP_SEGMENT(ip, seg) ((ip >> ((seg-1) * 8)) & 0xFF)
+#define GET_IP_SEGMENT(ip, seg) ((ip >> (((seg)-1) * 8)) & 0xFF)
 #define IS_MATCHED_IP(ip, target) \
     GET_IP_SEGMENT(ip, 1) == (target)[0] && GET_IP_SEGMENT(ip, 2) == (target)[1] && \
     GET_IP_SEGMENT(ip, 3) == (target)[2] && GET_IP_SEGMENT(ip, 4) == (target)[3]    \
