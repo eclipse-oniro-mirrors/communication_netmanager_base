@@ -132,10 +132,12 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
     const auto &data = eventData.GetData();
     const auto &code = eventData.GetCode();
     if (action == COMMON_EVENT_POWER_SAVE_MODE_CHANGED) {
+#ifdef NETMGR_POWER_SAVE_ENABLE
         bool isPowerSave = (code == SAVE_MODE || code == LOWPOWER_MODE);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->powerSaveMode = isPowerSave;
         receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
+#endif
         return;
     }
 
