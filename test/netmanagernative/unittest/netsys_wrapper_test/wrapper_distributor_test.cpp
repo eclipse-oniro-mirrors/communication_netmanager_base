@@ -144,14 +144,16 @@ void WrapperDistributorTest::TearDown() {}
 HWTEST_F(WrapperDistributorTest, SocketErrorTest001, TestSize.Level1)
 {
     int32_t testSocket = -1;
-    std::unique_ptr<WrapperDistributor> receiver = std::make_unique<WrapperDistributor>(testSocket, TEST_FORMAT, EXTERN_MUTEX);
+    std::unique_ptr<WrapperDistributor> receiver = std::make_unique<WrapperDistributor>(testSocket, TEST_FORMAT,
+                                                                                        EXTERN_MUTEX);
     ASSERT_NE(receiver, nullptr);
 }
 
 HWTEST_F(WrapperDistributorTest, FormatErrorTest001, TestSize.Level1)
 {
     int32_t testFormat = 6;
-    std::unique_ptr<WrapperDistributor> distributor = std::make_unique<WrapperDistributor>(TEST_SOCKET, testFormat, EXTERN_MUTEX);
+    std::unique_ptr<WrapperDistributor> distributor = std::make_unique<WrapperDistributor>(TEST_SOCKET, testFormat,
+                                                                                           EXTERN_MUTEX);
     ASSERT_NE(distributor, nullptr);
 }
 
