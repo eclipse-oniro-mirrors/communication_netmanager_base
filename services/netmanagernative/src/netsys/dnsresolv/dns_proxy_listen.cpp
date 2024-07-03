@@ -230,9 +230,17 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
 {
     NETNATIVE_LOG_D("epoll got request from client.");
     auto recvBuff = std::make_unique<RecvBuff>();
+    if (recvBuff == nullptr) {
+        NETNATIVE_LOGE("recvBuff mem failed");
+        return;
+    }
     (void)memset_s(recvBuff->questionsBuff, MAX_REQUESTDATA_LEN, 0, MAX_REQUESTDATA_LEN);
 
     auto clientAddr = std::make_unique<AlignedSockAddr>();
+    if (clientAddr == nullptr) {
+        NETNATIVE_LOGE("clientAddr mem failed");
+        return;
+    }
     int32_t proxySocket = proxySockFd_;
     if (family == AF_INET) {
         socklen_t len = sizeof(sockaddr_in);
