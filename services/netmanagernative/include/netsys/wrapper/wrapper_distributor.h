@@ -26,13 +26,15 @@ namespace OHOS {
 namespace nmd {
 class NET_SYMBOL_VISIBLE WrapperDistributor {
 public:
-    WrapperDistributor(int32_t socket, const int32_t format);
+    WrapperDistributor(int32_t socket, const int32_t format, std::mutex& externMutex);
     ~WrapperDistributor() = default;
 
     int32_t Start();
     int32_t Stop();
     int32_t
         RegisterNetlinkCallbacks(std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks);
+    void SetUseSelfMutex(bool flag);
+    std::mutex& GetMutex();
 
 private:
     void HandleDecodeSuccess(const std::shared_ptr<NetsysEventMessage> &message);
@@ -56,6 +58,8 @@ private:
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
     std::mutex netlinkCallbacksMutex_;
+    bool useSelftMutex_ = false;
+    std::mutex& externMutex_;
 };
 } // namespace nmd
 } // namespace OHOS
