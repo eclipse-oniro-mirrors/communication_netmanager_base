@@ -37,6 +37,7 @@ using namespace NetsysNative;
 constexpr int32_t TEST_SOCKET = 112;
 constexpr int32_t TEST_FORMAT = NetlinkDefine::NETLINK_FORMAT_BINARY_UNICAST;
 constexpr const char *WIFI_AP_DEFAULT_IFACE_NAME = "wlan0";
+mutex EXTERN_MUTEX;
 
 class NotifyCallbackImp : public NotifyCallbackStub {
 public:
@@ -129,7 +130,7 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<WrapperDistributor> instance_ =
-        std::make_shared<WrapperDistributor>(TEST_SOCKET, TEST_FORMAT);
+        std::make_shared<WrapperDistributor>(TEST_SOCKET, TEST_FORMAT, EXTERN_MUTEX);
 };
 
 void WrapperDistributorTest::SetUpTestCase() {}
@@ -143,14 +144,14 @@ void WrapperDistributorTest::TearDown() {}
 HWTEST_F(WrapperDistributorTest, SocketErrorTest001, TestSize.Level1)
 {
     int32_t testSocket = -1;
-    std::unique_ptr<WrapperDistributor> receiver = std::make_unique<WrapperDistributor>(testSocket, TEST_FORMAT);
+    std::unique_ptr<WrapperDistributor> receiver = std::make_unique<WrapperDistributor>(testSocket, TEST_FORMAT, EXTERN_MUTEX);
     ASSERT_NE(receiver, nullptr);
 }
 
 HWTEST_F(WrapperDistributorTest, FormatErrorTest001, TestSize.Level1)
 {
     int32_t testFormat = 6;
-    std::unique_ptr<WrapperDistributor> distributor = std::make_unique<WrapperDistributor>(TEST_SOCKET, testFormat);
+    std::unique_ptr<WrapperDistributor> distributor = std::make_unique<WrapperDistributor>(TEST_SOCKET, testFormat, EXTERN_MUTEX);
     ASSERT_NE(distributor, nullptr);
 }
 

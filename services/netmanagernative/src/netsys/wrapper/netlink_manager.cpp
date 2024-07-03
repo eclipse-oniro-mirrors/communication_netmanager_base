@@ -110,12 +110,6 @@ NetlinkManager::~NetlinkManager()
         callbacks_->clear();
         callbacks_ = nullptr;
     }
-    for (auto &it : distributorMap_) {
-        if (it.second == nullptr) {
-            continue;
-        }
-        it.second->SetUseSelfMutex(true);
-    }
 }
 
 int32_t NetlinkManager::StartListener()

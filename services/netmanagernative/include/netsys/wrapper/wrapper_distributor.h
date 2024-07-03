@@ -33,8 +33,6 @@ public:
     int32_t Stop();
     int32_t
         RegisterNetlinkCallbacks(std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks);
-    void SetUseSelfMutex(bool flag);
-    std::mutex& GetMutex();
 
 private:
     void HandleDecodeSuccess(const std::shared_ptr<NetsysEventMessage> &message);
@@ -57,9 +55,7 @@ private:
 
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
-    std::mutex netlinkCallbacksMutex_;
-    bool useSelftMutex_ = false;
-    std::mutex& externMutex_;
+    std::mutex& netlinkCallbacksMutex_;
 };
 } // namespace nmd
 } // namespace OHOS
