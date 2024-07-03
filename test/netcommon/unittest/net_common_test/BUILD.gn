@@ -31,12 +31,15 @@ ohos_unittest("net_common_test") {
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETMANAGER_BASE_ROOT/test/security",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "broadcast_manager_test.cpp",
     "errorcode_convertor_test.cpp",
+    "net_datashare_utils_test.cpp",
     "net_manager_center_test.cpp",
     "net_mgr_log_wrapper_test.cpp",
     "net_setting_test.cpp",
@@ -57,6 +60,8 @@ ohos_unittest("net_common_test") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
