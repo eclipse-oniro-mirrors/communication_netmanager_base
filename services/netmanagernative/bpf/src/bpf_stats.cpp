@@ -118,9 +118,9 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
         if (pName != nullptr) {
             tempStats.iface_ = pName;
         }
-        if (k.ifIndex == SIM_WLAN_IF_INDEX) {
+        if (k.ifType == IFACE_TYPE_WIFI) {
             tempStats.iface_ = WIFI_IFACE;
-        } else if (k.ifIndex == SIM_CELLULAR_IF_INDEX) {
+        } else if (k.ifType == IFACE_TYPE_CELLULAR) {
             tempStats.iface_ = CELLULAR_IFACE;
         }
         tempStats.rxBytes_ = v.rxBytes;

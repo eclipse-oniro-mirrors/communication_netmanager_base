@@ -199,6 +199,20 @@ static inline __u64 check_broker_policy(uint64_t uid)
     return network_access_uid;
 }
 
+static inline __u8 get_iface_type(__u32 ipv4)
+{
+    if (IS_MATCHED_IP(ipv4, WLAN_IPv4)) {
+        return IFACE_TYPE_WIFI;
+    }
+    if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
+        return IFACE_TYPE_CELLULAR;
+    }
+    if (IS_MATCHED_IP(ipv4, SPECIAL_IPv4)) {
+        return IFACE_TYPE_WIFI;
+    }
+    return 0;
+}
+
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
@@ -258,16 +272,12 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
     }
 
-    if (sock_uid < SIM_UID_MAX ||
+    if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
         if (value_uid_sim == NULL) {
-            __u32 simIfIndex = skb->ifindex;
-            if (IS_MATCHED_IP(skb->local_ip4, WLAN_IPv4)) {
-                simIfIndex = SIM_WLAN_IF_INDEX;
-            }
-            key_sim.ifIndex = simIfIndex;
+            key_sim.ifType = get_iface_type(skb->local_ip4);
             app_uid_sim_stats_value newValue = {};
             bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
             value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -351,16 +361,12 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
     }
 
-    if (sock_uid < SIM_UID_MAX ||
+    if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
         if (value_uid_sim == NULL) {
-            __u32 simIfIndex = skb->ifindex;
-            if (IS_MATCHED_IP(skb->local_ip4, WLAN_IPv4)) {
-                simIfIndex = SIM_WLAN_IF_INDEX;
-            }
-            key_sim.ifIndex = simIfIndex;
+            key_sim.ifType = get_iface_type(skb->local_ip4);
             app_uid_sim_stats_value newValue = {};
             bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
             value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
