@@ -199,7 +199,7 @@ static inline __u64 check_broker_policy(uint64_t uid)
     return network_access_uid;
 }
 
-static inline __u8 get_iface_type(__u32 ipv4)
+static inline __u32 get_iface_type(__u32 ipv4)
 {
     if (IS_MATCHED_IP(ipv4, WLAN_IPv4)) {
         return IFACE_TYPE_WIFI;
