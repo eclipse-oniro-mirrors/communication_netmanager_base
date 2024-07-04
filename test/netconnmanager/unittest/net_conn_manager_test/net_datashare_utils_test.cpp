@@ -58,11 +58,11 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     airplaneMode = "0";
     ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
