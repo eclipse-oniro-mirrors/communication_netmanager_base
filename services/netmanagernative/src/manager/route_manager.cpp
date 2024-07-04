@@ -48,6 +48,7 @@ namespace {
 constexpr int32_t RULE_LEVEL_CLAT_TUN = 8000;
 constexpr int32_t RULE_LEVEL_VPN_OUTPUT_TO_LOCAL = 9000;
 constexpr int32_t RULE_LEVEL_SECURE_VPN = 10000;
+constexpr int32_t RULE_LEVEL_INTERNAL_VIRTUAL_NETWORK = 10500;
 constexpr int32_t RULE_LEVEL_EXPLICIT_NETWORK = 11000;
 constexpr int32_t RULE_LEVEL_OUTPUT_IFACE_VPN = 11500;
 constexpr int32_t RULE_LEVEL_OUTPUT_INTERFACE = 12000;
@@ -248,6 +249,9 @@ int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std
 int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
 {
     NETNATIVE_LOGI("ModifyVirtualNetBasedRules,add===%{public}d", add);
+    if (IsInternalNetId(netId)) {
+        return NETMANAGER_SUCCESS;
+    }
     uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, ifaceName);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
@@ -312,12 +316,24 @@ int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &int
                                            const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add)
 {
     NETNATIVE_LOGI("UpdateVirtualNetwork, add == %{public}d", add);
-    uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, interfaceName);
+    int32_t ret = ROUTEMANAGER_SUCCESS;
+    uint32_t table = RT_TABLE_UNSPEC;
+    if (IsInternalNetId(netId)) {
+        table = GetRouteTableFromType(RouteManager::INTERFACE, interfaceName);
+        if (table == RT_TABLE_UNSPEC) {
+            NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
+            return ROUTEMANAGER_ERROR;
+        }
+        for (auto range : uidRanges) {
+            ret += UpdateInternalVirtualNetworkUidRangeRule(table, range.begin_, range.end_, add);
+        }
+        return ret;
+    }
+    table = GetRouteTableFromType(RouteManager::VPN_NETWORK, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
         return ROUTEMANAGER_ERROR;
     }
-    int32_t ret = ROUTEMANAGER_SUCCESS;
     for (auto range : uidRanges) {
         // If the rule fails to be added, continue to execute the next rule
         ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add);
@@ -325,6 +341,24 @@ int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &int
         ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
     }
     return ret;
+}
+
+int32_t RouteManager::UpdateInternalVirtualNetworkUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
+{
+    Fwmark fwmark;
+    Fwmark mask;
+    fwmark.protectedFromVpn = false;
+    mask.protectedFromVpn = false;
+
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_INTERNAL_VIRTUAL_NETWORK;
+    ruleInfo.ruleFwmark = fwmark.intValue;
+    ruleInfo.ruleMask = mask.intValue;
+    ruleInfo.ruleIif = RULEIIF_LOOPBACK;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, uidStart, uidEnd);
 }
 
 int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
@@ -924,7 +958,8 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
 uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
     NETNATIVE_LOGI("FindTableByInterfacename netId %{public}d", netId);
-    if (NetManagerStandard::IsInternalNetId(netId)) {
+
+    if (NetManagerStandard::IsInternalNetId(netId) && interfaceName .find("tun") == std::string::npos) {
         return ROUTE_INTERNAL_DEFAULT_TABLE;
     }
     auto iter = interfaceToTable_.find(interfaceName);

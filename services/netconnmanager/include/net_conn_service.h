@@ -362,6 +362,8 @@ public:
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
+    int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId) override;
+    int32_t UnregisterInternalVirtualNetwork(int32_t &netId) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -466,6 +468,8 @@ private:
     }
     uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId);
     uint32_t FindSupplierToIncreaseScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t supplierId);
+    int32_t RegisterInternalVirtualNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId);
+    int32_t UnregisterInternalVirtualNetworkAsync(int32_t &netId);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
@@ -485,6 +489,7 @@ private:
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
+    NET_NETWORK_MAP internalVirtualnetworks_;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
