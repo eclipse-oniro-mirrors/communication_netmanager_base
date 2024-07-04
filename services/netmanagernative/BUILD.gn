@@ -53,6 +53,7 @@ netsys_native_manager_sources = [
   "src/manager/route_manager.cpp",
   "src/manager/sharing_manager.cpp",
   "src/manager/traffic_manager.cpp",
+  "src/manager/vnic_manager.cpp",
   "src/manager/vpn_manager.cpp",
   "src/net_diag_callback_proxy.cpp",
   "src/netsys/clat_utils.cpp",

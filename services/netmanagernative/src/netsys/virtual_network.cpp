@@ -18,9 +18,11 @@
 #include <cinttypes>
 
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "route_manager.h"
 #include "vpn_manager.h"
+#include "vnic_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -66,14 +68,21 @@ int32_t VirtualNetwork::RemoveUids(const std::vector<UidRange> &uidVec)
 
 int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
 {
+    int32_t ret = NETMANAGER_SUCCESS;
     NETNATIVE_LOGI("Entry VirtualNetwork::AddInterface %{public}s", interfaceName.c_str());
     if (ExistInterface(interfaceName)) {
         NETNATIVE_LOGW("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
 
-    if (VpnManager::GetInstance().CreateVpnInterface()) {
-        NETNATIVE_LOGE("create vpn interface error");
+    if (IsInternalNetId(netId_)) {
+        ret = VnicManager::GetInstance().CreateVnicInterface();
+    } else {
+        ret = VpnManager::GetInstance().CreateVpnInterface();
+    }
+
+    if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("create virtual tun interface error");
         return NETMANAGER_ERROR;
     }
 
@@ -100,7 +109,13 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    VpnManager::GetInstance().DestroyVpnInterface();
+    NETNATIVE_LOGI("destroy virtual interface");
+    if (IsInternalNetId(netId_)) {
+        VnicManager::GetInstance().DestroyVnicInterface();
+    } else {
+        VpnManager::GetInstance().DestroyVpnInterface();
+    }
+
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;

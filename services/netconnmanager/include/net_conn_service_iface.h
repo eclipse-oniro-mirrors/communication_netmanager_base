@@ -26,6 +26,8 @@ class NetConnServiceIface : public NetConnBaseService {
 public:
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
+    int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId);
+    int32_t UnregisterInternalVirtualNetwork(int32_t &netId);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;

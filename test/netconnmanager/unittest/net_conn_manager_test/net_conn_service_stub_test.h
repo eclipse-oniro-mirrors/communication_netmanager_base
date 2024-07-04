@@ -293,6 +293,16 @@ public:
     {
         return 0;
     }
+
+    int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId) override
+    {
+        return 0;
+    }
+
+    int32_t UnregisterInternalVirtualNetwork(int32_t &netId) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

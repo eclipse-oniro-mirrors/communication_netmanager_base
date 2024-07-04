@@ -70,6 +70,73 @@ int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
     return reply.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+{
+    if (netLinkInfo == nullptr) {
+        NETMGR_LOG_E("netLinkInfo is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!netLinkInfo->Marshalling(data)) {
+        NETMGR_LOG_E("proxy Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_VIRTUAL_NET_SUPPLIER), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadInt32(netId)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::UnregisterInternalVirtualNetwork(int32_t &netId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_VIRTUAL_NET_SUPPLIER), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
+
 int32_t NetConnServiceProxy::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {

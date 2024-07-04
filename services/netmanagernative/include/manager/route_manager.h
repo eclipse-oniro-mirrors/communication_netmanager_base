@@ -284,6 +284,7 @@ private:
     static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
     static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
 
+    static int32_t UpdateInternalVirtualNetworkUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
     static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
     static int32_t UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
                                                     uid_t uidStart, uid_t uidEnd, bool add);

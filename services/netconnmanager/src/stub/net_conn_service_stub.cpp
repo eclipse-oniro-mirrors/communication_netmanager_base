@@ -49,6 +49,10 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_VIRTUAL_NET_SUPPLIER)] = {
+        &NetConnServiceStub::OnRegisterInternalVirtualNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_VIRTUAL_NET_SUPPLIER)] = {
+        &NetConnServiceStub::OnUnregisterInternalVirtualNetwork, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
         &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
@@ -291,6 +295,42 @@ int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, Message
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId;
+
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
+    int32_t ret = RegisterInternalVirtualNetwork(netLinkInfo, netId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("supplierId[%{public}d].", netId);
+        if (!reply.WriteUint32(netId)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUnregisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId;
+
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = UnregisterInternalVirtualNetwork(netId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 

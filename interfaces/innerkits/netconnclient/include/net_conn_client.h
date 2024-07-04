@@ -432,6 +432,10 @@ public:
 
     int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
 
+    int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId);
+
+    int32_t UnregisterInternalVirtualNetwork(int32_t &netId);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

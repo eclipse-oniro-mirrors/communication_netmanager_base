@@ -1102,6 +1102,9 @@ int32_t NetConnService::GenerateInternalNetId()
         if (networks_.find(value) == networks_.end()) {
             return value;
         }
+        if (internalVirtualnetworks_.find(value) == internalVirtualnetworks_.end()) {
+            return value;
+        }
     }
     return INVALID_NET_ID;
 }
@@ -2565,5 +2568,64 @@ void NetConnService::NetConnListener::OnReceiveEvent(const EventFwk::CommonEvent
                  eventData.GetWant().GetAction().c_str(), eventData.GetData().c_str(), eventData.GetCode());
     eventReceiver_(eventData);
 }
+int32_t NetConnService::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, &netLinkInfo, &netId, &result]() {
+            result = this->RegisterInternalVirtualNetworkAsync(netLinkInfo, netId);
+        });
+    }
+    return result;
+}
+
+int32_t NetConnService::RegisterInternalVirtualNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+{
+    NETMGR_LOG_I("add new internal virtual network");
+    int32_t id = GenerateInternalNetId();
+    if (id == INVALID_NET_ID) {
+        NETMGR_LOG_E("GenerateNetId fail");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    NetDetectionHandler nonDetect;
+    std::shared_ptr<NetConnEventHandler> nonEvent{nullptr};
+    std::shared_ptr<Network> network =
+        std::make_shared<Network>(id, 0, nonDetect, BEARER_VPN, nonEvent);
+
+    network->UpdateBasicNetwork(true);
+    if (!network->UpdateNetLinkInfo(*netLinkInfo)) {
+        return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    internalVirtualnetworks_[id] = network;
+    netId = id;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::UnregisterInternalVirtualNetwork(int32_t &netId)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, &netId, &result]() {
+            result = this->UnregisterInternalVirtualNetworkAsync(netId);
+        });
+    }
+    return result;
+}
+
+int32_t NetConnService::UnregisterInternalVirtualNetworkAsync(int32_t &netId)
+{
+    NETMGR_LOG_I("del internal virtual network");
+    auto iterNetwork = internalVirtualnetworks_.find(netId);
+    if (iterNetwork == networks_.end()) {
+        NETMGR_LOG_E("cannot find network");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+    internalVirtualnetworks_[netId]->UpdateBasicNetwork(false);
+    internalVirtualnetworks_.erase(netId);
+    netId = INVALID_NET_ID;
+    return NETMANAGER_SUCCESS;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

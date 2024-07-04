@@ -30,6 +30,16 @@ int32_t NetConnServiceIface::GetIfaceNameByType(NetBearType bearerType, const st
     return NetConnService::GetInstance()->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
+int32_t NetConnServiceIface::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+{
+    return NetConnService::GetInstance()->RegisterInternalVirtualNetwork(netLinkInfo, netId);
+}
+
+int32_t NetConnServiceIface::UnregisterInternalVirtualNetwork(int32_t &netId)
+{
+    return NetConnService::GetInstance()->UnregisterInternalVirtualNetwork(netId);
+}
+
 int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
