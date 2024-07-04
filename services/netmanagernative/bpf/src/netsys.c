@@ -207,9 +207,6 @@ static inline __u32 get_iface_type(__u32 ipv4)
     if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
         return IFACE_TYPE_CELLULAR;
     }
-    if (IS_MATCHED_IP(ipv4, SPECIAL_IPv4)) {
-        return IFACE_TYPE_WIFI;
-    }
     return 0;
 }
 
@@ -274,10 +271,10 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
-        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
+                                         .ifType = get_iface_type(skb->local_ip4)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
         if (value_uid_sim == NULL) {
-            key_sim.ifType = get_iface_type(skb->local_ip4);
             app_uid_sim_stats_value newValue = {};
             bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
             value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -363,10 +360,10 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
-        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
+                                         .ifType = get_iface_type(skb->local_ip4)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
         if (value_uid_sim == NULL) {
-            key_sim.ifType = get_iface_type(skb->local_ip4);
             app_uid_sim_stats_value newValue = {};
             bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
             value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
