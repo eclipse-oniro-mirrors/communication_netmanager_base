@@ -50,7 +50,7 @@ const std::map<int32_t, DistributorParam> distributorParamList_ = {
 
 std::map<int32_t, std::unique_ptr<WrapperDistributor>> distributorMap_;
 
-bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param)
+bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param, std::mutex& externMutex)
 {
     sockaddr_nl sockAddr;
     int32_t size = BUFFER_SIZE;
@@ -89,7 +89,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
         return false;
     }
     NETNATIVE_LOGI("CreateNetlinkDistributor netlinkType: %{public}d, socketFd: %{public}d", netlinkType, socketFd);
-    distributorMap_[netlinkType] = std::make_unique<WrapperDistributor>(socketFd, param.format);
+    distributorMap_[netlinkType] = std::make_unique<WrapperDistributor>(socketFd, param.format, externMutex);
     return true;
 }
 } // namespace
@@ -97,7 +97,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
 NetlinkManager::NetlinkManager()
 {
     for (const auto &it : distributorParamList_) {
-        CreateNetlinkDistributor(it.first, it.second);
+        CreateNetlinkDistributor(it.first, it.second, linkCallbackMutex_);
     }
     if (callbacks_ == nullptr) {
         callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
@@ -143,11 +143,11 @@ int32_t NetlinkManager::StopListener()
 
 int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback)
 {
+    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     if (callback == nullptr) {
         NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
-    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     for (const auto &cb : *callbacks_) {
         if (cb == callback) {
             NETNATIVE_LOGI("callback is already registered");
@@ -161,11 +161,11 @@ int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallba
 
 int32_t NetlinkManager::UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback)
 {
+    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     if (callback == nullptr) {
         NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
-    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     for (auto it = callbacks_->begin(); it != callbacks_->end(); ++it) {
         if (*it == callback) {
             callbacks_->erase(it);
