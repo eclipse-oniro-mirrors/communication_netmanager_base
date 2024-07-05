@@ -216,7 +216,7 @@ std::optional<HttpProxy> HttpProxy::FromString(const std::string &str)
 
     errno = 0;
     port = std::strtol(portContent.c_str(), &str_end, BASE_DEC);
-    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) || 
+    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) ||
         str_end == portContent.c_str()) {
         return std::nullopt;
     }
