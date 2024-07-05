@@ -18,13 +18,14 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <errno.h>
+#include <cerrno>
 #include <sstream>
 
 namespace OHOS {
 namespace NetManagerStandard {
 static const size_t MAX_EXCLUSION_SIZE = 500;
 static const size_t MAX_URL_SIZE = 2048;
+static const size_t BASE_DEC = 10;
 
 HttpProxy::HttpProxy() : port_(0) {}
 
@@ -190,7 +191,8 @@ std::list<std::string> ParseProxyExclusionList(const std::string &exclusionList)
     return exclusionItems;
 }
 
-std::optional<HttpProxy> HttpProxy::FromString(const std::string &str) {
+std::optional<HttpProxy> HttpProxy::FromString(const std::string &str)
+{
     using iter_t = std::string::const_iterator;
     iter_t hostStart = str.cbegin();
     iter_t proxyContentEnd = str.end();
@@ -213,8 +215,9 @@ std::optional<HttpProxy> HttpProxy::FromString(const std::string &str) {
     char *str_end = nullptr;
 
     errno = 0;
-    port = std::strtol(portContent.c_str(), &str_end, 10);
-    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) || str_end == portContent.c_str()) {
+    port = std::strtol(portContent.c_str(), &str_end, BASE_DEC);
+    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) || 
+        str_end == portContent.c_str()) {
         return std::nullopt;
     }
 
