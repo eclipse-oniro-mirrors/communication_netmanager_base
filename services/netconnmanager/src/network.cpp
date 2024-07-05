@@ -691,7 +691,8 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
     if (eventHandler_) {
         auto network = shared_from_this();
         eventHandler_->PostAsyncTask(
-            [netDetectionState, urlRedirect, network]() { network->HandleNetMonitorResult(netDetectionState, urlRedirect); },
+            [netDetectionState, urlRedirect,
+            network]() { network->HandleNetMonitorResult(netDetectionState, urlRedirect); },
             0);
     }
 }
