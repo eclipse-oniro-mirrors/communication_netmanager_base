@@ -221,6 +221,7 @@ private:
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
 
     std::atomic<bool> isIfaceNameIdentMapLoaded_ = false;
+    ffrt::mutex ifaceIdentMapLock_;
     std::unordered_map<std::string, std::string> ifaceNameIdentMap_;
 
     void LoadIfaceNameIdentMaps();

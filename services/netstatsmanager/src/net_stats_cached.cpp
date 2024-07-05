@@ -301,6 +301,11 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
         NETMGR_LOG_D("ifaceNameIdentMaps has been loaded from netConnClient.");
         return;
     }
+    std::lock_guard<ffrt::mutex> lock(ifaceIdentMapLock_);
+    if (isIfaceNameIdentMapLoaded_.load()) {
+        NETMGR_LOG_D("ifaceNameIdentMaps has been loaded from netConnClient by other.");
+        return;
+    }
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
