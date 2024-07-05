@@ -168,5 +168,65 @@ std::string HttpProxy::ToString() const
     }
     return s;
 }
+
+std::list<std::string> ParseProxyExclusionList(const std::string &exclusionList)
+{
+    std::list<std::string> exclusionItems;
+    std::stringstream ss(exclusionList);
+    std::string item;
+
+    while (std::getline(ss, item, ',')) {
+        size_t start = item.find_first_not_of(" \t");
+        size_t end = item.find_last_not_of(" \t");
+        if (start != std::string::npos && end != std::string::npos) {
+            item = item.substr(start, end - start + 1);
+        }
+        exclusionItems.push_back(item);
+    }
+    return exclusionItems;
+}
+
+std::optional<HttpProxy> HttpProxy::FromString(const std::string &str) {
+    using iter_t = std::string::const_iterator;
+    iter_t hostStart = str.cbegin();
+    iter_t proxyContentEnd = str.end();
+    iter_t hostEnd = std::find(hostStart, proxyContentEnd, '\t');
+    if (hostEnd == proxyContentEnd) {
+        return std::nullopt;
+    }
+    auto host = std::string(hostStart, hostEnd);
+
+    hostEnd += 1;
+    iter_t portStart = hostEnd;
+    iter_t portEnd = std::find(portStart, proxyContentEnd, '\t');
+    if (portEnd == proxyContentEnd) {
+        return std::nullopt;
+    }
+    std::string portContent = std::string(portStart, portEnd);
+    
+    // 0 used as default value for port in HttpProxy
+    long port = 0;
+    char *str_end = nullptr;
+
+    errno = 0;
+    port = std::strtol(portContent.c_str(), &str_end, 10);
+    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) || str_end == portContent.c_str()) {
+        return std::nullopt;
+    }
+
+    if (port < 0 || port > std::numeric_limits<uint16_t>::max()) {
+        // out of 16 bits
+        return std::nullopt;
+    }
+
+    std::list<std::string> exclusionList;
+    if (portEnd != proxyContentEnd) {
+        portEnd += 1;
+        iter_t exclusionListStart = portEnd;
+        std::string exclusionListContent = std::string(exclusionListStart, proxyContentEnd);
+        exclusionList = ParseProxyExclusionList(exclusionListContent);
+    }
+    return NetManagerStandard::HttpProxy(host, static_cast<uint16_t>(port), exclusionList);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

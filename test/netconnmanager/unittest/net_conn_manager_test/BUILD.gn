@@ -52,6 +52,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
     "net_monitor_test.cpp",
+    "net_proxy_from_string_test.cpp",
     "net_proxy_userinfo_test.cpp",
     "net_score_test.cpp",
     "net_specifier_test.cpp",
