@@ -14,8 +14,12 @@
  */
 
 #include "net_mgr_log_wrapper.h"
-
 #include "http_proxy.h"
+
+#include <cstdint>
+#include <cstdlib>
+#include <errno.h>
+#include <sstream>
 
 namespace OHOS {
 namespace NetManagerStandard {
