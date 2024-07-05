@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         return 0;
     }
     if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_AVAILABLE)) {
-        NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_AVAILABLE);
+        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_AVAILABLE);
         return 0;
     }
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, new NetHandle(*netHandle), NetAvailableCallback);
@@ -53,7 +53,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         return 0;
     }
     if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_CAPABILITIES_CHANGE)) {
-        NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_CAPABILITIES_CHANGE);
+        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CAPABILITIES_CHANGE);
         return 0;
     }
     auto pair = new std::pair<NetHandle *, NetAllCapabilities *>;
@@ -76,7 +76,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         return 0;
     }
     if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_CONNECTION_PROPERTIES_CHANGE)) {
-        NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
+        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
         return 0;
     }
     auto pair = new std::pair<NetHandle *, NetLinkInfo *>;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +153,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t ru
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_I("NotifyNetUidRuleChange uid= %{public}d policy= %{public}d", uid, rule);
+    NETMGR_LOG_I("NetUidRuleChange uid=%{public}d policy=%{public}d", uid, rule);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidRuleChange(uid, rule);
@@ -165,7 +165,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 
 int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChangeAsync(bool isAllowed)
 {
-    NETMGR_LOG_D("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
+    NETMGR_LOG_D("NotifyNetBackgroundPolicyChange isAllowed[%{public}d]", isAllowed);
     if (!netPolicyCallbackFfrtQueue_) {
         NETMGR_LOG_E("FFRT Init Fail");
         return NETMANAGER_ERR_PARAMETER_ERROR;

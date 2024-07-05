@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -281,7 +281,7 @@ bool NetSupplier::RequestToConnect(uint32_t reqId, const int32_t registerType)
 
 int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
 {
-    NETMGR_LOG_I("Request[%{public}d] select supplier[%{public}d, %{public}s] as best network", reqId, supplierId_,
+    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", reqId, supplierId_,
                  netSupplierIdent_.c_str());
     if (requestList_.find(reqId) == requestList_.end()) {
         requestList_.insert(reqId);
@@ -327,7 +327,7 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
-    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
+    NETMGR_LOG_I("CancelRequest netId:%{public}u", reqId);
     requestList_.erase(reqId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());

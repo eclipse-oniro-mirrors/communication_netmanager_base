@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     IterateDnsReportResults(netDnsResultReport);
     netDnsResult_.Iterate([this](int32_t netid, NetDnsResult dnsResult) {
         double failRate = static_cast<double>(dnsResult.failReports_) / dnsResult.totalReports_;
-        NETMGR_LOG_I("netId:%{public}d, totalReports:%{public}d, failReports:%{public}d",
+        NETMGR_LOG_I("Reports: netId:%{public}d fail-total:%{public}d-%{public}d",
                      netid, dnsResult.totalReports_, dnsResult.failReports_);
         if (failRate > FAIL_RATE) {
             uint32_t failValue_ = 0;

@@ -497,7 +497,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     }
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
-        NETMGR_LOG_E("RegisterNetConnCallback find same callback, callUid[%{public}u], reqId[%{public}u]", callingUid,
+        NETMGR_LOG_E("FindSameCallback callUid:%{public}u reqId:%{public}u", callingUid,
                      reqId);
         return NET_CONN_ERR_SAME_CALLBACK;
     }
@@ -587,11 +587,11 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     RegisterType registerType = INVALIDTYPE;
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId, registerType) || registerType == INVALIDTYPE) {
-        NETMGR_LOG_E("UnregisterNetConnCallback can not find callback, callUid[%{public}u], reqId[%{public}u]",
+        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u",
                      callingUid, reqId);
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
-    NETMGR_LOG_I("UnregisterNetConnCallback start, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
+    NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
     DecreaseNetConnCallbackCntForUid(callingUid, registerType);
     
     NET_ACTIVATE_MAP::iterator iterActive;
@@ -626,7 +626,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         iterActive = netActivates_.erase(iterActive);
         RemoveClientDeathRecipient(callback);
     }
-    NETMGR_LOG_I("UnregisterNetConnCallback end, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
+    NETMGR_LOG_I("end, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -863,13 +863,13 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
-    NETMGR_LOG_I("Make a new request, request id:[%{public}u]", reqId);
+    NETMGR_LOG_I("New request [id:%{public}u]", reqId);
     netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
         NETMGR_LOG_I(
-            "Match to optimal supplier:[%{public}d %{public}s], netId[%{public}d], score[%{public}d], "
+            "Match to optimal supplier:[%{public}d %{public}s] netId[%{public}d] score[%{public}d] "
             "reqId[%{public}u]",
             bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore, reqId);
         bestNet->SelectAsBestNetwork(reqId);
@@ -1248,7 +1248,7 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
         NETMGR_LOG_E("Input parameter is null.");
         return;
     }
-    NETMGR_LOG_I("Callback net available for supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
+    NETMGR_LOG_I("CallbackForAvailable supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
                  supplier->GetNetSupplierIdent().c_str());
     sptr<NetHandle> netHandle = supplier->GetNetHandle();
     callback->NetAvailable(netHandle);
@@ -1588,7 +1588,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         defaultNetSupplier_->GetHttpProxy(httpProxy);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("Return default network's http proxy as default, cost=%{public}lld",  durationNs.count());
+        NETMGR_LOG_I("Use default http proxy, cost=%{public}lld",  durationNs.count());
         return NETMANAGER_SUCCESS;
     }
     NETMGR_LOG_I("No default http proxy.");
