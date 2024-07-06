@@ -120,7 +120,7 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 
     LoadIfaceNameIdentMaps();
     ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
-        std::for_each(allInfos.begin(), allInfos.end(),[&k, &v](NetStatsInfo &item) {
+        std::for_each(allInfos.begin(), allInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.iface_ == k) {
                 item.ident_ = v;
             }
@@ -211,7 +211,7 @@ void NetStatsCached::CacheUidSimStats()
 
     LoadIfaceNameIdentMaps();
     ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
-        std::for_each(statsInfos.begin(), statsInfos.end(),[&k, &v](NetStatsInfo &item) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.iface_ == k) {
                 item.ident_ = v;
             }
