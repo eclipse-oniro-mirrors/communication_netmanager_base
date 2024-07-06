@@ -220,7 +220,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
-                                  std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) override;
+                                  SafeMap<std::string, std::string> &ifaceNameIdentMaps) override;
 
     /**
      * register network detection return result method

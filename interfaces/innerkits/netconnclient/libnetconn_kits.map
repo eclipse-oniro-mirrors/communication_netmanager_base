@@ -31,7 +31,7 @@
       "OHOS::NetManagerStandard::NetConnClient::HasDefaultNet(bool&)";
       "OHOS::NetManagerStandard::NetConnClient::IsDefaultNetMetered(bool&)";
       "OHOS::NetManagerStandard::NetConnClient::GetInstance()";
-      "OHOS::NetManagerStandard::NetConnClient::GetIfaceNameIdentMaps(OHOS::NetManagerStandard::NetBearType, std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetIfaceNameIdentMaps(OHOS::NetManagerStandard::NetBearType, OHOS::SafeMap<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetConnectionProperties(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetLinkInfo&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAllNets(std::__h::list<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>, std::__h::allocator<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>>>&)";
       "OHOS::NetManagerStandard::NetConnClient::IsPreferCellularUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";

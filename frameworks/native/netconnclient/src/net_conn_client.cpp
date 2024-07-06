@@ -351,7 +351,7 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 }
 
 int32_t NetConnClient::GetIfaceNameIdentMaps(NetBearType bearerType,
-                                             std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+                                             SafeMap<std::string, std::string> &ifaceNameIdentMaps)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {

@@ -46,7 +46,7 @@ public:
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
     int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
-                                  std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) override;
+                                  SafeMap<std::string, std::string> &ifaceNameIdentMaps) override;
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t NetDetection(int32_t netId) override;

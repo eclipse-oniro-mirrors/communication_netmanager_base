@@ -707,19 +707,23 @@ int32_t NetConnServiceStub::OnGetIfaceNameIdentMaps(MessageParcel &data, Message
         return NETMANAGER_ERR_INTERNAL;
     }
     NetBearType bearerType = static_cast<NetBearType>(netType);
-    std::unordered_map<std::string, std::string> ifaceNameIdentMaps;
+    SafeMap<std::string, std::string> ifaceNameIdentMaps;
     int32_t ret = GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.WriteUint32(ifaceNameIdentMaps.size())) {
+        if (!reply.WriteUint32(ifaceNameIdentMaps.Size())) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
-        for (const auto &item: ifaceNameIdentMaps) {
-            if (!reply.WriteString(item.first) || !reply.WriteString(item.second)) {
-                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        int32_t err = NETMANAGER_SUCCESS;
+        ifaceNameIdentMaps.Iterate([&err, &reply](const std::string &k, const std::string &v) -> void {
+            if (!reply.WriteString(k) || !reply.WriteString(v)) {
+                err = NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
+        });
+        if (err != NETMANAGER_SUCCESS) {
+            return err;
         }
     }
     return NETMANAGER_SUCCESS;

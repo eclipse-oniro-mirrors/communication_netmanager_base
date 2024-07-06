@@ -1519,7 +1519,7 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 }
 
 int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
-                                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+                                              SafeMap<std::string, std::string> &ifaceNameIdentMaps)
 {
     if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
@@ -1531,7 +1531,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
     }
     netConnEventHandler_->PostSyncTask([bearerType, &ifaceNameIdentMaps, this]() {
         NETMGR_LOG_I("Enter GetIfaceNameIdentMaps, netBearType=%{public}d", bearerType);
-        ifaceNameIdentMaps.clear();
+        ifaceNameIdentMaps.Clear();
         auto suppliers = GetNetSupplierFromList(bearerType);
         for (auto supplier: suppliers) {
             if (supplier == nullptr && !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
@@ -1546,7 +1546,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
                 continue;
             }
             std::string ident = network->GetNetLinkInfo().ident_;
-            ifaceNameIdentMaps[std::move(ifaceName)] = std::move(ident);
+            ifaceNameIdentMaps.EnsureInsert(std::move(ifaceName), std::move(ident));
         }
     });
     return NETMANAGER_SUCCESS;
