@@ -689,9 +689,10 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
     if (eventHandler_) {
-        eventHandler_->PostAsyncTask(
-            [netDetectionState, urlRedirect, this]() { this->HandleNetMonitorResult(netDetectionState, urlRedirect); },
-            0);
+        auto network = shared_from_this();
+        eventHandler_->PostAsyncTask([netDetectionState, urlRedirect,
+                                      network]() { network->HandleNetMonitorResult(netDetectionState, urlRedirect); },
+                                     0);
     }
 }
 
