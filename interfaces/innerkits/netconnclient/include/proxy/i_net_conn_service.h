@@ -33,6 +33,7 @@
 #include "net_specifier.h"
 #include "net_supplier_info.h"
 #include "conn_ipc_interface_code.h"
+#include "safe_map.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -59,7 +60,7 @@ public:
     virtual int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) = 0;
     virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
     virtual int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
-                                          std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) = 0;
+                                          SafeMap<std::string, std::string> &ifaceNameIdentMaps) = 0;
     virtual int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t NetDetection(int32_t netId) = 0;

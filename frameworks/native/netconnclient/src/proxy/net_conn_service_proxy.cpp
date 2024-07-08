@@ -582,7 +582,7 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
 }
 
 int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
-                                                   std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+                                                   SafeMap<std::string, std::string> &ifaceNameIdentMaps)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -616,7 +616,7 @@ int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
         if (!reply.ReadString(key) || !reply.ReadString(value)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
-        ifaceNameIdentMaps.emplace(key, value);
+        ifaceNameIdentMaps.EnsureInsert(key, value);
     }
     return ret;
 }

@@ -271,8 +271,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
-                                 std::unordered_map<std::string, std::string> &ifaceNameIdentMaps);
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType, SafeMap<std::string, std::string> &ifaceNameIdentMaps);
 
     /**
      * The interface is to bind socket

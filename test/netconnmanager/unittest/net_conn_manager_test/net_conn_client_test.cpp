@@ -1096,7 +1096,7 @@ HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    std::unordered_map<std::string, std::string> data;
+    SafeMap<std::string, std::string> data;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR,
                                                                                         data);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1410,7 +1410,7 @@ HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)
 {
     uint32_t invalidValue = INVALID_VALUE;
     NetBearType bearerType = static_cast<NetBearType>(invalidValue);
-    std::unordered_map<std::string, std::string> ifaceNameIdentMaps;
+    SafeMap<std::string, std::string> ifaceNameIdentMaps;
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 

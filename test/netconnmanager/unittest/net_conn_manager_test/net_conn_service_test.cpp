@@ -740,7 +740,7 @@ HWTEST_F(NetConnServiceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
 {
-    std::unordered_map<std::string, std::string> data;
+    SafeMap<std::string, std::string> data;
     auto ret = NetConnService::GetInstance()->GetIfaceNameIdentMaps(BEARER_CELLULAR, data);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

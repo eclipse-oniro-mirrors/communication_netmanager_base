@@ -26,6 +26,7 @@
 #include "net_stats_callback.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
+#include "safe_map.h"
 
 #include "ffrt_timer.h"
 
@@ -221,7 +222,7 @@ private:
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
 
     std::atomic<bool> isIfaceNameIdentMapLoaded_ = false;
-    std::unordered_map<std::string, std::string> ifaceNameIdentMap_;
+    SafeMap<std::string, std::string> ifaceNameIdentMap_;
 
     void LoadIfaceNameIdentMaps();
 

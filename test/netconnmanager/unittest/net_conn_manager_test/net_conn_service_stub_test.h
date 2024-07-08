@@ -142,7 +142,7 @@ public:
     }
 
     int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
-                                  std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) override
+                                  SafeMap<std::string, std::string> &ifaceNameIdentMaps) override
     {
         return 0;
     }

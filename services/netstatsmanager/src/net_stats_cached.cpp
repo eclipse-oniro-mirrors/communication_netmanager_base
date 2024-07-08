@@ -119,11 +119,17 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
     allInfos.insert(allInfos.end(), SimInfos.begin(), SimInfos.end());
 
     LoadIfaceNameIdentMaps();
+    ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
+        std::for_each(allInfos.begin(), allInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
     std::for_each(allInfos.begin(), allInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        info.ident_ = ifaceNameIdentMap_[info.iface_];
         NetStatsInfo tmp = GetIncreasedStats(info);
         if (tmp.HasNoData()) {
             return;
@@ -154,12 +160,18 @@ void NetStatsCached::CacheUidStats()
     }
 
     LoadIfaceNameIdentMaps();
+    ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
 
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        info.ident_ = ifaceNameIdentMap_[info.iface_];
         auto findRet = std::find_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidStatsInfo_.end()) {
@@ -198,12 +210,18 @@ void NetStatsCached::CacheUidSimStats()
     }
 
     LoadIfaceNameIdentMaps();
+    ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
 
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        info.ident_ = ifaceNameIdentMap_[info.iface_];
         info.uid_ = Sim_UID;
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
