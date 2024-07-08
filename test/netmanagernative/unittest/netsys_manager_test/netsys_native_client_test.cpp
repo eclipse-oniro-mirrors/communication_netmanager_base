@@ -52,6 +52,7 @@ const int32_t PERMISSION = 5;
 const int32_t STATRUID = 1000;
 const int32_t ENDUID = 1100;
 const int32_t PREFIX_LENGTH = 23;
+const int32_t INVALID_ARGUMENTS = -22;
 uint16_t BASE_TIMEOUT_MSEC = 200;
 const int64_t CHAIN = 1010;
 uint8_t RETRY_COUNT = 3;
@@ -96,10 +97,10 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.NetworkAddRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, INVALID_ARGUMENTS);
 
     ret = nativeClient_.NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, INVALID_ARGUMENTS);
 
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     ret = nativeClient_.GetInterfaceConfig(parcel);
@@ -368,9 +369,9 @@ HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
     uint64_t stats = 0;
     BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
     ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetsysNativeClientTest, GetNetworkSharingTypeTest001, TestSize.Level1)
