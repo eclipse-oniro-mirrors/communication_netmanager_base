@@ -247,7 +247,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface, BEARER_DEFAULT);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -262,7 +262,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, BEARER_DEFAULT);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -278,7 +278,7 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->RemoveInterfaceFromNetwork(INTERNAL_NETID, iface);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**

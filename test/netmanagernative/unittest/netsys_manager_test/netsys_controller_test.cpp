@@ -1046,6 +1046,16 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest003, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
+HWTEST_F(NetsysControllerTest, SetEnableIpv6Test001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = NetsysController::GetInstance().SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = NetsysController::GetInstance().SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
 {
     NetsysController::GetInstance().netsysService_ = nullptr;
@@ -1063,6 +1073,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
 
     ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    uint64_t stats = 0;
+    ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
@@ -1070,9 +1084,9 @@ HWTEST_F(NetsysControllerTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
     uint32_t on = 0;
     std::string interface = "wlan0";
     int32_t ret = NetsysController::GetInstance().SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().SetEnableIpv6(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, SetNetworkAccessPolicy001, TestSize.Level1)
