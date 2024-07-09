@@ -453,7 +453,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     bool reconfirmFlag = true;
     bool isBroker = false;
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -465,7 +465,7 @@ HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -478,7 +478,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
     std::set<NetManagerStandard::NetBearType> bearTypes;
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
