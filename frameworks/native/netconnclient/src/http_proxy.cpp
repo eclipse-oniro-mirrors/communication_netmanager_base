@@ -193,47 +193,81 @@ std::list<std::string> ParseProxyExclusionList(const std::string &exclusionList)
 
 std::optional<HttpProxy> HttpProxy::FromString(const std::string &str)
 {
-    using iter_t = std::string::const_iterator;
-    iter_t hostStart = str.cbegin();
-    iter_t proxyContentEnd = str.end();
-    iter_t hostEnd = std::find(hostStart, proxyContentEnd, '\t');
-    if (hostEnd == proxyContentEnd) {
+    struct Parser {
+        Parser(std::string::const_iterator begin, std::string::const_iterator end) : begin(begin), end(end) {}
+
+        static std::optional<uint16_t> ParsePort(const std::string &portStr)
+        {
+            char *str_end = nullptr;
+            errno = 0;
+            auto port = std::strtol(portStr.c_str(), &str_end, BASE_DEC);
+            if ((errno != 0 && port == 0) || str_end == portStr.c_str() || port < 0 ||
+                port > std::numeric_limits<uint16_t>::max()) {
+                return std::nullopt;
+            }
+            return static_cast<uint16_t>(port);
+        }
+
+        static std::list<std::string> ParseProxyExclusionList(const std::string &exclusionList)
+        {
+            std::list<std::string> exclusionItems;
+            std::stringstream ss(exclusionList);
+            std::string item;
+
+            while (std::getline(ss, item, ',')) {
+                size_t start = item.find_first_not_of(" \t");
+                size_t end = item.find_last_not_of(" \t");
+                if (start != std::string::npos && end != std::string::npos) {
+                    item = item.substr(start, end - start + 1);
+                }
+                exclusionItems.push_back(item);
+            }
+            return exclusionItems;
+        }
+
+        std::optional<std::string> GetHost()
+        {
+            if (auto hostEnd = std::find(begin, end, '\t'); hostEnd != end) {
+                auto host = std::string(begin, hostEnd);
+                begin = hostEnd + 1;
+                return host;
+            }
+            return std::nullopt;
+        }
+
+        std::optional<uint16_t> GetPort()
+        {
+            if (auto portEnd = std::find(begin, end, '\t'); portEnd != end) {
+                auto host = std::string(begin, portEnd);
+                auto port = ParsePort(std::string(begin, portEnd));
+                begin = portEnd + 1;
+                return port;
+            }
+            return std::nullopt;
+        }
+
+        std::list<std::string> GetExclusionList()
+        {
+            if (begin != end) {
+                auto list = ParseProxyExclusionList(std::string(begin, end));
+                begin = end;
+                return list;
+            }
+            return {};
+        }
+
+        std::string::const_iterator begin;
+        std::string::const_iterator end;
+    };
+
+    Parser parcer(str.cbegin(), str.cend());
+    auto host = parcer.GetHost();
+    auto port = parcer.GetPort();
+
+    if (!host || !port) {
         return std::nullopt;
     }
-    auto host = std::string(hostStart, hostEnd);
-
-    hostEnd += 1;
-    iter_t portStart = hostEnd;
-    iter_t portEnd = std::find(portStart, proxyContentEnd, '\t');
-    if (portEnd == proxyContentEnd) {
-        return std::nullopt;
-    }
-    std::string portContent = std::string(portStart, portEnd);
-    
-    // 0 used as default value for port in HttpProxy
-    long port = 0;
-    char *str_end = nullptr;
-
-    errno = 0;
-    port = std::strtol(portContent.c_str(), &str_end, BASE_DEC);
-    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN)) || (errno != 0 && port == 0) ||
-        str_end == portContent.c_str()) {
-        return std::nullopt;
-    }
-
-    if (port < 0 || port > std::numeric_limits<uint16_t>::max()) {
-        // out of 16 bits
-        return std::nullopt;
-    }
-
-    std::list<std::string> exclusionList;
-    if (portEnd != proxyContentEnd) {
-        portEnd += 1;
-        iter_t exclusionListStart = portEnd;
-        std::string exclusionListContent = std::string(exclusionListStart, proxyContentEnd);
-        exclusionList = ParseProxyExclusionList(exclusionListContent);
-    }
-    return NetManagerStandard::HttpProxy(host, static_cast<uint16_t>(port), exclusionList);
+    return NetManagerStandard::HttpProxy(*host, *port, parcer.GetExclusionList());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
