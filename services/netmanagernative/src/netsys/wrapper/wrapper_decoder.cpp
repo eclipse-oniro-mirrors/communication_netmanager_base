@@ -301,7 +301,7 @@ bool WrapperDecoder::InterpreteInfoMsg(const nlmsghdr *hdrMsg)
             auto action = (info->ifi_flags & IFF_LOWER_UP) ? NetsysEventMessage::Action::LINKUP
                                                            : NetsysEventMessage::Action::LINKDOWN;
             NETNATIVE_LOGI("Netsys listen to kernel interface action: action is %{public}d", 
-                static_cast<int>(action));                                       
+                static_cast<int>(action));                                      
             message_->SetAction(action);
             message_->SetSubSys(NetsysEventMessage::SubSys::NET);
             return true;
