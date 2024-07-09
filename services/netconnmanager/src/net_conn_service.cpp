@@ -19,8 +19,6 @@
 #include <sys/time.h>
 #include <utility>
 #include <regex>
-#include <mutex>
-#include <thread>
 #include <condition_variable>
 
 #include "common_event_support.h"
@@ -72,7 +70,6 @@ constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdat
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
-constexpr uint16_t DATA_SHARE_WAIT_TIME = 3;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -1967,18 +1964,8 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
-    if (!isDataShareReady_.load()) {
-        std::thread checkSettingsDataReady([this]() { return CheckIfSettingsDataReady(); });
-        std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
-        dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
-        checkSettingsDataReady.join();
-        if (!isDataShareReady_.load()) {
-            NETMGR_LOG_E("data share is not ready.");
-            return;
-        }
-    }
-    if (isGlobalProxyLoaded_.load()) {
-        NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database.");
+    if (!isDataShareReady_.load() && !CheckIfSettingsDataReady()) {
+        NETMGR_LOG_E("data share is not ready.");
         return;
     }
     int32_t userId;
