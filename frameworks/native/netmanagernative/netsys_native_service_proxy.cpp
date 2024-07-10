@@ -2542,10 +2542,10 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
         if (!WriteInterfaceToken(data)) {
             return ERR_FLATTEN_OBJECT;
         }
-        if (!data.WriteUint32(offset)) {
+        if (!data.WriteInt32(static_cast<int32_t>(type))) {
             return ERR_FLATTEN_OBJECT;
         }
-        if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        if (!data.WriteUint32(offset)) {
             return ERR_FLATTEN_OBJECT;
         }
         if (!data.WriteBool(offset == remain)) {
