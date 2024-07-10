@@ -875,7 +875,7 @@ int32_t NetPolicyServiceProxy::ClearIpAndUidRule(const std::string &ip, uint32_t
         reply, option);
 }
 
-int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+int32_t NetPolicyServiceProxy::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -889,7 +889,7 @@ int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::st
         NETMGR_LOG_E("SetNicTrafficAllowed ifaceNames size return error");
         return ERR_FLATTEN_OBJECT;
     }
-    for (const auto iter : ifaceNames) {
+    for (auto iter : ifaceNames) {
         if (!data.WriteString(iter)) {
             NETMGR_LOG_E("SetNicTrafficAllowed write name return error");
             return ERR_FLATTEN_OBJECT;
