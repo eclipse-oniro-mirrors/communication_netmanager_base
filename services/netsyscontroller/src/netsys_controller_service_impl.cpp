@@ -59,6 +59,19 @@ int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId)
     return netsysClient_.NetworkDestroy(netId);
 }
 
+int32_t NetsysControllerServiceImpl::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                                const std::set<int32_t> &uids)
+{
+    NETMGR_LOG_I("Create Vnic network");
+    return netsysClient_.CreateVnic(mtu, tunAddr, prefix, uids);
+}
+
+int32_t NetsysControllerServiceImpl::DestroyVnic()
+{
+    NETMGR_LOG_I("Destroy Vnic network");
+    return netsysClient_.DestroyVnic();
+}
+
 int32_t NetsysControllerServiceImpl::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);

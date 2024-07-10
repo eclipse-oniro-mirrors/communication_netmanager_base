@@ -62,8 +62,8 @@
       "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(OHOS::NetManagerStandard::NetBearType, bool, unsigned int&)";
-      "OHOS::NetManagerStandard::NetConnClient::RegisterInternalVirtualNetwork(OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&, int&)";
-      "OHOS::NetManagerStandard::NetConnClient::UnregisterInternalVirtualNetwork(int&)";
+      "OHOS::NetManagerStandard::NetConnClient::EnableVnicNetwork(OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&, std::__h::set<int, std::__h::less<int>, std::__h::allocator<int>> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::DisableVnicNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplier(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplierCallback(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierCallbackBase> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetSupplier(unsigned int)";

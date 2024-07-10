@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
@@ -49,10 +50,6 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_VIRTUAL_NET_SUPPLIER)] = {
-        &NetConnServiceStub::OnRegisterInternalVirtualNetwork, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_VIRTUAL_NET_SUPPLIER)] = {
-        &NetConnServiceStub::OnUnregisterInternalVirtualNetwork, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
         &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
@@ -96,6 +93,7 @@ void NetConnServiceStub::InitAll()
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
+    InitVnicFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
@@ -168,6 +166,14 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
+}
+
+void NetConnServiceStub::InitVnicFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_VNIC_NET_WORK)] = {
+        &NetConnServiceStub::OnEnableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK)] = {
+        &NetConnServiceStub::OnDisableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -298,36 +304,44 @@ int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, Message
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnRegisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t netId;
-
-    if (!data.ReadInt32(netId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
     sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
-    int32_t ret = RegisterInternalVirtualNetwork(netLinkInfo, netId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("supplierId[%{public}d].", netId);
-        if (!reply.WriteUint32(netId)) {
+    if (netLinkInfo == nullptr) {
+        NETMGR_LOG_E("netLinkInfo ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::set<int32_t> uids;
+    int32_t size = 0;
+    int32_t uid = 0;
+    if (!data.ReadInt32(size)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (size  < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETMGR_LOG_E("vnic uids size is invalid");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (int32_t index = 0; index < size; index++) {
+        if (!data.ReadInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        uids.insert(uid);
+    }
+    int32_t ret = EnableVnicNetwork(netLinkInfo, uids);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnUnregisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t netId;
-
-    if (!data.ReadInt32(netId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    int32_t ret = UnregisterInternalVirtualNetwork(netId);
+    int32_t ret = DisableVnicNetwork();
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

@@ -37,6 +37,7 @@ private:
 
 private:
     void InitQueryFuncToInterfaceMap();
+    void InitVnicFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
@@ -46,8 +47,8 @@ private:
     int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
     int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetInternetPermission(MessageParcel &data, MessageParcel &reply);
-    int32_t OnRegisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUnregisterInternalVirtualNetwork(MessageParcel &data, MessageParcel &reply);
+    int32_t OnEnableVnicNetwork(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);

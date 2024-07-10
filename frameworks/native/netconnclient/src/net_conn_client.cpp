@@ -78,28 +78,28 @@ int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
     return result;
 }
 
-int32_t NetConnClient::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+int32_t NetConnClient::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids)
 {
-    NETMGR_LOG_D("RegisterInternalVirtualNetwork client in.");
+    NETMGR_LOG_D("EnableVnicNetwork client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->RegisterInternalVirtualNetwork(netLinkInfo, netId);
+    return proxy->EnableVnicNetwork(netLinkInfo, uids);
 }
 
-int32_t NetConnClient::UnregisterInternalVirtualNetwork(int32_t &netId)
+int32_t NetConnClient::DisableVnicNetwork()
 {
-    NETMGR_LOG_D("UnregisterInternalVirtualNetwork client in.");
+    NETMGR_LOG_D("DisableVnicNetwork client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->UnregisterInternalVirtualNetwork(netId);
+    return proxy->DisableVnicNetwork();
 }
 
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,

@@ -103,8 +103,8 @@ public:
     virtual int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
     virtual int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
     virtual int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) = 0;
-    virtual int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId) = 0;
-    virtual int32_t UnregisterInternalVirtualNetwork(int32_t &netId) = 0;
+    virtual int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) = 0;
+    virtual int32_t DisableVnicNetwork() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

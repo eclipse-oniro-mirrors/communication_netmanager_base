@@ -260,6 +260,27 @@ public:
      */
     static int32_t RemoveClatTunInterface(const std::string &interfaceName);
 
+    /**
+     * Update route for vnic interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param destinationName Destination address of route item
+     * @param nextHop Gateway address of the route item
+     * @param add add or delete route
+     * @return Returns 0, Update route successfully, otherwise it will fail
+     */
+    static int32_t UpdateVnicRoute(const std::string &interfaceName, const std::string &destinationName,
+                                      const std::string &nextHop, bool add);
+
+    /**
+     * Update uid ranges for vnic interface
+     *
+     * @param uidRanges uidRanges to update
+     * @param add add or delete uid ranges
+     * @return Returns 0, update UidRangesRules successfully, otherwise it will fail
+     */
+    static int32_t UpdateVnicUidRangesRule(const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
@@ -284,7 +305,6 @@ private:
     static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
     static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
 
-    static int32_t UpdateInternalVirtualNetworkUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
     static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
     static int32_t UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
                                                     uid_t uidStart, uid_t uidEnd, bool add);
