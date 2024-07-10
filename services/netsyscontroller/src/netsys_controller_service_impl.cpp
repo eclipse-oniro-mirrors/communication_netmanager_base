@@ -902,7 +902,7 @@ int32_t NetsysControllerServiceImpl::FirewallClearIpAndUidRule(const std::string
 
 int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
-    NETMGR_LOG_D("SetNicTrafficAllowed: interfaceNames size=%{public}d, status = %{public}d", interfaceNames.size(),
+    NETMGR_LOG_D("SetNicTrafficAllowed: ifaceNames size=%{public}d, status = %{public}d", ifaceNames.size(),
         status);
     return netsysClient_.SetNicTrafficAllowed(ifaceNames, status);
 }
