@@ -246,7 +246,6 @@ std::optional<HttpProxy> HttpProxy::FromString(const std::string &str)
     Parser parser(str.cbegin(), str.cend());
     auto host = parser.GetHost();
     auto port = parser.GetPort();
-
     if (!host || !port) {
         return std::nullopt;
     }
