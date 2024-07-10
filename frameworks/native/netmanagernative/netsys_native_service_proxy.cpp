@@ -3021,7 +3021,7 @@ int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::st
         NETNATIVE_LOGE("SetNicTrafficAllowed ifaceNames size return error");
         return ERR_FLATTEN_OBJECT;
     }
-    for (auto iter : ifaceNames) {
+    for (const std::string& iter : ifaceNames) {
         if (!data.WriteString(iter)) {
             NETNATIVE_LOGE("SetNicTrafficAllowed write name return error");
             return ERR_FLATTEN_OBJECT;
