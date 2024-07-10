@@ -826,5 +826,41 @@ int32_t NetPolicyServiceStub::OnClearIpAndUidRule(MessageParcel &data, MessagePa
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetPolicyServiceStub::OnSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("OnSetNicTrafficAllowed CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    bool status = false;
+    int32_t size = 0;
+    if (!data.ReadBool(status) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("OnSetNicTrafficAllowed read status or size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > static_cast<int32_t>(MAX_IFACENAMES_SIZE)) {
+        NETNATIVE_LOGE("OnSetNicTrafficAllowed read data size too big");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<std::string> ifaceNames;
+    std::string ifaceName;
+    for (int32_t index = 0; index < size; index++) {
+        data.ReadString(ifaceName);
+        if (ifaceName.empty()) {
+            NETNATIVE_LOGE("OnSetNicTrafficAllowed ifaceName is empty, size mismatch");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ifaceNames.push_back(ifaceName);
+    }
+    int32_t result = SetNicTrafficAllowed(ifaceNames, status);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write OnSetNicTrafficAllowed result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -874,5 +874,38 @@ int32_t NetPolicyServiceProxy::ClearIpAndUidRule(const std::string &ip, uint32_t
     return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE), data,
         reply, option);
 }
+
+int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(status)) {
+        NETMGR_LOG_E("SetNicTrafficAllowed WriteBool func return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(ifaceNames.size())) {
+        NETMGR_LOG_E("SetNicTrafficAllowed ifaceNames size return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto iter : ifaceNames) {
+        if (!data.WriteString(iter)) {
+            NETMGR_LOG_E("SetNicTrafficAllowed write name return error");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED),
+        data, reply, option);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

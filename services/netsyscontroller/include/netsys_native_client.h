@@ -965,6 +965,15 @@ public:
     int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
     int32_t ClearFirewallAllRules();
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

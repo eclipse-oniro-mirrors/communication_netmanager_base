@@ -136,6 +136,7 @@ enum class NotifyInterfaceCode {
     ON_ROUTE_CHANGED,
     ON_DHCP_SUCCESS,
     ON_BANDWIDTH_REACHED_LIMIT,
+    NETSYS_SET_NIC_TRAFFIC_ALLOWED,
 };
 
 enum class NetDiagInterfaceCode {

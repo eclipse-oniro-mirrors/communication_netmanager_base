@@ -450,5 +450,16 @@ int32_t NetPolicyClient::ClearIpAndUidRule(const std::string &ip, uint32_t ipTyp
 
     return proxy->ClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetPolicyClient::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

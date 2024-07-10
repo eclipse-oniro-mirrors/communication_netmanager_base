@@ -973,6 +973,15 @@ public:
      * Clear Firewall All Rules
      */
     virtual int32_t ClearFirewallAllRules() = 0;
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

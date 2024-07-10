@@ -74,6 +74,7 @@ private:
     int32_t OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetIpAndUidRule(MessageParcel &data, MessageParcel &reply);
     int32_t OnClearIpAndUidRule(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;

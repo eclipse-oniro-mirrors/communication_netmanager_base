@@ -493,5 +493,10 @@ int32_t NetPolicyRule::PolicyClearIpAndUidRule(const std::string &ip, uint32_t i
 {
     return GetNetsysInst()->FirewallClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetPolicyRule::PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    return GetNetsysInst()->SetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
