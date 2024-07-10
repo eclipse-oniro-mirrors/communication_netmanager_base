@@ -2053,7 +2053,7 @@ int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, Me
         }
         ifaceNames.push_back(ifaceName);
     }
-    int32_t result = CmdSetNicTrafficAllowed(ifaceNames, status);
+    int32_t result = SetNicTrafficAllowed(ifaceNames, status);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetNicTrafficAllowed result failed");
         return ERR_FLATTEN_OBJECT;
