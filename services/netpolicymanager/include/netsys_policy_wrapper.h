@@ -48,7 +48,7 @@ public:
     int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType);
     int32_t ClearFirewallAllRules();
-    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
