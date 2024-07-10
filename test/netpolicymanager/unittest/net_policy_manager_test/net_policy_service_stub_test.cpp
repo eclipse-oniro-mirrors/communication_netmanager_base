@@ -194,6 +194,11 @@ public:
 
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override
+    {
+        return 0;
+    }
 };
 
 } // namespace
