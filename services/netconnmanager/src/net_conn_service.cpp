@@ -1589,7 +1589,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         defaultNetSupplier_->GetHttpProxy(httpProxy);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("Use default http proxy, cost=%{public}lld",  durationNs.count());
+        NETMGR_LOG_D("Use default http proxy, cost=%{public}lld",  durationNs.count());
         return NETMANAGER_SUCCESS;
     }
     NETMGR_LOG_I("No default http proxy.");
