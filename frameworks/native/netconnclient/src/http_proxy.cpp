@@ -174,32 +174,15 @@ std::string HttpProxy::ToString() const
     return s;
 }
 
-std::list<std::string> ParseProxyExclusionList(const std::string &exclusionList)
-{
-    std::list<std::string> exclusionItems;
-    std::stringstream ss(exclusionList);
-    std::string item;
-
-    while (std::getline(ss, item, ',')) {
-        size_t start = item.find_first_not_of(" \t");
-        size_t end = item.find_last_not_of(" \t");
-        if (start != std::string::npos && end != std::string::npos) {
-            item = item.substr(start, end - start + 1);
-        }
-        exclusionItems.push_back(item);
-    }
-    return exclusionItems;
-}
-
 struct Parser {
     Parser(std::string::const_iterator begin, std::string::const_iterator end) : begin(begin), end(end) {}
 
     static std::optional<uint16_t> ParsePort(const std::string &portStr)
     {
-        char *str_end = nullptr;
+        char *strEnd = nullptr;
         errno = 0;
-        auto port = std::strtol(portStr.c_str(), &str_end, BASE_DEC);
-        if ((errno != 0 && port == 0) || str_end == portStr.c_str() || port < 0 ||
+        auto port = std::strtol(portStr.c_str(), &strEnd, BASE_DEC);
+        if ((errno != 0 && port == 0) || strEnd == portStr.c_str() || port < 0 ||
             port > std::numeric_limits<uint16_t>::max()) {
             return std::nullopt;
         }
@@ -260,14 +243,14 @@ struct Parser {
 
 std::optional<HttpProxy> HttpProxy::FromString(const std::string &str)
 {
-    Parser parcer(str.cbegin(), str.cend());
-    auto host = parcer.GetHost();
-    auto port = parcer.GetPort();
+    Parser parser(str.cbegin(), str.cend());
+    auto host = parser.GetHost();
+    auto port = parser.GetPort();
 
     if (!host || !port) {
         return std::nullopt;
     }
-    return NetManagerStandard::HttpProxy(*host, *port, parcer.GetExclusionList());
+    return NetManagerStandard::HttpProxy(*host, *port, parser.GetExclusionList());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
