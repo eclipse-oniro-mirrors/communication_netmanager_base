@@ -32,8 +32,7 @@ std::vector<uint32_t> OHOS::nmd::NetManagerNative::interfaceIdex_;
 namespace OHOS {
 namespace nmd {
 namespace {
-constexpr const char *VPN_TUN_CARD_NAME = "vpn-tun";
-constexpr const char *VNIC_TUN_CARD_NAME = "vnic-tun";
+constexpr const char *TUN_CARD_NAME = "vpn-tun";
 constexpr const char *TCP_RMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_rmem";
 constexpr const char *TCP_WMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_wmem";
 constexpr uint32_t TCP_BUFFER_SIZES_TYPE = 2;
@@ -104,6 +103,17 @@ int32_t NetManagerNative::NetworkDestroy(int32_t netId)
     return ret;
 }
 
+int32_t NetManagerNative::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                     const std::set<int32_t> &uids)
+{
+    return VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+}
+
+int32_t NetManagerNative::DestroyVnic()
+{
+    return VnicManager::GetInstance().DestroyVnic();
+}
+
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     dnsManager_->AddUidRange(netId, uidRanges);
@@ -128,13 +138,10 @@ int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string inte
 
 int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
-    if (!strncmp(ifName.c_str(), VPN_TUN_CARD_NAME, strlen(VPN_TUN_CARD_NAME))) {
-        return VpnManager::GetInstance().SetVpnAddress(ifName, addrString, prefixLength);
+    if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
+        return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
     }
-    if (!strncmp(ifName.c_str(), VNIC_TUN_CARD_NAME, strlen(VNIC_TUN_CARD_NAME))) {
-        return VnicManager::GetInstance().SetVnicAddress(ifName, addrString, prefixLength);
-    }
-    return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    return VpnManager::GetInstance().SetVpnAddress(ifName, addrString, prefixLength);
 }
 
 int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
@@ -209,13 +216,10 @@ int32_t NetManagerNative::GetInterfaceMtu(std::string ifName)
 
 int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
 {
-    if (!strncmp(ifName.c_str(), VPN_TUN_CARD_NAME, strlen(VPN_TUN_CARD_NAME))) {
-        return VpnManager::GetInstance().SetVpnMtu(ifName, mtuValue);
+    if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
+        return InterfaceManager::SetMtu(ifName.c_str(), std::to_string(mtuValue).c_str());
     }
-    if (!strncmp(ifName.c_str(), VNIC_TUN_CARD_NAME, strlen(VNIC_TUN_CARD_NAME))) {
-        return VnicManager::GetInstance().SetVnicMtu(ifName, mtuValue);
-    }
-    return interfaceManager_->SetMtu(ifName.c_str(), std::to_string(mtuValue).c_str());
+    return VpnManager::GetInstance().SetVpnMtu(ifName, mtuValue);
 }
 
 int32_t NetManagerNative::SetTcpBufferSizes(const std::string &tcpBufferSizes)

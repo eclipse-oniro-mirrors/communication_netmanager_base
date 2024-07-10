@@ -18,8 +18,8 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <linux/if.h>
-#include <linux/ipv6.h>
 #include <linux/if_tun.h>
+#include <linux/ipv6.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -30,9 +30,12 @@
 
 #include "init_socket.h"
 #include "net_manager_constants.h"
-#include "netnative_log_wrapper.h"
-#include "securec.h"
 #include "netmanager_base_common_utils.h"
+#include "netnative_log_wrapper.h"
+#include "route_manager.h"
+#include "securec.h"
+
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -250,6 +253,22 @@ int32_t VnicManager::SetVnicDown()
     }
 }
 
+int32_t VnicManager::AddDefaultRoute()
+{
+    const std::string interface = VNIC_TUN_CARD_NAME;
+    const std::string destinationName = "0.0.0.0/0";
+    const std::string nextHop = "0.0.0.0";
+    return nmd::RouteManager::UpdateVnicRoute(interface, destinationName, nextHop, true);
+}
+
+int32_t VnicManager::DelDefaultRoute()
+{
+    const std::string interface = VNIC_TUN_CARD_NAME;
+    const std::string destinationName = "0.0.0.0/0";
+    const std::string nextHop = "0.0.0.0";
+    return nmd::RouteManager::UpdateVnicRoute(interface, destinationName, nextHop, false);
+}
+
 int32_t VnicManager::InitIfreq(ifreq &ifr, const std::string &cardName)
 {
     if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
@@ -260,6 +279,29 @@ int32_t VnicManager::InitIfreq(ifreq &ifr, const std::string &cardName)
         NETNATIVE_LOGE("strcpy_s ifr name fail");
         return NETMANAGER_ERROR;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                const std::set<int32_t> &uids)
+{
+    CreateVnicInterface();
+    SetVnicMtu(VNIC_TUN_CARD_NAME, mtu);
+    SetVnicAddress(VNIC_TUN_CARD_NAME, tunAddr, prefix);
+    AddDefaultRoute();
+
+    for (const auto &uid: uids) {
+        uidRanges.push_back({uid, uid});
+    }
+    nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, true);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t VnicManager::DestroyVnic()
+{
+    nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
+    DelDefaultRoute();
+    DestroyVnicInterface();
     return NETMANAGER_SUCCESS;
 }
 

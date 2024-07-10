@@ -28,8 +28,8 @@ public:
     virtual ~NetConnServiceProxy();
     int32_t SystemReady() override;
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
-    int32_t RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId) override;
-    int32_t UnregisterInternalVirtualNetwork(int32_t &netId) override;
+    int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
+    int32_t DisableVnicNetwork() override;
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                 uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;

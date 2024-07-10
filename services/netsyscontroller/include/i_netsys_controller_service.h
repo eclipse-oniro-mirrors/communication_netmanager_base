@@ -81,6 +81,10 @@ public:
      */
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
 
+    virtual int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                               const std::set<int32_t> &uids) = 0;
+    virtual int32_t DestroyVnic() = 0;
+
     virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
     virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
 

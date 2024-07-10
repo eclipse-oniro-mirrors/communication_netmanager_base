@@ -243,6 +243,29 @@ int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
     return proxy->NetworkDestroy(netId);
 }
 
+int32_t NetsysNativeClient::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                       const std::set<int32_t> &uids)
+{
+    NETMGR_LOG_I("Create vnic");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->CreateVnic(mtu, tunAddr, prefix, uids);
+}
+
+int32_t NetsysNativeClient::DestroyVnic()
+{
+    NETMGR_LOG_I("Destroy vnic");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DestroyVnic();
+}
+
 int32_t NetsysNativeClient::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);

@@ -70,7 +70,7 @@ int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
     return reply.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+int32_t NetConnServiceProxy::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids)
 {
     if (netLinkInfo == nullptr) {
         NETMGR_LOG_E("netLinkInfo is null");
@@ -84,17 +84,23 @@ int32_t NetConnServiceProxy::RegisterInternalVirtualNetwork(const sptr<NetLinkIn
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteInt32(netId)) {
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
     if (!netLinkInfo->Marshalling(data)) {
         NETMGR_LOG_E("proxy Marshalling failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
+    if (!data.WriteInt32(uids.size())) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (const auto &uid: uids) {
+        if (!data.WriteInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+    }
+
     int32_t error =
-        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_VIRTUAL_NET_SUPPLIER), data, reply);
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_VNIC_NET_WORK), data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
@@ -103,15 +109,10 @@ int32_t NetConnServiceProxy::RegisterInternalVirtualNetwork(const sptr<NetLinkIn
     if (!reply.ReadInt32(ret)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadInt32(netId)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
     return ret;
 }
 
-int32_t NetConnServiceProxy::UnregisterInternalVirtualNetwork(int32_t &netId)
+int32_t NetConnServiceProxy::DisableVnicNetwork()
 {
     MessageParcel data;
     MessageParcel reply;
@@ -120,12 +121,8 @@ int32_t NetConnServiceProxy::UnregisterInternalVirtualNetwork(int32_t &netId)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteInt32(netId)) {
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
     int32_t error =
-        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_VIRTUAL_NET_SUPPLIER), data, reply);
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK), data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }

@@ -52,6 +52,7 @@ private:
     void InitOpToInterfaceMapExt();
     void InitNetDiagOpToInterfaceMap();
     void InitNetDnsDiagOpToInterfaceMap();
+    void InitNetVnicInterfaceMap();
     void InitStaticArpToInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
@@ -86,6 +87,8 @@ private:
     int32_t CmdNetworkAddInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdCreateVnic(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDestroyVnic(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetFwmarkForNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetInterfaceConfig(MessageParcel &data, MessageParcel &reply);

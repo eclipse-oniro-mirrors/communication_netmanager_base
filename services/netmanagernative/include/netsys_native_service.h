@@ -36,6 +36,7 @@
 #include "sharing_manager.h"
 #include "netsys_access_policy.h"
 #include "clat_manager.h"
+#include "vnic_manager.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -96,6 +97,9 @@ public:
     int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId) override;
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                       const std::set<int32_t> &uids) override;
+    int32_t DestroyVnic() override;
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;
     int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) override;

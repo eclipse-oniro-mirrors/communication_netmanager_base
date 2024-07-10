@@ -96,6 +96,9 @@ public:
     virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
+    virtual int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                               const std::set<int32_t> &uids) = 0;
+    virtual int32_t DestroyVnic() = 0;
     virtual int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) = 0;
     virtual int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) = 0;
     virtual int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) = 0;

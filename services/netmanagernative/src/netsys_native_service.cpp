@@ -403,6 +403,21 @@ int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
     return result;
 }
 
+int32_t NetsysNativeService::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                        const std::set<int32_t> &uids)
+{
+    int32_t result = netsysService_->CreateVnic(mtu, tunAddr, prefix, uids);
+    NETNATIVE_LOG_D("CreateVnic");
+    return result;
+}
+
+int32_t NetsysNativeService::DestroyVnic()
+{
+    int32_t result = netsysService_->DestroyVnic();
+    NETNATIVE_LOG_D("DestroyVnic");
+    return result;
+}
+
 int32_t NetsysNativeService::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)
 {
     markMaskParcel = netsysService_->GetFwmarkForNetwork(netId);
