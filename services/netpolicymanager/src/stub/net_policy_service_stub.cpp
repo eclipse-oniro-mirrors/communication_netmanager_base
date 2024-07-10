@@ -53,7 +53,9 @@ std::map<uint32_t, const char *> g_codeNPS = {
      Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), Permission::MANAGE_NET_STRATEGY},
 };
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
@@ -118,6 +120,8 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetIpAndUidRule;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CLEAR_IP_AND_UID_RULE)] =
         &NetPolicyServiceStub::OnClearIpAndUidRule;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED)] =
+        &NetPolicyServiceStub::OnSetNicTrafficAllowed;
     return;
 }
 
