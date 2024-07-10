@@ -1771,21 +1771,23 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules");
-    int32_t size = 0;
-    if (!data.ReadInt32(size)) {
-        NETNATIVE_LOGE("Read size failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (size > FIREWALL_IPC_IP_RULE_PAGE_SIZE) {
-        return FIREWALL_ERR_EXCEED_MAX_IP;
-    }
     int32_t type = 0;
     if (!data.ReadInt32(type)) {
         NETNATIVE_LOGE("Read rule type failed");
         return ERR_FLATTEN_OBJECT;
     }
     NetFirewallRuleType ruleType = static_cast<NetFirewallRuleType>(type);
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        NETNATIVE_LOGE("Read size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules ruleType=%{public}d, size=%{public}d", ruleType, size);
+    uint32_t maxSize =
+        ruleType == NetFirewallRuleType::RULE_IP ? FIREWALL_IPC_IP_RULE_PAGE_SIZE : FIREWALL_RULE_SIZE_MAX;
+    if (size > maxSize) {
+        return FIREWALL_ERR_EXCEED_MAX_IP;
+    }
     bool isFinish = false;
     if (!data.ReadBool(isFinish)) {
         NETNATIVE_LOGE("Read isFinish failed");
