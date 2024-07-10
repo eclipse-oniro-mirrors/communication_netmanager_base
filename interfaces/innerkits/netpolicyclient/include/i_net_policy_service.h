@@ -266,7 +266,7 @@ public:
 };
 
     /**
-     * Clear NIC Traffic allowed or disallowed
+     * Set NIC Traffic allowed or disallowed
      *
      * @param ifaceNames ifaceNames
      * @param status true for allowed, false for disallowed
