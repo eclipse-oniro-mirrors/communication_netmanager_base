@@ -1012,7 +1012,7 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
             cmds.push_back("-t raw -I OUTPUT -o " + ifaceName + " -j DROP");
             cmds.push_back("-t raw -I PREROUTING -i " + ifaceName + " -j DROP");
         } else {
-            NETNATIVE_LOGI("CmdSetNicTrafficAllowed open");
+            NETNATIVE_LOGI("CmdSetNicTrafficAllowed %{public}s disallowed", ifaceName.c_str());
             cmds.push_back("-t raw -D OUTPUT -o " + ifaceName + " -j DROP");
             cmds.push_back("-t raw -D PREROUTING -i " + ifaceName + " -j DROP");
         }
