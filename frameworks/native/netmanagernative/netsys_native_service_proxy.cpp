@@ -3033,7 +3033,7 @@ int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::st
         NETNATIVE_LOGE("SetNicTrafficAllowed remote pointer is null");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_NIC),
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED),
         data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetNicTrafficAllowed proxy sendRequest failed");
