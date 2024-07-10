@@ -1032,7 +1032,7 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
             cmds.push_back("-t raw -D PREROUTING -i " + ifaceName + " -j DROP");
         }
     }
-    ret = IptablesWrapper::GetInstance()->RunMutipleCommand(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmds);
+    ret = IptablesWrapper::GetInstance()->RunMutipleCommands(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmds);
     if (ret) {
         NETNATIVE_LOGE("SetNicTrafficAllowed iptablesWrapper_ apply failed");
         return NetManagerStandard::NETMANAGER_ERROR;
