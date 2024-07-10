@@ -125,7 +125,7 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
         return NETMANAGER_ERROR;
     }
 
-    for (const std::string command : commands) {
+    for (const std::string& command : commands) {
         if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
             std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
