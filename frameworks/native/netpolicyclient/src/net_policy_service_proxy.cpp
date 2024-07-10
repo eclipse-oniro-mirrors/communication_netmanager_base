@@ -889,7 +889,7 @@ int32_t NetPolicyServiceProxy::SetNicTrafficAllowed(const std::vector<std::strin
         NETMGR_LOG_E("SetNicTrafficAllowed ifaceNames size return error");
         return ERR_FLATTEN_OBJECT;
     }
-    for (auto iter : ifaceNames) {
+    for (const std::string& iter : ifaceNames) {
         if (!data.WriteString(iter)) {
             NETMGR_LOG_E("SetNicTrafficAllowed write name return error");
             return ERR_FLATTEN_OBJECT;
