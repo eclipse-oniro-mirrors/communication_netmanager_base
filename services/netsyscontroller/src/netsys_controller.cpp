@@ -1258,7 +1258,7 @@ int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &i
         NETMGR_LOG_E("SetNicTrafficAllowed netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->SetNicTrafficAllowed(ip, ipType);
+    return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
