@@ -39,6 +39,7 @@ constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -244,6 +245,8 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED)] =
+        &NetsysNativeServiceStub::CmdSetNicTrafficAllowed;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -2050,7 +2053,7 @@ int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, Me
         }
         ifaceNames.push_back(ifaceName);
     }
-    int32_t result = SetIptablesCommandForNIC(ifaceNames, status);
+    int32_t result = CmdSetNicTrafficAllowed(ifaceNames, status);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetNicTrafficAllowed result failed");
         return ERR_FLATTEN_OBJECT;
