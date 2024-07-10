@@ -1714,12 +1714,12 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules");
-    int32_t size = 0;
-    if (!data.ReadInt32(size)) {
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
         NETNATIVE_LOGE("Read size failed");
         return ERR_FLATTEN_OBJECT;
     }
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules size=%{public}d", size);
     if (size > FIREWALL_IPC_IP_RULE_PAGE_SIZE) {
         return FIREWALL_ERR_EXCEED_MAX_IP;
     }

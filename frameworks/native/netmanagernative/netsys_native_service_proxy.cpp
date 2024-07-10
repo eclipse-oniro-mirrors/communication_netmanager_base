@@ -2529,33 +2529,41 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
                                                    const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                                                    bool isFinish)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallRules: ruleList size=%{public}zu isFinish=%{public}d",
-                   ruleList.size(), isFinish);
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(ruleList.size())) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(static_cast<int32_t>(type))) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteBool(isFinish)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    for (const auto &rule : ruleList) {
-        if (!rule->Marshalling(data)) {
-            return NETMANAGER_EXT_ERR_WRITE_REPLY_FAIL;
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallRules: ruleList size=%{public}zu type=%{public}d",
+                   ruleList.size(), type);
+    auto it = ruleList.begin();
+    uint32_t pageSize = type == NetFirewallRuleType::RULE_IP ? FIREWALL_IPC_IP_RULE_PAGE_SIZE : FIREWALL_RULE_SIZE_MAX;
+    uint32_t offset = 0;
+    uint32_t remain;
+    while (it != ruleList.end()) {
+        remain = ruleList.end() - it;
+        offset = std::min(remain, pageSize);
+        MessageParcel data;
+        if (!WriteInterfaceToken(data)) {
+            return ERR_FLATTEN_OBJECT;
         }
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES), data,
-                                        reply, option);
-    if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("AddFirewallIpRules SendRequest failed");
-        return ret;
+        if (!data.WriteUint32(offset)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteInt32(static_cast<int32_t>(type))) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteBool(offset == remain)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        for (uint32_t i = 0; i < offset && it != ruleList.end(); i++, it++) {
+            if (!(*it)->Marshalling(data)) {
+                return NETMANAGER_EXT_ERR_WRITE_REPLY_FAIL;
+            }
+        }
+        MessageParcel reply;
+        MessageOption option;
+        int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES),
+                                            data, reply, option);
+        if (ret != ERR_NONE) {
+            NETNATIVE_LOGE("SetFirewallRules SendRequest failed");
+            return ret;
+        }
     }
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
