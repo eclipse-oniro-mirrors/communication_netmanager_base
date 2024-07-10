@@ -195,7 +195,7 @@ public:
      * @param status true for allowed, false for disallowed
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
+    int32_t PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
