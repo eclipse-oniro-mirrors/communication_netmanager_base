@@ -16,10 +16,12 @@
 #ifndef NET_VNIC_MANAGER_H
 #define NET_VNIC_MANAGER_H
 
+#include "uid_range.h"
 #include <cstdint>
 #include <linux/if.h>
-#include <string>
 #include <map>
+#include <set>
+#include <string>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -39,6 +41,8 @@ public:
     }
 
 public:
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
+    int32_t DestroyVnic();
     int32_t CreateVnicInterface();
     void DestroyVnicInterface();
     int32_t SetVnicMtu(const std::string &ifName, int32_t mtu);
@@ -48,6 +52,8 @@ private:
     std::atomic_int& GetNetSock(bool ipv4);
     int32_t SetVnicUp();
     int32_t SetVnicDown();
+    int32_t AddDefaultRoute();
+    int32_t DelDefaultRoute();
     int32_t InitIfreq(ifreq &ifr, const std::string &cardName);
     int32_t SetVnicResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
 
@@ -55,6 +61,7 @@ private:
     std::atomic_int tunFd_ = 0;
     std::atomic_int net4Sock_ = 0;
     std::atomic_int net6Sock_ = 0;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

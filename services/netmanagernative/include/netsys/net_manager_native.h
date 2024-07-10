@@ -27,6 +27,7 @@
 #include "interface_manager.h"
 #include "interface_type.h"
 #include "route_manager.h"
+#include "vnic_manager.h"
 #include "route_type.h"
 #include "sharing_manager.h"
 #include "uid_range.h"
@@ -52,6 +53,8 @@ public:
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
     int32_t NetworkDestroy(int32_t netId);
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
+    int32_t DestroyVnic();
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkAddInterface(int32_t netId, std::string iface, NetBearType netBearerType);

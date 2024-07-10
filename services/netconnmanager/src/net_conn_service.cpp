@@ -21,13 +21,13 @@
 #include <regex>
 #include <condition_variable>
 
-#include "common_event_support.h"
-#include "network.h"
-#include "system_ability_definition.h"
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
+#include "netmanager_base_common_utils.h"
+#include "network.h"
+#include "system_ability_definition.h"
 #include "want.h"
 
 #include "broadcast_manager.h"
@@ -1097,9 +1097,6 @@ int32_t NetConnService::GenerateInternalNetId()
             value = MIN_INTERNAL_NET_ID;
         }
         if (networks_.find(value) == networks_.end()) {
-            return value;
-        }
-        if (internalVirtualnetworks_.find(value) == internalVirtualnetworks_.end()) {
             return value;
         }
     }
@@ -2556,64 +2553,73 @@ void NetConnService::NetConnListener::OnReceiveEvent(const EventFwk::CommonEvent
                  eventData.GetWant().GetAction().c_str(), eventData.GetData().c_str(), eventData.GetCode());
     eventReceiver_(eventData);
 }
-int32_t NetConnService::RegisterInternalVirtualNetwork(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+
+int32_t NetConnService::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, &netLinkInfo, &netId, &result]() {
-            result = this->RegisterInternalVirtualNetworkAsync(netLinkInfo, netId);
-        });
+        netConnEventHandler_->PostSyncTask(
+            [this, &netLinkInfo, &uids, &result]() { result = this->EnableVnicNetworkAsync(netLinkInfo, uids); });
     }
     return result;
 }
 
-int32_t NetConnService::RegisterInternalVirtualNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, int32_t &netId)
+int32_t NetConnService::EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids)
 {
-    NETMGR_LOG_I("add new internal virtual network");
-    int32_t id = GenerateInternalNetId();
-    if (id == INVALID_NET_ID) {
-        NETMGR_LOG_E("GenerateNetId fail");
+    NETMGR_LOG_I("enable vnic network");
+
+    if (vnicCreated.load()) {
+        NETMGR_LOG_E("Enable Vnic Network already");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
-    NetDetectionHandler nonDetect;
-    std::shared_ptr<NetConnEventHandler> nonEvent{nullptr};
-    std::shared_ptr<Network> network =
-        std::make_shared<Network>(id, 0, nonDetect, BEARER_VPN, nonEvent);
-
-    network->UpdateBasicNetwork(true);
-    if (!network->UpdateNetLinkInfo(*netLinkInfo)) {
-        return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    uint16_t mtu = netLinkInfo->mtu_;
+    if (netLinkInfo->netAddrList_.empty()) {
+        NETMGR_LOG_E("the netLinkInfo netAddrList is empty");
+        return NET_CONN_ERR_INVALID_NETWORK;
     }
-    internalVirtualnetworks_[id] = network;
-    netId = id;
+
+    const std::string &tunAddr = netLinkInfo->netAddrList_.front().address_;
+    int32_t prefix = netLinkInfo->netAddrList_.front().prefixlen_;
+    if (!CommonUtils::IsValidIPV4(tunAddr)) {
+        NETMGR_LOG_E("the netLinkInfo tunAddr is not valid");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    NETMGR_LOG_I("EnableVnicNetwork tunAddr:[%{public}s], prefix:[%{public}d]", tunAddr.c_str(), prefix);
+    if (NetsysController::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("EnableVnicNetwork CreateVnic failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    vnicCreated = true;
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::UnregisterInternalVirtualNetwork(int32_t &netId)
+int32_t NetConnService::DisableVnicNetwork()
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, &netId, &result]() {
-            result = this->UnregisterInternalVirtualNetworkAsync(netId);
-        });
+        netConnEventHandler_->PostSyncTask(
+            [this, &result]() { result = this->DisableVnicNetworkAsync(); });
     }
     return result;
 }
 
-int32_t NetConnService::UnregisterInternalVirtualNetworkAsync(int32_t &netId)
+int32_t NetConnService::DisableVnicNetworkAsync()
 {
     NETMGR_LOG_I("del internal virtual network");
-    auto iterNetwork = internalVirtualnetworks_.find(netId);
-    if (iterNetwork == networks_.end()) {
-        NETMGR_LOG_E("cannot find network");
+
+    if (!vnicCreated.load()) {
+        NETMGR_LOG_E("cannot find vnic network");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
-    internalVirtualnetworks_[netId]->UpdateBasicNetwork(false);
-    internalVirtualnetworks_.erase(netId);
-    netId = INVALID_NET_ID;
+
+    if (NetsysController::GetInstance().DestroyVnic() != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    vnicCreated = false;
     return NETMANAGER_SUCCESS;
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS

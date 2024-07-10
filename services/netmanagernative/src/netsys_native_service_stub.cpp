@@ -32,6 +32,7 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 namespace {
+constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr int32_t MAX_FLAG_NUM = 64;
 constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
@@ -50,6 +51,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetDiagOpToInterfaceMap();
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
+    InitNetVnicInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -280,6 +282,14 @@ void NetsysNativeServiceStub::InitNetDnsDiagOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdRegisterDnsHealthListener;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER)] =
         &NetsysNativeServiceStub::CmdUnregisterDnsHealthListener;
+}
+
+void NetsysNativeServiceStub::InitNetVnicInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_CREATE)] =
+        &NetsysNativeServiceStub::CmdCreateVnic;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY)] =
+        &NetsysNativeServiceStub::CmdDestroyVnic;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -866,6 +876,45 @@ int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageP
     int32_t result = NetworkDestroy(netId);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdCreateVnic(MessageParcel &data, MessageParcel &reply)
+{
+    uint16_t mtu = data.ReadUint16();
+    std::string tunAddr = data.ReadString();
+    int32_t prefix = data.ReadInt32();
+    std::set<int32_t> uids;
+    int32_t size = 0;
+    int32_t uid = 0;
+    if (!data.ReadInt32(size)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (size < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETNATIVE_LOGE("vnic uids size is invalid");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (int32_t index = 0; index < size; index++) {
+        if (!data.ReadInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        uids.insert(uid);
+    }
+    int32_t result = CreateVnic(mtu, tunAddr, prefix, uids);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("VnciCreate has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDestroyVnic(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = DestroyVnic();
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("VnicDestroy has recved result %{public}d", result);
 
     return result;
 }

@@ -92,6 +92,27 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
     return netsysService_->NetworkDestroy(netId);
 }
 
+int32_t NetsysController::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                     const std::set<int32_t> &uids)
+{
+    NETMGR_LOG_I("Create Vnic network");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->CreateVnic(mtu, tunAddr, prefix, uids);
+}
+
+int32_t NetsysController::DestroyVnic()
+{
+    NETMGR_LOG_I("Destroy Vnic network");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DestroyVnic();
+}
+
 int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids,
                                          const std::vector<int32_t> &endUids)
 {

@@ -101,6 +101,9 @@ public:
      */
     int32_t NetworkDestroy(int32_t netId);
 
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
+    int32_t DestroyVnic();
+
     /**
      * Add network port device
      *

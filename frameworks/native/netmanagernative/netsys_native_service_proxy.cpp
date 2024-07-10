@@ -959,6 +959,67 @@ int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                             const std::set<int32_t> &uids)
+{
+    NETNATIVE_LOGI("Begin to CreateVnic");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint16(mtu)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(tunAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(prefix)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(uids.size())) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (const auto &uid: uids) {
+        if (!data.WriteInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_CREATE), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::DestroyVnic()
+{
+    NETNATIVE_LOGI("Begin to DestroyVnic");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)
 {
     NETNATIVE_LOGI("Begin to GetFwmarkForNetwork");
@@ -3005,5 +3066,6 @@ int32_t NetsysNativeServiceProxy::FirewallClearIpAndUidRule(const std::string &i
     int32_t res = reply.ReadInt32();
     return res;
 }
+
 } // namespace NetsysNative
 } // namespace OHOS

@@ -320,9 +320,6 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
     if (netId == LOCAL_NET_ID) {
         return RouteManager::LOCAL_NETWORK;
     } else if (FindVirtualNetwork(netId) != nullptr) {
-        if (NetManagerStandard::IsInternalNetId(netId)) {
-            return RouteManager::INTERFACE;
-        }
         return RouteManager::VPN_NETWORK;
     } else if (NetManagerStandard::IsInternalNetId(netId)) {
         return RouteManager::INTERNAL_DEFAULT;
