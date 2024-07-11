@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <cerrno>
 #include <sstream>
 
 namespace OHOS {
@@ -180,10 +179,8 @@ struct Parser {
     static std::optional<uint16_t> ParsePort(const std::string &portStr)
     {
         char *strEnd = nullptr;
-        errno = 0;
         auto port = std::strtol(portStr.c_str(), &strEnd, BASE_DEC);
-        if ((errno != 0 && port == 0) || strEnd == portStr.c_str() || port < 0 ||
-            port > std::numeric_limits<uint16_t>::max()) {
+        if (strEnd == portStr.c_str() || port < 0 || port > std::numeric_limits<uint16_t>::max()) {
             return std::nullopt;
         }
         return static_cast<uint16_t>(port);
