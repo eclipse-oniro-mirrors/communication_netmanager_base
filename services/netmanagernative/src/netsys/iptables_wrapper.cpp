@@ -118,7 +118,7 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
 
 int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands)
 {
-    NETNATIVE_LOG_D("IptablesWrapper::RunMutipleCommands, ipType:%{public}d, command size:%{public}d", ipType,
+    NETNATIVE_LOG_D("IptablesWrapper::RunMutipleCommands, ipType:%{public}d, command size:%{public}ld", ipType,
         commands.size());
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
