@@ -45,6 +45,7 @@ constexpr const char *VNIC_TUN_CARD_NAME = "vnic-tun";
 constexpr const char *VNIC_TUN_DEVICE_PATH = "/dev/tun";
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t MAX_UNIX_SOCKET_CLIENT = 5;
+constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 } // namespace
 
 
@@ -285,21 +286,42 @@ int32_t VnicManager::InitIfreq(ifreq &ifr, const std::string &cardName)
 int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                                 const std::set<int32_t> &uids)
 {
-    CreateVnicInterface();
-    SetVnicMtu(VNIC_TUN_CARD_NAME, mtu);
-    SetVnicAddress(VNIC_TUN_CARD_NAME, tunAddr, prefix);
-    AddDefaultRoute();
-
+    uidRanges.clear();
     for (const auto &uid: uids) {
         uidRanges.push_back({uid, uid});
     }
-    nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, true);
+
+    if (uidRanges.size() > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETNATIVE_LOGE("vnic uidRanges's size is over the max size.");
+        uidRanges.clear();
+        return NETMANAGER_ERROR;
+    }
+
+    if (CreateVnicInterface() != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+    if (SetVnicMtu(VNIC_TUN_CARD_NAME, mtu) != NETMANAGER_SUCCESS ||
+        SetVnicAddress(VNIC_TUN_CARD_NAME, tunAddr, prefix) != NETMANAGER_SUCCESS ||
+        AddDefaultRoute() != NETMANAGER_SUCCESS) {
+        DestroyVnicInterface();
+        return NETMANAGER_ERROR;
+    }
+
+    if (!uidRanges.empty() &&
+        nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, true) != NETMANAGER_SUCCESS) {
+        uidRanges.clear();
+        DelDefaultRoute();
+        DestroyVnicInterface();
+        return NETMANAGER_ERROR;
+    }
+
     return NETMANAGER_SUCCESS;
 }
 
 int32_t VnicManager::DestroyVnic()
 {
     nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
+    uidRanges.clear();
     DelDefaultRoute();
     DestroyVnicInterface();
     return NETMANAGER_SUCCESS;
