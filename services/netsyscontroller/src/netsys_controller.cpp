@@ -1272,5 +1272,14 @@ int32_t NetsysController::FirewallClearIpAndUidRule(const std::string &ip, uint3
     }
     return netsysService_->FirewallClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetNicTrafficAllowed netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

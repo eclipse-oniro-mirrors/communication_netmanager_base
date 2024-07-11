@@ -1688,5 +1688,15 @@ int32_t NetsysNativeClient::FirewallClearIpAndUidRule(const std::string &ip, uin
     }
     return proxy->FirewallClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetsysNativeClient::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

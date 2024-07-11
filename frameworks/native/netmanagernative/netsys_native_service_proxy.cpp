@@ -3075,5 +3075,46 @@ int32_t NetsysNativeServiceProxy::FirewallClearIpAndUidRule(const std::string &i
     return res;
 }
 
+int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("SetNicTrafficAllowed WriteParam func in");
+    if (!data.WriteBool(status)) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed WriteBool func return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(ifaceNames.size())) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed ifaceNames size return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const std::string& iter : ifaceNames) {
+        if (!data.WriteString(iter)) {
+            NETNATIVE_LOGE("SetNicTrafficAllowed write name return error");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed proxy sendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("SetNicTrafficAllowed WriteParam func out");
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

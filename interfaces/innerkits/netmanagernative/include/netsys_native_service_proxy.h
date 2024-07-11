@@ -156,6 +156,7 @@ public:
                                     const std::vector<uint32_t> &uids) override;
     int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
     int32_t ClearFirewallAllRules() override;
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

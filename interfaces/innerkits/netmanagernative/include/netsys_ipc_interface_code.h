@@ -126,6 +126,7 @@ enum class NetsysInterfaceCode {
     NETSYS_DELETE_SIM_STATS_INFO,
     NETSYS_VNIC_CREATE,
     NETSYS_VNIC_DESTROY,
+    NETSYS_SET_NIC_TRAFFIC_ALLOWED,
 };
 
 enum class NotifyInterfaceCode {

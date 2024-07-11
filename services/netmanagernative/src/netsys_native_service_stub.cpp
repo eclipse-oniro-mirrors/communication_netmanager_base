@@ -40,6 +40,7 @@ constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -246,6 +247,8 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED)] =
+        &NetsysNativeServiceStub::CmdSetNicTrafficAllowed;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -2071,6 +2074,42 @@ int32_t NetsysNativeServiceStub::CmdClearFirewallAllRules(MessageParcel &data, M
     int32_t result = ClearFirewallAllRules();
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    bool status = false;
+    int32_t size = 0;
+    if (!data.ReadBool(status) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed read status or size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > static_cast<int32_t>(MAX_IFACENAMES_SIZE)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed read data size too big");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<std::string> ifaceNames;
+    std::string ifaceName;
+    for (int32_t index = 0; index < size; index++) {
+        data.ReadString(ifaceName);
+        if (ifaceName.empty()) {
+            NETNATIVE_LOGE("CmdSetNicTrafficAllowed ifaceName is empty, size mismatch");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ifaceNames.push_back(ifaceName);
+    }
+    int32_t result = SetNicTrafficAllowed(ifaceNames, status);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetNicTrafficAllowed result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS
