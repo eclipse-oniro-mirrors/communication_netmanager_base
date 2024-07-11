@@ -177,7 +177,7 @@ int32_t VnicManager::SetVnicAddress(const std::string &ifName, const std::string
         if (inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) == 0) {
             NETNATIVE_LOGE("inet_pton ipv6 address failed: %{public}d", errno);
         }
-        ifr6.ifr6_prefixlen = prefix;
+        ifr6.ifr6_prefixlen = static_cast<uint32_t>(prefix);
         ifr6.ifr6_ifindex = ifr.ifr_ifindex;
         if (ioctl(GetNetSock(false), SIOCSIFADDR, &ifr6) < 0) {
             NETNATIVE_LOGE("ioctl set ipv6 address failed: %{public}d", errno);
@@ -242,7 +242,7 @@ int32_t VnicManager::SetVnicDown()
         return NETMANAGER_ERROR;
     }
 
-    ifr.ifr_flags &= ~IFF_UP;
+    ifr.ifr_flags = (uint16_t)ifr.ifr_flags & ~IFF_UP;
     int32_t ret4 = SetVnicResult(GetNetSock(true), SIOCSIFFLAGS, ifr);
     int32_t ret6 = SetVnicResult(GetNetSock(false), SIOCSIFFLAGS, ifr);
     if (ret4 == NETMANAGER_ERROR || ret6 == NETMANAGER_ERROR || (GetNetSock(true) < 0 && GetNetSock(false) < 0)) {
