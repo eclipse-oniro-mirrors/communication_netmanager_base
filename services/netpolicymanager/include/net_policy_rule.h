@@ -188,6 +188,16 @@ public:
      */
     int32_t PolicyClearIpAndUidRule(const std::string &ip, uint32_t ipType);
 
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
+
+
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);

@@ -48,6 +48,7 @@ enum class PolicyInterfaceCode {
     CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG,
     CMD_NPS_SET_IP_AND_UID_RULE,
     CMD_NPS_CLEAR_IP_AND_UID_RULE,
+    CMD_NPS_SET_NIC_TRAFFIC_ALLOWED,
     CMD_NPS_END = 100,
 };
 enum class PolicyCallbackInterfaceCode {

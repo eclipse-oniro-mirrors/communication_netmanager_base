@@ -55,6 +55,7 @@ public:
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
     int32_t SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids) override;
     int32_t ClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

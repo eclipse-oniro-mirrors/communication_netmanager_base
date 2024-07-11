@@ -63,6 +63,16 @@ public:
      */
     std::string RunCommandForRes(const IpType &ipType, const std::string &command);
 
+    /**
+     * @brief run mutiple iptables commands.
+     *
+     * @param ipType ipv4 or ipv6.
+     * @param commands iptables commands.
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
+     */
+    int32_t RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands);
+
+
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);

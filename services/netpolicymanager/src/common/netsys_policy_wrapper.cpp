@@ -160,5 +160,10 @@ int32_t NetsysPolicyWrapper::FirewallClearIpAndUidRule(const std::string &ip, ui
     auto netsysReturnValue = NetsysController::GetInstance().FirewallClearIpAndUidRule(ip, ipType);
     return netsysReturnValue;
 }
+int32_t NetsysPolicyWrapper::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    auto netsysReturnValue = NetsysController::GetInstance().SetNicTrafficAllowed(ifaceNames, status);
+    return netsysReturnValue;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
