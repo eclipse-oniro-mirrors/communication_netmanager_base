@@ -834,7 +834,7 @@ int32_t NetPolicyServiceStub::OnClearIpAndUidRule(MessageParcel &data, MessagePa
 int32_t NetPolicyServiceStub::OnSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
-            NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETMGR_LOG_E("OnSetNicTrafficAllowed CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
