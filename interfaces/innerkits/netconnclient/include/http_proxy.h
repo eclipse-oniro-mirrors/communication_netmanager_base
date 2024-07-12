@@ -39,6 +39,7 @@ public:
     [[nodiscard]] std::string ToString() const;
     [[nodiscard]] SecureData GetUsername() const;
     [[nodiscard]] SecureData GetPassword() const;
+    [[nodiscard]] static std::optional<HttpProxy> FromString(const std::string &str);
     void inline SetHost(std::string &&host)
     {
         host_ = host;
