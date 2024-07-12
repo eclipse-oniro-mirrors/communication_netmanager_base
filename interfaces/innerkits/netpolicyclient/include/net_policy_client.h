@@ -359,7 +359,6 @@ public:
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
-
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
