@@ -22,7 +22,10 @@
         "syscap": [
             "SystemCapability.Communication.NetManager.Core"
         ],
-        "features": [],
+        "features": [
+            "netmanager_base_enable_netsys_access_policy_diag_listen",
+            "netmanager_base_enable_feature_net_firewall"
+        ],
         "adapted_system_type": [
             "standard"
         ],
