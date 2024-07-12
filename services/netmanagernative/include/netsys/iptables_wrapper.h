@@ -72,7 +72,6 @@ public:
      */
     int32_t RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands);
 
-
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
