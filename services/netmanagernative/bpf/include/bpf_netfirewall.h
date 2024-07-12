@@ -44,6 +44,7 @@ using Ip4Key = ip4_key;
 using Ip6Key = ip6_key;
 using Ipv4LpmKey = struct ipv4_lpm_key;
 using Ipv6LpmKey = struct ipv6_lpm_key;
+using PortKey = port_key;
 using ProtoKey = proto_key;
 using AppUidKey = appuid_key;
 using DefaultActionKey = default_action_key;

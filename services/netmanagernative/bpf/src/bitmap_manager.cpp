@@ -151,6 +151,8 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
     memset_s(&otherIp6Key, sizeof(in6_addr), 0xff, sizeof(in6_addr));
     srcIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
     dstIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
+    srcPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
+    dstPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
     protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
     appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
@@ -165,12 +167,12 @@ void BitmapManager::Clear()
     srcIp6Map_.Clear();
     dstIp4Map_.Clear();
     dstIp6Map_.Clear();
-    srcPortMap_.clear();
-    dstPortMap_.clear();
+    srcPortMap_.Clear();
+    dstPortMap_.Clear();
     protoMap_.Clear();
     appUidMap_.Clear();
     uidMap_.Clear();
-    actionMap_.clear();
+    actionMap_.Clear();
 }
 
 int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap &bitmap, Ip4RuleMap *ip4Map)
@@ -256,22 +258,40 @@ int32_t BitmapManager::InsertIpBitmap(const std::vector<NetFirewallIpParam> &ipI
     return NETFIREWALL_SUCCESS;
 }
 
-void BitmapManager::ProcessPorts(const std::vector<NetFirewallPortParam> &ports, Bitmap &bitmap, BpfPortMap &map)
+void BitmapManager::OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnorderedMap<PortKey> &portMap)
 {
-    PortArray portArr = {};
-    int i = 0;
-    for (const auto &port : ports) {
-        if (port.startPort <= port.endPort && i < PORT_NUM_MAX) {
-            portArr.ports[i].start = port.startPort;
-            portArr.ports[i].end = port.endPort;
-            i++;
+    auto &segMap = portSegMap.GetMap();
+    for (auto &item : segMap) {
+        uint32_t start = item.start;
+        while (start <= item.end) {
+            if (start == 0) {
+                continue;
+            }
+            PortKey key = (PortKey)Hltons(start);
+            portMap.OrInsert(key, item.bitmap);
+            start++;
         }
     }
-    map.insert(std::make_pair(Bitmap(bitmap), portArr));
+}
+
+void BitmapManager::AddPortBitmap(const std::vector<NetFirewallPortParam> &port, Bitmap &bitmap,
+    SegmentBitmapMap &portMap)
+{
+    for (const NetFirewallPortParam &item : port) {
+        uint16_t startPort = item.startPort;
+        if (startPort == 0) {
+            continue;
+        }
+        if (item.startPort <= item.endPort) {
+            portMap.AddMap(item.startPort, item.endPort, bitmap);
+        }
+    }
 }
 
 int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
 {
+    SegmentBitmapMap srcPortMap;
+    SegmentBitmapMap dstPortMap;
     uint32_t index = 0;
     int32_t ret;
     for (const auto &rule : ruleList) {
@@ -286,9 +306,9 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
             NETNATIVE_LOGW("BuildMarkBitmap InsertIpBitmap localIps fail ret=%{public}d", ret);
             return NETFIREWALL_ERR;
         }
-        if (!IsNoPortProtocol(rule->protocol)) {
-            ProcessPorts(rule->remotePorts, bitmap, srcPortMap_);
-            ProcessPorts(rule->localPorts, bitmap, dstPortMap_);
+        if (!IsNotNeedPort(rule->protocol)) {
+            AddPortBitmap(rule->remotePorts, bitmap, srcPortMap);
+            AddPortBitmap(rule->localPorts, bitmap, dstPortMap);
         }
 
         if (rule->protocol != (NetworkProtocol)0) {
@@ -304,11 +324,15 @@ int32_t BitmapManager::BuildMarkBitmap(const std::vector<sptr<NetFirewallIpRule>
             uidMap_.OrInsert((UidKey)rule->userId, bitmap);
         }
 
-        ActionValue action = rule->ruleAction == FirewallRuleAction::RULE_ALLOW ? SK_PASS : SK_DROP;
-        actionMap_.insert(std::make_pair(Bitmap(bitmap), action));
+        if (rule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
+            action_key Key = 1;
+            actionMap_.OrInsert(Key, bitmap);
+        }
         index++;
     }
 
+    OrInsertPortBitmap(srcPortMap, srcPortMap_);
+    OrInsertPortBitmap(dstPortMap, dstPortMap_);
     return NETFIREWALL_SUCCESS;
 }
 
@@ -325,6 +349,12 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
             dstIp4Map_.OrForEach(bitmap);
             dstIp6Map_.OrForEach(bitmap);
         }
+        if (rule->remotePorts.empty() || IsNotNeedPort(rule->protocol)) {
+            srcPortMap_.OrForEach(bitmap);
+        }
+        if (rule->localPorts.empty() || IsNotNeedPort(rule->protocol)) {
+            dstPortMap_.OrForEach(bitmap);
+        }
         if (rule->protocol == (NetworkProtocol)0) {
             protoMap_.OrForEach(bitmap);
         }
@@ -338,7 +368,7 @@ void BitmapManager::BuildNoMarkBitmap(const std::vector<sptr<NetFirewallIpRule>>
     }
 }
 
-bool BitmapManager::IsNoPortProtocol(NetworkProtocol protocol)
+bool BitmapManager::IsNotNeedPort(NetworkProtocol protocol)
 {
     if (protocol == NetworkProtocol::ICMPV6 || protocol == NetworkProtocol::ICMP) {
         return true;

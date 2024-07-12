@@ -122,7 +122,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         return SK_PASS;
     }
 
-    action_key key = { 0 };
+    struct bitmap key = { 0 };
     if (!match_action_key(&tuple, &key)) {
         return SK_PASS;
     }
@@ -174,7 +174,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         return SK_PASS;
     }
 
-    action_key key = { 0 };
+    struct bitmap key = { 0 };
     if (!match_action_key(&tuple, &key)) {
         return SK_PASS;
     }

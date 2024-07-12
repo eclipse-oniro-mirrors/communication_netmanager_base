@@ -198,11 +198,11 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     NETNATIVE_LOG_D("ClearBpfFirewallRules: direction=%{public}d", direction);
     Ipv4LpmKey ip4Key = {};
     Ipv6LpmKey ip6Key = {};
-    PortArray portVal = {};
+    PortKey portKey = 0;
     ProtoKey protoKey = 0;
     AppUidKey appIdKey = 0;
     UidKey uidKey = 0;
-    ActionKey actKey = {};
+    ActionKey actKey = 1;
     ActionValue actVal;
     RuleCode ruleCode;
     CtKey ctKey;
@@ -213,8 +213,8 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     ClearBpfMap(GET_MAP_PATH(ingress, saddr6), ip6Key, ruleCode);
     ClearBpfMap(GET_MAP_PATH(ingress, daddr), ip4Key, ruleCode);
     ClearBpfMap(GET_MAP_PATH(ingress, daddr6), ip6Key, ruleCode);
-    ClearBpfMap(GET_MAP_PATH(ingress, sport), actKey, portVal);
-    ClearBpfMap(GET_MAP_PATH(ingress, dport), actKey, portVal);
+    ClearBpfMap(GET_MAP_PATH(ingress, sport), portKey, ruleCode);
+    ClearBpfMap(GET_MAP_PATH(ingress, dport), portKey, ruleCode);
     ClearBpfMap(GET_MAP_PATH(ingress, proto), protoKey, ruleCode);
     ClearBpfMap(GET_MAP_PATH(ingress, appuid), appIdKey, ruleCode);
     ClearBpfMap(GET_MAP_PATH(ingress, uid), uidKey, ruleCode);
@@ -311,7 +311,7 @@ int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(FirewallRuleAction inDefa
         return NETFIREWALL_ERR;
     }
     DefaultActionKey key = DEFAULT_ACT_IN_KEY;
-    ActionValue val = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
+    enum sk_action val = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
     WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
 
     key = DEFAULT_ACT_OUT_KEY;
@@ -416,16 +416,17 @@ void NetsysBpfNetFirewall::WriteDstIpv6BpfMap(BitmapManager &manager, NetFirewal
 void NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfPortMap &srcPortMap = manager.GetSrcPortMap();
-    if (srcPortMap.empty()) {
+    if (srcPortMap.Empty()) {
         NETNATIVE_LOGE("WriteSrcPortBpfMap: srcPortMap is empty");
     } else {
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : srcPortMap) {
-            Bitmap key = pair.first;
-            PortArray val = pair.second;
-            ActionKey rule;
-            memcpy_s(rule.val, sizeof(RuleCode), key.Get(), sizeof(RuleCode));
-            WriteBpfMap(GET_MAP_PATH(ingress, sport), rule, val);
+        for (const auto &pair : srcPortMap.Get()) {
+            PortKey key = pair.first;
+            Bitmap val = pair.second;
+            RuleCode rule;
+            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+            NETNATIVE_LOG_D("sport_map=%{public}d", key);
+            WriteBpfMap(GET_MAP_PATH(ingress, sport), key, rule);
         }
     }
 }
@@ -433,16 +434,17 @@ void NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewal
 void NetsysBpfNetFirewall::WriteDstPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfPortMap &dstPortMap = manager.GetDstPortMap();
-    if (dstPortMap.empty()) {
+    if (dstPortMap.Empty()) {
         NETNATIVE_LOGE("WriteDstPortBpfMap: dstPortMap is empty");
     } else {
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : dstPortMap) {
-            Bitmap key = pair.first;
-            PortArray val = pair.second;
-            ActionKey rule;
-            memcpy_s(rule.val, sizeof(RuleCode), key.Get(), sizeof(RuleCode));
-            WriteBpfMap(GET_MAP_PATH(ingress, dport), rule, val);
+        for (const auto &pair : dstPortMap.Get()) {
+            PortKey key = pair.first;
+            Bitmap val = pair.second;
+            RuleCode rule;
+            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+            NETNATIVE_LOG_D("dport_map=%{public}d", key);
+            WriteBpfMap(GET_MAP_PATH(ingress, dport), key, rule);
         }
     }
 }
@@ -504,17 +506,17 @@ void NetsysBpfNetFirewall::WriteUidBpfMap(BitmapManager &manager, NetFirewallRul
 void NetsysBpfNetFirewall::WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
     BpfActionMap &actionMap = manager.GetActionMap();
-    if (actionMap.empty()) {
+    if (actionMap.Empty()) {
         NETNATIVE_LOGE("WriteActionBpfMap: actionMap is empty");
     } else {
         bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : actionMap) {
-            Bitmap key = pair.first;
-            ActionValue val = pair.second;
-            ActionKey rule;
-            memcpy_s(rule.val, sizeof(RuleCode), key.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("action_map=%{public}d", key.Get()[0]);
-            WriteBpfMap(GET_MAP_PATH(ingress, action), rule, val);
+        for (const auto &pair : actionMap.Get()) {
+            ActionKey key = pair.first;
+            Bitmap val = pair.second;
+            RuleCode rule;
+            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
+            NETNATIVE_LOG_D("action_map=%{public}d", val.Get()[0]);
+            WriteBpfMap(GET_MAP_PATH(ingress, action), key, rule);
         }
     }
 }
