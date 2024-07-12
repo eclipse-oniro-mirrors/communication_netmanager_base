@@ -279,7 +279,6 @@ public:
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 
-
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
