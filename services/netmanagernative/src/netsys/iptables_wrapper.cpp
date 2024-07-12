@@ -115,5 +115,30 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
 
     return result_;
 }
+
+int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands)
+{
+    NETNATIVE_LOG_D("IptablesWrapper::RunMutipleCommands, ipType:%{public}d", ipType);
+    if (!iptablesWrapperFfrtQueue_) {
+        NETNATIVE_LOGE("FFRT Init Fail");
+        return NETMANAGER_ERROR;
+    }
+
+    for (const std::string &command : commands) {
+        if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
+            std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+            std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+            iptablesWrapperFfrtQueue_->submit(executeCommand);
+        }
+
+        if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
+            std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+            std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+            iptablesWrapperFfrtQueue_->submit(executeCommand);
+        }
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace nmd
 } // namespace OHOS

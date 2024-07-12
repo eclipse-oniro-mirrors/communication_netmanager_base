@@ -270,6 +270,15 @@ public:
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
 
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

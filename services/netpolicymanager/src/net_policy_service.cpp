@@ -610,5 +610,15 @@ int32_t NetPolicyService::ClearIpAndUidRule(const std::string &ip, uint32_t ipTy
 
     return netPolicyRule_->PolicyClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetPolicyService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return netPolicyRule_->PolicySetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

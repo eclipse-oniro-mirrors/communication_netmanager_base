@@ -946,6 +946,16 @@ public:
      * Clear firewall All Rules
      */
     int32_t ClearFirewallAllRules() override;
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

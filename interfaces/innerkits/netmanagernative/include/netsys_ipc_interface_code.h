@@ -124,6 +124,7 @@ enum class NetsysInterfaceCode {
     NETSYS_CLEAR_FIREWALL_RULE,
     NETSYS_DELETE_STATS_INFO,
     NETSYS_DELETE_SIM_STATS_INFO,
+    NETSYS_SET_NIC_TRAFFIC_ALLOWED,
 };
 
 enum class NotifyInterfaceCode {

@@ -886,5 +886,11 @@ int32_t NetsysControllerServiceImpl::FirewallClearIpAndUidRule(const std::string
 {
     return netsysClient_.FirewallClearIpAndUidRule(ip, ipType);
 }
+
+int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    NETMGR_LOG_D("SetNicTrafficAllowed: status = %{public}d", status);
+    return netsysClient_.SetNicTrafficAllowed(ifaceNames, status);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
