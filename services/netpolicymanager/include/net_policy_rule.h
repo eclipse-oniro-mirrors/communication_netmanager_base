@@ -197,7 +197,6 @@ public:
      */
     int32_t PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
-
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);
