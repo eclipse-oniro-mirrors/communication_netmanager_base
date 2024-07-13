@@ -43,6 +43,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+enum IptablesType {
+    IPTYPE_IPV4 = 1,
+    IPTYPE_IPV6 = 2,
+    IPTYPE_IPV4V6 = 3,
+};
 class INetsysControllerService : public RefBase {
 public:
     virtual ~INetsysControllerService() = default;
@@ -762,9 +767,10 @@ public:
      *
      * @param cmd Iptables command
      * @param respond The respond of execute iptables command
+     * @param ipType The type of iptables command, the default value is ipv4
      * @return Value the return value of the netsys interface call
      */
-    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) = 0;
 
     /**
      * Check network connectivity by sending packets to a host and reporting its response.

@@ -697,9 +697,10 @@ int32_t NetsysControllerServiceImpl::DeleteStatsInfo(uint32_t uid)
     return netsysClient_.DeleteStatsInfo(uid);
 }
 
-int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, 
+                                                              IptablesType ipType)
 {
-    return netsysClient_.SetIptablesCommandForRes(cmd, respond);
+    return netsysClient_.SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,

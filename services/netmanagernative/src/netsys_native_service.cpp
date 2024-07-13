@@ -727,13 +727,13 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         return NetManagerStandard::NETMANAGER_ERROR;
     }
     switch (ipType) {
-        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4:
+        case NetManagerStandard::IptablesType::IPTYPE_IPV4:
             respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, cmd);
             break;
-        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV6:
+        case NetManagerStandard::IptablesType::IPTYPE_IPV6:
             respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV6, cmd);
             break;
-        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4V6:
+        case NetManagerStandard::IptablesType::IPTYPE_IPV4V6:
             respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmd);
             break;
         default:

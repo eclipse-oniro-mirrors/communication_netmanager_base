@@ -963,7 +963,7 @@ int32_t NetsysController::DeleteStatsInfo(uint32_t uid)
     return netsysService_->DeleteStatsInfo(uid);
 }
 
-int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
 {
     if (cmd.empty()) {
         NETMGR_LOG_E("SetIptablesCommandForRes cmd is empty");
@@ -973,8 +973,8 @@ int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::
         NETMGR_LOG_E("SetIptablesCommandForRes netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    NETMGR_LOG_I("SetIptablesCommandForRes");
-    return netsysService_->SetIptablesCommandForRes(cmd, respond);
+    NETMGR_LOG_I("SetIptablesCommandForRes, iptables is %{public}d.", ipType);
+    return netsysService_->SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
 int32_t NetsysController::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
