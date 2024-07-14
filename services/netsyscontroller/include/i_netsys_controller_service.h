@@ -40,6 +40,7 @@
 #include "uid_range.h"
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
+#include "i_netsys_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
