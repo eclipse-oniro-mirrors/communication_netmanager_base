@@ -1341,7 +1341,8 @@ int32_t NetsysNativeClient::DeleteStatsInfo(uint32_t uid)
     return proxy->DeleteStatsInfo(uid);
 }
 
-int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
+int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+    NetsysNative::IptablesType ipType)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {

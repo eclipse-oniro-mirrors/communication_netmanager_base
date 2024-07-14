@@ -963,7 +963,8 @@ int32_t NetsysController::DeleteStatsInfo(uint32_t uid)
     return netsysService_->DeleteStatsInfo(uid);
 }
 
-int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
+int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+    NetsysNative::IptablesType ipType)
 {
     if (cmd.empty()) {
         NETMGR_LOG_E("SetIptablesCommandForRes cmd is empty");

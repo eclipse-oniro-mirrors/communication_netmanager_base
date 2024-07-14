@@ -527,7 +527,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     std::string cmd = "";
     std::string respond = "";
-    IptablesType ipType = IptablesType::IPTYPE_IPV4;
+    NetsysNative::IptablesType ipType = NetsysNative::IptablesType::IPTYPE_IPV4;
     ret = instance_->SetIptablesCommandForRes(cmd, respond, ipType);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 

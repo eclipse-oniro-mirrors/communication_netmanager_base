@@ -37,12 +37,16 @@
 #include "uid_range.h"
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
-#include "i_netsys_controller_service.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
 using namespace OHOS::NetManagerStandard;
+enum IptablesType {
+    IPTYPE_IPV4 = 1,
+    IPTYPE_IPV6 = 2,
+    IPTYPE_IPV4V6 = 3,
+};
 class INetsysService : public IRemoteBroker {
 public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,

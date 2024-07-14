@@ -736,7 +736,8 @@ public:
      * @param ipType The type of iptables command.
      * @return Value the return value of the netsys interface call
      */
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                     NetsysNative::IptablesType ipType) override;
 
     /**
      * Check network connectivity by sending packets to a host and reporting its response.

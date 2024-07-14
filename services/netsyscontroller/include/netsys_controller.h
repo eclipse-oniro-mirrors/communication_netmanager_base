@@ -753,7 +753,8 @@ public:
      * @param ipType The type of iptables command, the default value is ipv4
      * @return Value the return value of the netsys interface call
      */
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType = IPTYPE_IPV4);
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                     NetsysNative::IptablesType ipType = NetsysNative::IPTYPE_IPV4);
 
     /**
      * Check network connectivity by sending packets to a host and reporting its response.
