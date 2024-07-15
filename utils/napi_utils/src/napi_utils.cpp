@@ -35,19 +35,19 @@ constexpr const char *MSG = "message";
 
 static std::unordered_set<napi_env> unorderedSetEnv;
 static std::recursive_mutex mutexForEnv;
- 
+
 class WorkData {
 public:
     WorkData() = delete;
- 
+
     WorkData(napi_env env, void *data, void (*handler)(napi_env env, napi_status status, void *data))
         : env_(env), data_(data), handler_(handler) {}
- 
+
     napi_env env_;
     void *data_;
     void (*handler_)(napi_env env, napi_status status, void *data);
 };
- 
+
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
 {
@@ -495,13 +495,13 @@ void HookForEnvCleanup(void *data)
     NETMANAGER_BASE_LOGD("env clean up, erase from the unordered set");
     unorderedSetEnv.erase(pos);
 }
- 
+
 void SetEnvValid(napi_env env)
 {
     std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
     unorderedSetEnv.emplace(env);
 }
- 
+
 bool IsEnvValid(napi_env env)
 {
     std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
