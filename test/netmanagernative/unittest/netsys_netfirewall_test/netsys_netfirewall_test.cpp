@@ -213,8 +213,8 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest004, TestSize.Level0)
     EXPECT_FALSE(manager.GetSrcIp6Map().empty());
     EXPECT_FALSE(manager.GetDstIp4Map().empty());
     EXPECT_FALSE(manager.GetDstIp6Map().empty());
-    EXPECT_FALSE(manager.GetSrcPortMap().empty());
-    EXPECT_FALSE(manager.GetDstPortMap().empty());
+    EXPECT_FALSE(manager.GetSrcPortMap().Empty());
+    EXPECT_FALSE(manager.GetDstPortMap().Empty());
     EXPECT_FALSE(manager.GetProtoMap().Empty());
     EXPECT_FALSE(manager.GetActionMap().empty());
     EXPECT_FALSE(manager.GetAppIdMap().Empty());

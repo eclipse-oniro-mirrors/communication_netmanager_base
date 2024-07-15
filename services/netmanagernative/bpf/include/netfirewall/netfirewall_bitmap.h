@@ -20,38 +20,6 @@
 
 #include "netfirewall_types.h"
 
-static __always_inline void bitmap_clr(bitmap_ptr bitmap)
-{
-    for (int i = 0; i < BITMAP_LEN; i++) {
-        bitmap[i] = 0;
-    }
-}
-
-static __always_inline int bitmap_get(bitmap_ptr bitmap, uint32_t n)
-{
-    uint32_t len = BITMAP_BITS;
-    if (n < len) {
-        int i = n >> 5;   // n/32
-        int j = n & 0x1f; // n%32
-
-        return bitmap[i] & (1 << j);
-    }
-    return -1;
-}
-
-static __always_inline int bitmap_count(bitmap_ptr bitmap)
-{
-    int bits = BITMAP_BITS;
-    int cnt = 0;
-    for (int i = 0; i < bits; i++) {
-        int flag = bitmap_get(bitmap, i);
-        if (flag) {
-            cnt++;
-        }
-    }
-    return cnt;
-}
-
 static __always_inline void bitmap_and(bitmap_ptr bitmap, bitmap_ptr val)
 {
     for (int i = 0; i < BITMAP_LEN; i++) {
@@ -59,11 +27,21 @@ static __always_inline void bitmap_and(bitmap_ptr bitmap, bitmap_ptr val)
     }
 }
 
-static __always_inline void bitmap_or(bitmap_ptr bitmap, bitmap_ptr val)
+static __always_inline void bitmap_and_inv(bitmap_ptr bitmap, bitmap_ptr val)
 {
     for (int i = 0; i < BITMAP_LEN; i++) {
-        bitmap[i] |= val[i];
+        bitmap[i] &= (~val[i]);
     }
+}
+
+static __always_inline bool bitmap_positive(bitmap_ptr bitmap)
+{
+    for (int i = 0; i < BITMAP_LEN; i++) {
+        if (bitmap[i] > 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 #endif // NET_FIREWALL_BITMAP_H
