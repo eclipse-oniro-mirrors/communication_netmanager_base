@@ -35,6 +35,7 @@ static constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t SIGNAL_NUM = 3;
 sptr<IRemoteObject> g_remoteObject = nullptr;
 uint32_t g_uid = 0;
+std::atomic_bool g_isDialogShow = false;
 } // namespace
 
 NetAccessPolicyDialogImpl::NetAccessPolicyDialogImpl() : dialogConnectionCallback_(new DialogAbilityConnection()) {}
@@ -47,6 +48,15 @@ NetAccessPolicyDialogImpl::~NetAccessPolicyDialogImpl()
 bool NetAccessPolicyDialogImpl::ConnectSystemUi(uint32_t uid)
 {
     NETMGR_LOG_I("OnAbilityConnectDone");
+
+    g_uid = uid;
+    if (g_isDialogShow) {
+        AppExecFwk::ElementName element;
+        dialogConnectionCallback_->OnAbilityConnectDone(element, g_remoteObject, INVALID_USERID);
+        NETMGR_LOG_I("network access policy dialog has been show");
+        return true;
+    }
+
     auto abilityManager = AbilityManagerClient::GetInstance();
     if (abilityManager == nullptr) {
         NETMGR_LOG_E("Get abilityManager err");
@@ -61,7 +71,6 @@ bool NetAccessPolicyDialogImpl::ConnectSystemUi(uint32_t uid)
         return false;
     }
 
-    g_uid = uid;
     return true;
 }
 
@@ -69,9 +78,14 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
     NETMGR_LOG_I("OnAbilityConnectDone");
+    std::lock_guard lock(mutex_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+
+    if (g_remoteObject == nullptr) {
+        g_remoteObject = remoteObject;
+    }
 
     std::string parameters =
         "{\"ability.want.params.uiExtensionType\":\"sysDialog/common\",\"sysDialogZOrder\":1, \"appUid\":";
@@ -81,11 +95,16 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityConnectDone(
     data.WriteString16(u"com.example.myapplication");
     data.WriteString16(u"abilityName");
     data.WriteString16(u"UIExtensionProvider");
-
     data.WriteString16(u"parameters");
     data.WriteString16(Str8ToStr16(tmpParameters));
  
-    remoteObject->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    int32_t ret = remoteObject->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("Show power dialog is failed:%{public}d", ret);
+        return;
+    }
+    g_isDialogShow = true;
+    NETMGR_LOG_I("Show network access policy dialog is success");
 }
 
 void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityDisconnectDone(
@@ -94,6 +113,7 @@ void NetAccessPolicyDialogImpl::DialogAbilityConnection::OnAbilityDisconnectDone
     NETMGR_LOG_I("OnAbilityDisconnectDone");
     std::lock_guard lock(mutex_);
     g_remoteObject = nullptr;
+    g_isDialogShow = false;
 }
 
 INetAccessPolicyDialog *GetNetAccessPolicyDialog()
