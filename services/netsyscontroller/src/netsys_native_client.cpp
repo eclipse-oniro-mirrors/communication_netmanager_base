@@ -1341,14 +1341,15 @@ int32_t NetsysNativeClient::DeleteStatsInfo(uint32_t uid)
     return proxy->DeleteStatsInfo(uid);
 }
 
-int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+    NetsysNative::IptablesType ipType)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetIptablesCommandForRes(cmd, respond);
+    return proxy->SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
 int32_t NetsysNativeClient::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,

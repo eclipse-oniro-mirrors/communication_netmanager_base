@@ -1366,8 +1366,9 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string cmd = data.ReadString();
+    IptablesType ipType = static_cast<IptablesType>(data.ReadUint32());
     std::string respond;
-    int32_t result = SetIptablesCommandForRes(cmd, respond);
+    int32_t result = SetIptablesCommandForRes(cmd, respond, ipType);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes result failed");
         return ERR_FLATTEN_OBJECT;

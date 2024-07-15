@@ -596,7 +596,8 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest001, TestSize.Leve
 {
     std::string iptableCmd = "-Sabbbb";
     std::string iptableOutput = "";
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -604,7 +605,8 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest002, TestSize.Leve
 {
     std::string iptableCmd = "Sabbbb";
     std::string iptableOutput = "";
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
@@ -618,8 +620,9 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Leve
     instance_->OnNetManagerRestart();
     std::string iptableCmd = "-Sabbbb";
     std::string iptableOutput = "";
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
     auto backup = std::move(instance_->iptablesWrapper_);
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     instance_->iptablesWrapper_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }

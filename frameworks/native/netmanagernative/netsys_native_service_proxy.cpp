@@ -1992,6 +1992,9 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
     if (!data.WriteString(cmd)) {
         return ERR_FLATTEN_OBJECT;
     }
+    if (!data.WriteUint32(ipType)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     MessageParcel reply;
     MessageOption option;
     if (Remote() == nullptr) {
