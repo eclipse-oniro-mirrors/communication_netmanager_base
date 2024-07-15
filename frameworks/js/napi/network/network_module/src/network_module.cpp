@@ -42,6 +42,8 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         manager->SetInvalid();
     };
     napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+    NapiUtils::SetEnvValid(env);
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, env);
     return exports;
 }
 
