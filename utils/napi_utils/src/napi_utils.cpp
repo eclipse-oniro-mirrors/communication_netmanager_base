@@ -18,7 +18,10 @@
 #include <cstring>
 #include <initializer_list>
 #include <memory>
+#include <mutex>
+#include <unordered_set>
 
+#include "netmanager_base_log.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -29,6 +32,22 @@ static constexpr const int MAX_STRING_LENGTH = 65536;
 constexpr const char *CODE = "code";
 constexpr const char *MSG = "message";
 } // namespace
+
+static std::unordered_set<napi_env> unorderedSetEnv;
+static std::recursive_mutex mutexForEnv;
+ 
+class WorkData {
+public:
+    WorkData() = delete;
+ 
+    WorkData(napi_env env, void *data, void (*handler)(napi_env env, napi_status status, void *data))
+        : env_(env), data_(data), handler_(handler) {}
+ 
+    napi_env env_;
+    void *data_;
+    void (*handler_)(napi_env env, napi_status status, void *data);
+};
+ 
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
 {
@@ -419,6 +438,10 @@ napi_value GetArrayElement(napi_env env, napi_value arr, uint32_t index)
 void CreateUvQueueWork(napi_env env, void *data, void(handler)(uv_work_t *, int status))
 {
     uv_loop_s *loop = nullptr;
+    if (!IsEnvValid(env)) {
+        NETMANAGER_BASE_LOGE("the env is invalid");
+        return;
+    }
     NAPI_CALL_RETURN_VOID(env, napi_get_uv_event_loop(env, &loop));
 
     auto work = new uv_work_t;
@@ -458,6 +481,35 @@ napi_value CreateErrorMessage(napi_env env, int32_t errorCode, const std::string
     SetNamedProperty(env, result, CODE, CreateInt32(env, errorCode));
     SetNamedProperty(env, result, MSG, CreateStringUtf8(env, errorMessage));
     return result;
+}
+
+void HookForEnvCleanup(void *data)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
+    auto env = static_cast<napi_env>(data);
+    auto pos = unorderedSetEnv.find(env);
+    if (pos == unorderedSetEnv.end()) {
+        NETMANAGER_BASE_LOGE("The env is not in the unordered set");
+        return;
+    }
+    NETMANAGER_BASE_LOGD("env clean up, erase from the unordered set");
+    unorderedSetEnv.erase(pos);
+}
+ 
+void SetEnvValid(napi_env env)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
+    unorderedSetEnv.emplace(env);
+}
+ 
+bool IsEnvValid(napi_env env)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
+    auto pos = unorderedSetEnv.find(env);
+    if (pos == unorderedSetEnv.end()) {
+        return false;
+    }
+    return true;
 }
 } // namespace NapiUtils
 } // namespace NetManagerStandard

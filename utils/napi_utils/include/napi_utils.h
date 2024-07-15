@@ -107,6 +107,10 @@ napi_handle_scope OpenScope(napi_env env);
 void CloseScope(napi_env env, napi_handle_scope scope);
 /* error */
 napi_value CreateErrorMessage(napi_env env, int32_t errorCodeconst, const std::string &errorMessage);
+
+void HookForEnvCleanup(void *data);
+void SetEnvValid(napi_env env);
+bool IsEnvValid(napi_env env);
 } // namespace NapiUtils
 } // namespace NetManagerStandard
 } // namespace OHOS
