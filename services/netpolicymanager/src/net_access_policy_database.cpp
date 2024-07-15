@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-static const int32_t RDB_VERSION = 0;
+static const int32_t RDB_VERSION = 1;
 const std::string DATABASE_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy.db";
 const std::string NETMANAGER_DB_UID_ACCESS_POLICY_TABLE = "uid_access_policy_infos";
 const std::string SQL_TABLE_COLUMS = std::string(
@@ -38,6 +38,15 @@ int NetAccessPolicyRDB::RdbDataOpenCallback::OnCreate(NativeRdb::RdbStore &rdbSt
 
 int NetAccessPolicyRDB::RdbDataOpenCallback::OnUpgrade(NativeRdb::RdbStore &store, int oldVersion, int newVersion)
 {
+    NETMGR_LOG_I("OnUpgrade, oldVersion: %{public}d, newVersion: %{public}d", oldVersion, newVersion);
+
+    // version 0 -> 1: add isBroker to the table
+    std::string NewVersionModify = "ALTER TABLE uid_access_policy_infos ADD COLUMN isBroker INTEGER";
+    int ret = store.ExecuteSql(NewVersionModify);
+    if (ret != 0) {
+        NETMGR_LOG_E("OnUpgrade failed, ret: %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
     return NETMANAGER_SUCCESS;
 }
 
