@@ -111,6 +111,9 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             netStatsCached_->ForceDeleteStats(uid);
             auto handler = std::make_unique<NetStatsDataHandler>();
             NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
+            if (handler->DeleteSimStatsByUid(uid) != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("Net Manager sim stats delete uid failed, uid:[%{public}d]", uid);
+            }
             return handler->DeleteByUid(uid);
         });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
