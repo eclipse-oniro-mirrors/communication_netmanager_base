@@ -391,10 +391,13 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("Network UpdateDns in.");
     std::vector<std::string> servers;
     std::vector<std::string> domains;
+    std::stringstream ss;
     for (const auto &dns : netLinkInfo.dnsList_) {
         servers.emplace_back(dns.address_);
         domains.emplace_back(dns.hostName_);
+        ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
     }
+    NETMGR_LOG_I("update dns server: %{public}s", ss.str().c_str());
     // Call netsys to set dns, use default timeout and retry
     int32_t ret = NetsysController::GetInstance().SetResolverConfig(netId_, 0, 0, servers, domains);
     if (ret != NETMANAGER_SUCCESS) {
