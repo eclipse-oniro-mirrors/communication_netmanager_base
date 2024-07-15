@@ -134,5 +134,34 @@ int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const 
     NETMGR_LOG_I("update success");
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetDataShareHelperUtils::Delete(Uri &uri, const std::string &key)
+{
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    std::string queryValue;
+    int32_t ret = Query(uri, key, queryValue);
+    if (ret == NETMANAGER_ERROR) {
+        dataShareHelper->Release();
+        NETMGR_LOG_D("don't have record");
+        return NETMANAGER_SUCCESS;
+    }
+
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);
+    int32_t result = dataShareHelper->Delete(uri, predicates);
+    if (result == INVALID_VALUE) {
+        dataShareHelper->Release();
+        NETMGR_LOG_D("Delete failed");
+        return NETMANAGER_ERROR;
+    }
+    dataShareHelper->NotifyChange(uri);
+    dataShareHelper->Release();
+    NETMGR_LOG_I("Delete success");
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

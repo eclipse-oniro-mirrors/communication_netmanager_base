@@ -52,6 +52,7 @@ public:
     int32_t Query(Uri &uri, const std::string &key, std::string &value);
     int32_t Insert(Uri &uri, const std::string &key, const std::string &value);
     int32_t Update(Uri &uri, const std::string &key, const std::string &value);
+    int32_t Delete(Uri &uri, const std::string &key);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();

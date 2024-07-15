@@ -44,5 +44,13 @@ int32_t NetDataShareHelperUtilsIface::Update(const std::string &strUri, const st
     int32_t ret = dataShareHelperUtils->Update(uri, key, value);
     return ret;
 }
+
+int32_t NetDataShareHelperUtilsIface::Delete(const std::string &strUri, const std::string &key)
+{
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    Uri uri(strUri);
+    int32_t ret = dataShareHelperUtils->Delete(uri, key);
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
