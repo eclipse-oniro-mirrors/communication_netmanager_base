@@ -375,7 +375,7 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, st
      * 2 default pass: 2.1 Reverse the action, 0011(1:pass, 0:drop) 2.2 Match results bit by and, and if
      * any bit is 1, it is pass(0110&0011->0010)
      */
-    if (action_bitmap) {
+    if (action_bitmap && bitmap_positive(key->val)) {
         if (sk_act == SK_DROP) {
             bitmap_and(key->val, action_bitmap->val);
             if (!bitmap_positive(key->val)) {
