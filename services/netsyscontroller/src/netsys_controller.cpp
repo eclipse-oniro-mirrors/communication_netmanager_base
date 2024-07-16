@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -702,8 +702,8 @@ int32_t NetsysController::SetIpAddress(int32_t socketFd, const std::string &ipAd
                                        struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysController::set addr");
-    if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > IPV4_MAX_LENGTH) || (prefixLen <= 0) ||
-        (prefixLen > IPV4_MAX_LENGTH)) {
+    if ((socketFd <= 0) || (ipAddress.length() == 0) || (static_cast<uint32_t>(ipAddress.length()) > IPV4_MAX_LENGTH) ||
+	    (prefixLen <= 0) || (static_cast<uint32_t>(prefixLen) > IPV4_MAX_LENGTH)) {
         NETMGR_LOG_E(
             "The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
             "ipAddress[%{public}s], prefixLen[%{public}d].",
