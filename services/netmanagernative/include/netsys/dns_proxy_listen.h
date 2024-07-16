@@ -56,6 +56,27 @@ public:
      */
     void SetParseNetId(uint16_t netId);
 
+    using DnsSocketHolderBase = std::map<int32_t, DnsProxyRequestSocket>;
+
+private:
+class DnsSocketHolder : private DnsSocketHolderBase {
+public:
+    auto find(const int32_t& x) { return DnsSocketHolderBase::find(x); }
+    auto begin() { return DnsSocketHolderBase::begin(); }
+    auto end() { return DnsSocketHolderBase::end(); }
+    auto cbegin() { return DnsSocketHolderBase::cbegin(); }
+    auto cend() { return DnsSocketHolderBase::cend(); }
+    auto clear() { return DnsSocketHolderBase::clear(); }
+    auto size() { return DnsSocketHolderBase::size(); }
+    auto empty() { return DnsSocketHolderBase::empty(); }
+    template<typename... Args>
+    auto emplace(Args&&... args) -> decltype(DnsSocketHolderBase::emplace(std::forward<Args>(args)...));
+    auto erase(iterator position) -> decltype(DnsSocketHolderBase::erase(position));
+private:
+    constexpr static uint32_t MAX_SOCKET_CAPACITY = 300;
+    std::list<iterator> lruCache;
+};
+
 private:
     void DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::unique_ptr<AlignedSockAddr> &clientSock);
     static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen,
@@ -72,7 +93,7 @@ private:
     static uint16_t netId_;
     static std::atomic_bool proxyListenSwitch_;
     static std::mutex listenerMutex_;
-    std::map<int32_t, DnsProxyRequestSocket> serverIdxOfSocket;
+    DnsSocketHolder serverIdxOfSocket;
     std::chrono::system_clock::time_point collectTime;
     void EpollTimeout();
     void CollectSocks();
