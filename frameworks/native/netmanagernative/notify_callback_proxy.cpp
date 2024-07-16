@@ -99,6 +99,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &addr, 
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -125,6 +126,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &addr, 
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -221,6 +223,7 @@ int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifNa
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED),
                                       data, reply, option);
     if (ret != ERR_NONE) {
