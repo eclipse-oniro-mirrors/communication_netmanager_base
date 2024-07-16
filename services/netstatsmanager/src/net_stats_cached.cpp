@@ -70,22 +70,27 @@ int32_t NetStatsCached::StartCached()
 
 void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(lock_);
     uidStatsInfo.insert(uidStatsInfo.end(), stats_.GetUidStatsInfo().begin(), stats_.GetUidStatsInfo().end());
 }
 
 void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(lock_);
     uidSimStatsInfo.insert(uidSimStatsInfo.end(), stats_.GetUidSimStatsInfo().begin(),
                            stats_.GetUidSimStatsInfo().end());
+    std::for_each(uidSimStatsInfo.begin(), uidSimStatsInfo.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
 }
 
 void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(lock_);
     uidPushStatsInfo.insert(uidPushStatsInfo.end(), uidPushStatsInfo_.begin(), uidPushStatsInfo_.end());
 }
 
 void NetStatsCached::GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(lock_);
     ifaceStatsInfo.insert(ifaceStatsInfo.end(), stats_.GetIfaceStatsInfo().begin(), stats_.GetIfaceStatsInfo().end());
 }
 
@@ -222,7 +227,6 @@ void NetStatsCached::CacheUidSimStats()
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        info.uid_ = Sim_UID;
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
