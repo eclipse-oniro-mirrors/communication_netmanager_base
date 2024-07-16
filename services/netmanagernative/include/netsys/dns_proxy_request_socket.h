@@ -20,6 +20,8 @@
 #include <chrono>
 #include <cstdint>
 #include <cstddef>
+#include <list>
+#include <map>
 #include <memory>
 #include <netinet/ip.h>
 #include <sys/epoll.h>
@@ -49,8 +51,9 @@ public:
     epoll_event *GetEventPtr();
     AlignedSockAddr &GetClientSock();
     RecvBuff &GetRecvBuff();
+    void SetLruIterator(std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator iterator);
+    [[nodiscard]] std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator GetLruIterator() const;
     ~DnsProxyRequestSocket();
-
     std::chrono::system_clock::time_point endTime;
 
 private:
@@ -61,6 +64,7 @@ private:
     AlignedSockAddr srcAddr{};
     std::unique_ptr<AlignedSockAddr> clientSock;
     std::unique_ptr<RecvBuff> recvBuff;
+    std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator lruIterator;
 };
 } // namespace OHOS::nmd
 #endif // NETSYS_DNS_PROXY_REQUEST_SOCKET_H

@@ -100,7 +100,6 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
     auto iter = serverIdxOfSocket.find(socketFd);
     if (iter == serverIdxOfSocket.end()) {
         NETNATIVE_LOGE("no idx found");
-        close(socketFd);
         return;
     }
     auto serverIdx = iter->second.GetIdx();
@@ -151,7 +150,6 @@ void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
     auto iter = serverIdxOfSocket.find(socketFd);
     if (iter == serverIdxOfSocket.end()) {
         NETNATIVE_LOGE("no idx found");
-        close(socketFd);
         return;
     }
     AlignedSockAddr &addrParse = iter->second.GetAddr();
@@ -204,7 +202,7 @@ void DnsProxyListen::StartListen()
     epoll_event eventsReceived[EPOLL_TASK_NUMBER];
     while (true) {
         int32_t nfds =
-            epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.size() == 0 ? -1 : EPOLL_TIMEOUT);
+            epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.empty() ? -1 : EPOLL_TIMEOUT);
         NETNATIVE_LOG_D("now socket num: %{public}zu", serverIdxOfSocket.size());
         if (nfds < 0) {
             NETNATIVE_LOGE("epoll errno: %{public}d", errno);
@@ -457,6 +455,26 @@ void DnsProxyListen::clearResource()
         epollFd_ = -1;
     }
     serverIdxOfSocket.clear();
+}
+
+template<typename... Args>
+auto DnsProxyListen::DnsSocketHolder::emplace(Args&&... args) ->
+decltype(DnsSocketHolderBase::emplace(std::forward<Args>(args)...))
+{
+    if (size() >= MAX_SOCKET_CAPACITY) {
+        NETNATIVE_LOG_D("Socket num over capacity, throw oldest socket.");
+        DnsSocketHolderBase::erase(lruCache.front());
+        lruCache.pop_front();
+    }
+    auto iter = DnsSocketHolderBase::emplace(std::forward<Args>(args)...);
+    iter.first->second.SetLruIterator(lruCache.insert(lruCache.end(), iter.first));
+    return iter;
+}
+
+auto DnsProxyListen::DnsSocketHolder::erase(iterator position) -> decltype(DnsSocketHolderBase::erase(position))
+{
+    lruCache.erase(position->second.GetLruIterator());
+    return DnsSocketHolderBase::erase(position);
 }
 } // namespace nmd
 } // namespace OHOS

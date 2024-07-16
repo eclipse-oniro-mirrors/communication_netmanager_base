@@ -75,4 +75,15 @@ RecvBuff &DnsProxyRequestSocket::GetRecvBuff()
 {
     return *recvBuff;
 }
+
+std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator DnsProxyRequestSocket::GetLruIterator() const
+{
+    return this->lruIterator;
+}
+
+void DnsProxyRequestSocket::SetLruIterator(
+    std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator iterator)
+{
+    this->lruIterator = iterator;
+}
 } // namespace OHOS::nmd
