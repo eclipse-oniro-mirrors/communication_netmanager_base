@@ -285,6 +285,9 @@ int32_t NetConnService::RequestNetConnection(const sptr<NetSpecifier> netSpecifi
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
     int32_t result = NETMANAGER_ERROR;
+    if (netSpecifier == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     std::set<NetCap> &netCaps = netSpecifier->netCapabilities_.netCaps_;
     if (netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end()) {
         if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
