@@ -239,6 +239,8 @@ private:
 
     NetStatsInfo GetIncreasedStats(const NetStatsInfo &info);
 
+    NetStatsInfo GetIncreasedSimStats(const NetStatsInfo &info);
+
     inline bool CheckUidStor()
     {
         return stats_.GetCurrentUidStats() >= trafficThreshold_;
