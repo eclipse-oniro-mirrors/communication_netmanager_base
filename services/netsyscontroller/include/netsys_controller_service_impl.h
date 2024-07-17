@@ -928,26 +928,6 @@ public:
     int32_t StopClat(const std::string &interfaceName) override;
 
     /**
-     * Set Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @param uids uid list
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-                                    const std::vector<uint32_t> &uids) override;
-
-    /**
-     * Clear Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) override;
-
-    /**
      * Clear firewall All Rules
      */
     int32_t ClearFirewallAllRules() override;

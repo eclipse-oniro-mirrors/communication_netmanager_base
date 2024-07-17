@@ -579,17 +579,6 @@ int32_t NetManagerNative::NotifyNetBearerTypeChange(std::set<NetBearType> bearer
     return connManager_->NotifyNetBearerTypeChange(bearerTypes);
 }
 
-int32_t NetManagerNative::NativeSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-    const std::vector<uint32_t> &uids)
-{
-    return firewallManager_->SetIpAndUidRule(ip, ipType, uids);
-}
-
-int32_t NetManagerNative::NativeClearIpAndUidRule(const std::string &ip, uint32_t ipType)
-{
-    return firewallManager_->ClearIpAndUidRule(ip, ipType);
-}
-
 int32_t NetManagerNative::ClearFirewallAllRules()
 {
     return firewallManager_->ClearAllRules();

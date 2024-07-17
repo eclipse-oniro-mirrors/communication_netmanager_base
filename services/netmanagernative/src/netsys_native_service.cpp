@@ -996,17 +996,6 @@ int32_t NetsysNativeService::StopClat(const std::string &interfaceName)
     return result;
 }
 
-int32_t  NetsysNativeService::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-                                                      const std::vector<uint32_t> &uids)
-{
-    return netsysService_->NativeSetIpAndUidRule(ip, ipType, uids);
-}
-
-int32_t NetsysNativeService::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
-{
-    return netsysService_->NativeClearIpAndUidRule(ip, ipType);
-}
-
 int32_t NetsysNativeService::ClearFirewallAllRules()
 {
     NETNATIVE_LOG_D("ClearFirewallAllRules");

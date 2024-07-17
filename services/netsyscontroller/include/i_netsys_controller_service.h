@@ -955,27 +955,6 @@ public:
 
     virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
     virtual int32_t StopClat(const std::string &interfaceName) = 0;
-
-    /**
-     * Set Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @param uids uid list
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    virtual int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-                                            const std::vector<uint32_t> &uids) = 0;
-
-    /**
-     * Clear Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
-
     /**
      * Clear Firewall All Rules
      */

@@ -173,9 +173,6 @@ public:
     virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
     virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
     virtual int32_t StopClat(const std::string &interfaceName) = 0;
-    virtual int32_t FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-                                            const std::vector<uint32_t> &uids) = 0;
-    virtual int32_t FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType) = 0;
     virtual int32_t ClearFirewallAllRules() = 0;
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")

@@ -149,17 +149,6 @@ int32_t NetsysPolicyWrapper::ClearFirewallAllRules()
     return netsysReturnValue;
 }
 
-int32_t NetsysPolicyWrapper::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-    const std::vector<uint32_t> &uids)
-{
-    auto netsysReturnValue = NetsysController::GetInstance().FirewallSetIpAndUidRule(ip, ipType, uids);
-    return netsysReturnValue;
-}
-int32_t NetsysPolicyWrapper::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
-{
-    auto netsysReturnValue = NetsysController::GetInstance().FirewallClearIpAndUidRule(ip, ipType);
-    return netsysReturnValue;
-}
 int32_t NetsysPolicyWrapper::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
     auto netsysReturnValue = NetsysController::GetInstance().SetNicTrafficAllowed(ifaceNames, status);

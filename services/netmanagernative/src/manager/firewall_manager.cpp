@@ -27,7 +27,6 @@ namespace nmd {
 using namespace NetManagerStandard;
 namespace {
 static constexpr const char *CONFIG_FILE_PATH = "/proc/self/uid_map";
-static constexpr uint32_t IPTYE_MAX = 3;
 bool SetFireWallCommand(const std::string &chainName, std::string command)
 {
     bool ret = false;
@@ -134,9 +133,6 @@ std::string FirewallManager::FetchChainName(ChainType chain)
         case ChainType::CHAIN_OHFW_UNDOZABLE:
             chainName = "ohfw_undozable";
             break;
-        case ChainType::CHAIN_DES_FILTER:
-            chainName = "oh_des_filter";
-            break;
         default:
             chainName = "oh_unusable";
             break;
@@ -174,8 +170,7 @@ int32_t FirewallManager::InitChain()
           (IptablesNewChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_DES_FILTER) == NETMANAGER_ERROR);
+          (IptablesNewChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR);
     chainInitFlag_ = true;
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
@@ -190,9 +185,7 @@ int32_t FirewallManager::DeInitChain()
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_DES_FILTER) == NETMANAGER_ERROR);
-
+          (IptablesDeleteChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR);
     chainInitFlag_ = false;
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
@@ -206,10 +199,6 @@ int32_t FirewallManager::InitDefaultRules()
     ret = ret ||
           (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
-    command = "-t filter -A OUTPUT -j " + chainName;
-    ret = ret ||
-          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
-    chainName = FetchChainName(ChainType::CHAIN_DES_FILTER);
     command = "-t filter -A OUTPUT -j " + chainName;
     ret = ret ||
           (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
@@ -454,85 +443,6 @@ int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule 
     }
 
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
-}
-
-int32_t FirewallManager::SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids)
-{
-    if (ipType > IPTYE_MAX) {
-        NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule ipType error");
-        return NETMANAGER_ERROR;
-    }
-    IpType iptypeInner = IpType(ipType);
-    std::string chainName = "oh_" + ip;
-    std::string command = "-t filter -N " + chainName;
-    int32_t ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule iptables new chain error");
-        return NETMANAGER_ERROR;
-    }
-    std::string fromChainName = FetchChainName(ChainType::CHAIN_DES_FILTER);
-    command = "-t filter -A " + fromChainName + " -d " + ip + " -j " + chainName;
-    ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule add filter error");
-        return NETMANAGER_ERROR;
-    }
-    if (iptypeInner == IPTYPE_IPV6) {
-        command = "-t filter -A " + chainName + " -p icmpv6 --icmpv6-type neighbor-advertisement -j ACCEPT";
-        ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-        if (ret == NETMANAGER_ERROR) {
-            NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule add na error");
-            return NETMANAGER_ERROR;
-        }
-    }
-    bool result = false;
-    std::for_each(uids.begin(), uids.end(), [&command, &chainName, &result, &iptypeInner](uint32_t uid) {
-        std::string strUid = std::to_string(uid);
-        command = "-t filter -A " + chainName + " -m owner --uid-owner " + strUid + " -j ACCEPT";
-        result = result || (IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command) ==  NETMANAGER_ERROR);
-    });
-    if (result) {
-        NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule add uid error");
-        return NETMANAGER_ERROR;
-    }
-    command = "-t filter -A " + chainName + " -j REJECT";
-    ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::SetIpAndUidRule add reject rule error");
-        return NETMANAGER_ERROR;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t FirewallManager::ClearIpAndUidRule(const std::string &ip, uint32_t ipType)
-{
-    if (ipType > IPTYE_MAX) {
-        NETNATIVE_LOGE("FirewallManager::ClearIpAndUidRule ipType error");
-        return NETMANAGER_ERROR;
-    }
-    IpType iptypeInner = IpType(ipType);
-    std::string chainName = "oh_" + ip;
-    std::string command = "-t filter -F " + chainName;
-    int32_t ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::ClearIpAndUidRule iptables clear chain error");
-        return NETMANAGER_ERROR;
-    }
-
-    std::string fromChainName = FetchChainName(ChainType::CHAIN_DES_FILTER);
-    command = "-t filter -D " + fromChainName + " -d " + ip + " -j " + chainName;
-    ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::ClearIpAndUidRule clear filter error");
-        return NETMANAGER_ERROR;
-    }
-    command = "-t filter -X " + chainName;
-    ret = IptablesWrapper::GetInstance()->RunCommand(iptypeInner, command);
-    if (ret == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("FirewallManager::ClearIpAndUidRule delete chain error");
-        return NETMANAGER_ERROR;
-    }
-    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS
