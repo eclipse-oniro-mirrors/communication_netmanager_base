@@ -95,6 +95,38 @@ bool DnsProxyListen::GetDnsProxyServers(std::vector<std::string> &servers, size_
     return true;
 }
 
+bool DnsProxyListen::MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
+                                  AlignedSockAddr &clientSock)
+{
+    if (clientSock.sa.sa_family == AF_INET) {
+        if (servers[serverIdx].find(".") == std::string::npos) {
+            return false;
+        }
+        addrParse.sin.sin_family = AF_INET;
+        addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
+        addrParse.sin.sin_addr.s_addr = inet_addr(servers[serverIdx].c_str());
+        if (addrParse.sin.sin_addr.s_addr == INADDR_NONE) {
+            NETNATIVE_LOGE("Input ipv4 dns server %{private}s is not correct!", servers[serverIdx].c_str());
+            return false;
+        }
+    } else if (clientSock.sa.sa_family == AF_INET6) {
+        if (servers[serverIdx].find(":") == std::string::npos) {
+            return false;
+        }
+        addrParse.sin6.sin6_family = AF_INET6;
+        addrParse.sin6.sin6_port = htons(DNS_PROXY_PORT);
+        inet_pton(AF_INET6, servers[serverIdx].c_str(), &(addrParse.sin6.sin6_addr));
+        if (IN6_IS_ADDR_UNSPECIFIED(&addrParse.sin6.sin6_addr)) {
+            NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", servers[serverIdx].c_str());
+            return false;
+        }
+    } else {
+        NETNATIVE_LOGE("current clientSock type is error!");
+        return false;
+    }
+    return true;
+}
+
 void DnsProxyListen::SendRequest2Server(int32_t socketFd)
 {
     auto iter = serverIdxOfSocket.find(socketFd);
@@ -113,25 +145,8 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
     socklen_t addrLen;
     AlignedSockAddr &addrParse = iter->second.GetAddr();
     AlignedSockAddr &clientSock = iter->second.GetClientSock();
-    if (clientSock.sa.sa_family == AF_INET) {
-        addrParse.sin.sin_family = AF_INET;
-        addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
-        addrParse.sin.sin_addr.s_addr = inet_addr(servers[serverIdx].c_str());
-        if (addrParse.sin.sin_addr.s_addr == INADDR_NONE) {
-            NETNATIVE_LOGE("Input dns server [%{public}s] is not correct!", servers[serverIdx].c_str());
-            return SendRequest2Server(socketFd);
-        }
-    } else if (clientSock.sa.sa_family == AF_INET6) {
-        if (servers[serverIdx].find(":") == std::string::npos) {
-            return SendRequest2Server(socketFd);
-        }
-        addrParse.sin6.sin6_family = AF_INET6;
-        addrParse.sin6.sin6_port = htons(DNS_PROXY_PORT);
-        inet_pton(AF_INET6, servers[serverIdx].c_str(), &(addrParse.sin6.sin6_addr));
-        if (IN6_IS_ADDR_UNSPECIFIED(&addrParse.sin6.sin6_addr)) {
-            NETNATIVE_LOGE("Input dns server [%{public}s] is not correct!", servers[serverIdx].c_str());
-            return SendRequest2Server(socketFd);
-        }
+    if (!MakeAddrInfo(servers, serverIdx, addrParse, clientSock)) {
+        return SendRequest2Server(socketFd);
     }
     if (PollUdpDataTransfer::PollUdpSendData(socketFd, iter->second.GetRecvBuff().questionsBuff,
                                              iter->second.GetRecvBuff().questionLen, addrParse, addrLen) < 0) {
@@ -144,6 +159,7 @@ void DnsProxyListen::SendRequest2Server(int32_t socketFd)
         serverIdxOfSocket.erase(iter);
     }
 }
+
 void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
 {
     NETNATIVE_LOG_D("epoll send back to client.");
@@ -154,7 +170,6 @@ void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
     }
     AlignedSockAddr &addrParse = iter->second.GetAddr();
     AlignedSockAddr &clientSock = iter->second.GetClientSock();
-    NETNATIVE_LOG_D("=====sa_family:[%{public}d]", clientSock.sa.sa_family);
     int32_t proxySocket = proxySockFd_;
     socklen_t addrLen = 0;
     if (clientSock.sa.sa_family == AF_INET) {
@@ -368,8 +383,8 @@ void DnsProxyListen::CollectSocks()
 void DnsProxyListen::EpollTimeout()
 {
     NETNATIVE_LOGE("epoll timeout, try next server.");
-    std::list<int32_t> sockTemp;
     if (serverIdxOfSocket.size() > 0) {
+        std::list<int32_t> sockTemp;
         std::transform(serverIdxOfSocket.cbegin(), serverIdxOfSocket.cend(), std::back_inserter(sockTemp),
                        [](auto &iter) { return iter.first; });
         for (const auto sock : sockTemp) {
