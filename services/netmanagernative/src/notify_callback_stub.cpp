@@ -18,26 +18,7 @@
 
 namespace OHOS {
 namespace NetsysNative {
-NotifyCallbackStub::NotifyCallbackStub()
-{
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED)] =
-        &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED)] =
-        &NotifyCallbackStub::CmdOnInterfaceAddressRemoved;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED)] =
-        &NotifyCallbackStub::CmdOnInterfaceAdded;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED)] =
-        &NotifyCallbackStub::CmdOnInterfaceRemoved;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED)] =
-        &NotifyCallbackStub::CmdOnInterfaceChanged;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED)] =
-        &NotifyCallbackStub::CmdOnInterfaceLinkStateChanged;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED)] =
-        &NotifyCallbackStub::CmdOnRouteChanged;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS)] = &NotifyCallbackStub::CmdDhcpSuccess;
-    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT)] =
-        &NotifyCallbackStub::CmdOnBandwidthReachedLimit;
-}
+NotifyCallbackStub::NotifyCallbackStub() {}
 
 NotifyCallbackStub::~NotifyCallbackStub() {}
 
@@ -51,17 +32,29 @@ int32_t NotifyCallbackStub::OnRemoteRequest(
         NETNATIVE_LOGE("Descriptor checked failed");
         return ERR_FLATTEN_OBJECT;
     }
-
-    auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto requestFunc = itFunc->second;
-        if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
-        }
+    switch (code) {
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED):
+            return CmdOnInterfaceAddressUpdated(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED):
+            return CmdOnInterfaceAddressRemoved(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED):
+            return CmdOnInterfaceAdded(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED):
+            return CmdOnInterfaceRemoved(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED):
+            return CmdOnInterfaceChanged(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED):
+            return CmdOnInterfaceLinkStateChanged(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED):
+            return CmdOnRouteChanged(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS):
+            return CmdDhcpSuccess(data, reply);
+        case static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT):
+            return CmdOnBandwidthReachedLimit(data, reply);
+        default:
+            NETNATIVE_LOGI("Stub default case, need check");
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-
-    NETNATIVE_LOGI("Stub default case, need check");
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)
