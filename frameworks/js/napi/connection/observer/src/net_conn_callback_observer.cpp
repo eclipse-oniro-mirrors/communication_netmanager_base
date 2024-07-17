@@ -27,6 +27,10 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -47,6 +51,10 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -70,6 +78,10 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -93,6 +105,10 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -109,6 +125,10 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -125,6 +145,10 @@ int32_t NetConnCallbackObserver::NetUnavailable()
 int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+        NETMANAGER_BASE_LOGI("can not find netConnection key");
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
