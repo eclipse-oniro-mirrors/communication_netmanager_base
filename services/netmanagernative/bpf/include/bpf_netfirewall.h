@@ -35,8 +35,7 @@ namespace OHOS::NetManagerStandard {
 // Only used for unittest code currently
 static constexpr const char *FIREWALL_BPF_PATH = "/system/etc/bpf/netsys.o";
 
-// Cilium ConntrackGCStartingInterval 5 Minutes: 300000 ms
-static constexpr const int CONNTRACK_GC_INTTERVAL_MS = 300000;
+static constexpr const int CONNTRACK_GC_INTTERVAL_MS = 60000;
 static constexpr const int RING_BUFFER_POLL_TIME_OUT_MS = -1;
 
 // convert ebpf types from unix style style to CPP's
