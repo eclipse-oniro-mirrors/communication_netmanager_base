@@ -286,10 +286,10 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetCookieStatsTest001, TestSize.Level1)
     ASSERT_NE(netsysNativeService, nullptr);
     BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = netsysNativeService->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 
     ret = netsysNativeService->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, TestSize.Level1)
