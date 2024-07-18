@@ -71,7 +71,6 @@ ohos_shared_library("netsys_controller") {
 
   external_deps = [
     "c_utils:utils",
-    "ffrt:libffrt",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
