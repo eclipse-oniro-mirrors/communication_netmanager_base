@@ -72,8 +72,6 @@ private:
     int32_t OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetIpAndUidRule(MessageParcel &data, MessageParcel &reply);
-    int32_t OnClearIpAndUidRule(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
 
 private:

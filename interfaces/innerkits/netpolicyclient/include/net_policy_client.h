@@ -332,25 +332,6 @@ public:
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid);
 
     /**
-     * Set Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @param uids uid list
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    [[nodiscard]] int32_t SetIpAndUidRule(const std::string &ip, uint32_t ipType, const std::vector<uint32_t> &uids);
-
-    /**
-     * Clear Ip And Uid iptables Rule
-     *
-     * @param ip ip
-     * @param ipType 1 for ipv4, 2 for ipv6
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     */
-    [[nodiscard]] int32_t ClearIpAndUidRule(const std::string &ip, uint32_t ipType);
-
-    /**
      * Set NIC Traffic allowed or disallowed
      *
      * @param ifaceNames ifaceNames

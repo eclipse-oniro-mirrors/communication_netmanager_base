@@ -177,10 +177,6 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetNetworkSharingType;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
         &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IP_AN_UID_RULE)] =
-        &NetsysNativeServiceStub::CmdFirewallSetIpAndUidRule;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_IP_AN_UID_RULE)] =
-        &NetsysNativeServiceStub::CmdFirewallClearIpAndUidRule;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE)] =
         &NetsysNativeServiceStub::CmdClearFirewallAllRules;
 #ifdef FEATURE_NET_FIREWALL_ENABLE
@@ -2044,28 +2040,6 @@ int32_t NetsysNativeServiceStub::CmdStopClat(MessageParcel &data, MessageParcel 
         NETNATIVE_LOGE("Write result failed");
         return ERR_FLATTEN_OBJECT;
     }
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdFirewallSetIpAndUidRule(MessageParcel &data, MessageParcel &reply)
-{
-    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetIpAndUidRule");
-    std::string ip = data.ReadString();
-    uint32_t ipType = (unsigned)data.ReadUint32();
-    std::vector<uint32_t> uids;
-    data.ReadUInt32Vector(&uids);
-    int32_t result = FirewallSetIpAndUidRule(ip, ipType, uids);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdFirewallClearIpAndUidRule(MessageParcel &data, MessageParcel &reply)
-{
-    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallClearIpAndUidRule");
-    std::string ip = data.ReadString();
-    uint32_t ipType = (unsigned)data.ReadUint32();
-    int32_t result = FirewallClearIpAndUidRule(ip, ipType);
-    reply.WriteInt32(result);
     return result;
 }
 

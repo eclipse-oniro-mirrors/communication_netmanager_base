@@ -1255,25 +1255,6 @@ int32_t NetsysController::StopClat(const std::string &interfaceName)
     return netsysService_->StopClat(interfaceName);
 }
 
-int32_t NetsysController::FirewallSetIpAndUidRule(const std::string &ip, uint32_t ipType,
-                                                  const std::vector<uint32_t> &uids)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("FirewallSetIpAndUidRule netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->FirewallSetIpAndUidRule(ip, ipType, uids);
-}
-
-int32_t NetsysController::FirewallClearIpAndUidRule(const std::string &ip, uint32_t ipType)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("FirewallClearIpAndUidRule netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->FirewallClearIpAndUidRule(ip, ipType);
-}
-
 int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
     if (netsysService_ == nullptr) {
