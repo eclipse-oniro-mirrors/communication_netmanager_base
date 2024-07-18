@@ -195,7 +195,7 @@ static __always_inline enum ct_status ct_lookup_entry(struct __sk_buff *skb, con
                 if (is_conn_alive(entry)) {
                     break;
                 }
-                update_timeout_inner(entry, CONN_COLSE_TIMEOUT_SEC, dir, seen_flags);
+                bpf_map_delete_elem(&CT_MAP, &tuple);
                 break;
             default:
                 break;
