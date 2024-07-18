@@ -109,7 +109,6 @@ void NetMonitor::Detection()
         if (probeResult.IsSuccessful()) {
             NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
             isDetecting_ = false;
-            detectionSteps_ = 0;
             result = VERIFICATION_STATE;
         } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
             NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
@@ -128,7 +127,6 @@ void NetMonitor::Detection()
                 detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
             }
             NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
-            detectionSteps_++;
             result = INVALID_DETECTION_STATE;
         }
         auto monitorCallback = netMonitorCallback_.lock();
