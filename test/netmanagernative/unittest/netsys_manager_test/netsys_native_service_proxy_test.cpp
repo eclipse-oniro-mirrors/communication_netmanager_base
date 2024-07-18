@@ -395,5 +395,27 @@ HWTEST_F(NetsysNativeServiceProxyTest, DeleteNetworkAccessPolicy001, TestSize.Le
     int32_t ret = netsysNativeService->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, CreateVnic001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+    int32_t ret = netsysNativeService->CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DestroyVnic001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    int32_t ret = netsysNativeService->DestroyVnic();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

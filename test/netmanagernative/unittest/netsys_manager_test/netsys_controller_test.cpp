@@ -1115,5 +1115,21 @@ HWTEST_F(NetsysControllerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, CreateVnic001, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+    int32_t ret = NetsysController::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DestroyVnic001, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().DestroyVnic();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

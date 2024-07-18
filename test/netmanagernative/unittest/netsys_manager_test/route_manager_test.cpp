@@ -560,5 +560,25 @@ HWTEST_F(RouteManagerTest, RemoveUsersFromVirtualNetwork001, TestSize.Level1)
     auto ret = RouteManager::RemoveUsersFromVirtualNetwork(testNetId, testInterfaceName, uidRanges);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(RouteManagerTest, UpdateVnicRoute001, TestSize.Level1)
+{
+    std::string testInterfaceName = "testName1";
+    auto ret = RouteManager::UpdateVnicRoute(testInterfaceName, {}, {}, true);
+    EXPECT_EQ(ret, -1);
+
+    ret = RouteManager::UpdateVnicRoute(testInterfaceName, {}, {}, false);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, UpdateVnicUidRangesRule001, TestSize.Level1)
+{
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    auto ret = RouteManager::UpdateVnicUidRangesRule(uidRanges, true);
+    EXPECT_EQ(ret, 0);
+
+    ret = RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace nmd
 } // namespace OHOS

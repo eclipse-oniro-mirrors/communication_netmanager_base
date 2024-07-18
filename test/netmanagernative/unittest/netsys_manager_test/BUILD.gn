@@ -48,6 +48,7 @@ ohos_unittest("netsys_native_manager_test") {
     "sharing_manager_test.cpp",
     "traffic_manager_test.cpp",
     "virtual_network_test.cpp",
+    "vnic_manager_test.cpp",
     "vpn_manager_test.cpp",
   ]
 

@@ -1103,5 +1103,48 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
     ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, EnableVnicNetwork001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NetLinkInfo> linkInfo = nullptr;
+    std::set<int32_t> uids;
+
+    linkInfo = new (std::nothrow) NetManagerStandard::NetLinkInfo();
+    ASSERT_NE(linkInfo, nullptr);
+
+    int32_t ret = NetConnService::GetInstance()->EnableVnicNetworkAsync(linkInfo, uids);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
+}
+
+HWTEST_F(NetConnServiceTest, EnableVnicNetwork002, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NetLinkInfo> linkInfo = nullptr;
+    std::set<int32_t> uids;
+
+    linkInfo = new (std::nothrow) NetManagerStandard::NetLinkInfo();
+    ASSERT_NE(linkInfo, nullptr);
+
+    NetManagerStandard::INetAddr inetAddr;
+    inetAddr.type_ = NetManagerStandard::INetAddr::IpType::IPV4;
+    inetAddr.family_ = 0x01;
+    inetAddr.address_ = "10.0.0.2";
+    inetAddr.netMask_ = "255.255.255.0";
+    inetAddr.hostName_ = "localhost";
+    inetAddr.port_ = 80;
+    inetAddr.prefixlen_ = 24;
+
+    linkInfo->ifaceName_ = "vnic-tun";
+    linkInfo->netAddrList_.push_back(inetAddr);
+    linkInfo->mtu_ = 1500;
+
+    int32_t ret = NetConnService::GetInstance()->EnableVnicNetworkAsync(linkInfo, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DisableVnicNetwork001, TestSize.Level1)
+{
+    int32_t ret = NetConnService::GetInstance()->DisableVnicNetworkAsync();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

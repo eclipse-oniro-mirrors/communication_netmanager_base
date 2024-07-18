@@ -1016,5 +1016,48 @@ HWTEST_F(NetConnServiceStubTest, OnRequestNetConnectionBySpecifierTest001, TestS
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceStubTest, OnEnableVnicNetwork001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    if (netLinkInfo == nullptr) {
+        return;
+    }
+
+    if (!netLinkInfo->Marshalling(data)) {
+        return;
+    }
+
+    std::set<int32_t> uids;
+    if (!data.WriteInt32(uids.size())) {
+        return;
+    }
+
+    for (const auto &uid: uids) {
+        if (!data.WriteInt32(uid)) {
+            return;
+        }
+    }
+
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_VNIC_NET_WORK);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnDisableVnicNetwork001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -821,5 +821,21 @@ HWTEST_F(NetsysNativeServiceTest, NotifyNetBearerTypeChangeTest001, TestSize.Lev
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearerTypes);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, CreateVnic001, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+    int32_t ret = instance_->CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DestroyVnic001, TestSize.Level1)
+{
+    int32_t ret = instance_->DestroyVnic();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
