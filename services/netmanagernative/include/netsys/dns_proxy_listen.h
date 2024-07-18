@@ -87,6 +87,8 @@ private:
     void clearResource();
     void SendRequest2Server(int32_t socketFd);
     bool GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx);
+    bool MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
+                      AlignedSockAddr &clientSock);
     int32_t proxySockFd_;
     int32_t proxySockFd6_;
     int32_t epollFd_ = -1;
