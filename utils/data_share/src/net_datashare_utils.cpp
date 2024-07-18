@@ -116,6 +116,7 @@ int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const 
     std::string queryValue;
     int32_t ret = Query(uri, key, queryValue);
     if (ret == NETMANAGER_ERROR) {
+        dataShareHelper->Release();
         return Insert(uri, key, value);
     }
 
