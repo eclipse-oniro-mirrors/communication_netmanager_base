@@ -18,6 +18,7 @@
 
 #include <string>
 #include <list>
+#include <optional>
 
 #include "parcel.h"
 #include "securec.h"
