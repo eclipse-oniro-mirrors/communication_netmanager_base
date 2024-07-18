@@ -658,6 +658,45 @@ HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Lev
     ret = instance_->RegisterNetFactoryResetCallback(netFactoryResetCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetConnServiceProxyTest, EnableVnicNetwork001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NetLinkInfo> linkInfo = nullptr;
+    std::set<int32_t> uids;
+    int32_t ret = instance_->EnableVnicNetwork(linkInfo, uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnServiceProxyTest, EnableVnicNetwork002, TestSize.Level1)
+{
+    sptr<NetManagerStandard::NetLinkInfo> linkInfo = nullptr;
+    std::set<int32_t> uids;
+
+    linkInfo = new (std::nothrow) NetManagerStandard::NetLinkInfo();
+    ASSERT_NE(linkInfo, nullptr);
+
+    NetManagerStandard::INetAddr inetAddr;
+    inetAddr.type_ = NetManagerStandard::INetAddr::IpType::IPV4;
+    inetAddr.family_ = 0x01;
+    inetAddr.address_ = "10.0.0.2";
+    inetAddr.netMask_ = "255.255.255.0";
+    inetAddr.hostName_ = "localhost";
+    inetAddr.port_ = 80;
+    inetAddr.prefixlen_ = 24;
+
+    linkInfo->ifaceName_ = "vnic-tun";
+    linkInfo->netAddrList_.push_back(inetAddr);
+    linkInfo->mtu_ = 1500;
+
+    int32_t ret = instance_->EnableVnicNetwork(linkInfo, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, DisableVnicNetwork001, TestSize.Level1)
+{
+    int32_t ret = instance_->DisableVnicNetwork();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1948,5 +1948,48 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNotifyNetBearerTypeChange001, TestSize.
     int32_t ret = notifyStub_->CmdNotifyNetBearerTypeChange(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdCreateVnic001, TestSize.Level1)
+{
+    MessageParcel data;
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+
+    if (!data.WriteUint16(mtu)) {
+        return;
+    }
+ 
+    if (!data.WriteString(tunAddr)) {
+        return;
+    }
+ 
+    if (!data.WriteInt32(prefix)) {
+        return;
+    }
+ 
+    if (!data.WriteInt32(uids.size())) {
+        return;
+    }
+ 
+    for (const auto &uid: uids) {
+        if (!data.WriteInt32(uid)) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdCreateVnic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyVnic001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDestroyVnic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS
