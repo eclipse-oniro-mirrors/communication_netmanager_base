@@ -69,6 +69,7 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
     std::vector<NetStatsInfo> uidSimTableInfos;
     ret1 = helper->QueryData(UID_TABLE, ident, start, end, infos);
     ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
         return NETMANAGER_ERROR;
@@ -85,7 +86,14 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
     ret1 = helper->QueryData(UID_TABLE, uid, ident, start, end, infos);
-    ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
+    if (uid == Sim_UID) {
+        ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+        std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
+            info.uid_ = Sim_UID;
+        });
+    } else {
+        ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
+    }
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
         return NETMANAGER_ERROR;

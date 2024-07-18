@@ -34,7 +34,6 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
-constexpr const uint32_t Sim_UID = 0xFFFFFFFF;
 } // namespace
 
 int32_t NetStatsCached::StartCached()
@@ -77,9 +76,11 @@ void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
 void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    uidSimStatsInfo.insert(uidSimStatsInfo.end(), stats_.GetUidSimStatsInfo().begin(),
-                           stats_.GetUidSimStatsInfo().end());
-    std::for_each(uidSimStatsInfo.begin(), uidSimStatsInfo.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
+    std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
+                   std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+                       info.uid_ = Sim_UID;
+                       return info;
+                   });
 }
 
 void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
@@ -114,16 +115,10 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    LoadIfaceNameIdentMaps();
     std::vector<NetStatsInfo> allInfos;
     NetsysController::GetInstance().GetAllStatsInfo(allInfos);
-    std::vector<NetStatsInfo> SimInfos;
-    NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
-    std::for_each(SimInfos.begin(), SimInfos.end(), [](NetStatsInfo &info) {
-       info.uid_ = Sim_UID;
-    });
-    allInfos.insert(allInfos.end(), SimInfos.begin(), SimInfos.end());
-
-    LoadIfaceNameIdentMaps();
     ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
         std::for_each(allInfos.begin(), allInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.iface_ == k) {
@@ -142,6 +137,27 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
         tmp.date_ = CommonUtils::GetCurrentSecond();
         statsInfo.push_back(std::move(tmp));
     });
+    std::vector<NetStatsInfo> SimInfos;
+    NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
+    ifaceNameIdentMap_.Iterate([&SimInfos](const std::string &k, const std::string &v) {
+        std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
+    std::for_each(SimInfos.begin(), SimInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
+        if (info.iface_ == IFACE_LO) {
+            return;
+        }
+        NetStatsInfo tmp = GetIncreasedSimStats(info);
+        if (tmp.HasNoData()) {
+            return;
+        }
+        tmp.date_ = CommonUtils::GetCurrentSecond();
+        tmp.uid_ = Sim_UID;
+        statsInfo.push_back(std::move(tmp));
+    });
 }
 
 NetStatsInfo NetStatsCached::GetIncreasedStats(const NetStatsInfo &info)
@@ -151,8 +167,17 @@ NetStatsInfo NetStatsCached::GetIncreasedStats(const NetStatsInfo &info)
     if (findRet == lastUidStatsInfo_.end()) {
         return info;
     }
-    auto currentStats = info - *findRet;
-    return currentStats;
+    return info - *findRet;
+}
+
+NetStatsInfo NetStatsCached::GetIncreasedSimStats(const NetStatsInfo &info)
+{
+    auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
+                                [&info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
+    if (findRet == lastUidSimStatsInfo_.end()) {
+        return info;
+    }
+    return info - *findRet;
 }
 
 void NetStatsCached::CacheUidStats()

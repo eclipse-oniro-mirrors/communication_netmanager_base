@@ -17,10 +17,12 @@
 #define NET_STATS_CONSTANTS_H
 
 #include "net_manager_constants.h"
+#include <limits>
 
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
+constexpr uint32_t Sim_UID = std::numeric_limits<uint32_t>::max();
 enum NetStatsResultCode {
     STATS_DUMP_MESSAGE_FAIL = 2103002,
     STATS_REMOVE_FILE_FAIL,
