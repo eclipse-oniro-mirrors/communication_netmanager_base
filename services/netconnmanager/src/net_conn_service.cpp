@@ -488,7 +488,7 @@ int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
         return NET_CONN_ERR_NO_SUPPLIER;
     }
     supplier->RegisterSupplierCallback(callback);
-    SendAllRequestToNetwork(supplier, REQUEST);
+    SendAllRequestToNetwork(supplier);
     NETMGR_LOG_I("RegisterNetSupplierCallback service out");
     return NETMANAGER_SUCCESS;
 }
@@ -869,7 +869,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request =
-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_);
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, registerType);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("Make a new request, request id:[%{public}u]", reqId);
@@ -1128,11 +1128,11 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
     }
     if (active != nullptr) {
         active->SetServiceSupply(nullptr);
-        SendRequestToAllNetwork(active, REQUEST);
+        SendRequestToAllNetwork(active, active->GetRegisterType());
     }
 }
 
-void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const int32_t registerType)
+void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
@@ -1148,7 +1148,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const i
         if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        bool result = supplier->RequestToConnect(iter->first, registerType);
+        bool result = supplier->RequestToConnect(iter->first, iter->GetRegisterType(), iter->GetBearType());
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());

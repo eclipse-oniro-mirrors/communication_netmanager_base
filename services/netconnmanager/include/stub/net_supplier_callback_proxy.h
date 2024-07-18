@@ -29,7 +29,7 @@ public:
 
 public:
     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-                           const int32_t registerType = REGISTER) override;
+                           const NetRequestBySpecifier netrequestBySpecifier = {}) override;
     int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
 
 private:

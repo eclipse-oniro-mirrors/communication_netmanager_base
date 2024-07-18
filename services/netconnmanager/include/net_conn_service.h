@@ -52,7 +52,10 @@ using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
 namespace {
 const int32_t PRIMARY_USER_ID = 100;
 }
-
+struct NetRequestBySpecifier {
+    std::set<NetBearType> bearTypes = {};
+    unt32_t registerType = REGISTER;
+}
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
@@ -411,7 +414,7 @@ private:
                                            sptr<NetSupplier> &supplier);
     void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const int32_t registerType = REGISTER);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
-    void SendAllRequestToNetwork(sptr<NetSupplier> supplier, const int32_t registerType = REGISTER);
+    void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
     void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,

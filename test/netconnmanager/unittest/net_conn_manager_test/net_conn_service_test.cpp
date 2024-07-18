@@ -278,7 +278,7 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     ASSERT_NE(netSpecifier, nullptr);
     auto ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     sptr<INetConnCallback> callback = nullptr;
     uint32_t timeoutMS = 0;

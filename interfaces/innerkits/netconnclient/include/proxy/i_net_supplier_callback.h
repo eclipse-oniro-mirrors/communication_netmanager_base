@@ -34,7 +34,7 @@ public:
 
 public:
     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-        const int32_t registerType = REGISTER) = 0;
+        const NetRequestBySpecifier netrequestBySpecifier = {}) = 0;
     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
 };
 } // namespace NetManagerStandard

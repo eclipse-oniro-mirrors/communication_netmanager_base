@@ -24,7 +24,7 @@
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
-
+#include "net_manager_constants.h"
 class NetSupplier;
 
 namespace OHOS {
@@ -56,6 +56,8 @@ public:
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
     sptr<INetConnCallback> GetNetCallback();
     sptr<NetSpecifier> GetNetSpecifier();
+    int32_t GetRegisterType() const;
+    std::set<NetBearType> const& GetBearType() const;
     void StartTimeOutNetAvailable();
 private:
     bool CompareByNetworkIdent(const std::string &ident);
@@ -75,6 +77,7 @@ private:
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_;
     std::string activateName_ = "";
+    int32_t registerType_ = REGISTER;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

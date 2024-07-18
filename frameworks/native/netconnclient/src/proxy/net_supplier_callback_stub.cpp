@@ -107,11 +107,11 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 }
 
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-    const int32_t registerType)
+    const NetRequestBySpecifier netrequestBySpecifier)
 {
     if (callback_ != nullptr) {
         auto startTime = std::chrono::steady_clock::now();
-        callback_->RequestNetwork(ident, netCaps, registerType);
+        callback_->RequestNetwork(ident, netCaps, netrequestBySpecifier);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
