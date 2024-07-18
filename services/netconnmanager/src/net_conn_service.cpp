@@ -488,7 +488,7 @@ int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
         return NET_CONN_ERR_NO_SUPPLIER;
     }
     supplier->RegisterSupplierCallback(callback);
-    SendAllRequestToNetwork(supplier);
+    SendAllRequestToNetwork(supplier, REQUEST);
     NETMGR_LOG_I("RegisterNetSupplierCallback service out");
     return NETMANAGER_SUCCESS;
 }
@@ -1128,7 +1128,7 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
     }
     if (active != nullptr) {
         active->SetServiceSupply(nullptr);
-        SendRequestToAllNetwork(active);
+        SendRequestToAllNetwork(active, REQUEST);
     }
 }
 
