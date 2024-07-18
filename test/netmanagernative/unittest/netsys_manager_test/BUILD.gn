@@ -415,3 +415,56 @@ ohos_unittest("conn_manager_test") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+ohos_unittest("nat464_clat_test") {
+  module_out_path = "netmanager_base/nat464_clat_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [ "clatd_packet_converter_test.cpp" ]
+
+  include_dirs = [
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$FWMARK_CLIENT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/include",
+    "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+  ]
+
+  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static" ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "LOG_DOMAIN = 0xD0015B0",
+    "SHARING_MANAGER_DEPS",
+  ]
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
