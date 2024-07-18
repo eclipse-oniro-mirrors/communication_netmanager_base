@@ -96,7 +96,6 @@ private:
     uint32_t netId_ = 0;
     NetBearType netBearType_;
     std::atomic<bool> isDetecting_ = false;
-    int32_t detectionSteps_ = 0;
     std::mutex detectionMtx_;
     std::mutex probeMtx_;
     std::condition_variable detectionCond_;
