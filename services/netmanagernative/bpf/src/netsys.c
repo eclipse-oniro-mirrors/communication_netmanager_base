@@ -270,7 +270,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     }
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
-        value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                          .ifType = get_iface_type(skb->local_ip4)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -359,7 +359,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     }
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
-        value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
+        (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                          .ifType = get_iface_type(skb->local_ip4)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);

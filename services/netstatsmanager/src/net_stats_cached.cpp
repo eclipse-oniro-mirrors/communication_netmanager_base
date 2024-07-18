@@ -76,10 +76,11 @@ void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
 void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    std::vector<NetStatsInfo> tmp;
-    tmp.insert(tmp.end(), stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end());
-    std::for_each(tmp.begin(), tmp.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
-    uidSimStatsInfo.insert(uidSimStatsInfo.end(), tmp.begin(), tmp.end());
+    std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
+                   std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+                       info.uid_ = Sim_UID;
+                       return info;
+                   });
 }
 
 void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
@@ -166,8 +167,7 @@ NetStatsInfo NetStatsCached::GetIncreasedStats(const NetStatsInfo &info)
     if (findRet == lastUidStatsInfo_.end()) {
         return info;
     }
-    auto currentStats = info - *findRet;
-    return currentStats;
+    return info - *findRet;
 }
 
 NetStatsInfo NetStatsCached::GetIncreasedSimStats(const NetStatsInfo &info)
@@ -177,8 +177,7 @@ NetStatsInfo NetStatsCached::GetIncreasedSimStats(const NetStatsInfo &info)
     if (findRet == lastUidSimStatsInfo_.end()) {
         return info;
     }
-    auto currentStats = info - *findRet;
-    return currentStats;
+    return info - *findRet;
 }
 
 void NetStatsCached::CacheUidStats()
