@@ -122,7 +122,6 @@ void NetPolicyRuleBranchFuzzTest(const uint8_t *data, size_t size)
     }
     std::shared_ptr<NetPolicyRule> netPolicyRule = std::make_shared<NetPolicyRule>();
     uint32_t testId = GetNetBranchFuzzData<uint32_t>();
-    netPolicyRule->DeleteUid(testId);
     bool isForeground = GetNetBranchFuzzData<bool>();
     netPolicyRule->UpdateForegroundUidList(testId, isForeground);
     std::string message = GetStringFromData(STR_LEN);
