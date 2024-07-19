@@ -100,7 +100,6 @@ void NetPolicyCore::SubscribeCommonEvent()
         matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_PACKAGE_REMOVED);
-        matchingSkills.AddEvent(COMMON_EVENT_NET_QUOTA_WARNING);
         EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPriority(CORE_EVENT_PRIORITY);
         subscriber_ = std::make_shared<ReceiveMessage>(subscribeInfo, shared_from_this());
