@@ -129,9 +129,10 @@ HWTEST_F(NetworkSecurityConfigTest, ReadCertFileTest001, TestSize.Level1)
 HWTEST_F(NetworkSecurityConfigTest, GetRehashedCADirName001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
+    std::string caPathHashValue = "eb6bf998a72433bdeb4eeb32cfa4bc15";
     std::cout << "GetRehashedCADirName001 In" << std::endl;
     auto ret = NetworkSecurityConfig::GetInstance().GetRehashedCADirName(caPath);
-    EXPECT_EQ(caPath, caPath);
+    EXPECT_EQ(ret, caPathHashValue);
 }
 
 /**
@@ -169,8 +170,8 @@ HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
     std::cout << "ReHashCAPathForX509001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().ReHashCAPathForX509(caPath);
-    EXPECT_EQ(caPath, caPath);
+    auto ret = NetworkSecurityConfig::GetInstance().ReHashCAPathForX509(caPath);
+    EXPECT_EQ(ret, "");
 }
 
 /**
