@@ -154,10 +154,18 @@ bool Network::ReleaseBasicNetwork()
         std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
         NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
             supplierId_, netId_, netCapabilities.c_str());
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                prefixLen, netCapabilities);
+        if (!IsIfaceNameInUse()) {
+            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                    prefixLen);
+            }
+        } else {
+            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                    prefixLen, netCapabilities);
+            }
         }
         for (const auto &route : netLinkInfo_.routeList_) {
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);

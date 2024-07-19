@@ -239,7 +239,7 @@ int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, in
     NetLinkSocketDiag socketDiag;
     socketDiag.SetSocketDestroyType(netCapabilities);
     socketDiag.DestroyLiveSockets(addr, true);
-    return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
+    return 0;
 }
 
 int Ipv4NetmaskToPrefixLength(in_addr_t mask)
