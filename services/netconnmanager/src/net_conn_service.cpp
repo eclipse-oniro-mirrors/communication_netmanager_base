@@ -525,7 +525,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RequestNetConnection found same callback");
-        return NET_CONN_ERR_SAME_CALLBACK;
+        return NET_CONN _ERR_SAME_CALLBACK;
     }
     int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, REQUEST);
     if (ret != NETMANAGER_SUCCESS) {
@@ -1964,6 +1964,10 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
+    if (!isGlobalProxyLoaded_) {
+        NETMGR_LOG_D("GlobalHttpProxy has already loaded.");
+        return;
+    }
     if (!isDataShareReady_.load() && !CheckIfSettingsDataReady()) {
         NETMGR_LOG_E("data share is not ready.");
         return;
