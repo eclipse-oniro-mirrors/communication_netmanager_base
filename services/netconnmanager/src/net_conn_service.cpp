@@ -525,7 +525,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RequestNetConnection found same callback");
-        return NET_CONN _ERR_SAME_CALLBACK;
+        return NET_CONN_ERR_SAME_CALLBACK;
     }
     int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, REQUEST);
     if (ret != NETMANAGER_SUCCESS) {
