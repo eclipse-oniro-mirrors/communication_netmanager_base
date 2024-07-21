@@ -38,7 +38,7 @@ public:
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-        const NetRequestBySpecifier netrequestBySpecifier = {}) override;
+        const NetRequestBySpecifier &netRequestBySpecifier = {}) override;
     int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
 
 private:

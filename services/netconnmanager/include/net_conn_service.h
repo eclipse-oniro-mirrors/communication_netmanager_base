@@ -412,7 +412,7 @@ private:
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
                                            sptr<NetSupplier> &supplier);
-    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const int32_t registerType = REGISTER);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();

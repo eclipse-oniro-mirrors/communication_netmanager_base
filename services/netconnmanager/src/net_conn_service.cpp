@@ -516,7 +516,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         return ret;
     }
     AddClientDeathRecipient(callback);
-    return ActivateNetwork(netSpecifier, callback, timeoutMS);
+    return ActivateNetwork(netSpecifier, callback, timeoutMS, REGISTER);
 }
 
 int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier,
@@ -896,7 +896,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
-    SendRequestToAllNetwork(request, registerType);
+    SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1148,7 +1148,8 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        bool result = supplier->RequestToConnect(iter->first, iter->GetRegisterType(), iter->GetBearType());
+        NetRequestBySpecifier netRequestBySpecifier(iter->second->GetRegiserType(), iter->second->GetBearType());
+        bool result = supplier->RequestToConnect(iter->first, netRequestBySpecifier);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());

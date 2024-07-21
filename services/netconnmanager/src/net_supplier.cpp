@@ -193,7 +193,7 @@ bool NetSupplier::IsAvailable() const
     return netSupplierInfo_.isAvailable_;
 }
 
-bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, NetrequestBySpecifier netrequestBySpecifier)
+bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetRequestBySpecifier &netRequestBySpecifier)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
@@ -208,7 +208,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, Netrequest
         return false;
     }
     NETMGR_LOG_D("execute RequestNetwork");
-    int32_t errCode = netController_->RequestNetwork(netSupplierIdent_, netCaps, netrequestBySpecifier);
+    int32_t errCode = netController_->RequestNetwork(netSupplierIdent_, netCaps, netRequestBySpecifier);
     NETMGR_LOG_D("RequestNetwork errCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
         NETMGR_LOG_E("RequestNetwork fail");
@@ -271,12 +271,12 @@ bool NetSupplier::IsConnected() const
     return false;
 }
 
-bool NetSupplier::RequestToConnect(uint32_t reqId, NetrequestBySpecifier netrequestBySpecifier)
+bool NetSupplier::RequestToConnect(uint32_t reqId, const NetrequestBySpecifier &netrequestBySpecifier)
 {
     if (requestList_.find(reqId) == requestList_.end()) {
         requestList_.insert(reqId);
     }
-    return SupplierConnection(netCaps_.ToSet(), registerType);
+    return SupplierConnection(netCaps_.ToSet(), netrequestBySpecifier);
 }
 
 int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)

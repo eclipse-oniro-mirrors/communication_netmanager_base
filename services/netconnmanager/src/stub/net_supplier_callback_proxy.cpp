@@ -25,7 +25,7 @@ NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &im
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 
 int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-                                                 const NetRequestBySpecifier netrequestBySpecifier) 
+                                                 const NetRequestBySpecifier &netrequestBySpecifier) 
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -38,8 +38,10 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     for (auto netCap : netCaps) {
         data.WriteUint32(static_cast<uint32_t>(netCap));
     }
-    data.WriteInt32(netrequestBySpecifier.registerType);
-    for (auto bearType: netrequestBySpecifier.bearTypes) {
+    data.WriteInt32(netRequestBySpecifier.registerType);
+    uint32_t bearTypeSize = static<uint32_t>(netRequestBySpecifier.bearTypes.size());
+    data.WriteUint32(bearTypesSize);
+    for (auto bearType: netRequestBySpecifier.bearTypes) {
         data.WriteUint32(static_cast<uint32_t>(bearType));
     }
     sptr<IRemoteObject> remote = Remote();

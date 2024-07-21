@@ -26,13 +26,21 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+struct NetRequestBySpecifier {
+    std::set<NetBearType> bearTypes = {};
+    uint32_t registerType = REGISTER;
+    NetRequestBySpecifier(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes)
+        : bearTypes(netBearTypes), registerType(registerType)
+    {}
+    NetRequestBySpecifier() = default;
+}
 class NetSupplierCallbackBase : public virtual RefBase {
 public:
     virtual ~NetSupplierCallbackBase() = default;
 
     virtual int32_t RequestNetwork(const std::string &ident,
                                    const std::set<NetCap> &netCaps,
-                                   const NetRequestBySpecifier netrequestBySpecifier = {});
+                                   const NetRequestBySpecifier &netRequestBySpecifier = {});
     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
 };
 } // NetManagerStandard

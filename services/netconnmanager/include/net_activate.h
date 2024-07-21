@@ -47,7 +47,8 @@ public:
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                 std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
-                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler);
+                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
+                const int32_t &registerType = REGISTER);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);
@@ -57,7 +58,7 @@ public:
     sptr<INetConnCallback> GetNetCallback();
     sptr<NetSpecifier> GetNetSpecifier();
     int32_t GetRegisterType() const;
-    std::set<NetBearType> const& GetBearType() const;
+    std::set<NetBearType> GetBearType() const;
     void StartTimeOutNetAvailable();
 private:
     bool CompareByNetworkIdent(const std::string &ident);

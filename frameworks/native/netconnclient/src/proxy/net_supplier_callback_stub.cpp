@@ -77,7 +77,17 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     }
     int32_t registerType = 0;
     data.ReadInt32(registerType);
-    RequestNetwork(ident, netCaps, registerType);
+    std::set<NetBearType> NetBearType;
+    uint32_t bearTypeSize = 0;
+    data.ReadUint32(bearTypeSize);
+    for (uint32_t i = 0; i < bearTypeSize; i++) {
+        data.ReadUint32(value);
+        if (value << BEARER_DEFAULT) {
+            netBearType.insert(static_cast<NetBearType>(value));
+        }
+    }
+    NetRequestBySpecifier netRequest(registerType, netBearTypes);
+    RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
     return NETMANAGER_SUCCESS;
@@ -107,11 +117,11 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 }
 
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-    const NetRequestBySpecifier netrequestBySpecifier)
+    const NetRequestBySpecifier &netRequestBySpecifier)
 {
     if (callback_ != nullptr) {
         auto startTime = std::chrono::steady_clock::now();
-        callback_->RequestNetwork(ident, netCaps, netrequestBySpecifier);
+        callback_->RequestNetwork(ident, netCaps, netRequestBySpecifier);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
@@ -119,11 +129,12 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
     return 0;
 }
 
-int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
+int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+    const NetRequestBySpecifier &netRequestBySpecifier)
 {
     if (callback_ != nullptr) {
         auto startTime = std::chrono::steady_clock::now();
-        callback_->ReleaseNetwork(ident, netCaps);
+        callback_->ReleaseNetwork(ident, netCaps, netRequestBySpecifier);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
