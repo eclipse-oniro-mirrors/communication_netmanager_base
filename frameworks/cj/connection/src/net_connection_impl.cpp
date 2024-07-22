@@ -26,6 +26,9 @@ std::mutex g_netConnectionsMutex;
 NetConnectionProxy::NetConnectionProxy(CNetSpecifier specifier, uint32_t timeout)
 {
     NetConnectionImpl *netConnection = NetConnectionImpl::MakeNetConnection();
+    if (netConnection == nullptr) {
+        return;
+    }
     if (specifier.hasSpecifier) {
         netConnection->hasNetSpecifier_ = true;
         NetSpecifier netSpecifier;
@@ -103,6 +106,11 @@ void NetConnectionProxy::OnNetUnavailable(void (*callback)())
     netConn_->netUnavailable.push_back(CJLambda::Create(callback));
 }
 
+void NetConnectionProxy::Release()
+{
+    netConn_->DeleteNetConnection(netConn_);
+}
+
 NetConnectionImpl::NetConnectionImpl()
     : hasNetSpecifier_(false), hasTimeout_(false), timeout_(0), observer_(new ConnectionCallbackObserver)
 {
@@ -112,7 +120,9 @@ NetConnectionImpl *NetConnectionImpl::MakeNetConnection()
 {
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     auto netConnection = new NetConnectionImpl();
-    NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
+    if (netConnection) {
+        NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
+    }
     return netConnection;
 }
 

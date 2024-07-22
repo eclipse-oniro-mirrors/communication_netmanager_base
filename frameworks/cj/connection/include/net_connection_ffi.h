@@ -27,6 +27,7 @@
 
 EXTERN_C_START
 FFI_EXPORT int64_t CJ_CreateNetConnection(CNetSpecifier netSpecifier, uint32_t timeout);
+FFI_EXPORT void CJ_ReleaseNetConnection(int64_t connId);
 FFI_EXPORT int32_t CJ_GetDefaultNet(int32_t &netId);
 FFI_EXPORT RetNetAddressArr CJ_GetAddressesByName(int32_t netId, const char *host);
 FFI_EXPORT int32_t CJ_IsDefaultNetMetered(bool &ret);

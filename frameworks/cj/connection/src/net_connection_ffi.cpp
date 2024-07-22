@@ -50,7 +50,20 @@ int32_t TransErrorCode(int32_t error)
 int64_t CJ_CreateNetConnection(CNetSpecifier netSpecifier, uint32_t timeout)
 {
     auto connection = FFI::FFIData::Create<NetConnectionProxy>(netSpecifier, timeout);
+    if (!connection) {
+        return ERR_INVALID_INSTANCE_CODE;
+    }
     return connection->GetID();
+}
+
+void CJ_ReleaseNetConnection(int64_t connId)
+{
+    auto instance = FFI::FFIData::GetData<NetConnectionProxy>(connId);
+    if (!instance) {
+        return;
+    }
+    instance->Release();
+    FFI::FFIData::Release(connId);
 }
 
 int32_t CJ_GetDefaultNet(int32_t &netId)

@@ -63,22 +63,7 @@ private:
 };
 
 class NetConnectionProxy : public OHOS::FFI::FFIData {
-private:
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType *GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType =
-            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("NetConnectionProxy");
-        return &runtimeType;
-    }
-
-public:
-    OHOS::FFI::RuntimeType *GetRuntimeType() override
-    {
-        return GetClassType();
-    }
-
+    DECL_TYPE(NetConnectionProxy, OHOS::FFI::FFIData);
 public:
     NetConnectionProxy(CNetSpecifier specifier, uint32_t timeout);
 
@@ -97,6 +82,8 @@ public:
     void OnNetLost(void (*callback)(int32_t));
 
     void OnNetUnavailable(void (*callback)());
+
+    void Release();
 
 private:
     NetConnectionImpl *netConn_;
