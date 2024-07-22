@@ -399,8 +399,8 @@ int32_t FirewallManager::EnableChain(ChainType chain, bool enable)
 
 int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule firewallRule)
 {
-    NETNATIVE_LOG_D("FirewallManager SetUidRule: chain=%{public}d, uid=%{public}d, firewallRule=%{public}d", chain,
-                    uid, firewallRule);
+    NETNATIVE_LOGI("FirewallManager SetUidRule: chain=%{public}d, uid=%{public}d, firewallRule=%{public}d", chain,
+                   uid, firewallRule);
     if (IsFirewallChian(chain) == NETMANAGER_ERROR) {
         return NETMANAGER_ERROR;
     }

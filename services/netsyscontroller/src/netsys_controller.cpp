@@ -845,7 +845,7 @@ int32_t NetsysController::BandwidthRemoveAllowedList(uint32_t uid)
 
 int32_t NetsysController::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidsAllowedListChain: chain=%{public}d", chain);
+    NETMGR_LOG_I("NetsysController::FirewallSetUidsAllowedListChain: chain=%{public}d", chain);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -855,7 +855,7 @@ int32_t NetsysController::FirewallSetUidsAllowedListChain(uint32_t chain, const 
 
 int32_t NetsysController::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidsDeniedListChain: chain=%{public}d", chain);
+    NETMGR_LOG_I("NetsysController::FirewallSetUidsDeniedListChain: chain=%{public}d", chain);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -865,7 +865,7 @@ int32_t NetsysController::FirewallSetUidsDeniedListChain(uint32_t chain, const s
 
 int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
 {
-    NETMGR_LOG_D("NetsysController::FirewallEnableChain: chain=%{public}d, enable=%{public}d", chain, enable);
+    NETMGR_LOG_I("NetsysController::FirewallEnableChain: chain=%{public}d, enable=%{public}d", chain, enable);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -875,7 +875,7 @@ int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
 
 int32_t NetsysController::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidRule Start");
+    NETMGR_LOG_I("NetsysController::FirewallSetUidRule Start");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
