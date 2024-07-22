@@ -379,5 +379,77 @@ HWTEST_F(UtNetPolicyService, DeleteNetworkAccessPolicy01, TestSize.Level1)
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: SetNicTrafficAllowed001
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed002
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed002, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed003
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed003, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed004
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed004, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed005
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed005, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed006
+ * @tc.desc: Test NetPolicyService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed006, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

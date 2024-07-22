@@ -837,5 +837,77 @@ HWTEST_F(NetsysNativeServiceTest, DestroyVnic001, TestSize.Level1)
     int32_t ret = instance_->DestroyVnic();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: SetNicTrafficAllowed001
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed002
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed002, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed003
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed003, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed004
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed004, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed005
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed005, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed006
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed006, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

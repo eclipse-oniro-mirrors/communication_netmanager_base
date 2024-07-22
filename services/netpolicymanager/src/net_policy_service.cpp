@@ -73,10 +73,6 @@ void NetPolicyService::OnStart()
             return;
         }
     }
-    if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
-        NETMGR_LOG_E("Register to sa manager failed");
-        return;
-    }
 
     state_ = STATE_RUNNING;
     Init();
@@ -119,6 +115,10 @@ void NetPolicyService::Init()
             RegisterFactoryResetCallback();
             netAccessPolicy_.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
+            if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
+                NETMGR_LOG_E("Register to sa manager failed");
+                return;
+            }
         }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
 }
 
