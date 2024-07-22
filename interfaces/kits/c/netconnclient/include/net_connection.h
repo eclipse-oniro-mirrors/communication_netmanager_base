@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
  *
  * @brief Provide C interface for the data network connection module of network management.
  *
+ * @kit NetworkKit
  * @syscap SystemCapability.Communication.NetManager.Core
  * @library libnet_connection.so
  * @since 11
@@ -115,7 +116,7 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
  * @since 11
  * @version 1.0
  */
-int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netCapacities);
+int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netCapabilities);
 
 /**
  * @brief Obtains the default http proxy.
@@ -185,6 +186,8 @@ int32_t OH_NetConn_GetAllNets(NetConn_NetHandleList *netHandleList);
  *         2100003 - Internal error.
  * @permission ohos.permission.INTERNET
  * @syscap SystemCapability.Communication.NetManager.Core
+ * @deprecated since 13
+ * @useinstead OH_NetConn_RegisterDnsResolver
  * @since 11
  * @version 1.0
  */
@@ -198,10 +201,40 @@ int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
  *         2100003 - Internal error.
  * @permission ohos.permission.INTERNET
  * @syscap SystemCapability.Communication.NetManager.Core
+ * @deprecated since 13
+ * @useinstead OH_NetConn_UnregisterDnsResolver
  * @since 11
  * @version 1.0
  */
 int32_t OHOS_NetConn_UnregisterDnsResolver(void);
+
+/**
+ * @brief Registers a custom DNS resolver.
+ *
+ * @param resolver Pointer to the custom DNS resolver.
+ * @return Returns the result code.
+ *         {@link NETMANAGER_EXT_SUCCESS} if the operation is successful.
+ *         {@link NETMANAGER_ERR_PERMISSION_DENIED} Missing permissions, add permission.
+ *         {@link NETMANAGER_ERR_PARAMETER_ERROR} Parameter error. Please enter a correct parameter.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 13
+ * @version 1.0
+ */
+int32_t OH_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
+
+/**
+ * @brief Unregisters a custom DNS resolver.
+ *
+ * @return 0 - Success. 201 - Missing permissions.
+ *         401 - Parameter error. 2100002 - Unable to connect to service.
+ *         2100003 - Internal error.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 13
+ * @version 1.0
+ */
+int32_t OH_NetConn_UnregisterDnsResolver(void);
 
 /**
  * @brief Binds a socket to the specific network.
@@ -212,7 +245,6 @@ int32_t OHOS_NetConn_UnregisterDnsResolver(void);
  *         401 - Parameter error.
  *         2100002 - Unable to connect to service.
  *         2100003 - Internal error.
- * @{link 401} - if socketFd less than 0 or netId less than 100 or netHandle is null.
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 12
  * @version 1.0
