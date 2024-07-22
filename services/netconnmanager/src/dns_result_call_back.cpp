@@ -59,7 +59,7 @@ void NetDnsResultCallback::RequestNetDetection(uint32_t &failValue_, uint32_t ne
         if (failValue_ >= MAX_FAIL_VALUE) {
             NETMGR_LOG_I("netId:%{public}d start net detection with DNS fail value failValue:%{public}d",
                          netid, failValue_);
-            int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
+            NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
             failCount_.EnsureInsert(netid, 0);
         } else {
             failCount_.EnsureInsert(netid, failValue_);

@@ -146,10 +146,12 @@ ohos_shared_library("net_data_share") {
 
   external_deps = [
     "ability_base:zuri",
+    "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 

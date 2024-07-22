@@ -121,6 +121,7 @@ ohos_shared_library("net_conn_manager_if") {
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
+    "c_utils:utils",
     "ipc:ipc_core",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
@@ -166,7 +167,11 @@ ohos_shared_library("socket_permission") {
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
   deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
   public_configs = [ ":socket_permission_config" ]
-  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "ipc:ipc_core",
+  ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

@@ -122,6 +122,7 @@ ohos_shared_library("net_native_manager_if") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

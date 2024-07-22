@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -583,7 +583,7 @@ bool NetPolicyService::CheckNetworkAccessIsBroker(uint32_t uid)
     }
 
     std::string bundleName = "";
-    bool ret = bundleMgrProxy->GetBundleNameForUid(uid, bundleName);
+    bundleMgrProxy->GetBundleNameForUid(uid, bundleName);
     if (bundleName == "myappliction.apps") {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return true;
