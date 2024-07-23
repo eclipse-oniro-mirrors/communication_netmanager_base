@@ -19,6 +19,7 @@ group("unittest") {
   deps = [
     "bandwidth_manager_test:bandwidth_manager_test",
     "firewall_manager_test:firewall_manager_test",
+    "netsys_dnsresolv_test:netsys_dnsresolv_test",
     "netsys_manager_test:conn_manager_test",
     "netsys_manager_test:netsys_controller_test",
     "netsys_manager_test:netsys_native_client_test",
@@ -26,7 +27,6 @@ group("unittest") {
     "netsys_manager_test:netsys_native_service_proxy_test",
     "netsys_manager_test:resolver_config_test",
     "netsys_wrapper_test:netsys_wrapper_test",
-    "netsys_dnsresolv_test:netsys_dnsresolv_test",
   ]
 
   if (enable_feature_net_firewall) {
