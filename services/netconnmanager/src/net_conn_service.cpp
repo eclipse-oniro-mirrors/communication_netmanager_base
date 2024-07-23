@@ -1984,7 +1984,7 @@ void NetConnService::LoadGlobalHttpProxy()
     } else {
         httpProxyTracker.ReadFromSettingsDataUser(globalHttpProxy_, userId);
     }
-    isUserGlobalProxyLoaded.stroe(userId);
+    isUserGlobalProxyLoaded.store(userId);
 }
 
 void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
