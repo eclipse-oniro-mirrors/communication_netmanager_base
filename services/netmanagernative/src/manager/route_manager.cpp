@@ -287,9 +287,7 @@ int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceNam
     ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
-    if (interfaceName.find("vpn") == std::string::npos) {
-        ruleInfo.ruleIif = interfaceName;
-    }
+    ruleInfo.ruleIif = interfaceName;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
