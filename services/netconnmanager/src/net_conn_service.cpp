@@ -1964,10 +1964,6 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
-    if (!isGlobalProxyLoaded_) {
-        NETMGR_LOG_D("GlobalHttpProxy has already loaded.");
-        return;
-    }
     if (!isDataShareReady_.load() && !CheckIfSettingsDataReady()) {
         NETMGR_LOG_E("data share is not ready.");
         return;
@@ -1978,13 +1974,17 @@ void NetConnService::LoadGlobalHttpProxy()
         NETMGR_LOG_E("LoadGlobalHttpProxy get calling userId fail.");
         return;
     }
+    if (isUserGlobalProxyLoaded.load() == userId) {
+        NETMGR_LOG_D("GlobalHttpProxy has already loaded. userId=%{public}d", userId);
+        return;
+    }
     NetHttpProxyTracker httpProxyTracker;
     if (IsPrimaryUserId(userId)) {
         httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
     } else {
         httpProxyTracker.ReadFromSettingsDataUser(globalHttpProxy_, userId);
     }
-    isGlobalProxyLoaded_ = true;
+    isUserGlobalProxyLoaded.stroe(userId);
 }
 
 void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
