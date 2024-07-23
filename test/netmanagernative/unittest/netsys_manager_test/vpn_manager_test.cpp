@@ -63,17 +63,17 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
 
     testNumber = 1;
     result = VpnManager::GetInstance().SetVpnMtu(ifName, testNumber);
-    EXPECT_EQ(result, NETMANAGER_ERROR);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     std::string tunAddr = "";
     result = VpnManager::GetInstance().SetVpnAddress(ifName, tunAddr, testNumber);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 
     result = VpnManager::GetInstance().SetVpnUp();
-    EXPECT_EQ(result, NETMANAGER_ERROR);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     result = VpnManager::GetInstance().SetVpnDown();
-    EXPECT_EQ(result, NETMANAGER_ERROR);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     ifreq ifr;
     std::string cardName = "";

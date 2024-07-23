@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,14 +69,22 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
     if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteCommand(cmd);
+#else
         std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
         iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif // UNITTEST_FORBID_FFRT
     }
 
     if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteCommand(cmd);
+#else
         std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
         iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif // UNITTEST_FORBID_FFRT
     }
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
