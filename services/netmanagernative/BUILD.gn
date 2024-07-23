@@ -228,6 +228,7 @@ ohos_static_library("netsys_native_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
+    "UNITTEST_FORBID_FFRT=1",
   ]
 
   if (build_selinux) {
