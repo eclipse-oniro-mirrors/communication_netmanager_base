@@ -967,7 +967,7 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
 
 void NetConnService::FindBestNetworkForAllRequest()
 {
-    NETMGR_LOG_I("FindBestNetworkForAllRequest Enter");
+    NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netActivates_ size: [%{public}zu]", netActivates_.size());
     NET_ACTIVATE_MAP::iterator iterActive;
     sptr<NetSupplier> bestSupplier = nullptr;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
