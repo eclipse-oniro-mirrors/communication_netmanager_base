@@ -630,6 +630,8 @@ void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    int32_t bindNetId = NetConnGetData<int32_t>();
+    dataParcel.WriteInt32(bindNetId);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), dataParcel);
 }
 
