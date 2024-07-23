@@ -22,19 +22,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_IFACE_SIZE = 100;
 
-NetPolicyCallbackStub::NetPolicyCallbackStub()
-{
-    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE)] =
-        &NetPolicyCallbackStub::OnNetUidPolicyChange;
-    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE)] =
-        &NetPolicyCallbackStub::OnNetUidRuleChange;
-    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE)] =
-        &NetPolicyCallbackStub::OnNetQuotaPolicyChange;
-    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE)] =
-        &NetPolicyCallbackStub::OnNetMeteredIfacesChange;
-    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE)] =
-        &NetPolicyCallbackStub::OnNetBackgroundPolicyChange;
-}
+NetPolicyCallbackStub::NetPolicyCallbackStub() {}
 
 NetPolicyCallbackStub::~NetPolicyCallbackStub() {}
 
@@ -48,15 +36,20 @@ int32_t NetPolicyCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
         return ERR_FLATTEN_OBJECT;
     }
 
-    auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto requestFunc = itFunc->second;
-        if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
-        }
+    switch (code) {
+        case static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE):
+            return OnNetUidPolicyChange(data, reply);
+        case static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE):
+            return OnNetUidRuleChange(data, reply);
+        case static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE):
+            return OnNetQuotaPolicyChange(data, reply);
+        case static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE):
+            return OnNetMeteredIfacesChange(data, reply);
+        case static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE):
+            return OnNetBackgroundPolicyChange(data, reply);
+        default:
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetPolicyCallbackStub::OnNetUidPolicyChange(MessageParcel &data, MessageParcel &reply)
