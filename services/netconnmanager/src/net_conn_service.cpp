@@ -1987,7 +1987,10 @@ void NetConnService::LoadGlobalHttpProxy(HttpProxy &httpProxy)
     } else {
         httpProxyTracker.ReadFromSettingsDataUser(tmpHttpProxy, userId);
     }
-    httpProxy = tmpHttpProxy;
+    {
+        std::lock_guard guard(globalHttpProxyMutex_);
+        httpProxy = tmpHttpProxy;
+    }
     globalHttpProxyCache_.EnsureInsert(userId, tmpHttpProxy);
 }
 
