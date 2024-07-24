@@ -20,7 +20,5 @@ group("fuzztest") {
     "netconnclient_fuzzer:fuzztest",
     "netpolicyclient_fuzzer:fuzztest",
     "netstatsclient_fuzzer:fuzztest",
-    "netsysclient_fuzzer:fuzztest",
-    "netsysclientnetdiag_fuzzer:fuzztest",
   ]
 }

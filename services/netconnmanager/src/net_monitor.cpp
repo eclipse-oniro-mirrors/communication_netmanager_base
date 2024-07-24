@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,8 +50,6 @@ constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char *HTTPS_URL_HEADER = "HttpsProbeUrl:";
-constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
-constexpr const char *NET_HTTPS_PROBE_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
