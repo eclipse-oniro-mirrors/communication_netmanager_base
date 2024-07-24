@@ -494,7 +494,7 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isDataShareReady_ = false;
-    std::atomic<int32_t> isUserGlobalProxyLoaded = -1;
+    SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
     HttpProxy globalHttpProxy_;
     std::mutex globalHttpProxyMutex_;
     std::recursive_mutex netManagerMutex_;

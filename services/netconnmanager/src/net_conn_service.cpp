@@ -1893,6 +1893,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
             NETMGR_LOG_E("GlobalHttpProxy write settingDateUser fail. userId=%{public}d", userId);
             return NETMANAGER_ERR_INTERNAL;
         }
+        globalHttpProxyCache_.EnsureInsert(userId, globalHttpProxy_);
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
         UpdateGlobalHttpProxy(globalHttpProxy_);
     }
@@ -1964,27 +1965,42 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
 
 void NetConnService::LoadGlobalHttpProxy()
 {
-    if (!isDataShareReady_.load() && !CheckIfSettingsDataReady()) {
-        NETMGR_LOG_E("data share is not ready.");
-        return;
-    }
     int32_t userId;
     int32_t ret = GetCallingUserId(userId);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("LoadGlobalHttpProxy get calling userId fail.");
         return;
     }
-    if (isUserGlobalProxyLoaded.load() == userId) {
-        NETMGR_LOG_D("GlobalHttpProxy has already loaded. userId=%{public}d", userId);
+    HttpProxy tmpHttpProxy;
+    if (globalHttpProxyCache_.Find(userId, tmpHttpProxy)) {
+        {
+            std::lock_guard guard(globalHttpProxyMutex_);
+            globalHttpProxy_ = tmpHttpProxy;
+        }
+        NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database. userId=%{public}d", userId);
         return;
+    }
+    if (!isDataShareReady_.load()) {
+        std::thread checkSettingsDataReady([this]() { return CheckIfSettingsDataReady(); });
+        std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
+        dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
+        checkSettingsDataReady.join();
+        if (!isDataShareReady_.load()) {
+            NETMGR_LOG_E("data share is not ready.");
+            return;
+        }
     }
     NetHttpProxyTracker httpProxyTracker;
     if (IsPrimaryUserId(userId)) {
-        httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
+        httpProxyTracker.ReadFromSettingsData(tmpHttpProxy);
     } else {
-        httpProxyTracker.ReadFromSettingsDataUser(globalHttpProxy_, userId);
+        httpProxyTracker.ReadFromSettingsDataUser(tmpHttpProxy, userId);
     }
-    isUserGlobalProxyLoaded.store(userId);
+    {
+        std::lock_guard guard(globalHttpProxyMutex_);
+        globalHttpProxy_ = tmpHttpProxy;
+    }
+    globalHttpProxyCache_.EnsureInsert(userId, tmpHttpProxy);
 }
 
 void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
