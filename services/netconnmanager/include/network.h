@@ -64,7 +64,8 @@ public:
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
-
+    void SetIsDetectionDone(bool netDetectionDoneState);
+    bool IsNetDetecting();
     bool ResumeNetworkInfo();
 
 private:
@@ -95,6 +96,7 @@ private:
     NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     std::atomic_bool isPhyNetCreated_ = false;
     std::atomic_bool isVirtualCreated_ = false;
+    std::atomic_bool isDetectionDone_ = false;
     std::shared_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;
