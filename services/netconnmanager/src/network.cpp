@@ -760,28 +760,6 @@ bool Network::IsNat464Prefered()
         return false;
     }
     return true;
-
-
-1301-1304
-    supplier->SetNetValid(netState);
-    if (supplier->GetNetwork()->IsNetDetecting()) {
-        NETMGR_LOG_D("first HandleDetectionResult.");
-        supplier->GetNetwork()->SetIsDetectionDone(true);
-    }
-    if (netState != QUALITY_POOR_STATE && netState != QUALITY_NORMAL_STATE && netState != QUALITY_GOOD_STATE) {
-
-
-
-
-    }
- 731
-    supplier->GetNetwork()->SetIsDetectionDone(false);
-    if (!NetScore::GetServiceScore(supplier)) {
-
-
-
-
-
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
