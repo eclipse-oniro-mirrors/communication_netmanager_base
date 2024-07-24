@@ -445,7 +445,7 @@ private:
     int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
-    void LoadGlobalHttpProxy();
+    void LoadGlobalHttpProxy(HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -495,8 +495,6 @@ private:
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isDataShareReady_ = false;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
-    HttpProxy globalHttpProxy_;
-    std::mutex globalHttpProxyMutex_;
     std::recursive_mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
