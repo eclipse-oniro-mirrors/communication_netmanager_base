@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,8 @@ public:
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
-
+    void SetIsDetectionDone(bool netDetectionDoneState);
+    bool IsNetDetecting();
     bool ResumeNetworkInfo();
 
 private:
@@ -95,6 +96,7 @@ private:
     NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     std::atomic_bool isPhyNetCreated_ = false;
     std::atomic_bool isVirtualCreated_ = false;
+    std::atomic_bool isDetectionDone_ = false;
     std::shared_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;
