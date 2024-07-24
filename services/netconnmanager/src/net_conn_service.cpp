@@ -1970,15 +1970,9 @@ void NetConnService::LoadGlobalHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database. userId=%{public}d", userId);
         return;
     }
-    if (!isDataShareReady_.load()) {
-        std::thread checkSettingsDataReady([this]() { return CheckIfSettingsDataReady(); });
-        std::unique_lock<std::mutex> lockWait(dataShareMutexWait);
-        dataShareWait.wait_for(lockWait, std::chrono::seconds(DATA_SHARE_WAIT_TIME));
-        checkSettingsDataReady.join();
-        if (!isDataShareReady_.load()) {
-            NETMGR_LOG_E("data share is not ready.");
-            return;
-        }
+    if (!isDataShareReady_.load() && !CheckIfSettingsDataReady()) {
+        NETMGR_LOG_E("data share is not ready.");
+        return;
     }
     NetHttpProxyTracker httpProxyTracker;
     HttpProxy tmpHttpProxy;
