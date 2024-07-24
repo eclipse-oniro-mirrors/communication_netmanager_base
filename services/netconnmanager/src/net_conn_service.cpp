@@ -725,10 +725,10 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
+        supplier->GetNetwork()->SetIsDetectionDone(false);
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
-    supplier->GetNetwork()->SetIsDetectionDone(false);
     if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
