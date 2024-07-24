@@ -17,7 +17,6 @@
 #include <sstream>
 
 #include "dns_quality_diag.h"
-#include "third_party/musl/include/netdb.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
 

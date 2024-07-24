@@ -109,6 +109,7 @@ ohos_shared_library("net_policy_manager_if") {
     "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

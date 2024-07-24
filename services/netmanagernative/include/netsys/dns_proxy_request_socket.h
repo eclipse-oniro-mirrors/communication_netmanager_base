@@ -61,7 +61,6 @@ private:
     size_t dnsServerIdx = 0;
     epoll_event event{};
     AlignedSockAddr addrParse{};
-    AlignedSockAddr srcAddr{};
     std::unique_ptr<AlignedSockAddr> clientSock;
     std::unique_ptr<RecvBuff> recvBuff;
     std::list<std::map<int32_t, DnsProxyRequestSocket>::iterator>::iterator lruIterator;

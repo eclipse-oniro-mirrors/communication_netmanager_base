@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,8 +86,8 @@ bool DnsProxyListen::GetDnsProxyServers(std::vector<std::string> &servers, size_
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
     uint8_t retryCount;
-    auto status = DnsParamCache::GetInstance().GetResolverConfig(DnsProxyListen::netId_, servers, domains,
-                                                                 baseTimeoutMsec, retryCount);
+    DnsParamCache::GetInstance().GetResolverConfig(DnsProxyListen::netId_, servers, domains, baseTimeoutMsec,
+                                                   retryCount);
     if (serverIdx >= servers.size()) {
         NETNATIVE_LOGE("no server useful");
         return false;
@@ -254,7 +254,7 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
         NETNATIVE_LOGE("clientAddr mem failed");
         return;
     }
-    int32_t proxySocket = proxySockFd_;
+
     if (family == AF_INET) {
         socklen_t len = sizeof(sockaddr_in);
         recvBuff->questionLen = recvfrom(proxySockFd_, recvBuff->questionsBuff, MAX_REQUESTDATA_LEN, 0,
