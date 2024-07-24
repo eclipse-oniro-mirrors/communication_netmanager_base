@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -728,6 +728,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
+    supplier->GetNetwork()->SetIsDetectionDone(false);
     if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
@@ -1292,6 +1293,10 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
         return;
     }
     supplier->SetNetValid(netState);
+    if (supplier->GetNetwork()->IsNetDetecting()) {
+        NETMGR_LOG_D("first HandleDetectionResult.");
+        supplier->GetNetwork()->SetIsDetectionDone(true);
+    }
     if (netState != QUALITY_POOR_STATE && netState != QUALITY_NORMAL_STATE && netState != QUALITY_GOOD_STATE) {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
