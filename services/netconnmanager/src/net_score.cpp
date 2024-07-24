@@ -36,7 +36,7 @@ bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
         static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
     netScore = static_cast<int32_t>(iter->second);
     supplier->SetNetScore(netScore);
-    if (!(supplier->IsNetValidated())) {
+    if (!supplier->IsNetValidated() || supplier->GetNetwork()->IsNetDetecting()) {
         netScore -= NET_VALID_SCORE;
     }
     if (supplier->IsNetQualityPoor()) {
