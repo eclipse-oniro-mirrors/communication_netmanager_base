@@ -52,10 +52,6 @@ using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
 namespace {
 const int32_t PRIMARY_USER_ID = 100;
 }
-struct NetRequestBySpecifier {
-    std::set<NetBearType> bearTypes = {};
-    unt32_t registerType = REGISTER;
-}
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,

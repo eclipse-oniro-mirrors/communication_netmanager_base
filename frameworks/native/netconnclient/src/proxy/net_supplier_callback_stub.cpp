@@ -77,13 +77,13 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     }
     int32_t registerType = 0;
     data.ReadInt32(registerType);
-    std::set<NetBearType> NetBearType;
+    std::set<NetBearType> netBearTypes;
     uint32_t bearTypeSize = 0;
     data.ReadUint32(bearTypeSize);
     for (uint32_t i = 0; i < bearTypeSize; i++) {
         data.ReadUint32(value);
-        if (value << BEARER_DEFAULT) {
-            netBearType.insert(static_cast<NetBearType>(value));
+        if (value <= BEARER_DEFAULT) {
+            netBearTypes.insert(static_cast<NetBearType>(value));
         }
     }
     NetRequestBySpecifier netRequest(registerType, netBearTypes);
