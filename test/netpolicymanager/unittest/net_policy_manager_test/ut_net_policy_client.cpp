@@ -562,5 +562,89 @@ HWTEST_F(UtNetPolicyClient, NotifyNetAccessPolicyDiag001, TestSize.Level1)
     std::cout << "NetPolicyClient027 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: SetNicTrafficAllowed001
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, false);
+    std::cout << "NetPolicyClient028 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed002
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, true);
+    std::cout << "NetPolicyClient029 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed003
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {"wlan0"};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, false);
+    std::cout << "NetPolicyClient030 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed004
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed004, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {"wlan0"};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, true);
+    std::cout << "NetPolicyClient031 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed005
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed005, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, false);
+    std::cout << "NetPolicyClient032 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed006
+ * @tc.desc: Test NetPolicyClient SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed006, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    int32_t result = g_netPolicyClient->SetNicTrafficAllowed(ifaceName, true);
+    std::cout << "NetPolicyClient027 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

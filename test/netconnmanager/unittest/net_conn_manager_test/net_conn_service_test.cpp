@@ -115,8 +115,10 @@ void NetConnServiceTest::SetUpTestCase()
         NetConnService::GetInstance()->serviceIface_ = std::make_unique<NetConnServiceIface>().release();
         NetManagerCenter::GetInstance().RegisterConnService(NetConnService::GetInstance()->serviceIface_);
         NetHttpProxyTracker httpProxyTracker;
-        httpProxyTracker.ReadFromSettingsData(NetConnService::GetInstance()->globalHttpProxy_);
-        NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(NetConnService::GetInstance()->globalHttpProxy_);
+        HttpProxy httpProxy;
+        httpProxy.SetPort(0);
+        httpProxyTracker.ReadFromSettingsData(httpProxy);
+        NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
     }
 }
 

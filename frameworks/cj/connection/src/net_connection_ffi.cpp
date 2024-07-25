@@ -243,8 +243,8 @@ bool SetRoute(NetLinkInfo &linkInfo, CConnectionProperties &ret)
             ret.routes[i] = CRouteInfo{.interfaceName = MallocCString(it->iface_),
                                        .destination = dest,
                                        .gateway = gateway,
-                                       .isDefaultRoute = it->isDefaultRoute_,
-                                       .hasGateway = it->hasGateway_};
+                                       .hasGateway = it->hasGateway_,
+                                       .isDefaultRoute = it->isDefaultRoute_};
         }
     }
     return true;
@@ -329,7 +329,8 @@ RetDataCArrI32 CJ_GetAllNets()
 {
     std::list<sptr<NetHandle>> netList;
     auto code = NetConnClient::GetInstance().GetAllNets(netList);
-    RetDataCArrI32 ret = {.code = code, .data.size = 0, .data.head = nullptr};
+    CArrI32 data = {.head = nullptr, .size = 0 };
+    RetDataCArrI32 ret = {.code = code, .data = data};
     if (code != NETMANAGER_SUCCESS) {
         return ret;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -737,6 +737,16 @@ bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool d
     return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
 }
 
+void Network::SetIsDetectionDone(bool netDetectionDoneState)
+{
+    isDetectionDone_ = netDetectionDoneState;
+}
+ 
+bool Network::IsNetDetecting()
+{
+    return !isDetectionDone_.load();
+}
+ 
 bool Network::IsNat464Prefered()
 {
     if (netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI && netSupplierType_ != BEARER_ETHERNET) {

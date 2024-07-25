@@ -49,7 +49,7 @@ bool MakeNonBlock(int sock)
 
 static int64_t SendWrapper(int fd, char *buf, size_t len)
 {
-    return send(fd, buf, len, 0);
+    return send(fd, buf, len, MSG_NOSIGNAL);
 }
 
 static int64_t RecvWrapper(int fd, char *buf, size_t len)

@@ -31,7 +31,8 @@ constexpr uint32_t UID_FOUNDATION = 5523;
 constexpr uint32_t UID_BROKER_SERVICE = 5557;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};

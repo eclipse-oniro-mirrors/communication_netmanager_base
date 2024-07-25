@@ -52,6 +52,7 @@ ohos_shared_library("net_connection") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 
   part_name = "netmanager_base"

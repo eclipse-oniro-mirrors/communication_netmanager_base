@@ -80,6 +80,7 @@ ohos_shared_library("netsys_bpf_utils") {
     "elfio:elfio",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libbpf:libbpf",
   ]
 
