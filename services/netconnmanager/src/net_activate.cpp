@@ -196,11 +196,6 @@ sptr<INetConnCallback> NetActivate::GetNetCallback()
     return netConnCallback_;
 }
 
-std::set<NetBearType> const& NetActivate::GetBearType() const
-{
-    return netSpecifier_->netCapabilities_.bearerTypes_;
-}
-
 bool NetActivate::HaveCapability(NetCap netCap) const
 {
     if (netSpecifier_ == nullptr) {
