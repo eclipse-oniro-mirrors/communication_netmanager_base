@@ -29,7 +29,7 @@ group("unittest") {
     "netsys_wrapper_test:netsys_wrapper_test",
   ]
 
-  if (enable_feature_net_firewall) {
+  if (netmanager_base_enable_feature_net_firewall) {
     deps += [
       "netsys_netfirewall_test:netsys_netfirewall_test",
       "netsys_netfirewall_test:suffix_match_trie_test",
