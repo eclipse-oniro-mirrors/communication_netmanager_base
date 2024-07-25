@@ -1175,7 +1175,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
             continue;
         }
         NetRequest netrequest(request->GetRegisterType(), request->GetBearType());
-        bool result = iter->second->RequestToConnect(reqId, registerType);
+        bool result = iter->second->RequestToConnect(reqId, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
                          iter->second->GetNetSupplierIdent().c_str());
