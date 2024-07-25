@@ -24,7 +24,11 @@ namespace {
 using namespace OHOS::NetManagerStandard;
 } // namespace
 
-NetDiagCallbackStub::NetDiagCallbackStub() {}
+NetDiagCallbackStub::NetDiagCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
+        &NetDiagCallbackStub::CmdNotifyPingResult;
+}
 
 int32_t NetDiagCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                              MessageOption &option)
@@ -36,13 +40,17 @@ int32_t NetDiagCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         NETNATIVE_LOGE("Descriptor checked failed");
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
-    switch (code) {
-        case static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT):
-            return CmdNotifyPingResult(data, reply);
-        default:
-            NETNATIVE_LOGE("stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETNATIVE_LOGE("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetDiagCallbackStub::CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)

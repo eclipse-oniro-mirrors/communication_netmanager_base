@@ -21,7 +21,13 @@ static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetSupplierCallbackStub::NetSupplierCallbackStub() {}
+NetSupplierCallbackStub::NetSupplierCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK)] =
+        &NetSupplierCallbackStub::OnRequestNetwork;
+    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK)] =
+        &NetSupplierCallbackStub::OnReleaseNetwork;
+}
 
 NetSupplierCallbackStub::~NetSupplierCallbackStub() {}
 
@@ -41,15 +47,16 @@ int32_t NetSupplierCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK):
-            return OnRequestNetwork(data, reply);
-        case static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK):
-            return OnReleaseNetwork(data, reply);
-        default:
-            NETMGR_LOG_I("Stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETMGR_LOG_I("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessageParcel &reply)

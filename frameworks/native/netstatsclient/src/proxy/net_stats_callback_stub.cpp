@@ -20,7 +20,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsCallbackStub::NetStatsCallbackStub() {}
+NetStatsCallbackStub::NetStatsCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED)] =
+        &NetStatsCallbackStub::OnNetIfaceStatsChanged;
+    memberFuncMap_[static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED)] =
+        &NetStatsCallbackStub::OnNetUidStatsChanged;
+}
 
 NetStatsCallbackStub::~NetStatsCallbackStub() = default;
 
@@ -33,14 +39,16 @@ int32_t NetStatsCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         NETMGR_LOG_E("Descriptor checked failed");
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
-    switch (code) {
-        case static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED):
-            return OnNetIfaceStatsChanged(data, reply);
-        case static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED):
-            return OnNetUidStatsChanged(data, reply);
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetStatsCallbackStub::OnNetIfaceStatsChanged(MessageParcel &data, MessageParcel &reply)
