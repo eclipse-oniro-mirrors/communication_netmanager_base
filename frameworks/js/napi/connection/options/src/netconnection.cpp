@@ -14,6 +14,7 @@
  */
 
 #include "netconnection.h"
+#include "netmanager_base_log.h"
 
 #include <mutex>
 
@@ -54,4 +55,6 @@ EventManager *NetConnection::GetEventManager() const
 {
     return manager_;
 }
+NetConnection::NetConnection() {}
+
 } // namespace OHOS::NetManagerStandard
