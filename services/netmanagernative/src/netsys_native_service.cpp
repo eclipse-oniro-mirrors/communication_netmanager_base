@@ -1011,7 +1011,7 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
     bool ret = false;
     std::vector<std::string> cmds;
     for (const std::string& ifaceName : ifaceNames) {
-        if (status) {
+        if (!status) {
             NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s allowed", ifaceName.c_str());
             cmds.push_back("-t raw -I OUTPUT -o " + ifaceName + " -j DROP");
             cmds.push_back("-t raw -I PREROUTING -i " + ifaceName + " -j DROP");
