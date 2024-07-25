@@ -28,7 +28,7 @@ using TimeOutCallback = std::function<void()>;
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                          std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
                          const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
-                         const int32_t &registerType)
+                         const int32_t registerType)
     : netSpecifier_(specifier),
       netConnCallback_(callback),
       timeoutMS_(timeoutMS),

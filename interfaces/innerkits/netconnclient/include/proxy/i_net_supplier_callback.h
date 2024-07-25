@@ -24,6 +24,7 @@
 
 #include "net_all_capabilities.h"
 #include "net_manager_constants.h"
+#include "net_supplier_callback_base.h"
 namespace OHOS {
 namespace NetManagerStandard {
 class INetSupplierCallback : public IRemoteBroker {
@@ -34,7 +35,7 @@ public:
 
 public:
     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-        const NetRequestBySpecifier &netRequestBySpecifier = {}) = 0;
+        const NetRequest &netrequest = {}) = 0;
     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
 };
 } // namespace NetManagerStandard
