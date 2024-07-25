@@ -30,7 +30,7 @@ struct NetRequest {
     uint32_t registerType = REGISTER;
     std::set<NetBearType> bearTypes = {};
     NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes)
-        : , registerType(registerType), bearTypes(netBearTypes)
+        : registerType(registerType), bearTypes(netBearTypes)
     {}
     NetRequest() = default;
 }
