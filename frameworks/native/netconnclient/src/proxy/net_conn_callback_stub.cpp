@@ -20,7 +20,20 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
-NetConnCallbackStub::NetConnCallbackStub() {}
+NetConnCallbackStub::NetConnCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_AVAILABLE)] =
+        &NetConnCallbackStub::OnNetAvailable;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE)] =
+        &NetConnCallbackStub::OnNetCapabilitiesChange;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE)] =
+        &NetConnCallbackStub::OnNetConnectionPropertiesChange;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_LOST)] = &NetConnCallbackStub::OnNetLost;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_UNAVAILABLE)] =
+        &NetConnCallbackStub::OnNetUnavailable;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE)] =
+        &NetConnCallbackStub::OnNetBlockStatusChange;
+}
 
 NetConnCallbackStub::~NetConnCallbackStub() {}
 
@@ -35,23 +48,16 @@ int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_AVAILABLE):
-            return OnNetAvailable(data, reply);
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE):
-            return OnNetCapabilitiesChange(data, reply);
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE):
-            return OnNetConnectionPropertiesChange(data, reply);
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_LOST):
-            return OnNetLost(data, reply);
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_UNAVAILABLE):
-            return OnNetUnavailable(data, reply);
-        case static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE):
-            return OnNetBlockStatusChange(data, reply);
-        default:
-            NETMGR_LOG_D("Stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETMGR_LOG_D("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &reply)

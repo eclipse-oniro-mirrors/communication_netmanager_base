@@ -18,7 +18,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetDetectionCallbackStub::NetDetectionCallbackStub() {}
+NetDetectionCallbackStub::NetDetectionCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT)] =
+        &NetDetectionCallbackStub::OnNetDetectionResult;
+}
 
 NetDetectionCallbackStub::~NetDetectionCallbackStub() {}
 
@@ -33,12 +37,15 @@ int32_t NetDetectionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT):
-            return OnNetDetectionResult(data, reply);
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetDetectionCallbackStub::OnNetDetectionResult(MessageParcel &data, MessageParcel &reply)

@@ -19,7 +19,11 @@
 
 namespace OHOS {
 namespace NetsysNative {
-NetDnsResultCallbackStub::NetDnsResultCallbackStub() {}
+NetDnsResultCallbackStub::NetDnsResultCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT)] =
+        &NetDnsResultCallbackStub::CmdDnsResultReport;
+}
 
 int32_t NetDnsResultCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -31,13 +35,17 @@ int32_t NetDnsResultCallbackStub::OnRemoteRequest(
         NETNATIVE_LOGE("Descriptor checked failed");
         return ERR_FLATTEN_OBJECT;
     }
-    switch (code) {
-        case static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT):
-            return CmdDnsResultReport(data, reply);
-        default:
-            NETNATIVE_LOGI("Stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETNATIVE_LOGI("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetDnsResultCallbackStub::CmdDnsResultReport(MessageParcel &data, MessageParcel &reply)

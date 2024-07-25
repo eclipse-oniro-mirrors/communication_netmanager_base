@@ -19,7 +19,11 @@
 
 namespace OHOS {
 namespace NetsysNative {
-NetDnsHealthCallbackStub::NetDnsHealthCallbackStub() {}
+NetDnsHealthCallbackStub::NetDnsHealthCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(NetDnsHealthInterfaceCode::ON_DNS_HEALTH_REPORT)] =
+        &NetDnsHealthCallbackStub::CmdDnsHealthReport;
+}
 
 int32_t NetDnsHealthCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -32,13 +36,16 @@ int32_t NetDnsHealthCallbackStub::OnRemoteRequest(
         return ERR_FLATTEN_OBJECT;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(NetDnsHealthInterfaceCode::ON_DNS_HEALTH_REPORT):
-            return CmdDnsHealthReport(data, reply);
-        default:
-            NETNATIVE_LOGI("Stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETNATIVE_LOGI("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 int32_t NetDnsHealthCallbackStub::CmdDnsHealthReport(MessageParcel &data, MessageParcel &reply)
 {

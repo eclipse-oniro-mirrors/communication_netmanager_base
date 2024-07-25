@@ -21,7 +21,21 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-NetInterfaceStateCallbackStub::NetInterfaceStateCallbackStub() {}
+NetInterfaceStateCallbackStub::NetInterfaceStateCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAddressRemoved;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAdded;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceRemoved;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceChanged;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged;
+}
 
 int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                        MessageOption &option)
@@ -33,23 +47,17 @@ int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessagePar
         NETMGR_LOG_E("Descriptor checked failed");
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
-    switch (code) {
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED):
-            return CmdInterfaceAddressUpdated(data, reply);
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED):
-            return CmdInterfaceAddressRemoved(data, reply);
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED):
-            return CmdInterfaceAdded(data, reply);
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED):
-            return CmdInterfaceRemoved(data, reply);
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED):
-            return CmdInterfaceChanged(data, reply);
-        case static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED):
-            return CmdInterfaceLinkStateChanged(data, reply);
-        default:
-            NETMGR_LOG_D("Stub default case, need check");
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    NETMGR_LOG_D("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)

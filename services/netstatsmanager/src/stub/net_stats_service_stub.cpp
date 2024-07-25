@@ -22,7 +22,53 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsServiceStub::NetStatsServiceStub() {}
+NetStatsServiceStub::NetStatsServiceStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK)] =
+        &NetStatsServiceStub::OnRegisterNetStatsCallback;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK)] =
+        &NetStatsServiceStub::OnUnregisterNetStatsCallback;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES)] =
+        &NetStatsServiceStub::OnGetIfaceRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES)] =
+        &NetStatsServiceStub::OnGetIfaceTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES)] =
+        &NetStatsServiceStub::OnGetCellularRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES)] =
+        &NetStatsServiceStub::OnGetCellularTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES)] =
+        &NetStatsServiceStub::OnGetAllRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES)] =
+        &NetStatsServiceStub::OnGetAllTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES)] =
+        &NetStatsServiceStub::OnGetUidRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES)] =
+        &NetStatsServiceStub::OnGetUidTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL)] =
+        &NetStatsServiceStub::OnGetIfaceStatsDetail;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL)] =
+        &NetStatsServiceStub::OnGetUidStatsDetail;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS)] =
+        &NetStatsServiceStub::OnUpdateIfacesStats;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA)] =
+        &NetStatsServiceStub::OnUpdateStatsData;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY)] =
+        &NetStatsServiceStub::OnResetFactory;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllSimStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByUidNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS)] =
+        &NetStatsServiceStub::OnSetAppStats;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES)] =
+        &NetStatsServiceStub::OnGetCookieRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES)] =
+        &NetStatsServiceStub::OnGetCookieTxBytes;
+}
 
 NetStatsServiceStub::~NetStatsServiceStub() = default;
 
@@ -38,54 +84,16 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK):
-            return OnRegisterNetStatsCallback(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK):
-            return OnUnregisterNetStatsCallback(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES):
-            return OnGetIfaceRxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES):
-            return OnGetIfaceTxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES):
-            return OnGetCellularRxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES):
-            return OnGetCellularTxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES):
-            return OnGetAllRxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES):
-            return OnGetAllTxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES):
-            return OnGetUidRxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES):
-            return OnGetUidTxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL):
-            return OnGetIfaceStatsDetail(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL):
-            return OnGetUidStatsDetail(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS):
-            return OnUpdateIfacesStats(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA):
-            return OnUpdateStatsData(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY):
-            return OnResetFactory(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO):
-            return OnGetAllStatsInfo(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO):
-            return OnGetAllSimStatsInfo(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK):
-            return OnGetTrafficStatsByNetwork(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK):
-            return OnGetTrafficStatsByUidNetwork(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS):
-            return OnSetAppStats(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES):
-            return OnGetCookieRxBytes(data, reply);
-        case static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES):
-            return OnGetCookieTxBytes(data, reply);
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            int32_t ret = (this->*requestFunc)(data, reply);
+            NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, ret);
+            return ret;
+        }
     }
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)

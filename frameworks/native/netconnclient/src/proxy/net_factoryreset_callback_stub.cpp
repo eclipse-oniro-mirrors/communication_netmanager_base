@@ -18,7 +18,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetFactoryResetCallbackStub::NetFactoryResetCallbackStub() {}
+NetFactoryResetCallbackStub::NetFactoryResetCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(FactoryResetCallbackInterfaceCode::NET_FACTORYRESET)] =
+        &NetFactoryResetCallbackStub::OnFactoryReset;
+}
 
 NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub() {}
 
@@ -39,12 +43,15 @@ int32_t NetFactoryResetCallbackStub::OnRemoteRequest(uint32_t code, MessageParce
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    switch (code) {
-        case static_cast<uint32_t>(FactoryResetCallbackInterfaceCode::NET_FACTORYRESET):
-            return OnFactoryReset(data, reply);
-        default:
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
     }
+
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t NetFactoryResetCallbackStub::OnFactoryReset(MessageParcel &data, MessageParcel &reply)
