@@ -91,7 +91,7 @@ public:
     ~NetSupplierCallbackStubTestCb() {}
 
     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-                           NetRequest &netrequest = {}) override
+                           const NetRequest &netrequest = {}) override
     {
         return NETMANAGER_SUCCESS;
     }
