@@ -33,7 +33,7 @@ struct NetRequest {
         : registerType(registerType), bearTypes(netBearTypes)
     {}
     NetRequest() = default;
-}
+};
 class NetSupplierCallbackBase : public virtual RefBase {
 public:
     virtual ~NetSupplierCallbackBase() = default;
