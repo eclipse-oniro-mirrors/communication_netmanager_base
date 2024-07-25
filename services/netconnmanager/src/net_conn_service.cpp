@@ -1148,7 +1148,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        NetRequest netrequest(iter->second->GetRegiserType(), iter->second->GetBearType());
+        NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
         bool result = supplier->RequestToConnect(iter->first, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
@@ -1174,6 +1174,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second)) {
             continue;
         }
+        NetRequest netrequest(request->GetRegisterType(), request->GetBearType());
         bool result = iter->second->RequestToConnect(reqId, registerType);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
