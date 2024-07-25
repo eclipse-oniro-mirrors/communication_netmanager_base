@@ -271,7 +271,7 @@ bool NetSupplier::IsConnected() const
     return false;
 }
 
-bool NetSupplier::RequestToConnect(uint32_t reqId, const Netrequest &netrequest)
+bool NetSupplier::RequestToConnect(uint32_t reqId, const NetRequest &netrequest)
 {
     if (requestList_.find(reqId) == requestList_.end()) {
         requestList_.insert(reqId);

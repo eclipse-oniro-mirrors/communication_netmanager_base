@@ -24,7 +24,6 @@
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
-#include "net_manager_constants.h"
 class NetSupplier;
 
 namespace OHOS {
