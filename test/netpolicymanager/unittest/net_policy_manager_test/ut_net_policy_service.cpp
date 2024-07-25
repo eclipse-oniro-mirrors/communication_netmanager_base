@@ -27,6 +27,7 @@
 #include "net_policy_service.h"
 #include "net_policy_traffic.h"
 #include "system_ability_definition.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -387,6 +388,7 @@ HWTEST_F(UtNetPolicyService, DeleteNetworkAccessPolicy01, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0", "aaa"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -399,6 +401,7 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed002, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0", "aaa"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -411,6 +414,7 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed002, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed003, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -423,6 +427,7 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed003, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed004, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {"wlan0"};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -435,6 +440,7 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed004, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed005, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -447,6 +453,7 @@ HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed005, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyService, SetNicTrafficAllowed006, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     std::vector<std::string> ifaceName = {};
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
