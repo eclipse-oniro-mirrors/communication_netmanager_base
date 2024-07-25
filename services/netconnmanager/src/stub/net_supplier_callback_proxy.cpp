@@ -40,7 +40,7 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     }
     data.WriteInt32(netrequest.registerType);
     uint32_t bearTypeSize = static<uint32_t>(netrequest.bearTypes.size());
-    data.WriteUint32(bearTypesSize);
+    data.WriteUint32(bearTypeSize);
     for (auto bearType : netrequest.bearTypes) {
         data.WriteUint32(static_cast<uint32_t>(bearType));
     }
