@@ -725,7 +725,6 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
-        supplier->GetNetwork()->SetIsDetectionDone(false);
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
@@ -1293,10 +1292,6 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
         return;
     }
     supplier->SetNetValid(netState);
-    if (supplier->GetNetwork()->IsNetDetecting()) {
-        NETMGR_LOG_D("first HandleDetectionResult.");
-        supplier->GetNetwork()->SetIsDetectionDone(true);
-    }
     if (netState != QUALITY_POOR_STATE && netState != QUALITY_NORMAL_STATE && netState != QUALITY_GOOD_STATE) {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }

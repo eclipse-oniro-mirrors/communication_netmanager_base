@@ -737,16 +737,6 @@ bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool d
     return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
 }
 
-void Network::SetIsDetectionDone(bool netDetectionDoneState)
-{
-    isDetectionDone_ = netDetectionDoneState;
-}
- 
-bool Network::IsNetDetecting()
-{
-    return !isDetectionDone_.load();
-}
- 
 bool Network::IsNat464Prefered()
 {
     if (netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI && netSupplierType_ != BEARER_ETHERNET) {
