@@ -19,7 +19,7 @@ ohos_bpf("netsys") {
 
   include_dirs = [ "include" ]
 
-  if (enable_feature_net_firewall) {
+  if (netmanager_base_enable_feature_net_firewall) {
     defines = [
       "FEATURE_NET_FIREWALL_ENABLE",
       "NET_FIREWALL_DEBUG=0",
@@ -86,7 +86,7 @@ ohos_shared_library("netsys_bpf_utils") {
 
   deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
 
-  if (enable_feature_net_firewall) {
+  if (netmanager_base_enable_feature_net_firewall) {
     public_configs = [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
     sources += [
       "src/bitmap_manager.cpp",

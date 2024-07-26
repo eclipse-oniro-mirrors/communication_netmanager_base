@@ -32,7 +32,7 @@ config("netsys_native_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
-  if (enable_feature_net_firewall) {
+  if (netmanager_base_enable_feature_net_firewall) {
     defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
 }
@@ -104,7 +104,7 @@ netsys_native_manager_deps = [
   "bpf:netsys_bpf_utils",
 ]
 
-if (enable_feature_net_firewall) {
+if (netmanager_base_enable_feature_net_firewall) {
   netsys_native_manager_sources += [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_callback_proxy.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netfirewall_callback_stub.cpp",
@@ -176,7 +176,7 @@ ohos_shared_library("netsys_native_manager") {
     defines += [ "USE_SELINUX" ]
   }
 
-  if (enable_netsys_access_policy_diag_listen) {
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
     defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
   }
 
@@ -237,7 +237,7 @@ ohos_static_library("netsys_native_manager_static") {
     defines += [ "USE_SELINUX" ]
   }
 
-  if (enable_netsys_access_policy_diag_listen) {
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
     defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
   }
 
