@@ -64,6 +64,7 @@ public:
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
+    
     bool ResumeNetworkInfo();
 
 private:
