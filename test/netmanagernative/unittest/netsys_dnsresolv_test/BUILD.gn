@@ -25,7 +25,10 @@ ohos_unittest("netsys_dnsresolv_test") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [ "dns_quality_diag_test.cpp" ]
+  sources = [
+    "dns_quality_diag_test.cpp",
+    "dns_quality_event_handler_test.cpp",
+  ]
 
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
@@ -38,6 +41,7 @@ ohos_unittest("netsys_dnsresolv_test") {
   deps = [
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
