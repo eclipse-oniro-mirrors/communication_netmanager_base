@@ -28,6 +28,12 @@ ohos_unittest("netsys_dnsresolv_test") {
   sources = [
     "dns_quality_diag_test.cpp",
     "dns_quality_event_handler_test.cpp",
+    "netsys_net_dns_health_data_test.cpp",
+  ]
+
+  sources += [
+    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
+    "$NETMANAGER_BASE_ROOT/test/netmanagernative/unittest/mock/src/parcel.cpp",
   ]
 
   include_dirs = [
@@ -35,6 +41,7 @@ ohos_unittest("netsys_dnsresolv_test") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/netmanagernative/unittest/mock/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys",
   ]
 
