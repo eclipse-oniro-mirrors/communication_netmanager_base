@@ -77,11 +77,11 @@ public:
     int32_t GetNetScore() const;
     void SetRealScore(int32_t score);
     int32_t GetRealScore();
-    bool SupplierConnection(const std::set<NetCap> &netCaps, const int32_t registerType = REGISTER);
+    bool SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest = {});
     bool SupplierDisconnection(const std::set<NetCap> &netCaps);
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
-    bool RequestToConnect(uint32_t reqId, const int32_t registerType = REGISTER);
+    bool RequestToConnect(uint32_t reqId, const NetRequest &netrequest = {});
     int32_t SelectAsBestNetwork(uint32_t reqId);
     void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     int32_t CancelRequest(uint32_t reqId);

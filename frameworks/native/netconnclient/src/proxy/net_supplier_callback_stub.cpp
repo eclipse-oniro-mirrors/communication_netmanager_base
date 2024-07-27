@@ -18,6 +18,7 @@
 #include "net_mgr_log_wrapper.h"
 
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+static constexpr uint32_t MAX_NET_BEARTYPE_NUM = 7;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -68,7 +69,10 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     uint32_t size = 0;
     uint32_t value = 0;
     data.ReadUint32(size);
-    size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
+    if (size > MAX_NET_CAP_NUM) {
+        NETMGR_LOG_E("Net cap size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
         if (value < NET_CAPABILITY_END) {
@@ -77,7 +81,21 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     }
     int32_t registerType = 0;
     data.ReadInt32(registerType);
-    RequestNetwork(ident, netCaps, registerType);
+    std::set<NetBearType> netBearTypes;
+    uint32_t bearTypeSize = 0;
+    data.ReadUint32(bearTypeSize);
+    if (bearTypeSize > MAX_NET_BEARTYPE_NUM) {
+        NETMGR_LOG_E("Net beartype size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < bearTypeSize; i++) {
+        data.ReadUint32(value);
+        if (value <= BEARER_DEFAULT) {
+            netBearTypes.insert(static_cast<NetBearType>(value));
+        }
+    }
+    NetRequest netRequest(registerType, netBearTypes);
+    RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
     return NETMANAGER_SUCCESS;
@@ -107,11 +125,11 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 }
 
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
-    const int32_t registerType)
+    const NetRequest &netrequest)
 {
     if (callback_ != nullptr) {
         auto startTime = std::chrono::steady_clock::now();
-        callback_->RequestNetwork(ident, netCaps, registerType);
+        callback_->RequestNetwork(ident, netCaps, netrequest);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());

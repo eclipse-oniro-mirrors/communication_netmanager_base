@@ -110,7 +110,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
         std::weak_ptr<INetActivateCallback> timeoutCb;
         defaultNetActivate_ =
-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_);
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, REQUEST);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
@@ -507,7 +507,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         return ret;
     }
     AddClientDeathRecipient(callback);
-    return ActivateNetwork(netSpecifier, callback, timeoutMS);
+    return ActivateNetwork(netSpecifier, callback, timeoutMS, REGISTER);
 }
 
 int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier,
@@ -860,7 +860,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request =
-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_);
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, registerType);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
@@ -887,7 +887,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
-    SendRequestToAllNetwork(request, registerType);
+    SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1123,7 +1123,7 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
     }
 }
 
-void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const int32_t registerType)
+void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
@@ -1139,7 +1139,8 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const i
         if (!iter->second->MatchRequestAndNetwork(supplier)) {
             continue;
         }
-        bool result = supplier->RequestToConnect(iter->first, registerType);
+        NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
+        bool result = supplier->RequestToConnect(iter->first, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());
@@ -1147,7 +1148,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier, const i
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const int32_t registerType)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
 {
     if (request == nullptr) {
         NETMGR_LOG_E("request is null");
@@ -1164,7 +1165,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second)) {
             continue;
         }
-        bool result = iter->second->RequestToConnect(reqId, registerType);
+        NetRequest netrequest(request->GetRegisterType(), request->GetBearType());
+        bool result = iter->second->RequestToConnect(reqId, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
                          iter->second->GetNetSupplierIdent().c_str());

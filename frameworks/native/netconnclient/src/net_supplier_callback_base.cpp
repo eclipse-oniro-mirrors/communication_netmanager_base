@@ -19,7 +19,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t NetSupplierCallbackBase::RequestNetwork(const std::string &ident,
                                                 const std::set<NetCap> &netCaps,
-                                                const int32_t registerType)
+                                                const NetRequest &netrequest)
 {
     return 0;
 }
