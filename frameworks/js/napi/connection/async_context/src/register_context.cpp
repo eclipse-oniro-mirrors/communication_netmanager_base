@@ -18,9 +18,28 @@
 #include "constant.h"
 #include "napi_constant.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
+#include "net_conn_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
-RegisterContext::RegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+RegisterContext::RegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
+{
+    auto conn = static_cast<NetConnection *>(manager->GetData());
+    if (conn) {
+        callback_ = conn->GetObserver();
+        conn_ = *conn;
+    }
+}
+
+wptr<NetConnCallbackObserver> RegisterContext::GetNetConnCallback()
+{
+    return callback_;
+}
+
+NetConnection RegisterContext::GetConn()
+{
+    return conn_;
+}
 
 void RegisterContext::ParseParams(napi_value *params, size_t paramsCount)
 {

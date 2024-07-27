@@ -21,6 +21,8 @@
 #include <napi/native_api.h>
 
 #include "base_context.h"
+#include "netconnection.h"
+#include "i_net_conn_callback.h"
 
 namespace OHOS::NetManagerStandard {
 class RegisterContext final : public BaseContext {
@@ -31,8 +33,14 @@ public:
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
+    wptr<NetConnCallbackObserver> GetNetConnCallback();
+
+    NetConnection GetConn();
+
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
+    wptr<NetConnCallbackObserver> callback_;
+    NetConnection conn_;
 };
 
 typedef RegisterContext UnregisterContext;
