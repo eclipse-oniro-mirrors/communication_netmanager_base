@@ -37,11 +37,39 @@ NetSupplier::NetSupplier(NetBearType bearerType, const std::string &netSupplierI
 {
     netAllCapabilities_.netCaps_ = netCaps;
     netAllCapabilities_.bearerTypes_.insert(bearerType);
+    ResetNetSupplier();
+    InitNetScore();
 }
 
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
     netController_ = callback;
+}
+
+void NetSupplier::InitNetScore()
+{
+    int32_t netScore = 0;
+    auto iter = netTypeScore_.find(netSupplierType_);
+    if (iter == netTypeScore_.end()) {
+        NETMGR_LOG_E("Can not find net bearer type[%{public}d] for this net service", netSupplierType_);
+        return;
+    }
+    NETMGR_LOG_D("Net type[%{public}d],default score[%{public}d]",
+                 static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
+    netScore = static_cast<int32_t>(iter->second);
+    netScore_ = netScore;
+    NETMGR_LOG_D("netScore_ = %{public}d", netScore_);
+}
+
+/**
+ * Reset all attributes that may change in the supplier, such as detection progress and network quality.
+ */
+void NetSupplier::ResetNetSupplier()
+{
+    // Reset network quality.
+    netQuality_ = QUALITY_NORMAL_STATE;
+    // Reset network detection progress.
+    isFirstTimeDetectionDone = false;
 }
 
 bool NetSupplier::operator==(const NetSupplier &netSupplier) const
@@ -395,31 +423,51 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
     }
 }
 
-bool NetSupplier::IsNetValidated()
+bool NetSupplier::IsNetValidated() const
 {
     return HasNetCap(NET_CAPABILITY_VALIDATED);
 }
 
-void NetSupplier::SetNetScore(int32_t score)
-{
-    netScore_ = score;
-    NETMGR_LOG_D("netScore_ = %{public}d", netScore_);
-}
-
+/**
+ * This method returns the score of the current network supplier.
+ *
+ * It is used to prioritize network suppliers so that higher priority producers can activate when lower
+ * priority networks are available.
+ *
+ * @return the score of the current network supplier.
+ */
 int32_t NetSupplier::GetNetScore() const
 {
     return netScore_;
 }
 
-void NetSupplier::SetRealScore(int32_t score)
-{
-    netRealScore_ = score;
-    NETMGR_LOG_D("netRealScore_ = %{public}d", netRealScore_);
-}
-
+/**
+ * This method returns the real score of current network supplier.
+ *
+ * This method subtracts the score depending on different conditions, or returns netScore_ if the conditions are not
+ * met.
+ * It is used to compare the priorities of different networks.
+ *
+ * @return the real score of current network supplier.
+ */
 int32_t NetSupplier::GetRealScore()
 {
-    return netRealScore_;
+    // Notice: the order is important here:
+    // 1. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
+    if (!IsInFirstTimeDetecting()) {
+        return netScore_ - NET_VALID_SCORE;
+    }
+
+    // 2. If network is not validated, subtract NET_VALID_SCORE.
+    if (!(IsNetValidated())) {
+        return netScore_ - NET_VALID_SCORE;
+    }
+
+    // 3. Deduct DIFF_SCORE_BETWEEN_GOOD_POOR for poor network quality (reported by the supplier).
+    if (IsNetQualityPoor()) {
+        return netScore_ - DIFF_SCORE_BETWEEN_GOOD_POOR;
+    }
+    return netScore_;
 }
 
 void NetSupplier::SetDefault()
@@ -485,24 +533,16 @@ bool NetSupplier::IsNetQualityPoor()
     return netQuality_ == QUALITY_POOR_STATE;
 }
 
-bool NetSupplier::IsNetQualityGood()
+void NetSupplier::SetDetectionDone()
 {
-    return netQuality_ == QUALITY_GOOD_STATE;
+    if (!isFirstTimeDetectionDone) {
+        isFirstTimeDetectionDone = true;
+    }
 }
 
-void NetSupplier::ResetNetQuality()
+bool NetSupplier::IsInFirstTimeDetecting() const
 {
-    netQuality_ = QUALITY_NORMAL_STATE;
-}
-
-void NetSupplier::SetReducedScored(bool isReducedScore)
-{
-    alreadyReduceScore_ = isReducedScore;
-}
-
-bool NetSupplier::AlreadyReducedScore()
-{
-    return alreadyReduceScore_;
+    return !isFirstTimeDetectionDone;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

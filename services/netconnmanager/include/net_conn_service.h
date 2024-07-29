@@ -34,7 +34,6 @@
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
-#include "net_score.h"
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
@@ -466,7 +465,6 @@ private:
         return userId == PRIMARY_USER_ID;
     }
     uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId);
-    uint32_t FindSupplierToIncreaseScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t supplierId);
     int32_t EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
     int32_t DisableVnicNetworkAsync();
 
