@@ -1002,7 +1002,7 @@ int32_t NetsysNativeService::ClearFirewallAllRules()
     return netsysService_->ClearFirewallAllRules();
 }
 
-int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool allowed)
 {
     if (iptablesWrapper_ == nullptr) {
         NETNATIVE_LOGE("SetNicTrafficAllowed iptablesWrapper_ is null");
@@ -1011,14 +1011,14 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
     bool ret = false;
     std::vector<std::string> cmds;
     for (const std::string& ifaceName : ifaceNames) {
-        if (status) {
+        if (allowed) {
             NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s allowed", ifaceName.c_str());
-            cmds.push_back("-t raw -I OUTPUT -o " + ifaceName + " -j DROP");
-            cmds.push_back("-t raw -I PREROUTING -i " + ifaceName + " -j DROP");
-        } else {
-            NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s disallowed", ifaceName.c_str());
             cmds.push_back("-t raw -D OUTPUT -o " + ifaceName + " -j DROP");
             cmds.push_back("-t raw -D PREROUTING -i " + ifaceName + " -j DROP");
+        } else {
+            NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s disallowed", ifaceName.c_str());
+            cmds.push_back("-t raw -I OUTPUT -o " + ifaceName + " -j DROP");
+            cmds.push_back("-t raw -I PREROUTING -i " + ifaceName + " -j DROP");
         }
     }
     ret = IptablesWrapper::GetInstance()->RunMutipleCommands(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmds);
