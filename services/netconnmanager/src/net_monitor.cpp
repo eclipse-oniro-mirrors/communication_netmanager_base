@@ -46,6 +46,7 @@ constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
+constexpr int32_t HTTP_PROBE_FAIL_CODE = 0;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
@@ -99,44 +100,62 @@ bool NetMonitor::IsDetecting()
     return isDetecting_.load();
 }
 
-void NetMonitor::Detection()
+void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result)
 {
-    NetHttpProbeResult probeResult = SendHttpProbe(PROBE_HTTP_HTTPS);
-    if (isDetecting_) {
-        NetDetectionStatus result = UNKNOWN_STATE;
-        if (probeResult.IsSuccessful()) {
-            NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
-            isDetecting_ = false;
-            result = VERIFICATION_STATE;
-        } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
-            NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
-            detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
-            result = CAPTIVE_PORTAL_STATE;
-        } else if (probeResult.IsNeedPortal()) {
-            NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
-            detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
-            result = CAPTIVE_PORTAL_STATE;
+    if (probeResult.IsSuccessful()) {
+        NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
+        isDetecting_ = false;
+        needDetectionWithoutProxy_ = true;
+        needCallback_ = true;
+        result = VERIFICATION_STATE;
+    } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
+        NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
+        detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
+        needCallback_ = true;
+        result = CAPTIVE_PORTAL_STATE;
+    } else if (probeResult.IsNeedPortal()) {
+        NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
+        detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
+        needCallback_ = false;
+        result = CAPTIVE_PORTAL_STATE;
+    } else {
+        NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
+        needCallback_ = true;
+        if (probeResult.GetCode() == HTTP_PROBE_FAIL_CODE && HasGlobalHttpProxy() && needDetectionWithoutProxy_) {
+            NETMGR_LOG_E("Net[%{public}d] first probe failed with global http proxy, try without proxy", netId_);
+            ProbeWithoutGlobalHttpProxy();
+            needDetectionWithoutProxy_ = false;
+            needCallback_ = false;
+            detectionDelay_ = 0;
         } else {
-            NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
             detectionDelay_ *= DOUBLE;
             if (detectionDelay_ == 0) {
                 detectionDelay_ = INIT_DETECTION_DELAY_MS;
             } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
                 detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
             }
-            NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
-            result = INVALID_DETECTION_STATE;
         }
-        auto monitorCallback = netMonitorCallback_.lock();
-        if (monitorCallback) {
-            monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
-        }
-        struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
-        EventReport::SendMonitorBehaviorEvent(eventInfo);
-        if (isDetecting_) {
-            std::unique_lock<std::mutex> locker(detectionMtx_);
-            detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
-        }
+        NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
+        result = INVALID_DETECTION_STATE;
+    }
+    auto monitorCallback = netMonitorCallback_.lock();
+    if (monitorCallback && needCallback_) {
+        monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
+    }
+    struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
+    EventReport::SendMonitorBehaviorEvent(eventInfo);
+    if (isDetecting_) {
+        std::unique_lock<std::mutex> locker(detectionMtx_);
+        detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
+    }
+}
+
+void NetMonitor::Detection()
+{
+    NetHttpProbeResult probeResult = SendHttpProbe(PROBE_HTTP_HTTPS);
+    if (isDetecting_) {
+        NetDetectionStatus result = UNKNOWN_STATE;
+        ProcessDetection(probeResult, result);
     }
 }
 
@@ -224,6 +243,17 @@ void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     if (httpProbe_) {
         httpProbe_->UpdateGlobalHttpProxy(httpProxy);
     }
+}
+
+bool NetMonitor::HasGlobalHttpProxy()
+{
+    return httpProbe_->HasGlobalHttpProxy();
+}
+
+void NetMonitor::ProbeWithoutGlobalHttpProxy()
+{
+    std::lock_guard<std::mutex> locker(probeMtx_);
+    httpProbe_->ProbeWithoutGlobalHttpProxy();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -115,6 +115,9 @@ int32_t NetHttpProbe::SendProbe(ProbeType probeType, const std::string &httpUrl,
     SendHttpProbeRequest();
     RecvHttpProbeResponse();
     CleanHttpCurl();
+    if (!defaultUseGlobalHttpProxy_) {
+        defaultUseGlobalHttpProxy_ = true;
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -545,7 +548,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
 int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
 {
     std::lock_guard<std::mutex> locker(proxyMtx_);
-    if (!globalHttpProxy_.GetHost().empty()) {
+    if (!globalHttpProxy_.GetHost().empty() && defaultUseGlobalHttpProxy_) {
         proxyHost = globalHttpProxy_.GetHost();
         proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
     } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
@@ -555,6 +558,16 @@ int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
         return false;
     }
     return true;
+}
+
+bool NetHttpProbe::HasGlobalHttpProxy()
+{
+    return !globalHttpProxy_.GetHost().empty();
+}
+
+void NetHttpProbe::ProbeWithoutGlobalHttpProxy()
+{
+    defaultUseGlobalHttpProxy_ = false;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

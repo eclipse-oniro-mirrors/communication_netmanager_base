@@ -40,6 +40,8 @@ public:
     void UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     bool HasProbeType(ProbeType inputProbeType, ProbeType hasProbeType);
+    bool HasGlobalHttpProxy();
+    void ProbeWithoutGlobalHttpProxy();
 
 private:
     static bool CurlGlobalInit();
@@ -67,6 +69,7 @@ private:
 
     std::mutex proxyMtx_;
     bool isCurlInit_ = false;
+    bool defaultUseGlobalHttpProxy_ = true;
     uint32_t netId_ = 0;
     NetBearType netBearType_ = BEARER_DEFAULT;
     NetLinkInfo netLinkInfo_;

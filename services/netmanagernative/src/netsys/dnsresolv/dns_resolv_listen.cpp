@@ -62,7 +62,7 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uin
 #endif
 
     int status = -1;
-    if (DnsParamCache::GetInstance().IsVpnOpen()) {
+    if (DnsParamCache::GetInstance().IsVpnOpen() && netId == 0) {
         status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers,
                                                                 domains, baseTimeoutMsec, retryCount);
     } else {
