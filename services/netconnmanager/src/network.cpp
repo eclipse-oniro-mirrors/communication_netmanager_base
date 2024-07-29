@@ -686,6 +686,7 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
 void Network::ResetNetlinkInfo()
 {
     netLinkInfo_.Initialize();
+    detectResult_ = UNKNOWN_STATE;
 }
 
 void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
