@@ -43,10 +43,37 @@ enum CallbackType {
     CALL_TYPE_BLOCK_STATUS = 7,
 };
 
+using NetTypeScore = std::unordered_map<NetBearType, int32_t>;
+constexpr int32_t NET_TYPE_SCORE_INTERVAL = 10;
+constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
+constexpr int32_t DIFF_SCORE_BETWEEN_GOOD_POOR = 2 * NET_TYPE_SCORE_INTERVAL;
+enum class NetTypeScoreValue : int32_t {
+    USB_VALUE = 4 * NET_TYPE_SCORE_INTERVAL,
+    BLUETOOTH_VALUE = 5 * NET_TYPE_SCORE_INTERVAL,
+    CELLULAR_VALUE = 6 * NET_TYPE_SCORE_INTERVAL,
+    WIFI_VALUE = 7 * NET_TYPE_SCORE_INTERVAL,
+    ETHERNET_VALUE = 8 * NET_TYPE_SCORE_INTERVAL,
+    VPN_VALUE = 9 * NET_TYPE_SCORE_INTERVAL,
+    WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL
+};
+
+static inline NetTypeScore netTypeScore_ = {
+    {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
+    {BEARER_WIFI, static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)},
+    {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},
+    {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)},
+    {BEARER_VPN, static_cast<int32_t>(NetTypeScoreValue::VPN_VALUE)},
+    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}};
+
 class NetSupplier : public virtual RefBase {
 public:
     NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps);
     ~NetSupplier() = default;
+    void InitNetScore();
+    /**
+     * Resets all attributes that may change in the supplier, such as detection progress and network quality.
+     */
+    void ResetNetSupplier();
     bool operator==(const NetSupplier &netSupplier) const;
     void SetNetwork(const std::shared_ptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
@@ -72,10 +99,26 @@ public:
     bool IsConnecting() const;
     bool IsConnected() const;
     void SetNetValid(NetDetectionStatus netState);
-    bool IsNetValidated();
-    void SetNetScore(int32_t score);
+    bool IsNetValidated() const;
+    /**
+     * This method returns the score of the current network supplier.
+     *
+     * It is used to prioritize network suppliers so that higher priority producers can activate when lower
+     * priority networks are available.
+     *
+     * @return the score of the current network supplier.
+     */
     int32_t GetNetScore() const;
-    void SetRealScore(int32_t score);
+
+    /**
+     * This method returns the real score of current network supplier.
+     *
+     * This method subtracts the score depending on different conditions, or returns netScore_ if the conditions are not
+     * met.
+     * It is used to compare the priorities of different networks.
+     *
+     * @return the real score of current network supplier.
+     */
     int32_t GetRealScore();
     bool SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest = {});
     bool SupplierDisconnection(const std::set<NetCap> &netCaps);
@@ -94,13 +137,11 @@ public:
     void SetSupplierType(int32_t type);
     std::string GetSupplierType();
     std::string TechToType(NetSlotTech type);
+    void SetDetectionDone();
 
     bool ResumeNetworkInfo();
     bool IsNetQualityPoor();
-    bool IsNetQualityGood();
-    void ResetNetQuality();
-    void SetReducedScored(bool isReducedScore);
-    bool AlreadyReducedScore();
+    bool IsInFirstTimeDetecting() const;
 
 private:
     NetBearType netSupplierType_;
@@ -111,7 +152,6 @@ private:
     NetAllCapabilities netAllCapabilities_;
     uint32_t supplierId_ = 0;
     int32_t netScore_ = 0;
-    int32_t netRealScore_ = 0;
     std::set<uint32_t> requestList_;
     std::set<uint32_t> bestReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;
@@ -120,7 +160,7 @@ private:
     bool restrictBackground_ = true;
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
-    bool alreadyReduceScore_ = false;
+    bool isFirstTimeDetectionDone = false;
     enum RegisterType {
         UNKOWN,
         REGISTER,

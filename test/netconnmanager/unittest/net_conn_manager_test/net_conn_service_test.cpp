@@ -1087,9 +1087,10 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
         NetConnService::GetInstance()->netSuppliers_[supplierId]);
     bool isBetter = false;
-    uint32_t supplier;
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplier);
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    auto supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    EXPECT_EQ(supplier->GetRealScore(), supplier->GetNetScore() - DIFF_SCORE_BETWEEN_GOOD_POOR);
 }
 
 HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)

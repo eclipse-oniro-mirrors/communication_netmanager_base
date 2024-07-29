@@ -21,7 +21,7 @@
 
 #include "net_conn_types.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_score.h"
+#include "net_supplier.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -52,16 +52,12 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     // mock Failed to detect network
     supplier->SetNetValid(INVALID_DETECTION_STATE);
 
-    bool result = NetScore::GetServiceScore(supplier);
-    ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
         (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
 
     supplier->SetNetValid(CAPTIVE_PORTAL_STATE);
 
-    result = NetScore::GetServiceScore(supplier);
-    ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
         (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
@@ -69,22 +65,16 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     // mock successed to detect network
     supplier->SetNetValid(VERIFICATION_STATE);
 
-    result = NetScore::GetServiceScore(supplier);
-    ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
 
     // quality_poor
     supplier->SetNetValid(QUALITY_POOR_STATE);
-    result = NetScore::GetServiceScore(supplier);
-    ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
         static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - DIFF_SCORE_BETWEEN_GOOD_POOR);
     // quality_good
     supplier->SetNetValid(QUALITY_GOOD_STATE);
-    result = NetScore::GetServiceScore(supplier);
-    ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
         static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
