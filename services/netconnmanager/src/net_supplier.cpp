@@ -454,12 +454,12 @@ int32_t NetSupplier::GetRealScore()
 {
     // Notice: the order is important here:
     // 1. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
-    if (!IsInFirstTimeDetecting()) {
+    if (IsInFirstTimeDetecting()) {
         return netScore_ - NET_VALID_SCORE;
     }
 
     // 2. If network is not validated, subtract NET_VALID_SCORE.
-    if (!(IsNetValidated())) {
+    if (!IsNetValidated()) {
         return netScore_ - NET_VALID_SCORE;
     }
 
