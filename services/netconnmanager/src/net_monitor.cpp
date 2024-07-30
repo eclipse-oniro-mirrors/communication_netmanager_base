@@ -116,7 +116,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
     } else if (probeResult.IsNeedPortal()) {
         NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
         detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
-        needCallback_ = false;
+        needCallback_ = true;
         result = CAPTIVE_PORTAL_STATE;
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
