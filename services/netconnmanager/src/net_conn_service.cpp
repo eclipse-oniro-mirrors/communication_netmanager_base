@@ -475,7 +475,6 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
  
     netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, &callback]() {
-
         for (const auto &supplier : netSuppliers_) {
             if (supplier.second->GetSupplierCallback()->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
                 tmpSupplierId = supplier.second->GetSupplierId();
