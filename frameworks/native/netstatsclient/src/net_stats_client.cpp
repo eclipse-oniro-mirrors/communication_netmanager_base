@@ -19,6 +19,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "net_all_capabilities.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
@@ -325,6 +326,10 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return proxy->GetTrafficStatsByNetwork(infos, network);
 }
 
@@ -341,6 +346,10 @@ int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequ
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
