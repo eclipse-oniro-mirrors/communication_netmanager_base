@@ -215,7 +215,7 @@ int32_t NetConnServiceProxy::RegisterNetSupplierCallback(uint32_t supplierId,
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     dataParcel.WriteUint32(supplierId);
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(callback->AsObject());
 
     MessageParcel replyParcel;
     int32_t retCode = RemoteSendRequest(

@@ -522,14 +522,31 @@ private:
     private:
         NetConnService &client_;
     };
+    class NetSupplierCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit NetSupplierCallbackDeathRecipient(NetConnService &client) : client_(client) {}
+        ~NetSupplierCallbackDeathRecipient() override = default;
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override
+        {
+            client_.OnNetSupplierRemoteDied(remote);
+        }
+ 
+    private:
+        NetConnService &client_;
+    };
+ 
     void OnRemoteDied(const wptr<IRemoteObject> &remoteObject);
+    void OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteObject);
     void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);
+    void AddNetSupplierDeathRecipient(const sptr<INetSupplierCallback> &callback);
+    void RemoveNetSupplierDeathRecipient(const sptr<INetSupplierCallback> &callback);
     void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
+    sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
     std::vector<sptr<INetConnCallback>> remoteCallback_;
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;

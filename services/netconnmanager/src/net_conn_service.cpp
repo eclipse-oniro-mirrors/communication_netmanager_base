@@ -462,6 +462,57 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     return NETMANAGER_SUCCESS;
 }
 
+void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteObject)
+{
+    sptr<IRemoteObject> diedRemoted = remoteObject.promote();
+    if (diedRemoted == nullptr || netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("diedRemoted or netConnEventHandler_ is null");
+        return;
+    }
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    uint32_t tmpSupplierId = INVALID_SUPPLIER_ID;
+    NETMGR_LOG_I("OnNetSupplierRemoteDied, callingUid=%{public}u", callingUid);
+    sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
+ 
+    netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, &callback]() {
+
+        for (const auto &supplier : netSuppliers_) {
+            if (supplier.second->GetSupplierCallback()->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+                tmpSupplierId = supplier.second->GetSupplierId();
+                break;
+            }
+        }
+        if (tmpSupplierId != INVALID_SUPPLIER_ID) {
+            NETMGR_LOG_I("OnNetSupplierRemoteDied UnregisterNetSupplier SupplierId %{public}u", tmpSupplierId);
+            UnregisterNetSupplierAsync(tmpSupplierId);
+        }
+    });
+}
+ 
+void NetConnService::RemoveNetSupplierDeathRecipient(const sptr<INetSupplierCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("RemoveNetSupplierDeathRecipient is null");
+        return;
+    }
+    callback->AsObject()->RemoveDeathRecipient(netSuplierDeathRecipient_);
+}
+ 
+void NetConnService::AddNetSupplierDeathRecipient(const sptr<INetSupplierCallback> &callback)
+{
+    if (netSuplierDeathRecipient_ == nullptr) {
+        netSuplierDeathRecipient_ = new (std::nothrow) NetSupplierCallbackDeathRecipient(*this);
+    }
+    if (netSuplierDeathRecipient_ == nullptr) {
+        NETMGR_LOG_E("netSuplierDeathRecipient_ is null");
+        return;
+    }
+    if (!callback->AsObject()->AddDeathRecipient(netSuplierDeathRecipient_)) {
+        NETMGR_LOG_E("AddNetSupplierDeathRecipient failed");
+        return;
+    }
+}
+
 int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
                                                          const sptr<INetSupplierCallback> &callback)
 {
@@ -477,6 +528,7 @@ int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
     }
     supplier->RegisterSupplierCallback(callback);
     SendAllRequestToNetwork(supplier);
+    AddNetSupplierDeathRecipient(callback);
     NETMGR_LOG_I("RegisterNetSupplierCallback service out");
     return NETMANAGER_SUCCESS;
 }
@@ -566,6 +618,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     }
     NetSupplierInfo info;
     supplier->UpdateNetSupplierInfo(info);
+    RemoveNetSupplierDeathRecipient(supplier->GetSupplierCallback());
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_.erase(supplierId);
     locker.unlock();

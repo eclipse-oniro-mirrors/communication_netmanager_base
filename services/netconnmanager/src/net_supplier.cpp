@@ -41,6 +41,11 @@ NetSupplier::NetSupplier(NetBearType bearerType, const std::string &netSupplierI
     InitNetScore();
 }
 
+sptr<INetSupplierCallback> NetSupplier::GetSupplierCallback()
+{
+    return netController_;
+}
+
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
     netController_ = callback;
