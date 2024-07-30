@@ -148,27 +148,22 @@ std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
 bool Network::ReleaseBasicNetwork()
 {
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
-    if (isPhyNetCreated_) {
-        NETMGR_LOG_D("Destroy physical network");
-        StopNetDetection();
-        std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
-        NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
-            supplierId_, netId_, netCapabilities.c_str());
-        if (!IsIfaceNameInUse()) {
-            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                    prefixLen);
-            }
-        } else {
-            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                    prefixLen, netCapabilities);
-            }
+    if (!isPhyNetCreated_) {
+        return true;
+    }
+    NETMGR_LOG_D("Destroy physical network");
+    StopNetDetection();
+    std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
+    NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
+        supplierId_, netId_, netCapabilities.c_str());
+    if (!IsIfaceNameInUse()) {
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
-            std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+            auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
             NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                route.gateway_.address_);
             if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
@@ -178,12 +173,18 @@ bool Network::ReleaseBasicNetwork()
                 NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
             }
         }
-        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetsysController::GetInstance().NetworkDestroy(netId_);
-        NetsysController::GetInstance().DestroyNetworkCache(netId_);
-        netLinkInfo_.Initialize();
-        isPhyNetCreated_ = false;
+    } else {
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen, netCapabilities);
+        }
     }
+    NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+    NetsysController::GetInstance().NetworkDestroy(netId_);
+    NetsysController::GetInstance().DestroyNetworkCache(netId_);
+    netLinkInfo_.Initialize();
+    isPhyNetCreated_ = false;
     return true;
 }
 
