@@ -207,6 +207,9 @@ static inline __u32 get_iface_type(__u32 ipv4)
     if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
         return IFACE_TYPE_CELLULAR;
     }
+    if (IS_MATCHED_IP(ipv4, UNKNOWN_IPv4)) {
+        return IFACE_TYPE_WIFI;
+    }
     return 0;
 }
 
