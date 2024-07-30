@@ -132,6 +132,7 @@ public:
     std::set<uint32_t> &GetBestRequestList();
     void SetDefault();
     void ClearDefault();
+    sptr<INetSupplierCallback> GetSupplierCallback();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void SetSupplierType(int32_t type);
