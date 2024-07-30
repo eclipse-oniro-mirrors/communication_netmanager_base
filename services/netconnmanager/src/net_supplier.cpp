@@ -355,7 +355,7 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
-    NETMGR_LOG_I("CancelRequest netId:%{public}u", reqId);
+    NETMGR_LOG_I("CancelRequest reqId:%{public}u", reqId);
     requestList_.erase(reqId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
