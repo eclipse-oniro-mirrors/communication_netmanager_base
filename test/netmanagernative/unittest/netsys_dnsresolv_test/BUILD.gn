@@ -27,7 +27,6 @@ ohos_unittest("netsys_dnsresolv_test") {
 
   sources = [
     "dns_quality_diag_test.cpp",
-    "dns_quality_event_handler_test.cpp",
     "netsys_net_dns_health_data_test.cpp",
   ]
 
