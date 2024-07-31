@@ -116,7 +116,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     }
     int32_t idx = 1;
     if (paramCount == UID_PARAM_NUM) {
-        statement_.BindInt32(idx, info.uid_);
+        statement_.BindInt64(idx, info.uid_);
         ++idx;
     }
     statement_.BindText(idx, info.iface_);
@@ -300,8 +300,21 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
 
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t uid)
 {
-    std::string sql = "DELETE FROM " + tableName + " WHERE UID = " + std::to_string(uid);
-    return ExecSql(sql, nullptr, sqlCallback);
+    std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    statement_.BindInt32(idx, uid);
+    ret = statement_.Step();
+    statement_.ResetStatementAndClearBindings();
+    if (ret != SQLITE_DONE) {
+        NETMGR_LOG_E("Step failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsDatabaseHelper::Close()

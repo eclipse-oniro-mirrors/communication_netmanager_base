@@ -24,7 +24,6 @@
     GET_IP_SEGMENT(ip, 3) == (target)[2] && GET_IP_SEGMENT(ip, 4) == (target)[3]    \
 
 static const uint32_t WLAN_IPv4[] = {172, 17, 1, 2};
-static const uint32_t UNKNOWN_IPv4[] = {0, 0, 0, 0};
 static const uint32_t CELLULAR_IPv4[] = {172, 17, 0, 2};
 static const int32_t IFACE_TYPE_CELLULAR = 1;
 static const int32_t IFACE_TYPE_WIFI = 2;
