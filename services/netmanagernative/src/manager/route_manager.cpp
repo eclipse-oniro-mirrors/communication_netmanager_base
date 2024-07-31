@@ -275,8 +275,7 @@ int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::strin
     }
 
     // If the rule fails to be added, continue to execute the next rule
-    int32_t ret = UpdateVpnOutputToLocalRule(ifaceName, add);
-    ret += UpdateVpnSystemPermissionRule(netId, table, add);
+    int32_t ret = UpdateVpnSystemPermissionRule(netId, table, add);
     ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add);
     return ret;
 }
