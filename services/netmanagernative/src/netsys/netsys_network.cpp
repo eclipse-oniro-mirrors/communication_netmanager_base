@@ -26,12 +26,14 @@ NetsysNetwork::NetsysNetwork(uint16_t netId) : netId_(netId) {}
 
 int32_t NetsysNetwork::ClearInterfaces()
 {
+    std::lock_guard locker(mutex_);
     interfaces_.clear();
     return NETMANAGER_SUCCESS;
 }
 
 bool NetsysNetwork::ExistInterface(std::string &interfaceName)
 {
+    std::lock_guard locker(mutex_);
     return interfaces_.find(interfaceName) != interfaces_.end();
 }
 } // namespace nmd
