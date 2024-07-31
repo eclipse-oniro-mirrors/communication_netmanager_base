@@ -61,6 +61,9 @@
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
                 <filteritem type="filename" name="*.png" desc="Image files used in readme"/>
             </filefilter>
+            <filefilter name="defaultFilter" desc="Filters not to check">
+                <filteritem type="filepath" name="services/etc/init/initHosts" desc="Add host initialization data"/>
+            </filefilter>
         </filefilterlist>
     </oatconfig>
 </configuration>
