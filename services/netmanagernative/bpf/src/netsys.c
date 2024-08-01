@@ -199,6 +199,14 @@ static inline __u64 check_broker_policy(uint64_t uid)
     return network_access_uid;
 }
 
+static inline __u32 filter_sim_stats(__u32 ipv4)
+{
+    if (IS_MATCHED_IP(ipv4, WLAN_IPv4) || IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
+        return 1;
+    }
+    return 0;
+}
+
 static inline __u32 get_iface_type(__u32 ipv4)
 {
     if (IS_MATCHED_IP(ipv4, WLAN_IPv4)) {
@@ -206,9 +214,6 @@ static inline __u32 get_iface_type(__u32 ipv4)
     }
     if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
         return IFACE_TYPE_CELLULAR;
-    }
-    if (IS_MATCHED_IP(ipv4, UNKNOWN_IPv4)) {
-        return IFACE_TYPE_WIFI;
     }
     return 0;
 }
@@ -274,17 +279,19 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
-        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
-                                         .ifType = get_iface_type(skb->local_ip4)};
-        app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-        if (value_uid_sim == NULL) {
-            app_uid_sim_stats_value newValue = {};
-            bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
-            value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-        }
-        if (value_uid_sim != NULL) {
-            __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
-            __sync_fetch_and_add(&value_uid_sim->rxBytes, skb->len);
+        if (filter_sim_stats(skb->local_ip4) == 1) {
+            app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
+                                             .ifType = get_iface_type(skb->local_ip4)};
+            app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+            if (value_uid_sim == NULL) {
+                app_uid_sim_stats_value newValue = {};
+                bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
+                value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+            }
+            if (value_uid_sim != NULL) {
+                __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
+                __sync_fetch_and_add(&value_uid_sim->rxBytes, skb->len);
+            }
         }
     } else {
         app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
@@ -363,17 +370,19 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 
     if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
         (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
-        app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
-                                         .ifType = get_iface_type(skb->local_ip4)};
-        app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-        if (value_uid_sim == NULL) {
-            app_uid_sim_stats_value newValue = {};
-            bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
-            value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-        }
-        if (value_uid_sim != NULL) {
-            __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
-            __sync_fetch_and_add(&value_uid_sim->txBytes, skb->len);
+        if (filter_sim_stats(skb->local_ip4) == 1) {
+            app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
+                                             .ifType = get_iface_type(skb->local_ip4)};
+            app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+            if (value_uid_sim == NULL) {
+                app_uid_sim_stats_value newValue = {};
+                bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
+                value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
+            }
+            if (value_uid_sim != NULL) {
+                __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
+                __sync_fetch_and_add(&value_uid_sim->txBytes, skb->len);
+            }
         }
     } else {
         app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
