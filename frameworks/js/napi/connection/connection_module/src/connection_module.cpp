@@ -452,42 +452,6 @@ napi_value ConnectionModule::FactoryResetNetworkSync(napi_env env, napi_callback
                                                                      ConnectionExec::FactoryResetNetworkCallback);
 }
 
-napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
-        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-	ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName,
-        ConnectionAsyncWork::NetHandleAsyncWork::GetAddressesByNameCallback);
-}
-
-napi_value ConnectionModule::NetHandleInterface::GetAddressByName(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
-        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-        ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressByName,
-        ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback);
-}
-
-napi_value ConnectionModule::NetHandleInterface::BindSocket(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<BindSocketContext>(
-        env, info, FUNCTION_BIND_SOCKET,
-        [](napi_env theEnv, napi_value thisVal, BindSocketContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-        ConnectionAsyncWork::NetHandleAsyncWork::ExecBindSocket,
-        ConnectionAsyncWork::NetHandleAsyncWork::BindSocketCallback);
-}
-
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)
 {
     std::initializer_list<std::string> events = {EVENT_NET_AVAILABLE,

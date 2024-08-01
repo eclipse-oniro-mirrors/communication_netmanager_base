@@ -39,6 +39,64 @@ ohos_shared_library("connection") {
   ]
 
   sources = [
+    "connection_module/src/connection_module.cpp",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  deps = [
+    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection_if",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module/net"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_shared_library("connection_if") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
+    debug = false
+  }
+ 
+  branch_protector_ret = "pac_ret"
+ 
+  include_dirs = [
+    "async_context/include",
+    "async_work/include",
+    "constant/include",
+    "connection_exec/include",
+    "net_handle_interface/include",
+    "observer/include",
+    "options/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+  ]
+ 
+  sources = [
     "async_context/src/bindsocket_context.cpp",
     "async_context/src/deletecustomdnsrule_context.cpp",
     "async_context/src/deletecustomdnsrules_context.cpp",
@@ -55,10 +113,10 @@ ohos_shared_library("connection") {
     "async_context/src/setglobalhttpproxy_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
-    "connection_module/src/connection_module.cpp",
     "observer/src/net_conn_callback_observer.cpp",
     "options/src/net_address.cpp",
     "options/src/netconnection.cpp",
+    "net_handle_interface/src/net_handle_interface.cpp",
   ]
 
   cflags = [
@@ -85,7 +143,6 @@ ohos_shared_library("connection") {
     "napi:ace_napi",
   ]
 
-  relative_install_dir = "module/net"
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

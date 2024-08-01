@@ -64,18 +64,6 @@ public:
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
 
-    class NetHandleInterface final {
-    public:
-        static constexpr const char *PROPERTY_NET_ID = "netId";
-        static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME = "getAddressesByName";
-        static constexpr const char *FUNCTION_GET_ADDRESS_BY_NAME = "getAddressByName";
-        static constexpr const char *FUNCTION_BIND_SOCKET = "bindSocket";
-
-        static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
-        static napi_value GetAddressByName(napi_env env, napi_callback_info info);
-        static napi_value BindSocket(napi_env env, napi_callback_info info);
-    };
-
     class NetConnectionInterface final {
     public:
         static constexpr const char *FUNCTION_ON = "on";
