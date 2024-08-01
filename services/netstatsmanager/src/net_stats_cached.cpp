@@ -339,6 +339,7 @@ void NetStatsCached::WriteUidSimStats()
     auto handler = std::make_unique<NetStatsDataHandler>();
     handler->WriteStatsData(stats_.GetUidSimStatsInfo(), NetStatsDatabaseDefines::UID_SIM_TABLE);
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_SIM_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
+    handler->DeleteSimStatsByUid(Sim_UID);
     stats_.ResetUidSimStats();
 }
 
