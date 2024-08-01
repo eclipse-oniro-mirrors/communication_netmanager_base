@@ -1865,6 +1865,8 @@ void NetConnService::ActiveHttpProxy()
         if (httpProxyThreadNeedRun_.load()) {
             std::unique_lock lock(httpProxyThreadMutex_);
             httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+        } else {
+            NETMGR_LOG_W("ActiveHttpProxy has been clear.");
         }
     }
 }
@@ -1896,18 +1898,6 @@ void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}s", httpProxy.GetHost().c_str());
-    if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
-        NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
-                     httpProxy.password_.length());
-        httpProxyThreadNeedRun_ = true;
-        std::thread t([this]() { ActiveHttpProxy(); });
-        std::string threadName = "ActiveHttpProxy";
-        pthread_setname_np(t.native_handle(), threadName.c_str());
-        t.detach();
-    } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
-        httpProxyThreadNeedRun_ = false;
-    }
-
     HttpProxy oldHttpProxy;
     LoadGlobalHttpProxy(oldHttpProxy);
     if (oldHttpProxy != httpProxy) {
@@ -1934,6 +1924,17 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         globalHttpProxyCache_.EnsureInsert(userId, newHttpProxy);
         SendHttpProxyChangeBroadcast(newHttpProxy);
         UpdateGlobalHttpProxy(newHttpProxy);
+    }
+    if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
+        NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
+                     httpProxy.password_.length());
+        httpProxyThreadNeedRun_ = true;
+        std::thread t([this]() { ActiveHttpProxy(); });
+        std::string threadName = "ActiveHttpProxy";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
+        httpProxyThreadNeedRun_ = false;
     }
     NETMGR_LOG_I("End SetGlobalHttpProxy.");
     return NETMANAGER_SUCCESS;
