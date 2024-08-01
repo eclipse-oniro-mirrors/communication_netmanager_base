@@ -260,6 +260,10 @@ ohos_static_library("netsys_native_manager_static") {
   subsystem_name = "communication"
 }
 
+config("netsys_client_public_config") {
+  include_dirs = [ "include/netsys" ]
+}
+
 ohos_shared_library("netsys_client") {
   sanitize = {
     cfi = true
@@ -268,6 +272,8 @@ ohos_shared_library("netsys_client") {
     all_ubsan = true
     debug = false
   }
+
+  public_configs = [ ":netsys_client_public_config" ]
 
   branch_protector_ret = "pac_ret"
 
