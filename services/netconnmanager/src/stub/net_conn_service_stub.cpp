@@ -191,10 +191,9 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     std::u16string myDescripter = NetConnServiceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
-    NETMGR_LOG_D("myDescripter[%{public}s], remoteDescripter[%{public}s]", ToUtf8(myDescripter).c_str(),
-                 ToUtf8(remoteDescripter).c_str());
     if (myDescripter != remoteDescripter) {
-        NETMGR_LOG_E("descriptor checked fail");
+        NETMGR_LOG_E("descriptor checked fail. my Descriptor: [%{public}s], remote Descriptor: [%{public}s]",
+                     ToUtf8(myDescripter).c_str(), ToUtf8(remoteDescripter).c_str());
         if (!reply.WriteInt32(NETMANAGER_ERR_DESCRIPTOR_MISMATCH)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
