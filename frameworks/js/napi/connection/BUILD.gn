@@ -38,9 +38,7 @@ ohos_shared_library("connection") {
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
-  sources = [
-    "connection_module/src/connection_module.cpp",
-  ]
+  sources = [ "connection_module/src/connection_module.cpp" ]
 
   cflags = [
     "-fstack-protector-strong",
@@ -80,9 +78,9 @@ ohos_shared_library("connection_if") {
     all_ubsan = true
     debug = false
   }
- 
+
   branch_protector_ret = "pac_ret"
- 
+
   include_dirs = [
     "async_context/include",
     "async_work/include",
@@ -95,7 +93,7 @@ ohos_shared_library("connection_if") {
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
- 
+
   sources = [
     "async_context/src/bindsocket_context.cpp",
     "async_context/src/deletecustomdnsrule_context.cpp",
