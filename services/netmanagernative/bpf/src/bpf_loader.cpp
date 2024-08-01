@@ -728,6 +728,7 @@ private:
         } else {
             if (SysBpfObjPin(progFd, progPinLocation) < NETSYS_SUCCESS) {
                 NETNATIVE_LOGE("Failed to pin prog: %{public}s, errno = %{public}d", progPinLocation.c_str(), errno);
+                close(progFd);
                 return false;
             }
         }
@@ -736,6 +737,7 @@ private:
         if (progType == BPF_PROG_TYPE_SOCKET_FILTER) {
             if (g_sockFd < 0) {
                 NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", g_sockFd, errno);
+                close(progFd);
                 /* return true to ignore this prog */
                 return true;
             }
@@ -744,9 +746,12 @@ private:
                 close(g_sockFd);
                 g_sockFd = -1;
             }
+            close(progFd);
             return true;
         } else {
-            return DoAttach(progFd, progName);
+            auto ret = DoAttach(progFd, progName);
+            close(progFd);
+            return ret;
         }
     }
 
