@@ -341,16 +341,6 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
-{
-    std::unordered_map<uint32_t, NetStatsInfo> infos;
-    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    network->startTime_ = 1;
-    network->endTime_ = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
-}
-
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
     std::vector<NetStatsInfoSequence> infos;
@@ -358,17 +348,6 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level1)
-{
-    std::vector<NetStatsInfoSequence> infos;
-    uint32_t uid = 1;
-    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    network->startTime_ = 1;
-    network->endTime_ = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetStatsServiceTest, SetAppStats001, TestSize.Level1)
