@@ -202,10 +202,12 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc == memberFuncMap_.end()) {
+        NETMGR_LOG_E("memberFuncMap not found this code! code: [%{public}d]", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     auto requestFunc = itFunc->second.first;
     if (requestFunc == nullptr) {
+        NETMGR_LOG_E("requestFunc is nullptr. code:[%{public}d]", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     if (code == static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION)) {
