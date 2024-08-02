@@ -456,8 +456,7 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByNetwork(MessageParcel &data, Mes
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (network->type_ < static_cast<uint32_t>(BEARER_CELLULAR) ||
-        network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
@@ -493,8 +492,7 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByUidNetwork(MessageParcel &data, 
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (network->type_ < static_cast<uint32_t>(BEARER_CELLULAR) ||
-        network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }

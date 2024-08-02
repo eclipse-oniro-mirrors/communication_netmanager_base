@@ -323,8 +323,7 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (network->type_ < static_cast<uint32_t>(BEARER_CELLULAR) ||
-        network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
@@ -347,8 +346,7 @@ int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequ
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (network->type_ < static_cast<uint32_t>(BEARER_CELLULAR) ||
-        network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
