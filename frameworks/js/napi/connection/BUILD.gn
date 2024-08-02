@@ -75,7 +75,7 @@ ohos_shared_library("connection_if") {
     cfi = true
     cfi_cross_dso = true
     boundary_sanitize = true
-    all_ubsan = true
+    ubsan = true
     debug = false
   }
 
