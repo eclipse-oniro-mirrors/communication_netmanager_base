@@ -14,8 +14,8 @@
 import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_unittest("net_conn_manager_test") {
-  module_out_path = "netmanager_base/net_conn_manager_test"
+ohos_unittest("net_conn_multi_test") {
+  module_out_path = "netmanager_base/net_conn_multi_test"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -26,13 +26,20 @@ ohos_unittest("net_conn_manager_test") {
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
-    "net_common_event_test.cpp",
-    "net_conn_callback_stub_test.cpp",
-    "net_conn_callback_test.cpp",
-    "net_conn_manager_test.cpp",
-    "net_conn_service_test.cpp",
-    "net_detection_callback_stub_test.cpp",
-    "net_detection_callback_test.cpp",
+    "net_activate_test.cpp",
+    "net_all_capabilities_test.cpp",
+    "net_conn_client_test.cpp",
+    "net_conn_event_handler_test.cpp",
+    "net_conn_hievent_test.cpp",
+    "net_datashare_utils_test.cpp",
+    "net_handle_test.cpp",
+    "net_http_probe_test.cpp",
+    "net_monitor_test.cpp",
+    "net_proxy_from_string_test.cpp",
+    "net_proxy_userinfo_test.cpp",
+    "net_score_test.cpp",
+    "network_security_config_test.cpp",
+    "network_test.cpp",
   ]
 
   include_dirs = [
