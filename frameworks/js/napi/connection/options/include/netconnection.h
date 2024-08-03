@@ -29,6 +29,7 @@ public:
     bool hasTimeout_ = false;
     NetManagerStandard::NetSpecifier netSpecifier_;
     uint32_t timeout_ = 0;
+    uint64_t moduleId_ = 0;
 
 public:
     NetConnection();

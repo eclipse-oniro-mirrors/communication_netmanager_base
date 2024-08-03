@@ -38,6 +38,7 @@
 #include "deletecustomdnsrules_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
+static thread_local uint64_t g_moduleId;
 
 #define DECLARE_NET_CAP(cap) \
     DECLARE_NAPI_STATIC_PROPERTY(#cap, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetCap::cap)))
@@ -131,6 +132,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
 {
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
+    netConnection->moduleId_ = g_moduleId;
 
     auto netConnType = GetNetConnectionType(env, argc, argv);
 
@@ -165,6 +167,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
 
 napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
 {
+    g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),

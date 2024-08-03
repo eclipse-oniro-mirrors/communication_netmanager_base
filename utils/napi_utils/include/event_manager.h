@@ -23,6 +23,7 @@
 #include <uv.h>
 
 #include "event_listener.h"
+#include "napi_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -35,6 +36,7 @@ public:
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
     void SetData(void *data);
     void EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status));
+    void EmitByUvWithModuleId(const std::string &type, const NapiUtils::UvHandler &handler, uint64_t moduleId);
     bool HasEventListener(const std::string &type);
     void DeleteListener(const std::string &type);
     void DeleteAllListener();

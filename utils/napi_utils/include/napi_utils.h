@@ -16,6 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_NAPI_UTILS_H
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_NAPI_UTILS_H
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -111,6 +112,12 @@ napi_value CreateErrorMessage(napi_env env, int32_t errorCodeconst, const std::s
 void HookForEnvCleanup(void *data);
 void SetEnvValid(napi_env env);
 bool IsEnvValid(napi_env env);
+
+using UvHandler = std::function<void(napi_env)>;
+napi_value GetGlobal(napi_env env);
+uint64_t CreateUvHandlerQueue(napi_env env);
+napi_value GetValueFromGlobal(napi_env env, const std::string &className);
+void CreateUvQueueWorkByModuleId(napi_env env, const UvHandler &handler, uint64_t id);
 } // namespace NapiUtils
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -15,8 +15,8 @@
 
 #include "event_listener.h"
 
-#include "netmanager_base_log.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -107,6 +107,15 @@ bool EventListener::MatchType(const std::string &type) const
 bool EventListener::IsAsyncCallback() const
 {
     return asyncCallback_;
+}
+
+void EventListener::EmitByUvByModuleId(const std::string &type, const NapiUtils::UvHandler &handler,
+                                       uint64_t moduleId) const
+{
+    if (type_ != type || callbackRef_ == nullptr) {
+        return;
+    }
+    NapiUtils::CreateUvQueueWorkByModuleId(env_, handler, moduleId);
 }
 
 void EventListener::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status)) const

@@ -36,18 +36,29 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_AVAILABLE)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_AVAILABLE)) {
         NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_AVAILABLE);
         return 0;
     }
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, new NetHandle(*netHandle), NetAvailableCallback);
+
+    auto network = *netHandle;
+    auto handler = [network, manager](napi_env env) {
+        auto obj = CreateNetAvailableParam(env, network);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_AVAILABLE, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_AVAILABLE, handler, netConnection->moduleId_);
     return 0;
 }
 
 int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
-    if (netHandle == nullptr) {
+    if (netHandle == nullptr || netAllCap == nullptr) {
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
@@ -60,21 +71,29 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_CAPABILITIES_CHANGE)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_CAPABILITIES_CHANGE)) {
         NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CAPABILITIES_CHANGE);
         return 0;
     }
-    auto pair = new std::pair<NetHandle *, NetAllCapabilities *>;
-    pair->first = new NetHandle(*netHandle);
-    pair->second = new NetAllCapabilities(*netAllCap);
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_CAPABILITIES_CHANGE, pair, NetCapabilitiesChangeCallback);
+    auto network = *netHandle;
+    auto caps = *netAllCap;
+    auto handler = [network, caps, manager](napi_env env) {
+        auto obj = CreateNetCapabilitiesChangeParam(env, network, caps);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_CAPABILITIES_CHANGE, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_CAPABILITIES_CHANGE, handler, netConnection->moduleId_);
     return 0;
 }
 
 int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
                                                                const sptr<NetLinkInfo> &info)
 {
-    if (netHandle == nullptr) {
+    if (netHandle == nullptr || info == nullptr) {
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
@@ -87,15 +106,22 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_CONNECTION_PROPERTIES_CHANGE)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_CONNECTION_PROPERTIES_CHANGE)) {
         NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
         return 0;
     }
-    auto pair = new std::pair<NetHandle *, NetLinkInfo *>;
-    pair->first = new NetHandle(*netHandle);
-    pair->second = new NetLinkInfo(*info);
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, pair,
-                                               NetConnectionPropertiesChangeCallback);
+    auto network = *netHandle;
+    auto linkInfo = *info;
+    auto handler = [network, linkInfo, manager](napi_env env) {
+        auto obj = CreateNetConnectionPropertiesChangeParam(env, network, linkInfo);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, handler, netConnection->moduleId_);
     return 0;
 }
 
@@ -114,11 +140,21 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_LOST)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_LOST)) {
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_LOST);
         return 0;
     }
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, new NetHandle(*netHandle), NetLostCallback);
+    auto network = *netHandle;
+    auto handler = [network, manager](napi_env env) {
+        auto obj = CreateNetLostParam(env, network);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_LOST, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_LOST, handler, netConnection->moduleId_);
     return 0;
 }
 
@@ -134,16 +170,28 @@ int32_t NetConnCallbackObserver::NetUnavailable()
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_UNAVAILABLE)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_UNAVAILABLE)) {
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_UNAVAILABLE);
         return 0;
     }
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_UNAVAILABLE, nullptr, NetUnavailableCallback);
+    auto handler = [manager](napi_env env) {
+        auto obj = CreateNetUnavailableParam(env);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_UNAVAILABLE, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_UNAVAILABLE, handler, netConnection->moduleId_);
     return 0;
 }
 
 int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
+    if (netHandle == nullptr) {
+        return 0;
+    }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
@@ -154,117 +202,85 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    if (!netConnection->GetEventManager()->HasEventListener(EVENT_NET_BLOCK_STATUS_CHANGE)) {
+    auto manager = netConnection->GetEventManager();
+    if (manager == nullptr) {
+        return 0;
+    }
+    if (!manager->HasEventListener(EVENT_NET_BLOCK_STATUS_CHANGE)) {
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_BLOCK_STATUS_CHANGE);
         return 0;
     }
-    auto pair = new std::pair<NetHandle *, bool>;
-    pair->first = new NetHandle(*netHandle);
-    pair->second = blocked;
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_BLOCK_STATUS_CHANGE, pair, NetBlockStatusChangeCallback);
+    auto network = *netHandle;
+    auto handler = [network, blocked, manager](napi_env env) {
+        auto obj = CreateNetBlockStatusChangeParam(env, network, blocked);
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
+        manager->Emit(EVENT_NET_BLOCK_STATUS_CHANGE, arg);
+    };
+    manager->EmitByUvWithModuleId(EVENT_NET_BLOCK_STATUS_CHANGE, handler, netConnection->moduleId_);
     return 0;
 }
 
-napi_value NetConnCallbackObserver::CreateNetHandle(napi_env env, NetHandle *handle)
+napi_value NetConnCallbackObserver::CreateNetHandle(napi_env env, NetHandle handle)
 {
-    napi_value netHandle = ConnectionExec::CreateNetHandle(env, handle);
-    delete handle;
+    napi_value netHandle = ConnectionExec::CreateNetHandle(env, &handle);
     return netHandle;
 }
 
-napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities)
+napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCapabilities capabilities)
 {
-    napi_value netCapabilities = ConnectionExec::CreateNetCapabilities(env, capabilities);
-    delete capabilities;
+    napi_value netCapabilities = ConnectionExec::CreateNetCapabilities(env, &capabilities);
     return netCapabilities;
 }
 
-napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo)
+napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, NetLinkInfo linkInfo)
 {
-    napi_value connectionProperties = ConnectionExec::CreateConnectionProperties(env, linkInfo);
-    delete linkInfo;
+    napi_value connectionProperties = ConnectionExec::CreateConnectionProperties(env, &linkInfo);
     return connectionProperties;
 }
 
-napi_value NetConnCallbackObserver::CreateNetAvailableParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetAvailableParam(napi_env env, const NetHandle &netHandle)
 {
-    return CreateNetHandle(env, static_cast<NetHandle *>(data));
+    return CreateNetHandle(env, netHandle);
 }
 
-napi_value NetConnCallbackObserver::CreateNetCapabilitiesChangeParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetCapabilitiesChangeParam(napi_env env, const NetHandle &handle,
+                                                                     const NetAllCapabilities &caps)
 {
-    auto pair = static_cast<std::pair<NetHandle *, NetAllCapabilities *> *>(data);
-    napi_value netHandle = CreateNetHandle(env, pair->first);
-    napi_value capabilities = CreateNetCapabilities(env, pair->second);
+    napi_value netHandle = CreateNetHandle(env, handle);
+    napi_value capabilities = CreateNetCapabilities(env, caps);
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetNamedProperty(env, obj, KEY_NET_HANDLE, netHandle);
     NapiUtils::SetNamedProperty(env, obj, KEY_NET_CAP, capabilities);
-    delete pair;
     return obj;
 }
 
-napi_value NetConnCallbackObserver::CreateNetConnectionPropertiesChangeParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetConnectionPropertiesChangeParam(napi_env env, const NetHandle &handle,
+                                                                             const NetLinkInfo &linkInfo)
 {
-    auto pair = static_cast<std::pair<NetHandle *, NetLinkInfo *> *>(data);
-    napi_value netHandle = CreateNetHandle(env, pair->first);
-    napi_value properties = CreateConnectionProperties(env, pair->second);
+    napi_value netHandle = CreateNetHandle(env, handle);
+    napi_value properties = CreateConnectionProperties(env, linkInfo);
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetNamedProperty(env, obj, KEY_NET_HANDLE, netHandle);
     NapiUtils::SetNamedProperty(env, obj, KEY_CONNECTION_PROPERTIES, properties);
-    delete pair;
     return obj;
 }
 
-napi_value NetConnCallbackObserver::CreateNetLostParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetLostParam(napi_env env, const NetHandle &netHandle)
 {
-    return CreateNetHandle(env, static_cast<NetHandle *>(data));
+    return CreateNetHandle(env, netHandle);
 }
 
-napi_value NetConnCallbackObserver::CreateNetUnavailableParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetUnavailableParam(napi_env env)
 {
-    (void)data;
-
     return NapiUtils::GetUndefined(env);
 }
 
-napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env, void *data)
+napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env, const NetHandle &handle, bool blocked)
 {
-    auto pair = static_cast<std::pair<NetHandle *, bool> *>(data);
-    napi_value netHandle = CreateNetHandle(env, pair->first);
+    napi_value netHandle = CreateNetHandle(env, handle);
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetNamedProperty(env, obj, KEY_NET_HANDLE, netHandle);
-    NapiUtils::SetBooleanProperty(env, obj, KEY_BLOCKED, pair->second);
-    delete pair;
+    NapiUtils::SetBooleanProperty(env, obj, KEY_BLOCKED, blocked);
     return obj;
-}
-
-void NetConnCallbackObserver::NetAvailableCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetAvailableParam>(work, status);
-}
-
-void NetConnCallbackObserver::NetCapabilitiesChangeCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetCapabilitiesChangeParam>(work, status);
-}
-
-void NetConnCallbackObserver::NetConnectionPropertiesChangeCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetConnectionPropertiesChangeParam>(work, status);
-}
-
-void NetConnCallbackObserver::NetLostCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetLostParam>(work, status);
-}
-
-void NetConnCallbackObserver::NetUnavailableCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetUnavailableParam>(work, status);
-}
-
-void NetConnCallbackObserver::NetBlockStatusChangeCallback(uv_work_t *work, int status)
-{
-    CallbackTemplate<CreateNetBlockStatusChangeParam>(work, status);
 }
 } // namespace OHOS::NetManagerStandard
