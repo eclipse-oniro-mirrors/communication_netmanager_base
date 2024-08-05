@@ -43,7 +43,9 @@ public:
     WorkData() = delete;
 
     WorkData(napi_env env, void *data, void (*handler)(napi_env env, napi_status status, void *data))
-        : env_(env), data_(data), handler_(handler) {}
+        : env_(env), data_(data), handler_(handler)
+    {
+    }
 
     napi_env env_;
     void *data_;
@@ -59,7 +61,6 @@ private:
 };
 
 static std::mutex g_mutex;
-static std::mutex g_mutexForModuleId;
 static std::unordered_map<uint64_t, std::shared_ptr<UvHandlerQueue>> g_handlerQueueMap;
 static const char *const HTTP_UV_SYNC_QUEUE_NAME = "NET_CONNECTION_UV_SYNC_QUEUE_NAME";
 
@@ -91,12 +92,7 @@ napi_value GetGlobal(napi_env env)
 uint64_t CreateUvHandlerQueue(napi_env env)
 {
     static std::atomic<uint64_t> id = 1; // start from 1
-    uint64_t newId = 0;
-    {
-        std::lock_guard<std::mutex> lock(g_mutexForModuleId);
-        newId = id.load();
-        ++id;
-    }
+    uint64_t newId = id++;
     NETMANAGER_BASE_LOGI("newId = %{public}s, id = %{public}s", std::to_string(newId).c_str(),
                          std::to_string(id).c_str());
 

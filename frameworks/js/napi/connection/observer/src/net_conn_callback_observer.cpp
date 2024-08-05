@@ -220,31 +220,31 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
     return 0;
 }
 
-napi_value NetConnCallbackObserver::CreateNetHandle(napi_env env, NetHandle handle)
+napi_value NetConnCallbackObserver::CreateNetHandle(napi_env env, NetHandle &handle)
 {
     napi_value netHandle = ConnectionExec::CreateNetHandle(env, &handle);
     return netHandle;
 }
 
-napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCapabilities capabilities)
+napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCapabilities &capabilities)
 {
     napi_value netCapabilities = ConnectionExec::CreateNetCapabilities(env, &capabilities);
     return netCapabilities;
 }
 
-napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, NetLinkInfo linkInfo)
+napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, NetLinkInfo &linkInfo)
 {
     napi_value connectionProperties = ConnectionExec::CreateConnectionProperties(env, &linkInfo);
     return connectionProperties;
 }
 
-napi_value NetConnCallbackObserver::CreateNetAvailableParam(napi_env env, const NetHandle &netHandle)
+napi_value NetConnCallbackObserver::CreateNetAvailableParam(napi_env env, NetHandle &netHandle)
 {
     return CreateNetHandle(env, netHandle);
 }
 
-napi_value NetConnCallbackObserver::CreateNetCapabilitiesChangeParam(napi_env env, const NetHandle &handle,
-                                                                     const NetAllCapabilities &caps)
+napi_value NetConnCallbackObserver::CreateNetCapabilitiesChangeParam(napi_env env, NetHandle &handle,
+                                                                     NetAllCapabilities &caps)
 {
     napi_value netHandle = CreateNetHandle(env, handle);
     napi_value capabilities = CreateNetCapabilities(env, caps);
@@ -254,8 +254,8 @@ napi_value NetConnCallbackObserver::CreateNetCapabilitiesChangeParam(napi_env en
     return obj;
 }
 
-napi_value NetConnCallbackObserver::CreateNetConnectionPropertiesChangeParam(napi_env env, const NetHandle &handle,
-                                                                             const NetLinkInfo &linkInfo)
+napi_value NetConnCallbackObserver::CreateNetConnectionPropertiesChangeParam(napi_env env, NetHandle &handle,
+                                                                             NetLinkInfo &linkInfo)
 {
     napi_value netHandle = CreateNetHandle(env, handle);
     napi_value properties = CreateConnectionProperties(env, linkInfo);
@@ -265,7 +265,7 @@ napi_value NetConnCallbackObserver::CreateNetConnectionPropertiesChangeParam(nap
     return obj;
 }
 
-napi_value NetConnCallbackObserver::CreateNetLostParam(napi_env env, const NetHandle &netHandle)
+napi_value NetConnCallbackObserver::CreateNetLostParam(napi_env env, NetHandle &netHandle)
 {
     return CreateNetHandle(env, netHandle);
 }
@@ -275,7 +275,7 @@ napi_value NetConnCallbackObserver::CreateNetUnavailableParam(napi_env env)
     return NapiUtils::GetUndefined(env);
 }
 
-napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env, const NetHandle &handle, bool blocked)
+napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env, NetHandle &handle, bool blocked)
 {
     napi_value netHandle = CreateNetHandle(env, handle);
     napi_value obj = NapiUtils::CreateObject(env);

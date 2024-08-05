@@ -37,25 +37,25 @@ public:
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
 private:
-    static napi_value CreateNetHandle(napi_env env, NetHandle netHandle);
+    static napi_value CreateNetHandle(napi_env env, NetHandle &netHandle);
 
-    static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities capabilities);
+    static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities &capabilities);
 
-    static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo linkInfo);
+    static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo &linkInfo);
 
-    static napi_value CreateNetAvailableParam(napi_env env, const NetHandle &netHandle);
+    static napi_value CreateNetAvailableParam(napi_env env, NetHandle &netHandle);
 
-    static napi_value CreateNetCapabilitiesChangeParam(napi_env env, const NetHandle &netHandle,
-                                                       const NetAllCapabilities &capabilities);
+    static napi_value CreateNetCapabilitiesChangeParam(napi_env env, NetHandle &netHandle,
+                                                       NetAllCapabilities &capabilities);
 
-    static napi_value CreateNetConnectionPropertiesChangeParam(napi_env env, const NetHandle &netHandle,
-                                                               const NetLinkInfo &linkInfo);
+    static napi_value CreateNetConnectionPropertiesChangeParam(napi_env env, NetHandle &netHandle,
+                                                               NetLinkInfo &linkInfo);
 
-    static napi_value CreateNetLostParam(napi_env env, const NetHandle &netHandle);
+    static napi_value CreateNetLostParam(napi_env env, NetHandle &netHandle);
 
     static napi_value CreateNetUnavailableParam(napi_env env);
 
-    static napi_value CreateNetBlockStatusChangeParam(napi_env env, const NetHandle &netHandle, bool blocked);
+    static napi_value CreateNetBlockStatusChangeParam(napi_env env, NetHandle &netHandle, bool blocked);
 };
 } // namespace OHOS::NetManagerStandard
 
