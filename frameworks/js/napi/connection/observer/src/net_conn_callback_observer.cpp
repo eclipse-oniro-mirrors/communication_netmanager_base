@@ -47,7 +47,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 
     auto network = *netHandle;
     auto handler = [network, manager](napi_env env) {
-        auto obj = CreateNetAvailableParam(env, network);
+        auto obj = CreateNetAvailableParam(env, const_cast<NetHandle &>(network));
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_AVAILABLE, arg);
     };
@@ -82,7 +82,8 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     auto network = *netHandle;
     auto caps = *netAllCap;
     auto handler = [network, caps, manager](napi_env env) {
-        auto obj = CreateNetCapabilitiesChangeParam(env, network, caps);
+        auto obj = CreateNetCapabilitiesChangeParam(env, const_cast<NetHandle &>(network),
+                                                    const_cast<NetAllCapabilities &>(caps));
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_CAPABILITIES_CHANGE, arg);
     };
@@ -117,7 +118,8 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     auto network = *netHandle;
     auto linkInfo = *info;
     auto handler = [network, linkInfo, manager](napi_env env) {
-        auto obj = CreateNetConnectionPropertiesChangeParam(env, network, linkInfo);
+        auto obj = CreateNetConnectionPropertiesChangeParam(env, const_cast<NetHandle &>(network),
+                                                            const_cast<NetLinkInfo &>(linkInfo));
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, arg);
     };
@@ -150,7 +152,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
     }
     auto network = *netHandle;
     auto handler = [network, manager](napi_env env) {
-        auto obj = CreateNetLostParam(env, network);
+        auto obj = CreateNetLostParam(env, const_cast<NetHandle &>(network));
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_LOST, arg);
     };
@@ -212,7 +214,7 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
     }
     auto network = *netHandle;
     auto handler = [network, blocked, manager](napi_env env) {
-        auto obj = CreateNetBlockStatusChangeParam(env, network, blocked);
+        auto obj = CreateNetBlockStatusChangeParam(env, const_cast<NetHandle &>(network), blocked);
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_BLOCK_STATUS_CHANGE, arg);
     };
