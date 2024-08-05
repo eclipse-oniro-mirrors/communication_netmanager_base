@@ -15,10 +15,12 @@
 
 #include "napi_utils.h"
 
+#include <atomic>
 #include <cstring>
 #include <initializer_list>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <unordered_set>
 
 #include "netmanager_base_log.h"
@@ -41,13 +43,159 @@ public:
     WorkData() = delete;
 
     WorkData(napi_env env, void *data, void (*handler)(napi_env env, napi_status status, void *data))
-        : env_(env), data_(data), handler_(handler) {}
+        : env_(env), data_(data), handler_(handler)
+    {
+    }
 
     napi_env env_;
     void *data_;
     void (*handler_)(napi_env env, napi_status status, void *data);
 };
 
+struct UvHandlerQueue : public std::queue<UvHandler> {
+    UvHandler Pop();
+    void Push(const UvHandler &handler);
+
+private:
+    std::mutex mutex;
+};
+
+static std::mutex g_mutex;
+static std::unordered_map<uint64_t, std::shared_ptr<UvHandlerQueue>> g_handlerQueueMap;
+static const char *const HTTP_UV_SYNC_QUEUE_NAME = "NET_CONNECTION_UV_SYNC_QUEUE_NAME";
+
+UvHandler UvHandlerQueue::Pop()
+{
+    std::lock_guard lock(mutex);
+    if (empty()) {
+        return {};
+    }
+    auto s = front();
+    pop();
+    return s;
+}
+
+void UvHandlerQueue::Push(const UvHandler &handler)
+{
+    std::lock_guard lock(mutex);
+    push(handler);
+}
+
+napi_value GetGlobal(napi_env env)
+{
+    napi_value undefined = GetUndefined(env);
+    napi_value global = nullptr;
+    NAPI_CALL_BASE(env, napi_get_global(env, &global), undefined);
+    return global;
+}
+
+uint64_t CreateUvHandlerQueue(napi_env env)
+{
+    static std::atomic<uint64_t> id = 1; // start from 1
+    uint64_t newId = id++;
+    NETMANAGER_BASE_LOGI("newId = %{public}s, id = %{public}s", std::to_string(newId).c_str(),
+                         std::to_string(id).c_str());
+
+    auto global = GetGlobal(env);
+    auto queueWrapper = CreateObject(env);
+    SetNamedProperty(env, global, HTTP_UV_SYNC_QUEUE_NAME, queueWrapper);
+    {
+        std::lock_guard lock(g_mutex);
+        g_handlerQueueMap.emplace(newId, std::make_shared<UvHandlerQueue>());
+    }
+    napi_wrap(
+        env, queueWrapper, reinterpret_cast<void *>(newId),
+        [](napi_env env, void *data, void *) {
+            auto id = reinterpret_cast<uint64_t>(data);
+            std::lock_guard lock(g_mutex);
+            g_handlerQueueMap.erase(id);
+        },
+        nullptr, nullptr);
+    return newId;
+}
+
+napi_value GetValueFromGlobal(napi_env env, const std::string &className)
+{
+    auto global = NapiUtils::GetGlobal(env);
+    if (NapiUtils::GetValueType(env, global) == napi_undefined) {
+        return GetUndefined(env);
+    }
+    return NapiUtils::GetNamedProperty(env, global, className);
+}
+
+static uv_after_work_cb MakeUvCallback()
+{
+    return [](uv_work_t *work, int status) {
+        if (!work) {
+            return;
+        }
+        std::unique_ptr<uv_work_t> workHandle(work);
+
+        if (!work->data) {
+            return;
+        }
+        auto env = reinterpret_cast<napi_env>(work->data);
+        if (!env) {
+            return;
+        }
+
+        auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+        std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+        auto queueWrapper = GetValueFromGlobal(env, HTTP_UV_SYNC_QUEUE_NAME);
+        if (!queueWrapper) {
+            return;
+        }
+        void *theId = nullptr;
+        napi_unwrap(env, queueWrapper, &theId);
+        if (!theId) { // that is why moduleId is started from 1
+            return;
+        }
+        UvHandler handler;
+        {
+            std::lock_guard lock(g_mutex);
+            auto it = g_handlerQueueMap.find(reinterpret_cast<uint64_t>(theId));
+            if (it == g_handlerQueueMap.end()) {
+                return;
+            }
+            handler = it->second->Pop();
+        }
+        if (handler) {
+            handler(env);
+        }
+    };
+}
+
+void CreateUvQueueWorkByModuleId(napi_env env, const UvHandler &handler, uint64_t id)
+{
+    uv_loop_s *loop = nullptr;
+    if (!IsEnvValid(env)) {
+        NETMANAGER_BASE_LOGE("the env is invalid");
+        return;
+    }
+    napi_get_uv_event_loop(env, &loop);
+    if (!loop) {
+        return;
+    }
+    uv_work_t *work = nullptr;
+    {
+        std::lock_guard lock(g_mutex);
+        auto it = g_handlerQueueMap.find(id);
+        if (it == g_handlerQueueMap.end()) {
+            return;
+        }
+        work = new (std::nothrow) uv_work_t;
+        if (work == nullptr) {
+            return;
+        }
+        work->data = env;
+        it->second->Push(handler);
+    }
+
+    if (work) {
+        (void)uv_queue_work_with_qos(
+            loop, work, [](uv_work_t *) {}, MakeUvCallback(), uv_qos_default);
+    }
+}
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
 {
