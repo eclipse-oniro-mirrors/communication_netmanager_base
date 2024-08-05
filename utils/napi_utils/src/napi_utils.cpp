@@ -61,7 +61,7 @@ private:
 static std::mutex g_mutex;
 static std::mutex g_mutexForModuleId;
 static std::unordered_map<uint64_t, std::shared_ptr<UvHandlerQueue>> g_handlerQueueMap;
-static const char *const HTTP_UV_SYNC_QUEUE_NAME = "HTTP_UV_SYNC_QUEUE_NAME";
+static const char *const HTTP_UV_SYNC_QUEUE_NAME = "NET_CONNECTION_UV_SYNC_QUEUE_NAME";
 
 UvHandler UvHandlerQueue::Pop()
 {
