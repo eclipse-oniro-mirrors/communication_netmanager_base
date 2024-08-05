@@ -61,6 +61,7 @@ private:
     enum TableVersion : int32_t {
         Version_0 = 0,
         Version_1,
+        Version_2,
     };
 
 private:
