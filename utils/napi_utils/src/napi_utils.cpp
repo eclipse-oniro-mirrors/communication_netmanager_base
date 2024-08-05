@@ -151,10 +151,9 @@ static uv_after_work_cb MakeUvCallback()
             return;
         }
         UvHandler handler;
-        decltype(g_handlerQueueMap.end()) it;
         {
             std::lock_guard lock(g_mutex);
-            it = g_handlerQueueMap.find(reinterpret_cast<uint64_t>(theId));
+            auto it = g_handlerQueueMap.find(reinterpret_cast<uint64_t>(theId));
             if (it == g_handlerQueueMap.end()) {
                 return;
             }
@@ -177,20 +176,22 @@ void CreateUvQueueWorkByModuleId(napi_env env, const UvHandler &handler, uint64_
     if (!loop) {
         return;
     }
-    decltype(g_handlerQueueMap.end()) it;
+    uv_work_t *work = nullptr;
     {
         std::lock_guard lock(g_mutex);
-        it = g_handlerQueueMap.find(id);
+        auto it = g_handlerQueueMap.find(id);
         if (it == g_handlerQueueMap.end()) {
             return;
         }
+        work = new uv_work_t;
+        work->data = env;
+        it->second->Push(handler);
     }
 
-    auto work = new uv_work_t;
-    work->data = env;
-    it->second->Push(handler);
-    (void)uv_queue_work_with_qos(
-        loop, work, [](uv_work_t *) {}, MakeUvCallback(), uv_qos_default);
+    if (work) {
+        (void)uv_queue_work_with_qos(
+            loop, work, [](uv_work_t *) {}, MakeUvCallback(), uv_qos_default);
+    }
 }
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
