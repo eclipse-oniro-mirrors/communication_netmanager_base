@@ -393,6 +393,13 @@ int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t 
 int32_t NetStatsDatabaseHelper::Upgrade()
 {
     auto ret = ExecTableUpgrade(UID_TABLE, Version_1);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_TABLE, Version_1);
+    }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_2);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_2);
+    }
     return ret;
 }
 
@@ -416,6 +423,13 @@ int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, T
             NETMGR_LOG_E("ExecTableUpgrade version_1 failed. ret = %{public}d", ret);
         }
         oldVersion = Version_1;
+    }
+    if (oldVersion < Version_2 && newVersion >= Version_2) {
+        ret = DeleteData(tableName, Sim_UID);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade Version_2 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_2;
     }
     if (oldVersion != newVersion) {
         NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
