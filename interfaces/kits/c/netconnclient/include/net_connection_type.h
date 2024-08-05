@@ -95,6 +95,8 @@ typedef enum NetConn_NetBearerType {
     NETCONN_BEARER_ETHERNET = 3,
     /** VPN */
     NETCONN_BEARER_VPN = 4,
+    /** BTPROXY */
+    NETCONN_BEARER_BTPROXY = 6,
 } NetConn_NetBearerType;
 
 /**

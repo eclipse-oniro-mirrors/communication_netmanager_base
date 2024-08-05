@@ -28,7 +28,8 @@ using NetCapMap = std::map<NetCap, NetConn_NetCap>;
 static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_WIFI, NETCONN_BEARER_WIFI},
                                   {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET},
-                                  {BEARER_VPN, NETCONN_BEARER_VPN}};
+                                  {BEARER_VPN, NETCONN_BEARER_VPN},
+                                  {BEARER_BTPROXY, NETCONN_BEARER_BTPROXY}};
 
 static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILITY_MMS},
                               {NET_CAPABILITY_SUPL,         NETCONN_NET_CAPABILITY_SUPL},

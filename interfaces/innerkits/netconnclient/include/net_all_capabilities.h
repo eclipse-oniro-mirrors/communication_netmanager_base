@@ -44,6 +44,7 @@ enum NetBearType {
     BEARER_ETHERNET = 3,
     BEARER_VPN = 4,
     BEARER_WIFI_AWARE = 5,
+    BEARER_BTPROXY = 6,
     BEARER_DEFAULT // 枚举最大值，无实际含义
 };
 

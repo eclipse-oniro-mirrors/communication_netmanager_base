@@ -54,7 +54,8 @@ enum class NetTypeScoreValue : int32_t {
     WIFI_VALUE = 7 * NET_TYPE_SCORE_INTERVAL,
     ETHERNET_VALUE = 8 * NET_TYPE_SCORE_INTERVAL,
     VPN_VALUE = 9 * NET_TYPE_SCORE_INTERVAL,
-    WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL
+    WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL,
+    BTPROXY_VALUE = 11 * NET_TYPE_SCORE_INTERVAL
 };
 
 static inline NetTypeScore netTypeScore_ = {
@@ -63,7 +64,8 @@ static inline NetTypeScore netTypeScore_ = {
     {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},
     {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)},
     {BEARER_VPN, static_cast<int32_t>(NetTypeScoreValue::VPN_VALUE)},
-    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}};
+    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)},
+    {BEARER_BTPROXY, static_cast<int32_t>(NetTypeScoreValue::BTPROXY_VALUE)}};
 
 class NetSupplier : public virtual RefBase {
 public:
