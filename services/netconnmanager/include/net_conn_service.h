@@ -405,7 +405,7 @@ private:
                                              const std::set<NetCap> &netCaps);
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                             const uint32_t &timeoutMS, const int32_t registerType = REGISTER,
-                            const uint32_t callingUid = 0);
+                            const int32_t callingUid = 0);
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
