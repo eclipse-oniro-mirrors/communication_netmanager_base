@@ -115,7 +115,7 @@ bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType be
     if (ident.empty() || netSpecifier_->ident_.empty()) {
         return true;
     }
-    if (netSpecifier->ident_ == IDENT_WIFI) {
+    if (IDENT_WIFI == netSpecifier_->ident_) {
         return true;
     }
     if (ident == netSpecifier_->ident_) {
@@ -257,7 +257,7 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
     return result;
 }
 
-int32_t Netactivate::GetNetworkId() const
+int32_t NetActivate::GetNetworkId() const
 {
     cJSON *identRoot = cJSON_Parse(netSpecifier_->ident_.c_str());
     if (identRoot == nullptr) {
