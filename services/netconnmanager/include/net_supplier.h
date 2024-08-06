@@ -54,7 +54,7 @@ constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
 constexpr int32_t DIFF_SCORE_BETWEEN_GOOD_POOR = 2 * NET_TYPE_SCORE_INTERVAL;
 enum class NetTypeScoreValue : int32_t {
     USB_VALUE = 4 * NET_TYPE_SCORE_INTERVAL,
-    BLUETOOTH_VALUE = BLUETOOTH_SCORE_MULTIPLIER * NET_TYPE_SCORE_INTERVAL,
+    BLUETOOTH_VALUE = BLUETOOTH_SCORE_FACTOR * NET_TYPE_SCORE_INTERVAL,
     CELLULAR_VALUE = 6 * NET_TYPE_SCORE_INTERVAL,
     WIFI_VALUE = 7 * NET_TYPE_SCORE_INTERVAL,
     ETHERNET_VALUE = 8 * NET_TYPE_SCORE_INTERVAL,
@@ -68,8 +68,7 @@ static inline NetTypeScore netTypeScore_ = {
     {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},
     {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)},
     {BEARER_VPN, static_cast<int32_t>(NetTypeScoreValue::VPN_VALUE)},
-    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}
-};
+    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}};
 
 class NetSupplier : public virtual RefBase {
 public:
