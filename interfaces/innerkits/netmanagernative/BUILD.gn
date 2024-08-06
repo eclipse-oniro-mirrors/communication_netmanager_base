@@ -42,7 +42,7 @@ config("net_native_manager_if_config") {
     defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
   if (netmanager_base_enable_feature_net_bluetooth) {
-    defines = [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
   }
 }
 
