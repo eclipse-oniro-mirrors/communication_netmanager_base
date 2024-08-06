@@ -44,7 +44,7 @@ enum NetBearType {
     BEARER_ETHERNET = 3,
     BEARER_VPN = 4,
     BEARER_WIFI_AWARE = 5,
-    BEARER_DEFAULT // 枚举最大值，无实际含义
+    BEARER_DEFAULT // The maximum value of NetBearType. Do not exceed the limit. No actual meaning.
 };
 
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
