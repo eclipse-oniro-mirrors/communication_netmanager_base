@@ -94,7 +94,8 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCh
                      supplier->GetSupplierId(), requestId_);
         return false;
     }
-    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
+    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent(), supplier->GetNetSupplierType(),
+        skipCheckIdent)) {
         NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
                      supplier->GetSupplierId(), requestId_);
         return false;
