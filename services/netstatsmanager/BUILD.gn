@@ -172,10 +172,6 @@ ohos_static_library("net_stats_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  if (netmanager_base_enable_feature_net_bluetooth) {
-    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
-  }
-
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }

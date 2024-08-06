@@ -41,9 +41,6 @@ config("net_native_manager_if_config") {
   if (netmanager_base_enable_feature_net_firewall) {
     defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
-  if (netmanager_base_enable_feature_net_bluetooth) {
-    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
-  }
 }
 
 ohos_source_set("net_native_parcel") {
