@@ -898,7 +898,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                        const uint32_t &timeoutMS, const int32_t registerType
+                                        const uint32_t &timeoutMS, const int32_t registerType,
                                         const int32_t callingUid)
 {
     NETMGR_LOG_D("ActivateNetwork Enter");
@@ -1115,7 +1115,7 @@ void NetConnService::RequestAllNetworkExceptDefault()
             NETMGR_LOG_I("Supplier[%{public}d] is internal, skip.", netSupplier.second->GetSupplierId());
             continue;
         }
-        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second), NEED_SKIP_CHECK_IDENT) {
+        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second, NEED_SKIP_CHECK_IDENT)) {
             continue;
         }
         if (!netSupplier.second->RequestToConnect(reqId)) {
@@ -1184,11 +1184,11 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (iter->second == nullptr) {
             continue;
         }
-        if (!iter->second->MatchRequestAndNetwork(supplier)) {
+        if (!iter->second->MatchRequestAndNetwork(supplier, NEED_SKIP_CHECK_IDENT)) {
             continue;
         }
         NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
-        bool result = supplier->RequestToConnect(iter->first, netrequest, NEED_SKIP_CHECK_IDENT);
+        bool result = supplier->RequestToConnect(iter->first, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());
@@ -1210,7 +1210,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (iter->second == nullptr) {
             continue;
         }
-        if (!request->MatchRequestAndNetwork(iter->second), NEED_SKIP_CHECK_IDENT) {
+        if (!request->MatchRequestAndNetwork(iter->second, NEED_SKIP_CHECK_IDENT)) {
             continue;
         }
         NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetNetworkId());
