@@ -119,6 +119,10 @@ ohos_shared_library("net_policy_manager") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
+  if (netmanager_base_enable_feature_net_bluetooth) {
+    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

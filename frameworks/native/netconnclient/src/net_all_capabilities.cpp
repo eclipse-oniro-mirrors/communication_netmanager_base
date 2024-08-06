@@ -231,9 +231,11 @@ void NetAllCapabilities::ToStrNetBearTypes(const std::set<NetBearType> &bearerTy
             case BEARER_WIFI_AWARE:
                 str.append("BEARER_WIFI_AWARE");
                 break;
-            case BEARER_BTPROXY:
-                str.append("BEARER_BTPROXY");
+#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+            case BEARER_BLUETOOTH:
+                str.append("BEARER_BLUETOOTH");
                 break;
+#endif
             default:
                 str.append("unknown NetBearType");
                 break;

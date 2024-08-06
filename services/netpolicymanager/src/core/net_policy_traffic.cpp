@@ -80,8 +80,7 @@ bool NetPolicyTraffic::IsValidNetType(int32_t netType)
         case NetBearType::BEARER_BLUETOOTH:
         case NetBearType::BEARER_ETHERNET:
         case NetBearType::BEARER_VPN:
-        case NetBearType::BEARER_WIFI_AWARE:
-        case NetBearType::BEARER_BTPROXY: {
+        case NetBearType::BEARER_WIFI_AWARE: {
             return true;
         }
         default: {

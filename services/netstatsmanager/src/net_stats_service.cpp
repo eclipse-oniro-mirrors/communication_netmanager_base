@@ -44,7 +44,6 @@ namespace {
 constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
-    NetBearType::BEARER_BTPROXY,
 };
 constexpr const char* UID = "uid";
 } // namespace

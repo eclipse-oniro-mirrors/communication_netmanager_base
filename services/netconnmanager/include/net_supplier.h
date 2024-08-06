@@ -30,6 +30,11 @@
 #include "net_specifier.h"
 #include "net_supplier_info.h"
 
+#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+#define BLUETOOTH_SCORE_FACTOR 8  
+#else  
+#define BLUETOOTH_SCORE_FACTOR 5  
+#endif 
 namespace OHOS {
 namespace NetManagerStandard {
 enum CallbackType {
@@ -49,13 +54,12 @@ constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
 constexpr int32_t DIFF_SCORE_BETWEEN_GOOD_POOR = 2 * NET_TYPE_SCORE_INTERVAL;
 enum class NetTypeScoreValue : int32_t {
     USB_VALUE = 4 * NET_TYPE_SCORE_INTERVAL,
-    BLUETOOTH_VALUE = 5 * NET_TYPE_SCORE_INTERVAL,
+    BLUETOOTH_VALUE = BLUETOOTH_SCORE_MULTIPLIER * NET_TYPE_SCORE_INTERVAL,
     CELLULAR_VALUE = 6 * NET_TYPE_SCORE_INTERVAL,
     WIFI_VALUE = 7 * NET_TYPE_SCORE_INTERVAL,
     ETHERNET_VALUE = 8 * NET_TYPE_SCORE_INTERVAL,
     VPN_VALUE = 9 * NET_TYPE_SCORE_INTERVAL,
     WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL,
-    BTPROXY_VALUE = 11 * NET_TYPE_SCORE_INTERVAL
 };
 
 static inline NetTypeScore netTypeScore_ = {
@@ -64,8 +68,8 @@ static inline NetTypeScore netTypeScore_ = {
     {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},
     {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)},
     {BEARER_VPN, static_cast<int32_t>(NetTypeScoreValue::VPN_VALUE)},
-    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)},
-    {BEARER_BTPROXY, static_cast<int32_t>(NetTypeScoreValue::BTPROXY_VALUE)}};
+    {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}
+};
 
 class NetSupplier : public virtual RefBase {
 public:

@@ -161,16 +161,18 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKVPN_ERROR_REFUSE_CREATE_VPN, "VPN creation denied, please check the user type"},
     {NETWORKVPN_ERROR_VPN_EXIST, "VPN exist already, please execute destroy first"},
     {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
-    /* Net BTPROXY Manager*/
-    {NETMANAGER_BTPROXY_ERR_START_FAIL, "BTPROXY start failed"},
-    {NETMANAGER_BTPROXY_ERR_STOP_FAIL, "BTPROXY stop failed"},
-    {NETMANAGER_BTPROXY_ERR_INIT_FAIL, "Failed to initialize the BTPROXY"},
-    {NETMANAGER_BTPROXY_ERR_INVALID_PORT_ID, "The port id is invalid"},
-    {NETMANAGER_BTPROXY_ERR_INVALID_UDP_ID, "The udp id is invalid"},
-    {NETMANAGER_BTPROXY_ERR_INVALID_TCP_ID, "The tcp id is invalid"},
-    {NETMANAGER_BTPROXY_ERR_INVALID_RULE_TYPE, "The rule type is invalid"},
-    {NETMANAGER_BTPROXY_ERR_INVALID_SUPPLIER_ID, "The supplier id is invalid"},
-    {NETMANAGER_BTPROXY_ERR_OBJ_ERR_NULL, "The obj is null"},
+#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+    /* Net BLUETOOTH Manager*/
+    {NETMANAGER_BLUETOOTH_ERR_START_FAIL, "BLUETOOTH start failed"},
+    {NETMANAGER_BLUETOOTH_ERR_STOP_FAIL, "BLUETOOTH stop failed"},
+    {NETMANAGER_BLUETOOTH_ERR_INIT_FAIL, "Failed to initialize the BLUETOOTH"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_PORT_ID, "The port id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_UDP_ID, "The udp id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_TCP_ID, "The tcp id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_RULE_TYPE, "The rule type is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_SUPPLIER_ID, "The supplier id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_OBJ_ERR_NULL, "The obj is null"},
+#endif
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /* Net firewall Manager */
     {FIREWALL_ERR_NO_USER, "The specified user does not exist"},

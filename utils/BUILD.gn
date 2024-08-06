@@ -75,6 +75,10 @@ ohos_shared_library("net_manager_common") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
+  if (netmanager_base_enable_feature_net_bluetooth) {
+    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  }
+
   if (is_standard_system) {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
   }

@@ -133,6 +133,10 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "SYS_FUNC" ]
   }
 
+  if (netmanager_base_enable_feature_net_bluetooth) {
+    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

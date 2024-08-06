@@ -66,6 +66,10 @@ ohos_static_library("net_conn_parcel") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
+  if (netmanager_base_enable_feature_net_bluetooth) {
+    defines = [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  }
+
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   external_deps = [ "c_utils:utils" ]

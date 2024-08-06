@@ -91,12 +91,14 @@ typedef enum NetConn_NetBearerType {
     NETCONN_BEARER_CELLULAR = 0,
     /** WIFI */
     NETCONN_BEARER_WIFI = 1,
+#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+    /** BLUETOOTH */
+    NETCONN_BEARER_BLUETOOTH = 2,
+#endif
     /** Ethernet */
     NETCONN_BEARER_ETHERNET = 3,
     /** VPN */
     NETCONN_BEARER_VPN = 4,
-    /** BTPROXY */
-    NETCONN_BEARER_BTPROXY = 6,
 } NetConn_NetBearerType;
 
 /**
