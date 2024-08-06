@@ -91,6 +91,9 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netSupplierInfo_ = netSupplierInfo;
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
+    if (NetSupplierType_ == BEARER_WIFI) {
+        NetSupplierIdent_ = std::to_string(NetSupplierInfo.networkId_);
+    }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);
         return;
@@ -230,11 +233,13 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
-        return true;
+    if (netRequest.networkId < 0) {
+        if (netSupplierInfo_.isAvailable_) {
+            NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
+            return true;
+        }
+        UpdateNetConnState(NET_CONN_STATE_IDLE);
     }
-    UpdateNetConnState(NET_CONN_STATE_IDLE);
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");

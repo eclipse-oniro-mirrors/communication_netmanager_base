@@ -29,8 +29,11 @@ namespace NetManagerStandard {
 struct NetRequest {
     uint32_t registerType = REGISTER;
     std::set<NetBearType> bearTypes = {};
-    NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes)
-        : registerType(registerType), bearTypes(netBearTypes)
+    uint32_t uid = 0;
+    int32_t networkId = -1;
+    NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes, const int32_t uid = 0,
+        const uint32_t networkId = -1)
+        : registerType(registerType), bearTypes(netBearTypes), uid(uid), networkId(networkId)
     {}
     NetRequest() = default;
 };

@@ -19,10 +19,12 @@
 #include "net_activate.h"
 #include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
+#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextRequestId = MIN_REQUEST_ID;
+static std::string IDENT_WIFI = "wifi";
 using TimeOutCallback = std::function<void()>;
 
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
@@ -73,18 +75,13 @@ void NetActivate::TimeOutNetAvailable()
     }
 }
 
-bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
+bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent)
 {
     NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]",
                  (supplier ? supplier->GetSupplierId() : 0),
                  (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), requestId_);
     if (supplier == nullptr) {
         NETMGR_LOG_E("Supplier is null");
-        return false;
-    }
-    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
-        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
-                     supplier->GetSupplierId(), requestId_);
         return false;
     }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
@@ -94,6 +91,11 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
         NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
+                     supplier->GetSupplierId(), requestId_);
+        return false;
+    }
+    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
                      supplier->GetSupplierId(), requestId_);
         return false;
     }
@@ -107,15 +109,45 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
     return true;
 }
 
-bool NetActivate::CompareByNetworkIdent(const std::string &ident)
+bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent)
 {
     if (ident.empty() || netSpecifier_->ident_.empty()) {
+        return true;
+    }
+    if (netSpecifier->ident_ == IDENT_WIFI) {
         return true;
     }
     if (ident == netSpecifier_->ident_) {
         return true;
     }
+    if (CompareByJsonNetworkId(ident,bearerType, skipCheckIdent)) {
+        return true;
+    }
     return false;
+}
+
+bool NetActivate::CompareByJsonNetworkId(const std::string &ident, NetBearType bearerType, bool skipCheckIdent)
+{
+    cJSON *identRoot = cJSON_Parse(netSpecifier_->ident_.c_str());
+    if (identRoot == nullptr) {
+        NETMGR_LOG_D("request ident is not json");
+        return false;
+    }
+    cJSON *networkId = cJSON_GetObjectItem(identRoot, "networkId");
+    if (networkId == nullptr) {
+        NETMGR_LOG_D("request networkId is null");
+        cJSON_Delete(identRoot);
+        return false;
+    }
+    bool result = false;
+    if (ident == std::to_string(networkId->valueint)) {
+        result = true;
+    }
+    if (skipCheckIdent && BEARER_WIFI == bearerType) {
+        result = true;
+    }
+    cJSON_Delete(identRoot);
+    return result;
 }
 
 bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
@@ -221,6 +253,24 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
             break;
         }
     }
+    return result;
+}
+
+int32_t Netactivate::GetNetworkId() const
+{
+    cJSON *identRoot = cJSON_Parse(netSpecifier_->ident_.c_str());
+    if (identRoot == nullptr) {
+        NETMGR_LOG_D("request ident is not json");
+        return -1;
+    }
+    cJSON *networkId = cJSON_GetObjectItem(identRoot, "networkId");
+    if (networkId == nullptr) {
+        NETMGR_LOG_D("request networkId is null");
+        cJSON_Delete(identRoot);
+        return -1;
+    }
+    int32_t result = networkId->valueint;
+    cJSON_Delete(identRoot);
     return result;
 }
 } // namespace NetManagerStandard
