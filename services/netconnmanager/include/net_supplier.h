@@ -31,10 +31,10 @@
 #include "net_supplier_info.h"
 
 #ifdef FEATURE_NET_BLUETOOTH_ENABLE
-#define BLUETOOTH_SCORE_FACTOR 8  
-#else  
-#define BLUETOOTH_SCORE_FACTOR 5  
-#endif 
+#define BLUETOOTH_SCORE_FACTOR 8
+#else
+#define BLUETOOTH_SCORE_FACTOR 5
+#endif
 namespace OHOS {
 namespace NetManagerStandard {
 enum CallbackType {
