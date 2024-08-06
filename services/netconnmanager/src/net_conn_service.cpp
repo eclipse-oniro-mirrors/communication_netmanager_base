@@ -899,7 +899,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                         const uint32_t &timeoutMS, const int32_t registerType,
-                                        const int32_t callingUid)
+                                        const uint32_t callingUid)
 {
     NETMGR_LOG_D("ActivateNetwork Enter");
     if (netSpecifier == nullptr || callback == nullptr) {
