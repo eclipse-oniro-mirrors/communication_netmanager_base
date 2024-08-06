@@ -92,6 +92,12 @@ void ParseAddrInfo(addrinfo *res, std::vector<CNetAddress> &addresses_)
             host_ = ip;
         }
 
+        auto hostAddress = MallocCString(host_);
+        if (hostAddress == nullptr) {
+            NETMANAGER_BASE_LOGE("ParseAddrInfo mallocCString failed.");
+            continue;
+        }
+
         uint16_t port = 0;
         if (tmp->ai_addr->sa_family == AF_INET) {
             auto addr4 = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
@@ -101,7 +107,7 @@ void ParseAddrInfo(addrinfo *res, std::vector<CNetAddress> &addresses_)
             port = addr6->sin6_port;
         }
 
-        CNetAddress address = {.address = MallocCString(host_), .family = tmp->ai_addr->sa_family, .port = port};
+        CNetAddress address = {.address = hostAddress, .family = tmp->ai_addr->sa_family, .port = port};
         addresses_.emplace_back(address);
     }
 }
@@ -197,7 +203,13 @@ bool SetLinkAddr(NetLinkInfo &linkInfo, CConnectionProperties &ret)
         }
         int i = 0;
         for (auto it = linkInfo.netAddrList_.begin(); it != linkInfo.netAddrList_.end(); ++it, ++i) {
-            CNetAddress netAddr{.address = MallocCString(it->address_), .family = it->family_, .port = it->port_};
+            auto address = MallocCString(it->address_);
+            if (address == nullptr) {
+                NETMANAGER_BASE_LOGE("SetLinkAddr mallocCString falied.");
+                continue;
+            }
+
+            CNetAddress netAddr{.address = address, .family = it->family_, .port = it->port_};
             ret.linkAddresses[i] = CLinkAddress{.address = netAddr, .prefixLength = it->prefixlen_};
         }
     }
@@ -233,14 +245,22 @@ bool SetRoute(NetLinkInfo &linkInfo, CConnectionProperties &ret)
         int i = 0;
 
         for (auto it = linkInfo.routeList_.begin(); it != linkInfo.routeList_.end(); ++it, ++i) {
-            CNetAddress destAddr = {.address = MallocCString(it->destination_.address_),
+            auto destinationAddress = MallocCString(it->destination_.address_);
+            auto gatewayAddress = MallocCString(it->gateway_.address_);
+            auto interfaceNameAddress = MallocCString(it->iface_);
+            if (destinationAddress == nullptr || gatewayAddress == nullptr || interfaceNameAddress == nullptr) {
+                NETMANAGER_BASE_LOGE("SetRoute mallocCString falied.");
+                continue;
+            }
+
+            CNetAddress destAddr = {.address = destinationAddress,
                                     .family = it->destination_.family_,
                                     .port = it->destination_.port_};
             CLinkAddress dest = {.address = destAddr, .prefixLength = it->destination_.prefixlen_};
-            CNetAddress gateway = {.address = MallocCString(it->gateway_.address_),
+            CNetAddress gateway = {.address = gatewayAddress,
                                    .family = it->gateway_.family_,
                                    .port = it->gateway_.port_};
-            ret.routes[i] = CRouteInfo{.interfaceName = MallocCString(it->iface_),
+            ret.routes[i] = CRouteInfo{.interfaceName = interfaceNameAddress,
                                        .destination = dest,
                                        .gateway = gateway,
                                        .hasGateway = it->hasGateway_,

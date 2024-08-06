@@ -297,7 +297,10 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
 
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
     struct ifreq ifr = {};
-    strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
+    auto ret = strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
+    if (ret != 0) {
+        NETNATIVE_LOGW("IfName copy failed.");
+    }
 
     ifaceConfig.ifName = ifName;
     if (ioctl(fd, SIOCGIFADDR, &ifr) != -1) {
