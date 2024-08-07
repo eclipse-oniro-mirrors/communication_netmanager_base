@@ -47,21 +47,23 @@ IptablesWrapper::~IptablesWrapper()
 
 void IptablesWrapper::ExecuteCommand(const std::string &command)
 {
+    NETNATIVE_LOGI("ExecuteCommand %{public}s", AnonymizeIptablesCommand(command).c_str());
     if (CommonUtils::ForkExec(command) == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("run exec faild, command=%{public}s", command.c_str());
+        NETNATIVE_LOGE("run exec faild");
     }
 }
 
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
+    NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", AnonymizeIptablesCommand(command).c_str());
     if (CommonUtils::ForkExec(command, &result_) == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("run exec faild, command=%{public}s", command.c_str());
+        NETNATIVE_LOGE("run exec faild");
     }
 }
 
 int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &command)
 {
-    NETNATIVE_LOG_D("IptablesWrapper::RunCommand, ipType:%{public}d, command:%{public}s", ipType, command.c_str());
+    NETNATIVE_LOGI("IptablesWrapper::RunCommand, ipType:%{public}d", ipType);
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
         return NETMANAGER_ERROR;
@@ -92,8 +94,7 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
 {
-    NETNATIVE_LOG_D("IptablesWrapper::RunCommandForRes, ipType:%{public}d, command:%{public}s", ipType,
-                    command.c_str());
+    NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d", ipType);
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
         return result_;

@@ -500,9 +500,11 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
         NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
+    NETMGR_LOG_I("ready for execv");
     if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
         NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
+    NETMGR_LOG_I("execv done");
     if (close(pipeFd[PIPE_IN]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
@@ -522,6 +524,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (out != nullptr) {
         char buf[CHAR_ARRAY_SIZE_MAX] = {0};
         out->clear();
+        NETMGR_LOG_I("ready for read");
         while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
             if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
@@ -529,11 +532,12 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
             }
         }
     }
-
+    NETMGR_LOG_I("read done");
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     pid_t pidRet = waitpid(childPid, nullptr, 0);
+    NETMGR_LOG_I("waitpid %{public}d done", childPid);
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
@@ -551,6 +555,7 @@ int32_t ForkExec(const std::string &command, std::string *out)
         NETMGR_LOG_E("creat pipe failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
     }
+    NETMGR_LOG_I("ForkExec");
     pid_t pid = fork();
     if (pid < 0) {
         NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
