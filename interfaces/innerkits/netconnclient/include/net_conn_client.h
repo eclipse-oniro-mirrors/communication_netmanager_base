@@ -480,6 +480,7 @@ private:
     void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
+    static std::optional<std::string> ObtainBundleNameFromBundleMgr();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;

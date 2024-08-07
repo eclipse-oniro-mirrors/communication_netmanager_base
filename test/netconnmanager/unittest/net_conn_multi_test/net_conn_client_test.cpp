@@ -386,7 +386,6 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest10, TestSize.Level1)
     HttpProxy httpProxy = {TEST_DOMAIN9, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
 }
 
 /**

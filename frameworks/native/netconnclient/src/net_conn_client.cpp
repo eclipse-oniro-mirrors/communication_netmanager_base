@@ -906,10 +906,12 @@ bool NetConnClient::IsAPIVersionSupported(int targetApiVersion)
 
 std::optional<std::string> NetConnClient::ObtainBundleNameForSelf()
 {
-    static std::optional<std::string> cachedResult;
-    if (cachedResult.has_value()) {
-        return cachedResult;
-    }
+    static auto bundleName = ObtainBundleNameFromBundleMgr();
+    return bundleName;
+}
+
+std::optional<std::string> NetConnClient::ObtainBundleNameFromBundleMgr()
+{
     void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
     if (handler == nullptr) {
         NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
@@ -930,7 +932,6 @@ std::optional<std::string> NetConnClient::ObtainBundleNameForSelf()
     }
     auto result = netBundle->ObtainBundleNameForSelf();
     dlclose(handler);
-    cachedResult = result;
     return result;
 }
 } // namespace NetManagerStandard
