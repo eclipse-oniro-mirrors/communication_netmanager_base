@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -435,6 +435,27 @@ public:
 
     int32_t DisableVnicNetwork();
 
+    /**
+     * This function returns whether the caller process's API version is not earlier
+     * than {@link targetApiVersion}, which meaning the caller process has same or later
+     * target API version.
+     *
+     * @param targetApiVersion target API version.
+     * @return true for supported and false for not, and true by default if cannot get
+     * process bundle's information.
+     */
+    static bool IsAPIVersionSupported(int targetApiVersion);
+
+    /**
+     * This function returns the caller's bundle name.
+     * This function is defined here because it is required in some Network Kit APIs.
+     * Please do not use this function except Network Kit APIs.
+     *
+     * @return optional bundle name in string format, return empty if cannot get bundle
+     * info from bundle manager.
+     */
+    static std::optional<std::string> ObtainBundleNameForSelf();
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -458,6 +479,7 @@ private:
     sptr<INetConnService> GetProxy();
     void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    static std::optional<int32_t> ObtainTargetApiVersionForSelf();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
