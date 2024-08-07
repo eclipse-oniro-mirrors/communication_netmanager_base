@@ -28,7 +28,6 @@ constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
-constexpr uint32_t UID_BROKER_SERVICE = 5557;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
@@ -213,7 +212,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     if (code == static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION)) {
         // get uid should be called in this function
         auto uid = IPCSkeleton::GetCallingUid();
-        if (uid != UID_FOUNDATION && uid != UID_BROKER_SERVICE) {
+        if (uid != UID_FOUNDATION && !CheckPermission({Permission::CONNECTIVITY_INTERNAL})) {
             if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
                 return IPC_STUB_WRITE_PARCEL_ERR;
             }

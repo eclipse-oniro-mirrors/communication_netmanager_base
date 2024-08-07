@@ -46,8 +46,8 @@ static constexpr const char *IF_CFG_DOWN = "down";
 static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/public/netmanager/route";
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
-static constexpr uint32_t UID_BROKER_SERVICE = 5557;
 static constexpr uint32_t IPV4_MAX_LENGTH = 32;
+static constexpr int UID_NET_MANAGER = 1099;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -206,8 +206,7 @@ int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     auto callingUid = IPCSkeleton::GetCallingUid();
-    uint8_t isBroker = callingUid == UID_BROKER_SERVICE ? 1 : 0;
-    return proxy->SetInternetPermission(uid, allow, isBroker);
+    return proxy->SetInternetPermission(uid, allow, callingUid != UID_NET_MANAGER);
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
