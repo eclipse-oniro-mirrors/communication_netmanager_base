@@ -92,7 +92,6 @@ typedef enum NetConn_NetBearerType {
     /** WIFI */
     NETCONN_BEARER_WIFI = 1,
 #ifdef FEATURE_NET_BLUETOOTH_ENABLE
-    /** BLUETOOTH */
     NETCONN_BEARER_BLUETOOTH = 2,
 #endif
     /** Ethernet */
