@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "net_conn_client.h"
 #include <thread>
+#include <dlfcn.h>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -23,6 +24,7 @@
 #include "net_conn_service_proxy.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_bundle.h"
 #include "net_supplier_callback_stub.h"
 #include "netsys_sock_client.h"
 #include "network_security_config.h"
@@ -32,6 +34,7 @@ static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
 static constexpr const int32_t MAX_VALID_INTERNAL_NETID = 50;
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
+static const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -867,6 +870,69 @@ int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, bool isBetter
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->UpdateSupplierScore(bearerType, isBetter, supplierId);
+}
+
+std::optional<int32_t> NetConnClient::ObtainTargetApiVersionForSelf()
+{
+    void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
+        return std::nullopt;
+    }
+    using GetNetBundleClass = INetBundle *(*)();
+    auto getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return std::nullopt;
+    }
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler);
+        return std::nullopt;
+    }
+    auto result = netBundle->ObtainTargetApiVersionForSelf();
+    dlclose(handler);
+    return result;
+}
+
+bool NetConnClient::IsAPIVersionSupported(int targetApiVersion)
+{
+    static auto currentApiVersion = ObtainTargetApiVersionForSelf();
+    // Returns true by default in case can not get bundle info from bundle mgr.
+    return currentApiVersion.value_or(targetApiVersion) >= targetApiVersion;
+}
+
+std::optional<std::string> NetConnClient::ObtainBundleNameForSelf()
+{
+    static auto bundleName = ObtainBundleNameFromBundleMgr();
+    return bundleName;
+}
+
+std::optional<std::string> NetConnClient::ObtainBundleNameFromBundleMgr()
+{
+    void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
+        return std::nullopt;
+    }
+    using GetNetBundleClass = INetBundle *(*)();
+    auto getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return std::nullopt;
+    }
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler);
+        return std::nullopt;
+    }
+    auto result = netBundle->ObtainBundleNameForSelf();
+    dlclose(handler);
+    return result;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -48,6 +48,7 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     std::string ident = "ident";
     NetBearType bearerType = BEARER_CELLULAR;
     sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(bearerType, ident, netCaps)).release();
+    supplier->SetDetectionDone();
 
     // mock Failed to detect network
     supplier->SetNetValid(INVALID_DETECTION_STATE);

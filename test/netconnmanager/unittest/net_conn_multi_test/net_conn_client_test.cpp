@@ -1472,5 +1472,16 @@ HWTEST_F(NetConnClientTest, DisableVnicNetwork001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnClientTest, IsAPIVersionSupported001, TestSize.Level1)
+{
+    int targetApiVersion = 1;
+    EXPECT_TRUE(NetConnClient::IsAPIVersionSupported(targetApiVersion));
+}
+
+HWTEST_F(NetConnClientTest, ObtainBundleNameForSelf001, TestSize.Level1)
+{
+    auto result = NetConnClient::ObtainBundleNameForSelf();
+    EXPECT_EQ(result, std::nullopt);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

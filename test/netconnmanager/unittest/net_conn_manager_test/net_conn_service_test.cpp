@@ -1090,6 +1090,7 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     auto supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
+    supplier->SetDetectionDone();
     EXPECT_EQ(supplier->GetRealScore(), supplier->GetNetScore() - DIFF_SCORE_BETWEEN_GOOD_POOR);
 }
 
