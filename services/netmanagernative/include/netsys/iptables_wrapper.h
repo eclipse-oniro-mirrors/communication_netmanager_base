@@ -75,9 +75,10 @@ public:
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
-    static std::string AnonymizeIptablesCommand(const std::string &command) {
+    static std::string AnonymizeIptablesCommand(const std::string &command)
+    {
         std::string temp{command};
-        std::transform(temp.cbegin(), temp.cend(), temp.begin(), [](char c){
+        std::transform(temp.cbegin(), temp.cend(), temp.begin(), [](char c) {
             return std::isdigit(c) ? 'x' : c;
         });
         return temp;
