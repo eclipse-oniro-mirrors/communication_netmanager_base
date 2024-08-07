@@ -61,7 +61,8 @@ public:
     void StartTimeOutNetAvailable();
     int32_t GetNetworkId() const;
 private:
-    bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
+    bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType = nullptr,
+        bool skipCheckIdent = false);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
     bool CompareByNetworkNetType(NetBearType bearerType);
     bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);
