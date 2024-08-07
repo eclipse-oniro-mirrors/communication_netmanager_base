@@ -121,7 +121,7 @@ bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType be
     if (ident == netSpecifier_->ident_) {
         return true;
     }
-    if (CompareByJsonNetworkId(ident,bearerType, skipCheckIdent)) {
+    if (CompareByJsonNetworkId(ident, bearerType, skipCheckIdent)) {
         return true;
     }
     return false;
