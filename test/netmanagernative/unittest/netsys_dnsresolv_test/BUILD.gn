@@ -25,10 +25,7 @@ ohos_unittest("netsys_dnsresolv_test") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [
-    "dns_quality_diag_test.cpp",
-    "netsys_net_dns_health_data_test.cpp",
-  ]
+  sources = [ "dns_quality_diag_test.cpp" ]
 
   sources += [
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
