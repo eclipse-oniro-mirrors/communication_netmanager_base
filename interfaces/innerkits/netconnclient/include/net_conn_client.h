@@ -497,6 +497,7 @@ private:
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
     std::mutex registerConnTupleListMutex_;
+    std::mutex netSupplierCallbackMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
