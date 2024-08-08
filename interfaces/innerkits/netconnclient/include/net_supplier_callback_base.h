@@ -30,10 +30,11 @@ struct NetRequest {
     uint32_t registerType = REGISTER;
     std::set<NetBearType> bearTypes = {};
     uint32_t uid = 0;
-    int32_t networkId = -1;
+    uint32_t requestId = 0;
+    std::string ident;
     NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes, const uint32_t uid = 0,
-        const int32_t networkId = -1)
-        : registerType(registerType), bearTypes(netBearTypes), uid(uid), networkId(networkId)
+        const uint32_t requestId = 0, const std::sring ident = "")
+        : registerType(registerType), bearTypes(netBearTypes), uid(uid), requestId(requestId), ident(ident)
     {}
     NetRequest() = default;
 };

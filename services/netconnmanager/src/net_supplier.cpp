@@ -91,8 +91,8 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netSupplierInfo_ = netSupplierInfo;
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
-    if (netSupplierType_ == BEARER_WIFI) {
-        netSupplierIdent_ = std::to_string(netSupplierInfo.networkId_);
+    if (!netSupplierInfo_.ident_.empty()) {
+        netSupplierIdent_ = netSupplierInfo.ident_;
     }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);

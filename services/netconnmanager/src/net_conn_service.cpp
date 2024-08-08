@@ -1213,7 +1213,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second, NEED_SKIP_CHECK_IDENT)) {
             continue;
         }
-        NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetNetworkId());
+        NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetRequestId(),
+            request->GetNetSpecifier()->ident_);
         bool result = iter->second->RequestToConnect(reqId, netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),

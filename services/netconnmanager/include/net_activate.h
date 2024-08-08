@@ -61,15 +61,13 @@ public:
     void StartTimeOutNetAvailable();
     int32_t GetNetworkId() const;
 private:
-    bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType = BEARER_DEFAULT,
-        bool skipCheckIdent = false);
+    bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
     bool CompareByNetworkNetType(NetBearType bearerType);
     bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);
     bool HaveCapability(NetCap netCap) const;
     bool HaveTypes(const std::set<NetBearType> &bearerTypes) const;
     void TimeOutNetAvailable();
-    bool CompareByJsonNetworkId(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
 
 private:
     uint32_t requestId_ = 1;

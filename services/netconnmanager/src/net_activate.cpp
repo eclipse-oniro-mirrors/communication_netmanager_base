@@ -121,34 +121,10 @@ bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType be
     if (ident == netSpecifier_->ident_) {
         return true;
     }
-    if (CompareByJsonNetworkId(ident, bearerType, skipCheckIdent)) {
+    if (skipCheckIdent && BEARER_WIFI == bearerType) {
         return true;
     }
     return false;
-}
-
-bool NetActivate::CompareByJsonNetworkId(const std::string &ident, NetBearType bearerType, bool skipCheckIdent)
-{
-    cJSON *identRoot = cJSON_Parse(netSpecifier_->ident_.c_str());
-    if (identRoot == nullptr) {
-        NETMGR_LOG_D("request ident is not json");
-        return false;
-    }
-    cJSON *networkId = cJSON_GetObjectItem(identRoot, "networkId");
-    if (networkId == nullptr) {
-        NETMGR_LOG_D("request networkId is null");
-        cJSON_Delete(identRoot);
-        return false;
-    }
-    bool result = false;
-    if (ident == std::to_string(networkId->valueint)) {
-        result = true;
-    }
-    if (skipCheckIdent && BEARER_WIFI == bearerType) {
-        result = true;
-    }
-    cJSON_Delete(identRoot);
-    return result;
 }
 
 bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
