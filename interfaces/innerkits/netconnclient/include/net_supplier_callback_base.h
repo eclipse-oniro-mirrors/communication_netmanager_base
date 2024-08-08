@@ -33,7 +33,7 @@ struct NetRequest {
     uint32_t requestId = 0;
     std::string ident;
     NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes, const uint32_t uid = 0,
-        const uint32_t requestId = 0, const std::sring ident = "")
+        const uint32_t requestId = 0, const std::string ident = "")
         : registerType(registerType), bearTypes(netBearTypes), uid(uid), requestId(requestId), ident(ident)
     {}
     NetRequest() = default;
