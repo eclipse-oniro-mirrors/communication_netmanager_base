@@ -75,8 +75,8 @@ bool SetCapability(CNetCapabilities &capabilities, const std::set<NetBearType> &
 int32_t ConnectionCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                           const sptr<NetAllCapabilities> &netAllCap)
 {
-    if (netHandle == nullptr) {
-        NETMANAGER_BASE_LOGE("NetCapabilitiesChange netHandle is null");
+    if (netHandle == nullptr || netAllCap == nullptr) {
+        NETMANAGER_BASE_LOGE("NetCapabilitiesChange param is nullptr");
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
@@ -92,9 +92,6 @@ int32_t ConnectionCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHa
 
     int32_t id = netHandle->GetNetId();
 
-    if (netAllCap == nullptr) {
-        return 0;
-    }
     int len = static_cast<int>(netConnection->netCapabilitiesChange.size());
     for (int i = 0; i < len; i++) {
         auto bearTypes = netAllCap->bearerTypes_;
@@ -169,7 +166,8 @@ void SetConnectionProp(CConnectionProperties &props, const sptr<NetLinkInfo> &in
 int32_t ConnectionCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
                                                                   const sptr<NetLinkInfo> &info)
 {
-    if (netHandle == nullptr) {
+    if (netHandle == nullptr || info == nullptr) {
+        NETMANAGER_BASE_LOGE("NetConnectionPropertiesChange param is nullptr");
         return 0;
     }
     std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
