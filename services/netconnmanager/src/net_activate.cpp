@@ -231,23 +231,5 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
     }
     return result;
 }
-
-int32_t NetActivate::GetNetworkId() const
-{
-    cJSON *identRoot = cJSON_Parse(netSpecifier_->ident_.c_str());
-    if (identRoot == nullptr) {
-        NETMGR_LOG_D("request ident is not json");
-        return -1;
-    }
-    cJSON *networkId = cJSON_GetObjectItem(identRoot, "networkId");
-    if (networkId == nullptr) {
-        NETMGR_LOG_D("request networkId is null");
-        cJSON_Delete(identRoot);
-        return -1;
-    }
-    int32_t result = networkId->valueint;
-    cJSON_Delete(identRoot);
-    return result;
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

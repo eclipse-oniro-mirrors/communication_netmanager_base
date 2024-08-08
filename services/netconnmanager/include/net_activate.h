@@ -59,7 +59,6 @@ public:
     int32_t GetRegisterType() const;
     std::set<NetBearType> GetBearType() const;
     void StartTimeOutNetAvailable();
-    int32_t GetNetworkId() const;
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
