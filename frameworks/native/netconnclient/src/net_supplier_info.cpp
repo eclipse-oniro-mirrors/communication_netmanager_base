@@ -154,7 +154,7 @@ std::string NetSupplierInfo::ToString(const std::string &tab) const
 
     str.append(tab);
     str.append("ident_ = ");
-    str.append(std::to_string(ident_));
+    str.append(ident_);
 
     return str;
 }
