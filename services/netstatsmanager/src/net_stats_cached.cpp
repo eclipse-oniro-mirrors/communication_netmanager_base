@@ -89,6 +89,12 @@ void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushSta
     uidPushStatsInfo.insert(uidPushStatsInfo.end(), uidPushStatsInfo_.begin(), uidPushStatsInfo_.end());
 }
 
+void NetStatsCached::GetAllPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    uidPushStatsInfo.insert(uidPushStatsInfo.end(), allPushStatsInfo_.begin(), allPushStatsInfo_.end());
+}
+
 void NetStatsCached::GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
@@ -213,7 +219,10 @@ void NetStatsCached::CacheUidStats()
     });
     lastUidStatsInfo_.clear();
     lastUidStatsInfo_ = std::move(statsInfos);
+}
 
+void NetStatsCached::CacheAppStats()
+{
     std::vector<NetStatsInfo> pushInfos;
     std::for_each(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(), [&pushInfos](NetStatsInfo &info) {
         auto findRet = std::find_if(pushInfos.begin(), pushInfos.end(),
@@ -226,6 +235,15 @@ void NetStatsCached::CacheUidStats()
     });
     std::for_each(pushInfos.begin(), pushInfos.end(), [this](auto &item) {
         stats_.PushUidStats(item);
+        auto findRet = std::find_if(allPushStatsInfo_.begin(), allPushStatsInfo_.end(),
+                                    [&item](const NetStatsInfo &info) {
+                                        return info.Equals(item) && info.ident_ == item.ident_;
+                                    });
+        if (findRet == allPushStatsInfo_.end()) {
+            allPushStatsInfo_.push_back(item);
+            return;
+        }
+        *findRet += item;
     });
     uidPushStatsInfo_.clear();
 }
@@ -298,6 +316,7 @@ void NetStatsCached::CacheStats()
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     CacheUidStats();
+    CacheAppStats();
     CacheUidSimStats();
     CacheIfaceStats();
 }
