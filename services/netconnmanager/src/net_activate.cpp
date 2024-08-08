@@ -19,7 +19,6 @@
 #include "net_activate.h"
 #include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
-#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
