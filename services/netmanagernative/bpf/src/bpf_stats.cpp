@@ -27,7 +27,6 @@ namespace OHOS::NetManagerStandard {
 namespace {
 constexpr const char *CELLULAR_IFACE = "rmnet0";
 constexpr const char *WIFI_IFACE = "wlan0";
-const std::string LOOPBACK_IFACE = "lo";
 }
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
 {
@@ -119,7 +118,7 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
         if (pName != nullptr) {
             tempStats.iface_ = pName;
         }
-        if (k.ifType == IFACE_TYPE_WIFI && std::string(pName) != LOOPBACK_IFACE) {
+        if (k.ifType == IFACE_TYPE_WIFI) {
             tempStats.iface_ = WIFI_IFACE;
         } else if (k.ifType == IFACE_TYPE_CELLULAR) {
             tempStats.iface_ = CELLULAR_IFACE;
