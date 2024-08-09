@@ -396,6 +396,12 @@ int32_t NetStatsService::ResetFactory()
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
     NETMGR_LOG_D("Enter GetAllStatsInfo.");
+    if (netStatsCached_ != nullptr) {
+        netStatsCached_->GetUidPushStatsCached(infos);
+        netStatsCached_->GetAllPushStatsCached(infos);
+    } else {
+        NETMGR_LOG_E("Cached is nullptr");
+    }
     return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
 

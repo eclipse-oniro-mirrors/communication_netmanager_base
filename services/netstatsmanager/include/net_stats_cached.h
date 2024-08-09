@@ -50,6 +50,8 @@ public:
 
     void GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo);
 
+    void GetAllPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo);
+
     void GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsInfo);
 
     void SetAppStats(const PushStatsInfo &info);
@@ -217,6 +219,7 @@ private:
     uint64_t trafficThreshold_ = DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES;
     uint64_t dateCycle_ = DEFAULT_DATA_CYCLE_S;
     std::vector<NetStatsInfo> uidPushStatsInfo_;
+    std::vector<NetStatsInfo> allPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
@@ -230,7 +233,7 @@ private:
     void CacheUidStats();
     void CacheUidSimStats();
     void CacheIfaceStats();
-    void CacheAppStats(NetStatsInfo &netStatsInfo);
+    void CacheAppStats();
 
     void WriteStats();
     void WriteUidStats();
