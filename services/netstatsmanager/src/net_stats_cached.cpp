@@ -60,10 +60,12 @@ int32_t NetStatsCached::StartCached()
         return STATS_ERR_CREATE_TABLE_FAIL;
     }
     helper->Upgrade();
+#ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
     writeTimer_ = std::make_unique<FfrtTimer>();
     cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
     writeTimer_->Start(STATS_PACKET_CYCLE_MS, [this]() { WriteStats(); });
+#endif
     return ret;
 }
 
@@ -379,8 +381,10 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 {
     NETMGR_LOG_D("Current cycle threshold has changed current is : %{public}d", threshold);
     cycleThreshold_ = threshold;
+#ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
     cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
+#endif
 }
 
 void NetStatsCached::ForceUpdateStats()
