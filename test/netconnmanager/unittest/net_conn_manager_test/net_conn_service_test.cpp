@@ -228,10 +228,12 @@ HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
 
     netSupplierInfo->isAvailable_ = true;
     netSupplierInfo->uid_ = TEST_UID;
+    netSupplierInfo->ident_ = "0";
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     netSupplierInfo->isAvailable_ = false;
+    netSupplierInfo->ident_ = "";
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }

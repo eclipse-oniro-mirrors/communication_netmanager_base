@@ -404,13 +404,14 @@ private:
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                              const std::set<NetCap> &netCaps);
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                            const uint32_t &timeoutMS, const int32_t registerType = REGISTER);
+                            const uint32_t &timeoutMS, const int32_t registerType = REGISTER,
+                            const uint32_t callingUid = 0);
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
                                            sptr<NetSupplier> &supplier);
-    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const uint32_t callingUid = 0);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
