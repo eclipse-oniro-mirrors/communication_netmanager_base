@@ -91,7 +91,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netSupplierInfo_ = netSupplierInfo;
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
-    if (netSupplierInfo_.ident_ != nullptr && !netSupplierInfo_.ident_.empty()) {
+    if (!netSupplierInfo_.ident_.empty()) {
         netSupplierIdent_ = netSupplierInfo_.ident_;
     }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
