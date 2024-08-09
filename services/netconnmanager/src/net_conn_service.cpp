@@ -70,7 +70,6 @@ constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdat
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
-constexpr bool NEED_SKIP_CHECK_IDENT = true;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -1115,7 +1114,7 @@ void NetConnService::RequestAllNetworkExceptDefault()
             NETMGR_LOG_I("Supplier[%{public}d] is internal, skip.", netSupplier.second->GetSupplierId());
             continue;
         }
-        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second, NEED_SKIP_CHECK_IDENT)) {
+        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second, true)) {
             continue;
         }
         if (!netSupplier.second->RequestToConnect(reqId)) {
@@ -1184,7 +1183,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (iter->second == nullptr) {
             continue;
         }
-        if (!iter->second->MatchRequestAndNetwork(supplier, NEED_SKIP_CHECK_IDENT)) {
+        if (!iter->second->MatchRequestAndNetwork(supplier, true)) {
             continue;
         }
         NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
@@ -1210,7 +1209,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (iter->second == nullptr) {
             continue;
         }
-        if (!request->MatchRequestAndNetwork(iter->second, NEED_SKIP_CHECK_IDENT)) {
+        if (!request->MatchRequestAndNetwork(iter->second, true)) {
             continue;
         }
         NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetRequestId(),

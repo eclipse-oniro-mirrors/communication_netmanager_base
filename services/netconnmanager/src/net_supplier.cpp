@@ -91,7 +91,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netSupplierInfo_ = netSupplierInfo;
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
-    if (!netSupplierInfo_.ident_.empty()) {
+    if (netSupplierInfo_.ident_ != nullptr && !netSupplierInfo_.ident_.empty()) {
         netSupplierIdent_ = netSupplierInfo_.ident_;
     }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
@@ -233,13 +233,11 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (netRequest.ident.empty()) {
-        if (netSupplierInfo_.isAvailable_) {
-            NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
-            return true;
-        }
-        UpdateNetConnState(NET_CONN_STATE_IDLE);
+    if (netSupplierInfo_.isAvailable_ && (netRequest.ident.empty())) {
+        NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
+        return true;
     }
+    UpdateNetConnState(NET_CONN_STATE_IDLE);
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
