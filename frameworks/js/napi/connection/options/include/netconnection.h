@@ -46,7 +46,7 @@ public:
 private:
     sptr<NetConnCallbackObserver> observer_;
 
-    EventManager *manager_;
+    EventManager *manager_{nullptr};
 
     explicit NetConnection(EventManager *eventManager);
 };
