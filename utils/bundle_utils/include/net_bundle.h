@@ -17,6 +17,7 @@
 #define NET_BUNDLE__H
 
 #include <string>
+#include <optional>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -24,6 +25,8 @@ class INetBundle {
 public:
     virtual int32_t GetJsonFromBundle(std::string &jsonProfile) = 0;
     virtual bool IsAtomicService(std::string &bundleName) = 0;
+    virtual std::optional<int32_t> ObtainTargetApiVersionForSelf() = 0;
+    virtual std::optional<std::string> ObtainBundleNameForSelf() = 0;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
