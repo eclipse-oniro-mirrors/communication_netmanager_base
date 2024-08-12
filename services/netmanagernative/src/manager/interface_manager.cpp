@@ -299,7 +299,7 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
     struct ifreq ifr = {};
     auto ret = strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
     if (ret != 0) {
-        NETNATIVE_LOGW("IfName copy failed.");
+        NETNATIVE_LOGW("IfName copy failed, no need to return.");
     }
 
     ifaceConfig.ifName = ifName;
