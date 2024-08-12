@@ -106,6 +106,10 @@ public:
     virtual int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) = 0;
     virtual int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) = 0;
     virtual int32_t DisableVnicNetwork() = 0;
+    virtual int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) = 0;
+    virtual int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                               const std::string &dstAddr) = 0;
+    virtual int32_t DisableDistributedNet(bool isServer) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

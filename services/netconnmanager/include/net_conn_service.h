@@ -362,6 +362,10 @@ public:
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
+    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
+    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                       const std::string &dstAddr) override;
+    int32_t DisableDistributedNet(bool isServer) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -468,6 +472,10 @@ private:
     uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId);
     int32_t EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
     int32_t DisableVnicNetworkAsync();
+    int32_t EnableDistributedClientNetAsync(const std::string &virnicAddr, const std::string &iif);
+    int32_t EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
+                                            const std::string &dstAddr);
+    int32_t DisableDistributedNetAsync(bool isServer);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);

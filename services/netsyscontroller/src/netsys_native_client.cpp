@@ -265,6 +265,37 @@ int32_t NetsysNativeClient::DestroyVnic()
     return proxy->DestroyVnic();
 }
 
+int32_t NetsysNativeClient::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->EnableDistributedClientNet(virnicAddr, iif);
+}
+
+int32_t NetsysNativeClient::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                       const std::string &dstAddr)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->EnableDistributedServerNet(iif, devIface, dstAddr);
+}
+
+int32_t NetsysNativeClient::DisableDistributedNet(bool isServer)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DisableDistributedNet(isServer);
+}
+
 int32_t NetsysNativeClient::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);

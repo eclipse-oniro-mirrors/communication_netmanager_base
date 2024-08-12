@@ -1020,6 +1020,91 @@ int32_t NetsysNativeServiceProxy::DestroyVnic()
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    NETNATIVE_LOGI("Begin to EnableDistributedClientNet");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(virnicAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(iif)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET), data,
+                              reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                             const std::string &dstAddr)
+{
+    NETNATIVE_LOGI("Begin to EnableDistributedServerNet");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(iif)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(devIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(dstAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET), data,
+                              reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::DisableDistributedNet(bool isServer)
+{
+    NETNATIVE_LOGI("Begin to DisableDistributedNet");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(isServer)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET), data,
+                              reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return IPC_INVOKER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)
 {
     NETNATIVE_LOGI("Begin to GetFwmarkForNetwork");

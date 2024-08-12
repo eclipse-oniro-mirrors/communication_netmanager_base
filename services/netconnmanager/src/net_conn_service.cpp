@@ -2673,5 +2673,88 @@ int32_t NetConnService::DisableVnicNetworkAsync()
     vnicCreated = false;
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask(
+            [this, &virnicAddr, &iif, &result]() { result = this->EnableDistributedClientNetAsync(virnicAddr, iif); });
+    }
+    return result;
+}
+
+int32_t NetConnService::EnableDistributedClientNetAsync(const std::string &virnicAddr, const std::string &iif)
+{
+    if (iif.empty()) {
+        NETMGR_LOG_E("iif is empty");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    if (!CommonUtils::IsValidIPV4(virnicAddr)) {
+        NETMGR_LOG_E("the virnicAddr is not valid");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    if (NetsysController::GetInstance().EnableDistributedClientNet(virnicAddr, iif) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("EnableDistributedClientNet failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                   const std::string &dstAddr)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, &iif, &devIface, &dstAddr, &result]() {
+            result = this->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+        });
+    }
+    return result;
+}
+
+int32_t NetConnService::EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
+                                                        const std::string &dstAddr)
+{
+    if (iif.empty() || devIface.empty()) {
+        NETMGR_LOG_E("iif || devIface is empty");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    if (!CommonUtils::IsValidIPV4(dstAddr)) {
+        NETMGR_LOG_E("the dstAddr is not valid");
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
+
+    if (NetsysController::GetInstance().EnableDistributedServerNet(iif, devIface, dstAddr) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("EnableDistributedServerNet failed");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::DisableDistributedNet(bool isServer)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask(
+            [this, isServer, &result]() { result = this->DisableDistributedNetAsync(isServer); });
+    }
+    return result;
+}
+
+int32_t NetConnService::DisableDistributedNetAsync(bool isServer)
+{
+    if (NetsysController::GetInstance().DisableDistributedNet(isServer) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DisableDistributedNet");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

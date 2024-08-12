@@ -112,6 +112,34 @@ int32_t NetsysController::DestroyVnic()
     return netsysService_->DestroyVnic();
 }
 
+int32_t NetsysController::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->EnableDistributedClientNet(virnicAddr, iif);
+}
+
+int32_t NetsysController::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                     const std::string &dstAddr)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->EnableDistributedServerNet(iif, devIface, dstAddr);
+}
+
+int32_t NetsysController::DisableDistributedNet(bool isServer)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DisableDistributedNet(isServer);
+}
+
 int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids,
                                          const std::vector<int32_t> &endUids)
 {

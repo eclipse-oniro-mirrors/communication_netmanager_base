@@ -418,6 +418,37 @@ int32_t NetsysNativeService::DestroyVnic()
     return result;
 }
 
+int32_t NetsysNativeService::EnableDistributedClientNet(const std::string &virnicAddr,
+                                                        const std::string &iif)
+{
+    if (virnicAddr.empty() || iif.empty()) {
+        NETNATIVE_LOGE("EnableDistributedClientNet param is empty.");
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    int32_t result = netsysService_->EnableDistributedClientNet(virnicAddr, iif);
+    NETNATIVE_LOG_D("EnableDistributedClientNet");
+    return result;
+}
+
+int32_t NetsysNativeService::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                        const std::string &dstAddr)
+{
+    if (iif.empty() || devIface.empty() || dstAddr.empty()) {
+        NETNATIVE_LOGE("EnableDistributedServerNet param is empty.");
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    int32_t result = netsysService_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    NETNATIVE_LOG_D("EnableDistributedServerNet");
+    return result;
+}
+
+int32_t NetsysNativeService::DisableDistributedNet(bool isServer)
+{
+    int32_t result = netsysService_->DisableDistributedNet(isServer);
+    NETNATIVE_LOGI("DisableDistributedNet");
+    return result;
+}
+
 int32_t NetsysNativeService::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)
 {
     markMaskParcel = netsysService_->GetFwmarkForNetwork(netId);

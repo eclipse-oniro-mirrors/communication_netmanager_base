@@ -25,6 +25,7 @@
 #include "traffic_manager.h"
 #include "vpn_manager.h"
 #include "vnic_manager.h"
+#include "distributed_manager.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -111,6 +112,22 @@ int32_t NetManagerNative::CreateVnic(uint16_t mtu, const std::string &tunAddr, i
 int32_t NetManagerNative::DestroyVnic()
 {
     return VnicManager::GetInstance().DestroyVnic();
+}
+
+int32_t NetManagerNative::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    return routeManager_->EnableDistributedClientNet(virnicAddr, iif);
+}
+
+int32_t NetManagerNative::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                     const std::string &dstAddr)
+{
+    return routeManager_->EnableDistributedServerNet(iif, devIface, dstAddr);
+}
+
+int32_t NetManagerNative::DisableDistributedNet(bool isServer)
+{
+    return routeManager_->DisableDistributedNet(isServer);
 }
 
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)

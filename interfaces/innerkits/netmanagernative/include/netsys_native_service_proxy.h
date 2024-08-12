@@ -76,6 +76,10 @@ public:
     int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                        const std::set<int32_t> &uids) override;
     int32_t DestroyVnic() override;
+    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
+    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                       const std::string &dstAddr) override;
+    int32_t DisableDistributedNet(bool isServer) override;
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;
     int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) override;
@@ -125,7 +129,7 @@ public:
                          const std::string &ifName) override;
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                          const std::string &ifName) override;
-    
+
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override;
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override;
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;

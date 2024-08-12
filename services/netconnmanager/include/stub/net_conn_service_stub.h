@@ -38,6 +38,7 @@ private:
 private:
     void InitQueryFuncToInterfaceMap();
     void InitVnicFuncToInterfaceMap();
+    void InitVirnicFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
@@ -49,6 +50,9 @@ private:
     int32_t OnSetInternetPermission(MessageParcel &data, MessageParcel &reply);
     int32_t OnEnableVnicNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply);
+    int32_t OnEnableDistributedClientNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnEnableDistributedServerNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDisableDistributedNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);
