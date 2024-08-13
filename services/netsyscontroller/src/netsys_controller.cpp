@@ -295,7 +295,7 @@ int32_t NetsysController::GetInterfaceMtu(const std::string &ifName)
 
 int32_t NetsysController::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
-    NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu)；
+    NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
