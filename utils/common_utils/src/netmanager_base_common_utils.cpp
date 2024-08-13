@@ -488,14 +488,17 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 
 int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
 {
+    NETMGR_LOG_I("ready for fork");
     if (count != PIPE_FD_NUM) {
         NETMGR_LOG_E("fork exec parent process failed");
         _exit(-1);
     }
+    NETMGR_LOG_I("Fork done and ready to close");
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
+    NETMGR_LOG_I("Close done and ready for dup2");
     if (dup2(pipeFd[PIPE_IN], STDOUT_FILENO) == -1) {
         NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
