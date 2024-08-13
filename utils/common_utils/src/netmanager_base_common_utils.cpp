@@ -488,7 +488,7 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 
 int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
 {
-    NETMGR_LOG_I("ready for fork");
+    NETMGR_LOG_I("Fork OK");
     if (count != PIPE_FD_NUM) {
         NETMGR_LOG_E("fork exec parent process failed");
         _exit(-1);
