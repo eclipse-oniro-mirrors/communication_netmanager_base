@@ -60,10 +60,6 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
 
 bool ohos_socket_hook_initialize(const SocketDispatchType* disptch, bool*, const char*)
 {
-    if (disptch == nullptr) {
-        return false;
-    }
-
     g_dispatch.store(disptch);
     g_hookFlag = true;
     return true;
