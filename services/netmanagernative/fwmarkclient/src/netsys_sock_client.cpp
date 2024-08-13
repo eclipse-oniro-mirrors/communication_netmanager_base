@@ -26,7 +26,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace {
-SocketDispatchType defaultSocketDispatchType;    
+SocketDispatchType defaultSocketDispatchType;
 std::atomic_int g_netIdForApp(0);
 std::atomic<const SocketDispatchType*> g_dispatch(&defaultSocketDispatchType);
 std::atomic_bool g_hookFlag(false);
