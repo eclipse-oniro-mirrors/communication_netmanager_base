@@ -47,7 +47,7 @@ static int32_t Conv2Ch(const std::string s, char *ch)
         NETMGR_LOG_E("string out of memory");
         return NETMANAGER_ERR_INTERNAL;
     }
-    if (strcpy_s(ch, s.length() + 1, s.c_str()) != 0) {
+    if (strcpy_s(ch, std::strlen(ch), s.c_str()) != 0) {
         NETMGR_LOG_E("string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
