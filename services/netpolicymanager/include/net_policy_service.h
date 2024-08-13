@@ -246,7 +246,8 @@ public:
 
     NetAccessPolicyRDB GetNetAccessPolicyDBHandler()
     {
-        return netAccessPolicy_;
+        static NetAccessPolicyRDB netAccessPolicy;
+        return netAccessPolicy;
     }
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
@@ -314,7 +315,6 @@ private:
         std::shared_ptr<NetPolicyService> netPolicy_ = nullptr;
     };
     sptr<INetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
-    NetAccessPolicyRDB netAccessPolicy_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
