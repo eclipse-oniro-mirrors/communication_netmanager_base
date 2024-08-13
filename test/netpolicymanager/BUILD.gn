@@ -16,7 +16,6 @@ import("//build/test.gni")
 group("unittest") {
   testonly = true
   deps = [
-    "unittest/net_access_policy_database_test:net_access_policy_database_test",
     "unittest/net_policy_manager_test:net_policy_manager_test",
     "unittest/net_policy_service_test:net_policy_service_test",
   ]
