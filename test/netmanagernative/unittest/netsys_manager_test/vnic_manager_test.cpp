@@ -94,5 +94,64 @@ HWTEST_F(VnicManagerTest, InitIfreq001, TestSize.Level1)
     auto result = VnicManager::GetInstance().InitIfreq(ifr, cardName);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(VnicManagerTest, AddDefaultRoute001, TestSize.Level1)
+{
+    auto result = VnicManager::GetInstance().AddDefaultRoute();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VnicManagerTest, DelDefaultRoute001, TestSize.Level1)
+{
+    auto result = VnicManager::GetInstance().DelDefaultRoute();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VnicManagerTest, CreateWithDestroyVnic001, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    const std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids = {5527};
+    auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = VnicManager::GetInstance().DestroyVnic();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VnicManagerTest, CreateWithDestroyVnic002, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    const std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+    for (int32_t i = 1; i <= 30; ++i) {
+        uids.insert(i);
+    }
+
+    auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VnicManagerTest, CreateWithDestroyVnic003, TestSize.Level1)
+{
+    uint16_t mtu = -1;
+    const std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    const std::set<int32_t> uids = {5527};
+    auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VnicManagerTest, CreateWithDestroyVnic004, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    const std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    const std::set<int32_t> uids;
+    auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
