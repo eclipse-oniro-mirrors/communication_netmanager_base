@@ -19,6 +19,5 @@ group("unittest") {
     "unittest/net_access_policy_database_test:net_access_policy_database_test",
     "unittest/net_policy_manager_test:net_policy_manager_test",
     "unittest/net_policy_service_test:net_policy_service_test",
-    "unittest/net_access_policy_database_test:net_access_policy_database_test",
   ]
 }
