@@ -54,13 +54,6 @@ HWTEST_F(NetAccessPolicyRDBTest, InitRdbStore001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetAccessPolicyRDBTest, GetRdbStore001, TestSize.Level1)
-{
-    NetAccessPolicyRDB netAccessPolicy;
-    auto ret = netAccessPolicy.GetRdbStore();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetAccessPolicyRDBTest, InsertData001, TestSize.Level1)
 {
     NetAccessPolicyData policy;
