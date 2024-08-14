@@ -1391,7 +1391,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
-        NETMGR_LOG_E("not found the netId");
+        NETMGR_LOG_D("not found the netId");
         return NETMANAGER_SUCCESS;
     }
 
@@ -1642,7 +1642,9 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         NETMGR_LOG_D("Use default http proxy, cost=%{public}lld",  durationNs.count());
         return NETMANAGER_SUCCESS;
     }
-    NETMGR_LOG_I("No default http proxy.");
+    auto endTime = std::chrono::steady_clock::now();
+    auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+    NETMGR_LOG_I("No default http proxy, durationNs=%{public}lld", durationNs.count());
     return NETMANAGER_SUCCESS;
 }
 
