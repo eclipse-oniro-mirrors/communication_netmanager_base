@@ -879,6 +879,12 @@ int32_t NetsysController::StopDhcpClient(const std::string &iface, bool bIpv6)
 int32_t NetsysController::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("NetsysController::RegisterCallback");
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
     return netsysService_->RegisterCallback(callback);
 }
 
