@@ -50,16 +50,31 @@ int NetAccessPolicyRDB::RdbDataOpenCallback::OnUpgrade(NativeRdb::RdbStore &stor
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetAccessPolicyRDB::InitRdbStore()
+int32_t NetAccessPolicyRDB::GetRdbStore()
 {
+    if (rdbStore_ != nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+
     int errCode = NETMANAGER_SUCCESS;
     NativeRdb::RdbStoreConfig config(DATABASE_NAME);
     NetAccessPolicyRDB::RdbDataOpenCallback helper;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION, helper, errCode);
     if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("RDB create failed");
+        NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetAccessPolicyRDB::InitRdbStore()
+{
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
     std::string createTable =
         "CREATE TABLE IF NOT EXISTS " + NETMANAGER_DB_UID_ACCESS_POLICY_TABLE + " (" + SQL_TABLE_COLUMS + ")";
     rdbStore_->ExecuteSql(createTable);
@@ -71,12 +86,12 @@ int32_t NetAccessPolicyRDB::InitRdbStore()
 int32_t NetAccessPolicyRDB::InsertData(NetAccessPolicyData policy)
 {
     NETMGR_LOG_D("InsertData");
-    if (rdbStore_ == nullptr) {
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return NETMANAGER_ERROR;
     }
 
-    int ret = NETMANAGER_SUCCESS;
     NativeRdb::ValuesBucket policyValues;
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_UID, policy.uid);
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_WIFI_POLICY, policy.wifiPolicy);
@@ -100,10 +115,12 @@ int32_t NetAccessPolicyRDB::InsertData(NetAccessPolicyData policy)
 int32_t NetAccessPolicyRDB::DeleteByUid(const int32_t uid)
 {
     NETMGR_LOG_D("DeleteByUid");
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("%{public}s: rdb store is not initialized", __func__);
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return NETMANAGER_ERROR;
     }
+
     int32_t deletedRows = -1;
     std::vector<std::string> whereArgs;
     OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_UID_ACCESS_POLICY_TABLE};
@@ -120,8 +137,9 @@ int32_t NetAccessPolicyRDB::DeleteByUid(const int32_t uid)
 int32_t NetAccessPolicyRDB::UpdateByUid(int32_t uid, NetAccessPolicyData policy)
 {
     NETMGR_LOG_D("UpdateByUid");
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("%{public}s: rdb store is not initialized", __func__);
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return NETMANAGER_ERROR;
     }
 
@@ -149,8 +167,9 @@ std::vector<NetAccessPolicyData> NetAccessPolicyRDB::QueryAll()
 {
     NETMGR_LOG_D("QueryAll");
     std::vector<NetAccessPolicyData> result;
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("%{public}s: rdb store is not initialized", __func__);
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return result;
     }
 
@@ -178,8 +197,9 @@ std::vector<NetAccessPolicyData> NetAccessPolicyRDB::QueryAll()
 int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
 {
     NETMGR_LOG_D("QueryByUid uid:%{public}d", uid);
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("%{public}s: rdb store is not initialized", __func__);
+    int32_t ret = GetRdbStore();
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return NETMANAGER_ERROR;
     }
 
@@ -194,7 +214,7 @@ int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
     }
 
     int32_t rowCount = 0;
-    int ret = queryResultSet->GetRowCount(rowCount);
+    ret = queryResultSet->GetRowCount(rowCount);
     if (ret != OHOS::NativeRdb::E_OK) {
         NETMGR_LOG_E("query setting failed, get row count failed, name:%{public}d, ret:%{public}d", uid, ret);
         return ret;

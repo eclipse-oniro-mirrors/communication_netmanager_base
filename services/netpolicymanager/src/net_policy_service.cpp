@@ -113,7 +113,8 @@ void NetPolicyService::Init()
             netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
             netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
             RegisterFactoryResetCallback();
-            netAccessPolicy_.InitRdbStore();
+            NetAccessPolicyRDB netAccessPolicy;
+            netAccessPolicy.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
             if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
                 NETMGR_LOG_E("Register to sa manager failed");
@@ -426,7 +427,8 @@ void NetPolicyService::RegisterFactoryResetCallback()
 void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
 {
     NETMGR_LOG_I("UpdateNetAccessPolicyToMapFromDB enter.");
-    std::vector<NetAccessPolicyData> result = netAccessPolicy_.QueryAll();
+    NetAccessPolicyRDB netAccessPolicy;
+    std::vector<NetAccessPolicyData> result = netAccessPolicy.QueryAll();
     for (size_t i = 0; i < result.size(); i++) {
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
@@ -452,16 +454,20 @@ int32_t NetPolicyService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPoli
     data.cellularPolicy = policy.cellularAllow;
     data.setFromConfigFlag = !reconfirmFlag;
     data.isBroker = isBroker;
-    netAccessPolicy_.InsertData(data);
+    NetAccessPolicyRDB netAccessPolicy;
+    netAccessPolicy.InsertData(data);
+
     return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag, isBroker);
 }
 
 int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
 {
     NETMGR_LOG_I("GetNetworkAccessPolicy enter.");
+    NetAccessPolicyRDB netAccessPolicy;
+
     if (parameter.flag) {
         NetAccessPolicyData policyData;
-        if (netAccessPolicy_.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
+        if (netAccessPolicy.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
             policy.policy.wifiAllow = true;
             policy.policy.cellularAllow = true;
             return NETMANAGER_SUCCESS;
@@ -499,7 +505,7 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
     for (const auto &appInfo : appInfos) {
         NetworkAccessPolicy policyTmp;
         NetAccessPolicyData policyData;
-        if (netAccessPolicy_.QueryByUid(appInfo.uid, policyData) == NETMANAGER_SUCCESS) {
+        if (netAccessPolicy.QueryByUid(appInfo.uid, policyData) == NETMANAGER_SUCCESS) {
             policyTmp.wifiAllow = policyData.wifiPolicy;
             policyTmp.cellularAllow = policyData.cellularPolicy;
         } else {
