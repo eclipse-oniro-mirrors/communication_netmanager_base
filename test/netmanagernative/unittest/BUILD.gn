@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,14 +17,26 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 group("unittest") {
   testonly = true
   deps = [
+    "bandwidth_manager_test:bandwidth_manager_class_test",
     "bandwidth_manager_test:bandwidth_manager_test",
+    "firewall_manager_test:firewall_manager_class_test",
     "firewall_manager_test:firewall_manager_test",
+    "netsys_dnsresolv_test:netsys_dnsresolv_test",
     "netsys_manager_test:conn_manager_test",
+    "netsys_manager_test:nat464_clat_test",
     "netsys_manager_test:netsys_controller_test",
     "netsys_manager_test:netsys_native_client_test",
+    "netsys_manager_test:netsys_native_manager_fault_through_test",
     "netsys_manager_test:netsys_native_manager_test",
     "netsys_manager_test:netsys_native_service_proxy_test",
     "netsys_manager_test:resolver_config_test",
     "netsys_wrapper_test:netsys_wrapper_test",
   ]
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    deps += [
+      "netsys_netfirewall_test:netsys_netfirewall_test",
+      "netsys_netfirewall_test:suffix_match_trie_test",
+    ]
+  }
 }

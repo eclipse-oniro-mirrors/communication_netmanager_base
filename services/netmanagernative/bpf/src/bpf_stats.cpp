@@ -24,6 +24,10 @@
 #include "net_stats_constants.h"
 
 namespace OHOS::NetManagerStandard {
+namespace {
+constexpr const char *CELLULAR_IFACE = "rmnet0";
+constexpr const char *WIFI_IFACE = "wlan0";
+}
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
 {
     switch (statsType) {
@@ -87,6 +91,48 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     return GetNumberFromStatsValue(stats, statsType, uidStats);
 }
 
+int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_RDONLY);
+    if (!uidSimStatsMap.IsValid()) {
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+    }
+
+    stats.clear();
+    char if_name[IFNAME_SIZE] = {0};
+    auto keys = uidSimStatsMap.GetAllKeys();
+    for (const auto &k : keys) {
+        stats_value v = {};
+        if (uidSimStatsMap.Read(k, v) < 0) {
+            NETNATIVE_LOGE("Read uid_sim_map err");
+            return STATS_ERR_READ_BPF_FAIL;
+        }
+
+        NetStatsInfo tempStats;
+        tempStats.uid_ = k.uId;
+        if (memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) != EOK) {
+            return STATS_ERR_READ_BPF_FAIL;
+        }
+
+        char *pName = if_indextoname(k.ifIndex, if_name);
+        if (pName != nullptr) {
+            tempStats.iface_ = pName;
+        }
+        if (k.ifType == IFACE_TYPE_WIFI) {
+            tempStats.iface_ = WIFI_IFACE;
+        } else if (k.ifType == IFACE_TYPE_CELLULAR) {
+            tempStats.iface_ = CELLULAR_IFACE;
+        }
+        tempStats.rxBytes_ = v.rxBytes;
+        tempStats.txBytes_ = v.txBytes;
+        tempStats.rxPackets_ = v.rxPackets;
+        tempStats.txPackets_ = v.txPackets;
+        stats.emplace_back(tempStats);
+    }
+
+    return NETSYS_SUCCESS;
+}
+
 int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     BpfMapper<stats_key, stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_F_RDONLY);
@@ -121,6 +167,28 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         stats.emplace_back(tempStats);
     }
 
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysBpfStats::DeleteStatsInfo(const std::string &path, uint32_t uid)
+{
+    if (path != APP_UID_IF_STATS_MAP_PATH && path != APP_UID_SIM_STATS_MAP_PATH) {
+        NETNATIVE_LOGI("DeleteStatsInfo invalid path");
+        return NETSYS_SUCCESS;
+    }
+    BpfMapper<stats_key, stats_value> uidStatsMap(path, BPF_ANY);
+    if (!uidStatsMap.IsValid()) {
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+    }
+    auto keys = uidStatsMap.GetAllKeys();
+    for (const auto &k : keys) {
+        if (k.uId == uid) {
+            if (uidStatsMap.Delete(k) < 0) {
+                NETNATIVE_LOGE("Delete uidStatsMap err");
+                return STATS_ERR_WRITE_BPF_FAIL;
+            }
+        }
+    }
     return NETSYS_SUCCESS;
 }
 

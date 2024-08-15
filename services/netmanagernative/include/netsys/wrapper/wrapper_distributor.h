@@ -26,7 +26,7 @@ namespace OHOS {
 namespace nmd {
 class NET_SYMBOL_VISIBLE WrapperDistributor {
 public:
-    WrapperDistributor(int32_t socket, const int32_t format);
+    WrapperDistributor(int32_t socket, const int32_t format, std::mutex& externMutex);
     ~WrapperDistributor() = default;
 
     int32_t Start();
@@ -55,7 +55,7 @@ private:
 
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
-    std::mutex netlinkCallbacksMutex_;
+    std::mutex& netlinkCallbacksMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

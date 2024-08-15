@@ -30,7 +30,7 @@ NetDnsResultCallbackProxy::NetDnsResultCallbackProxy(const sptr<IRemoteObject> &
 int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
     const std::list<NetDnsResultReport> dnsResultReport)
 {
-    NETNATIVE_LOGI("Proxy OnDnsResultReport");
+    NETNATIVE_LOG_D("Proxy OnDnsResultReport");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");
@@ -59,6 +59,7 @@ int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret =
         remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT),
                             data, reply, option);

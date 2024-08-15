@@ -20,6 +20,10 @@
 #include <mutex>
 #include <netinet/in.h>
 #include <vector>
+#include <map>
+#include <sys/eventfd.h>
+
+#include "dns_proxy_request_socket.h"
 
 namespace OHOS {
 namespace nmd {
@@ -52,22 +56,53 @@ public:
      */
     void SetParseNetId(uint16_t netId);
 
+    using DnsSocketHolderBase = std::map<int32_t, DnsProxyRequestSocket>;
+
 private:
-    static constexpr const uint32_t MAX_REQUESTDATA_LEN = 512;
-    struct RecvBuff {
-        char questionsBuff[MAX_REQUESTDATA_LEN];
-        int32_t questionLen;
-    };
-    static void DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr);
-    static void DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
-                                 sockaddr_in proxyAddr);
-    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
-    static bool CheckDnsResponse(char* recBuff, size_t recLen);
-    static bool DnsThreadClose();
+class DnsSocketHolder : private DnsSocketHolderBase {
+public:
+    auto find(const int32_t& x) { return DnsSocketHolderBase::find(x); }
+    auto begin() { return DnsSocketHolderBase::begin(); }
+    auto end() { return DnsSocketHolderBase::end(); }
+    auto cbegin() { return DnsSocketHolderBase::cbegin(); }
+    auto cend() { return DnsSocketHolderBase::cend(); }
+    auto clear() { return DnsSocketHolderBase::clear(); }
+    auto size() { return DnsSocketHolderBase::size(); }
+    auto empty() { return DnsSocketHolderBase::empty(); }
+    template<typename... Args>
+    auto emplace(Args&&... args) -> decltype(DnsSocketHolderBase::emplace(std::forward<Args>(args)...));
+    auto erase(iterator position) -> decltype(DnsSocketHolderBase::erase(position));
+private:
+    constexpr static uint32_t MAX_SOCKET_CAPACITY = 300;
+    std::list<iterator> lruCache;
+};
+
+private:
+    void DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::unique_ptr<AlignedSockAddr> &clientSock);
+    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen,
+                                     AlignedSockAddr &proxyAddr);
+    static bool CheckDnsResponse(char *recBuff, size_t recLen);
+    static bool CheckDnsQuestion(char *recBuff, size_t recLen);
+    void SendDnsBack2Client(int32_t socketFd);
+    void clearResource();
+    void SendRequest2Server(int32_t socketFd);
+    bool GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx);
+    bool MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
+                      AlignedSockAddr &clientSock);
     int32_t proxySockFd_;
+    int32_t proxySockFd6_;
+    int32_t epollFd_ = -1;
     static uint16_t netId_;
-    static bool proxyListenSwitch_;
+    static std::atomic_bool proxyListenSwitch_;
     static std::mutex listenerMutex_;
+    DnsSocketHolder serverIdxOfSocket;
+    std::chrono::system_clock::time_point collectTime;
+    void EpollTimeout();
+    void CollectSocks();
+    void InitListenForIpv4();
+    void InitListenForIpv6();
+    bool InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event);
+    void GetRequestAndTransmit(int32_t family);
 };
 } // namespace nmd
 } // namespace OHOS

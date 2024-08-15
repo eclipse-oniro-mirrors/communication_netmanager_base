@@ -224,6 +224,30 @@ bool NetPolicyExec::ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context)
     return true;
 }
 
+bool NetPolicyExec::ExecSetNetworkAccessPolicy(SetNetworkAccessPolicyContext *context)
+{
+    int32_t errorCode = NetPolicyClient::GetInstance().SetNetworkAccessPolicy(context->uid_, context->policy_,
+                                                                              context->isReconfirmFlag_);
+    if (errorCode != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetNetworkAccessPolicy failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+bool NetPolicyExec::ExecGetNetworkAccessPolicy(GetNetworkAccessPolicyContext *context)
+{
+    int32_t errorCode =
+        NetPolicyClient::GetInstance().GetNetworkAccessPolicy(context->policy_parmeter_, context->policy_save_);
+    if (errorCode != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetNetworkAccessPolicy failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
 napi_value NetPolicyExec::SetPolicyByUidCallback(SetPolicyByUidContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
@@ -356,6 +380,31 @@ napi_value NetPolicyExec::ResetPoliciesCallback(ResetPoliciesContext *context)
 napi_value NetPolicyExec::UpdateRemindPolicyCallback(UpdateRemindPolicyContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value NetPolicyExec::SetNetworkAccessPolicyCallback(SetNetworkAccessPolicyContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value NetPolicyExec::GetNetworkAccessPolicyCallback(GetNetworkAccessPolicyContext *context)
+{
+    if (context->policy_parmeter_.flag) {
+        napi_value obj = NapiUtils::CreateObject(context->GetEnv());
+        NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowWiFi", context->policy_save_.policy.wifiAllow);
+        NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowCellular",
+                                      context->policy_save_.policy.cellularAllow);
+        return obj;
+    }
+
+    napi_value result = NapiUtils::CreateObject(context->GetEnv());
+    for (const auto &item : context->policy_save_.uid_policies) {
+        napi_value obj = NapiUtils::CreateObject(context->GetEnv());
+        NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowWiFi", item.second.wifiAllow);
+        NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowCellular", item.second.cellularAllow);
+        NapiUtils::SetNamedProperty(context->GetEnv(), result, std::to_string(item.first).c_str(), obj);
+    }
+    return result;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

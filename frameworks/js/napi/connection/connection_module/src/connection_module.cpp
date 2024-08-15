@@ -38,6 +38,7 @@
 #include "deletecustomdnsrules_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
+static thread_local uint64_t g_moduleId;
 
 #define DECLARE_NET_CAP(cap) \
     DECLARE_NAPI_STATIC_PROPERTY(#cap, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetCap::cap)))
@@ -131,6 +132,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
 {
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
+    netConnection->moduleId_ = g_moduleId;
 
     auto netConnType = GetNetConnectionType(env, argc, argv);
 
@@ -165,6 +167,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
 
 napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
 {
+    g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),
@@ -207,6 +210,8 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     ModuleTemplate::DefineClass(env, exports, netConnectionFunctions, INTERFACE_NET_CONNECTION);
 
     InitProperties(env, exports);
+    NapiUtils::SetEnvValid(env);
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, env);
     return exports;
 }
 
@@ -218,7 +223,7 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
         DECLARE_NET_CAP(NET_CAPABILITY_INTERNET),
         DECLARE_NET_CAP(NET_CAPABILITY_NOT_VPN),
         DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED),
-        DECLARE_NET_CAP(NET_CAPABILITY_CAPTIVE_PORTAL),
+        DECLARE_NET_CAP(NET_CAPABILITY_PORTAL),
         DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT),
     };
     napi_value caps = NapiUtils::CreateObject(env);
@@ -448,42 +453,6 @@ napi_value ConnectionModule::FactoryResetNetworkSync(napi_env env, napi_callback
     return ModuleTemplate::InterfaceSync<FactoryResetNetworkContext>(env, info, FUNCTION_FACTORY_RESET_NETWORK, nullptr,
                                                                      ConnectionExec::ExecFactoryResetNetwork,
                                                                      ConnectionExec::FactoryResetNetworkCallback);
-}
-
-napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
-        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-	ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName,
-        ConnectionAsyncWork::NetHandleAsyncWork::GetAddressesByNameCallback);
-}
-
-napi_value ConnectionModule::NetHandleInterface::GetAddressByName(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
-        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-        ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressByName,
-        ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback);
-}
-
-napi_value ConnectionModule::NetHandleInterface::BindSocket(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<BindSocketContext>(
-        env, info, FUNCTION_BIND_SOCKET,
-        [](napi_env theEnv, napi_value thisVal, BindSocketContext *context) -> bool {
-            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
-            return true;
-        },
-        ConnectionAsyncWork::NetHandleAsyncWork::ExecBindSocket,
-        ConnectionAsyncWork::NetHandleAsyncWork::BindSocketCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)

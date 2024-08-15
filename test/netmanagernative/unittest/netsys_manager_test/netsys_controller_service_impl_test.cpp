@@ -34,6 +34,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 } // namespace
+static constexpr uint32_t TEST_UID = 1;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
@@ -131,7 +132,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NoRegisterMockApi, TestSize.Level1)
     ret = instance_->NetworkDestroy(0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(0, testName);
+    ret = instance_->NetworkAddInterface(0, testName, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkRemoveInterface(0, testName);
@@ -459,7 +460,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetNetworkSharingTraffic(hostName, serverName, traffic);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->NetworkAddInterface(netId, testName);
+    ret = instance_->NetworkAddInterface(netId, testName, BEARER_DEFAULT);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkAddRoute(netId, testName, "", "");
@@ -526,7 +527,8 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     std::string cmd = "";
     std::string respond = "";
-    ret = instance_->SetIptablesCommandForRes(cmd, respond);
+    NetsysNative::IptablesType ipType = NetsysNative::IptablesType::IPTYPE_IPV4;
+    ret = instance_->SetIptablesCommandForRes(cmd, respond, ipType);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     OHOS::NetsysNative::NetDiagPingOption pingOption;
@@ -547,6 +549,9 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     uint32_t chain = 0;
     std::vector<uint32_t> uidsParam = {};
     int32_t ret = instance_->FirewallSetUidRule(chain, uidsParam, firewallRule);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->ClearFirewallAllRules();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     int32_t socketFd = 0;
@@ -587,12 +592,25 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetUidStats(stats, type, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = instance_->DeleteStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DeleteSimStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
     ret = instance_->GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::list<OHOS::NetsysNative::NetDiagRouteTable> routeTables;
     ret = instance_->NetDiagGetRouteTable(routeTables);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, GetAllSimStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
+    auto ret = instance_->GetAllSimStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -700,6 +718,21 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    auto ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint64_t type = 0;
+    bool isOpen = true;
+    auto ret = instance_->UpdateNetworkSharingType(type, isOpen);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest009, TestSize.Level1)
 {
     uint32_t timeStep = 0;
@@ -716,6 +749,44 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+    uint32_t on = 1;
+    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    bool isBroker = false;
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+    bearTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    auto ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    auto ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

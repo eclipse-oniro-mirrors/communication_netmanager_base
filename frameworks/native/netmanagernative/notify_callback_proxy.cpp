@@ -99,6 +99,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &addr, 
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -125,6 +126,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &addr, 
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -149,6 +151,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &ifName)
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -173,6 +176,7 @@ int32_t NotifyCallbackProxy::OnInterfaceRemoved(const std::string &ifName)
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -197,6 +201,7 @@ int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &ifName, bool 
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -207,7 +212,7 @@ int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &ifName, bool 
 
 int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
-    NETNATIVE_LOGI("Proxy OnInterfaceLinkStateChanged");
+    NETNATIVE_LOG_D("Proxy OnInterfaceLinkStateChanged");
     MessageParcel data;
     if (!WriteLinkStateData(data, ifName, up)) {
         return ERR_NONE;
@@ -221,6 +226,7 @@ int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifNa
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED),
                                       data, reply, option);
     if (ret != ERR_NONE) {
@@ -263,6 +269,7 @@ int32_t NotifyCallbackProxy::OnRouteChanged(bool updated, const std::string &rou
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED),
                                       data, reply, option);
     if (ret != ERR_NONE) {
@@ -288,6 +295,7 @@ int32_t NotifyCallbackProxy::OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult)
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS),
                                       data, reply, option);
     if (ret != ERR_NONE) {
@@ -320,6 +328,7 @@ int32_t NotifyCallbackProxy::OnBandwidthReachedLimit(const std::string &limitNam
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT),
                                       data, reply, option);
     if (ret != ERR_NONE) {

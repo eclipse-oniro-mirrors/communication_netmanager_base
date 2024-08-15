@@ -16,6 +16,7 @@
 #include "net_policy_rule.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "iptables_type.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -80,7 +81,7 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     auto policyCondition = BuildTransCondition(uid, policy);
     TransConditionToRuleAndNetsys(policyCondition, uid, policy);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
-    NETMGR_LOG_I("End TransPolicyToRule");
+    NETMGR_LOG_D("End TransPolicyToRule");
     return NETMANAGER_SUCCESS;
 }
 
@@ -158,7 +159,7 @@ void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
 {
     switch (netsysCtrl) {
         case POLICY_TRANS_CTRL_NONE:
-            NETMGR_LOG_D("Don't need to do anything,keep now status.");
+            ProcessCtrlNone(uid);
             break;
         case POLICY_TRANS_CTRL_REMOVE_ALL:
             GetNetsysInst()->BandwidthRemoveAllowedList(uid);
@@ -169,14 +170,31 @@ void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
             GetNetsysInst()->BandwidthRemoveAllowedList(uid);
             break;
         case POLICY_TRANS_CTRL_ADD_ALLOWEDLIST:
-            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-            GetNetsysInst()->BandwidthAddAllowedList(uid);
+            ProcessCtrlAddAllowedList(uid);
             break;
         default:
             NETMGR_LOG_E("Error netsysCtrl value, need to check");
             break;
     }
     NETMGR_LOG_D("uid:[%{public}u]   netsysCtrl: [%{public}u]", uid, netsysCtrl);
+}
+
+void NetPolicyRule::ProcessCtrlNone(uint32_t uid)
+{
+    if (IsPowerSave()) {
+        GetNetsysInst()->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_DENY);
+    } else {
+        NETMGR_LOG_D("Don't need to do anything,keep now status.");
+    }
+}
+
+void NetPolicyRule::ProcessCtrlAddAllowedList(uint32_t uid)
+{
+    GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+    GetNetsysInst()->BandwidthAddAllowedList(uid);
+    if (IsPowerSave()) {
+        GetNetsysInst()->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_ALLOW);
+    }
 }
 
 uint32_t NetPolicyRule::MoveToConditionBit(uint32_t value)
@@ -343,6 +361,7 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
@@ -410,6 +429,7 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
 
 void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     if (isForeground) {
         foregroundUidList_.insert(uid);
         return;
@@ -451,6 +471,22 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
+}
+
+int32_t NetPolicyRule::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                              bool isBroker)
+{
+    return GetNetsysInst()->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+}
+
+int32_t NetPolicyRule::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return GetNetsysInst()->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetPolicyRule::PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
+{
+    return GetNetsysInst()->SetNicTrafficAllowed(ifaceNames, status);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

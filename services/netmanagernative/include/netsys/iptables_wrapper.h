@@ -26,6 +26,7 @@
 #include "event_runner.h"
 #include "event_handler.h"
 #include "singleton.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace nmd {
@@ -62,20 +63,37 @@ public:
      */
     std::string RunCommandForRes(const IpType &ipType, const std::string &command);
 
+    /**
+     * @brief run mutiple iptables commands.
+     *
+     * @param ipType ipv4 or ipv6.
+     * @param commands iptables commands.
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
+     */
+    int32_t RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands);
+
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
+    static std::string AnonymizeIptablesCommand(const std::string &command)
+    {
+        std::string temp{command};
+        std::transform(temp.cbegin(), temp.cend(), temp.begin(), [](char c) {
+            return std::isdigit(c) ? 'x' : c;
+        });
+        return temp;
+    }
 
 private:
     std::mutex iptablesMutex_;
     std::condition_variable conditionVarLock_;
     bool isRunningFlag_ = false;
     bool isIptablesSystemAccess_ = false;
+    bool isIp6tablesSystemAccess_ = false;
     std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
-    std::shared_ptr<EventHandler> handler_ = nullptr;
-    std::shared_ptr<EventRunner> handlerRunner_ = nullptr;
+    std::shared_ptr<ffrt::queue> iptablesWrapperFfrtQueue_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS

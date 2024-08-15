@@ -19,6 +19,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "net_all_capabilities.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
@@ -296,6 +297,72 @@ int32_t NetStatsClient::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return proxy->GetAllStatsInfo(infos);
 }
 
+int32_t NetStatsClient::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllSimStatsInfo(infos);
+}
+
+int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                 const sptr<NetStatsNetwork> &network)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    return proxy->GetTrafficStatsByNetwork(infos, network);
+}
+
+int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                    const sptr<NetStatsNetwork> &network)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    return proxy->GetTrafficStatsByUidNetwork(infos, uid, network);
+}
+
+int32_t NetStatsClient::SetAppStats(const PushStatsInfo &info)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetAppStats(info);
+}
+
 int32_t NetStatsClient::GetSockfdRxBytes(uint64_t &stats, int32_t sockfd)
 {
     if (sockfd <= 0) {
@@ -340,6 +407,26 @@ int32_t NetStatsClient::GetSockfdTxBytes(uint64_t &stats, int32_t sockfd)
     }
 
     return proxy->GetCookieTxBytes(stats, optrval);
+}
+
+extern "C" int32_t GetUidTxBytesEx(uint64_t *stats, uint32_t uid)
+{
+    NETMGR_LOG_D("GetUidTxBytesEx in");
+    if (!stats) {
+        NETMGR_LOG_E("stats is null");
+        return -1;
+    }
+    return DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetUidTxBytes(*stats, uid);
+}
+
+extern "C" int32_t GetUidRxBytesEx(uint64_t *stats, uint32_t uid)
+{
+    NETMGR_LOG_D("GetUidRxBytesEx in");
+    if (!stats) {
+        NETMGR_LOG_E("stats is null");
+        return -1;
+    }
+    return DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetUidRxBytes(*stats, uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

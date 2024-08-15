@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <regex>
 #include "net_http_proxy_tracker.h"
 
 #include "base64_utils.h"
@@ -32,50 +33,81 @@ constexpr const char *DEFAULT_HTTP_PROXY_EXCLUSION_LIST = "NONE";
 
 void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
 {
+    Uri hostUri(GLOBAL_PROXY_HOST_URI);
+    Uri portUri(GLOBAL_PROXY_PORT_URI);
+    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
+    KeyUri keyUri = {hostUri, portUri, exclusionsUri};
+    ReadFromSettingsData(httpProxy, keyUri);
+}
+
+bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
+{
+    Uri hostUri(GLOBAL_PROXY_HOST_URI);
+    Uri portUri(GLOBAL_PROXY_PORT_URI);
+    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
+    KeyUri keyUri = {hostUri, portUri, exclusionsUri};
+    return WriteToSettingsData(httpProxy, keyUri);
+}
+
+void NetHttpProxyTracker::ReadFromSettingsDataUser(HttpProxy &httpProxy, int32_t userId)
+{
+    Uri hostUri(ReplaceUserIdForUri(USER_PROXY_HOST_URI, userId));
+    Uri portUri(ReplaceUserIdForUri(USER_PROXY_PORT_URI, userId));
+    Uri exclusionsUri(ReplaceUserIdForUri(USER_PROXY_EXCLUSIONS_URI, userId));
+    KeyUri keyUri = {hostUri, portUri, exclusionsUri};
+    ReadFromSettingsData(httpProxy, keyUri);
+}
+
+bool NetHttpProxyTracker::WriteToSettingsDataUser(HttpProxy &httpProxy, int32_t userId)
+{
+    Uri hostUri(ReplaceUserIdForUri(USER_PROXY_HOST_URI, userId));
+    Uri portUri(ReplaceUserIdForUri(USER_PROXY_PORT_URI, userId));
+    Uri exclusionsUri(ReplaceUserIdForUri(USER_PROXY_EXCLUSIONS_URI, userId));
+    KeyUri keyUri = {hostUri, portUri, exclusionsUri};
+    return WriteToSettingsData(httpProxy, keyUri);
+}
+
+void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy, KeyUri keyUri)
+{
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string proxyHost;
     std::string proxyPort;
     std::string proxyExclusions;
-    Uri hostUri(GLOBAL_PROXY_HOST_URI);
-    int32_t ret = dataShareHelperUtils->Query(hostUri, KEY_GLOBAL_PROXY_HOST, proxyHost);
+    int32_t ret = dataShareHelperUtils->Query(keyUri.hostUri_, KEY_GLOBAL_PROXY_HOST, proxyHost);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy host failed.");
+        NETMGR_LOG_D("Query global proxy host failed.");
     }
     std::string host = Base64::Decode(proxyHost);
     host = (host == DEFAULT_HTTP_PROXY_HOST ? "" : host);
 
-    Uri portUri(GLOBAL_PROXY_PORT_URI);
-    ret = dataShareHelperUtils->Query(portUri, KEY_GLOBAL_PROXY_PORT, proxyPort);
+    ret = dataShareHelperUtils->Query(keyUri.portUri_, KEY_GLOBAL_PROXY_PORT, proxyPort);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy port failed.");
+        NETMGR_LOG_D("Query global proxy port failed.");
     }
     uint16_t port = (proxyPort.empty() || host.empty()) ? 0 : static_cast<uint16_t>(CommonUtils::StrToUint(proxyPort));
 
-    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
-    ret = dataShareHelperUtils->Query(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, proxyExclusions);
+    ret = dataShareHelperUtils->Query(keyUri.exclusionsUri_, KEY_GLOBAL_PROXY_EXCLUSIONS, proxyExclusions);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy exclusions failed.");
+        NETMGR_LOG_D("Query global proxy exclusions failed.");
     }
     std::list<std::string> exclusionList =
         host.empty() ? std::list<std::string>() : ParseExclusionList(proxyExclusions);
     httpProxy = {host, port, exclusionList};
 }
 
-bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
+bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy, KeyUri keyUri)
 {
     std::string host =
         httpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST) : Base64::Encode(httpProxy.GetHost());
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
-    Uri hostUri(GLOBAL_PROXY_HOST_URI);
-    int32_t ret = dataShareHelperUtils->Update(hostUri, KEY_GLOBAL_PROXY_HOST, host);
+    int32_t ret = dataShareHelperUtils->Update(keyUri.hostUri_, KEY_GLOBAL_PROXY_HOST, host);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set host:%{public}s to datashare failed", host.c_str());
         return false;
     }
 
-    Uri portUri(GLOBAL_PROXY_PORT_URI);
     std::string port = httpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(httpProxy.GetPort());
-    ret = dataShareHelperUtils->Update(portUri, KEY_GLOBAL_PROXY_PORT, port);
+    ret = dataShareHelperUtils->Update(keyUri.portUri_, KEY_GLOBAL_PROXY_PORT, port);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set port:%{public}s to datashare failed", port.c_str());
         return false;
@@ -83,13 +115,16 @@ bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
 
     std::string exclusions = GetExclusionsAsString(httpProxy.GetExclusionList());
     exclusions = (httpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
-    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
-    ret = dataShareHelperUtils->Update(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, exclusions);
+    ret = dataShareHelperUtils->Update(keyUri.exclusionsUri_, KEY_GLOBAL_PROXY_EXCLUSIONS, exclusions);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set exclusions:%{public}s to datashare", exclusions.c_str());
         return false;
     }
     httpProxy.SetExclusionList(ParseExclusionList(exclusions));
+    if (!httpProxy.GetUsername().empty()) {
+        auto userInfoHelp = NetProxyUserinfo::GetInstance();
+        userInfoHelp.SaveHttpProxyHostPass(httpProxy);
+    }
     return true;
 }
 
@@ -128,6 +163,15 @@ std::string NetHttpProxyTracker::GetExclusionsAsString(const std::list<std::stri
         index++;
     }
     return exclusions;
+}
+
+std::string NetHttpProxyTracker::ReplaceUserIdForUri(const char *uri, int32_t userId)
+{
+    if (strlen(uri) <= 0) {
+        return "";
+    }
+    std::regex pattern(USER_URI_PATTERN);
+    return std::regex_replace(uri, pattern, std::to_string(userId));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

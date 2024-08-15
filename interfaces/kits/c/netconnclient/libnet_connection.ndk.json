@@ -42,5 +42,9 @@
     {
         "first_introduced": "11",
         "name": "OH_NetConn_GetDefaultHttpProxy"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_BindSocket"
     }
 ]

@@ -37,59 +37,25 @@ public:
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
 private:
-    static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
+    static napi_value CreateNetHandle(napi_env env, NetHandle &netHandle);
 
-    static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
+    static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities &capabilities);
 
-    static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
+    static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo &linkInfo);
 
-    template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
-    {
-        (void)status;
-        if (work == nullptr) {
-            return;
-        }
-        auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
-        if (workWrapper == nullptr) {
-            delete work;
-            return;
-        }
-        napi_env env = workWrapper->env;
-        auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-        std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+    static napi_value CreateNetAvailableParam(napi_env env, NetHandle &netHandle);
 
-        napi_value obj = MakeJsValue(env, workWrapper->data);
+    static napi_value CreateNetCapabilitiesChangeParam(napi_env env, NetHandle &netHandle,
+                                                       NetAllCapabilities &capabilities);
 
-        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(workWrapper->env), obj};
-        workWrapper->manager->Emit(workWrapper->type, arg);
+    static napi_value CreateNetConnectionPropertiesChangeParam(napi_env env, NetHandle &netHandle,
+                                                               NetLinkInfo &linkInfo);
 
-        delete workWrapper;
-        delete work;
-    }
+    static napi_value CreateNetLostParam(napi_env env, NetHandle &netHandle);
 
-    static napi_value CreateNetAvailableParam(napi_env env, void *data);
+    static napi_value CreateNetUnavailableParam(napi_env env);
 
-    static napi_value CreateNetCapabilitiesChangeParam(napi_env env, void *data);
-
-    static napi_value CreateNetConnectionPropertiesChangeParam(napi_env env, void *data);
-
-    static napi_value CreateNetLostParam(napi_env env, void *data);
-
-    static napi_value CreateNetUnavailableParam(napi_env env, void *data);
-
-    static napi_value CreateNetBlockStatusChangeParam(napi_env env, void *data);
-
-    static void NetAvailableCallback(uv_work_t *work, int status);
-
-    static void NetCapabilitiesChangeCallback(uv_work_t *work, int status);
-
-    static void NetConnectionPropertiesChangeCallback(uv_work_t *work, int status);
-
-    static void NetLostCallback(uv_work_t *work, int status);
-
-    static void NetUnavailableCallback(uv_work_t *work, int status);
-
-    static void NetBlockStatusChangeCallback(uv_work_t *work, int status);
+    static napi_value CreateNetBlockStatusChangeParam(napi_env env, NetHandle &netHandle, bool blocked);
 };
 } // namespace OHOS::NetManagerStandard
 

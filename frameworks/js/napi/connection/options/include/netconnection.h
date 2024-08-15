@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +25,16 @@
 namespace OHOS::NetManagerStandard {
 class NetConnection final {
 public:
-    bool hasNetSpecifier_;
-
-    bool hasTimeout_;
-
+    bool hasNetSpecifier_ = false;
+    bool hasTimeout_ = false;
     NetManagerStandard::NetSpecifier netSpecifier_;
-
-    uint32_t timeout_;
+    uint32_t timeout_ = 0;
+    uint64_t moduleId_ = 0;
 
 public:
+    NetConnection();
+    ~NetConnection() = default;
+
     [[nodiscard]] sptr<NetConnCallbackObserver> GetObserver() const;
 
     [[nodiscard]] EventManager *GetEventManager() const;
@@ -45,11 +46,9 @@ public:
 private:
     sptr<NetConnCallbackObserver> observer_;
 
-    EventManager *manager_;
+    EventManager *manager_{nullptr};
 
     explicit NetConnection(EventManager *eventManager);
-
-    ~NetConnection() = default;
 };
 
 extern std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;

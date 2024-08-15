@@ -16,6 +16,7 @@
 #ifndef INCLUDE_NETSYS_NETWORK_H
 #define INCLUDE_NETSYS_NETWORK_H
 
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -101,6 +102,7 @@ protected:
     explicit NetsysNetwork(uint16_t netId);
     uint16_t netId_;
     std::set<std::string> interfaces_;
+    std::mutex mutex_;
 };
 } // namespace nmd
 } // namespace OHOS

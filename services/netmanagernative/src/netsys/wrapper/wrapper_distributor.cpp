@@ -28,7 +28,8 @@ bool IsValidMessage(const std::shared_ptr<NetsysEventMessage> &message)
            message->GetSubSys() != NetsysEventMessage::SubSys::UNKNOWN;
 }
 } // namespace
-WrapperDistributor::WrapperDistributor(int32_t socket, const int32_t format)
+WrapperDistributor::WrapperDistributor(int32_t socket, const int32_t format, std::mutex& externMutex)
+    : netlinkCallbacksMutex_(externMutex)
 {
     NETNATIVE_LOG_D("WrapperDistributor::WrapperDistributor: Socket: %{public}d, Format: %{public}d", socket, format);
     receiver_ = std::make_unique<DataReceiver>(socket, format);
@@ -49,11 +50,11 @@ int32_t WrapperDistributor::Stop()
 int32_t WrapperDistributor::RegisterNetlinkCallbacks(
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks)
 {
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     netlinkCallbacks_ = netlinkCallbacks;
     return NetlinkResult::OK;
 }
@@ -167,11 +168,11 @@ void WrapperDistributor::HandleSubSysQlog(const std::shared_ptr<NetsysEventMessa
 void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
 {
     NETNATIVE_LOG_D("interface added: %{public}s", ifName.c_str());
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceAdded(ifName);
@@ -182,11 +183,11 @@ void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
 void WrapperDistributor::NotifyInterfaceRemove(const std::string &ifName)
 {
     NETNATIVE_LOG_D("interface removed: %{public}s", ifName.c_str());
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceRemoved(ifName);
@@ -197,11 +198,11 @@ void WrapperDistributor::NotifyInterfaceRemove(const std::string &ifName)
 void WrapperDistributor::NotifyInterfaceChange(const std::string &ifName, bool up)
 {
     NETNATIVE_LOG_D("interface Change: %{public}s, %{public}d", ifName.c_str(), up);
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceChanged(ifName, up);
@@ -212,11 +213,11 @@ void WrapperDistributor::NotifyInterfaceChange(const std::string &ifName, bool u
 void WrapperDistributor::NotifyInterfaceLinkStateChange(const std::string &ifName, bool up)
 {
     NETNATIVE_LOG_D("interface link state Change: %{public}s, %{public}d", ifName.c_str(), up);
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceLinkStateChanged(ifName, up);
@@ -227,11 +228,11 @@ void WrapperDistributor::NotifyInterfaceLinkStateChange(const std::string &ifNam
 void WrapperDistributor::NotifyQuotaLimitReache(const std::string &labelName, const std::string &ifName)
 {
     NETNATIVE_LOG_D("NotifyQuotaLimitReache: %{public}s, %{public}s", labelName.c_str(), ifName.c_str());
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnBandwidthReachedLimit(labelName, ifName);
@@ -244,11 +245,11 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
 {
     NETNATIVE_LOG_D("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
@@ -261,11 +262,11 @@ void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, c
 {
     NETNATIVE_LOG_D("NotifyInterfaceAddressRemove: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
@@ -279,11 +280,11 @@ void WrapperDistributor::NotifyRouteChange(bool updated, const std::string &rout
     NETNATIVE_LOG_D("NotifyRouteChange: %{public}s, %{public}s, %{public}s, %{public}s",
                     updated ? "updated" : "removed", ToAnonymousIp(route).c_str(), ToAnonymousIp(gateway).c_str(),
                     ifName.c_str());
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
         if (callback != nullptr) {
             callback->OnRouteChanged(updated, route, gateway, ifName);

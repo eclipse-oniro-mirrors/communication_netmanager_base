@@ -31,6 +31,10 @@
 #include "net_policy_service_common.h"
 #include "net_policy_service_stub.h"
 #include "net_policy_traffic.h"
+#include "net_access_policy.h"
+#include "net_access_policy_rdb.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -221,6 +225,42 @@ public:
      */
     int32_t FactoryResetPolicies() override;
 
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid The specified UID of application.
+     * @param policy The network access policy of application, {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+
+    /**
+     * Query the network access policy of the specified application or all applications.
+     *
+     * @param parameter Indicate to get all or an application network access policy, {@link AccessPolicyParameter}.
+     * @param policy The network access policy of application, {@link AccessPolicySave}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override;
+
+    NetAccessPolicyRDB GetNetAccessPolicyDBHandler()
+    {
+        static NetAccessPolicyRDB netAccessPolicy;
+        return netAccessPolicy;
+    }
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -230,6 +270,8 @@ private:
     int32_t GetDumpMessage(std::string &message);
 
     void OnNetSysRestart();
+    void UpdateNetAccessPolicyToMapFromDB();
+    bool CheckNetworkAccessIsBroker(uint32_t uid);
 
 private:
     enum ServiceRunningState {

@@ -677,5 +677,48 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager028, TestSize.Level1)
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPowerSaveTrustlist(uids);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: NetPolicyManager029
+ * @tc.desc: Test NetPolicyManager SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager029, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+        TEST_UID1, netAccessPolicy, reconfirmFlag);
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+    reconfirmFlag = false;
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+        TEST_UID6, netAccessPolicy, reconfirmFlag);
+    ASSERT_EQ(result2, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager030
+ * @tc.desc: Test NetPolicyManager GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager030, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    AccessPolicyParameter parameter;
+    parameter.flag = 0;
+    parameter.uid = TEST_UID1;
+    AccessPolicySave resultSave;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+    parameter.flag = 1;
+    parameter.uid = TEST_UID6;
+    auto result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    ASSERT_EQ(result2, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

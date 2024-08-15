@@ -16,12 +16,14 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_EVENT_LISTENER_H
 #define COMMUNICATIONNETMANAGER_BASE_EVENT_LISTENER_H
 
-#include <iosfwd>
 #include <cstddef>
+#include <iosfwd>
 #include <string>
 
 #include <napi/native_api.h>
 #include <uv.h>
+
+#include "napi_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,6 +36,7 @@ public:
 
     void Emit(const std::string &eventType, size_t argc, napi_value *argv) const;
     void EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status)) const;
+    void EmitByUvByModuleId(const std::string &type, const NapiUtils::UvHandler &handler, uint64_t moduleId) const;
     [[nodiscard]] bool Match(const std::string &type, napi_value callback) const;
     [[nodiscard]] bool MatchOnce(const std::string &type) const;
     [[nodiscard]] bool MatchType(const std::string &type) const;

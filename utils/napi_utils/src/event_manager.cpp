@@ -92,6 +92,19 @@ void *EventManager::GetData()
     return data_;
 }
 
+void EventManager::EmitByUvWithModuleId(const std::string &type, const NapiUtils::UvHandler &handler, uint64_t moduleId)
+{
+    std::lock_guard lock1(mutexForListenersAndEmitByUv_);
+    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
+    if (!IsValid()) {
+        return;
+    }
+
+    std::for_each(listeners_.begin(), listeners_.end(), [type, handler, moduleId](const EventListener &listener) {
+        listener.EmitByUvByModuleId(type, handler, moduleId);
+    });
+}
+
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
     std::lock_guard lock1(mutexForListenersAndEmitByUv_);
@@ -123,7 +136,7 @@ void EventManager::DeleteListener(const std::string &type)
 
 void EventManager::DeleteAllListener()
 {
-    NETMANAGER_BASE_LOGI("DeleteAllListener()");
+    NETMANAGER_BASE_LOGI("DeleteAllListener");
     std::lock_guard lock(mutexForListenersAndEmitByUv_);
     listeners_.clear();
 }

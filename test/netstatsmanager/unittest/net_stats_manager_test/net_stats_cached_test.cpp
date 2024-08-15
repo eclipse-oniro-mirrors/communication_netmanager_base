@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr int32_t TEST_UID = 1;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
@@ -128,6 +129,69 @@ HWTEST_F(NetStatsCachedTest, WriteUidStatsTest001, TestSize.Level1)
     instance_->stats_.currentUidStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
     instance_->WriteUidStats();
     EXPECT_FALSE(instance_->CheckUidStor());
+}
+
+HWTEST_F(NetStatsCachedTest, WriteUidSimStatsTest001, TestSize.Level1)
+{
+    instance_->isForce_ = true;
+    instance_->stats_.currentUidSimStats_ = 0;
+    instance_->WriteUidSimStats();
+    instance_->stats_.currentUidSimStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidSimStats();
+    instance_->isForce_ = false;
+    instance_->stats_.currentUidSimStats_ = 0;
+    instance_->WriteUidSimStats();
+    instance_->stats_.currentUidSimStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidSimStats();
+    EXPECT_FALSE(instance_->CheckUidStor());
+}
+
+HWTEST_F(NetStatsCachedTest, SetAppStatsTest001, TestSize.Level1)
+{
+    PushStatsInfo info;
+    info.uid_ = 1001;
+    info.iface_ = "eth0";
+    info.endTime_ = 1609459200;
+    info.rxBytes_ = 1024;
+    info.txBytes_ = 512;
+    info.simId_ = 1;
+    instance_->SetAppStats(info);
+    EXPECT_EQ(instance_->uidPushStatsInfo_.size(), 1);
+    const NetStatsInfo& addedInfo = instance_->uidPushStatsInfo_.back();
+    EXPECT_EQ(addedInfo.uid_, info.uid_);
+    EXPECT_EQ(addedInfo.iface_, info.iface_);
+    EXPECT_EQ(addedInfo.date_, info.endTime_);
+    EXPECT_EQ(addedInfo.rxBytes_, info.rxBytes_);
+    EXPECT_EQ(addedInfo.txBytes_, info.txBytes_);
+    EXPECT_EQ(addedInfo.rxPackets_, info.rxBytes_ > 0 ? 1 : 0);
+    EXPECT_EQ(addedInfo.txPackets_, info.txBytes_ > 0 ? 1 : 0);
+    EXPECT_EQ(addedInfo.ident_, std::to_string(info.simId_));
+}
+
+HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
+{
+    std::vector<NetStatsInfo> infos;
+    instance_->GetKernelStats(infos);
+    EXPECT_FALSE(infos.empty());
+    for (const auto &info : infos) {
+        EXPECT_NE(info.uid_, 0);
+        EXPECT_NE(info.iface_, "");
+    }
+}
+
+HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
+{
+    instance_->ForceDeleteStats(TEST_UID);
+    std::vector<NetStatsInfo> statsInfoAfter;
+    instance_->GetKernelStats(statsInfoAfter);
+    bool found = false;
+    for (const auto &item : statsInfoAfter) {
+        if (item.uid_ == TEST_UID) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_FALSE(found);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

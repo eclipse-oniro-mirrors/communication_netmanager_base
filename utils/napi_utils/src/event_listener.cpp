@@ -15,8 +15,8 @@
 
 #include "event_listener.h"
 
-#include "netmanager_base_log.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -47,7 +47,7 @@ EventListener::EventListener(const EventListener &listener)
 
 EventListener::~EventListener()
 {
-    NETMANAGER_BASE_LOGI("~EventListener() is called, to delete EventListener");
+    NETMANAGER_BASE_LOGD("delete EventListener");
     if (callbackRef_ != nullptr) {
         NapiUtils::DeleteReference(env_, callbackRef_);
     }
@@ -109,9 +109,18 @@ bool EventListener::IsAsyncCallback() const
     return asyncCallback_;
 }
 
+void EventListener::EmitByUvByModuleId(const std::string &type, const NapiUtils::UvHandler &handler,
+                                       uint64_t moduleId) const
+{
+    if (type_ != type || callbackRef_ == nullptr) {
+        return;
+    }
+    NapiUtils::CreateUvQueueWorkByModuleId(env_, handler, moduleId);
+}
+
 void EventListener::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status)) const
 {
-    NETMANAGER_BASE_LOGI("EventListener::EmitByUv() is called, to EmitByUv");
+    NETMANAGER_BASE_LOGD("to EmitByUv");
 
     if (type_ != type || callbackRef_ == nullptr) {
         return;

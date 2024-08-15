@@ -22,10 +22,15 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+/**
+ *  @deprecated use net_conn_client.h to instead
+ */
 class NetConnServiceIface : public NetConnBaseService {
 public:
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
+    int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
+    int32_t DisableVnicNetwork();
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
@@ -34,6 +39,9 @@ public:
     int32_t RestrictBackgroundChanged(bool isRestrictBackground) override;
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
+    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
+    bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
+    std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

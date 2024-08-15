@@ -49,7 +49,7 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     if (pos != std::string::npos) {
         destination = destination.substr(0, pos);
     }
-    if (!IsValidIPV6(destination) || !IsValidIPV6(nextHop)) {
+    if (!(IsValidIPV6(destination) && (IsValidIPV6(nextHop) || nextHop.empty()))) {
         NETNATIVE_LOGE("check IsValidIPV6 faild");
         return;
     }
@@ -134,7 +134,7 @@ int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &
     }
 
     qparam.qp_netid = netId;
-    qparam.qp_type = 0;
+    qparam.qp_type = 1;
 
     hint.ai_family = hints.aiFamily;
     hint.ai_flags = hints.aiFlags;
@@ -173,6 +173,18 @@ int32_t DnsManager::UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDns
     return DnsQualityDiag::GetInstance().UnregisterHealthListener(callback);
 }
 
+int32_t DnsManager::AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::AddUidRange");
+    return DnsParamCache::GetInstance().AddUidRange(netId, uidRanges);
+}
+
+int32_t DnsManager::DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    NETNATIVE_LOG_D("DnsManager::DelUidRange");
+    return DnsParamCache::GetInstance().DelUidRange(netId, uidRanges);
+}
+
 int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
 {
     int32_t resNum = 0;
@@ -180,10 +192,10 @@ int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
 
     while (tmp) {
         AddrInfo info;
-        info.aiFlags = tmp->ai_flags;
-        info.aiFamily = tmp->ai_family;
-        info.aiSockType = tmp->ai_socktype;
-        info.aiProtocol = tmp->ai_protocol;
+        info.aiFlags = static_cast<int32_t>(tmp->ai_flags);
+        info.aiFamily = static_cast<int32_t>(tmp->ai_family);
+        info.aiSockType = static_cast<int32_t>(tmp->ai_socktype);
+        info.aiProtocol = static_cast<int32_t>(tmp->ai_protocol);
         info.aiAddrLen = tmp->ai_addrlen;
         if (memcpy_s(&info.aiAddr, sizeof(info.aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
             NETNATIVE_LOGE("memcpy_s failed");
@@ -202,5 +214,37 @@ int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
     NETNATIVE_LOGI("FillAddrInfo %{public}d", resNum);
     return 0;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t DnsManager::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    return DnsParamCache::GetInstance().SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t DnsManager::SetFirewallCurrentUserId(int32_t userId)
+{
+    return DnsParamCache::GetInstance().SetFirewallCurrentUserId(userId);
+}
+
+int32_t DnsManager::SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                     bool isFinish)
+{
+    return DnsParamCache::GetInstance().SetFirewallRules(type, ruleList, isFinish);
+}
+
+int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)
+{
+    return DnsParamCache::GetInstance().ClearFirewallRules(type);
+}
+
+int32_t DnsManager::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    return DnsParamCache::GetInstance().RegisterNetFirewallCallback(callback);
+}
+int32_t DnsManager::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    return DnsParamCache::GetInstance().UnRegisterNetFirewallCallback(callback);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

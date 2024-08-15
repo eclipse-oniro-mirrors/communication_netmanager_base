@@ -40,6 +40,8 @@ public:
     static void ExecUpdateStatsData(napi_env env, void *data);
     static void ExecGetSockfdRxBytes(napi_env env, void *data);
     static void ExecGetSockfdTxBytes(napi_env env, void *data);
+    static void ExecGetTrafficStatsByNetwork(napi_env env, void *data);
+    static void ExecGetTrafficStatsByUidNetwork(napi_env env, void *data);
 
     static void GetCellularRxBytesCallback(napi_env env, napi_status status, void *data);
     static void GetCellularTxBytesCallback(napi_env env, napi_status status, void *data);
@@ -55,6 +57,8 @@ public:
     static void UpdateStatsDataCallback(napi_env env, napi_status status, void *data);
     static void GetSockfdRxBytesCallback(napi_env env, napi_status status, void *data);
     static void GetSockfdTxBytesCallback(napi_env env, napi_status status, void *data);
+    static void GetTrafficStatsByNetworkCallback(napi_env env, napi_status status, void *data);
+    static void GetTrafficStatsByUidNetworkCallback(napi_env env, napi_status status, void *data);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

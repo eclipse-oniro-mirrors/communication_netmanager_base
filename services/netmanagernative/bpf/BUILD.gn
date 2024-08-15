@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,10 +17,15 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_bpf("netsys") {
   sources = [ "src/netsys.c" ]
 
-  include_dirs = [
-    "include",
-    "//third_party/libbpf/src",
-  ]
+  include_dirs = [ "include" ]
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines = [
+      "FEATURE_NET_FIREWALL_ENABLE",
+      "NET_FIREWALL_DEBUG=0",
+      "NET_FIREWALL_DEBUG_TUPLE=0",
+    ]
+  }
 
   subsystem_name = "communication"
   part_name = "netmanager_base"
@@ -31,13 +36,16 @@ ohos_shared_library("netsys_bpf_utils") {
     cfi = true
     cfi_cross_dso = true
     boundary_sanitize = true
-    all_ubsan = true
+    ubsan = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/net_stats_info.cpp",
     "src/bpf_loader.cpp",
+    "src/bpf_ring_buffer.cpp",
     "src/bpf_stats.cpp",
   ]
 
@@ -47,8 +55,7 @@ ohos_shared_library("netsys_bpf_utils") {
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "//third_party/elfio",
-    "//third_party/elfio/elfio",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include",
   ]
 
   cflags = [
@@ -70,8 +77,32 @@ ohos_shared_library("netsys_bpf_utils") {
 
   external_deps = [
     "c_utils:utils",
+    "elfio:elfio",
+    "ffrt:libffrt",
     "hilog:libhilog",
+    "ipc:ipc_core",
+    "libbpf:libbpf",
   ]
+
+  deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    public_configs = [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
+    sources += [
+      "src/bitmap_manager.cpp",
+      "src/bpf_netfirewall.cpp",
+    ]
+
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+
+    deps += [ "$INNERKITS_ROOT/netmanagernative:net_native_parcel" ]
+
+    external_deps += [
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
 
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"

@@ -66,11 +66,16 @@ public:
                                 int32_t prefixLength) override;
     int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                 int32_t prefixLength) override;
+    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                int32_t prefixLength, const std::string &netCapabilities) override;
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override;
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override;
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId) override;
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                       const std::set<int32_t> &uids) override;
+    int32_t DestroyVnic() override;
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;
     int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) override;
@@ -105,7 +110,10 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
+    int32_t DeleteStatsInfo(uint32_t uid) override;
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+    int32_t DeleteSimStatsInfo(uint32_t uid) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
     int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;
@@ -123,7 +131,28 @@ public:
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)  override;
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish) override;
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
+    int32_t SetFirewallCurrentUserId(int32_t userId) override;
+    int32_t ClearFirewallRules(NetFirewallRuleType type) override;
+    int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
+    int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
+#endif
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                   bool isBroker) override;
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
+    int32_t StopClat(const std::string &interfaceName) override;
+    int32_t ClearFirewallAllRules() override;
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

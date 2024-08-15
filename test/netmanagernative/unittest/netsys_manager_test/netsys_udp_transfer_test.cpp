@@ -46,10 +46,23 @@ HWTEST_F(PollUdpDataTransferTest, PollUdpSendData001, TestSize.Level1)
     int32_t sock = 34343;
     char data[] = "testdnsproxydata";
     size_t size = 17;
-    sockaddr_in addr = {0};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(1212);
-    socklen_t addrLen = sizeof(addr);
+    AlignedSockAddr addr = {};
+    addr.sin.sin_family = AF_INET;
+    addr.sin.sin_port = htons(1212);
+    socklen_t addrLen = sizeof(sockaddr_in);
+    int32_t ret = PollUdpDataTransfer::PollUdpSendData(sock, data, size, addr, addrLen);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(PollUdpDataTransferTest, PollUdpSendData002, TestSize.Level1)
+{
+    int32_t sock = 34343;
+    char data[] = "testdnsproxydata";
+    size_t size = 17;
+    AlignedSockAddr addr = {};
+    addr.sin6.sin6_family = AF_INET6;
+    addr.sin6.sin6_port = htons(1212);
+    socklen_t addrLen = sizeof(sockaddr_in6);
     int32_t ret = PollUdpDataTransfer::PollUdpSendData(sock, data, size, addr, addrLen);
     EXPECT_EQ(ret, -1);
 }
@@ -58,10 +71,22 @@ HWTEST_F(PollUdpDataTransferTest, PollUdpRecvData001, TestSize.Level1)
 {
     int32_t sock = 34343;
     char requesData[MAX_REQUESTDATA_LEN] = {0};
-    sockaddr_in addr = {0};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(1212);
-    socklen_t addrLen = sizeof(addr);
+    AlignedSockAddr addr = {};
+    addr.sin.sin_family = AF_INET;
+    addr.sin.sin_port = htons(1212);
+    socklen_t addrLen = sizeof(sockaddr_in);
+    int32_t ret = PollUdpDataTransfer::PollUdpRecvData(sock, requesData, MAX_REQUESTDATA_LEN, addr, addrLen);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(PollUdpDataTransferTest, PollUdpRecvData002, TestSize.Level1)
+{
+    int32_t sock = 34343;
+    char requesData[MAX_REQUESTDATA_LEN] = {0};
+    AlignedSockAddr addr = {};
+    addr.sin6.sin6_family = AF_INET6;
+    addr.sin6.sin6_port = htons(1212);
+    socklen_t addrLen = sizeof(sockaddr_in6);
     int32_t ret = PollUdpDataTransfer::PollUdpRecvData(sock, requesData, MAX_REQUESTDATA_LEN, addr, addrLen);
     EXPECT_EQ(ret, -1);
 }
@@ -79,6 +104,6 @@ HWTEST_F(PollUdpDataTransferTest, MakeUdpNonBlock002, TestSize.Level1)
     bool ret = PollUdpDataTransfer::MakeUdpNonBlock(sock);
     EXPECT_EQ(ret, false);
 }
-} // PollUdpDataTransfer
+} // namespace PollUdpDataTransfer
 } // namespace nmd
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
 
     /**
      * Register net connection callback by NetSpecifier
@@ -138,9 +138,21 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS);
 
+    /**
+     * Request net connection callback by NetSpecifier
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetConnCallback interface
+     * @param timeoutMS net connection time out
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                    const uint32_t timeoutMS);
     /**
      * Unregister net connection callback
      *
@@ -249,6 +261,17 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr);
+
+    /**
+     * The interface is to get all iface and ident maps
+     *
+     * @param bearerType the type of network
+     * @param ifaceNameIdentMaps the map of ifaceName and ident
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType, SafeMap<std::string, std::string> &ifaceNameIdentMaps);
 
     /**
      * The interface is to bind socket
@@ -388,7 +411,6 @@ public:
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
     int32_t GetSlotType(std::string &type);
-
     int32_t FactoryResetNetwork();
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
@@ -402,6 +424,37 @@ public:
      * @return Returns 0, unregister the network successfully, otherwise it will fail
      */
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
+
+    int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
+    int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
+
+    int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
+
+    int32_t DisableVnicNetwork();
+
+    /**
+     * This function returns whether the caller process's API version is not earlier
+     * than {@link targetApiVersion}, which meaning the caller process has same or later
+     * target API version.
+     *
+     * @param targetApiVersion target API version.
+     * @return true for supported and false for not, and true by default if cannot get
+     * process bundle's information.
+     */
+    static bool IsAPIVersionSupported(int targetApiVersion);
+
+    /**
+     * This function returns the caller's bundle name.
+     * This function is defined here because it is required in some Network Kit APIs.
+     * Please do not use this function except Network Kit APIs.
+     *
+     * @return optional bundle name in string format, return empty if cannot get bundle
+     * info from bundle manager.
+     */
+    static std::optional<std::string> ObtainBundleNameForSelf();
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -424,14 +477,17 @@ private:
     NetConnClient(const NetConnClient&) = delete;
 
     sptr<INetConnService> GetProxy();
-    void RecoverCallback();
+    void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    static std::optional<int32_t> ObtainTargetApiVersionForSelf();
+    static std::optional<std::string> ObtainBundleNameFromBundleMgr();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
     HttpProxy appHttpProxy_;
+    HttpProxy globalHttpProxy_;
     char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;
@@ -439,6 +495,9 @@ private:
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
+    sptr<IPreAirplaneCallback> preAirplaneCallback_;
+    std::mutex registerConnTupleListMutex_;
+    std::mutex netSupplierCallbackMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

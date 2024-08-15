@@ -46,11 +46,13 @@ private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
     void InitNetInfoOpToInterfaceMap();
+    void InitNetInfoOpToInterfaceMapPart2();
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
     void InitNetDiagOpToInterfaceMap();
     void InitNetDnsDiagOpToInterfaceMap();
+    void InitNetVnicInterfaceMap();
     void InitStaticArpToInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
@@ -85,6 +87,8 @@ private:
     int32_t CmdNetworkAddInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdCreateVnic(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDestroyVnic(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetFwmarkForNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
@@ -117,7 +121,10 @@ private:
     int32_t CmdGetTotalStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetAllSimStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteSimStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDeleteStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply);
@@ -132,7 +139,25 @@ private:
     int32_t CmdRegisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnregisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
-
+    int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
+#endif
+    int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStartClat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStopClat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdClearFirewallAllRules(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

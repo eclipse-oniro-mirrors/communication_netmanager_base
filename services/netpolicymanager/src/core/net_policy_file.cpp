@@ -18,8 +18,6 @@
 #include <fcntl.h>
 #include <string>
 
-#include <json/json.h>
-
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_file_event_handler.h"
@@ -104,56 +102,110 @@ const std::vector<UidPolicy> &NetPolicyFile::ReadUidPolicies()
     return netPolicy_.uidPolicies;
 }
 
-void NetPolicyFile::ParseUidPolicy(const Json::Value &root, NetPolicy &netPolicy)
+void NetPolicyFile::ParseUidPolicy(const cJSON* const root, NetPolicy &netPolicy)
 {
-    const Json::Value &arrayUidPolicy = root[CONFIG_UID_POLICY];
-    uint32_t size = arrayUidPolicy.size();
+    cJSON *netUidPolicy = cJSON_GetObjectItem(root, CONFIG_UID_POLICY);
+    if (netUidPolicy == nullptr) {
+        return;
+    }
+    uint32_t size = cJSON_GetArraySize(netUidPolicy);
     UidPolicy uidPolicy;
     for (uint32_t i = 0; i < size; i++) {
-        uidPolicy.uid = arrayUidPolicy[i][CONFIG_UID].asString();
-        uidPolicy.policy = arrayUidPolicy[i][CONFIG_POLICY].asString();
+        cJSON *uidPolicyItem = cJSON_GetArrayItem(netUidPolicy, i);
+        if (uidPolicyItem == nullptr) {
+            NETMGR_LOG_E("uidPolicyItem is null");
+            continue;
+        }
+        cJSON *uid = cJSON_GetObjectItem(uidPolicyItem, CONFIG_UID);
+        uidPolicy.uid = cJSON_GetStringValue(uid);
+        NETMGR_LOG_D("uid: %{public}s", uidPolicy.uid.c_str());
+        cJSON *policy = cJSON_GetObjectItem(uidPolicyItem, CONFIG_POLICY);
+        uidPolicy.policy = cJSON_GetStringValue(policy);
+        NETMGR_LOG_D("policy: %{public}s", uidPolicy.policy.c_str());
         netPolicy.uidPolicies.push_back(uidPolicy);
     }
 }
 
-void NetPolicyFile::ParseBackgroundPolicy(const Json::Value &root, NetPolicy &netPolicy)
+void NetPolicyFile::ParseBackgroundPolicy(const cJSON* const root, NetPolicy &netPolicy)
 {
-    const Json::Value &mapBackgroundPolicy = root[CONFIG_BACKGROUND_POLICY];
-    netPolicy.backgroundPolicyStatus = mapBackgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS].asString();
+    cJSON *netBackgroundPolicy = cJSON_GetObjectItem(root, CONFIG_BACKGROUND_POLICY);
+    if (netBackgroundPolicy != nullptr) {
+        cJSON *status = cJSON_GetObjectItem(netBackgroundPolicy, CONFIG_BACKGROUND_POLICY_STATUS);
+        netPolicy.backgroundPolicyStatus = cJSON_GetStringValue(status);
+        NETMGR_LOG_D("backgroundPolicyStatus: %{public}s", netPolicy.backgroundPolicyStatus.c_str());
+    }
 }
 
-void NetPolicyFile::ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPolicy)
+void NetPolicyFile::ParseQuotaPolicy(const cJSON* const root, NetPolicy &netPolicy)
 {
-    const Json::Value &arrayQuotaPolicy = root[CONFIG_QUOTA_POLICY];
-    uint32_t size = arrayQuotaPolicy.size();
+    cJSON *netQuotaPolicy = cJSON_GetObjectItem(root, CONFIG_QUOTA_POLICY);
+    if (netQuotaPolicy == nullptr) {
+        return;
+    }
     NetPolicyQuota quotaPolicy;
+    uint32_t size = cJSON_GetArraySize(netQuotaPolicy);
+    NETMGR_LOG_D("netQuotaPolicy size: %{public}u", size);
     for (uint32_t i = 0; i < size; i++) {
-        quotaPolicy.netType = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_NETTYPE].asString();
-        quotaPolicy.simId = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SUBSCRIBERID].asString();
-        quotaPolicy.periodStartTime = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODSTARTTIME].asString();
-        quotaPolicy.periodDuration = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODDURATION].asString();
-        quotaPolicy.warningBytes = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_WARNINGBYTES].asString();
-        quotaPolicy.limitBytes = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_LIMITBYTES].asString();
-        quotaPolicy.lastLimitSnooze = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE].asString();
-        quotaPolicy.metered = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_METERED].asString();
-        quotaPolicy.ident = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_IDENT].asString();
+        cJSON *quotaPolicyItem = cJSON_GetArrayItem(netQuotaPolicy, i);
+        if (quotaPolicyItem == nullptr) {
+            NETMGR_LOG_E("quotaPolicyItem is null");
+            continue;
+        }
+        cJSON *netType = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_NETTYPE);
+        quotaPolicy.netType = cJSON_GetStringValue(netType);
+        cJSON *simId = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_SUBSCRIBERID);
+        quotaPolicy.simId = cJSON_GetStringValue(simId);
+        cJSON *periodStartTime = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_PERIODSTARTTIME);
+        quotaPolicy.periodStartTime = cJSON_GetStringValue(periodStartTime);
+        cJSON *periodDuration = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_PERIODDURATION);
+        quotaPolicy.periodDuration = cJSON_GetStringValue(periodDuration);
+        cJSON *warningBytes = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_WARNINGBYTES);
+        quotaPolicy.warningBytes = cJSON_GetStringValue(warningBytes);
+        cJSON *limitBytes = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_LIMITBYTES);
+        quotaPolicy.limitBytes = cJSON_GetStringValue(limitBytes);
+        cJSON *lastLimitSnooze = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE);
+        quotaPolicy.lastLimitSnooze = cJSON_GetStringValue(lastLimitSnooze);
+        cJSON *metered = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_METERED);
+        quotaPolicy.metered = cJSON_GetStringValue(metered);
+        cJSON *ident = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_IDENT);
+        quotaPolicy.ident = cJSON_GetStringValue(ident);
+        NETMGR_LOG_D("netType:%{public}s, simId:%{public}s, perioST:%{public}s, perioDt:%{public}s, ident:%{public}s,\
+                     warningBytes:%{public}s, limitBytes:%{public}s, lastLimitSnooze:%{public}s, metered:%{public}s",
+                     quotaPolicy.netType.c_str(), quotaPolicy.simId.c_str(), quotaPolicy.periodStartTime.c_str(),
+                     quotaPolicy.periodDuration.c_str(), quotaPolicy.ident.c_str(), quotaPolicy.warningBytes.c_str(),
+                     quotaPolicy.limitBytes.c_str(), quotaPolicy.lastLimitSnooze.c_str(), quotaPolicy.metered.c_str());
         netPolicy.netQuotaPolicies.push_back(quotaPolicy);
     }
 }
 
-void NetPolicyFile::ParseFirewallRule(const Json::Value &root, NetPolicy &netPolicy)
+void NetPolicyFile::ParseFirewallRule(const cJSON* const root, NetPolicy &netPolicy)
 {
-    const Json::Value &mapFirewallList = root[CONFIG_FIREWALL_RULE];
-    for (auto iter = mapFirewallList.begin(); iter != mapFirewallList.end(); iter++) {
-        uint32_t chainType = CommonUtils::StrToUint(iter.key().asString());
-        const Json::Value &deniedList = (*iter)[CONFIG_FIREWALL_RULE_DENIEDLIST];
-        const Json::Value &allowedList = (*iter)[CONFIG_FIREWALL_RULE_ALLOWEDLIST];
-        for (uint32_t i = 0; i < deniedList.size(); i++) {
-            netPolicy_.netFirewallRules[chainType].deniedList.insert(CommonUtils::StrToUint(deniedList[i].asString()));
+    cJSON *netFirewallRules = cJSON_GetObjectItem(root, CONFIG_FIREWALL_RULE);
+    if (netFirewallRules == nullptr) {
+        return;
+    }
+    uint32_t size = cJSON_GetArraySize(netFirewallRules);
+    for (uint32_t i = 0; i < size; i++) {
+        cJSON *firewallRulesItem = cJSON_GetArrayItem(netFirewallRules, i);
+        std::string firewallRulesItemStr = firewallRulesItem->string;
+        uint32_t chainType = CommonUtils::StrToUint(firewallRulesItemStr);
+        cJSON *netDeniedList = cJSON_GetObjectItem(firewallRulesItem, CONFIG_FIREWALL_RULE_DENIEDLIST);
+        cJSON *netAllowedList = cJSON_GetObjectItem(firewallRulesItem, CONFIG_FIREWALL_RULE_ALLOWEDLIST);
+        uint32_t itemSize = cJSON_GetArraySize(netDeniedList);
+        for (uint32_t j = 0; j < itemSize; j++) {
+            cJSON *netDeniedListItem = cJSON_GetArrayItem(netDeniedList, j);
+            std::string netDeniedListItemStr = cJSON_GetStringValue(netDeniedListItem);
+            uint32_t deniedListNumber = CommonUtils::StrToUint(netDeniedListItemStr);
+            NETMGR_LOG_D("netFirewallRules.deniedList: %{public}u", deniedListNumber);
+            netPolicy.netFirewallRules[chainType].deniedList.insert(deniedListNumber);
         }
-        for (uint32_t i = 0; i < allowedList.size(); i++) {
-            netPolicy_.netFirewallRules[chainType].allowedList.insert(
-                CommonUtils::StrToUint(allowedList[i].asString()));
+        itemSize = cJSON_GetArraySize(netAllowedList);
+        for (uint32_t j = 0; j < itemSize; j++) {
+            cJSON *netAllowedListItem = cJSON_GetArrayItem(netAllowedList, j);
+            std::string netAllowedListItemStr = cJSON_GetStringValue(netAllowedListItem);
+            uint32_t allowedListNumber = CommonUtils::StrToUint(netAllowedListItemStr);
+            NETMGR_LOG_D("netFirewallRules.allowedList: %{public}u", allowedListNumber);
+            netPolicy.netFirewallRules[chainType].allowedList.insert(allowedListNumber);
         }
     }
 }
@@ -164,110 +216,141 @@ bool NetPolicyFile::Json2Obj(const std::string &content, NetPolicy &netPolicy)
         return false;
     }
 
-    Json::Value root;
-    Json::CharReaderBuilder builder;
-    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
-    JSONCPP_STRING errs;
-
-    bool isSuccess = reader->parse(content.c_str(), content.c_str() + content.length(), &root, &errs);
-    if (isSuccess && errs.size() == 0) {
-        netPolicy.hosVersion = root[CONFIG_HOS_VERSION].asString();
-        if (netPolicy.hosVersion.empty()) {
-            netPolicy.hosVersion = HOS_VERSION;
-        }
-
-        // parse uid policy from file
-        ParseUidPolicy(root, netPolicy);
-
-        // parse background policy from file
-        ParseBackgroundPolicy(root, netPolicy);
-
-        // parse quota policy from file
-        ParseQuotaPolicy(root, netPolicy);
-
-        // parse firewall rule from file
-        ParseFirewallRule(root, netPolicy);
-
-        return true;
+    cJSON *root = cJSON_Parse(content.c_str());
+    if (root == nullptr) {
+        return false;
     }
 
-    return false;
+    cJSON *hosVersion = cJSON_GetObjectItem(root, CONFIG_HOS_VERSION);
+    if (hosVersion == nullptr) {
+        netPolicy.hosVersion = HOS_VERSION;
+    } else {
+        netPolicy.hosVersion = cJSON_GetStringValue(hosVersion);
+        NETMGR_LOG_E("hosVersion: %{public}s", netPolicy.hosVersion.c_str());
+    }
+
+    // parse uid policy from file
+    ParseUidPolicy(root, netPolicy);
+
+    // parse background policy from file
+    ParseBackgroundPolicy(root, netPolicy);
+
+    // parse quota policy from file
+    ParseQuotaPolicy(root, netPolicy);
+
+    // parse firewall rule from file
+    ParseFirewallRule(root, netPolicy);
+
+    cJSON_Delete(root);
+    return true;
 }
 
 bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
 {
-    Json::Value root;
-    Json::StreamWriterBuilder builder;
-    auto streamWriter = std::unique_ptr<Json::StreamWriter>(builder.newStreamWriter());
+    cJSON *root = cJSON_CreateObject();
+    if (root == nullptr) {
+        return false;
+    }
+
     if (netPolicy_.hosVersion.empty()) {
         netPolicy_.hosVersion = HOS_VERSION;
     }
-    root[CONFIG_HOS_VERSION] = Json::Value(netPolicy_.hosVersion);
+    cJSON_AddItemToObject(root, CONFIG_HOS_VERSION, cJSON_CreateString(netPolicy_.hosVersion.c_str()));
     AddUidPolicy(root);
     AddBackgroundPolicy(root);
     AddQuotaPolicy(root);
     AddFirewallRule(root);
-
-    std::ostringstream out;
-    streamWriter->write(root, &out);
-    content = out.str();
+    char *jsonStr = cJSON_Print(root);
+    if (jsonStr == nullptr) {
+        NETMGR_LOG_E("jsonStr write fail");
+        cJSON_Delete(root);
+        return false;
+    }
+    content = jsonStr;
+    cJSON_Delete(root);
+    free(jsonStr);
+    NETMGR_LOG_D("content: %{public}s", content.c_str());
     return true;
 }
 
-void NetPolicyFile::AddQuotaPolicy(Json::Value &root)
+void NetPolicyFile::AddQuotaPolicy(cJSON *root)
 {
+    cJSON *quotaPolicy = cJSON_CreateArray();
+
     uint32_t size = netPolicy_.netQuotaPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
-        Json::Value quotaPolicy;
-        quotaPolicy[CONFIG_QUOTA_POLICY_NETTYPE] = netPolicy_.netQuotaPolicies[i].netType;
-        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicies[i].simId;
-        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODSTARTTIME] = netPolicy_.netQuotaPolicies[i].periodStartTime;
-        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODDURATION] = netPolicy_.netQuotaPolicies[i].periodDuration;
-        quotaPolicy[CONFIG_QUOTA_POLICY_WARNINGBYTES] = netPolicy_.netQuotaPolicies[i].warningBytes;
-        quotaPolicy[CONFIG_QUOTA_POLICY_LIMITBYTES] = netPolicy_.netQuotaPolicies[i].limitBytes;
-        quotaPolicy[CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE] = netPolicy_.netQuotaPolicies[i].lastLimitSnooze;
-        quotaPolicy[CONFIG_QUOTA_POLICY_METERED] = netPolicy_.netQuotaPolicies[i].metered;
-        quotaPolicy[CONFIG_QUOTA_POLICY_IDENT] = netPolicy_.netQuotaPolicies[i].ident;
-        root[CONFIG_QUOTA_POLICY].append(quotaPolicy);
+        cJSON *quotaPolicyItem = cJSON_CreateObject();
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_NETTYPE,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].netType.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_SUBSCRIBERID,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].simId.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_PERIODSTARTTIME,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].periodStartTime.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_PERIODDURATION,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].periodDuration.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_WARNINGBYTES,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].warningBytes.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_LIMITBYTES,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].limitBytes.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].lastLimitSnooze.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_METERED,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].metered.c_str()));
+        cJSON_AddItemToObject(quotaPolicyItem, CONFIG_QUOTA_POLICY_IDENT,
+                              cJSON_CreateString(netPolicy_.netQuotaPolicies[i].ident.c_str()));
+        cJSON_AddItemToArray(quotaPolicy, quotaPolicyItem);
     }
+
+    cJSON_AddItemToObject(root, CONFIG_QUOTA_POLICY, quotaPolicy);
 }
 
-void NetPolicyFile::AddUidPolicy(Json::Value &root)
+void NetPolicyFile::AddUidPolicy(cJSON *root)
 {
+    cJSON *uidPolicy = cJSON_CreateArray();
+
     uint32_t size = netPolicy_.uidPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
-        Json::Value uidPolicy;
-        uidPolicy[CONFIG_UID] = netPolicy_.uidPolicies[i].uid;
-        uidPolicy[CONFIG_POLICY] = netPolicy_.uidPolicies[i].policy;
-        root[CONFIG_UID_POLICY].append(uidPolicy);
+        cJSON *uidPolicyItem = cJSON_CreateObject();
+        cJSON_AddItemToObject(uidPolicyItem, CONFIG_UID, cJSON_CreateString(netPolicy_.uidPolicies[i].uid.c_str()));
+        cJSON_AddItemToObject(uidPolicyItem, CONFIG_POLICY,
+                              cJSON_CreateString(netPolicy_.uidPolicies[i].policy.c_str()));
+        cJSON_AddItemToArray(uidPolicy, uidPolicyItem);
     }
+
+    cJSON_AddItemToObject(root, CONFIG_UID_POLICY, uidPolicy);
 }
 
-void NetPolicyFile::AddBackgroundPolicy(Json::Value &root)
+void NetPolicyFile::AddBackgroundPolicy(cJSON *root)
 {
-    Json::Value backgroundPolicy;
+    cJSON *backgroundPolicy = cJSON_CreateObject();
+
     if (netPolicy_.backgroundPolicyStatus.empty()) {
         netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     }
-    backgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS] = netPolicy_.backgroundPolicyStatus;
-    root[CONFIG_BACKGROUND_POLICY] = backgroundPolicy;
+    cJSON_AddItemToObject(backgroundPolicy, CONFIG_BACKGROUND_POLICY_STATUS,
+                          cJSON_CreateString(netPolicy_.backgroundPolicyStatus.c_str()));
+    cJSON_AddItemToObject(root, CONFIG_BACKGROUND_POLICY, backgroundPolicy);
 }
 
-void NetPolicyFile::AddFirewallRule(Json::Value &root)
+void NetPolicyFile::AddFirewallRule(cJSON *root)
 {
-    Json::Value mapFirewallList(Json::objectValue);
+    cJSON *firewallRuleObj = cJSON_CreateObject();
     for (auto &&[k, v] : netPolicy_.netFirewallRules) {
         NETMGR_LOG_D("read k[%{public}d].", k);
-        Json::Value deniedList(Json::arrayValue);
-        Json::Value allowedList(Json::arrayValue);
-        std::for_each(v.deniedList.begin(), v.deniedList.end(),
-                      [&deniedList](const auto &it) { deniedList.append(std::to_string(it)); });
-        std::for_each(v.allowedList.begin(), v.allowedList.end(),
-                      [&allowedList](const auto &it) { allowedList.append(std::to_string(it)); });
-        mapFirewallList[std::to_string(k)][CONFIG_FIREWALL_RULE_DENIEDLIST] = deniedList;
-        mapFirewallList[std::to_string(k)][CONFIG_FIREWALL_RULE_ALLOWEDLIST] = allowedList;
+        cJSON *deniedListArr = cJSON_CreateArray();
+        cJSON *allowedListArr = cJSON_CreateArray();
+        cJSON *firewallRuleItem = cJSON_CreateObject();
+        for (auto &it : v.deniedList) {
+            cJSON_AddItemToArray(deniedListArr, cJSON_CreateString(std::to_string(it).c_str()));
+        }
+        for (auto &it : v.allowedList) {
+            cJSON_AddItemToArray(allowedListArr, cJSON_CreateString(std::to_string(it).c_str()));
+        }
+        cJSON_AddItemToObject(firewallRuleItem, CONFIG_FIREWALL_RULE_DENIEDLIST, deniedListArr);
+        cJSON_AddItemToObject(firewallRuleItem, CONFIG_FIREWALL_RULE_ALLOWEDLIST, allowedListArr);
+        cJSON_AddItemToObject(firewallRuleObj, std::to_string(k).c_str(), firewallRuleItem);
     }
-    root[CONFIG_FIREWALL_RULE] = mapFirewallList;
+    cJSON_AddItemToObject(root, CONFIG_FIREWALL_RULE, firewallRuleObj);
 }
 
 uint32_t NetPolicyFile::ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy)
@@ -330,7 +413,7 @@ void NetPolicyFile::WritePolicyByUid(uint32_t netUidPolicyOpType, uint32_t uid, 
         uidPolicy.policy = std::to_string(static_cast<uint32_t>(policy));
         netPolicy_.uidPolicies.push_back(uidPolicy);
     } else {
-        NETMGR_LOG_I("Need to do nothing!");
+        NETMGR_LOG_D("Need to do nothing!");
     }
 
     WriteFile();
@@ -447,12 +530,7 @@ bool NetPolicyFile::ReadBackgroundPolicy()
 std::shared_ptr<NetPolicyFileEventHandler> NetPolicyFile::GetHandler()
 {
     static auto handler = [this]() -> std::shared_ptr<NetPolicyFileEventHandler> {
-        auto runner = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_THREAD);
-        if (!runner) {
-            NETMGR_LOG_E("Create net policy file work event runner.");
-            return nullptr;
-        }
-        return std::make_shared<NetPolicyFileEventHandler>(runner);
+        return std::make_shared<NetPolicyFileEventHandler>(NET_POLICY_WORK_THREAD);
     }();
     return handler;
 }

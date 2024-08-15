@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "netsys_policy_wrapper.h"
+#include "iptables_type.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -98,6 +99,15 @@ HWTEST_F(NetsysPolicyWrapperTest, BandwidthRemoveAllowedListTest001, TestSize.Le
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysPolicyWrapperTest, PowerSaveUpdataAllowedListTest001, TestSize.Level1)
+{
+    uint32_t uid = 666;
+    auto ret = instance_->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_ALLOW);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+    ret = instance_->PowerSaveUpdataAllowedList(uid, FirewallRule::RULE_DENY);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsAllowedListChainTest001, TestSize.Level1)
 {
     uint32_t chain = 2;
@@ -129,6 +139,25 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallEnableChainTest001, TestSize.Level1)
     auto ret = instance_->FirewallEnableChain(chain, false);
     EXPECT_LE(ret, 0);
     std::remove(POLICY_FILE_NAME);
+}
+
+HWTEST_F(NetsysPolicyWrapperTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 666;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    bool isBroker = false;
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysPolicyWrapperTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 666;
+    auto ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

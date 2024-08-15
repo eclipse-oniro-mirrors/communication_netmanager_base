@@ -36,6 +36,7 @@ namespace NetsysNative {
 namespace {
 using namespace NetManagerStandard;
 using namespace testing::ext;
+static constexpr uint32_t TEST_UID = 1;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
@@ -268,7 +269,7 @@ HWTEST_F(NetsysNativeServiceTest, NetworkAddInterfaceTest001, TestSize.Level1)
 {
     int32_t netId = 1000;
     std::string iFName = "test0";
-    int32_t ret = instance_->NetworkAddInterface(netId, iFName);
+    int32_t ret = instance_->NetworkAddInterface(netId, iFName, BEARER_DEFAULT);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -572,11 +573,31 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeServiceTest, DeleteStatsInfo001, TestSize.Level1)
+{
+    int32_t ret = instance_->DeleteStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAllSimStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t ret = instance_->GetAllSimStatsInfo(stats);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DeleteSimStatsInfo001, TestSize.Level1)
+{
+    int32_t ret = instance_->DeleteSimStatsInfo(TEST_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest001, TestSize.Level1)
 {
     std::string iptableCmd = "-Sabbbb";
     std::string iptableOutput = "";
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -584,7 +605,8 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest002, TestSize.Leve
 {
     std::string iptableCmd = "Sabbbb";
     std::string iptableOutput = "";
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
@@ -598,8 +620,9 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Leve
     instance_->OnNetManagerRestart();
     std::string iptableCmd = "-Sabbbb";
     std::string iptableOutput = "";
+    IptablesType ipType = IptablesType::IPTYPE_IPV4;
     auto backup = std::move(instance_->iptablesWrapper_);
-    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
     instance_->iptablesWrapper_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
@@ -734,6 +757,157 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest003, TestSize.Lev
 
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    std::set<uint32_t> sharingTypeIsOn;
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 1);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    sharingTypeIsOn.clear();
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    bool isBroker = false;
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NotifyNetBearerTypeChangeTest001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, CreateVnic001, TestSize.Level1)
+{
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+    int32_t ret = instance_->CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DestroyVnic001, TestSize.Level1)
+{
+    int32_t ret = instance_->DestroyVnic();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed001
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed002
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed002, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0", "aaa"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed003
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed003, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed004
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed004, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {"wlan0"};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed005
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed005, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetNicTrafficAllowed006
+ * @tc.desc: Test NetsysNativeService SetNicTrafficAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed006, TestSize.Level1)
+{
+    std::vector<std::string> ifaceName = {};
+    auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

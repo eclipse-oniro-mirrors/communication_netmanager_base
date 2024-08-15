@@ -125,6 +125,9 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     statement_.BindInt64(++idx, info.rxPackets_);
     statement_.BindInt64(++idx, info.txBytes_);
     statement_.BindInt64(++idx, info.txPackets_);
+    if (paramCount == UID_PARAM_NUM) {
+        statement_.BindText(++idx, info.ident_);
+    }
     ret = statement_.Step();
     statement_.ResetStatementAndClearBindings();
     if (ret != SQLITE_DONE) {
@@ -235,6 +238,59 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
     return Step(infos);
 }
 
+int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const std::string &ident, uint64_t start,
+                                          uint64_t end, std::vector<NetStatsInfo> &infos)
+{
+    infos.clear();
+    std::string sql =
+        "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Ident = ?" + " AND t.Date >= ?" + " AND t.Date <= ?";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, ident);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = BindInt64(idx, start, end);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    return Step(infos);
+}
+
+int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident,
+                                          uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
+{
+    infos.clear();
+    std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND T.UID = ? AND t.Ident = ?" + " AND t.Date >= ?" +
+                      " AND t.Date <= ?";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindInt32(idx, uid);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind int32 ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = statement_.BindText(++idx, ident);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = BindInt64(idx, start, end);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    return Step(infos);
+}
+
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t start, uint64_t end)
 {
     std::string sql =
@@ -244,8 +300,21 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
 
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t uid)
 {
-    std::string sql = "DELETE FROM " + tableName + " WHERE UID = " + std::to_string(uid);
-    return ExecSql(sql, nullptr, sqlCallback);
+    std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    statement_.BindInt32(idx, uid);
+    ret = statement_.Step();
+    statement_.ResetStatementAndClearBindings();
+    if (ret != SQLITE_DONE) {
+        NETMGR_LOG_E("Step failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsDatabaseHelper::Close()
@@ -294,6 +363,9 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
         statement_.GetColumnLong(++i, info.rxPackets_);
         statement_.GetColumnLong(++i, info.txBytes_);
         statement_.GetColumnLong(++i, info.txPackets_);
+        if (statement_.GetColumnCount() == UID_PARAM_NUM) {
+            statement_.GetColumnString(++i, info.ident_);
+        }
         infos.emplace_back(info);
         rc = statement_.Step();
         NETMGR_LOG_D("Step result:%{public}d", rc);
@@ -316,6 +388,93 @@ int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t 
     }
 
     return ret;
+}
+
+int32_t NetStatsDatabaseHelper::Upgrade()
+{
+    auto ret = ExecTableUpgrade(UID_TABLE, Version_1);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_TABLE, Version_1);
+    }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_2);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_2);
+    }
+    return ret;
+}
+
+int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, TableVersion newVersion)
+{
+    TableVersion oldVersion;
+    auto ret = GetTableVersion(oldVersion, tableName);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("ExecTableUpgrade getTableVersion failed. ret = %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
+    if (oldVersion == newVersion) {
+        return NETMANAGER_SUCCESS;
+    }
+    NETMGR_LOG_I("ExecTableUpgrade tableName = %{public}s, oldVersion = %{public}d, newVersion = %{public}d",
+                 tableName.c_str(), oldVersion, newVersion);
+    if (oldVersion < Version_1 && newVersion >= Version_1) {
+        std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
+        ret = ExecSql(sql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade version_1 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_1;
+    }
+    if (oldVersion < Version_2 && newVersion >= Version_2) {
+        ret = DeleteData(tableName, Sim_UID);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade Version_2 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_2;
+    }
+    if (oldVersion != newVersion) {
+        NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
+                     oldVersion, newVersion);
+        return NETMANAGER_ERROR;
+    }
+    ret = UpdateTableVersion(oldVersion, tableName);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ExecTableUpgrade updateVersion failed. ret = %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std::string &tableName)
+{
+    std::string sql = "SELECT * FROM " + std::string(VERSION_TABLE) + " WHERE Name = ?;";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, tableName);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t rc = statement_.Step();
+    auto v = static_cast<uint32_t>(Version_0);
+    while (rc != SQLITE_DONE) {
+        int32_t i = 1;
+        statement_.GetColumnInt(i, v);
+        rc = statement_.Step();
+    }
+    statement_.ResetStatementAndClearBindings();
+    version = static_cast<TableVersion>(v);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::UpdateTableVersion(TableVersion version, const std::string &tableName)
+{
+    std::string sql = "INSERT OR REPLACE INTO "+ std::string(VERSION_TABLE) + "(Name, Version) VALUES('" +
+                      tableName + "', " + std::to_string(version) + ");";
+    return ExecSql(sql, nullptr, sqlCallback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,6 +21,8 @@
 #include "i_net_dns_result_callback.h"
 #include "i_netsys_controller_service.h"
 #include "refbase.h"
+#include <set>
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetsysController {
@@ -65,6 +67,9 @@ public:
      */
     int32_t NetworkDestroy(int32_t netId);
 
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
+    int32_t DestroyVnic();
+
     int32_t NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids, const std::vector<int32_t> &endUids);
     int32_t NetworkDelUids(int32_t netId, const std::vector<int32_t> &beginUids, const std::vector<int32_t> &endUids);
 
@@ -73,9 +78,10 @@ public:
      *
      * @param netId
      * @param iface Network port device name
+     * @param netBearerType Network bearer type
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface);
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType = BEARER_DEFAULT);
 
     /**
      * Delete network port device
@@ -193,6 +199,18 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
+
+    /**
+     * Delete ip address
+     *
+     * @param ifName Network port device name
+     * @param ipAddr ip address
+     * @param prefixLength subnet mask
+     * @param netCapabilities Net capabilities in string format
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength,
+                                const std::string &netCapabilities);
 
     /**
      * Set iface ip address
@@ -697,6 +715,21 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName);
 
     /**
+     * Get all Sim stats info
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Delete the Sim Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteSimStatsInfo(uint32_t uid);
+
+    /**
      * Get all stats info
      *
      * @param stats stats
@@ -705,13 +738,23 @@ public:
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
     /**
+     * Delete the Iface Stats with uid
+     *
+     * @param uid the uid of application
+     * @return returns 0 for success other as failed.
+     */
+    int32_t DeleteStatsInfo(uint32_t uid);
+
+    /**
      * Set iptables for result
      *
      * @param cmd Iptables command
      * @param respond The respond of execute iptables command
+     * @param ipType The type of iptables command, the default value is ipv4
      * @return Value the return value of the netsys interface call
      */
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond);
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                     NetsysNative::IptablesType ipType = NetsysNative::IPTYPE_IPV4);
 
     /**
      * Check network connectivity by sending packets to a host and reporting its response.
@@ -817,6 +860,99 @@ public:
      * @return returns the stats of the cookie
      */
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie);
+
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn);
+
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen);
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /**
+     * Set firewall rules to native
+     *
+     * @param type ip, dns, domain
+     * @param ruleList list of NetFirewallIpRule
+     * @param isFinish transmit finish or not
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
+
+    /**
+     * Set firewall default action
+     *
+     * @param inDefault  Default action of NetFirewallRuleDirection:RULE_IN
+     * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+
+    /**
+     * Set firewall current user id
+     *
+     * @param userId current user id
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+
+    /**
+     * Clear firewall rules by type
+     *
+     * @param type ip, dns, domain, all
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
+
+    /**
+     * Register callback for recevie intercept event
+     *
+     * @param callback implement of INetFirewallCallback
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+
+    /**
+     * Unregister callback for recevie intercept event
+     *
+     * @param callback register callback for recevie intercept event
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid - The specified UID of application.
+     * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @param isBroker true means the broker application.
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
+
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr);
+    int32_t StopClat(const std::string &interfaceName);
+
+    /**
+     * Clear Firewall All Rules
+     */
+    int32_t ClearFirewallAllRules();
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 private:
     NetsysController() = default;
 

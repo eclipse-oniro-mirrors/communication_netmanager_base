@@ -35,6 +35,8 @@
 #include "set_policy_by_uid_context.h"
 #include "set_power_save_allow_list_context.h"
 #include "update_remind_policy_context.h"
+#include "set_network_access_policy_context.h"
+#include "get_network_access_policy_context.h"
 
 #define DEFINE_REMIND(REMIND) \
     DECLARE_NAPI_STATIC_PROPERTY(#REMIND, NapiUtils::CreateUint32(env, static_cast<uint32_t>(RemindType::REMIND)))
@@ -85,6 +87,8 @@ constexpr const char *NET_UID_RULE = "NetUidRule";
 constexpr const char *NET_UID_POLICY = "NetUidPolicy";
 constexpr const char *NET_LIMIT_ACTION = "LimitAction";
 constexpr const char *NET_BACKGROUND_POLICY = "NetBackgroundPolicy";
+constexpr const char *FUNCTION_SET_NETWORK_ACCESS_POLICY = "setNetworkAccessPolicy";
+constexpr const char *FUNCTION_GET_NETWORK_ACCESS_POLICY = "getNetworkAccessPolicy";
 
 enum MeteringMode {
     /* non metering */
@@ -213,6 +217,20 @@ napi_value GetPowerSaveTrustlist(napi_env env, napi_callback_info info)
         NetPolicyAsyncWork::GetPowerSaveTrustlistCallback);
 }
 
+napi_value SetNetworkAccessPolicy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetNetworkAccessPolicyContext>(
+        env, info, FUNCTION_SET_NETWORK_ACCESS_POLICY, nullptr, NetPolicyAsyncWork::ExecSetNetworkAccessPolicy,
+        NetPolicyAsyncWork::SetNetworkAccessPolicyCallback);
+}
+
+napi_value GetNetworkAccessPolicy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetNetworkAccessPolicyContext>(
+        env, info, FUNCTION_GET_NETWORK_ACCESS_POLICY, nullptr, NetPolicyAsyncWork::ExecGetNetworkAccessPolicy,
+        NetPolicyAsyncWork::GetNetworkAccessPolicyCallback);
+}
+
 napi_value On(napi_env env, napi_callback_info info)
 {
     return PolicyObserverWrapper::GetInstance().On(env, info,
@@ -328,6 +346,8 @@ napi_value InitPolicyModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_SET_POWER_SAVE_ALLOWLIST, SetPowerSaveTrustlist),
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_POWER_SAVE_ALLOWLIST, GetPowerSaveTrustlist),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_NETWORK_ACCESS_POLICY, SetNetworkAccessPolicy),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_NETWORK_ACCESS_POLICY, GetNetworkAccessPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
         });
@@ -337,6 +357,8 @@ napi_value InitPolicyModule(napi_env env, napi_value exports)
     CreateBackgroundPolicy(env, exports);
     CreateMeteringMode(env, exports);
     CreateNetUidRule(env, exports);
+    NapiUtils::SetEnvValid(env);
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, env);
     return exports;
 }
 

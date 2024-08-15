@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,71 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("bandwidth_manager_test") {
   module_out_path = "netmanager_base/netsys_native_manager_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [ "bandwidth_manager_test.cpp" ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/dnsresolverclient/include",
+    "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/test",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+  ]
+
+  deps = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_unittest("bandwidth_manager_class_test") {
+  module_out_path = "netmanager_base/netsys_native_manager_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [ "bandwidth_manager_class_test.cpp" ]
 
   include_dirs = [
     "$INNERKITS_ROOT/dnsresolverclient/include",

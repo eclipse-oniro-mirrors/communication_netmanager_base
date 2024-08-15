@@ -36,6 +36,8 @@ using namespace NetManagerStandard;
 using namespace NetConnManagerTestUtil;
 constexpr int32_t NETID = 103;
 const std::string INTERFACENAME = "wlan0";
+constexpr int32_t INTERNAL_NETID = 10;
+const std::string INTERNAL_INTERFACENAME = "rmnet0";
 constexpr int32_t LOCAL_NET_ID = 99;
 constexpr int32_t ERROR_CODE = -101;
 constexpr int32_t INVALID_VALUE = -1;
@@ -112,6 +114,17 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest002, TestSize.Level1)
     int32_t ret = instance_->ReinitRoute();
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->CreatePhysicalNetwork(NETID, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: CreatePhysicalNetworkTest003
+ * @tc.desc: Test ConnManager CreatePhysicalNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest003, TestSize.Level1)
+{
+    auto ret = instance_->CreatePhysicalNetwork(INTERNAL_NETID, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -229,8 +242,12 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 {
     std::string iface = INTERFACENAME;
-    int32_t ret = instance_->AddInterfaceToNetwork(NETID, iface);
+    int32_t ret = instance_->AddInterfaceToNetwork(NETID, iface, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
+
+    iface = INTERNAL_INTERFACENAME;
+    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface, BEARER_DEFAULT);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -241,8 +258,11 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
 {
     std::string testInterfaceName = "testName";
-    int32_t ret = instance_->AddInterfaceToNetwork(NETID, testInterfaceName);
+    int32_t ret = instance_->AddInterfaceToNetwork(NETID, testInterfaceName, BEARER_DEFAULT);
     EXPECT_NE(ret, 0);
+
+    ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, BEARER_DEFAULT);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -255,6 +275,10 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
     std::string iface = INTERFACENAME;
     int32_t ret = instance_->RemoveInterfaceFromNetwork(NETID, iface);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
+
+    iface = INTERNAL_INTERFACENAME;
+    ret = instance_->RemoveInterfaceFromNetwork(INTERNAL_NETID, iface);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -266,6 +290,9 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest002, TestSize.Level1)
 {
     std::string testInterfaceName = "testName";
     auto ret = instance_->RemoveInterfaceFromNetwork(NETID, testInterfaceName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->RemoveInterfaceFromNetwork(INTERNAL_NETID, testInterfaceName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -388,7 +415,7 @@ HWTEST_F(ConnManagerTest, GetFwmarkForNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
 {
     std::string testInterfaceName = "testName";
-    int32_t ret = instance_->GetNetworkForInterface(testInterfaceName);
+    int32_t ret = instance_->GetNetworkForInterface(100, testInterfaceName);
     EXPECT_EQ(ret, INVALID_VALUE);
 
     RouteManager::TableType type = instance_->GetTableType(LOCAL_NET_ID);
@@ -410,6 +437,48 @@ HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
     netId = 99;
     result = instance_->FindVirtualNetwork(netId);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: SetNetworkAccessPolicy001
+ * @tc.desc: Test ConnManager SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    bool isBroker = false;
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: DeleteNetworkAccessPolicy001
+ * @tc.desc: Test ConnManager DeleteNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetBearerTypeChange001
+ * @tc.desc: Test ConnManager NotifyNetBearerTypeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 } // namespace NetsysNative
 } // namespace OHOS

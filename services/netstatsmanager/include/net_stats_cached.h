@@ -16,15 +16,19 @@
 #ifndef NET_STATS_CACHED_H
 #define NET_STATS_CACHED_H
 
+#include <algorithm>
 #include <map>
 #include <mutex>
 #include <vector>
 
+#include "ffrt.h"
+#include "net_push_stats_info.h"
 #include "net_stats_callback.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
+#include "safe_map.h"
 
-#include "timer.h"
+#include "ffrt_timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,13 +38,25 @@ public:
     ~NetStatsCached() = default;
     void ForceUpdateStats();
 
+    void ForceDeleteStats(uint32_t uid);
+
     int32_t StartCached();
 
     void SetCycleThreshold(uint32_t threshold);
 
     void GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo);
 
+    void GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo);
+
+    void GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo);
+
+    void GetAllPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo);
+
     void GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsInfo);
+
+    void SetAppStats(const PushStatsInfo &info);
+
+    void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
     inline void SetTrafficThreshold(uint64_t threshold)
     {
@@ -75,6 +91,19 @@ private:
             }
         }
 
+        void PushUidSimStats(NetStatsInfo &info)
+        {
+            if (info.HasNoData()) {
+                return;
+            }
+            info.date_ = CommonUtils::GetCurrentSecond();
+            uidSimStatsInfo_.push_back(info);
+            currentUidSimStats_ += info.GetStats();
+            if (netStatsCallbackManager_ != nullptr) {
+                netStatsCallbackManager_->NotifyNetUidStatsChanged(info.iface_, info.uid_);
+            }
+        }
+
         void PushIfaceStats(NetStatsInfo &info)
         {
             if (info.HasNoData()) {
@@ -93,6 +122,11 @@ private:
             return uidStatsInfo_;
         }
 
+        inline std::vector<NetStatsInfo> &GetUidSimStatsInfo()
+        {
+            return uidSimStatsInfo_;
+        }
+
         inline std::vector<NetStatsInfo> &GetIfaceStatsInfo()
         {
             return ifaceStatsInfo_;
@@ -101,6 +135,11 @@ private:
         inline uint64_t GetCurrentUidStats() const
         {
             return currentUidStats_;
+        }
+
+        inline uint64_t GetCurrentUidSimStats() const
+        {
+            return currentUidSimStats_;
         }
 
         inline uint64_t GetCurrentIfaceStats() const
@@ -112,6 +151,36 @@ private:
         {
             uidStatsInfo_.clear();
             currentUidStats_ = 0;
+        }
+
+        void ResetUidStats(uint32_t uid)
+        {
+            for (const auto &item : uidStatsInfo_) {
+                if (item.uid_ == uid) {
+                    currentUidStats_ -= item.GetStats();
+                }
+            }
+            uidStatsInfo_.erase(std::remove_if(uidStatsInfo_.begin(), uidStatsInfo_.end(),
+                                               [uid](const auto &item) { return item.uid_ == uid; }),
+                                uidStatsInfo_.end());
+        }
+
+        void ResetUidSimStats()
+        {
+            uidSimStatsInfo_.clear();
+            currentUidSimStats_ = 0;
+        }
+
+        void ResetUidSimStats(uint32_t uid)
+        {
+            for (const auto &item : uidSimStatsInfo_) {
+                if (item.uid_ == uid) {
+                    currentUidSimStats_ -= item.GetStats();
+                }
+            }
+            uidSimStatsInfo_.erase(std::remove_if(uidSimStatsInfo_.begin(), uidSimStatsInfo_.end(),
+                                                  [uid](const auto &item) { return item.uid_ == uid; }),
+                                   uidSimStatsInfo_.end());
         }
 
         void ResetIfaceStats()
@@ -127,8 +196,10 @@ private:
 
     private:
         uint64_t currentUidStats_ = 0;
+        uint64_t currentUidSimStats_ = 0;
         uint64_t currentIfaceStats_ = 0;
         std::vector<NetStatsInfo> uidStatsInfo_;
+        std::vector<NetStatsInfo> uidSimStatsInfo_;
         std::vector<NetStatsInfo> ifaceStatsInfo_;
         std::shared_ptr<NetStatsCallback> netStatsCallbackManager_ = nullptr;
     };
@@ -140,23 +211,38 @@ private:
     static constexpr uint64_t STATS_PACKET_CYCLE_MS = 1 * 60 * 60 * 1000;
 
     CachedInfo stats_;
-    std::mutex lock_;
+    ffrt::mutex lock_;
     bool isForce_ = false;
-    std::unique_ptr<Timer> cacheTimer_ = nullptr;
-    std::unique_ptr<Timer> writeTimer_ = nullptr;
+    std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
+    std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
     uint32_t cycleThreshold_ = DEFAULT_CACHE_CYCLE_MS;
     uint64_t trafficThreshold_ = DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES;
     uint64_t dateCycle_ = DEFAULT_DATA_CYCLE_S;
+    std::vector<NetStatsInfo> uidPushStatsInfo_;
+    std::vector<NetStatsInfo> allPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
+    std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
+
+    std::atomic<bool> isIfaceNameIdentMapLoaded_ = false;
+    SafeMap<std::string, std::string> ifaceNameIdentMap_;
+
+    void LoadIfaceNameIdentMaps();
 
     void CacheStats();
     void CacheUidStats();
+    void CacheUidSimStats();
     void CacheIfaceStats();
+    void CacheAppStats();
 
     void WriteStats();
     void WriteUidStats();
+    void WriteUidSimStats();
     void WriteIfaceStats();
+
+    NetStatsInfo GetIncreasedStats(const NetStatsInfo &info);
+
+    NetStatsInfo GetIncreasedSimStats(const NetStatsInfo &info);
 
     inline bool CheckUidStor()
     {

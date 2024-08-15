@@ -71,16 +71,9 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
     t.detach();
 }
 
-void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
+void NetPolicyCore::HandleEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData)
 {
-    if (!event) {
-        NETMGR_LOG_E("HandleEvent event is null.");
-        return;
-    }
-
     for (const auto &core : cores_) {
-        auto eventId = event->GetInnerEventId();
-        auto eventData = event->GetSharedObject<PolicyEvent>();
         if (eventData && core && core != eventData->sender) {
             core->HandleEvent(eventId, eventData);
         }
@@ -107,7 +100,6 @@ void NetPolicyCore::SubscribeCommonEvent()
         matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_PACKAGE_REMOVED);
-        matchingSkills.AddEvent(COMMON_EVENT_NET_QUOTA_WARNING);
         EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPriority(CORE_EVENT_PRIORITY);
         subscriber_ = std::make_shared<ReceiveMessage>(subscribeInfo, shared_from_this());
@@ -139,10 +131,12 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
     const auto &data = eventData.GetData();
     const auto &code = eventData.GetCode();
     if (action == COMMON_EVENT_POWER_SAVE_MODE_CHANGED) {
+#ifdef NETMGR_POWER_SAVE_ENABLE
         bool isPowerSave = (code == SAVE_MODE || code == LOWPOWER_MODE);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->powerSaveMode = isPowerSave;
         receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
+#endif
         return;
     }
 

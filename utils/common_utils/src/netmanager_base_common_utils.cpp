@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <regex>
+#include <sstream>
 #include <set>
 #include <string>
 #include <sys/socket.h>
@@ -150,7 +151,7 @@ int GetMaskLength(const std::string &mask)
 
 std::string GetMaskByLength(uint32_t length)
 {
-    const auto mask = length == 0 ? 0 : -1 << (NET_MASK_MAX_LENGTH - length);
+    const uint32_t mask = length == 0 ? 0 : 0xFFFFFFFF << (NET_MASK_MAX_LENGTH - length);
     auto maskGroup = new int[NET_MASK_GROUP_COUNT];
     for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
         int pos = NET_MASK_GROUP_COUNT - 1 - i;
@@ -487,21 +488,26 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 
 int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
 {
+    NETMGR_LOG_I("Fork OK");
     if (count != PIPE_FD_NUM) {
         NETMGR_LOG_E("fork exec parent process failed");
         _exit(-1);
     }
+    NETMGR_LOG_I("Fork done and ready to close");
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
+    NETMGR_LOG_I("Close done and ready for dup2");
     if (dup2(pipeFd[PIPE_IN], STDOUT_FILENO) == -1) {
         NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
+    NETMGR_LOG_I("ready for execv");
     if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
         NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
+    NETMGR_LOG_I("execv done");
     if (close(pipeFd[PIPE_IN]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
@@ -515,31 +521,26 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("fork exec parent process failed");
         return NETMANAGER_ERROR;
     }
+    if (close(pipeFd[PIPE_IN]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+    }
     if (out != nullptr) {
         char buf[CHAR_ARRAY_SIZE_MAX] = {0};
         out->clear();
-        if (close(pipeFd[PIPE_IN]) != 0) {
-            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
-        }
+        NETMGR_LOG_I("ready for read");
         while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
             if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
                 NETMGR_LOG_E("memset is false");
-                close(pipeFd[PIPE_OUT]);
-                return NETMANAGER_ERROR;
             }
         }
-        if (close(pipeFd[PIPE_OUT]) != 0) {
-            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
-            _exit(-1);
-        }
-        return NETMANAGER_SUCCESS;
-    } else {
-        NETMGR_LOG_D("there is no need to return execution results");
-        close(pipeFd[PIPE_IN]);
-        close(pipeFd[PIPE_OUT]);
+    }
+    NETMGR_LOG_I("read done");
+    if (close(pipeFd[PIPE_OUT]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     pid_t pidRet = waitpid(childPid, nullptr, 0);
+    NETMGR_LOG_I("waitpid %{public}d done", childPid);
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
@@ -557,6 +558,7 @@ int32_t ForkExec(const std::string &command, std::string *out)
         NETMGR_LOG_E("creat pipe failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
     }
+    NETMGR_LOG_I("ForkExec");
     pid_t pid = fork();
     if (pid < 0) {
         NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
@@ -631,5 +633,57 @@ bool HasInternetPermission()
         close(testSock);
     }
     return true;
+}
+
+std::string Trim(const std::string &str)
+{
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    if (start == std::string::npos || end == std::string::npos) {
+        return "";
+    }
+    return str.substr(start, end - start + 1);
+}
+
+bool IsUrlRegexValid(const std::string &regex)
+{
+    if (Trim(regex).empty()) {
+        return false;
+    }
+    return regex_match(regex, std::regex("^[a-zA-Z0-9\\-_\\.*]+$"));
+}
+
+std::string InsertCharBefore(const std::string &input, const char from, const char preChar, const char nextChar)
+{
+    std::ostringstream output;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (input[i] == from && (i == input.size() - 1 || input[i + 1] != nextChar)) {
+            output << preChar;
+        }
+        output << input[i];
+    }
+    return output.str();
+}
+
+std::string ReplaceCharacters(const std::string &input)
+{
+    std::string output = InsertCharBefore(input, '*', '.', '\0');
+    output = InsertCharBefore(output, '.', '\\', '*');
+    return output;
+}
+
+bool UrlRegexParse(const std::string &str, const std::string &patternStr)
+{
+    if (patternStr.empty()) {
+        return false;
+    }
+    if (patternStr == "*") {
+        return true;
+    }
+    if (!IsUrlRegexValid(patternStr)) {
+        return patternStr == str;
+    }
+    std::regex pattern(ReplaceCharacters(patternStr));
+    return !patternStr.empty() && std::regex_match(str, pattern);
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

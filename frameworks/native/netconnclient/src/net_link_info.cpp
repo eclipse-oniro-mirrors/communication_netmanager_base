@@ -36,6 +36,7 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+    ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
 }
 
@@ -48,6 +49,7 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+    ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
     return *this;
 }
@@ -90,7 +92,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint16(mtu_)) {
         return false;
     }
-    if (!parcel.WriteString(tcpBufferSizes_)) {
+    if (!parcel.WriteString(tcpBufferSizes_) || !parcel.WriteString(ident_)) {
         return false;
     }
     if (!httpProxy_.Marshalling(parcel)) {
@@ -145,7 +147,7 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
         }
         ptr->routeList_.push_back(*route);
     }
-    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) ||
+    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) || !parcel.ReadString(ptr->ident_) ||
         !HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
         return nullptr;
     }
@@ -191,10 +193,8 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
             return false;
         }
     }
-    if (!parcel.WriteUint16(object->mtu_)) {
-        return false;
-    }
-    if (!parcel.WriteString(object->tcpBufferSizes_)) {
+    if (!parcel.WriteUint16(object->mtu_) || !parcel.WriteString(object->tcpBufferSizes_) ||
+        !parcel.WriteString(object->ident_)) {
         return false;
     }
     if (!object->httpProxy_.Marshalling(parcel)) {
@@ -213,6 +213,7 @@ void NetLinkInfo::Initialize()
     std::list<Route>().swap(routeList_);
     mtu_ = 0;
     tcpBufferSizes_ = "";
+    ident_ = "";
 }
 
 bool NetLinkInfo::HasNetAddr(const INetAddr &netAddr) const
@@ -256,6 +257,10 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("tcpBufferSizes_ = ");
     str.append(tcpBufferSizes_);
+
+    str.append(tab);
+    str.append("ident_ = ");
+    str.append(ident_);
 
     str.append(tab);
     str.append("httpProxy = ");

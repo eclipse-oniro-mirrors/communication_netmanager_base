@@ -21,6 +21,7 @@
 #include "get_policy_by_uid_context.h"
 #include "get_uids_by_policy_context.h"
 #include "get_net_quota_policies_context.h"
+#include "get_network_access_policy_context.h"
 #include "is_uid_net_allowed_context.h"
 #include "net_quota_policy.h"
 #include "restore_all_policies_context.h"
@@ -30,6 +31,7 @@
 #include "set_power_save_allow_list_context.h"
 #include "set_device_idle_allow_list_context.h"
 #include "update_remind_policy_context.h"
+#include "set_network_access_policy_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -54,6 +56,8 @@ public:
     static bool ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context);
     static bool ExecSetPowerSaveTrustlist(SetPowerSaveTrustlistContext *context);
     static bool ExecGetPowerSaveTrustlist(GetPowerSaveTrustlistContext *context);
+    static bool ExecSetNetworkAccessPolicy(SetNetworkAccessPolicyContext *context);
+    static bool ExecGetNetworkAccessPolicy(GetNetworkAccessPolicyContext *context);
 
     static napi_value SetPolicyByUidCallback(SetPolicyByUidContext *context);
     static napi_value GetPolicyByUidCallback(GetPolicyByUidContext *context);
@@ -71,6 +75,8 @@ public:
     static napi_value UpdateRemindPolicyCallback(UpdateRemindPolicyContext *context);
     static napi_value SetPowerSaveTrustlistCallback(SetPowerSaveTrustlistContext *context);
     static napi_value GetPowerSaveTrustlistCallback(GetPowerSaveTrustlistContext *context);
+    static napi_value SetNetworkAccessPolicyCallback(SetNetworkAccessPolicyContext *context);
+    static napi_value GetNetworkAccessPolicyCallback(GetNetworkAccessPolicyContext *context);
 
     static napi_value CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &netQuotaPolicy);
     static void FillNetWorkMatchRule(napi_env env, napi_value connectionProperties,

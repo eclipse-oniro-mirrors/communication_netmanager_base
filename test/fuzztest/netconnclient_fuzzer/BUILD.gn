@@ -67,6 +67,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
@@ -77,9 +78,11 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

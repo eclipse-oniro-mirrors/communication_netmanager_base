@@ -28,13 +28,17 @@ public:
     virtual ~NetConnServiceProxy();
     int32_t SystemReady() override;
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
+    int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
+    int32_t DisableVnicNetwork() override;
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                 uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override;
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS) override;
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                    const uint32_t timeoutMS) override;
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
@@ -43,6 +47,8 @@ public:
     int32_t HasDefaultNet(bool &flag) override;
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
+                                  SafeMap<std::string, std::string> &ifaceNameIdentMaps) override;
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t NetDetection(int32_t netId) override;
@@ -78,6 +84,9 @@ public:
     int32_t FactoryResetNetwork() override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
+    int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
+    int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

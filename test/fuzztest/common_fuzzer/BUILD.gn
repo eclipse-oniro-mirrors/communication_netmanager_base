@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,8 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_fuzztest("CommonFuzzTest") {
   module_out_path = fuzz_test_path
   fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/common_fuzzer"
+  _cfi_blocklist_path =
+      "$NETMANAGER_BASE_ROOT/test/fuzztest/common_fuzzer/cfi_blocklist.txt"
 
   include_dirs = [
     "$ETHERNETMANAGER_SOURCE_DIR/include",
@@ -42,7 +44,19 @@ ohos_fuzztest("CommonFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+    "-fvisibility=hidden",
+    "-fsanitize-blacklist=" + rebase_path(_cfi_blocklist_path, root_build_dir),
   ]
+
+  ldflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+  ]
+
   sources = [ "common_fuzzer.cpp" ]
 
   deps = [
@@ -53,7 +67,6 @@ ohos_fuzztest("CommonFuzzTest") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   defines = [
@@ -67,6 +80,7 @@ ohos_fuzztest("CommonFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",

@@ -54,6 +54,8 @@ ohos_shared_library("net_manager_common") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "common_utils/src/base64_utils.cpp",
     "common_utils/src/event_report.cpp",
@@ -73,14 +75,15 @@ ohos_shared_library("net_manager_common") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
+  if (netmanager_base_enable_feature_net_bluetooth) {
+    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  }
+
   if (is_standard_system) {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
   }
 
-  public_configs = [
-    ":netmgr_common_config",
-    "$C_UTILS_ROOT/base:utils_config",
-  ]
+  public_configs = [ ":netmgr_common_config" ]
 
   external_deps = [ "hilog:libhilog" ]
 
@@ -147,10 +150,12 @@ ohos_shared_library("net_data_share") {
 
   external_deps = [
     "ability_base:zuri",
+    "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 
@@ -164,6 +169,7 @@ ohos_shared_library("net_bundle_utils") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./bundle_utils/net_bundle_utils_blocklist.txt"
   }
 
   include_dirs = [
@@ -196,6 +202,7 @@ ohos_shared_library("net_bundle_utils") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,11 @@
 #include "interface_manager.h"
 #include "interface_type.h"
 #include "route_manager.h"
+#include "vnic_manager.h"
 #include "route_type.h"
 #include "sharing_manager.h"
 #include "uid_range.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace nmd {
@@ -51,9 +53,11 @@ public:
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
     int32_t NetworkDestroy(int32_t netId);
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
+    int32_t DestroyVnic();
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
-    int32_t NetworkAddInterface(int32_t netId, std::string iface);
+    int32_t NetworkAddInterface(int32_t netId, std::string iface, NetBearType netBearerType);
     int32_t NetworkRemoveInterface(int32_t netId, std::string iface);
 
     MarkMaskParcel GetFwmarkForNetwork(int32_t netId);
@@ -78,6 +82,8 @@ public:
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
     int32_t AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
+    int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength,
+                                const std::string &netCapabilities);
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
     int32_t InterfaceSetIffUp(std::string ifaceName);
     int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);
@@ -128,7 +134,21 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback);
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
-
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
+    int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+    int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
+    int32_t ClearFirewallAllRules();
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;
@@ -137,7 +157,7 @@ private:
     std::shared_ptr<InterfaceManager> interfaceManager_ = nullptr;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
     std::shared_ptr<DnsManager> dnsManager_ = nullptr;
-    static std::vector<uint32_t> interfaceIdex_;
+    static inline std::vector<uint32_t> interfaceIdex_;
 };
 } // namespace nmd
 } // namespace OHOS

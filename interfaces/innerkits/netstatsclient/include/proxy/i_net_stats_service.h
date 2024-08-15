@@ -20,8 +20,11 @@
 
 #include "i_net_stats_callback.h"
 #include "iremote_broker.h"
+#include "net_push_stats_info.h"
 #include "net_stats_constants.h"
 #include "net_stats_info.h"
+#include "net_stats_info_sequence.h"
+#include "net_stats_network.h"
 #include "stats_ipc_interface_code.h"
 
 namespace OHOS {
@@ -40,6 +43,12 @@ public:
     virtual int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &info) = 0;
+    virtual int32_t GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos) = 0;
+    virtual int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                             const sptr<NetStatsNetwork> &network) = 0;
+    virtual int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                const sptr<NetStatsNetwork> &network) = 0;
+    virtual int32_t SetAppStats(const PushStatsInfo &info) = 0;
     virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,

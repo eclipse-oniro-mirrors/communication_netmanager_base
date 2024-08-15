@@ -19,6 +19,7 @@
 #include <linux/netlink.h>
 #include <map>
 #include <netinet/in.h>
+#include <cstdint>
 
 #include "netlink_msg.h"
 #include "network_permission.h"
@@ -63,6 +64,7 @@ public:
         INTERFACE,
         VPN_NETWORK,
         LOCAL_NETWORK,
+        INTERNAL_DEFAULT,
     };
 
     /**
@@ -237,12 +239,54 @@ public:
      */
     static int32_t ReadAddrGw(const std::string &addr, InetAddr *res);
 
+    /**
+     * Add rules for clat tun interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, add rules successfully, otherwise it will fail
+     */
+    static int32_t AddClatTunInterface(const std::string &interfaceName, const std::string &dstAddr,
+                                       const std::string &nxtHop);
+
+    /**
+     * Remove rules for clat tun interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, remove rules successfully, otherwise it will fail
+     */
+    static int32_t RemoveClatTunInterface(const std::string &interfaceName);
+
+    /**
+     * Update route for vnic interface
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param destinationName Destination address of route item
+     * @param nextHop Gateway address of the route item
+     * @param add add or delete route
+     * @return Returns 0, Update route successfully, otherwise it will fail
+     */
+    static int32_t UpdateVnicRoute(const std::string &interfaceName, const std::string &destinationName,
+                                      const std::string &nextHop, bool add);
+
+    /**
+     * Update uid ranges for vnic interface
+     *
+     * @param uidRanges uidRanges to update
+     * @param add add or delete uid ranges
+     * @return Returns 0, update UidRangesRules successfully, otherwise it will fail
+     */
+    static int32_t UpdateVnicUidRangesRule(const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
     static int32_t Init();
     static int32_t ClearRules();
-    static int32_t ClearRoutes(const std::string &interfaceName);
+    static int32_t ClearRoutes(const std::string &interfaceName, int32_t netId = 0);
     static int32_t AddLocalNetworkRules();
     static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
                                          bool add);
@@ -275,11 +319,13 @@ private:
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
                                      uint32_t index);
-    static uint32_t FindTableByInterfacename(const std::string &interfaceName);
+    static uint32_t FindTableByInterfacename(const std::string &interfaceName, int32_t netId = 0);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
     static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,
                                 const std::string &destinationName, const std::string &nextHop,
                                 RouteInfo &routeInfo);
+    static int32_t UpdateClatTunInterface(const std::string &interfaceName,
+                                            NetworkPermission permission, bool add);
 };
 } // namespace nmd
 } // namespace OHOS

@@ -18,9 +18,11 @@
 #include <cinttypes>
 
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "route_manager.h"
 #include "vpn_manager.h"
+#include "vnic_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -101,6 +103,7 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
     }
 
     VpnManager::GetInstance().DestroyVpnInterface();
+
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;

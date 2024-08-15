@@ -34,6 +34,7 @@ using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint64_t TEST_UID = 1;
 
 class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
 public:
@@ -201,6 +202,12 @@ public:
         return 0;
     }
 
+    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                int32_t prefixLength, const std::string &netCapabilities) override
+    {
+        return 0;
+    }
+
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override
     {
         return 0;
@@ -211,7 +218,7 @@ public:
         return 0;
     }
 
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override
+    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override
     {
         return 0;
     }
@@ -222,6 +229,17 @@ public:
     }
 
     int32_t NetworkDestroy(int32_t netId) override
+    {
+        return 0;
+    }
+
+    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                       const std::set<int32_t> &uids) override
+    {
+        return 0;
+    }
+
+    int32_t DestroyVnic() override
     {
         return 0;
     }
@@ -387,12 +405,27 @@ public:
         return 0;
     }
 
+    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    {
+        return 0;
+    }
+
+    int32_t DeleteSimStatsInfo(uint32_t uid) override
+    {
+        return 0;
+    }
+
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
     {
         return 0;
     }
 
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
+    int32_t DeleteStatsInfo(uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;
     }
@@ -459,6 +492,61 @@ public:
     }
 
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override
+    {
+        return 0;
+    }
+
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override
+    {
+        return 0;
+    }
+    
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override
+    {
+        return 0;
+    }
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker) override
+    {
+        return 0;
+    }
+
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override
+    {
+        return 0;
+    }
+
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override
+    {
+        return 0;
+    }
+
+    int32_t StopClat(const std::string &interfaceName) override
+    {
+        return 0;
+    }
+
+    int32_t ClearFirewallAllRules() override
+    {
+        return 0;
+    }
+
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override
     {
         return 0;
     }
@@ -909,6 +997,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
 {
     int32_t netId = 1001;
     std::string interfaceName = "testInterfaceName";
+    NetBearType bearerType = BEARER_DEFAULT;
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
@@ -918,6 +1007,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
         return;
     }
     if (!data.WriteUint32(netId)) {
+        return;
+    }
+    if (!data.WriteUint8(bearerType)) {
         return;
     }
 
@@ -1252,6 +1344,21 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidRule001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdClearFirewallAllRules001, TestSize.Level1)
+{
+    uint32_t chain = 0;
+    bool enable = true;
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdClearFirewallAllRules(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 HWTEST_F(NetsysNativeServiceStubTest, CmdShareDnsSet001, TestSize.Level1)
 {
     uint16_t netId = 0;
@@ -1367,6 +1474,32 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetAllStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint32(TEST_UID));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDeleteStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllSimStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetAllSimStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteSimStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint32(TEST_UID));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDeleteSimStatsInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1674,6 +1807,179 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsHealthListener001, TestSiz
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUnregisterDnsHealthListener(data, reply);
     EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingType001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    bool isOpen = true;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(type)) {
+        return;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+    return;
+    }
+    if (!data.WriteString(interface)) {
+    return;
+    }
+    if (!data.WriteUint32(0)) {
+    return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    bool isBroker = false;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.wifiAllow)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.cellularAllow)) {
+        return;
+    }
+
+    if (!data.WriteBool(reconfirmFlag)) {
+        return;
+    }
+
+    if (!data.WriteBool(isBroker)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDelNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.clear();
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    MessageParcel data;
+
+    uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    if (!data.WriteUint32(size)) {
+        return;
+    }
+
+    for (auto bearerType : bearerTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNotifyNetBearerTypeChange(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdCreateVnic001, TestSize.Level1)
+{
+    MessageParcel data;
+    uint16_t mtu = 1500;
+    std::string tunAddr = "192.168.1.100";
+    int32_t prefix = 24;
+    std::set<int32_t> uids;
+
+    if (!data.WriteUint16(mtu)) {
+        return;
+    }
+ 
+    if (!data.WriteString(tunAddr)) {
+        return;
+    }
+ 
+    if (!data.WriteInt32(prefix)) {
+        return;
+    }
+ 
+    if (!data.WriteInt32(uids.size())) {
+        return;
+    }
+ 
+    for (const auto &uid: uids) {
+        if (!data.WriteInt32(uid)) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdCreateVnic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyVnic001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDestroyVnic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative
 } // namespace OHOS

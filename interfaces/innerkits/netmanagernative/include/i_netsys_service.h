@@ -17,6 +17,7 @@
 
 #include <netdb.h>
 #include <string>
+#include <set>
 
 #include "dns_config_client.h"
 #include "i_net_diag_callback.h"
@@ -29,12 +30,23 @@
 #include "network_sharing.h"
 #include "netsys_ipc_interface_code.h"
 #include "route_type.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "i_netfirewall_callback.h"
+#include "netfirewall_parcel.h"
+#endif
 #include "uid_range.h"
+#include "netsys_access_policy.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
 using namespace OHOS::NetManagerStandard;
+enum IptablesType {
+    IPTYPE_IPV4 = 1,
+    IPTYPE_IPV6 = 2,
+    IPTYPE_IPV4V6 = 3,
+};
 class INetsysService : public IRemoteBroker {
 public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -77,11 +89,16 @@ public:
                                         int32_t prefixLength) = 0;
     virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
+    virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                        int32_t prefixLength, const std::string &netCapabilities) = 0;
     virtual int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) = 0;
     virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
-    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface) = 0;
+    virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
+    virtual int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                               const std::set<int32_t> &uids) = 0;
+    virtual int32_t DestroyVnic() = 0;
     virtual int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) = 0;
     virtual int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) = 0;
     virtual int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) = 0;
@@ -116,7 +133,11 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
-    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t DeleteStatsInfo(uint32_t uid) = 0;
+    virtual int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t DeleteSimStatsInfo(uint32_t uid) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                             IptablesType ipType = IPTYPE_IPV4) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
     virtual int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) = 0;
@@ -133,6 +154,27 @@ public:
     virtual int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
+    virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
+    virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    virtual int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                     bool isFinish) = 0;
+    virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
+    virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
+    virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
+    virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
+    virtual int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
+#endif
+    virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                           bool isBroker) = 0;
+    virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
+    virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
+    virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
+    virtual int32_t StopClat(const std::string &interfaceName) = 0;
+    virtual int32_t ClearFirewallAllRules() = 0;
+    virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

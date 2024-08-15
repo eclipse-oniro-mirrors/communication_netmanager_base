@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,44 +39,52 @@ size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 } // namespace
 
-template <class T> T GetData()
+template <class T> T NetCommonGetData()
 {
     T object{};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t commonSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || commonSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, commonSize, g_baseFuzzData + g_baseFuzzPos, commonSize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += commonSize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetCommonGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetCommonGetData<char>();
     }
     std::string str(cstr);
     return str;
+}
+
+bool IsCommonFuzzValidData(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return false;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    return true;
 }
 
 static auto g_netManagerCenter = DelayedSingleton<NetManagerCenter>::GetInstance();
 
 void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
-    uint32_t netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    uint32_t netType = NetCommonGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     std::list<std::string> ifaceNames;
     g_netManagerCenter->GetIfaceNames(static_cast<NetBearType>(netType), ifaceNames);
     return;
@@ -84,40 +92,31 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
-    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
-    std::string ident = GetStringFromData(STR_LEN);
-    std::string ifaceName = GetStringFromData(STR_LEN);
+    uint32_t bearerType = NetCommonGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    std::string ident = NetCommonGetString(STR_LEN);
+    std::string ifaceName = NetCommonGetString(STR_LEN);
     g_netManagerCenter->GetIfaceNameByType(static_cast<NetBearType>(bearerType), ident, ifaceName);
 }
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t supplierId = GetData<uint32_t>();
+    uint32_t supplierId = NetCommonGetData<uint32_t>();
     g_netManagerCenter->UnregisterNetSupplier(supplierId);
 }
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t supplierId = GetData<uint32_t>();
+    uint32_t supplierId = NetCommonGetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
     if (netLinkInfo == nullptr) {
         return;
@@ -128,13 +127,10 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t supplierId = GetData<uint32_t>();
+    uint32_t supplierId = NetCommonGetData<uint32_t>();
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
     if (netSupplierInfo == nullptr) {
         return;
@@ -142,14 +138,11 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     g_netManagerCenter->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
 }
 
-void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     sptr<NetConnServiceIface> serviceIface = new (std::nothrow) NetConnServiceIface();
     if (serviceIface == nullptr) {
         return;
@@ -159,40 +152,30 @@ void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    std::string iface = GetStringFromData(STR_LEN);
-    uint32_t start = GetData<uint32_t>();
-    uint32_t end = GetData<uint32_t>() + start;
+    std::string iface = NetCommonGetString(STR_LEN);
+    uint32_t start = NetCommonGetData<uint32_t>();
+    uint32_t end = NetCommonGetData<uint32_t>() + start;
     NetStatsInfo info;
     g_netManagerCenter->GetIfaceStatsDetail(iface, start, end, info);
 }
 
 void ResetStatsFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
     g_netManagerCenter->ResetStatsFactory();
 }
 
 void RegisterStatsServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     sptr<NetStatsBaseService> service = nullptr;
 
     g_netManagerCenter->RegisterStatsService(service);
@@ -200,35 +183,26 @@ void RegisterStatsServiceFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPolicyFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
     g_netManagerCenter->ResetPolicyFactory();
 }
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     g_netManagerCenter->ResetPolicies();
 }
 
 void RegisterPolicyServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     sptr<NetPolicyBaseService> service = new (std::nothrow) NetPolicyServiceCommon();
     if (service == nullptr) {
         return;
@@ -239,91 +213,68 @@ void RegisterPolicyServiceFuzzTest(const uint8_t *data, size_t size)
 
 void ResetEthernetFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
     g_netManagerCenter->ResetEthernetFactory();
 }
 
 void RegisterEthernetServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     sptr<NetEthernetBaseService> service = nullptr;
     g_netManagerCenter->RegisterEthernetService(service);
 }
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    std::string hostName = GetStringFromData(STR_LEN);
-    int32_t netId = GetData<int32_t>();
+    std::string hostName = NetCommonGetString(STR_LEN);
+    int32_t netId = NetCommonGetData<int32_t>();
     std::vector<INetAddr> addrInfo;
     g_netManagerCenter->GetAddressesByName(hostName, netId, addrInfo);
 }
 
 void RegisterDnsServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     sptr<DnsBaseService> service = nullptr;
     g_netManagerCenter->RegisterDnsService(service);
 }
 
 void RestrictBackgroundChangedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    bool isRestrictBackground = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    bool isRestrictBackground = NetCommonGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     g_netManagerCenter->RestrictBackgroundChanged(isRestrictBackground);
 }
 
 void IsUidNetAccessFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t uid = GetData<uint32_t>();
-    bool metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    uint32_t uid = NetCommonGetData<uint32_t>();
+    bool metered = NetCommonGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     g_netManagerCenter->IsUidNetAccess(uid, metered);
 }
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (!IsCommonFuzzValidData(data, size)) {
         return;
     }
-
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    uint32_t uid = GetData<uint32_t>();
-    bool metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    uint32_t uid = NetCommonGetData<uint32_t>();
+    bool metered = NetCommonGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     g_netManagerCenter->IsUidNetAllowed(uid, metered);
 }
 

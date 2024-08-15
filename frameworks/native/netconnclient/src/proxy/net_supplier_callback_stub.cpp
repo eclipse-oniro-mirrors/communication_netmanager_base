@@ -18,6 +18,7 @@
 #include "net_mgr_log_wrapper.h"
 
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+static constexpr uint32_t MAX_NET_BEARTYPE_NUM = 7;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -39,7 +40,7 @@ void NetSupplierCallbackStub::RegisterSupplierCallbackImpl(const sptr<NetSupplie
 int32_t NetSupplierCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                  MessageOption &option)
 {
-    NETMGR_LOG_I("Net supplier callback stub call start, code:[%{public}d]", code);
+    NETMGR_LOG_D("Net supplier callback stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetSupplierCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
@@ -68,15 +69,39 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     uint32_t size = 0;
     uint32_t value = 0;
     data.ReadUint32(size);
-    size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
+    if (size > MAX_NET_CAP_NUM) {
+        NETMGR_LOG_E("Net cap size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
-
-    RequestNetwork(ident, netCaps);
+    int32_t registerType = 0;
+    data.ReadInt32(registerType);
+    std::set<NetBearType> netBearTypes;
+    uint32_t bearTypeSize = 0;
+    data.ReadUint32(bearTypeSize);
+    if (bearTypeSize > MAX_NET_BEARTYPE_NUM) {
+        NETMGR_LOG_E("Net beartype size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < bearTypeSize; i++) {
+        data.ReadUint32(value);
+        if (value <= BEARER_DEFAULT) {
+            netBearTypes.insert(static_cast<NetBearType>(value));
+        }
+    }
+    uint32_t uid = 0;
+    data.ReadUint32(uid);
+    uint32_t requestId = 0;
+    data.ReadUint32(requestId);
+    std::string requestIdent;
+    data.ReadString(requestIdent);
+    NetRequest netRequest(registerType, netBearTypes, uid, requestId, requestIdent);
+    RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
     return NETMANAGER_SUCCESS;
@@ -94,7 +119,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -105,10 +130,15 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
+int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+    const NetRequest &netrequest)
 {
     if (callback_ != nullptr) {
-        callback_->RequestNetwork(ident, netCaps);
+        auto startTime = std::chrono::steady_clock::now();
+        callback_->RequestNetwork(ident, netCaps, netrequest);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("RequestNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
     }
     return 0;
 }
@@ -116,7 +146,11 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
 int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
+        auto startTime = std::chrono::steady_clock::now();
         callback_->ReleaseNetwork(ident, netCaps);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
     }
     return 0;
 }

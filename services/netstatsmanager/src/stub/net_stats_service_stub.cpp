@@ -15,8 +15,10 @@
 
 #include "net_stats_service_stub.h"
 
+#include "net_all_capabilities.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_network.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
@@ -55,6 +57,14 @@ NetStatsServiceStub::NetStatsServiceStub()
         &NetStatsServiceStub::OnResetFactory;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
         &NetStatsServiceStub::OnGetAllStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_SIM_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllSimStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByUidNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS)] =
+        &NetStatsServiceStub::OnSetAppStats;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES)] =
         &NetStatsServiceStub::OnGetCookieRxBytes;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES)] =
@@ -346,6 +356,11 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
     std::string iface;
     uint64_t start = 0;
     uint64_t end = 0;
@@ -358,7 +373,7 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t ret = UpdateIfacesStats(iface, start, end, infos);
+    ret = UpdateIfacesStats(iface, start, end, infos);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -390,6 +405,10 @@ int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &
 
 int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
     std::vector<NetStatsInfo> infos;
     int32_t result = GetAllStatsInfo(infos);
     if (!reply.WriteInt32(result)) {
@@ -403,6 +422,110 @@ int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParce
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetStatsServiceStub::OnGetAllSimStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    std::vector<NetStatsInfo> infos;
+    int32_t result = GetAllSimStatsInfo(infos);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfo::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetTrafficStatsByNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    int32_t result = GetTrafficStatsByNetwork(infos, network);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfo::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetTrafficStatsByUidNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    std::vector<NetStatsInfoSequence> infos;
+    int32_t result = GetTrafficStatsByUidNetwork(infos, uid, network);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfoSequence::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnSetAppStats(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    PushStatsInfo info;
+    if (!PushStatsInfo::Unmarshalling(data, info)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t result = SetAppStats(info);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsServiceStub::CheckNetManagerAvailable(MessageParcel &reply)
 {
     if (!NetManagerPermission::IsSystemCaller()) {
@@ -410,13 +533,13 @@ int32_t NetStatsServiceStub::CheckNetManagerAvailable(MessageParcel &reply)
         if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
-        return NETMANAGER_SUCCESS;
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
-        return NETMANAGER_SUCCESS;
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     return NETMANAGER_SUCCESS;

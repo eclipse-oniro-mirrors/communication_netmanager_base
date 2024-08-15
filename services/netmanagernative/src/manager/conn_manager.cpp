@@ -15,14 +15,22 @@
 
 #include "conn_manager.h"
 
+#include <linux/if_ether.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <string>
+
 #include "bpf_def.h"
 #include "bpf_mapper.h"
 #include "bpf_path.h"
 #include "local_network.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
 #include "virtual_network.h"
+#include "securec.h"
+#include "bpf_ring_buffer.h"
 
 namespace OHOS {
 namespace nmd {
@@ -194,12 +202,17 @@ int32_t ConnManager::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
+int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfaceName)
 {
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
-    networks_.Iterate([&InterfaceId, &interfaceName](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+    bool isInternalNetId = IsInternalNetId(netId);
+    networks_.Iterate([&InterfaceId, &interfaceName, isInternalNetId]
+        (int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+        if (IsInternalNetId(id) != isInternalNetId) {
+            return;
+        }
         if (InterfaceId != INTERFACE_UNSET) {
             return;
         }
@@ -212,11 +225,14 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
     return InterfaceId;
 }
 
-int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName)
+int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName,
+                                           NetManagerStandard::NetBearType netBearerType)
 {
-    NETNATIVE_LOG_D("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
-                    interfaceName.c_str());
-    int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
+    NETNATIVE_LOG_D(
+        "Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s, netBearerType: "
+        "%{public}u",
+        netId, interfaceName.c_str(), netBearerType);
+    int32_t alreadySetNetId = GetNetworkForInterface(netId, interfaceName);
     if ((alreadySetNetId != netId) && (alreadySetNetId != INTERFACE_UNSET)) {
         NETNATIVE_LOGE("AddInterfaceToNetwork failed alreadySetNetId:%{public}d", alreadySetNetId);
         return NETMANAGER_ERROR;
@@ -224,6 +240,23 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
+        // Create Map Table to establish the relationship betweet netId and the id about interfaceName.
+        BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+        if (netIdAndIfaceMap.IsValid()) {
+            net_interface_name_id v = {0};
+            if (netBearerType == BEARER_WIFI) {
+                v = NETWORK_BEARER_TYPE_WIFI;
+            } else if (netBearerType == BEARER_CELLULAR) {
+                v = NETWORK_BEARER_TYPE_CELLULAR;
+            } else {
+                v = NETWORK_BEARER_TYPE_INITIAL;
+            }
+
+            if (netIdAndIfaceMap.Write(netId, v, 0) != 0) {
+                NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, interfaceName:%{public}s", netId,
+                    interfaceName.c_str());
+            }
+        }
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (nw->IsPhysical()) {
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
@@ -236,7 +269,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 
 int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &interfaceName)
 {
-    int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
+    int32_t alreadySetNetId = GetNetworkForInterface(netId, interfaceName);
     if ((alreadySetNetId != netId) || (alreadySetNetId == INTERFACE_UNSET)) {
         return NETMANAGER_SUCCESS;
     } else if (alreadySetNetId == netId) {
@@ -247,6 +280,12 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
             if (nw->IsPhysical()) {
                 std::lock_guard<std::mutex> lock(interfaceNameMutex_);
                 physicalInterfaceName_.erase(netId);
+            }
+
+            BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+            if (netIdAndIfaceMap.IsValid() && netIdAndIfaceMap.Delete(netId) != 0) {
+                NETNATIVE_LOGE("netIdAndIfaceMap remove error: netId:%{public}d, interfaceName:%{public}s", netId,
+                               interfaceName.c_str());
             }
             return ret;
         }
@@ -282,6 +321,8 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
         return RouteManager::LOCAL_NETWORK;
     } else if (FindVirtualNetwork(netId) != nullptr) {
         return RouteManager::VPN_NETWORK;
+    } else if (NetManagerStandard::IsInternalNetId(netId)) {
+        return RouteManager::INTERNAL_DEFAULT;
     } else {
         return RouteManager::INTERFACE;
     }
@@ -347,6 +388,108 @@ void ConnManager::GetDumpInfos(std::string &infos)
         }
         infos.append(interfaces + "}\n");
     });
+}
+
+int32_t ConnManager::SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy,
+                                            bool reconfirmFlag, bool isBroker)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy isBroker: %{public}d", isBroker);
+
+    if (isBroker) {
+        BpfMapper<app_uid_key, app_uid_key> brokerUidAccessPolicyMap(BROKER_UID_ACCESS_POLICY_MAP_PATH, BPF_F_WRONLY);
+        if (!brokerUidAccessPolicyMap.IsValid()) {
+            return NETMANAGER_ERROR;
+        }
+        // 0 means no permission
+        app_uid_key v = {0};
+        v = uid;
+        if (brokerUidAccessPolicyMap.Write(DEFAULT_BROKER_UID_KEY, v, 0) != 0) {
+            NETNATIVE_LOGE("SetNetworkAccessPolicy Write brokerUidAccessPolicyMap err");
+            return NETMANAGER_ERROR;
+        }
+
+        NETNATIVE_LOG_D("SetNetworkAccessPolicy brokerUidAccessPolicyMap: %{public}d", isBroker);
+    }
+
+    BpfMapper<app_uid_key, uid_access_policy_value> uidAccessPolicyMap(APP_UID_PERMISSION_MAP_PATH, BPF_ANY);
+    if (!uidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("SetNetworkAccessPolicy uidAccessPolicyMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    uid_access_policy_value v = {0};
+    uid_access_policy_value v2 = {0};
+    (void)uidAccessPolicyMap.Read(uid, v);
+
+    v.configSetFromFlag = reconfirmFlag;
+    v.diagAckFlag = 0;
+    v.wifiPolicy = policy.wifiAllow;
+    v.cellularPolicy = policy.cellularAllow;
+
+    if (uidAccessPolicyMap.Write(uid, v, 0) != 0) {
+        NETNATIVE_LOGE("SetNetworkAccessPolicy Write uidAccessPolicyMap err");
+        return NETMANAGER_ERROR;
+    }
+
+    (void)uidAccessPolicyMap.Read(uid, v2);
+    NETNATIVE_LOG_D(
+        "SetNetworkAccessPolicy Read uid:%{public}u, wifi:%{public}u, cellular:%{public}u, reconfirmFlag:%{public}u",
+        uid, v2.wifiPolicy, v2.cellularPolicy, v2.configSetFromFlag);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    BpfMapper<app_uid_key, uid_access_policy_value> uidAccessPolicyMap(APP_UID_PERMISSION_MAP_PATH, BPF_ANY);
+    if (!uidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("uidAccessPolicyMap not exist");
+        return NETMANAGER_ERROR;
+    }
+
+    if (uidAccessPolicyMap.Delete(uid) != 0) {
+        NETNATIVE_LOGE("DeleteNetworkAccessPolicy err");
+        return NETMANAGER_ERROR;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes)
+{
+    NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
+    BpfMapper<net_bear_id_key, net_bear_type_map_value> NetBearerTypeMap(NET_BEAR_TYPE_MAP_PATH, BPF_ANY);
+    if (!NetBearerTypeMap.IsValid()) {
+        NETNATIVE_LOGE("NetBearerTypeMap not exist");
+        return NETMANAGER_ERROR;
+    }
+
+    // -1 means invalid
+    int32_t netbearerType = -1;
+    for (const auto& bearerType : bearerTypes) {
+        if (bearerType == BEARER_CELLULAR) {
+            netbearerType = NETWORK_BEARER_TYPE_CELLULAR;
+        }
+        if (bearerType == BEARER_WIFI) {
+            netbearerType = NETWORK_BEARER_TYPE_WIFI;
+        }
+    }
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange Type: %{public}d", static_cast<int32_t>(netbearerType));
+
+    net_bear_type_map_value v = 0;
+    int32_t ret = NetBearerTypeMap.Read(0, v);
+
+    net_bear_id_key key = DEFAULT_NETWORK_BEARER_MAP_KEY;
+    // -1 means current bearer independent network access.
+    if (netbearerType != -1 &&
+        (((ret == NETSYS_SUCCESS) && (static_cast<int32_t>(v) != netbearerType)) || (ret != NETSYS_SUCCESS))) {
+        v = netbearerType;
+        if (NetBearerTypeMap.Write(key, v, 0) != 0) {
+            NETNATIVE_LOGE("Could not update NetBearerTypeMap");
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS

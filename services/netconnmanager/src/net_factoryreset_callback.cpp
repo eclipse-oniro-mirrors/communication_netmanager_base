@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,24 +16,15 @@
 #include "net_factoryreset_callback.h"
 
 #include "net_mgr_log_wrapper.h"
-
+#include "cpp/queue.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr const char *NET_FACTORYRESET_WORK_THREAD = "NET_FACTORYRESET_CALLBACK_WORK_THREAD";
 constexpr int16_t LIMIT_CALLBACK_NUM = 200;
 
 NetFactoryResetCallback::NetFactoryResetCallback()
 {
-    factoryResetCallRunner_ = AppExecFwk::EventRunner::Create(NET_FACTORYRESET_WORK_THREAD);
-    factoryResetCallHandler_ = std::make_shared<AppExecFwk::EventHandler>(factoryResetCallRunner_);
-}
-
-NetFactoryResetCallback::~NetFactoryResetCallback()
-{
-    if (factoryResetCallRunner_) {
-        factoryResetCallRunner_->Stop();
-    }
+    factoryResetCallFfrtQueue_ = std::make_shared<ffrt::queue>("NetFactoryResetCall");
 }
 
 int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr<INetFactoryResetCallback> &callback)
@@ -43,12 +34,14 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     int32_t ret = NETMANAGER_SUCCESS;
-    if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
-            ret = RegisterNetFactoryResetCallback(callback);
-        });
+    if (!factoryResetCallFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    ffrt::task_handle ResetCallbackAsyncTask = factoryResetCallFfrtQueue_->submit_h([this, &callback, &ret]() {
+        ret = RegisterNetFactoryResetCallback(callback);
+    }, ffrt::task_attr().name("FfrtRegisterNetFactoryResetCallbackAsync"));
+    factoryResetCallFfrtQueue_->wait(ResetCallbackAsyncTask);
     return ret;
 }
 
@@ -79,13 +72,16 @@ int32_t NetFactoryResetCallback::UnregisterNetFactoryResetCallbackAsync(const sp
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
-            ret = UnregisterNetFactoryResetCallback(callback);
-        });
+    if (!factoryResetCallFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle UnregisterNetFactoryResetCallbackAsync =
+        factoryResetCallFfrtQueue_->submit_h([this, &callback, &ret]() {
+            ret = UnregisterNetFactoryResetCallback(callback);
+        }, ffrt::task_attr().name("FfrtUnregisterNetFactoryResetCallbackAsync"));
+    factoryResetCallFfrtQueue_->wait(UnregisterNetFactoryResetCallbackAsync);
 
     return ret;
 }
@@ -111,12 +107,14 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryResetAsync()
 {
     NETMGR_LOG_I("NotifyNetFactoryResetAsync enter");
     int32_t ret = NETMANAGER_SUCCESS;
-    if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &ret]() {
-            ret = NotifyNetFactoryReset();
-        });
+    if (!factoryResetCallFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    ffrt::task_handle  NotifyNetFactoryResetAsyncTask = factoryResetCallFfrtQueue_->submit_h([this, &ret]() {
+           ret = NotifyNetFactoryReset();
+    }, ffrt::task_attr().name("FfrtNotifyNetFactoryResetAsync"));
+    factoryResetCallFfrtQueue_->wait(NotifyNetFactoryResetAsyncTask);
     return ret;
 }
 

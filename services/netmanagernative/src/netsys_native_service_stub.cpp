@@ -32,6 +32,7 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 namespace {
+constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr int32_t MAX_FLAG_NUM = 64;
 constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
@@ -39,6 +40,7 @@ constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -50,6 +52,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetDiagOpToInterfaceMap();
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
+    InitNetVnicInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -100,6 +103,14 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
+        &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
+        &NetsysNativeServiceStub::CmdSetIpv6Enable;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_START_CLAT)] =
+        &NetsysNativeServiceStub::CmdStartClat;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_STOP_CLAT)] =
+        &NetsysNativeServiceStub::CmdStopClat;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -112,8 +123,14 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
         &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_SIM_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllSimStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_SIM_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdDeleteSimStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdDeleteStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
         &NetsysNativeServiceStub::CmdGetCookieStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_VIRTUAL)] =
@@ -138,6 +155,12 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION)] =
         &NetsysNativeServiceStub::CmdSetInternetPermission;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdSetNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdDelNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE)] =
+        &NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -150,6 +173,26 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdGetNetworkSharingType;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_FIREWALL_RULE)] =
+        &NetsysNativeServiceStub::CmdClearFirewallAllRules;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_RULES)] =
+        &NetsysNativeServiceStub::CmdSetFirewallRules;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION)] =
+        &NetsysNativeServiceStub::CmdSetFirewallDefaultAction;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_USER_ID)] =
+        &NetsysNativeServiceStub::CmdSetFirewallCurrentUserId;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_CLEAR_RULES)] =
+        &NetsysNativeServiceStub::CmdClearFirewallRules;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_REGISTER)] =
+        &NetsysNativeServiceStub::CmdRegisterNetFirewallCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER)] =
+        &NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback;
+#endif
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
@@ -200,6 +243,8 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED)] =
+        &NetsysNativeServiceStub::CmdSetNicTrafficAllowed;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -238,6 +283,14 @@ void NetsysNativeServiceStub::InitNetDnsDiagOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdUnregisterDnsHealthListener;
 }
 
+void NetsysNativeServiceStub::InitNetVnicInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_CREATE)] =
+        &NetsysNativeServiceStub::CmdCreateVnic;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY)] =
+        &NetsysNativeServiceStub::CmdDestroyVnic;
+}
+
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                  MessageOption &option)
 {
@@ -270,6 +323,18 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Check remote descriptor failed");
         return IPC_STUB_INVALID_DATA_ERR;
     }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    if (code >= static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_SET_DEFAULT_ACTION) &&
+        code <= static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER) &&
+        !NetManagerPermission::CheckPermission(Permission::NETSYS_INTERNAL)) {
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+#endif
+
     return (this->*(interfaceIndex->second))(data, reply);
 }
 
@@ -742,8 +807,15 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
-
-    int32_t result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
+    std::string netCapabilities;
+    int32_t result = 0;
+    if (!data.ReadString(netCapabilities)) {
+        NETNATIVE_LOG_D("DelInterfaceAddress");
+        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
+    } else {
+        NETNATIVE_LOG_D("DelInterfaceAddress with netCapabilities %{public}s", netCapabilities.c_str());
+        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength, netCapabilities);
+    }
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("DelInterfaceAddress has recved result %{public}d", result);
 
@@ -777,8 +849,9 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddInterface(MessageParcel &data, Mes
 {
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
+    NetBearType netBearerType = static_cast<NetBearType>(data.ReadUint8());
 
-    int32_t result = NetworkAddInterface(netId, iface);
+    int32_t result = NetworkAddInterface(netId, iface, netBearerType);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddInterface has recved result %{public}d", result);
 
@@ -802,6 +875,45 @@ int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageP
     int32_t result = NetworkDestroy(netId);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdCreateVnic(MessageParcel &data, MessageParcel &reply)
+{
+    uint16_t mtu = data.ReadUint16();
+    std::string tunAddr = data.ReadString();
+    int32_t prefix = data.ReadInt32();
+    std::set<int32_t> uids;
+    int32_t size = 0;
+    int32_t uid = 0;
+    if (!data.ReadInt32(size)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (size < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETNATIVE_LOGE("vnic uids size is invalid");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (int32_t index = 0; index < size; index++) {
+        if (!data.ReadInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        uids.insert(uid);
+    }
+    int32_t result = CreateVnic(mtu, tunAddr, prefix, uids);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("VnciCreate has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDestroyVnic(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = DestroyVnic();
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("VnicDestroy has recved result %{public}d", result);
 
     return result;
 }
@@ -960,8 +1072,8 @@ int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParce
 int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
-    const auto &fromIface = data.ReadString();
-    const auto &toIface = data.ReadString();
+    std::string fromIface = data.ReadString();
+    std::string toIface = data.ReadString();
     int32_t result = IpfwdAddInterfaceForward(fromIface, toIface);
     reply.WriteInt32(result);
     return result;
@@ -1188,6 +1300,33 @@ int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessagePa
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdGetAllSimStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t result = GetAllSimStatsInfo(stats);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDeleteSimStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    int32_t ret = DeleteSimStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteSimStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
@@ -1203,6 +1342,18 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdDeleteStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    int32_t ret = DeleteStatsInfo(uid);
+    NETNATIVE_LOG_D("DeleteStatsInfo uid[%{public}d] ret[%{public}d]", uid, ret);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
@@ -1211,8 +1362,9 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string cmd = data.ReadString();
+    IptablesType ipType = static_cast<IptablesType>(data.ReadUint32());
     std::string respond;
-    int32_t result = SetIptablesCommandForRes(cmd, respond);
+    int32_t result = SetIptablesCommandForRes(cmd, respond, ipType);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes result failed");
         return ERR_FLATTEN_OBJECT;
@@ -1565,6 +1717,374 @@ int32_t NetsysNativeServiceStub::CmdGetCookieStats(MessageParcel &data, MessageP
         return ERR_FLATTEN_OBJECT;
     }
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = GetNetworkSharingType(sharingTypeIsOn);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint32(sharingTypeIsOn.size())) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+    }
+    for (auto mem : sharingTypeIsOn) {
+        if (!reply.WriteUint32(mem)) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    
+    return ret;
+}
+
+int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = ERR_NONE;
+    if (!data.ReadUint32(type)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (type < ERR_NONE) {
+        NETNATIVE_LOGE("type parameter invalid");
+        return ERR_INVALID_DATA;
+    }
+
+    bool isOpen = false;
+    if (!data.ReadBool(isOpen)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = UpdateNetworkSharingType(type, isOpen);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ret;
+}
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        NETNATIVE_LOGE("Read rule type failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetFirewallRuleType ruleType = static_cast<NetFirewallRuleType>(type);
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        NETNATIVE_LOGE("Read size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallRules ruleType=%{public}d, size=%{public}d", ruleType, size);
+    uint32_t maxSize =
+        ruleType == NetFirewallRuleType::RULE_IP ? FIREWALL_IPC_IP_RULE_PAGE_SIZE : FIREWALL_RULE_SIZE_MAX;
+    if (size > maxSize) {
+        return FIREWALL_ERR_EXCEED_MAX_IP;
+    }
+    bool isFinish = false;
+    if (!data.ReadBool(isFinish)) {
+        NETNATIVE_LOGE("Read isFinish failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    for (int i = 0; i < size; i++) {
+        sptr<NetFirewallBaseRule> rule = nullptr;
+        if (ruleType == NetFirewallRuleType::RULE_IP) {
+            rule = NetFirewallIpRule::Unmarshalling(data);
+        } else if (ruleType == NetFirewallRuleType::RULE_DOMAIN) {
+            rule = NetFirewallDomainRule::Unmarshalling(data);
+        } else if (ruleType == NetFirewallRuleType::RULE_DNS) {
+            rule = NetFirewallDnsRule::Unmarshalling(data);
+        }
+        if (rule != nullptr) {
+            ruleList.emplace_back(std::move(rule));
+        }
+    }
+    return SetFirewallRules(ruleType, ruleList, isFinish);
+}
+
+int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallDefaultAction");
+    int32_t inDefault = 0;
+    if (!data.ReadInt32(inDefault)) {
+        NETNATIVE_LOGE("Read inDefault failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t outDefault = 0;
+    if (!data.ReadInt32(outDefault)) {
+        NETNATIVE_LOGE("Read outDefault failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return SetFirewallDefaultAction(static_cast<FirewallRuleAction>(inDefault),
+                                    static_cast<FirewallRuleAction>(outDefault));
+}
+
+int32_t NetsysNativeServiceStub::CmdSetFirewallCurrentUserId(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallCurrentUserId");
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        NETNATIVE_LOGE("Read userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetsysNativeServiceStub::CmdClearFirewallRules(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub::CmdClearFirewallRules");
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        NETNATIVE_LOGE("Read clear type failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    NetFirewallRuleType clearType = static_cast<NetFirewallRuleType>(type);
+    return ClearFirewallRules(clearType);
+}
+
+int32_t NetsysNativeServiceStub::CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        return result;
+    }
+
+    sptr<INetFirewallCallback> callback = iface_cast<INetFirewallCallback>(remote);
+    if (callback == nullptr) {
+        result = ERR_FLATTEN_OBJECT;
+        return result;
+    }
+
+    return RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        return result;
+    }
+
+    sptr<INetFirewallCallback> callback = iface_cast<INetFirewallCallback>(remote);
+    if (callback == nullptr) {
+        result = ERR_FLATTEN_OBJECT;
+        return result;
+    }
+
+    return UnRegisterNetFirewallCallback(callback);
+}
+#endif
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetIpv6PrivacyExtensions(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6PrivacyExtensions has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetEnableIpv6(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t wifi_allow = 0;
+    if (!data.ReadUint8(wifi_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t cellular_allow = 0;
+    if (!data.ReadUint8(cellular_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool reconfirmFlag = true;
+    if (!data.ReadBool(reconfirmFlag)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool isBroker = true;
+    if (!data.ReadBool(isBroker)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    NetworkAccessPolicy policy;
+    policy.wifiAllow = wifi_allow;
+    policy.cellularAllow = cellular_allow;
+    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DeleteNetworkAccessPolicy(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<NetBearType> bearerTypes;
+
+    uint32_t size = 0;
+    uint32_t value = 0;
+    if (!data.ReadUint32(size)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadUint32(value)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (value >= BEARER_DEFAULT) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        bearerTypes.insert(static_cast<NetBearType>(value));
+    }
+    int32_t result = NotifyNetBearerTypeChange(bearerTypes);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdStartClat(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStartClat CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string interfaceName;
+    if (!data.ReadString(interfaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        NETNATIVE_LOGE("Read int32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string nat64PrefixStr;
+    if (!data.ReadString(nat64PrefixStr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = StartClat(interfaceName, netId, nat64PrefixStr);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdStopClat(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStopClat CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string interfaceName;
+    if (!data.ReadString(interfaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = StopClat(interfaceName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdClearFirewallAllRules(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdClearFirewallAllRules");
+    int32_t result = ClearFirewallAllRules();
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    bool status = false;
+    int32_t size = 0;
+    if (!data.ReadBool(status) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed read status or size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > static_cast<int32_t>(MAX_IFACENAMES_SIZE)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed read data size too big");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<std::string> ifaceNames;
+    std::string ifaceName;
+    for (int32_t index = 0; index < size; index++) {
+        data.ReadString(ifaceName);
+        if (ifaceName.empty()) {
+            NETNATIVE_LOGE("CmdSetNicTrafficAllowed ifaceName is empty, size mismatch");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ifaceNames.push_back(ifaceName);
+    }
+    int32_t result = SetNicTrafficAllowed(ifaceNames, status);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetNicTrafficAllowed result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS

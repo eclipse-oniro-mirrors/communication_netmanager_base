@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,36 +35,9 @@ constexpr const char *DNS_SO_PATH = "libnetsys_client.z.so";
 static constexpr const int32_t CLIENT_SOCK_FD = 99999;
 static constexpr const uint32_t NET_ID = 99999;
 std::shared_ptr<DnsResolvListen> instance_ = nullptr;
-struct resolv_config {
-    int32_t error;
-    int32_t timeout_ms;
-    uint32_t retry_count;
-    char nameservers[MAX_SERVER_NUM][MAX_SERVER_LENGTH + 1];
-};
-struct ParamWrapper {
-    char *host;
-    char *serv;
-    struct addrinfo *hint;
-};
 
-typedef union {
-    struct sockaddr sa;
-    struct sockaddr_in6 sin6;
-    struct sockaddr_in sin;
-} AlignedSockAddr;
-
-struct addr_info_wrapper {
-    uint32_t ai_flags;
-    uint32_t ai_family;
-    uint32_t ai_sockType;
-    uint32_t ai_protocol;
-    uint32_t ai_addrLen;
-    AlignedSockAddr ai_addr;
-    char ai_canonName[MAX_CANON_NAME + 1];
-};
-
-typedef int32_t (*GetConfig)(uint16_t netId, struct resolv_config *config);
-typedef int32_t (*GetCache)(uint16_t netId, struct ParamWrapper param, struct addr_info_wrapper addr_info[MAX_RESULTS],
+typedef int32_t (*GetConfig)(uint16_t netId, struct ResolvConfig *config);
+typedef int32_t (*GetCache)(uint16_t netId, struct ParamWrapper param, struct AddrInfo addr_info[MAX_RESULTS],
                             uint32_t *num);
 
 typedef int32_t (*SetCache)(uint16_t netId, struct ParamWrapper param, struct addrinfo *res);
@@ -116,7 +89,7 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest001, TestSize.Level1)
         return;
     }
 
-    resolv_config config = {0};
+    ResolvConfig config = {0};
     int ret = func(0, &config);
     dlclose(handle);
     EXPECT_EQ(ret, -ENOENT);
@@ -140,7 +113,7 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest002, TestSize.Level1)
         return;
     }
 
-    resolv_config config = {0};
+    ResolvConfig config = {0};
     int ret = func(3, &config);
     dlclose(handle);
     EXPECT_EQ(ret, -ENOENT);
@@ -189,7 +162,7 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
     struct ParamWrapper param = {const_cast<char *>(host.c_str()), const_cast<char *>(serv.c_str()),
                                  (struct addrinfo *)hint};
     uint32_t num = 0;
-    struct addr_info_wrapper addr_info[MAX_RESULTS] = {{0}};
+    struct AddrInfo addr_info[MAX_RESULTS] = {{0}};
     int32_t ret = func(0, param, addr_info, &num);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
     dlclose(handle);
@@ -198,15 +171,13 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
 HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
 {
     DnsResolvListen dnsResolvListen;
-    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
     dnsResolvListen.serverSockFd_ = CLIENT_SOCK_FD;
-    ASSERT_NE(dnsResolvListen.dnsResolvRunner_, nullptr);
-    ASSERT_NE(dnsResolvListen.dnsResolvHandler_, nullptr);
+    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
 }
 
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)
 {
-    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID));
+    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID), getuid());
     ASSERT_EQ(instance_->serverSockFd_, -1);
 }
 
@@ -221,3 +192,4 @@ HWTEST_F(DnsResolvListenTest, ProcGetKeyForCache001, TestSize.Level1)
 }
 } // namespace NetsysNative
 } // namespace OHOS
+

@@ -203,6 +203,22 @@ int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
  */
 int32_t OHOS_NetConn_UnregisterDnsResolver(void);
 
+/**
+ * @brief Binds a socket to the specific network.
+ *
+ * @param socketFd Socket constructed by user.
+ * @param netHandle Pointer to the network handle that contains the network ID.
+ * @return 0 - Success.
+ *         401 - Parameter error.
+ *         2100002 - Unable to connect to service.
+ *         2100003 - Internal error.
+ * @{link 401} - if socketFd less than 0 or netId less than 100 or netHandle is null.
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle);
+
 #ifdef __cplusplus
 }
 #endif

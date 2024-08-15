@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,14 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
-constexpr uint32_t UID_BROKER_SERVICE = 5557;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
@@ -43,6 +44,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRegisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER)] = {
         &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION)] = {
+        &NetConnServiceStub::OnRequestNetConnectionBySpecifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
@@ -81,10 +84,16 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
         &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
+    InitAll();
+}
+
+void NetConnServiceStub::InitAll()
+{
     InitInterfaceFuncToInterfaceMap();
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
+    InitVnicFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
@@ -93,6 +102,12 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK)] = {
+        &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
+        &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
+        &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
@@ -117,6 +132,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetIfaceNames, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE)] = {
         &NetConnServiceStub::OnGetIfaceNameByType, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS)] = {
+        &NetConnServiceStub::OnGetIfaceNameIdentMaps, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK)] = {
         &NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)] = {
@@ -151,6 +168,14 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
 }
 
+void NetConnServiceStub::InitVnicFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_VNIC_NET_WORK)] = {
+        &NetConnServiceStub::OnEnableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK)] = {
+        &NetConnServiceStub::OnDisableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+}
+
 NetConnServiceStub::~NetConnServiceStub() {}
 
 std::string ToUtf8(std::u16string str16)
@@ -165,10 +190,9 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     std::u16string myDescripter = NetConnServiceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
-    NETMGR_LOG_D("myDescripter[%{public}s], remoteDescripter[%{public}s]", ToUtf8(myDescripter).c_str(),
-                 ToUtf8(remoteDescripter).c_str());
     if (myDescripter != remoteDescripter) {
-        NETMGR_LOG_E("descriptor checked fail");
+        NETMGR_LOG_E("descriptor checked fail. my Descriptor: [%{public}s], remote Descriptor: [%{public}s]",
+                     ToUtf8(myDescripter).c_str(), ToUtf8(remoteDescripter).c_str());
         if (!reply.WriteInt32(NETMANAGER_ERR_DESCRIPTOR_MISMATCH)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
@@ -177,16 +201,18 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc == memberFuncMap_.end()) {
+        NETMGR_LOG_E("memberFuncMap not found this code! code: [%{public}d]", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     auto requestFunc = itFunc->second.first;
     if (requestFunc == nullptr) {
+        NETMGR_LOG_E("requestFunc is nullptr. code:[%{public}d]", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     if (code == static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION)) {
         // get uid should be called in this function
         auto uid = IPCSkeleton::GetCallingUid();
-        if (uid != UID_FOUNDATION && uid != UID_BROKER_SERVICE) {
+        if (uid != UID_FOUNDATION && !CheckPermission({Permission::CONNECTIVITY_INTERNAL})) {
             if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
                 return IPC_STUB_WRITE_PARCEL_ERR;
             }
@@ -256,7 +282,7 @@ int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &re
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, MessageParcel &reply)
@@ -276,6 +302,50 @@ int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, Message
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
+    if (netLinkInfo == nullptr) {
+        NETMGR_LOG_E("netLinkInfo ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::set<int32_t> uids;
+    int32_t size = 0;
+    int32_t uid = 0;
+    if (!data.ReadInt32(size)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (size < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETMGR_LOG_E("vnic uids size is invalid");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    for (int32_t index = 0; index < size; index++) {
+        if (!data.ReadInt32(uid)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        uids.insert(uid);
+    }
+    int32_t ret = EnableVnicNetwork(netLinkInfo, uids);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = DisableVnicNetwork();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -308,7 +378,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -344,96 +414,143 @@ int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NETMANAGER_SUCCESS;
     uint32_t supplierId;
     data.ReadUint32(supplierId);
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = RegisterNetSupplierCallback(supplierId, callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = RegisterNetSupplierCallback(supplierId, callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = RegisterNetConnCallback(callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = RegisterNetConnCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
     uint32_t timeoutMS = data.ReadUint32();
-    int32_t result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRequestNetConnectionBySpecifier(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
+    uint32_t timeoutMS = data.ReadUint32();
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    int32_t result = RequestNetConnection(netSpecifier, callback, timeoutMS);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = UnregisterNetConnCallback(callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = UnregisterNetConnCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply)
@@ -449,8 +566,10 @@ int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, Message
     NETMGR_LOG_D("Test NetConnServiceStub::OnUpdateNetStateForTest(), netState[%{public}d]", netState);
     int32_t result = UpdateNetStateForTest(netSpecifier, netState);
     NETMGR_LOG_D("Test NetConnServiceStub::OnUpdateNetStateForTest(), result[%{public}d]", result);
-    reply.WriteInt32(result);
-    return result;
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply)
@@ -502,25 +621,29 @@ int32_t NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, 
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetDetectionCallback> callback = iface_cast<INetDetectionCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = RegisterNetDetectionCallback(netId, callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = RegisterNetDetectionCallback(netId, callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply)
@@ -533,25 +656,29 @@ int32_t NetConnServiceStub::OnUnRegisterNetDetectionCallback(MessageParcel &data
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetDetectionCallback> callback = iface_cast<INetDetectionCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = UnRegisterNetDetectionCallback(netId, callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = UnRegisterNetDetectionCallback(netId, callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &reply)
@@ -593,7 +720,7 @@ int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply)
@@ -622,7 +749,39 @@ int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessagePar
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetIfaceNameIdentMaps(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t netType = 0;
+    if (!data.ReadUint32(netType)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (netType > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+    SafeMap<std::string, std::string> ifaceNameIdentMaps;
+    int32_t ret = GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint32(ifaceNameIdentMaps.Size())) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        int32_t err = NETMANAGER_SUCCESS;
+        ifaceNameIdentMaps.Iterate([&err, &reply](const std::string &k, const std::string &v) -> void {
+            if (!reply.WriteString(k) || !reply.WriteString(v)) {
+                err = NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+        });
+        if (err != NETMANAGER_SUCCESS) {
+            return err;
+        }
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel &data, MessageParcel &reply)
@@ -695,7 +854,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &reply)
@@ -718,7 +877,7 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetSpecificUidNet(MessageParcel &data, MessageParcel &reply)
@@ -739,7 +898,7 @@ int32_t NetConnServiceStub::OnGetSpecificUidNet(MessageParcel &data, MessageParc
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, MessageParcel &reply)
@@ -762,7 +921,7 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessageParcel &reply)
@@ -814,7 +973,7 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessageParcel &reply)
@@ -851,7 +1010,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParcel &reply)
@@ -877,7 +1036,7 @@ int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParce
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &reply)
@@ -896,7 +1055,7 @@ int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &rep
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply)
@@ -909,7 +1068,7 @@ int32_t NetConnServiceStub::OnSetAirplaneMode(MessageParcel &data, MessageParcel
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply)
@@ -941,7 +1100,7 @@ int32_t NetConnServiceStub::OnSetGlobalHttpProxy(MessageParcel &data, MessagePar
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply)
@@ -1010,7 +1169,7 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
             }
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &reply)
@@ -1023,26 +1182,26 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t ret = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        ret = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(ret);
-        return ret;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
-    ret = RegisterNetInterfaceCallback(callback);
+    int32_t ret = RegisterNetInterfaceCallback(callback);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply)
@@ -1063,7 +1222,7 @@ int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, 
             return ERR_FLATTEN_OBJECT;
         }
     }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnAddNetworkRoute(MessageParcel &data, MessageParcel &reply)
@@ -1272,24 +1431,25 @@ int32_t NetConnServiceStub::OnFactoryResetNetwork(MessageParcel &data, MessagePa
 
 int32_t NetConnServiceStub::OnRegisterNetFactoryResetCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        NETMGR_LOG_E("remote ptr is nullptr.");
-        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-        reply.WriteInt32(result);
-        return result;
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     sptr<INetFactoryResetCallback> callback = iface_cast<INetFactoryResetCallback>(remote);
     if (callback == nullptr) {
-        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
-        reply.WriteInt32(result);
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        return result;
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    result = RegisterNetFactoryResetCallback(callback);
+    int32_t result = RegisterNetFactoryResetCallback(callback);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -1312,6 +1472,93 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
  
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = 0;
+    bool isBetter;
+    uint32_t supplierId;
+    if (!data.ReadUint32(type)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadBool(isBetter)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(type);
+    int32_t ret = UpdateSupplierScore(bearerType, isBetter, supplierId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("supplierId[%{public}d].", supplierId);
+        if (!reply.WriteUint32(supplierId)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<IPreAirplaneCallback> callback = iface_cast<IPreAirplaneCallback>(remote);
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    int32_t result = RegisterPreAirplaneCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUnregisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<IPreAirplaneCallback> callback = iface_cast<IPreAirplaneCallback>(remote);
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    int32_t result = UnregisterPreAirplaneCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

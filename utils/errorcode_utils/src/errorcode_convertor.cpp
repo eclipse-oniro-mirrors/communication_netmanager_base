@@ -161,6 +161,29 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKVPN_ERROR_REFUSE_CREATE_VPN, "VPN creation denied, please check the user type"},
     {NETWORKVPN_ERROR_VPN_EXIST, "VPN exist already, please execute destroy first"},
     {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
+#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+    /* Net BLUETOOTH Manager*/
+    {NETMANAGER_BLUETOOTH_ERR_START_FAIL, "BLUETOOTH start failed"},
+    {NETMANAGER_BLUETOOTH_ERR_STOP_FAIL, "BLUETOOTH stop failed"},
+    {NETMANAGER_BLUETOOTH_ERR_INIT_FAIL, "Failed to initialize the BLUETOOTH"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_PORT_ID, "The port id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_UDP_ID, "The udp id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_TCP_ID, "The tcp id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_RULE_TYPE, "The rule type is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_INVALID_SUPPLIER_ID, "The supplier id is invalid"},
+    {NETMANAGER_BLUETOOTH_ERR_OBJ_ERR_NULL, "The obj is null"},
+#endif
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /* Net firewall Manager */
+    {FIREWALL_ERR_NO_USER, "The specified user does not exist"},
+    {FIREWALL_ERR_EXCEED_MAX_RULE, "The number of firewall rules exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_IP, "The number of IP address rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_PORT, "The number of port rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_MAX_DOMAIN, "The number of domain rules in the firewall rule exceeds the maximum"},
+    {FIREWALL_ERR_EXCEED_ALL_MAX_DOMAIN, "The number of domain rules exceeds the maximum"},
+    {FIREWALL_ERR_NO_RULE, "The specified rule does not exist"},
+    {FIREWALL_ERR_DNS_RULE_DUPLICATION, "The dns rule is duplication"},
+#endif
 };
 } // namespace
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)

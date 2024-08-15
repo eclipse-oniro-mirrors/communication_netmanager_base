@@ -53,6 +53,7 @@ bool PollSendData(int sock, const char *data, size_t size);
 
 bool PollRecvData(int sock, char *data, size_t size);
 
+int NetSysIsIpv6Enable(uint16_t netId);
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023 Huawei Device Co., Ltd.
+* Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -27,13 +27,19 @@ using NetCapMap = std::map<NetCap, NetConn_NetCap>;
 
 static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_WIFI, NETCONN_BEARER_WIFI},
-                                  {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET}};
+                                  {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET},
+                                  {BEARER_VPN, NETCONN_BEARER_VPN}};
 
 static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILITY_MMS},
+                              {NET_CAPABILITY_SUPL,         NETCONN_NET_CAPABILITY_SUPL},
+                              {NET_CAPABILITY_DUN,         NETCONN_NET_CAPABILITY_DUN},
+                              {NET_CAPABILITY_IA,         NETCONN_NET_CAPABILITY_IA},
+                              {NET_CAPABILITY_XCAP,         NETCONN_NET_CAPABILITY_XCAP},
                               {NET_CAPABILITY_NOT_METERED, NETCONN_NET_CAPABILITY_NOT_METERED},
                               {NET_CAPABILITY_INTERNET,    NETCONN_NET_CAPABILITY_INTERNET},
                               {NET_CAPABILITY_NOT_VPN,     NETCONN_NET_CAPABILITY_NOT_VPN},
-                              {NET_CAPABILITY_VALIDATED,   NETCONN_NET_CAPABILITY_VALIDATED}};
+                              {NET_CAPABILITY_VALIDATED,   NETCONN_NET_CAPABILITY_VALIDATED},
+                              {NET_CAPABILITY_PORTAL,   NETCONN_NET_CAPABILITY_PORTAL}};
 
 static int32_t Conv2Ch(const std::string s, char *ch)
 {
@@ -41,7 +47,7 @@ static int32_t Conv2Ch(const std::string s, char *ch)
         NETMGR_LOG_E("string out of memory");
         return NETMANAGER_ERR_INTERNAL;
     }
-    if (strcpy_s(ch, s.length() + 1, s.c_str()) != 0) {
+    if (strcpy_s(ch, std::strlen(ch), s.c_str()) != 0) {
         NETMGR_LOG_E("string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -107,7 +113,7 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
         }
     }
 
-    httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
+    httpProxy->exclusionListSize = static_cast<int32_t>(httpProxyObj.GetExclusionList().size());
 
     return NETMANAGER_SUCCESS;
 }
@@ -139,7 +145,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
             return ret;
         }
     }
-    prop->netAddrListSize = infoObj.netAddrList_.size();
+    prop->netAddrListSize = static_cast<int32_t>(infoObj.netAddrList_.size());
 
     i = 0;
     for (const auto& dns : infoObj.dnsList_) {
@@ -152,7 +158,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
             return ret;
         }
     }
-    prop->dnsListSize = infoObj.dnsList_.size();
+    prop->dnsListSize = static_cast<int32_t>(infoObj.dnsList_.size());
 
     ret = Conv2HttpProxy(infoObj.httpProxy_, &(prop->httpProxy));
     if (ret != NETMANAGER_SUCCESS) {
@@ -181,7 +187,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
         }
         netAllCaps->netCaps[i++] = iterMap->second;
     }
-    netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
+    netAllCaps->netCapsSize = static_cast<int32_t>(netAllCapsObj.netCaps_.size());
 
     i = 0;
     for (const auto& bearType : netAllCapsObj.bearerTypes_) {
@@ -197,9 +203,8 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
         }
         netAllCaps->bearerTypes[i++] = iterMap->second;
     }
-    netAllCaps->bearerTypesSize = netAllCapsObj.bearerTypes_.size();
+    netAllCaps->bearerTypesSize = static_cast<int32_t>(netAllCapsObj.bearerTypes_.size());
 
     return NETMANAGER_SUCCESS;
 }
-
 } // namespace OHOS::NetManagerStandard

@@ -20,6 +20,7 @@
 
 #include "net_policy_base.h"
 #include "netmanager_base_common_utils.h"
+#include "net_access_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -145,6 +146,38 @@ public:
     // When system's mode status is changed, do this function.
     void TransPolicyToRule();
 
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid The specified UID of application.
+     * @param policy The network access policy of application, {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @param isBroker true means the broker application.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy Policy, bool reconfirmFlag, bool isBroker);
+
+    /**
+     * Delete the policy to access the network of the specified application from map.
+     *
+     * @param uid The specified UID of application.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+
+    /**
+     * Set NIC Traffic allowed or disallowed
+     *
+     * @param ifaceNames ifaceNames
+     * @param status true for allowed, false for disallowed
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t PolicySetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
+
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);
@@ -153,6 +186,8 @@ private:
     uint32_t ChangePolicyToPolicyTransitionCondition(uint32_t policy);
     uint32_t BuildTransCondition(uint32_t uid, uint32_t policy);
     uint32_t GetMatchTransCondition(uint32_t policyCondition);
+    void ProcessCtrlNone(uint32_t uid);
+    void ProcessCtrlAddAllowedList(uint32_t uid);
 
     // When a uid add into some forbidden list, do this function.
     void TransPolicyToRule(uint32_t uid);
@@ -175,6 +210,7 @@ private:
     std::set<uint32_t> deviceIdleAllowedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> foregroundUidList_;
+    std::mutex foregroundUidListMutex_;
 
 private:
     /**

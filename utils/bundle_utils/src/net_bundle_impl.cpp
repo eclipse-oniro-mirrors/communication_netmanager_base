@@ -61,10 +61,71 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
     return NETMANAGER_SUCCESS;
 }
 
+bool NetBundleImpl::IsAtomicService(std::string &bundleName)
+{
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return false;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(flags), bundleInfo);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("GetSelfBundleName: bundleName get fail.");
+        return false;
+    }
+    bundleName = bundleInfo.applicationInfo.bundleName;
+    return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
+}
+
+std::optional<std::string> NetBundleImpl::ObtainBundleNameForSelf()
+{
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return std::nullopt;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(flags), bundleInfo);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("bundleName get failed %{public}d.", ret);
+        return std::nullopt;
+    }
+    return bundleInfo.applicationInfo.bundleName;
+}
+
+std::optional<int32_t> NetBundleImpl::ObtainTargetApiVersionForSelf()
+{
+    static constexpr int32_t API_VERSION_MOD = 1000;
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return std::nullopt;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(flags), bundleInfo);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("GetBundleInfoForSelf: bundleName get failed %{public}d.", ret);
+        return std::nullopt;
+    }
+    auto targetApiVersion = bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD;
+    NETMGR_LOG_I("Got target API version %{public}d.", targetApiVersion);
+    return targetApiVersion;
+}
+
 INetBundle *GetNetBundle()
 {
     static NetBundleImpl impl;
     return &impl;
+}
+
+bool IsAtomicService(std::string &bundleName)
+{
+    NetBundleImpl impl;
+    return impl.IsAtomicService(bundleName);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

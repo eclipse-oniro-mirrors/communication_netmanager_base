@@ -55,7 +55,7 @@ bool NetHttpProbe::CurlGlobalInit()
     NETMGR_LOG_D("curl_global_init() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_init()");
+        NETMGR_LOG_D("Call curl_global_init()");
         if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
             NETMGR_LOG_E("curl_global_init() failed");
             return false;
@@ -73,7 +73,7 @@ void NetHttpProbe::CurlGlobalCleanup()
     useCurlCount_ = useCurlCount_ > 0 ? (useCurlCount_ - 1) : 0;
     NETMGR_LOG_D("Curl global used count remain:[%{public}d]", useCurlCount_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_cleanup()");
+        NETMGR_LOG_D("Call curl_global_cleanup()");
         curl_global_cleanup();
     }
 }
@@ -115,6 +115,9 @@ int32_t NetHttpProbe::SendProbe(ProbeType probeType, const std::string &httpUrl,
     SendHttpProbeRequest();
     RecvHttpProbeResponse();
     CleanHttpCurl();
+    if (!defaultUseGlobalHttpProxy_) {
+        defaultUseGlobalHttpProxy_ = true;
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -326,6 +329,7 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
     }
 
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_VERBOSE, 0L);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_FORBID_REUSE, 1L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 0L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
     if (probeType == ProbeType::PROBE_HTTPS) {
@@ -362,7 +366,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
     if (!LoadProxy(proxyHost, proxyPort)) {
-        NETMGR_LOG_E("global http proxy or network proxy is empty.");
+        NETMGR_LOG_D("global http proxy or network proxy is empty.");
         return true;
     }
 
@@ -530,12 +534,12 @@ void NetHttpProbe::RecvHttpProbeResponse()
 
         if (curlMsg->easy_handle == httpCurl_) {
             httpProbeResult_ = {responseCode, redirectUrl};
-            NETMGR_LOG_I("Recv net[%{public}d] http probe response, code:[%{public}d], redirectUrl:[%{public}s]",
-                         netId_, httpProbeResult_.GetCode(), httpProbeResult_.GetRedirectUrl().c_str());
+            NETMGR_LOG_I("Recv net[%{public}d] http probe response, code:[%{public}d]", netId_,
+                         httpProbeResult_.GetCode());
         } else if (curlMsg->easy_handle == httpsCurl_) {
             httpsProbeResult_ = {responseCode, redirectUrl};
-            NETMGR_LOG_I("Recv net[%{public}d] https probe response, code:[%{public}d], redirectUrl:[%{public}s]",
-                         netId_, httpsProbeResult_.GetCode(), httpsProbeResult_.GetRedirectUrl().c_str());
+            NETMGR_LOG_I("Recv net[%{public}d] https probe response, code:[%{public}d]", netId_,
+                         httpsProbeResult_.GetCode());
         } else {
             NETMGR_LOG_E("Unknown curl handle.");
         }
@@ -544,7 +548,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
 int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
 {
     std::lock_guard<std::mutex> locker(proxyMtx_);
-    if (!globalHttpProxy_.GetHost().empty()) {
+    if (!globalHttpProxy_.GetHost().empty() && defaultUseGlobalHttpProxy_) {
         proxyHost = globalHttpProxy_.GetHost();
         proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
     } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
@@ -554,6 +558,16 @@ int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
         return false;
     }
     return true;
+}
+
+bool NetHttpProbe::HasGlobalHttpProxy()
+{
+    return !globalHttpProxy_.GetHost().empty();
+}
+
+void NetHttpProbe::ProbeWithoutGlobalHttpProxy()
+{
+    defaultUseGlobalHttpProxy_ = false;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -23,8 +23,12 @@ namespace NetManagerStandard {
 class NetBundleImpl : public INetBundle {
 public:
     int32_t GetJsonFromBundle(std::string &jsonProfile) override;
+    bool IsAtomicService(std::string &bundleName) override;
+    std::optional<int32_t> ObtainTargetApiVersionForSelf() override;
+    std::optional<std::string> ObtainBundleNameForSelf() override;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
+extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE_IMPL_H

@@ -13,22 +13,26 @@
  * limitations under the License.
  */
 
+#include "net_mgr_log_wrapper.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+bool NetManagerPermission::IsSystemCaller()
+{
+    NETMGR_LOG_D("Is system caller.");
+    return true;
+}
+
 bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
+    NETMGR_LOG_D("Net policy client fuzzer permissionName: %{public}s", permissionName.c_str());
     return true;
 }
 
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
-    return true;
-}
-
-bool NetManagerPermission::IsSystemCaller()
-{
+    NETMGR_LOG_D("Net policy client fuzzer permissionName: %{public}s", permissionName.c_str());
     return true;
 }
 } // namespace NetManagerStandard

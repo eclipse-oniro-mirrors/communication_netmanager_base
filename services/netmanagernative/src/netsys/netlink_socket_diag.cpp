@@ -38,6 +38,7 @@ constexpr uint8_t ADDR_POSITION = 3U;
 constexpr int32_t DOMAIN_IP_ADDR_MAX_LEN = 128;
 constexpr uint32_t LOCKBACK_MASK = 0xff000000;
 constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
+constexpr uid_t PUSH_UID = 7023;
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
@@ -185,7 +186,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std:
         return NETMANAGER_ERR_INTERNAL;
     }
     while (readBytes > 0) {
-        uint32_t len = readBytes;
+        uint32_t len = static_cast<uint32_t>(readBytes);
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
             if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
@@ -237,13 +238,21 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
         return;
     }
 
+    if (socketDestroyType_ == SocketDestroyType::DESTROY_SPECIAL_CELLULAR && msg->idiag_uid != PUSH_UID) {
+        return;
+    }
+
+    if (socketDestroyType_ == SocketDestroyType::DESTROY_DEFAULT_CELLULAR && msg->idiag_uid == PUSH_UID) {
+        return;
+    }
+
     if (excludeLoopback && IsLoopbackSocket(msg)) {
         NETNATIVE_LOGE("Loop back socket, no need to close.");
         return;
     }
 
     if (!IsMatchNetwork(msg, ipAddr)) {
-        NETNATIVE_LOGE("Socket is not associated with the network");
+        NETNATIVE_LOG_D("Socket is not associated with the network");
         return;
     }
 
@@ -280,6 +289,20 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
     }
 
     NETNATIVE_LOG_D("Destroyed %{public}d sockets", socketsDestroyed_);
+}
+
+int32_t NetLinkSocketDiag::SetSocketDestroyType(const std::string &netCapabilities)
+{
+    const std::string capSpecialCellularStr = "NET_CAPABILITY_INTERNAL_DEFAULT";
+    const std::string bearerCellularStr = "BEARER_CELLULAR";
+    if (netCapabilities.find(capSpecialCellularStr) != std::string::npos) {
+        socketDestroyType_ = SocketDestroyType::DESTROY_SPECIAL_CELLULAR;
+    } else if (netCapabilities.find(bearerCellularStr) != std::string::npos) {
+        socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT_CELLULAR;
+    } else {
+        socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
+    }
+    return 0;
 }
 } // namespace nmd
 } // namespace OHOS

@@ -26,8 +26,9 @@
 #include "netnative_log_wrapper.h"
 
 namespace {
+SocketDispatchType defaultSocketDispatchType;
 std::atomic_int g_netIdForApp(0);
-std::atomic<const SocketDispatchType*> g_dispatch(nullptr);
+std::atomic<const SocketDispatchType*> g_dispatch(&defaultSocketDispatchType);
 std::atomic_bool g_hookFlag(false);
 const SocketDispatchType* GetDispatch()
 {
@@ -43,7 +44,6 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
     }
 
     if (fd < 0) {
-        NETNATIVE_LOGE("musl create socket failed, errno %{public}d", errno);
         return fd;
     }
 
@@ -72,10 +72,7 @@ void ohos_socket_hook_finalize(void)
 
 int ohos_socket_hook_socket(int domain, int type, int protocol)
 {
-    g_hookFlag = false;
-    int ret = HookSocket(GetDispatch()->socket, domain, type, protocol);
-    g_hookFlag = true;
-    return ret;
+    return HookSocket(GetDispatch()->socket, domain, type, protocol);
 }
 
 bool ohos_socket_hook_get_hook_flag(void)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,14 @@ extern "C" {
 typedef enum NetConn_NetCap {
     /** MMS */
     NETCONN_NET_CAPABILITY_MMS = 0,
+    /** SUPL */
+    NETCONN_NET_CAPABILITY_SUPL = 1,
+    /** DUN */
+    NETCONN_NET_CAPABILITY_DUN = 2,
+    /** IA */
+    NETCONN_NET_CAPABILITY_IA = 3,
+    /** XCAP */
+    NETCONN_NET_CAPABILITY_XCAP = 4,
     /** Not Metered */
     NETCONN_NET_CAPABILITY_NOT_METERED = 11,
     /** Internet */
@@ -68,6 +76,8 @@ typedef enum NetConn_NetCap {
     NETCONN_NET_CAPABILITY_NOT_VPN = 15,
     /** Validated */
     NETCONN_NET_CAPABILITY_VALIDATED = 16,
+    /** portal */
+    NETCONN_NET_CAPABILITY_PORTAL = 17,
 } NetConn_NetCap;
 
 /**
@@ -83,6 +93,8 @@ typedef enum NetConn_NetBearerType {
     NETCONN_BEARER_WIFI = 1,
     /** Ethernet */
     NETCONN_BEARER_ETHERNET = 3,
+    /** VPN */
+    NETCONN_BEARER_VPN = 4,
 } NetConn_NetBearerType;
 
 /**

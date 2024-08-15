@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,10 @@
 
 #include "broadcast_manager.h"
 #include "event_report.h"
+#include "net_conn_service_iface.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_client.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
 #include "network.h"
@@ -44,6 +46,7 @@ constexpr const char *ERROR_MSG_SET_NET_RESOLVER_FAILED = "Set network resolver 
 constexpr const char *ERROR_MSG_UPDATE_NET_DNSES_FAILED = "Update netlink dns failed,dns list is empty";
 constexpr const char *ERROR_MSG_SET_NET_MTU_FAILED = "Set netlink interface mtu failed";
 constexpr const char *ERROR_MSG_SET_NET_TCP_BUFFER_SIZE_FAILED = "Set netlink tcp buffer size failed";
+constexpr const char *ERROR_MSG_UPDATE_STATS_CACHED = "force update kernel map stats cached failed";
 constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default network failed";
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
@@ -66,6 +69,11 @@ int32_t Network::GetNetId() const
     return netId_;
 }
 
+uint32_t Network::GetSupplierId() const
+{
+    return supplierId_;
+}
+
 bool Network::operator==(const Network &network) const
 {
     return netId_ == network.netId_;
@@ -82,6 +90,9 @@ bool Network::UpdateBasicNetwork(bool isAvailable_)
     } else {
         if (netSupplierType_ == BEARER_VPN) {
             return ReleaseVirtualNetwork();
+        }
+        if (nat464Service_ != nullptr) {
+            nat464Service_->UpdateService(NAT464_SERVICE_STOP);
         }
         return ReleaseBasicNetwork();
     }
@@ -119,21 +130,40 @@ bool Network::CreateVirtualNetwork()
     return true;
 }
 
+bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
+{
+    return NetConnServiceIface().IsAddrInOtherNetwork(netLinkInfo_.ifaceName_, netId_, netAddr);
+}
+
+bool Network::IsIfaceNameInUse()
+{
+    return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
+}
+
+std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
+{
+    return NetConnServiceIface().GetNetCapabilitiesAsString(supplierId);
+}
+
 bool Network::ReleaseBasicNetwork()
 {
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
-    if (isPhyNetCreated_) {
-        NETMGR_LOG_D("Destroy physical network");
-        StopNetDetection();
+    if (!isPhyNetCreated_) {
+        return true;
+    }
+    NETMGR_LOG_D("Destroy physical network");
+    StopNetDetection();
+    std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
+    NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
+        supplierId_, netId_, netCapabilities.c_str());
+    if (!IsIfaceNameInUse()) {
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_;
-            if (prefixLen == 0) {
-                prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
-            }
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
-            std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+            auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
             NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                route.gateway_.address_);
             if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
@@ -143,12 +173,18 @@ bool Network::ReleaseBasicNetwork()
                 NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
             }
         }
-        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetsysController::GetInstance().NetworkDestroy(netId_);
-        NetsysController::GetInstance().DestroyNetworkCache(netId_);
-        netLinkInfo_.Initialize();
-        isPhyNetCreated_ = false;
+    } else {
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen, netCapabilities);
+        }
     }
+    NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+    NetsysController::GetInstance().NetworkDestroy(netId_);
+    NetsysController::GetInstance().DestroyNetworkCache(netId_);
+    netLinkInfo_.Initialize();
+    isPhyNetCreated_ = false;
     return true;
 }
 
@@ -181,9 +217,20 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
+    UpdateStatsCached(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN) {
+    if (IsNat464Prefered()) {
+        if (nat464Service_ == nullptr) {
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+        }
+        nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
+        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
+    } else if (nat464Service_ != nullptr) {
+        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
+    }
+
+    if (netSupplierType_ != BEARER_VPN && netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         StartNetDetection(false);
     }
     return true;
@@ -203,6 +250,16 @@ NetLinkInfo Network::GetNetLinkInfo() const
     return linkInfo;
 }
 
+std::string Network::GetIfaceName() const
+{
+    return netLinkInfo_.ifaceName_;
+}
+
+std::string Network::GetIdent() const
+{
+    return netLinkInfo_.ident_;
+}
+
 void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
 {
     NETMGR_LOG_D("Network UpdateInterfaces in.");
@@ -214,7 +271,7 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
     int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
     if (!newNetLinkInfo.ifaceName_.empty()) {
-        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_);
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_, netSupplierType_);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_INTERFACE_FAILED);
         }
@@ -235,6 +292,9 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfo_.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -244,15 +304,15 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
                                                                      : Ipv4PrefixLen(inetAddr.netMask_));
-        int32_t ret = NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
-            inetAddr.address_, prefixLen);
+        int32_t ret =
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         if (NETMANAGER_SUCCESS != ret) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
 
         if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
             NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
-                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             netLinkInfo_.routeList_.remove_if([family](const Route &route) {
                 INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
                 if (family == AF_INET) {
@@ -265,8 +325,16 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         }
     }
 
-    NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
+    HandleUpdateIpAddrs(newNetLinkInfo);
+}
+
+void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
+{
+    NETMGR_LOG_I("HandleUpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -342,10 +410,13 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("Network UpdateDns in.");
     std::vector<std::string> servers;
     std::vector<std::string> domains;
+    std::stringstream ss;
     for (const auto &dns : netLinkInfo.dnsList_) {
         servers.emplace_back(dns.address_);
         domains.emplace_back(dns.hostName_);
+        ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
     }
+    NETMGR_LOG_I("update dns server: %{public}s", ss.str().c_str());
     // Call netsys to set dns, use default timeout and retry
     int32_t ret = NetsysController::GetInstance().SetResolverConfig(netId_, 0, 0, servers, domains);
     if (ret != NETMANAGER_SUCCESS) {
@@ -386,9 +457,23 @@ void Network::UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("Network UpdateTcpBufferSize out.");
 }
 
+void Network::UpdateStatsCached(const NetLinkInfo &netLinkInfo)
+{
+    NETMGR_LOG_D("Network UpdateStatsCached in.");
+    if (netLinkInfo.ifaceName_ == netLinkInfo_.ifaceName_ && netLinkInfo.ident_ == netLinkInfo_.ident_) {
+        NETMGR_LOG_D("Network UpdateStatsCached out. same with before");
+        return;
+    }
+    int32_t ret = NetStatsClient::GetInstance().UpdateStatsData();
+    if (ret != NETMANAGER_SUCCESS) {
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_STATS_CACHED);
+    }
+    NETMGR_LOG_D("Network UpdateStatsCached out.");
+}
+
 void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter RegisterNetDetectionCallback");
+    NETMGR_LOG_I("Enter RNDCB");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return;
@@ -406,7 +491,7 @@ void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &ca
 
 int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback");
+    NETMGR_LOG_I("Enter URNDCB");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -424,7 +509,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 
 void Network::StartNetDetection(bool needReport)
 {
-    NETMGR_LOG_I("Enter Network::StartNetDetection");
+    NETMGR_LOG_I("Enter StartNetDetection");
     if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
@@ -437,25 +522,26 @@ void Network::StartNetDetection(bool needReport)
     }
 }
 
-void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
+void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
-    if (eventHandler_) {
-        eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
-            this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
-        });
-    }
+    netCaps_ = netCaps;
 }
 
-void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
+void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealthSync");
+    NETMGR_LOG_D("Enter NetDetectionForDnsHealthSync");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
-    NETMGR_LOG_I("Last netDetectionState: [%{public}d]", lastDetectResult);
+    {
+        static NetDetectionStatus preStatus = UNKNOWN_STATE;
+        if (preStatus != lastDetectResult) {
+            NETMGR_LOG_I("Last netDetectionState: [%{public}d->%{public}d]", preStatus, lastDetectResult);
+            preStatus = lastDetectResult;
+        }
+    }
     if (IsDetectionForDnsSuccess(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
         isDetectingForDns_ = true;
@@ -465,13 +551,13 @@ void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
     } else {
-        NETMGR_LOG_I("Not match, no need to restart.");
+        NETMGR_LOG_D("Not match, no need to restart.");
     }
 }
 
 void Network::StopNetDetection()
 {
-    NETMGR_LOG_D("Enter Network::StopNetDetection");
+    NETMGR_LOG_D("Enter StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
         netMonitor_ = nullptr;
@@ -480,7 +566,7 @@ void Network::StopNetDetection()
 
 void Network::InitNetMonitor()
 {
-    NETMGR_LOG_I("Enter Network::InitNetMonitor()");
+    NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
     if (netMonitor_ == nullptr) {
@@ -492,12 +578,12 @@ void Network::InitNetMonitor()
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
-    NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
+    NETMGR_LOG_I("HNMR, [%{public}d]", netDetectionState);
     isDetectingForDns_ = false;
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {
         detectResult_ = netDetectionState;
-        netCallback_(supplierId_, netDetectionState == VERIFICATION_STATE);
+        netCallback_(supplierId_, netDetectionState);
     }
 }
 
@@ -539,6 +625,13 @@ void Network::ClearDefaultNetWorkNetId()
     int32_t ret = NetsysController::GetInstance().ClearDefaultNetWorkNetId();
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_CLEAR_DEFAULT_NETWORK_FAILED, ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED);
+    } else {
+        std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+                                                                prefixLen, netCapabilities);
+        }
     }
 }
 
@@ -555,7 +648,7 @@ bool Network::IsConnected() const
 void Network::UpdateNetConnState(NetConnState netConnState)
 {
     if (state_ == netConnState) {
-        NETMGR_LOG_E("Ignore same network state changed.");
+        NETMGR_LOG_D("Ignore same network state changed.");
         return;
     }
     NetConnState oldState = state_;
@@ -576,6 +669,15 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     }
 
     SendConnectionChangedBroadcast(netConnState);
+    if (IsNat464Prefered()) {
+        if (nat464Service_ == nullptr) {
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+        }
+        nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
+        nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
+    } else if (nat464Service_ != nullptr) {
+        nat464Service_->UpdateService(NAT464_SERVICE_STOP);
+    }
     NETMGR_LOG_I("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
 }
 
@@ -585,7 +687,7 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
     info.data = "Net Manager Connection State Changed";
     info.code = static_cast<int32_t>(netConnState);
-    info.ordered = true;
+    info.ordered = false;
     std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
@@ -602,6 +704,7 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
 void Network::ResetNetlinkInfo()
 {
     netLinkInfo_.Initialize();
+    detectResult_ = UNKNOWN_STATE;
 }
 
 void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
@@ -616,9 +719,10 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
     if (eventHandler_) {
-        eventHandler_->PostAsyncTask(
-            [netDetectionState, urlRedirect, this]() { this->HandleNetMonitorResult(netDetectionState, urlRedirect); },
-            0);
+        auto network = shared_from_this();
+        eventHandler_->PostAsyncTask([netDetectionState, urlRedirect,
+                                      network]() { network->HandleNetMonitorResult(netDetectionState, urlRedirect); },
+                                     0);
     }
 }
 
@@ -626,19 +730,19 @@ bool Network::ResumeNetworkInfo()
 {
     NetLinkInfo nli = netLinkInfo_;
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork false");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
         NETMGR_LOG_E("%s release existed basic network failed", __FUNCTION__);
         return false;
     }
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork true");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork true");
     if (!UpdateBasicNetwork(true)) {
         NETMGR_LOG_E("%s create basic network failed", __FUNCTION__);
         return false;
     }
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateNetLinkInfo");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateNetLinkInfo");
     return UpdateNetLinkInfo(nli);
 }
 
@@ -650,6 +754,21 @@ bool Network::IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, boo
 bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess)
 {
     return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
+}
+
+bool Network::IsNat464Prefered()
+{
+    if (netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI && netSupplierType_ != BEARER_ETHERNET) {
+        return false;
+    }
+    if (std::any_of(netLinkInfo_.netAddrList_.begin(), netLinkInfo_.netAddrList_.end(),
+                    [](const INetAddr &i) { return i.type_ != INetAddr::IPV6; })) {
+        return false;
+    }
+    if (netLinkInfo_.ifaceName_.empty() || !IsConnected()) {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

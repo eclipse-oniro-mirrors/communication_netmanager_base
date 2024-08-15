@@ -91,17 +91,22 @@ private:
     NetHttpProbeResult SendHttpProbe(ProbeType probeType);
     void GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl);
     void LoadGlobalHttpProxy();
+    bool HasGlobalHttpProxy();
+    void ProbeWithoutGlobalHttpProxy();
+    void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
 
 private:
     uint32_t netId_ = 0;
+    NetBearType netBearType_;
     std::atomic<bool> isDetecting_ = false;
-    int32_t detectionSteps_ = 0;
+    bool needCallback_ = true;
     std::mutex detectionMtx_;
     std::mutex probeMtx_;
     std::condition_variable detectionCond_;
     uint32_t detectionDelay_ = 0;
     std::weak_ptr<INetMonitorCallback> netMonitorCallback_;
     std::unique_ptr<NetHttpProbe> httpProbe_;
+    bool needDetectionWithoutProxy_ = true;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -17,9 +17,11 @@
 #define NET_POLICY_FILE_EVENT_HANDLER_H
 
 #include <iostream>
+#include <dirent.h>
 
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ffrt.h"
 #include "singleton.h"
 
 struct PolicyFileEvent {
@@ -28,24 +30,26 @@ struct PolicyFileEvent {
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetPolicyFileEventHandler : public AppExecFwk::EventHandler {
+class NetPolicyFileEventHandler {
 public:
     static constexpr uint32_t MSG_POLICY_FILE_WRITE = 2;
     static constexpr uint32_t MSG_POLICY_FILE_DELETE = 3;
     static constexpr uint32_t MSG_POLICY_FILE_COMMIT = 4;
 
-    explicit NetPolicyFileEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    explicit NetPolicyFileEventHandler(const char *queueName);
     virtual ~NetPolicyFileEventHandler() = default;
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     void SendWriteEvent(AppExecFwk::InnerEvent::Pointer &event);
 
 private:
     bool Write();
     bool DeleteBak();
 
+    void SendEvent(const AppExecFwk::InnerEvent::Pointer &event, uint32_t delayTime = 0);
+    void ProcessEvent(uint32_t eventId, std::shared_ptr<PolicyFileEvent> eventData);
     std::atomic<int64_t> timeStamp_ = 0;
     std::atomic<bool> commitWait_ = false;
     std::string fileContent_;
+    ffrt::queue netPolicyFileEventQueue_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

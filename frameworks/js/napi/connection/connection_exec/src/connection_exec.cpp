@@ -19,16 +19,17 @@
 #include <cstdint>
 #include <string>
 
-#include "connection_module.h"
+#include "net_handle_interface.h"
 #include "constant.h"
 #include "errorcode_convertor.h"
+#include "napi_utils.h"
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
 #include "netconnection.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
-#include "napi_utils.h"
 #include "securec.h"
+#include "net_conn_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
 namespace {
@@ -46,16 +47,15 @@ napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
     }
 
     std::initializer_list<napi_property_descriptor> properties = {
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
-                              ConnectionModule::NetHandleInterface::GetAddressesByName),
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
-                              ConnectionModule::NetHandleInterface::GetAddressByName),
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_BIND_SOCKET,
-                              ConnectionModule::NetHandleInterface::BindSocket),
+        DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
+                              NetHandleInterface::GetAddressesByName),
+        DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
+                              NetHandleInterface::GetAddressByName),
+        DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_BIND_SOCKET,
+                              NetHandleInterface::BindSocket),
     };
     NapiUtils::DefineProperties(env, netHandle, properties);
-    NapiUtils::SetUint32Property(env, netHandle, ConnectionModule::NetHandleInterface::PROPERTY_NET_ID,
-                                 handle->GetNetId());
+    NapiUtils::SetUint32Property(env, netHandle, NetHandleInterface::PROPERTY_NET_ID, handle->GetNetId());
     return netHandle;
 }
 
@@ -66,13 +66,11 @@ napi_value ConnectionExec::CreateNetCapabilities(napi_env env, NetAllCapabilitie
         return NapiUtils::GetUndefined(env);
     }
 
-    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_UP_BAND_WIDTH_KPS,
-                                 capabilities->linkUpBandwidthKbps_);
+    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_UP_BAND_WIDTH_KPS, capabilities->linkUpBandwidthKbps_);
     NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_DOWN_BAND_WIDTH_KPS,
                                  capabilities->linkDownBandwidthKbps_);
     if (!capabilities->netCaps_.empty() && capabilities->netCaps_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value networkCap =
-            NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
+        napi_value networkCap = NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
         auto it = capabilities->netCaps_.begin();
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != capabilities->netCaps_.end(); ++index, ++it) {
             NapiUtils::SetArrayElement(env, networkCap, index, NapiUtils::CreateUint32(env, *it));
@@ -558,16 +556,23 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
+    uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    if (context->host_.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
+        context->SetErrorCode(temp);
+        return false;
+    }
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo_ext errno %{public}d %{public}s", errno, strerror(errno));
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
         int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
@@ -611,16 +616,23 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
+    uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    if (context->host_.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
+        context->SetErrorCode(temp);
+        return false;
+    }
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
         int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
@@ -704,20 +716,24 @@ void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *i
 
 bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
 {
-    EventManager *manager = context->GetManager();
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    sptr<INetConnCallback> callback = conn->GetObserver();
+    auto wCallback = context->GetNetConnCallback();
+    sptr<INetConnCallback> callback = wCallback.promote();
+    if (callback == nullptr) {
+        NETMANAGER_BASE_LOGE("ExecRegister getNetConnCallback nullptr");
+        return false;
+    }
 
-    if (conn->hasNetSpecifier_ && conn->hasTimeout_) {
-        sptr<NetSpecifier> specifier = new NetSpecifier(conn->netSpecifier_);
-        int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, conn->timeout_);
+    auto conn = context->GetConn();
+    if (conn.hasNetSpecifier_ && conn.hasTimeout_) {
+        sptr<NetSpecifier> specifier = new NetSpecifier(conn.netSpecifier_);
+        int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, conn.timeout_);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ and hasTimeout_ %{public}d", ret);
         context->SetErrorCode(ret);
         return ret == NETMANAGER_SUCCESS;
     }
 
-    if (conn->hasNetSpecifier_) {
-        sptr<NetSpecifier> specifier = new NetSpecifier(conn->netSpecifier_);
+    if (conn.hasNetSpecifier_) {
+        sptr<NetSpecifier> specifier = new NetSpecifier(conn.netSpecifier_);
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, 0);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ %{public}d", ret);
         context->SetErrorCode(ret);
@@ -737,9 +753,12 @@ napi_value ConnectionExec::NetConnectionExec::RegisterCallback(RegisterContext *
 
 bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *context)
 {
-    EventManager *manager = context->GetManager();
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    sptr<INetConnCallback> callback = conn->GetObserver();
+    auto wCallback = context->GetNetConnCallback();
+    auto callback = wCallback.promote();
+    if (callback == nullptr) {
+        NETMANAGER_BASE_LOGE("ExecUnregister getNetConnCallback nullptr");
+        return false;
+    }
 
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {

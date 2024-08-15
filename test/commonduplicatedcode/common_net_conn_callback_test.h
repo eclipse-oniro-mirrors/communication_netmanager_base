@@ -22,6 +22,8 @@
 #include "net_manager_constants.h"
 #include "net_supplier_callback_base.h"
 #include "net_supplier_callback_stub.h"
+#include "net_manager_constants.h"
+#include <iostream>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -58,11 +60,21 @@ public:
     }
 };
 
+class PreAirplaneCallbackTest : public PreAirplaneCallbackStub {
+public:
+    int32_t PreAirplaneStart() override
+    {
+        std::cout << "test PreAirplaneStart" << std::endl;
+        return NETMANAGER_SUCCESS;
+    }
+};
+
 class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
 public:
     virtual ~NetSupplierCallbackBaseTestCb() = default;
 
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+        const NetRequest &netrequest = {}) override
     {
         return NETMANAGER_SUCCESS;
     };
@@ -78,13 +90,26 @@ public:
     NetSupplierCallbackStubTestCb() = default;
     ~NetSupplierCallbackStubTestCb() {}
 
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+                           const NetRequest &netrequest = {}) override
     {
         return NETMANAGER_SUCCESS;
     }
 
     int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
     {
+        return NETMANAGER_SUCCESS;
+    }
+};
+
+class IPreAirplaneCallbackStubTestCb : public PreAirplaneCallbackStub {
+public:
+    IPreAirplaneCallbackStubTestCb() = default;
+    ~IPreAirplaneCallbackStubTestCb() = default;
+
+    int32_t PreAirplaneStart() override
+    {
+        std::cout << "fuzz test PreAirplaneStart" << std::endl;
         return NETMANAGER_SUCCESS;
     }
 };

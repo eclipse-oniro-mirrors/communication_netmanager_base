@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "netsys_client.h"
 #include "init_socket.h"
 #ifdef USE_SELINUX
-#include "selinux.h"
+#include "selinux/selinux.h"
 #endif
 #include "singleton.h"
 #include <ipc_skeleton.h>
@@ -35,14 +35,9 @@
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
-namespace {
-constexpr const char *DNS_RESOLV_THREAD = "DNS_RESOLV_THREAD";
-} // namespace
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
-    dnsResolvRunner_ = AppExecFwk::EventRunner::Create(DNS_RESOLV_THREAD);
-    dnsResolvHandler_ = std::make_shared<AppExecFwk::EventHandler>(dnsResolvRunner_);
 }
 
 DnsResolvListen::~DnsResolvListen()
@@ -53,17 +48,27 @@ DnsResolvListen::~DnsResolvListen()
     }
 }
 
-void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId)
+void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid)
 {
-    DNS_CONFIG_PRINT("ProcGetConfigCommand");
+    NETNATIVE_LOG_D("DnsResolvListen::ProcGetConfigCommand uid = [%{public}u]", uid);
     ResolvConfig sendData = {0};
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
 
-    auto status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers, domains,
-                                                                 baseTimeoutMsec, retryCount);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(uid);
+#endif
+
+    int status = -1;
+    if (DnsParamCache::GetInstance().IsVpnOpen() && netId == 0) {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers,
+                                                                domains, baseTimeoutMsec, retryCount);
+    } else {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers,
+                                                                domains, baseTimeoutMsec, retryCount);
+    }
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
         sendData.error = status;
@@ -112,6 +117,13 @@ int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
 
 void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ProcGetCacheCommand(clientSockFd, netId, 0);
+}
+
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
+{
+#endif
     DNS_CONFIG_PRINT("ProcGetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
     int32_t res = ProcGetKeyForCache(clientSockFd, name);
@@ -119,6 +131,9 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+#endif
     auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
 
     uint32_t resNum = std::min<uint32_t>(MAX_RESULTS, static_cast<uint32_t>(cacheRes.size()));
@@ -149,6 +164,13 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 
 void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ProcSetCacheCommand(clientSockFd, netId, 0);
+}
+
+void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
+{
+#endif
     DNS_CONFIG_PRINT("ProcSetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
     int32_t res = ProcGetKeyForCache(clientSockFd, name);
@@ -175,6 +197,9 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(callingUid);
+#endif
     for (size_t i = 0; i < resNum; ++i) {
         DnsParamCache::GetInstance().SetDnsCache(netId, name, addrInfo[i]);
     }
@@ -190,23 +215,31 @@ void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
     }
 }
 
-void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
+bool DnsResolvListen::ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid)
 {
-    char name[MAX_HOST_NAME_LEN] = {0};
-
-    uint32_t netid = netId;
-
-    uint32_t uid;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read1 errno %{public}d", errno);
         close(clientSockFd);
-        return;
+        return false;
     }
 
-    uint32_t pid;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read2 errno %{public}d", errno);
         close(clientSockFd);
+        return false;
+    }
+
+    return true;
+}
+
+void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
+{
+    char name[MAX_HOST_NAME_LEN] = {0};
+    uint32_t netid = netId;
+    uint32_t uid;
+    uint32_t pid;
+
+    if (!ProcPostDnsThreadResult(clientSockFd, uid, pid)) {
         return;
     }
     
@@ -296,16 +329,28 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
 
     auto info = reinterpret_cast<RequestInfo *>(buff);
     auto netId = info->netId;
+    auto uid = info->uid;
+
+    NETNATIVE_LOG_D("netId = [%{public}u], uid = [%{public}u], command = [%{public}u]",
+                    netId, uid, info->command);
 
     switch (info->command) {
         case GET_CONFIG:
-            ProcGetConfigCommand(clientSockFd, netId);
+            ProcGetConfigCommand(clientSockFd, netId, uid);
             break;
         case GET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcGetCacheCommand(clientSockFd, netId, uid);
+#else
             ProcGetCacheCommand(clientSockFd, netId);
+#endif
             break;
         case SET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcSetCacheCommand(clientSockFd, netId, uid);
+#else
             ProcSetCacheCommand(clientSockFd, netId);
+#endif
             break;
         case JUDGE_IPV6:
             ProcJudgeIpv6Command(clientSockFd, netId);
@@ -360,11 +405,7 @@ void DnsResolvListen::StartListen()
             close(clientSockFd);
             continue;
         }
-        if (dnsResolvHandler_ != nullptr) {
-            dnsResolvHandler_->PostSyncTask([this, &clientSockFd]() {
-                this->ProcCommand(clientSockFd);
-            });
-        }
+        this->ProcCommand(clientSockFd);
     }
 }
 } // namespace OHOS::nmd

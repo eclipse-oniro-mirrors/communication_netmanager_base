@@ -30,6 +30,16 @@ int32_t NetConnServiceIface::GetIfaceNameByType(NetBearType bearerType, const st
     return NetConnService::GetInstance()->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
+int32_t NetConnServiceIface::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids)
+{
+    return NetConnService::GetInstance()->EnableVnicNetwork(netLinkInfo, uids);
+}
+
+int32_t NetConnServiceIface::DisableVnicNetwork()
+{
+    return NetConnService::GetInstance()->DisableVnicNetwork();
+}
+
 int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
@@ -64,6 +74,20 @@ int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback
 int32_t NetConnServiceIface::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
 {
     return NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
+}
+
+bool NetConnServiceIface::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
+{
+    return NetConnService::GetInstance()->IsAddrInOtherNetwork(ifaceName, netId, netAddr);
+}
+bool NetConnServiceIface::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
+{
+    return NetConnService::GetInstance()->IsIfaceNameInUse(ifaceName, netId);
+}
+
+std::string NetConnServiceIface::GetNetCapabilitiesAsString(const uint32_t supplierId) const
+{
+    return NetConnService::GetInstance()->GetNetCapabilitiesAsString(supplierId);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

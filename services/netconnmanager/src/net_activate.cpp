@@ -23,16 +23,19 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextRequestId = MIN_REQUEST_ID;
+static std::string IDENT_WIFI = "wifi";
 using TimeOutCallback = std::function<void()>;
 
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                          std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
-                         const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler)
+                         const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
+                         const int32_t registerType)
     : netSpecifier_(specifier),
       netConnCallback_(callback),
       timeoutMS_(timeoutMS),
       timeoutCallback_(timeoutCallback),
-      netActEventHandler_(netActEventHandler)
+      netActEventHandler_(netActEventHandler),
+      registerType_(registerType)
 {
     requestId_ = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
@@ -71,42 +74,53 @@ void NetActivate::TimeOutNetAvailable()
     }
 }
 
-bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
+bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent)
 {
-    NETMGR_LOG_I("MatchRequestAndNetwork enter, supplier[%{public}d, %{public}s], request[%{public}d]",
+    NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]",
                  (supplier ? supplier->GetSupplierId() : 0),
                  (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), requestId_);
     if (supplier == nullptr) {
         NETMGR_LOG_E("Supplier is null");
         return false;
     }
-    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
-        NETMGR_LOG_W("Supplier ident is not matched");
-        return false;
-    }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
-        NETMGR_LOG_W("Supplier capability is not matched");
+        NETMGR_LOG_D("Supplier[%{public}d], request[%{public}d], capability is not matched", supplier->GetSupplierId(),
+                     requestId_);
         return false;
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
-        NETMGR_LOG_W("Supplier net type not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
+                     supplier->GetSupplierId(), requestId_);
+        return false;
+    }
+    if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent(), supplier->GetNetSupplierType(),
+        skipCheckIdent)) {
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
+                     supplier->GetSupplierId(), requestId_);
         return false;
     }
     NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
-        NETMGR_LOG_W("Supplier net band not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], supplier net band not matched",
+                     supplier->GetSupplierId(), requestId_);
         return false;
     }
 
     return true;
 }
 
-bool NetActivate::CompareByNetworkIdent(const std::string &ident)
+bool NetActivate::CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent)
 {
     if (ident.empty() || netSpecifier_->ident_.empty()) {
         return true;
     }
+    if (IDENT_WIFI == netSpecifier_->ident_) {
+        return true;
+    }
     if (ident == netSpecifier_->ident_) {
+        return true;
+    }
+    if (skipCheckIdent && BEARER_WIFI == bearerType) {
         return true;
     }
     return false;
@@ -119,7 +133,7 @@ bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
     }
     std::set<NetCap> &reqCaps = netSpecifier_->netCapabilities_.netCaps_;
     if (reqCaps.empty()) {
-        NETMGR_LOG_I("Use default Supplier for empty cap");
+        NETMGR_LOG_D("Use default Supplier for empty cap");
         return netCaps.HasNetCap(NET_CAPABILITY_INTERNET);
     }
     return netCaps.HasNetCaps(reqCaps);
@@ -158,6 +172,16 @@ sptr<NetSpecifier> NetActivate::GetNetSpecifier()
 uint32_t NetActivate::GetRequestId() const
 {
     return requestId_;
+}
+
+std::set<NetBearType> NetActivate::GetBearType() const
+{
+    return netSpecifier_->netCapabilities_.bearerTypes_;
+}
+
+int32_t NetActivate::GetRegisterType() const
+{
+    return registerType_;
 }
 
 void NetActivate::SetRequestId(uint32_t reqId)

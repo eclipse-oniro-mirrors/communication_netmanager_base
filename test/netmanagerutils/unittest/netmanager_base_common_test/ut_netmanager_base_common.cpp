@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,15 @@ constexpr const char *TEST_DOMAIN5 = "com.test";
 constexpr const char *TEST_DOMAIN6 = "test.co.uk";
 constexpr const char *TEST_DOMAIN7 = "test.com.com";
 constexpr const char *TEST_DOMAIN8 = "test1.test2.test3.test4.test5.com";
+constexpr const char *DEFAULT_IPV6_ANY_INIT_ADDR = "::";
+
+const std::string TEST_DOMAIN9 = "www.test.com";
+const std::string TEST_DOMAIN10 = "*";
+const std::string TEST_DOMAIN11 = "";
+const std::string TEST_DOMAIN12 = "*.test.*";
+const std::string TEST_DOMAIN13 = "*.test./{*";
+
+constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 constexpr uint32_t ADDREDD_LEN = 16;
 constexpr int32_t BIT_32 = 32;
 constexpr int32_t BIT_24 = 24;
@@ -568,6 +577,88 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
     uint64_t value2 = 100;
     result = CommonUtils::StrToUint64(value, defaultErr);
     EXPECT_EQ(result, value2);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, Trim, TestSize.Level2)
+{
+    std::string str = "    trim   ";
+    std::string strResult = CommonUtils::Trim(str);
+    EXPECT_STREQ(strResult.c_str(), "trim");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse001, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN10);
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse002, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN11);
+    EXPECT_EQ(isMatch, false);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse003, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN12);
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse004, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN9);
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid001, TestSize.Level2)
+{
+    bool isValid = CommonUtils::IsUrlRegexValid(TEST_DOMAIN12);
+    EXPECT_EQ(isValid, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid002, TestSize.Level2)
+{
+    bool isValid = CommonUtils::IsUrlRegexValid(TEST_DOMAIN13);
+    EXPECT_EQ(isValid, false);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetIpv6Prefix001, TestSize.Level2)
+{
+    std::string ipv6Addr = TEST_IP;
+    uint8_t prefixLen = MAX_IPV6_PREFIX_LENGTH;
+    auto result = CommonUtils::GetIpv6Prefix(ipv6Addr, prefixLen);
+    EXPECT_EQ(result, ipv6Addr);
+
+    prefixLen = MAX_IPV6_PREFIX_LENGTH - 1;
+    result = CommonUtils::GetIpv6Prefix(ipv6Addr, prefixLen);
+    EXPECT_EQ(result, DEFAULT_IPV6_ANY_INIT_ADDR);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, Ipv6PrefixLen001, TestSize.Level2)
+{
+    std::string ip = "";
+    auto result = CommonUtils::Ipv6PrefixLen(ip);
+    EXPECT_EQ(result, 0);
+
+    result = CommonUtils::Ipv6PrefixLen(TEST_IP);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, HasInternetPermission001, TestSize.Level2)
+{
+    bool result = CommonUtils::HasInternetPermission();
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, CheckIfaceName001, TestSize.Level2)
+{
+    std::string name = "";
+    bool result = CommonUtils::CheckIfaceName(name);
+    EXPECT_FALSE(result);
+
+    name = TEST_TEXT;
+    result = CommonUtils::CheckIfaceName(name);
+    EXPECT_FALSE(result);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

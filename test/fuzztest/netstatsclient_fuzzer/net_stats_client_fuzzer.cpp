@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,27 +37,27 @@ size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 } // namespace
 
-template <class T> T GetData()
+template <class T> T NetStatsGetData()
 {
     T object{};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t netStatsSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || netStatsSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, netStatsSize, g_baseFuzzData + g_baseFuzzPos, netStatsSize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += netStatsSize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetStatsGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetStatsGetData<char>();
     }
     std::string str(cstr);
     return str;
@@ -88,7 +88,7 @@ void Init()
     }
 }
 
-int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
+__attribute__((no_sanitize("cfi"))) int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
         Init();
@@ -165,11 +165,11 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
-void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    std::string interfaceName = GetStringFromData(STR_LEN);
+    std::string interfaceName = NetStatsGetString(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), dataParcel);
@@ -179,7 +179,7 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    std::string interfaceName = GetStringFromData(STR_LEN);
+    std::string interfaceName = NetStatsGetString(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), dataParcel);
@@ -189,7 +189,7 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint32_t uid = GetData<uint32_t>();
+    uint32_t uid = NetStatsGetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), dataParcel);
@@ -199,7 +199,7 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint32_t uid = GetData<uint32_t>();
+    uint32_t uid = NetStatsGetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES), dataParcel);
@@ -237,9 +237,9 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    dataParcel.WriteString(GetStringFromData(STR_LEN));
-    dataParcel.WriteUint64(GetData<uint64_t>());
-    dataParcel.WriteUint64(GetData<uint64_t>());
+    dataParcel.WriteString(NetStatsGetString(STR_LEN));
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL), dataParcel);
 }
@@ -248,10 +248,10 @@ void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    dataParcel.WriteString(GetStringFromData(STR_LEN));
-    dataParcel.WriteUint64(GetData<uint32_t>());
-    dataParcel.WriteUint64(GetData<uint64_t>());
-    dataParcel.WriteUint64(GetData<uint64_t>());
+    dataParcel.WriteString(NetStatsGetString(STR_LEN));
+    dataParcel.WriteUint64(NetStatsGetData<uint32_t>());
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL), dataParcel);
 }
@@ -260,17 +260,17 @@ void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    dataParcel.WriteString(GetStringFromData(STR_LEN));
-    dataParcel.WriteUint64(GetData<uint64_t>());
-    dataParcel.WriteUint64(GetData<uint64_t>());
+    dataParcel.WriteString(NetStatsGetString(STR_LEN));
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
+    dataParcel.WriteUint64(NetStatsGetData<uint64_t>());
     NetStatsInfo stats;
-    stats.iface_ = GetStringFromData(STR_LEN);
-    stats.uid_ = GetData<uint32_t>();
-    stats.date_ = GetData<uint64_t>();
-    stats.rxBytes_ = GetData<uint64_t>();
-    stats.txBytes_ = GetData<uint64_t>();
-    stats.rxPackets_ = GetData<uint64_t>();
-    stats.txPackets_ = GetData<uint64_t>();
+    stats.iface_ = NetStatsGetString(STR_LEN);
+    stats.uid_ = NetStatsGetData<uint32_t>();
+    stats.date_ = NetStatsGetData<uint64_t>();
+    stats.rxBytes_ = NetStatsGetData<uint64_t>();
+    stats.txBytes_ = NetStatsGetData<uint64_t>();
+    stats.rxPackets_ = NetStatsGetData<uint64_t>();
+    stats.txPackets_ = NetStatsGetData<uint64_t>();
     stats.Marshalling(dataParcel);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), dataParcel);
@@ -294,7 +294,7 @@ void GetCookieRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint64_t cookie = GetData<uint64_t>();
+    uint64_t cookie = NetStatsGetData<uint64_t>();
     dataParcel.WriteUint32(cookie);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), dataParcel);
@@ -304,7 +304,7 @@ void GetCookieTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
-    uint64_t cookie = GetData<uint64_t>();
+    uint64_t cookie = NetStatsGetData<uint64_t>();
     dataParcel.WriteUint32(cookie);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), dataParcel);

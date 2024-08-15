@@ -60,6 +60,48 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
     return helper->SelectData(iface, uid, start, end, infos);
 }
 
+int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &infos, const std::string &ident,
+                                                  uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    int32_t ret1;
+    int32_t ret2;
+    std::vector<NetStatsInfo> uidSimTableInfos;
+    ret1 = helper->QueryData(UID_TABLE, ident, start, end, infos);
+    ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
+    if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
+        return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
+    }
+    infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t uid, const std::string &ident,
+                                           uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    int32_t ret1;
+    int32_t ret2;
+    std::vector<NetStatsInfo> uidSimTableInfos;
+    ret1 = helper->QueryData(UID_TABLE, uid, ident, start, end, infos);
+    if (uid == Sim_UID) {
+        ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+        std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
+            info.uid_ = Sim_UID;
+        });
+    } else {
+        ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
+    }
+    if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
+        return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
+    }
+    infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &infos, const std::string &tableName)
 {
     NETMGR_LOG_I("WriteStatsData enter tableName:%{public}s", tableName.c_str());
@@ -78,6 +120,12 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
                       [&helper](const auto &info) { helper->InsertData(IFACE_TABLE, IFACE_TABLE_PARAM_LIST, info); });
         return NETMANAGER_SUCCESS;
     }
+    if (tableName == UID_SIM_TABLE) {
+        std::for_each(infos.begin(), infos.end(), [&helper](const auto &info) {
+            helper->InsertData(UID_SIM_TABLE, UID_SIM_TABLE_PARAM_LIST, info);
+        });
+        return NETMANAGER_SUCCESS;
+    }
     return NETMANAGER_ERR_PARAMETER_ERROR;
 }
 
@@ -85,6 +133,12 @@ int32_t NetStatsDataHandler::DeleteByUid(uint64_t uid)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     return helper->DeleteData(UID_TABLE, uid);
+}
+
+int32_t NetStatsDataHandler::DeleteSimStatsByUid(uint64_t uid)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    return helper->DeleteData(UID_SIM_TABLE, uid);
 }
 
 int32_t NetStatsDataHandler::DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end)
@@ -98,7 +152,8 @@ int32_t NetStatsDataHandler::ClearData()
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     int32_t ifaceDataRet = helper->ClearData(IFACE_TABLE);
     int32_t uidDataRet = helper->ClearData(UID_TABLE);
-    if (ifaceDataRet != NETMANAGER_SUCCESS || uidDataRet != NETMANAGER_SUCCESS) {
+    int32_t uidSimDataRet = helper->ClearData(UID_SIM_TABLE);
+    if (ifaceDataRet != NETMANAGER_SUCCESS || uidDataRet != NETMANAGER_SUCCESS || uidSimDataRet != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
     return NETMANAGER_SUCCESS;

@@ -32,10 +32,7 @@ constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 constexpr int INVALID_VALUE = -1;
 } // namespace
 
-NetDataShareHelperUtils::NetDataShareHelperUtils()
-{
-    dataShareHelper_ = CreateDataShareHelper();
-}
+NetDataShareHelperUtils::NetDataShareHelperUtils() {}
 
 std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataShareHelper()
 {
@@ -54,22 +51,24 @@ std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataS
 
 int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::string &value)
 {
-    if (dataShareHelper_ == nullptr) {
-        NETMGR_LOG_E("dataShareHelper_ is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
         return NETMANAGER_ERROR;
     }
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);
-    auto result = dataShareHelper_->Query(uri, predicates, columns);
+    auto result = dataShareHelper->Query(uri, predicates, columns);
     if (result == nullptr) {
         NETMGR_LOG_E("DataShareHelper query error, result is null");
+        dataShareHelper->Release();
         return NETMANAGER_ERROR;
     }
 
     if (result->GoToFirstRow() != DataShare::E_OK) {
-        NETMGR_LOG_E("DataShareHelper query failed,go to first row error");
         result->Close();
+        dataShareHelper->Release();
         return NETMANAGER_ERROR;
     }
 
@@ -77,14 +76,16 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
     result->GetColumnIndex(SETTINGS_DATA_COLUMN_VALUE, columnIndex);
     result->GetString(columnIndex, value);
     result->Close();
+    dataShareHelper->Release();
     NETMGR_LOG_I("DataShareHelper query success,value[%{public}s]", value.c_str());
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetDataShareHelperUtils::Insert(Uri &uri, const std::string &key, const std::string &value)
 {
-    if (dataShareHelper_ == nullptr) {
-        NETMGR_LOG_E("dataShareHelper_ is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
         return NETMANAGER_ERROR;
     }
     DataShare::DataShareValuesBucket valuesBucket;
@@ -92,25 +93,29 @@ int32_t NetDataShareHelperUtils::Insert(Uri &uri, const std::string &key, const 
     DataShare::DataShareValueObject valueObj(value);
     valuesBucket.Put(SETTINGS_DATA_COLUMN_KEYWORD, keyObj);
     valuesBucket.Put(SETTINGS_DATA_COLUMN_VALUE, valueObj);
-    int32_t result = dataShareHelper_->Insert(uri, valuesBucket);
+    int32_t result = dataShareHelper->Insert(uri, valuesBucket);
     if (result == INVALID_VALUE) {
         NETMGR_LOG_E("DataShareHelper insert failed, insert result:%{public}d", result);
+        dataShareHelper->Release();
         return NETMANAGER_ERROR;
     }
-    dataShareHelper_->NotifyChange(uri);
+    dataShareHelper->NotifyChange(uri);
+    dataShareHelper->Release();
     NETMGR_LOG_I("DataShareHelper insert success");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const std::string &value)
 {
-    if (dataShareHelper_ == nullptr) {
-        NETMGR_LOG_E("dataShareHelper_ is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
         return NETMANAGER_ERROR;
     }
     std::string queryValue;
     int32_t ret = Query(uri, key, queryValue);
     if (ret == NETMANAGER_ERROR) {
+        dataShareHelper->Release();
         return Insert(uri, key, value);
     }
 
@@ -119,11 +124,13 @@ int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const 
     valuesBucket.Put(SETTINGS_DATA_COLUMN_VALUE, valueObj);
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);
-    int32_t result = dataShareHelper_->Update(uri, predicates, valuesBucket);
+    int32_t result = dataShareHelper->Update(uri, predicates, valuesBucket);
     if (result == INVALID_VALUE) {
+        dataShareHelper->Release();
         return NETMANAGER_ERROR;
     }
-    dataShareHelper_->NotifyChange(uri);
+    dataShareHelper->NotifyChange(uri);
+    dataShareHelper->Release();
     NETMGR_LOG_I("DataShareHelper update success");
     return NETMANAGER_SUCCESS;
 }

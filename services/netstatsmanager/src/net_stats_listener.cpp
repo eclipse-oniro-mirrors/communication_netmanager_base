@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_cached.h"
 #include "net_stats_data_handler.h"
 #include "netmanager_base_common_utils.h"
 

@@ -20,26 +20,26 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetPolicyEventHandler::NetPolicyEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
-                                             const std::shared_ptr<NetPolicyCore> &core)
-    : EventHandler(runner), core_(core)
+NetPolicyEventHandler::NetPolicyEventHandler(const std::shared_ptr<NetPolicyCore> &core, ffrt::queue& ffrtQueue)
+    : core_(core), ffrtQueue_(ffrtQueue)
 {
 }
 
-NetPolicyEventHandler::~NetPolicyEventHandler() = default;
-
-void NetPolicyEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+void NetPolicyEventHandler::ProcessEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData)
 {
-    if (event == nullptr) {
-        NETMGR_LOG_E("NetPolicyEventHandler::ProcessEvent::parameter error");
-        return;
-    }
-
     if (core_ == nullptr) {
         NETMGR_LOG_E("Net policy core is null.");
         return;
     }
-    core_->HandleEvent(event);
+    core_->HandleEvent(eventId, eventData);
+}
+
+void NetPolicyEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &event, int64_t delayTime)
+{
+    auto eventId = static_cast<int32_t>(event->GetInnerEventId());
+    auto eventData = event->GetSharedObject<PolicyEvent>();
+    ffrtQueue_.submit([this, eventId, eventData] { ProcessEvent(eventId, eventData); },
+                      ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)).name("FfrtSendEvent"));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

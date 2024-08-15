@@ -41,6 +41,7 @@ constexpr int16_t LIMIT_ACTION_THREE = 3;
 constexpr int16_t LIMIT_CALLBACK_NUM = 200;
 constexpr const char *POLICY_FILE_NAME = "/data/service/el1/public/netmanager/net_policy.json";
 constexpr const char *POLICY_FILE_BAK_NAME = "/data/service/el1/public/netmanager/net_policy.bak";
+constexpr const char *POLICY_FILE_BAK_PATH = "/data/service/el1/public/netmanager/";
 constexpr const char *CONFIG_HOS_VERSION = "hosVersion";
 constexpr const char *CONFIG_UID_POLICY = "uidPolicy";
 constexpr const char *CONFIG_UID = "uid";

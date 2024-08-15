@@ -22,11 +22,15 @@
 #include <set>
 #include <sys/types.h>
 #include <vector>
+#include <thread>
 
 #include "netsys_network.h"
 #include "network_permission.h"
 #include "route_manager.h"
 #include "safe_map.h"
+#include "netsys_access_policy.h"
+#include "net_all_capabilities.h"
+
 namespace OHOS {
 namespace nmd {
 class ConnManager {
@@ -113,7 +117,8 @@ public:
      *
      * @return Returns 0, successfully add an interface to a network, otherwise it will fail
      */
-    int32_t AddInterfaceToNetwork(int32_t netId, std::string &interafceName);
+    int32_t AddInterfaceToNetwork(int32_t netId, std::string &interafceName,
+                                  NetManagerStandard::NetBearType netBearerType = NetManagerStandard::BEARER_DEFAULT);
 
     /**
      * Remove an interface to a network. The interface must be assigned to the specified network
@@ -227,6 +232,18 @@ public:
      */
     void GetDumpInfos(std::string &infos);
 
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid - The specified UID of application.
+     * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
+     * @return Returns 0, successfully set the network access policy for application, otherwise it will fail
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy, bool reconfirmFlag,
+                                   bool isBroker);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes);
+
 private:
     int32_t defaultNetId_;
     bool needReinitRouteFlag_;
@@ -234,7 +251,7 @@ private:
     SafeMap<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
     std::mutex interfaceNameMutex_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
-    int32_t GetNetworkForInterface(std::string &interfaceName);
+    int32_t GetNetworkForInterface(int32_t netId, std::string &interfaceName);
     RouteManager::TableType GetTableType(int32_t netId);
 };
 } // namespace nmd

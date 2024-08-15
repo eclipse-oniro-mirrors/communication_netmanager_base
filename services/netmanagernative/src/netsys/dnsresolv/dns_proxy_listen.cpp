@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,106 +18,189 @@
 #include <thread>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/epoll.h>
 
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_udp_transfer.h"
 #include "singleton.h"
+#include "ffrt.h"
 
 #include "dns_proxy_listen.h"
 
 namespace OHOS {
 namespace nmd {
 uint16_t DnsProxyListen::netId_ = 0;
-bool DnsProxyListen::proxyListenSwitch_ = false;
+std::atomic_bool DnsProxyListen::proxyListenSwitch_ = false;
 std::mutex DnsProxyListen::listenerMutex_;
 constexpr uint16_t DNS_PROXY_PORT = 53;
 constexpr uint8_t RESPONSE_FLAG = 0x80;
 constexpr uint8_t RESPONSE_FLAG_USED = 80;
 constexpr size_t FLAG_BUFF_LEN = 1;
 constexpr size_t FLAG_BUFF_OFFSET = 2;
-DnsProxyListen::DnsProxyListen() : proxySockFd_(-1) {}
+constexpr size_t DNS_HEAD_LENGTH = 12;
+constexpr int32_t EPOLL_TASK_NUMBER = 10;
+DnsProxyListen::DnsProxyListen() : proxySockFd_(-1), proxySockFd6_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
     if (proxySockFd_ > 0) {
         close(proxySockFd_);
         proxySockFd_ = -1;
     }
-}
-
-void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr)
-{
-    std::vector<std::string> servers;
-    std::vector<std::string> domains;
-    uint16_t baseTimeoutMsec;
-    uint8_t retryCount;
-    auto status = DnsParamCache::GetInstance().GetResolverConfig(DnsProxyListen::netId_, servers, domains,
-                                                                 baseTimeoutMsec, retryCount);
-    if (status < 0) {
-        NETNATIVE_LOGE("GetResolvConfig failed set default server failed status:[%{poublic}d]", status);
-        return;
+    if (proxySockFd6_ > 0) {
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
     }
-    DnsParseBySocket(clientSocket, servers, recvBuff, proxyAddr);
+    if (epollFd_ > 0) {
+        close(epollFd_);
+        epollFd_ = -1;
+    }
+    serverIdxOfSocket.clear();
 }
 
-void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
-                                      sockaddr_in proxyAddr)
+void DnsProxyListen::DnsParseBySocket(std::unique_ptr<RecvBuff> &recvBuff, std::unique_ptr<AlignedSockAddr> &clientSock)
 {
-    int32_t socketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
+    int32_t socketFd = -1;
+    if (clientSock->sa.sa_family == AF_INET) {
+        socketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
+    } else if (clientSock->sa.sa_family == AF_INET6) {
+        socketFd = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
+    }
     if (socketFd < 0) {
         NETNATIVE_LOGE("socketFd create socket failed %{public}d", errno);
         return;
     }
-
     if (!PollUdpDataTransfer::MakeUdpNonBlock(socketFd)) {
-        NETNATIVE_LOGE("MakeNonBlock error  %{public}d: %{public}s", errno, strerror(errno));
+        NETNATIVE_LOGE("MakeNonBlock error %{public}d: %{public}s", errno, strerror(errno));
         close(socketFd);
         return;
     }
-    int32_t resLen = 0;
-    socklen_t addrLen;
-    char requesData[MAX_REQUESTDATA_LEN] = {0};
-    sockaddr_in addrParse = {0};
-    uint32_t serversNum = 0;
-    while (serversNum < servers.size()) {
-        addrParse.sin_family = AF_INET;
-        addrParse.sin_addr.s_addr = inet_addr(servers[serversNum].c_str());
-        if (addrParse.sin_addr.s_addr == INADDR_NONE) {
-            NETNATIVE_LOGE("Input dns server [%{public}s] is not correct!", servers[serversNum].c_str());
-            serversNum++;
-            continue;
-        }
-        addrParse.sin_port = htons(DNS_PROXY_PORT);
-        if (PollUdpDataTransfer::PollUdpSendData(socketFd, recvBuff.questionsBuff, recvBuff.questionLen, addrParse,
-                                                 addrLen) < 0) {
-            NETNATIVE_LOGE("send failed %{public}d: %{public}s", errno, strerror(errno));
-            serversNum++;
-            continue;
-        }
-        addrLen = sizeof(addrParse);
-        resLen = PollUdpDataTransfer::PollUdpRecvData(socketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
-        if (resLen > 0) {
-            break;
-        }
-        if (!CheckDnsResponse(requesData, MAX_REQUESTDATA_LEN)) {
-            NETNATIVE_LOGE("read buff is not dns answer");
-            break;
-        }
-        if (serversNum == servers.size() - 1) {
-            return;
-        }
-        serversNum++;
+    serverIdxOfSocket.emplace(std::piecewise_construct, std::forward_as_tuple(socketFd),
+                              std::forward_as_tuple(socketFd, std::move(clientSock), std::move(recvBuff)));
+    SendRequest2Server(socketFd);
+}
+
+bool DnsProxyListen::GetDnsProxyServers(std::vector<std::string> &servers, size_t serverIdx)
+{
+    std::vector<std::string> domains;
+    uint16_t baseTimeoutMsec;
+    uint8_t retryCount;
+    DnsParamCache::GetInstance().GetResolverConfig(DnsProxyListen::netId_, servers, domains, baseTimeoutMsec,
+                                                   retryCount);
+    if (serverIdx >= servers.size()) {
+        NETNATIVE_LOGE("no server useful");
+        return false;
     }
-    close(socketFd);
-    if (resLen > 0) {
-        DnsSendRecvParseData(clientSocket, requesData, resLen, proxyAddr);
+    return true;
+}
+
+bool DnsProxyListen::MakeAddrInfo(std::vector<std::string> &servers, size_t serverIdx, AlignedSockAddr &addrParse,
+                                  AlignedSockAddr &clientSock)
+{
+    if (clientSock.sa.sa_family == AF_INET) {
+        if (servers[serverIdx].find(".") == std::string::npos) {
+            return false;
+        }
+        addrParse.sin.sin_family = AF_INET;
+        addrParse.sin.sin_port = htons(DNS_PROXY_PORT);
+        addrParse.sin.sin_addr.s_addr = inet_addr(servers[serverIdx].c_str());
+        if (addrParse.sin.sin_addr.s_addr == INADDR_NONE) {
+            NETNATIVE_LOGE("Input ipv4 dns server %{private}s is not correct!", servers[serverIdx].c_str());
+            return false;
+        }
+    } else if (clientSock.sa.sa_family == AF_INET6) {
+        if (servers[serverIdx].find(":") == std::string::npos) {
+            return false;
+        }
+        addrParse.sin6.sin6_family = AF_INET6;
+        addrParse.sin6.sin6_port = htons(DNS_PROXY_PORT);
+        inet_pton(AF_INET6, servers[serverIdx].c_str(), &(addrParse.sin6.sin6_addr));
+        if (IN6_IS_ADDR_UNSPECIFIED(&addrParse.sin6.sin6_addr)) {
+            NETNATIVE_LOGE("Input ipv6 dns server %{private}s is not correct!", servers[serverIdx].c_str());
+            return false;
+        }
+    } else {
+        NETNATIVE_LOGE("current clientSock type is error!");
+        return false;
+    }
+    return true;
+}
+
+void DnsProxyListen::SendRequest2Server(int32_t socketFd)
+{
+    auto iter = serverIdxOfSocket.find(socketFd);
+    if (iter == serverIdxOfSocket.end()) {
+        NETNATIVE_LOGE("no idx found");
+        return;
+    }
+    auto serverIdx = iter->second.GetIdx();
+    std::vector<std::string> servers;
+    if (!GetDnsProxyServers(servers, serverIdx)) {
+        serverIdxOfSocket.erase(iter);
+        return;
+    }
+    iter->second.IncreaseIdx();
+    epoll_ctl(epollFd_, EPOLL_CTL_DEL, socketFd, nullptr);
+    socklen_t addrLen;
+    AlignedSockAddr &addrParse = iter->second.GetAddr();
+    AlignedSockAddr &clientSock = iter->second.GetClientSock();
+    if (!MakeAddrInfo(servers, serverIdx, addrParse, clientSock)) {
+        return SendRequest2Server(socketFd);
+    }
+    if (PollUdpDataTransfer::PollUdpSendData(socketFd, iter->second.GetRecvBuff().questionsBuff,
+                                             iter->second.GetRecvBuff().questionLen, addrParse, addrLen) < 0) {
+        NETNATIVE_LOGE("send failed %{public}d: %{public}s", errno, strerror(errno));
+        return SendRequest2Server(socketFd);
+    }
+    iter->second.endTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
+    if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, socketFd, iter->second.GetEventPtr()) < 0) {
+        NETNATIVE_LOGE("epoll add sock %{public}d failed, errno: %{public}d", socketFd, errno);
+        serverIdxOfSocket.erase(iter);
     }
 }
 
-void DnsProxyListen::DnsSendRecvParseData(int32_t clientSocket, char *requesData, int32_t resLen, sockaddr_in proxyAddr)
+void DnsProxyListen::SendDnsBack2Client(int32_t socketFd)
 {
-    socklen_t addrLen = sizeof(proxyAddr);
+    NETNATIVE_LOG_D("epoll send back to client.");
+    auto iter = serverIdxOfSocket.find(socketFd);
+    if (iter == serverIdxOfSocket.end()) {
+        NETNATIVE_LOGE("no idx found");
+        return;
+    }
+    AlignedSockAddr &addrParse = iter->second.GetAddr();
+    AlignedSockAddr &clientSock = iter->second.GetClientSock();
+    int32_t proxySocket = proxySockFd_;
+    socklen_t addrLen = 0;
+    if (clientSock.sa.sa_family == AF_INET) {
+        proxySocket = proxySockFd_;
+        addrLen = sizeof(sockaddr_in);
+    } else {
+        proxySocket = proxySockFd6_;
+        addrLen = sizeof(sockaddr_in6);
+    }
+    char requesData[MAX_REQUESTDATA_LEN] = {0};
+    int32_t resLen =
+        PollUdpDataTransfer::PollUdpRecvData(socketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
+    if (resLen > 0 && CheckDnsResponse(requesData, MAX_REQUESTDATA_LEN)) {
+        NETNATIVE_LOG_D("send %{public}d back to client.", socketFd);
+        DnsSendRecvParseData(proxySocket, requesData, resLen, iter->second.GetClientSock());
+        serverIdxOfSocket.erase(iter);
+        return;
+    }
+    NETNATIVE_LOGE("response not correct, retry for next server.");
+    SendRequest2Server(socketFd);
+}
+
+void DnsProxyListen::DnsSendRecvParseData(int32_t clientSocket, char *requesData, int32_t resLen,
+                                          AlignedSockAddr &proxyAddr)
+{
+    socklen_t addrLen = 0;
+    if (proxyAddr.sa.sa_family == AF_INET) {
+        addrLen = sizeof(sockaddr_in);
+    } else {
+        addrLen = sizeof(sockaddr_in6);
+    }
     if (PollUdpDataTransfer::PollUdpSendData(clientSocket, requesData, resLen, proxyAddr, addrLen) < 0) {
         NETNATIVE_LOGE("send failed %{public}d: %{public}s", errno, strerror(errno));
     }
@@ -125,8 +208,76 @@ void DnsProxyListen::DnsSendRecvParseData(int32_t clientSocket, char *requesData
 
 void DnsProxyListen::StartListen()
 {
-    RecvBuff recvBuff = {{0}};
-    NETNATIVE_LOG_D("StartListen proxySockFd_ : %{public}d", proxySockFd_);
+    NETNATIVE_LOGI("StartListen proxySockFd_ : %{public}d, proxySockFd6_ : %{public}d", proxySockFd_, proxySockFd6_);
+    epoll_event proxyEvent;
+    epoll_event proxy6Event;
+    if (!InitForListening(proxyEvent, proxy6Event)) {
+        return;
+    }
+    epoll_event eventsReceived[EPOLL_TASK_NUMBER];
+    while (true) {
+        int32_t nfds =
+            epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.empty() ? -1 : EPOLL_TIMEOUT);
+        NETNATIVE_LOG_D("now socket num: %{public}zu", serverIdxOfSocket.size());
+        if (nfds < 0) {
+            NETNATIVE_LOGE("epoll errno: %{public}d", errno);
+            continue; // now ignore all errno.
+        }
+        if (nfds == 0) {
+            // dns timeout
+            EpollTimeout();
+            continue;
+        }
+        for (int i = 0; i < nfds; ++i) {
+            if (eventsReceived[i].data.fd == proxySockFd_ || eventsReceived[i].data.fd == proxySockFd6_) {
+                int32_t family = (eventsReceived[i].data.fd == proxySockFd_) ? AF_INET : AF_INET6;
+                GetRequestAndTransmit(family);
+            } else {
+                SendDnsBack2Client(eventsReceived[i].data.fd);
+            }
+        }
+        CollectSocks();
+    }
+}
+void DnsProxyListen::GetRequestAndTransmit(int32_t family)
+{
+    NETNATIVE_LOG_D("epoll got request from client.");
+    auto recvBuff = std::make_unique<RecvBuff>();
+    if (recvBuff == nullptr) {
+        NETNATIVE_LOGE("recvBuff mem failed");
+        return;
+    }
+    (void)memset_s(recvBuff->questionsBuff, MAX_REQUESTDATA_LEN, 0, MAX_REQUESTDATA_LEN);
+
+    auto clientAddr = std::make_unique<AlignedSockAddr>();
+    if (clientAddr == nullptr) {
+        NETNATIVE_LOGE("clientAddr mem failed");
+        return;
+    }
+
+    if (family == AF_INET) {
+        socklen_t len = sizeof(sockaddr_in);
+        recvBuff->questionLen = recvfrom(proxySockFd_, recvBuff->questionsBuff, MAX_REQUESTDATA_LEN, 0,
+                                         reinterpret_cast<sockaddr *>(&(clientAddr->sin)), &len);
+    } else {
+        socklen_t len = sizeof(sockaddr_in6);
+        recvBuff->questionLen = recvfrom(proxySockFd6_, recvBuff->questionsBuff, MAX_REQUESTDATA_LEN, 0,
+                                         reinterpret_cast<sockaddr *>(&(clientAddr->sin6)), &len);
+    }
+    if (recvBuff->questionLen <= 0) {
+        NETNATIVE_LOGE("read errno %{public}d", errno);
+        return;
+    }
+    if (!CheckDnsQuestion(recvBuff->questionsBuff, MAX_REQUESTDATA_LEN)) {
+        NETNATIVE_LOGE("read buff is not dns question");
+        return;
+    }
+    DnsParseBySocket(recvBuff, clientAddr);
+}
+
+void DnsProxyListen::InitListenForIpv4()
+{
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (proxySockFd_ < 0) {
         proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if (proxySockFd_ < 0) {
@@ -134,47 +285,130 @@ void DnsProxyListen::StartListen()
             return;
         }
     }
-
-    sockaddr_in proxyAddr;
-    (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
+    sockaddr_in proxyAddr{};
     proxyAddr.sin_family = AF_INET;
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     proxyAddr.sin_port = htons(DNS_PROXY_PORT);
+    if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
+        NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
+        close(proxySockFd_);
+        proxySockFd_ = -1;
+        return;
+    }
+}
 
-    {
-        std::lock_guard<std::mutex> lock(DnsProxyListen::listenerMutex_);
-        if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
-            NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
-            close(proxySockFd_);
-            proxySockFd_ = -1;
+void DnsProxyListen::InitListenForIpv6()
+{
+    std::lock_guard<std::mutex> lock(listenerMutex_);
+    if (proxySockFd6_ < 0) {
+        proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+        if (proxySockFd6_ < 0) {
+            NETNATIVE_LOGE("proxySockFd_ create socket failed %{public}d", errno);
             return;
         }
     }
+    sockaddr_in6 proxyAddr6{};
+    proxyAddr6.sin6_family = AF_INET6;
+    proxyAddr6.sin6_addr = in6addr_any;
+    proxyAddr6.sin6_port = htons(DNS_PROXY_PORT);
+    int on = 1;
+    if (setsockopt(proxySockFd6_, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
+        NETNATIVE_LOGE("setsockopt failed");
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+        return;
+    }
+    if (bind(proxySockFd6_, (sockaddr *)&proxyAddr6, sizeof(proxyAddr6)) == -1) {
+        NETNATIVE_LOGE("bind6 errno %{public}d: %{public}s", errno, strerror(errno));
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+        return;
+    }
+}
 
-    while (true) {
-        if (DnsThreadClose()) {
-            break;
+bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event)
+{
+    InitListenForIpv4();
+    InitListenForIpv6();
+    epollFd_ = epoll_create1(0);
+    if (epollFd_ < 0) {
+        NETNATIVE_LOGE("epoll_create1 errno %{public}d: %{public}s", errno, strerror(errno));
+        clearResource();
+        return false;
+    }
+    if (proxySockFd_ > 0) {
+        proxyEvent.data.fd = proxySockFd_;
+        proxyEvent.events = EPOLLIN;
+        if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, proxySockFd_, &proxyEvent) < 0) {
+            NETNATIVE_LOGE("EPOLL_CTL_ADD proxy errno %{public}d: %{public}s", errno, strerror(errno));
+            clearResource();
+            return false;
         }
-        (void)memset_s(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0, MAX_REQUESTDATA_LEN);
-        socklen_t len = sizeof(proxyAddr);
-        recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0,
-                                        reinterpret_cast<sockaddr *>(&proxyAddr), &len);
-        if (!(recvBuff.questionLen > 0)) {
-            NETNATIVE_LOGE("read errno %{public}d", errno);
-            continue;
+    }
+    if (proxySockFd6_ > 0) {
+        proxy6Event.data.fd = proxySockFd6_;
+        proxy6Event.events = EPOLLIN;
+        if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, proxySockFd6_, &proxy6Event) < 0) {
+            NETNATIVE_LOGE("EPOLL_CTL_ADD proxy6 errno %{public}d: %{public}s", errno, strerror(errno));
+            clearResource();
+            return false;
         }
-        if (CheckDnsResponse(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
-            NETNATIVE_LOGE("read buff is not dns question");
-            continue;
-        }
+    }
+    if (proxySockFd_ < 0 && proxySockFd6_ < 0) {
+        NETNATIVE_LOGE("InitForListening ipv4/ipv6 error!");
+        clearResource();
+        return false;
+    }
+    collectTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
+    return true;
+}
 
-        if (DnsThreadClose()) {
-            break;
+void DnsProxyListen::CollectSocks()
+{
+    if (std::chrono::system_clock::now() >= collectTime) {
+        NETNATIVE_LOG_D("collect socks");
+        std::list<int32_t> sockTemp;
+        for (const auto &[sock, request] : serverIdxOfSocket) {
+            if (std::chrono::system_clock::now() >= request.endTime) {
+                sockTemp.push_back(sock);
+            }
         }
-        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
-        std::string threadName = "DnsPxyPacket";
-        pthread_setname_np(t.native_handle(), threadName.c_str());
-        t.detach();
+        for (const auto sock : sockTemp) {
+            SendRequest2Server(sock);
+        }
+        collectTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
+    }
+}
+
+void DnsProxyListen::EpollTimeout()
+{
+    NETNATIVE_LOGE("epoll timeout, try next server.");
+    if (serverIdxOfSocket.size() > 0) {
+        std::list<int32_t> sockTemp;
+        std::transform(serverIdxOfSocket.cbegin(), serverIdxOfSocket.cend(), std::back_inserter(sockTemp),
+                       [](auto &iter) { return iter.first; });
+        for (const auto sock : sockTemp) {
+            SendRequest2Server(sock);
+        }
+    }
+    collectTime = std::chrono::system_clock::now() + std::chrono::milliseconds(EPOLL_TIMEOUT);
+}
+
+bool DnsProxyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
+{
+    if (recLen < DNS_HEAD_LENGTH) {
+        return false;
+    }
+    uint8_t flagBuff;
+    char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
+    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
+        return false;
+    }
+    int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
+    if (reqFlag) {
+        return false; // answer
+    } else {
+        return true; // question
     }
 }
 
@@ -196,31 +430,66 @@ bool DnsProxyListen::CheckDnsResponse(char *recBuff, size_t recLen)
     }
 }
 
-bool DnsProxyListen::DnsThreadClose()
-{
-    return !DnsProxyListen::proxyListenSwitch_;
-}
-
 void DnsProxyListen::OnListen()
 {
     DnsProxyListen::proxyListenSwitch_ = true;
-    NETNATIVE_LOG_D("endl OnListen");
+    NETNATIVE_LOGI("DnsProxy OnListen");
 }
 
 void DnsProxyListen::OffListen()
 {
-    DnsProxyListen::proxyListenSwitch_ = false;
     if (proxySockFd_ > 0) {
         close(proxySockFd_);
         proxySockFd_ = -1;
     }
-    NETNATIVE_LOG_D("endl OffListen");
+    if (proxySockFd6_ > 0) {
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+    }
+    NETNATIVE_LOGI("DnsProxy OffListen");
 }
 
 void DnsProxyListen::SetParseNetId(uint16_t netId)
 {
     DnsProxyListen::netId_ = netId;
-    NETNATIVE_LOG_D("endl SetParseNetId");
+    NETNATIVE_LOGI("SetParseNetId");
+}
+
+void DnsProxyListen::clearResource()
+{
+    if (proxySockFd_ > 0) {
+        close(proxySockFd_);
+        proxySockFd_ = -1;
+    }
+    if (proxySockFd6_ > 0) {
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+    }
+    if (epollFd_ > 0) {
+        close(epollFd_);
+        epollFd_ = -1;
+    }
+    serverIdxOfSocket.clear();
+}
+
+template<typename... Args>
+auto DnsProxyListen::DnsSocketHolder::emplace(Args&&... args) ->
+decltype(DnsSocketHolderBase::emplace(std::forward<Args>(args)...))
+{
+    if (size() >= MAX_SOCKET_CAPACITY) {
+        NETNATIVE_LOG_D("Socket num over capacity, throw oldest socket.");
+        DnsSocketHolderBase::erase(lruCache.front());
+        lruCache.pop_front();
+    }
+    auto iter = DnsSocketHolderBase::emplace(std::forward<Args>(args)...);
+    iter.first->second.SetLruIterator(lruCache.insert(lruCache.end(), iter.first));
+    return iter;
+}
+
+auto DnsProxyListen::DnsSocketHolder::erase(iterator position) -> decltype(DnsSocketHolderBase::erase(position))
+{
+    lruCache.erase(position->second.GetLruIterator());
+    return DnsSocketHolderBase::erase(position);
 }
 } // namespace nmd
 } // namespace OHOS

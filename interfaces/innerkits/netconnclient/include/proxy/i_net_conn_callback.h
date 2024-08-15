@@ -39,6 +39,16 @@ public:
     virtual int32_t NetUnavailable() = 0;
     virtual int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) = 0;
 };
+
+class IPreAirplaneCallback : public IRemoteBroker {
+public:
+    virtual ~IPreAirplaneCallback() = default;
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.IPreAirplaneCallback");
+
+public:
+    virtual int32_t PreAirplaneStart() = 0;
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // I_NET_CONN_CALLBACK_H

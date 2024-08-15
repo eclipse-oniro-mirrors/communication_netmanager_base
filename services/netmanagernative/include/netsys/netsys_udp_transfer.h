@@ -16,6 +16,7 @@
 #ifndef INCLUDE_NETSYS_UDP_CLIENT_H
 #define INCLUDE_NETSYS_UDP_CLIENT_H
 
+#include "dns_config_client.h"
 #include <iostream>
 #include <netinet/in.h>
 #include <poll.h>
@@ -26,10 +27,10 @@
 namespace OHOS {
 namespace nmd {
 namespace PollUdpDataTransfer {
-int32_t PollUdpSendData(int32_t sock, char *data, size_t size, sockaddr_in addr, socklen_t &lenAddr);
-int32_t PollUdpRecvData(int32_t sock, char *data, size_t size, sockaddr_in addr, socklen_t &lenAddr);
+int32_t PollUdpSendData(int32_t sock, char *data, size_t size, AlignedSockAddr &addr, socklen_t &lenAddr);
+int32_t PollUdpRecvData(int32_t sock, char *data, size_t size, AlignedSockAddr &addr, socklen_t &lenAddr);
 bool MakeUdpNonBlock(int32_t sock);
-}
+} // namespace PollUdpDataTransfer
 } // namespace nmd
 } // namespace OHOS
 #endif // INCLUDE_NETSYS_UDP_CLIENT_H

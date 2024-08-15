@@ -18,6 +18,7 @@
 
 #include <string>
 #include <list>
+#include <optional>
 
 #include "parcel.h"
 #include "securec.h"
@@ -37,6 +38,9 @@ public:
     [[nodiscard]] uint16_t GetPort() const;
     [[nodiscard]] std::list<std::string> GetExclusionList() const;
     [[nodiscard]] std::string ToString() const;
+    [[nodiscard]] SecureData GetUsername() const;
+    [[nodiscard]] SecureData GetPassword() const;
+    [[nodiscard]] static std::optional<HttpProxy> FromString(const std::string &str);
     void inline SetHost(std::string &&host)
     {
         host_ = host;

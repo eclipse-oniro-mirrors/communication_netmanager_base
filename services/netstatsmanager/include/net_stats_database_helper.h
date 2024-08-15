@@ -46,16 +46,31 @@ public:
     int32_t SelectData(const std::string &iface, uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t SelectData(const std::string &iface, const uint32_t uid, uint64_t start, uint64_t end,
                        std::vector<NetStatsInfo> &infos);
+    int32_t QueryData(const std::string &tableName, const std::string &ident, uint64_t start, uint64_t end,
+                      std::vector<NetStatsInfo> &infos);
+    int32_t QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident, uint64_t start,
+                      uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t DeleteData(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t DeleteData(const std::string &tableName, uint64_t uid);
     int32_t ClearData(const std::string &tableName);
     int32_t Step(std::vector<NetStatsInfo> &infos);
     int32_t ExecSql(const std::string &sql, void *recv, SqlCallback callback);
+    int32_t Upgrade();
+
+private:
+    enum TableVersion : int32_t {
+        Version_0 = 0,
+        Version_1,
+        Version_2,
+    };
 
 private:
     int32_t Open(const std::string &path);
     int32_t Close();
     int32_t BindInt64(int32_t idx, uint64_t start, uint64_t end);
+    int32_t GetTableVersion(TableVersion &version, const std::string &tableName);
+    int32_t UpdateTableVersion(TableVersion version, const std::string &tableName);
+    int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
 };

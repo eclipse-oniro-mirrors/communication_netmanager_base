@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #include <sstream>
 
 #include "dns_quality_diag.h"
-#include "third_party/musl/include/netdb.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
 
@@ -109,13 +108,18 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
     NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                     netId, uid, pid, usedtime, size, failreason);
 
+    if (queryParam.type == 1) {
+        NETNATIVE_LOG_D("ReportDnsResult: query from Netmanager ignore report");
+        return 0;
+    }
+
     if (!reportSizeReachLimit) {
         NetsysNative::NetDnsResultReport report;
         report.netid_ = netId;
         report.uid_ = uid;
         report.pid_ = pid;
-        report.timeused_ = usedtime;
-        report.queryresult_ = failreason;
+        report.timeused_ = static_cast<uint32_t>(usedtime);
+        report.queryresult_ = static_cast<uint32_t>(failreason);
         report.host_ = name;
         if (failreason == 0) {
             ParseReportAddr(size, addrinfo, report);
@@ -133,7 +137,10 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
 int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     report_delay = std::max(report_delay, timeStep);
+
+    std::unique_lock<std::mutex> locker(resultListenersMutex_);
     resultListeners_.push_back(callback);
+    locker.unlock();
 
     if (handler_started != true) {
         handler_started = true;
@@ -149,6 +156,7 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
 
 int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallback> &callback)
 {
+    std::lock_guard<std::mutex> locker(resultListenersMutex_);
     resultListeners_.remove(callback);
     if (resultListeners_.empty()) {
         handler_started = false;
@@ -179,7 +187,7 @@ int32_t DnsQualityDiag::UnregisterHealthListener(const sptr<INetDnsHealthCallbac
 
 int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 {
-    monitor_loop_delay = delay;
+    monitor_loop_delay = static_cast<uint32_t>(delay);
     return 0;
 }
 
@@ -232,22 +240,23 @@ int32_t DnsQualityDiag::send_dns_report()
         return 0;
     }
 
+    std::unique_lock<std::mutex> locker(resultListenersMutex_);
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOG_D("send_dns_report (%{public}u)", reportSend.size());
+        NETNATIVE_LOG_D("send_dns_report (%{public}zu)", reportSend.size());
         for (auto cb: resultListeners_) {
-            NETNATIVE_LOGI("send_dns_report cb)");
+            NETNATIVE_LOG_D("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
     }
+    locker.unlock();
     handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     return 0;
 }
 
 int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report)
 {
-    NETNATIVE_LOGI("add_dns_report (%{public}s)", report->host_.c_str());
     if (report_.size() < MAX_RESULT_SIZE) {
         report_.push_back(*report);
     }

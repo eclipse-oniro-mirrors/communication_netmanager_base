@@ -27,6 +27,11 @@ bool NetConnEventHandler::PostAsyncTask(const Callback &callback, int64_t delayT
     return AppExecFwk::EventHandler::PostTask(callback, delayTime, Priority::HIGH);
 }
 
+bool NetConnEventHandler::PostAsyncTask(const Callback &callback, const std::string& taskName, int64_t delayTime)
+{
+    return AppExecFwk::EventHandler::PostTask(callback, taskName, delayTime, Priority::HIGH);
+}
+
 bool NetConnEventHandler::PostSyncTask(const Callback &callback)
 {
     return AppExecFwk::EventHandler::PostSyncTask(callback, Priority::HIGH);

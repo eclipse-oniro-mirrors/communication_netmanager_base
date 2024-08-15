@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,9 +16,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("netsys_native_manager_config") {
   include_dirs = [
-    "$C_UTILS_ROOT/base/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
@@ -27,21 +24,16 @@ config("netsys_native_manager_config") {
     "include/manager",
     "include/netsys",
     "include/netsys/wrapper",
-    "$C_UTILS_ROOT/base/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
-    "$THIRD_PARTY_ROOT/curl/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
-  if (build_selinux) {
-    include_dirs += [ "$THIRD_PARTY_ROOT/selinux/libselinux/include/selinux" ]
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
 }
 
@@ -53,6 +45,7 @@ netsys_native_manager_sources = [
   "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
   "src/dhcp_controller.cpp",
   "src/manager/bandwidth_manager.cpp",
+  "src/manager/clat_manager.cpp",
   "src/manager/conn_manager.cpp",
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
@@ -60,10 +53,15 @@ netsys_native_manager_sources = [
   "src/manager/route_manager.cpp",
   "src/manager/sharing_manager.cpp",
   "src/manager/traffic_manager.cpp",
+  "src/manager/vnic_manager.cpp",
   "src/manager/vpn_manager.cpp",
   "src/net_diag_callback_proxy.cpp",
+  "src/netsys/clat_utils.cpp",
+  "src/netsys/clatd.cpp",
+  "src/netsys/clatd_packet_converter.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
   "src/netsys/dnsresolv/dns_proxy_listen.cpp",
+  "src/netsys/dnsresolv/dns_proxy_request_socket.cpp",
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
   "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
   "src/netsys/dnsresolv/dns_resolv_config.cpp",
@@ -100,14 +98,18 @@ netsys_native_manager_sources = [
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-  "$NETMANAGERNATIVE_ROOT/netsys_client",
+  "$NETMANAGERNATIVE_ROOT:netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-  "$THIRD_PARTY_ROOT/iptables:iptables",
-  "$THIRD_PARTY_ROOT/iptables:iptables-restore",
-  "$THIRD_PARTY_ROOT/iptables:iptables-save",
   "bpf:netsys",
   "bpf:netsys_bpf_utils",
 ]
+
+if (netmanager_base_enable_feature_net_firewall) {
+  netsys_native_manager_sources += [
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netfirewall_callback_proxy.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netfirewall_callback_stub.cpp",
+  ]
+}
 
 ohos_shared_library("netsys_native_manager") {
   sanitize = {
@@ -115,6 +117,9 @@ ohos_shared_library("netsys_native_manager") {
     cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
   configs = [ ":netsys_native_manager_config" ]
 
   cflags = [
@@ -152,19 +157,28 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_DNS_MONITOR=0",
   ]
 
-  if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
-    defines += [ "USE_SELINUX" ]
-  }
-
   external_deps = [
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "iptables:iptables",
+    "iptables:iptables-restore",
+    "iptables:iptables-save",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
+
+  if (build_selinux) {
+    external_deps += [ "selinux:libselinux" ]
+    defines += [ "USE_SELINUX" ]
+  }
+
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
+  }
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
@@ -185,6 +199,15 @@ ohos_shared_library("netsys_native_manager") {
 
 ohos_static_library("netsys_native_manager_static") {
   testonly = true
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = netsys_native_manager_sources
 
   configs = [ ":netsys_native_manager_config" ]
@@ -192,6 +215,8 @@ ohos_static_library("netsys_native_manager_static") {
   deps = netsys_native_manager_deps
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
@@ -204,11 +229,16 @@ ohos_static_library("netsys_native_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
+    "UNITTEST_FORBID_FFRT=1",
   ]
 
   if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
+    external_deps += [ "selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
+  }
+
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
+    defines += [ "ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN" ]
   }
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
@@ -221,8 +251,64 @@ ohos_static_library("netsys_native_manager_static") {
     defines += [ "SERVER_SUPPORT_IPV6" ]
   }
 
-  external_deps += [ "hilog:libhilog" ]
+  external_deps += [
+    "ffrt:libffrt",
+    "hilog:libhilog",
+  ]
 
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+config("netsys_client_public_config") {
+  include_dirs = [ "include/netsys" ]
+}
+
+ohos_shared_library("netsys_client") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    all_ubsan = true
+    debug = false
+  }
+
+  public_configs = [ ":netsys_client_public_config" ]
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "src/netsys/netsys_client.c",
+    "src/netsys/netsys_tcp_client.c",
+  ]
+
+  include_dirs = [
+    "$NETMANAGERNATIVE_ROOT/include/netsys",
+    "$FWMARK_CLIENT_DIR/include",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
+
+  external_deps = [ "c_utils:utils" ]
+
+  defines = [
+    "NETSYS_CONFIG_DEBUG=0",
+    "NETSYS_CLIENT_DEBUG=0",
+  ]
+
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

@@ -22,10 +22,14 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "bpf_loader.h"
+#include "bpf_path.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
+#include "bpf_ring_buffer.h"
+#endif
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -45,7 +49,7 @@ NetsysNativeService::NetsysNativeService()
 
 void NetsysNativeService::OnStart()
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnStart Begin");
+    NETNATIVE_LOGI("OnStart Begin");
     std::lock_guard<std::mutex> guard(instanceLock_);
     if (state_ == ServiceRunningState::STATE_RUNNING) {
         return;
@@ -64,6 +68,9 @@ void NetsysNativeService::OnStart()
     state_ = ServiceRunningState::STATE_RUNNING;
     NETNATIVE_LOGI("start listener");
     manager_->StartListener();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_->StartListener();
+#endif
     NETNATIVE_LOGI("start listener end on start end");
 }
 
@@ -73,7 +80,18 @@ void NetsysNativeService::OnStop()
     state_ = ServiceRunningState::STATE_STOPPED;
     NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_->StopListener();
+    auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
+    NETNATIVE_LOGI("UnloadElf is %{public}d", ret);
+    if (ret == ElfLoadError::ELF_LOAD_ERR_NONE) {
+        bpfNetFirewall_->SetBpfLoaded(false);
+    }
+#endif
     NETNATIVE_LOGI("stop listener end on stop end");
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
+    NetsysBpfRingBuffer::ExistRingBufferPoll();
+#endif
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -119,16 +137,30 @@ bool NetsysNativeService::Init()
     sharingManager_ = std::make_unique<SharingManager>();
     iptablesWrapper_ = IptablesWrapper::GetInstance();
     netDiagWrapper = NetDiagWrapper::GetInstance();
+    clatManager_ = std::make_unique<OHOS::nmd::ClatManager>();
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    bpfNetFirewall_ = NetsysBpfNetFirewall::GetInstance();
+    if (ret == ElfLoadError::ELF_LOAD_ERR_NONE) {
+        bpfNetFirewall_->SetBpfLoaded(true);
+    }
+    AddSystemAbilityListener(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+    bpfNetFirewall_->LoadSystemAbility(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+#endif
+
+#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
+    NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
+#endif
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
 
 void NetsysNativeService::OnNetManagerRestart()
 {
-    NETNATIVE_LOGI("NetsysNativeClient::OnNetManagerRestart");
+    NETNATIVE_LOGI("OnNetManagerRestart");
     if (netsysService_ != nullptr) {
         netsysService_->NetworkReinitRoute();
     }
@@ -211,7 +243,7 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
                                              const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
+    NETNATIVE_LOG_D("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
                     interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
@@ -330,6 +362,14 @@ int32_t NetsysNativeService::DelInterfaceAddress(const std::string &interfaceNam
     return result;
 }
 
+int32_t NetsysNativeService::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
+                                                 int32_t prefixLength, const std::string &netCapabilities)
+{
+    int32_t result = netsysService_->DelInterfaceAddress(interfaceName, addrString, prefixLength, netCapabilities);
+    NETNATIVE_LOG_D("DelInterfaceAddress");
+    return result;
+}
+
 int32_t NetsysNativeService::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETNATIVE_LOG_D("InterfaceSetIpAddress");
@@ -342,10 +382,10 @@ int32_t NetsysNativeService::InterfaceSetIffUp(const std::string &ifaceName)
     return netsysService_->InterfaceSetIffUp(ifaceName);
 }
 
-int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface)
+int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType)
 {
     NETNATIVE_LOG_D("NetworkAddInterface");
-    int32_t result = netsysService_->NetworkAddInterface(netId, iface);
+    int32_t result = netsysService_->NetworkAddInterface(netId, iface, netBearerType);
     return result;
 }
 
@@ -360,6 +400,21 @@ int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
 {
     int32_t result = netsysService_->NetworkDestroy(netId);
     NETNATIVE_LOG_D("NetworkDestroy");
+    return result;
+}
+
+int32_t NetsysNativeService::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                        const std::set<int32_t> &uids)
+{
+    int32_t result = netsysService_->CreateVnic(mtu, tunAddr, prefix, uids);
+    NETNATIVE_LOG_D("CreateVnic");
+    return result;
+}
+
+int32_t NetsysNativeService::DestroyVnic()
+{
+    int32_t result = netsysService_->DestroyVnic();
+    NETNATIVE_LOG_D("DestroyVnic");
     return result;
 }
 
@@ -569,7 +624,7 @@ int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIfa
 
 void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         if (!hasSARemoved_) {
             hasSARemoved_ = true;
@@ -581,10 +636,14 @@ void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std:
 
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         OnNetManagerRestart();
         hasSARemoved_ = true;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    } else if (systemAbilityId == COMM_FIREWALL_MANAGER_SYS_ABILITY_ID) {
+        bpfNetFirewall_->LoadSystemAbility(COMM_FIREWALL_MANAGER_SYS_ABILITY_ID);
+#endif
     }
 }
 
@@ -618,6 +677,25 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
+int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->GetAllSimStatsInfo(stats);
+}
+
+int32_t NetsysNativeService::DeleteSimStatsInfo(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteSimStatsInfo uid[%{public}u]", uid);
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteStatsInfo(APP_UID_SIM_STATS_MAP_PATH, uid);
+}
+
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {
@@ -628,7 +706,17 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     return bpfStats_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeService::DeleteStatsInfo(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteStatsInfo uid[%{public}u]", uid);
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->DeleteStatsInfo(APP_UID_IF_STATS_MAP_PATH, uid);
+}
+
+int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
 {
     if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
         NETNATIVE_LOGE("IptablesWrapper command format is invalid");
@@ -638,7 +726,20 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
+    switch (ipType) {
+        case IptablesType::IPTYPE_IPV4:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, cmd);
+            break;
+        case IptablesType::IPTYPE_IPV6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV6, cmd);
+            break;
+        case IptablesType::IPTYPE_IPV4V6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmd);
+            break;
+        default:
+            NETNATIVE_LOGE("IptablesWrapper ipputType is invalid");
+            return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -741,6 +842,19 @@ int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealt
     return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+    NETNATIVE_LOG_D("SetIpv6PrivacyExtensions");
+    return result;
+}
+int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on);
+    NETNATIVE_LOG_D("SetEnableIpv6");
+    return result;
+}
+
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     if (bpfStats_ == nullptr) {
@@ -749,6 +863,171 @@ int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint
     }
 
     return bpfStats_->GetCookieStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), cookie);
+}
+
+int32_t NetsysNativeService::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("GetNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    sharingTypeIsOn = sharingTypeIsOn_;
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("UpdateNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    if (isOpen) {
+        sharingTypeIsOn_.insert(type);
+    } else {
+        sharingTypeIsOn_.erase(type);
+    }
+    return NETSYS_SUCCESS;
+}
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
+                                              const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
+                   isFinish);
+    int32_t ret = NETSYS_SUCCESS;
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP:
+            ret = bpfNetFirewall_->SetFirewallRules(ruleList, isFinish);
+            break;
+        case NetFirewallRuleType::RULE_DOMAIN:
+        case NetFirewallRuleType::RULE_DNS:
+            ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeService::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallDefaultAction");
+    int32_t ret = netsysService_->SetFirewallDefaultAction(inDefault, outDefault);
+    ret += bpfNetFirewall_->SetFirewallDefaultAction(inDefault, outDefault);
+    return ret;
+}
+
+int32_t NetsysNativeService::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETNATIVE_LOGI("NetsysNativeService::SetFirewallCurrentUserId");
+    int32_t ret = netsysService_->SetFirewallCurrentUserId(userId);
+    ret += bpfNetFirewall_->SetFirewallCurrentUserId(userId);
+    return ret;
+}
+
+int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETNATIVE_LOGI("NetsysNativeService::ClearFirewallRules");
+    int32_t ret = NETSYS_SUCCESS;
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP:
+            ret = bpfNetFirewall_->ClearFirewallRules();
+            break;
+        case NetFirewallRuleType::RULE_DNS:
+        case NetFirewallRuleType::RULE_DOMAIN:
+            ret = netsysService_->ClearFirewallRules(type);
+            break;
+        case NetFirewallRuleType::RULE_ALL:
+            ret = bpfNetFirewall_->ClearFirewallRules();
+            ret += netsysService_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeService::RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("NetsysNativeService::RegisterNetFirewallCallback");
+    int32_t ret = netsysService_->RegisterNetFirewallCallback(callback);
+    ret += bpfNetFirewall_->RegisterCallback(callback);
+    return ret;
+}
+
+int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOGI("NetsysNativeService::UnRegisterNetFirewallCallback");
+    int32_t ret = netsysService_->UnRegisterNetFirewallCallback(callback);
+    ret += bpfNetFirewall_->UnregisterCallback(callback);
+    return ret;
+}
+#endif
+
+int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                                    bool isBroker)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+}
+
+int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteNetworkAccessPolicy");
+    return netsysService_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetsysNativeService::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
+    return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
+}
+
+int32_t NetsysNativeService::StartClat(const std::string &interfaceName, int32_t netId,
+                                       const std::string &nat64PrefixStr)
+{
+    int32_t result = clatManager_->ClatStart(interfaceName, netId, nat64PrefixStr, netsysService_.get());
+    NETNATIVE_LOG_D("StartClat");
+    return result;
+}
+
+int32_t NetsysNativeService::StopClat(const std::string &interfaceName)
+{
+    int32_t result = clatManager_->ClatStop(interfaceName);
+    NETNATIVE_LOG_D("StartClat");
+    return result;
+}
+
+int32_t NetsysNativeService::ClearFirewallAllRules()
+{
+    NETNATIVE_LOG_D("ClearFirewallAllRules");
+    return netsysService_->ClearFirewallAllRules();
+}
+
+int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool allowed)
+{
+    if (iptablesWrapper_ == nullptr) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed iptablesWrapper_ is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    bool ret = false;
+    std::vector<std::string> cmds;
+    for (const std::string& ifaceName : ifaceNames) {
+        if (allowed) {
+            NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s allowed", ifaceName.c_str());
+            cmds.push_back("-t raw -D OUTPUT -o " + ifaceName + " -j DROP");
+            cmds.push_back("-t raw -D PREROUTING -i " + ifaceName + " -j DROP");
+        } else {
+            NETNATIVE_LOG_D("SetNicTrafficAllowed %{public}s disallowed", ifaceName.c_str());
+            cmds.push_back("-t raw -I OUTPUT -o " + ifaceName + " -j DROP");
+            cmds.push_back("-t raw -I PREROUTING -i " + ifaceName + " -j DROP");
+        }
+    }
+    ret = IptablesWrapper::GetInstance()->RunMutipleCommands(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmds);
+    if (ret) {
+        NETNATIVE_LOGE("SetNicTrafficAllowed iptablesWrapper_ apply failed");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    NETNATIVE_LOG_D("SetNicTrafficAllowed iptablesWrapper_ apply success");
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS

@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <unordered_set>
 
 #include "i_notify_callback.h"
 #include "iptables_type.h"
@@ -124,8 +125,8 @@ private:
     std::mutex bandwidthMutex_;
     std::map<std::string, int64_t> ifaceAlertBytes_;
     std::map<std::string, int64_t> ifaceQuotaBytes_;
-    std::vector<uint32_t> deniedListUids_;
-    std::vector<uint32_t> allowedListUids_;
+    std::unordered_set<uint32_t> deniedListUids_;
+    std::unordered_set<uint32_t> allowedListUids_;
 };
 } // namespace nmd
 } // namespace OHOS

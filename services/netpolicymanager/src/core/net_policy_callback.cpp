@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,20 +21,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr const char *NET_ACTIVATE_WORK_THREAD = "POLICY_CALLBACK_WORK_THREAD";
 
 NetPolicyCallback::NetPolicyCallback()
 {
-    policyCallRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
-    policyCallHandler_ = std::make_shared<AppExecFwk::EventHandler>(policyCallRunner_);
+    netPolicyCallbackFfrtQueue_ = std::make_shared<ffrt::queue>("NetPolicyCallback");
 }
 
-NetPolicyCallback::~NetPolicyCallback()
-{
-    if (policyCallRunner_) {
-        policyCallRunner_->Stop();
-    }
-}
+NetPolicyCallback::~NetPolicyCallback() {}
 
 int32_t NetPolicyCallback::RegisterNetPolicyCallbackAsync(const sptr<INetPolicyCallback> &callback)
 {
@@ -42,12 +35,16 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallbackAsync(const sptr<INetPolicyC
         NETMGR_LOG_E("The parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, &callback, &ret]() {
-            ret = this->RegisterNetPolicyCallback(callback);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle RegisterNetPolicyCallbackAsyncTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, callback, &ret]() {
+            ret = this->RegisterNetPolicyCallback(callback);
+        }, ffrt::task_attr().name("FfrtRegisterNetPolicyCallbackAsync"));
+    netPolicyCallbackFfrtQueue_->wait(RegisterNetPolicyCallbackAsyncTask);
 
     return ret;
 }
@@ -79,13 +76,16 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallbackAsync(const sptr<INetPolic
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, &callback, &ret]() {
-            ret = this->UnregisterNetPolicyCallback(callback);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle UnregisterNetPolicyCallbackAsyncTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, callback, &ret]() {
+            ret = this->UnregisterNetPolicyCallback(callback);
+        }, ffrt::task_attr().name("FfrtUnregisterNetPolicyCallbackAsync"));
+    netPolicyCallbackFfrtQueue_->wait(UnregisterNetPolicyCallbackAsyncTask);
 
     return ret;
 }
@@ -109,12 +109,16 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
 int32_t NetPolicyCallback::NotifyNetUidPolicyChangeAsync(uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_D("NotifyNetUidPolicyChange uid[%{public}u] policy[%{public}u]", uid, policy);
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, uid, policy, &ret]() {
-            ret = this->NotifyNetUidPolicyChange(uid, policy);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle NotifyNetUidPolicyChangeAsyncTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, uid, policy, &ret]() {
+            ret = this->NotifyNetUidPolicyChange(uid, policy);
+        }, ffrt::task_attr().name("FfrtNotifyNetUidPolicyChangeAsync"));
+    netPolicyCallbackFfrtQueue_->wait(NotifyNetUidPolicyChangeAsyncTask);
 
     return ret;
 }
@@ -134,19 +138,22 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t polic
 int32_t NetPolicyCallback::NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t rule)
 {
     NETMGR_LOG_D("NotifyNetUidRuleChange uid[%{public}u] rule[%{public}u]", uid, rule);
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, uid, rule, &ret]() {
-            ret = this->NotifyNetUidRuleChange(uid, rule);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle NotifyNetUidRuleChangeAsyncTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, uid, rule, &ret]() {
+            ret = this->NotifyNetUidRuleChange(uid, rule);
+        }, ffrt::task_attr().name("FfrtNotifyNetUidRuleChangeAsync"));
+    netPolicyCallbackFfrtQueue_->wait(NotifyNetUidRuleChangeAsyncTask);
     return ret;
 }
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_I("NotifyNetUidRuleChange uid= %{public}d policy= %{public}d", uid, rule);
+    NETMGR_LOG_I("NetUidRuleChange uid=%{public}d policy=%{public}d", uid, rule);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidRuleChange(uid, rule);
@@ -158,13 +165,17 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 
 int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChangeAsync(bool isAllowed)
 {
-    NETMGR_LOG_D("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, isAllowed, &ret]() {
-            ret = this->NotifyNetBackgroundPolicyChange(isAllowed);
-        });
+    NETMGR_LOG_D("NotifyNetBackgroundPolicyChange isAllowed[%{public}d]", isAllowed);
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle NotifyNetBackgroundPolicyChangeAsyncTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, isAllowed, &ret]() {
+            ret = this->NotifyNetBackgroundPolicyChange(isAllowed);
+        }, ffrt::task_attr().name("FfrtNotifyNetBackgroundPolicyChangeAsync"));
+    netPolicyCallbackFfrtQueue_->wait(NotifyNetBackgroundPolicyChangeAsyncTask);
     return ret;
 }
 
@@ -186,13 +197,16 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChangeAsync(const std::vector<Net
         return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
     }
     NETMGR_LOG_D("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zu]", quotaPolicies.size());
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, &quotaPolicies, &ret]() {
-            ret = this->NotifyNetQuotaPolicyChange(quotaPolicies);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle NotifyNetQuotaPolicyChangeTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, &quotaPolicies, &ret]() {
+            ret = this->NotifyNetQuotaPolicyChange(quotaPolicies);
+        }, ffrt::task_attr().name("FfrtNotifyNetQuotaPolicyChangeAsync"));
+    netPolicyCallbackFfrtQueue_->wait(NotifyNetQuotaPolicyChangeTask);
     return ret;
 }
 
@@ -210,12 +224,16 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
 int32_t NetPolicyCallback::NotifyNetMeteredIfacesChangeAsync(std::vector<std::string> &ifaces)
 {
     NETMGR_LOG_D("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this, &ifaces, &ret]() {
-            ret = this->NotifyNetMeteredIfacesChange(ifaces);
-        });
+    if (!netPolicyCallbackFfrtQueue_) {
+        NETMGR_LOG_E("FFRT Init Fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+    int32_t ret = NETMANAGER_SUCCESS;
+    ffrt::task_handle NotifyNetMeteredIfacesChangeTask =
+        netPolicyCallbackFfrtQueue_->submit_h([this, &ifaces, &ret]() {
+            ret = this->NotifyNetMeteredIfacesChange(ifaces);
+        }, ffrt::task_attr().name("FfrtNotifyNetMeteredIfacesChangeAsync"));
+    netPolicyCallbackFfrtQueue_->wait(NotifyNetMeteredIfacesChangeTask);
     return ret;
 }
 

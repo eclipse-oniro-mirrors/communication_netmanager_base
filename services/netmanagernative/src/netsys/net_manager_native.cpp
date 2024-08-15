@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@
 #include "route_manager.h"
 #include "traffic_manager.h"
 #include "vpn_manager.h"
+#include "vnic_manager.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
-std::vector<uint32_t> OHOS::nmd::NetManagerNative::interfaceIdex_;
 
 namespace OHOS {
 namespace nmd {
@@ -102,19 +102,32 @@ int32_t NetManagerNative::NetworkDestroy(int32_t netId)
     return ret;
 }
 
+int32_t NetManagerNative::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
+                                     const std::set<int32_t> &uids)
+{
+    return VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+}
+
+int32_t NetManagerNative::DestroyVnic()
+{
+    return VnicManager::GetInstance().DestroyVnic();
+}
+
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
+    dnsManager_->AddUidRange(netId, uidRanges);
     return connManager_->AddUidsToNetwork(netId, uidRanges);
 }
 
 int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
+    dnsManager_->DelUidRange(netId, uidRanges);
     return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 
-int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName)
+int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName, NetBearType netBearerType)
 {
-    return connManager_->AddInterfaceToNetwork(netId, interfaceName);
+    return connManager_->AddInterfaceToNetwork(netId, interfaceName, netBearerType);
 }
 
 int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string interfaceName)
@@ -133,6 +146,12 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
 int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
     return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+}
+
+int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength,
+                                              const std::string &netCapabilities)
+{
+    return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength, netCapabilities);
 }
 
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
@@ -311,6 +330,16 @@ int32_t NetManagerNative::IpEnableForwarding(const std::string &requester)
     return sharingManager_->IpEnableForwarding(requester);
 }
 
+int32_t NetManagerNative::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetEnableIpv6(interfaceName, on);
+}
+
 int32_t NetManagerNative::IpDisableForwarding(const std::string &requester)
 {
     return sharingManager_->IpDisableForwarding(requester);
@@ -426,6 +455,44 @@ int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<u
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetManagerNative::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+{
+    NETNATIVE_LOG_D("NetManagerNative, SetFirewallDefaultAction");
+    return dnsManager_->SetFirewallDefaultAction(inDefault, outDefault);
+}
+
+int32_t NetManagerNative::SetFirewallCurrentUserId(int32_t userId)
+{
+    NETNATIVE_LOG_D("NetManagerNative, SetFirewallCurrentUserId");
+    return dnsManager_->SetFirewallCurrentUserId(userId);
+}
+
+int32_t NetManagerNative::SetFirewallRules(NetFirewallRuleType type,
+                                           const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+{
+    return dnsManager_->SetFirewallRules(type, ruleList, isFinish);
+}
+
+int32_t NetManagerNative::ClearFirewallRules(NetFirewallRuleType type)
+{
+    NETNATIVE_LOG_D("NetManagerNative, ClearFirewallRules");
+    return dnsManager_->ClearFirewallRules(type);
+}
+
+int32_t NetManagerNative::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOG_D("NetManagerNative, RegisterNetFirewallCallback");
+    return dnsManager_->RegisterNetFirewallCallback(callback);
+}
+
+int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    NETNATIVE_LOG_D("NetManagerNative, UnRegisterNetFirewallCallback");
+    return dnsManager_->UnRegisterNetFirewallCallback(callback);
+}
+#endif
+
 void NetManagerNative::ShareDnsSet(uint16_t netId)
 {
     dnsManager_->ShareDnsSet(netId);
@@ -495,5 +562,25 @@ int32_t NetManagerNative::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCa
     return dnsManager_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
+                                                 bool isBroker)
+{
+    return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+}
+
+int32_t NetManagerNative::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return connManager_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetManagerNative::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    return connManager_->NotifyNetBearerTypeChange(bearerTypes);
+}
+
+int32_t NetManagerNative::ClearFirewallAllRules()
+{
+    return firewallManager_->ClearAllRules();
+}
 } // namespace nmd
 } // namespace OHOS

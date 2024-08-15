@@ -60,7 +60,7 @@ private:
 #ifdef NETMGR_DEBUG
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 #define PRINT_LOG(op, fmt, ...)                                                                               \
-    (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
+    (void)HILOG_##op(LOG_CORE, "[%{public}s:%{public}d]" fmt,  \
                                     MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(op, fmt, ...)
