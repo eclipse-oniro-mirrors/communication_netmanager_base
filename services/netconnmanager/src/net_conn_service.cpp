@@ -1562,12 +1562,19 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
         if (suppliers.empty()) {
             NETMGR_LOG_D("supplier is nullptr.");
             result = NET_CONN_ERR_NO_SUPPLIER;
+            return;
         }
         auto supplier = suppliers.front();
+        if (supplier == nullptr) {
+            NETMGR_LOG_E("supplier is nullptr");
+            result = NETMANAGER_ERR_LOCAL_PTR_NULL;
+            return;
+        }
         std::shared_ptr<Network> network = supplier->GetNetwork();
         if (network == nullptr) {
             NETMGR_LOG_E("network is nullptr");
             result = NET_CONN_ERR_INVALID_NETWORK;
+            return;
         }
         ifaceName = network->GetIfaceName();
     });
