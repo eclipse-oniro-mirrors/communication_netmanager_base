@@ -1038,14 +1038,17 @@ int32_t NetsysNativeServiceProxy::EnableDistributedClientNet(const std::string &
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error =
+    int32_t ret =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET), data,
                               reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
     }
-    return reply.ReadInt32();
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
@@ -1071,14 +1074,17 @@ int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error =
+    int32_t ret =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET), data,
                               reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
     }
-    return reply.ReadInt32();
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::DisableDistributedNet(bool isServer)
@@ -1095,14 +1101,17 @@ int32_t NetsysNativeServiceProxy::DisableDistributedNet(bool isServer)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error =
+    int32_t ret =
         Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET), data,
                               reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
     }
-    return reply.ReadInt32();
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)

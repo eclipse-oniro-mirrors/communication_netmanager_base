@@ -380,7 +380,8 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
 {
     NETNATIVE_LOGI("EnableDistributedClientNet virNicAddr:%{public}s,iif:%{public}s",
                    ToAnonymousIp(virNicAddr).c_str(), iif.c_str());
-    if (int32_t ret = DistributedManager::GetInstance().CreateDistributedNic(virNicAddr, DISTRIBUTED_TUN_CARD_NAME)) {
+    int32_t ret = DistributedManager::GetInstance().CreateDistributedNic(virNicAddr, DISTRIBUTED_TUN_CARD_NAME);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("CreateDistributedNic err, error is %{public}d", ret);
         return ret;
     }
@@ -391,8 +392,9 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
     ruleInfo.ruleIif = iif;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
-    if (int32_t ret = UpdateRuleInfoEx(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
-        NETNATIVE_LOGE("EnableDistributedClientNet UpdateRuleInfoEx err, error is %{public}d", ret);
+    ret = UpdateDistributedRule(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+    if (ret != ROUTEMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("EnableDistributedClientNet UpdateDistributedRule err, error is %{public}d", ret);
         return ret;
     }
     NETNATIVE_LOGI("EnableDistributedClientNet add rule success.");
@@ -403,10 +405,11 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
     routeInfo.routeNextHop = "0.0.0.0";
     uint16_t flags = (NLM_F_CREATE | NLM_F_EXCL);
     uint16_t action = RTM_NEWROUTE;
-    if (int32_t ret = UpdateRouteRule(action, flags, routeInfo)) {
+    ret = UpdateRouteRule(action, flags, routeInfo);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("EnableDistributedClientNet UpdateRouteRule err, NLM_F_REPLACE");
         if (UpdateRouteRule(RTM_NEWROUTE, NLM_F_REPLACE, routeInfo)) {
-            UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+            UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
             return ROUTEMANAGER_ERROR;
         }
     }
@@ -423,7 +426,8 @@ int32_t RouteManager::AddServerUplinkRoute(const std::string &UplinkIif, const s
     ruleInfo.ruleIif = UplinkIif;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
-    if (int32_t ret = UpdateRuleInfoEx(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
+    int32_t ret = UpdateDistributedRule(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("EnableDistributedServerNet Update Uplink RuleInfo err, error is %{public}d", ret);
         return ret;
     }
@@ -435,10 +439,11 @@ int32_t RouteManager::AddServerUplinkRoute(const std::string &UplinkIif, const s
     routeInfo.routeNextHop = "0.0.0.0";
     uint16_t flags = (NLM_F_CREATE | NLM_F_EXCL);
     uint16_t action = RTM_NEWROUTE;
-    if (int32_t  ret = UpdateRouteRule(action, flags, routeInfo)) {
+    ret = UpdateRouteRule(action, flags, routeInfo);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("EnableDistributedServerNet Update Uplink RouteRule err, NLM_F_REPLACE");
         if (UpdateRouteRule(RTM_NEWROUTE, NLM_F_REPLACE, routeInfo)) {
-            UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+            UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
             return ROUTEMANAGER_ERROR;
         }
     }
@@ -455,7 +460,8 @@ int32_t RouteManager::AddServerDownlinkRoute(const std::string &UplinkIif, const
     ruleInfo.ruleDstIp = dstAddr;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
-    if (int32_t ret = UpdateRuleInfoEx(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
+    int32_t ret = UpdateDistributedRule(RTM_NEWRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("EnableDistributedServerNet Update Downlink RuleInfo err, error is %{public}d", ret);
         return ret;
     }
@@ -467,10 +473,11 @@ int32_t RouteManager::AddServerDownlinkRoute(const std::string &UplinkIif, const
     routeInfo.routeNextHop = "0.0.0.0";
     uint16_t flags = (NLM_F_CREATE | NLM_F_EXCL);
     uint16_t action = RTM_NEWROUTE;
-    if (int32_t ret = UpdateRouteRule(action, flags, routeInfo)) {
+    ret = UpdateRouteRule(action, flags, routeInfo);
+    if (ret != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("EnableDistributedServerNet Update Downlink RouteRule err, NLM_F_REPLACE");
         if (UpdateRouteRule(RTM_NEWROUTE, NLM_F_REPLACE, routeInfo)) {
-            UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+            UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
             return ROUTEMANAGER_ERROR;
         }
     }
@@ -486,6 +493,7 @@ int32_t RouteManager::EnableDistributedServerNet(const std::string &iif, const s
                    iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str());
 
     int32_t ret = ROUTEMANAGER_SUCCESS;
+    DistributedManager::GetInstance().SetServerNicInfo(iif, devIface);
     ret += AddServerUplinkRoute(iif, devIface);
     ret += AddServerDownlinkRoute(iif, dstAddr);
 
@@ -500,29 +508,46 @@ int32_t RouteManager::DisableDistributedNet(bool isServer)
     ruleInfo.ruleMask = MARK_UNSET;
     ruleInfo.ruleIif = RULEIIF_NULL;
     ruleInfo.ruleOif = RULEOIF_NULL;
-    int32_t result = ROUTEMANAGER_SUCCESS;
+    ruleInfo.ruleTable = RT_TABLE_UNSPEC;
+    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
+    RouteInfo routeInfo;
+    routeInfo.routeTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
+    routeInfo.routeInterfaceName = DISTRIBUTED_TUN_CARD_NAME;
+    routeInfo.routeDestinationName = "0.0.0.0/0";
+    routeInfo.routeNextHop = "0.0.0.0";
+    int32_t ret = ROUTEMANAGER_SUCCESS;
     if (isServer) {
-        ruleInfo.ruleTable = RT_TABLE_UNSPEC;
-        ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
-        if (int32_t ret = UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
-            NETNATIVE_LOGE("del server rule err, rule prio is %{public}d", ruleInfo.rulePriority);
-            result += ret;
+        ret += UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("del server uplink rule err, rule prio is %{public}d", ruleInfo.rulePriority);
         }
-        ruleInfo.ruleTable = RT_TABLE_UNSPEC;
-        ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
-        if (int32_t ret = UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
-            NETNATIVE_LOGE("del server rule err, rule prio is %{public}d", ruleInfo.rulePriority);
-            result += ret;
+        ret += UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("del server downlink rule err, rule prio is %{public}d", ruleInfo.rulePriority);
+        }
+        routeInfo.routeTable = ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE;
+        routeInfo.routeInterfaceName = DistributedManager::GetInstance().GetServerDevIfaceNic();
+        ret += UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("del server uplink route err, route table is %{public}d", routeInfo.routeTable);
+        }
+        routeInfo.routeTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
+        routeInfo.routeInterfaceName = DistributedManager::GetInstance().GetServerIifNic();
+        ret += UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("del server downlink route err, route table is %{public}d", routeInfo.routeTable);
         }
     } else {
-        ruleInfo.ruleTable = RT_TABLE_UNSPEC;
-        ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
-        if (int32_t ret = UpdateRuleInfoEx(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID)) {
+        ret += UpdateDistributedRule(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+        if (ret != ROUTEMANAGER_SUCCESS) {
             NETNATIVE_LOGE("del client rule err, rule prio is %{public}d", ruleInfo.rulePriority);
-            result += ret;
+        }
+        ret += UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
+        if (ret != ROUTEMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("del client route err, route table is %{public}d", routeInfo.routeTable);
         }
     }
-    return result;
+    return ret;
 }
 
 int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
@@ -983,10 +1008,10 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
     return NETMANAGER_SUCCESS;
 }
 
-int32_t RouteManager::UpdateRuleInfoEx(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
-                                       uid_t uidEnd)
+int32_t RouteManager::UpdateDistributedRule(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
+                                            uid_t uidEnd)
 {
-    NETNATIVE_LOGI("UpdateRuleInfoEx");
+    NETNATIVE_LOGI("UpdateDistributedRule");
     if (ruleInfo.rulePriority < 0) {
         NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
         return ROUTEMANAGER_ERROR;

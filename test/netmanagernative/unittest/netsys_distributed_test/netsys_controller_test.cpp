@@ -92,6 +92,7 @@ public:
 void NetsysControllerTest::SetUpTestCase()
 {
     instance_ = std::make_shared<NetsysController>();
+    instance_->Init();
 }
 
 void NetsysControllerTest::TearDownTestCase() {}

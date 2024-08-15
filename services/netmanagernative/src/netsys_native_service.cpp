@@ -426,7 +426,7 @@ int32_t NetsysNativeService::EnableDistributedClientNet(const std::string &virni
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
     int32_t result = netsysService_->EnableDistributedClientNet(virnicAddr, iif);
-    NETNATIVE_LOG_D("EnableDistributedClientNet");
+    NETNATIVE_LOGI("EnableDistributedClientNet");
     return result;
 }
 
@@ -438,7 +438,7 @@ int32_t NetsysNativeService::EnableDistributedServerNet(const std::string &iif, 
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
     int32_t result = netsysService_->EnableDistributedServerNet(iif, devIface, dstAddr);
-    NETNATIVE_LOG_D("EnableDistributedServerNet");
+    NETNATIVE_LOGI("EnableDistributedServerNet");
     return result;
 }
 

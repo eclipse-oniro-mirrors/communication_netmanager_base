@@ -86,8 +86,9 @@ int32_t DistributedManager::SetDistributedNicResult(std::atomic_int &fd, unsigne
             NETNATIVE_LOGE("set virnic error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
+        return NETMANAGER_SUCCESS;
     }
-    return NETMANAGER_SUCCESS;
+    return NETMANAGER_ERROR;
 }
 
 int32_t DistributedManager::InitIfreq(ifreq &ifr, const std::string &cardName)
@@ -110,7 +111,7 @@ int32_t DistributedManager::SetDistributedNicMtu(const std::string &ifName, int3
         return NETMANAGER_ERROR;
     }
 
-    ifreq ifr;
+    ifreq ifr{};
     if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
@@ -213,24 +214,32 @@ int32_t DistributedManager::SetDistributedNicDown(const std::string &ifName)
     }
 }
 
+void DistributedManager::CloseDistributedSocket()
+{
+    if (net4Sock_ > 0) {
+        close(net4Sock_);
+        net4Sock_ = 0;
+    }
+}
+
 int32_t DistributedManager::CreateDistributedNic(const std::string &virNicAddr, const std::string &ifName)
 {
     NETNATIVE_LOGI("CreateVirnic, mtu:%{public}d", DISTRIBUTED_MTU);
     if (CreateDistributedInterface(ifName) != NETMANAGER_SUCCESS) {
+        CloseDistributedSocket();
         return NETMANAGER_ERROR;
     }
     if (SetDistributedNicMtu(ifName, DISTRIBUTED_MTU) != NETMANAGER_SUCCESS ||
         SetDistributedNicAddress(ifName, virNicAddr) != NETMANAGER_SUCCESS) {
         SetDistributedNicDown(ifName);
+        CloseDistributedSocket();
         return NETMANAGER_ERROR;
     }
     if (SetDistributedNicUp(ifName) != NETMANAGER_SUCCESS) {
+        CloseDistributedSocket();
         return NETMANAGER_ERROR;
     }
-    if (net4Sock_ > 0) {
-        close(net4Sock_);
-        net4Sock_ = 0;
-    }
+    CloseDistributedSocket();
 
     return NETMANAGER_SUCCESS;
 }
@@ -239,6 +248,22 @@ int32_t DistributedManager::DestroyDistributedNic(const std::string &ifName)
 {
     SetDistributedNicDown(ifName);
     return NETMANAGER_SUCCESS;
+}
+
+void DistributedManager::SetServerNicInfo(const std::string &iif, const std::string &devIface)
+{
+    serverIif_ = iif;
+    serverDevIface_ = devIface;
+}
+
+std::string DistributedManager::GetServerIifNic()
+{
+    return serverIif_;
+}
+
+std::string DistributedManager::GetServerDevIfaceNic()
+{
+    return serverDevIface_;
 }
 
 } // namespace NetManagerStandard
