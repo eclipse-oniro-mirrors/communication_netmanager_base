@@ -30,6 +30,10 @@ public:
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
+    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
+    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                       const std::string &dstAddr) override;
+    int32_t DisableDistributedNet(bool isServer) override;
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                 uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;

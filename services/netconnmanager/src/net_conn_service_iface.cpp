@@ -40,6 +40,22 @@ int32_t NetConnServiceIface::DisableVnicNetwork()
     return NetConnService::GetInstance()->DisableVnicNetwork();
 }
 
+int32_t NetConnServiceIface::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
+{
+    return NetConnService::GetInstance()->EnableDistributedClientNet(virnicAddr, iif);
+}
+
+int32_t NetConnServiceIface::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                                        const std::string &dstAddr)
+{
+    return NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, dstAddr);
+}
+
+int32_t NetConnServiceIface::DisableDistributedNet(bool isServer)
+{
+    return NetConnService::GetInstance()->DisableDistributedNet(isServer);
+}
+
 int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {

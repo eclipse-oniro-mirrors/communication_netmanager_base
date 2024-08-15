@@ -53,6 +53,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
     InitNetVnicInterfaceMap();
+    InitNetVirnicInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -289,6 +290,16 @@ void NetsysNativeServiceStub::InitNetVnicInterfaceMap()
         &NetsysNativeServiceStub::CmdCreateVnic;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_VNIC_DESTROY)] =
         &NetsysNativeServiceStub::CmdDestroyVnic;
+}
+
+void NetsysNativeServiceStub::InitNetVirnicInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET)] =
+        &NetsysNativeServiceStub::CmdEnableDistributedClientNet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET)] =
+        &NetsysNativeServiceStub::CmdEnableDistributedServerNet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET)] =
+        &NetsysNativeServiceStub::CmdDisableDistributedNet;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -914,6 +925,42 @@ int32_t NetsysNativeServiceStub::CmdDestroyVnic(MessageParcel &data, MessageParc
     int32_t result = DestroyVnic();
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("VnicDestroy has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdEnableDistributedClientNet(MessageParcel &data, MessageParcel &reply)
+{
+    std::string virnicAddr = data.ReadString();
+    std::string iif = data.ReadString();
+
+    int32_t result = EnableDistributedClientNet(virnicAddr, iif);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("CmdEnableDistributedClientNet has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdEnableDistributedServerNet(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iif = data.ReadString();
+    std::string devIface = data.ReadString();
+    std::string dstAddr = data.ReadString();
+
+    int32_t result = EnableDistributedServerNet(iif, devIface, dstAddr);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("CmdEnableDistributedServerNet has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDisableDistributedNet(MessageParcel &data, MessageParcel &reply)
+{
+    bool isServer = data.ReadBool();
+
+    int32_t result = DisableDistributedNet(isServer);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("CmdDisableDistributedNet has recved result %{public}d", result);
 
     return result;
 }

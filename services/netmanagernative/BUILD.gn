@@ -47,6 +47,7 @@ netsys_native_manager_sources = [
   "src/manager/bandwidth_manager.cpp",
   "src/manager/clat_manager.cpp",
   "src/manager/conn_manager.cpp",
+  "src/manager/distributed_manager.cpp",
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
   "src/manager/interface_manager.cpp",

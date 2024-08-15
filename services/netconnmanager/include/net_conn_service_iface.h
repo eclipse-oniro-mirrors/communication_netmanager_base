@@ -31,6 +31,9 @@ public:
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
     int32_t DisableVnicNetwork();
+    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif);
+    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface, const std::string &dstAddr);
+    int32_t DisableDistributedNet(bool isServer);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;

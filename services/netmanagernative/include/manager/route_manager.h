@@ -35,6 +35,8 @@ typedef struct RuleInfo {
     uint32_t ruleMask;
     std::string ruleIif;
     std::string ruleOif;
+    std::string ruleSrcIp;
+    std::string ruleDstIp;
 } RuleInfo;
 
 typedef struct RouteInfo {
@@ -281,6 +283,34 @@ public:
      */
     static int32_t UpdateVnicUidRangesRule(const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
 
+    /**
+     * Enable distribute client net: create virnic and config route
+     *
+     * @param virNicAddr virnic addr
+     * @param iif iif name to config route
+     * @return Returns 0, enable successfully, otherwise it will fail
+     */
+    static int32_t EnableDistributedClientNet(const std::string &virNicAddr, const std::string &iif);
+
+    /**
+     * Enable distribute client net: config route
+     *
+     * @param iif iif to config route
+     * @param devIface dev Iface name to config route
+     * @param dstAddr dstAddr to config route
+     * @return Returns 0, enable successfully, otherwise it will fail
+     */
+    static int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                              const std::string &dstAddr);
+
+    /**
+     * Disable distribute net: del route
+     *
+     * @param isServer true:server, false:client
+     * @return Returns 0, disable successfully, otherwise it will fail
+     */
+    static int32_t DisableDistributedNet(bool isServer);
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
@@ -314,8 +344,12 @@ private:
     static int32_t ClearSharingRules(const std::string &inputInterface);
     static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart = INVALID_UID,
                                   uid_t uidEnd = INVALID_UID);
+    static int32_t UpdateDistributedRule(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo,
+                                         uid_t uidStart, uid_t uidEnd);
     static int32_t SendRuleToKernel(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
                                     uid_t uidStart, uid_t uidEnd);
+    static int32_t SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
+                                      uid_t uidStart, uid_t uidEnd);
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
                                      uint32_t index);
@@ -326,6 +360,8 @@ private:
                                 RouteInfo &routeInfo);
     static int32_t UpdateClatTunInterface(const std::string &interfaceName,
                                             NetworkPermission permission, bool add);
+    static int32_t AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface);
+    static int32_t AddServerDownlinkRoute(const std::string &UplinkIif, const std::string &dstAddr);
 };
 } // namespace nmd
 } // namespace OHOS

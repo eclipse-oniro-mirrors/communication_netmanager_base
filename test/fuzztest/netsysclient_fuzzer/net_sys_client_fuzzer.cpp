@@ -1436,6 +1436,51 @@ void CmdNotifyNetBearerTypeChangeFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdEnableDistributedClientNetFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string virnicAddr = NetSysGetString(STR_LEN);
+    std::string iif = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(virnicAddr);
+    dataParcel.WriteString(iif);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_CLIENT_NET),
+                    dataParcel);
+}
+
+void CmdEnableDistributedServerNetFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string iif = NetSysGetString(STR_LEN);
+    std::string devIface = NetSysGetString(STR_LEN);
+    std::string dstAddr = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(iif);
+    dataParcel.WriteString(devIface);
+    dataParcel.WriteString(dstAddr);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET),
+                    dataParcel);
+}
+
+void CmdDisableDistributedNetFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    bool isServer = NetSysGetData<bool>();
+    dataParcel.WriteBool(isServer);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET),
+                    dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1491,6 +1536,9 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdSetNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDeleteNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdNotifyNetBearerTypeChangeFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdEnableDistributedClientNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdEnableDistributedServerNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDisableDistributedNetFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -94,6 +94,7 @@ void NetConnServiceStub::InitAll()
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
     InitVnicFuncToInterfaceMap();
+    InitVirnicFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
@@ -174,6 +175,16 @@ void NetConnServiceStub::InitVnicFuncToInterfaceMap()
         &NetConnServiceStub::OnEnableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK)] = {
         &NetConnServiceStub::OnDisableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+}
+
+void NetConnServiceStub::InitVirnicFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET)] = {
+        &NetConnServiceStub::OnEnableDistributedClientNet, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET)] = {
+        &NetConnServiceStub::OnEnableDistributedServerNet, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET)] = {
+        &NetConnServiceStub::OnDisableDistributedNet, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -343,6 +354,60 @@ int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParc
 int32_t NetConnServiceStub::OnDisableVnicNetwork(MessageParcel &data, MessageParcel &reply)
 {
     int32_t ret = DisableVnicNetwork();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnEnableDistributedClientNet(MessageParcel &data, MessageParcel &reply)
+{
+    std::string virnicAddr = "";
+    if (!data.ReadString(virnicAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    std::string iif = "";
+    if (!data.ReadString(iif)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = EnableDistributedClientNet(virnicAddr, iif);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnEnableDistributedServerNet(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iif = "";
+    if (!data.ReadString(iif)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    std::string devIface = "";
+    if (!data.ReadString(devIface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    std::string dstAddr = "";
+    if (!data.ReadString(dstAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = EnableDistributedServerNet(iif, devIface, dstAddr);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDisableDistributedNet(MessageParcel &data, MessageParcel &reply)
+{
+    bool isServer = false;
+    if (!data.ReadBool(isServer)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = DisableDistributedNet(isServer);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

@@ -244,6 +244,22 @@ public:
         return 0;
     }
 
+    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override
+    {
+        return 0;
+    }
+
+    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
+                                       const std::string &dstAddr) override
+    {
+        return 0;
+    }
+
+    int32_t DisableDistributedNet(bool isServer) override
+    {
+        return 0;
+    }
+
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override
     {
         return 0;

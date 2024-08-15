@@ -1387,6 +1387,49 @@ void UnregisterPreAirplaneCallbackFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel);
 }
+
+void EnableDistributedClientNetFuzzTest(const uint8_t *data, size_t size)
+{
+    std::string virnicAddr = NetConnGetString(STR_LEN);
+    std::string iif = NetConnGetString(STR_LEN);
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("EnableDistributedClientNetFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteString(virnicAddr);
+    dataParcel.WriteString(iif);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET), dataParcel);
+}
+
+void EnableDistributedServerNetFuzzTest(const uint8_t *data, size_t size)
+{
+    std::string iif = NetConnGetString(STR_LEN);
+    std::string devIface = NetConnGetString(STR_LEN);
+    std::string dstAddr = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("EnableDistributedClientNetFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteString(iif);
+    dataParcel.WriteString(devIface);
+    dataParcel.WriteString(dstAddr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET), dataParcel);
+}
+
+void DisableDistributedNetFuzzTest(const uint8_t *data, size_t size)
+{
+    bool isServer = NetConnGetData<bool>();
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("EnableDistributedClientNetFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcel.WriteBool(isServer);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1438,5 +1481,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DelInterfaceAddressFuzzTest(data, size);
     OHOS::NetManagerStandard::AddStaticArpFuzzTest(data, size);
     OHOS::NetManagerStandard::DelStaticArpFuzzTest(data, size);
+    OHOS::NetManagerStandard::EnableDistributedClientNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::EnableDistributedServerNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     return 0;
 }
