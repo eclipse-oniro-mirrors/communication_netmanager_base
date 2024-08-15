@@ -22,6 +22,7 @@
 #include <mutex>
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "netmanager_base_log.h"
 #include "securec.h"
