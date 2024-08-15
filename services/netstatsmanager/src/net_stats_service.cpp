@@ -108,13 +108,17 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
         [this](const EventFwk::Want &want) {
             uint32_t uid = want.GetIntParam(UID, 0);
-            netStatsCached_->ForceDeleteStats(uid);
-            auto handler = std::make_unique<NetStatsDataHandler>();
             NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
-            if (handler->DeleteSimStatsByUid(uid) != NETMANAGER_SUCCESS) {
-                NETMGR_LOG_E("Net Manager sim stats delete uid failed, uid:[%{public}d]", uid);
+            auto handler = std::make_unique<NetStatsDataHandler>();
+            auto ret = handler->UpdateStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("Net Manager update stats flag failed, uid:[%{public}d]", uid);
             }
-            return handler->DeleteByUid(uid);
+            if (handler->UpdateSimStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("Net Manager update sim stats flag failed, uid:[%{public}d]", uid);
+            }
+            netStatsCached_->ForceArchiveStats(uid);
+            return ret;
         });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
@@ -443,12 +447,15 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](const NetStatsInfo &info) {
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
         if (ident != info.ident_) {
             return;
         }
         if (start > info.date_ || end < info.date_) {
             return;
+        }
+        if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
+            info.uid_ = UNINSTALLED_UID;
         }
         auto item = infos.find(info.uid_);
         if (item == infos.end()) {
@@ -502,6 +509,9 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
             return;
         }
         if (start > info.date_ || end < info.date_) {
+            return;
+        }
+        if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
             return;
         }
         NetStatsInfoSequence tmp;

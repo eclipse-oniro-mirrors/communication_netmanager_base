@@ -147,6 +147,18 @@ int32_t NetStatsDataHandler::DeleteByDate(const std::string &tableName, uint64_t
     return helper->DeleteData(tableName, start, end);
 }
 
+int32_t NetStatsDataHandler::UpdateStatsFlag(const uint32_t uid, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    return helper->UpdateStatsFlag(UID_TABLE, uid, flag);
+}
+
+int32_t NetStatsDataHandler::UpdateSimStatsFlag(const uint32_t uid, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    return helper->UpdateStatsFlag(UID_SIM_TABLE, uid, flag);
+}
+
 int32_t NetStatsDataHandler::ClearData()
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
