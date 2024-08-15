@@ -222,6 +222,14 @@ void DistributedManager::CloseDistributedSocket()
     }
 }
 
+void DistributedManager::CloseDistributedTunFd()
+{
+    if (tunFd_ > 0) {
+        close(tunFd_);
+        tunFd_ = 0;
+    }
+}
+
 int32_t DistributedManager::CreateDistributedNic(const std::string &virNicAddr, const std::string &ifName)
 {
     NETNATIVE_LOGI("CreateVirnic, mtu:%{public}d", DISTRIBUTED_MTU);

@@ -546,6 +546,7 @@ int32_t RouteManager::DisableDistributedNet(bool isServer)
         if (ret != ROUTEMANAGER_SUCCESS) {
             NETNATIVE_LOGE("del client route err, route table is %{public}d", routeInfo.routeTable);
         }
+        DistributedManager::GetInstance().CloseDistributedTunFd();
     }
     return ret;
 }

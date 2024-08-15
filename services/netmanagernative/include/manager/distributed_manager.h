@@ -41,6 +41,7 @@ public:
     int32_t SetDistributedNicMtu(const std::string &ifName, int32_t mtu);
     int32_t SetDistributedNicAddress(const std::string &ifName, const std::string &tunAddr);
     void SetServerNicInfo(const std::string &iif, const std::string &devIface);
+    void CloseDistributedTunFd();
     std::string GetServerIifNic();
     std::string GetServerDevIfaceNic();
 
