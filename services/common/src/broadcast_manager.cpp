@@ -12,9 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* change something*/
-
 #include "broadcast_manager.h"
 
 #include "common_event_manager.h"
