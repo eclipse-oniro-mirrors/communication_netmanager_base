@@ -14,6 +14,7 @@
  */
 
 #include "net_conn_event_handler.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -39,6 +40,7 @@ bool NetConnEventHandler::PostSyncTask(const Callback &callback)
 
 void NetConnEventHandler::RemoveAsyncTask(const std::string &name)
 {
+    NETMGR_LOG_D("RemoveAsyncTask name = [%{public}s]", name.c_str());
     AppExecFwk::EventHandler::RemoveTask(name);
 }
 } // namespace NetManagerStandard
