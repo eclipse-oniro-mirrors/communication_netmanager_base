@@ -317,6 +317,9 @@ int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(FirewallRuleAction inDefa
     key = DEFAULT_ACT_OUT_KEY;
     val = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
     WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
+    CtKey ctKey;
+    CtVaule ctVal;
+    ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);
     return NETFIREWALL_SUCCESS;
 }
 
