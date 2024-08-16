@@ -94,6 +94,9 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     if (!netSupplierInfo_.ident_.empty()) {
         netSupplierIdent_ = netSupplierInfo_.ident_;
     }
+    if (netSupplierInfo_.score_ != 0) {
+        netScore_ = netSupplierInfo_.score_;
+    }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);
         return;

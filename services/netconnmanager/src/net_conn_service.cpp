@@ -779,7 +779,9 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
     // Init score again here in case of net supplier type changed.
-    supplier->InitNetScore();
+    if (netSupplierInfo->score_ == 0) {
+        supplier->InitNetScore();
+    }
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
