@@ -83,7 +83,6 @@ std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "
                                           "es",   "in",      "online", "shop", "vip", "club", "xyz",  "top", "icu",
                                           "work", "website", "tech",   "asia", "xin", "co",   "mobi", "info"};
 std::mutex g_commonUtilsMutex;
-std::mutex g_forkExecMutex;
 
 std::string Strip(const std::string &str, char ch)
 {
@@ -550,7 +549,6 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
 
 int32_t ForkExec(const std::string &command, std::string *out)
 {
-    std::unique_lock<std::mutex> lock(g_forkExecMutex);
     const std::vector<std::string> cmd = Split(command, CMD_SEP);
     std::vector<const char *> args = FormatCmd(cmd);
     int32_t pipeFd[PIPE_FD_NUM] = {0};
