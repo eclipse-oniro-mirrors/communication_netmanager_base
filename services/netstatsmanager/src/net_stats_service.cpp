@@ -502,10 +502,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
-        if (uid != info.uid_) {
-            return;
-        }
-        if (ident != info.ident_) {
+        if (uid != info.uid_ || ident != info.ident_) {
             return;
         }
         if (start > info.date_ || end < info.date_) {
