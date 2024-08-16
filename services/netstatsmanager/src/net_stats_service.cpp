@@ -110,15 +110,20 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             uint32_t uid = want.GetIntParam(UID, 0);
             NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
             auto handler = std::make_unique<NetStatsDataHandler>();
-            auto ret = handler->UpdateStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
-            if (ret != NETMANAGER_SUCCESS) {
+            if (handler == nullptr) {
+                NETMGR_LOG_E("Net Manager package removed, get db handler failed. uid:[%{public}d]", uid);
+                return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
+            }
+            auto ret1 = handler->UpdateStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
+            if (ret1 != NETMANAGER_SUCCESS) {
                 NETMGR_LOG_E("Net Manager update stats flag failed, uid:[%{public}d]", uid);
             }
-            if (handler->UpdateSimStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
+            auto ret2 = handler->UpdateSimStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
+            if (ret2 != NETMANAGER_SUCCESS) {
                 NETMGR_LOG_E("Net Manager update sim stats flag failed, uid:[%{public}d]", uid);
             }
             netStatsCached_->ForceArchiveStats(uid);
-            return ret;
+            return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
         });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
@@ -427,18 +432,20 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
         NETMGR_LOG_E("param network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    int32_t ret;
     std::string ident;
     if (network->type_ == 0) {
         ident = std::to_string(network->simId_);
     }
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
-    NETMGR_LOG_D("GetTrafficStatsByNetwork param: ident=%{public}s, start=%{public}u, end=%{public}u", ident.c_str(),
-                 start, end);
-    std::vector<NetStatsInfo> allInfo;
+    NETMGR_LOG_D("param: ident=%{public}s, start=%{public}u, end=%{public}u", ident.c_str(), start, end);
     auto history = std::make_unique<NetStatsHistory>();
-    ret = history->GetHistoryByIdent(allInfo, ident, start, end);
+    if (history == nullptr) {
+        NETMGR_LOG_E("history is null");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<NetStatsInfo> allInfo;
+    int32_t ret = history->GetHistoryByIdent(allInfo, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("get history by ident failed, err code=%{public}d", ret);
         return ret;
@@ -448,10 +455,7 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
-        if (ident != info.ident_) {
-            return;
-        }
-        if (start > info.date_ || end < info.date_) {
+        if (ident != info.ident_ || (start > info.date_ || end < info.date_)) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
@@ -481,7 +485,6 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
         NETMGR_LOG_E("param network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    int32_t ret;
     std::string ident;
     if (network->type_ == 0) {
         ident = std::to_string(network->simId_);
@@ -490,9 +493,13 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     uint32_t end = network->endTime_;
     NETMGR_LOG_D("GetTrafficStatsByUidNetwork param: "
         "uid=%{public}u, ident=%{public}s, start=%{public}u, end=%{public}u", uid, ident.c_str(), start, end);
-    std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
-    ret = history->GetHistory(allInfo, uid, ident, start, end);
+    if (history == nullptr) {
+        NETMGR_LOG_E("history is null");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<NetStatsInfo> allInfo;
+    int32_t ret = history->GetHistory(allInfo, uid, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("get history by uid and ident failed, err code=%{public}d", ret);
         return ret;
@@ -502,10 +509,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
-        if (uid != info.uid_ || ident != info.ident_) {
-            return;
-        }
-        if (start > info.date_ || end < info.date_) {
+        if (uid != info.uid_ || ident != info.ident_ || (start > info.date_ || end < info.date_)) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
