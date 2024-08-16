@@ -1814,7 +1814,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     netConnEventHandler_->RemoveAsyncTask("delay airplane mode");
     auto delayTime = GetDelayNotifyTime();
 
-    netConnEventHandler_->PostAsyncTask(
+    bool ret = netConnEventHandler_->PostAsyncTask(
         [state]() {
             NETMGR_LOG_I("Enter delay");
             auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
@@ -1834,7 +1834,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
             BroadcastManager::GetInstance().SendBroadcast(info, param);
         },
         "delay airplane mode", delayTime);
-    NETMGR_LOG_I("SetAirplaneMode out");
+    NETMGR_LOG_I("SetAirplaneMode out [%{public}d]", ret);
 
     return NETMANAGER_SUCCESS;
 }
