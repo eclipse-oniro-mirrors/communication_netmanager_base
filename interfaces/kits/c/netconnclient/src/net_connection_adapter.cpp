@@ -27,6 +27,7 @@ using NetCapMap = std::map<NetCap, NetConn_NetCap>;
 
 static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_WIFI, NETCONN_BEARER_WIFI},
+                                  {BEARER_BLUETOOTH, NETCONN_BEARER_BLUETOOTH},
                                   {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET},
                                   {BEARER_VPN, NETCONN_BEARER_VPN}};
 
@@ -39,7 +40,8 @@ static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILIT
                               {NET_CAPABILITY_INTERNET,    NETCONN_NET_CAPABILITY_INTERNET},
                               {NET_CAPABILITY_NOT_VPN,     NETCONN_NET_CAPABILITY_NOT_VPN},
                               {NET_CAPABILITY_VALIDATED,   NETCONN_NET_CAPABILITY_VALIDATED},
-                              {NET_CAPABILITY_PORTAL,   NETCONN_NET_CAPABILITY_PORTAL}};
+                              {NET_CAPABILITY_PORTAL,   NETCONN_NET_CAPABILITY_PORTAL},
+                              {NET_CAPABILITY_CHECKING_CONNECTIVITY, NETCONN_NET_CAPABILITY_CHECKING_CONNECTIVITY}};
 
 static int32_t Conv2Ch(const std::string s, char *ch)
 {

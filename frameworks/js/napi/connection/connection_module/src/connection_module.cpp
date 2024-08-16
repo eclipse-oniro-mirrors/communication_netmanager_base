@@ -225,6 +225,7 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
         DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED),
         DECLARE_NET_CAP(NET_CAPABILITY_PORTAL),
         DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT),
+        DECLARE_NET_CAP(NET_CAPABILITY_CHECKING_CONNECTIVITY),
     };
     napi_value caps = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, caps, netCaps);
