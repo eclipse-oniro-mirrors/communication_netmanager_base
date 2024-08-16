@@ -34,7 +34,8 @@ enum NetCap {
     NET_CAPABILITY_VALIDATED = 16,
     NET_CAPABILITY_PORTAL = 17,
     NET_CAPABILITY_INTERNAL_DEFAULT = 18, // for inner virtual interface if needed.
-    NET_CAPABILITY_END // The maximum value is 32. Do not exceed the limit.
+    NET_CAPABILITY_CHECKING_CONNECTIVITY = 31,
+    NET_CAPABILITY_END = 32 // The maximum value is 32. Do not exceed the limit.
 };
 
 enum NetBearType {

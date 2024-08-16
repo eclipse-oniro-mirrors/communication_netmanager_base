@@ -75,6 +75,10 @@ void NetSupplier::ResetNetSupplier()
     netQuality_ = QUALITY_NORMAL_STATE;
     // Reset network detection progress.
     isFirstTimeDetectionDone = false;
+    // Reset network capabilities for checking connectivity finished flag.
+    netCaps_.InsertNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
 }
 
 bool NetSupplier::operator==(const NetSupplier &netSupplier) const
@@ -545,6 +549,11 @@ void NetSupplier::SetDetectionDone()
 {
     if (!isFirstTimeDetectionDone) {
         isFirstTimeDetectionDone = true;
+    }
+    if (HasNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY)) {
+        netCaps_.RemoveNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+        netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+        NETMGR_LOG_I("supplier %{public}u detection done, remove NET_CAPABILITY_CHECKING_CONNECTIVITY", supplierId_);
     }
 }
 
