@@ -39,8 +39,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int PERFORM_POLL_INTERVAL_MS = 50;
-constexpr int CURL_CONNECT_TIME_OUT_MS = 5000;
-constexpr int CURL_OPERATE_TIME_OUT_MS = 5000;
+constexpr int CURL_CONNECT_TIME_OUT_MS = 10000;
+constexpr int CURL_OPERATE_TIME_OUT_MS = 10000;
 constexpr int32_t DOMAIN_IP_ADDR_LEN_MAX = 128;
 constexpr int32_t DEFAULT_HTTP_PORT = 80;
 constexpr int32_t DEFAULT_HTTPS_PORT = 443;
@@ -558,11 +558,6 @@ int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
         return false;
     }
     return true;
-}
-
-bool NetHttpProbe::HasGlobalHttpProxy()
-{
-    return !globalHttpProxy_.GetHost().empty();
 }
 
 void NetHttpProbe::ProbeWithoutGlobalHttpProxy()

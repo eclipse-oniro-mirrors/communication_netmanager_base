@@ -40,6 +40,7 @@ ohos_unittest("net_conn_multi_test") {
     "net_score_test.cpp",
     "network_security_config_test.cpp",
     "network_test.cpp",
+    "probe_thread_test.cpp",
   ]
 
   include_dirs = [

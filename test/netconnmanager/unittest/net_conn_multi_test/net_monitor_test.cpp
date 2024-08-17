@@ -76,16 +76,90 @@ HWTEST_F(NetMonitorTest, SendHttpProbe001, TestSize.Level1)
 {
     std::string domain;
     std::string urlPath;
-    NetHttpProbeResult probeResult = instance_->SendHttpProbe(PROBE_HTTP_HTTPS);
+    NetHttpProbeResult probeResult = instance_->SendProbe();
     EXPECT_EQ(probeResult.IsFailed(), true);
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult001, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {200, url};
+    NetHttpProbeResult httpsResult = {0, url};
+    NetHttpProbeResult fallbackHttpResult = {200, url};
+    NetHttpProbeResult fallbackHttpsResult = {0, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_TRUE(result.IsNeedPortal());
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult002, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {0, url};
+    NetHttpProbeResult httpsResult = {0, url};
+    NetHttpProbeResult fallbackHttpResult = {200, url};
+    NetHttpProbeResult fallbackHttpsResult = {0, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_TRUE(result.IsNeedPortal());
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult003, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {0, url};
+    NetHttpProbeResult httpsResult = {204, url};
+    NetHttpProbeResult fallbackHttpResult = {0, url};
+    NetHttpProbeResult fallbackHttpsResult = {0, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_TRUE(result.IsSuccessful());
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult004, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {0, url};
+    NetHttpProbeResult httpsResult = {0, url};
+    NetHttpProbeResult fallbackHttpResult = {0, url};
+    NetHttpProbeResult fallbackHttpsResult = {204, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_TRUE(result.IsSuccessful());
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult005, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {204, url};
+    NetHttpProbeResult httpsResult = {0, url};
+    NetHttpProbeResult fallbackHttpResult = {204, url};
+    NetHttpProbeResult fallbackHttpsResult = {0, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_TRUE(result.IsSuccessful());
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResult006, TestSize.Level1)
+{
+    std::string url = "test";
+    NetHttpProbeResult httpResult = {0, url};
+    NetHttpProbeResult httpsResult = {0, url};
+    NetHttpProbeResult fallbackHttpResult = {0, url};
+    NetHttpProbeResult fallbackHttpsResult = {0, url};
+    NetHttpProbeResult result = instance_->ProcessThreadDetectResult(httpResult, httpsResult, fallbackHttpResult,
+        fallbackHttpsResult);
+    EXPECT_FALSE(result.IsSuccessful());
 }
 
 HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
 {
-    std::string httpUrl, httpsUrl;
-    instance_->GetHttpProbeUrlFromConfig(httpUrl, httpsUrl);
-    EXPECT_EQ(httpUrl.empty(), false);
-    EXPECT_EQ(httpsUrl.empty(), false);
+    instance_->GetHttpProbeUrlFromConfig();
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS
