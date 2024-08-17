@@ -117,7 +117,7 @@ int32_t Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
+int32_t Conv2HttpProxy(const HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
 {
     int32_t ret = Conv2Ch(httpProxyObj.GetHost(), httpProxy->host);
     if (ret != NETMANAGER_SUCCESS) {
@@ -140,6 +140,17 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
     httpProxy->exclusionListSize = static_cast<int32_t>(httpProxyObj.GetExclusionList().size());
 
     return NETMANAGER_SUCCESS;
+}
+
+void ConvertNetConn2HttpProxy(const NetConn_HttpProxy &netConn, HttpProxy &httpProxyObj)
+{
+    httpProxyObj.SetHost(std::string(netConn.host));
+    httpProxyObj.SetPort(netConn.port);
+    std::list<std::string> exclusionList;
+    for (int32_t i = 0; i < netConn.exclusionListSize; i++) {
+        exclusionList.emplace_back(netConn.exclusionList[i]);
+    }
+    httpProxyObj.SetExclusionList(exclusionList);
 }
 
 int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *prop)

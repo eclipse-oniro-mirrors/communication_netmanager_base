@@ -226,6 +226,12 @@ int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netCo
 
 int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId);
 
+int32_t OH_NetConn_SetAppHttpProxy(NetConn_HttpProxy *httpProxy);
+
+int32_t OH_NetConn_RegisterAppHttpProxyCallback(OH_NetConn_AppHttpProxyChange appHttpProxyChange, uint32_t *callbackId);
+
+void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId);
+
 #ifdef __cplusplus
 }
 #endif

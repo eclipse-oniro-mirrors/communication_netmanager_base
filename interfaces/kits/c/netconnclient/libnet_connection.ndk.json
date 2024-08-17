@@ -46,5 +46,17 @@
     {
         "first_introduced": "12",
         "name": "OH_NetConn_BindSocket"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_SetAppHttpProxy"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_RegisterAppHttpProxyCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_UnregisterAppHttpProxyCallback"
     }
 ]
