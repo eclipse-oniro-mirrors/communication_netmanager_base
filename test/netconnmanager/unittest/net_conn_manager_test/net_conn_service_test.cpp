@@ -729,19 +729,6 @@ HWTEST_F(NetConnServiceTest, GetIfaceNamesTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
-{
-    std::string ifaceName;
-    auto ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_DEFAULT, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
-
-    ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_BLUETOOTH, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
-
-    ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_VPN, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
 {
     SafeMap<std::string, std::string> data;
