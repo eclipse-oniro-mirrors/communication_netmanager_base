@@ -51,6 +51,9 @@ void NetAccessPolicyRDB::RdbDataOpenCallback::UpgradeDbVersionTo(NativeRdb::RdbS
 {
     switch (newVersion) {
         case RDB_VERSION_1: case RDB_VERSION_2:
+        // Add column isBroker integer field when upgrading rdb version to 1 or 2.
+        case RDB_VERSION_1:
+        case RDB_VERSION_2:
             AddIsBroker(store, newVersion);
         default:
             NETMGR_LOG_E("no such newVersion: %{public}d", newVersion);
