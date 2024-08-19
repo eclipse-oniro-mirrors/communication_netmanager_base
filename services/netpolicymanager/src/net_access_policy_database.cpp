@@ -50,9 +50,8 @@ int NetAccessPolicyRDB::RdbDataOpenCallback::OnUpgrade(NativeRdb::RdbStore &stor
 void NetAccessPolicyRDB::RdbDataOpenCallback::UpgradeDbVersionTo(NativeRdb::RdbStore &store, int newVersion)
 {
     switch (newVersion) {
-        case RDB_VERSION_1: case RDB_VERSION_2:
-        // When upgrading the rdb version to 1, the is_broker field was added, but some users failed the upgrade.
         case RDB_VERSION_1:
+        // When upgrading the rdb version to 1, the is_broker field was added, but some users failed the upgrade.
         case RDB_VERSION_2:
             AddIsBroker(store, newVersion);
         default:
