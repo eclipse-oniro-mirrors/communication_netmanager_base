@@ -137,27 +137,14 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
-    if(!data.ReadUint32(uid)) {
-        NETMGR_LOG_E("Read uid failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
     uint32_t requestId = 0;
-    if(!data.ReadUint32(requestId)) {
-        NETMGR_LOG_E("Read requestId failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
     uint32_t registerType = 0;
-    if(!data.ReadUint32(registerType)) {
-        NETMGR_LOG_E("Read registerType failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    std::string ident;
-    if(!data.ReadString(ident)) {
-        NETMGR_LOG_E("Read ident failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+    std::string iden;
+    int32_t result =
+        data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) && data.ReadString(ident);
+    if (!result) {
+        NETMGR_LOG_E("Read uid, requestid, registerType or ident failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL
     }
 
     std::set<NetBearType> netBearTypes;
@@ -172,7 +159,7 @@ int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if(!data.ReadInt32(value)) {
+        if (!data.ReadInt32(value)) {
             NETMGR_LOG_E("Read bearType failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
@@ -181,8 +168,8 @@ int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel
         }
     }
     std::set<NetCap> netCaps;
-    
-    if(!data.ReadUint32(size)) {
+
+    if (!data.ReadUint32(size)) {
         NETMGR_LOG_E("Read size failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -191,7 +178,7 @@ int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if(!data.ReadInt32(value)) {
+        if (!data.ReadInt32(value)) {
             NETMGR_LOG_E("Read Netcap failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
@@ -208,27 +195,14 @@ int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel
 int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
-    if(!data.ReadUint32(uid)) {
-        NETMGR_LOG_E("Read uid failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
     uint32_t requestId = 0;
-    if(!data.ReadUint32(requestId)) {
-        NETMGR_LOG_E("Read requestId failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
     uint32_t registerType = 0;
-    if(!data.ReadUint32(registerType)) {
-        NETMGR_LOG_E("Read registerType failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    std::string ident;
-    if(!data.ReadString(ident)) {
-        NETMGR_LOG_E("Read ident failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+    std::string iden;
+    int32_t result =
+        data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) && data.ReadString(ident);
+    if (!result) {
+        NETMGR_LOG_E("Read uid, requestid, registerType or ident failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL
     }
 
     std::set<NetBearType> netBearTypes;
@@ -243,7 +217,7 @@ int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessagePar
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if(!data.ReadInt32(value)) {
+        if (!data.ReadInt32(value)) {
             NETMGR_LOG_E("Read bearType failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
@@ -252,8 +226,8 @@ int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessagePar
         }
     }
     std::set<NetCap> netCaps;
-    
-    if(!data.ReadUint32(size)) {
+
+    if (!data.ReadUint32(size)) {
         NETMGR_LOG_E("Read size failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -262,7 +236,7 @@ int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessagePar
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
-        if(!data.ReadInt32(value)) {
+        if (!data.ReadInt32(value)) {
             NETMGR_LOG_E("Read Netcap failed");
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }

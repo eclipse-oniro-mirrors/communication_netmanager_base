@@ -69,7 +69,6 @@ HWTEST_F(NetSupplierCallbackBaseTest, AddRequest001, TestSize.Level1)
     netrequest.uid = 0;
     int32_t ret = supplierCbStub_->AddRequest(netrequest);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
 }
 
 HWTEST_F(NetSupplierCallbackBaseTest, RemoveRequest001, TestSize.Level1)

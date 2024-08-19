@@ -170,7 +170,6 @@ private:
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
     bool isFirstTimeDetectionDone = false;
-
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

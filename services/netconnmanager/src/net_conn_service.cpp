@@ -109,8 +109,8 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
         defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
         std::weak_ptr<INetActivateCallback> timeoutCb;
-        defaultNetActivate_ =
-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, 0, REQUEST);
+        defaultNetActivate_ = std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0,
+                                                            netConnEventHandler_, 0, REQUEST);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
@@ -660,9 +660,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
-        NetRequest netRequest;
-        netRequest.requestId = reqId;
-        netRequest.uid = callingUid;
+        NetRequest netRequest(callingUid, reqId);
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
@@ -908,8 +906,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
-    std::shared_ptr<NetActivate> request =
-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+    std::shared_ptr<NetActivate> request = std::make_shared<NetActivate>(
+        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
