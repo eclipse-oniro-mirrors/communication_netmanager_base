@@ -139,13 +139,13 @@ int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel
     uint32_t uid = 0;
     uint32_t requestId = 0;
     uint32_t registerType = 0;
-    std::string iden;
+    std::string ident;
     uint32_t size = 0;
     int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
                      data.ReadString(ident) && data.ReadUint32(size);
     if (!result) {
         NETMGR_LOG_E("Read uid, requestid, registerType, ident or size failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     std::set<NetBearType> netBearTypes;
@@ -193,13 +193,13 @@ int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessagePar
     uint32_t uid = 0;
     uint32_t requestId = 0;
     uint32_t registerType = 0;
-    std::string iden;
+    std::string ident;
     uint32_t size = 0;
     int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
                      data.ReadString(ident) && data.ReadUint32(size);
     if (!result) {
         NETMGR_LOG_E("Read uid, requestid, registerType, ident or size failed");
-        return NETMANAGER_ERR_READ_DATA_FAIL
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     std::set<NetBearType> netBearTypes;
