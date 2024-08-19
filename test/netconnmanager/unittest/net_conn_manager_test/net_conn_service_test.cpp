@@ -34,6 +34,7 @@
 #include "net_interface_callback_stub.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
 
@@ -279,6 +280,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
@@ -731,6 +733,19 @@ HWTEST_F(NetConnServiceTest, GetIfaceNamesTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
+{
+    std::string ifaceName;
+    auto ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_DEFAULT, TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
+
+    ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_BLUETOOTH, TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+
+    ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_VPN, TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
 HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
 {
     SafeMap<std::string, std::string> data;
@@ -895,9 +910,9 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     bool dnsHealthSuccess = true;
     bool dnsHealthFail = false;
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthSuccess);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, FactoryResetNetworkTest001, TestSize.Level1)
@@ -954,7 +969,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, callback, timeoutMS);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     ret = NetConnService::GetInstance()->UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERROR);

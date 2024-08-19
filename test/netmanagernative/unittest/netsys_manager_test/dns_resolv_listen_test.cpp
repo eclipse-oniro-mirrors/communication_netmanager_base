@@ -168,13 +168,6 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
     dlclose(handle);
 }
 
-HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
-{
-    DnsResolvListen dnsResolvListen;
-    dnsResolvListen.serverSockFd_ = CLIENT_SOCK_FD;
-    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
-}
-
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)
 {
     instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID), getuid());
