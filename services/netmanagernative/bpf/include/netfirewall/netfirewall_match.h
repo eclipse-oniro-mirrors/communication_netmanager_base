@@ -364,7 +364,7 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, st
     bool ingress = tuple->dir == INGRESS;
     default_action_key default_key = ingress ? DEFAULT_ACT_IN_KEY : DEFAULT_ACT_OUT_KEY;
     enum sk_action *default_action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &default_key);
-    enum sk_action sk_act = !default_action ? *default_action : SK_PASS;
+    enum sk_action sk_act = default_action ? *default_action : SK_PASS;
     action_key akey = 1;
     struct bitmap *action_bitmap = bpf_map_lookup_elem(GET_MAP(ingress, action), &akey);
     /*

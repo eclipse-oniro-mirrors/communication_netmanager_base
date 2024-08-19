@@ -156,6 +156,8 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
     protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
     appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
+    action_key Key = 1;
+    actionMap_.OrInsert(Key, Bitmap());
 
     BuildNoMarkBitmap(ruleList);
     return NETFIREWALL_SUCCESS;

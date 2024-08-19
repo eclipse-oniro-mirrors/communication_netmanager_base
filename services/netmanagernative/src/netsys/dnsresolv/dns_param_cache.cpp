@@ -446,7 +446,7 @@ bool DnsParamCache::checkEmpty4InterceptDomain(const std::string &hostName)
 bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostName)
 {
     if (checkEmpty4InterceptDomain(hostName)) {
-        return (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
+        return false;
     }
     std::string host = hostName.substr(0, hostName.find(' '));
     DNS_CONFIG_PRINT("IsInterceptDomain: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
@@ -472,23 +472,15 @@ bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostNam
     if (domainDenyLsmTrie_->LongestSuffixMatch(host, rules)) {
         wildcardDenyAction = GetFirewallRuleAction(appUid, rules);
     }
-    bool allow = false;
-    bool deny = false;
-    if ((exactAllowAction != FirewallRuleAction::RULE_INVALID) ||
-        (wildcardAllowAction != FirewallRuleAction::RULE_INVALID)) {
-        allow = true;
+    bool isAllow = (exactAllowAction != FirewallRuleAction::RULE_INVALID) ||
+                   (wildcardAllowAction != FirewallRuleAction::RULE_INVALID);
+    bool isDeny = (exactDenyAction != FirewallRuleAction::RULE_INVALID) ||
+                  (wildcardDenyAction != FirewallRuleAction::RULE_INVALID);
+    if (isAllow) {
+        // Apply default rules in case of conflict
+        return isDeny && (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
     }
-    if ((exactDenyAction != FirewallRuleAction::RULE_INVALID) ||
-        (wildcardDenyAction != FirewallRuleAction::RULE_INVALID)) {
-        deny = true;
-    }
-    if (allow && !deny) {
-        return false;
-    }
-    if (!allow && deny) {
-        return true;
-    }
-    return (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
+    return isDeny;
 }
 
 int32_t DnsParamCache::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
