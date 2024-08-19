@@ -70,6 +70,9 @@ public:
     public:
         int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override;
         int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override;
+    private:
+        void UpgradeDbVersionTo(NativeRdb::RdbStore &store, int newVersion);
+        void AddIsBroker(NativeRdb::RdbStore &store, int newVersion);
     };
     friend class RdbDataOpenCallback;
 
