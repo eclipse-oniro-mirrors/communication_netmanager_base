@@ -51,7 +51,7 @@ void NetAccessPolicyRDB::RdbDataOpenCallback::UpgradeDbVersionTo(NativeRdb::RdbS
 {
     switch (newVersion) {
         case RDB_VERSION_1: case RDB_VERSION_2:
-        // Add column isBroker integer field when upgrading rdb version to 1 or 2.
+        // When upgrading the rdb version to 1, the is_broker field was added, but some users failed the upgrade.
         case RDB_VERSION_1:
         case RDB_VERSION_2:
             AddIsBroker(store, newVersion);
