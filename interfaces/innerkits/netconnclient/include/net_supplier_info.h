@@ -40,6 +40,7 @@ struct NET_SYMBOL_VISIBLE NetSupplierInfo final : public Parcelable {
     uint32_t linkDownBandwidthKbps_ = 0;
     int32_t uid_ = 0;
     std::string ident_;
+    int32_t score_ = 0;
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSupplierInfo> Unmarshalling(Parcel &parcel);
