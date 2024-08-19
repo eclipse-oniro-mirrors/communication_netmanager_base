@@ -155,6 +155,8 @@
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
