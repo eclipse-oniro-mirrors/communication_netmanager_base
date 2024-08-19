@@ -15,9 +15,14 @@
 #ifndef NATIVE_NET_CONN_ADAPTER_H
 #define NATIVE_NET_CONN_ADAPTER_H
 
+#include <atomic>
+#include <map>
+#include <mutex>
+
 #include "http_proxy.h"
-#include "net_connection_type.h"
 #include "net_all_capabilities.h"
+#include "net_conn_callback_stub.h"
+#include "net_connection_type.h"
 #include "net_handle.h"
 #include "net_link_info.h"
 #include "refbase.h"
@@ -34,7 +39,38 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
 
 int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCapabilities *netAllCaps);
 
+int32_t ConvFromNetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCapabilities *netAllCaps);
+
 int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy);
+
+class NetConnCallbackStubAdapter : public NetConnCallbackStub {
+public:
+    NetConnCallbackStubAdapter(NetConn_NetConnCallback *callback);
+
+    int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
+    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
+    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
+    int32_t NetLost(sptr<NetHandle> &netHandle) override;
+    int32_t NetUnavailable() override;
+    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+
+private:
+    NetConn_NetConnCallback callback_{};
+};
+
+class NetConnCallbackManager {
+public:
+    static NetConnCallbackManager &GetInstance();
+    int32_t RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
+                                    const uint32_t &timeoutMS, uint32_t *callbackId);
+    int32_t UnregisterNetConnCallback(uint32_t callbackId);
+
+private:
+    NetConnCallbackManager() = default;
+    std::mutex callbackMapMutex_;
+    std::map<uint32_t, sptr<INetConnCallback>> callbackMap_;
+    uint32_t index_{0};
+};
 
 } // namespace OHOS::NetManagerStandard
 #endif /* NATIVE_NET_CONN_ADAPTER_H */

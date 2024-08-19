@@ -219,6 +219,13 @@ int32_t OHOS_NetConn_UnregisterDnsResolver(void);
  */
 int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle);
 
+int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
+                                           uint32_t timeoutMS, uint32_t *callbackId);
+
+int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netConnCallback, uint32_t *callbackId);
+
+int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId);
+
 #ifdef __cplusplus
 }
 #endif
