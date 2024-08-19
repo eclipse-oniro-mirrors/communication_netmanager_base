@@ -119,5 +119,72 @@ HWTEST_F(NetAccessPolicyRDBTest, DeleteByUid001, TestSize.Level1)
     auto ret = netAccessPolicy.DeleteByUid(uid);
     EXPECT_EQ(ret, 1);
 }
+
+HWTEST_F(NetAccessPolicyRDBTest, GetRdbStore001, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, UpgradeDbVersionTo001, TestSize.Level1)
+{
+    int newVersion = 0;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.UpgradeDbVersionTo(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, UpgradeDbVersionTo002, TestSize.Level1)
+{
+    int newVersion = 1;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.UpgradeDbVersionTo(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, UpgradeDbVersionTo003, TestSize.Level1)
+{
+    int newVersion = 2;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.UpgradeDbVersionTo(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, UpgradeDbVersionTo004, TestSize.Level1)
+{
+    int newVersion = 3;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.UpgradeDbVersionTo(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, AddIsBroker001, TestSize.Level1)
+{
+    int newVersion = 2;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.AddIsBroker(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, AddIsBroker002, TestSize.Level1)
+{
+    int newVersion = 0;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetRdbStore();
+    NetAccessPolicyRDB::RdbDataOpenCallback rdbDataOpenCallback;
+    rdbDataOpenCallback.AddIsBroker(*netAccessPolicy.rdbStore_, newVersion);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
