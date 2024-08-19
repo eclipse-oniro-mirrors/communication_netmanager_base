@@ -282,7 +282,7 @@ int32_t NetSupplierCallbackStub::AddRequest(const NetRequest &netrequest)
         callback_->AddRequest(netrequest);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("AddRequest, cost=%{public}lld", durationNs.count());
+        NETMGR_LOG_D("AddRequest, cost=%{public}lld", durationNs.count());
     }
     return 0;
 }
@@ -294,7 +294,7 @@ int32_t NetSupplierCallbackStub::RemoveRequest(const NetRequest &netrequest)
         callback_->RemoveRequest(netrequest);
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
-        NETMGR_LOG_I("RemoveRequest, cost=%{public}lld", durationNs.count());
+        NETMGR_LOG_D("RemoveRequest, cost=%{public}lld", durationNs.count());
     }
     return 0;
 }

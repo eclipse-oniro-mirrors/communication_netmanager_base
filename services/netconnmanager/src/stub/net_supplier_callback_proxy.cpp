@@ -139,6 +139,7 @@ int32_t NetSupplierCallbackProxy::AddRequest(const NetRequest &netRequest)
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_ADD_REQUEST), data,
                                       reply, option);
     if (ret != ERR_NONE) {
@@ -193,6 +194,7 @@ int32_t NetSupplierCallbackProxy::RemoveRequest(const NetRequest &netRequest)
 
     MessageParcel reply;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REMOVE_REQUEST), data,
                                       reply, option);
     if (ret != ERR_NONE) {
