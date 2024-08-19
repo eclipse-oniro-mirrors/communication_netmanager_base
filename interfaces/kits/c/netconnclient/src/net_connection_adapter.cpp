@@ -15,6 +15,7 @@
 
 #include <map>
 
+#include "net_conn_client.h"
 #include "net_connection_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -23,7 +24,9 @@
 namespace OHOS::NetManagerStandard {
 
 using BearTypeMap = std::map<NetBearType, NetConn_NetBearerType>;
+using ReverseBearTypeMap = std::map<NetConn_NetBearerType, NetBearType>;
 using NetCapMap = std::map<NetCap, NetConn_NetCap>;
+using ReverseNetCapMap = std::map<NetConn_NetCap, NetCap>;
 
 static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_WIFI, NETCONN_BEARER_WIFI},
@@ -31,17 +34,36 @@ static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET},
                                   {BEARER_VPN, NETCONN_BEARER_VPN}};
 
-static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILITY_MMS},
-                              {NET_CAPABILITY_SUPL,         NETCONN_NET_CAPABILITY_SUPL},
-                              {NET_CAPABILITY_DUN,         NETCONN_NET_CAPABILITY_DUN},
-                              {NET_CAPABILITY_IA,         NETCONN_NET_CAPABILITY_IA},
-                              {NET_CAPABILITY_XCAP,         NETCONN_NET_CAPABILITY_XCAP},
+static ReverseBearTypeMap reverseBearTypeMap = {{NETCONN_BEARER_CELLULAR, BEARER_CELLULAR},
+                                                {NETCONN_BEARER_WIFI, BEARER_WIFI},
+                                                {NETCONN_BEARER_BLUETOOTH, BEARER_BLUETOOTH},
+                                                {NETCONN_BEARER_ETHERNET, BEARER_ETHERNET},
+                                                {NETCONN_BEARER_VPN, BEARER_VPN}};
+
+static NetCapMap netCapMap = {{NET_CAPABILITY_MMS, NETCONN_NET_CAPABILITY_MMS},
+                              {NET_CAPABILITY_SUPL, NETCONN_NET_CAPABILITY_SUPL},
+                              {NET_CAPABILITY_DUN, NETCONN_NET_CAPABILITY_DUN},
+                              {NET_CAPABILITY_IA, NETCONN_NET_CAPABILITY_IA},
+                              {NET_CAPABILITY_XCAP, NETCONN_NET_CAPABILITY_XCAP},
                               {NET_CAPABILITY_NOT_METERED, NETCONN_NET_CAPABILITY_NOT_METERED},
-                              {NET_CAPABILITY_INTERNET,    NETCONN_NET_CAPABILITY_INTERNET},
-                              {NET_CAPABILITY_NOT_VPN,     NETCONN_NET_CAPABILITY_NOT_VPN},
-                              {NET_CAPABILITY_VALIDATED,   NETCONN_NET_CAPABILITY_VALIDATED},
-                              {NET_CAPABILITY_PORTAL,   NETCONN_NET_CAPABILITY_PORTAL},
+                              {NET_CAPABILITY_INTERNET, NETCONN_NET_CAPABILITY_INTERNET},
+                              {NET_CAPABILITY_NOT_VPN, NETCONN_NET_CAPABILITY_NOT_VPN},
+                              {NET_CAPABILITY_VALIDATED, NETCONN_NET_CAPABILITY_VALIDATED},
+                              {NET_CAPABILITY_PORTAL, NETCONN_NET_CAPABILITY_PORTAL},
                               {NET_CAPABILITY_CHECKING_CONNECTIVITY, NETCONN_NET_CAPABILITY_CHECKING_CONNECTIVITY}};
+
+static ReverseNetCapMap reverseNetCapMap = {
+    {NETCONN_NET_CAPABILITY_MMS, NET_CAPABILITY_MMS},
+    {NETCONN_NET_CAPABILITY_SUPL, NET_CAPABILITY_SUPL},
+    {NETCONN_NET_CAPABILITY_DUN, NET_CAPABILITY_DUN},
+    {NETCONN_NET_CAPABILITY_IA, NET_CAPABILITY_IA},
+    {NETCONN_NET_CAPABILITY_XCAP, NET_CAPABILITY_XCAP},
+    {NETCONN_NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_NOT_METERED},
+    {NETCONN_NET_CAPABILITY_INTERNET, NET_CAPABILITY_INTERNET},
+    {NETCONN_NET_CAPABILITY_NOT_VPN, NET_CAPABILITY_NOT_VPN},
+    {NETCONN_NET_CAPABILITY_VALIDATED, NET_CAPABILITY_VALIDATED},
+    {NETCONN_NET_CAPABILITY_PORTAL, NET_CAPABILITY_PORTAL},
+    {NETCONN_NET_CAPABILITY_CHECKING_CONNECTIVITY, NET_CAPABILITY_CHECKING_CONNECTIVITY}};
 
 static int32_t Conv2Ch(const std::string s, char *ch)
 {
@@ -49,7 +71,7 @@ static int32_t Conv2Ch(const std::string s, char *ch)
         NETMGR_LOG_E("string out of memory");
         return NETMANAGER_ERR_INTERNAL;
     }
-    if (strcpy_s(ch, std::strlen(ch), s.c_str()) != 0) {
+    if (strcpy_s(ch, NETCONN_MAX_STR_LEN, s.c_str()) != EOK) {
         NETMGR_LOG_E("string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -72,7 +94,7 @@ static int32_t Conv2INetAddr(const INetAddr &netAddrObj, NetConn_NetAddr *netAdd
 int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, NetConn_NetHandleList *netHandleList)
 {
     int32_t i = 0;
-    for (const auto& netHandleObj : netHandleObjList) {
+    for (const auto &netHandleObj : netHandleObjList) {
         if (i > NETCONN_MAX_NET_SIZE - 1) {
             NETMGR_LOG_E("netHandleList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -104,7 +126,7 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
     httpProxy->port = httpProxyObj.GetPort();
 
     int32_t i = 0;
-    for (const auto& exclusion : httpProxyObj.GetExclusionList()) {
+    for (const auto &exclusion : httpProxyObj.GetExclusionList()) {
         if (i > NETCONN_MAX_EXCLUSION_SIZE - 1) {
             NETMGR_LOG_E("exclusionList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -119,7 +141,6 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
 
     return NETMANAGER_SUCCESS;
 }
-
 
 int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *prop)
 {
@@ -137,7 +158,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
     }
 
     int32_t i = 0;
-    for (const auto& netAddr : infoObj.netAddrList_) {
+    for (const auto &netAddr : infoObj.netAddrList_) {
         if (i > NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("netAddrList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -150,7 +171,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
     prop->netAddrListSize = static_cast<int32_t>(infoObj.netAddrList_.size());
 
     i = 0;
-    for (const auto& dns : infoObj.dnsList_) {
+    for (const auto &dns : infoObj.dnsList_) {
         if (i > NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("dnsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -176,7 +197,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
     netAllCaps->linkDownBandwidthKbps = netAllCapsObj.linkDownBandwidthKbps_;
 
     int32_t i = 0;
-    for (const auto& netCap : netAllCapsObj.netCaps_) {
+    for (const auto &netCap : netAllCapsObj.netCaps_) {
         if (i > NETCONN_MAX_CAP_SIZE - 1) {
             NETMGR_LOG_E("netCapsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -192,7 +213,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
     netAllCaps->netCapsSize = static_cast<int32_t>(netAllCapsObj.netCaps_.size());
 
     i = 0;
-    for (const auto& bearType : netAllCapsObj.bearerTypes_) {
+    for (const auto &bearType : netAllCapsObj.bearerTypes_) {
         if (i > NETCONN_MAX_BEARER_TYPE_SIZE - 1) {
             NETMGR_LOG_E("bearerTypes out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -209,4 +230,202 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t ConvFromNetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCapabilities *netAllCaps)
+{
+    netAllCapsObj.linkUpBandwidthKbps_ = netAllCaps->linkUpBandwidthKbps;
+    netAllCapsObj.linkDownBandwidthKbps_ = netAllCaps->linkDownBandwidthKbps;
+
+    if (netAllCaps->netCapsSize > NETCONN_MAX_CAP_SIZE) {
+        NETMGR_LOG_E("netCapsList out of memory");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    for (int32_t i = 0; i < netAllCaps->netCapsSize; ++i) {
+        auto netCap = netAllCaps->netCaps[i];
+        auto iterMap = reverseNetCapMap.find(netCap);
+        if (iterMap == reverseNetCapMap.end()) {
+            NETMGR_LOG_E("unknown netCapMap key");
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        netAllCapsObj.netCaps_.insert(iterMap->second);
+    }
+
+    if (netAllCaps->bearerTypesSize > NETCONN_MAX_BEARER_TYPE_SIZE) {
+        NETMGR_LOG_E("bearerTypes out of memory");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    for (int32_t i = 0; i < netAllCaps->bearerTypesSize; ++i) {
+        auto bearType = netAllCaps->bearerTypes[i];
+        auto iterMap = reverseBearTypeMap.find(bearType);
+        if (iterMap == reverseBearTypeMap.end()) {
+            NETMGR_LOG_E("unknown bearTypeMap key");
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        netAllCapsObj.bearerTypes_.insert(iterMap->second);
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+NetConnCallbackStubAdapter::NetConnCallbackStubAdapter(NetConn_NetConnCallback *callback)
+{
+    this->callback_.onNetworkAvailable = callback->onNetworkAvailable;
+    this->callback_.onNetCapabilitiesChange = callback->onNetCapabilitiesChange;
+    this->callback_.onConnetionProperties = callback->onConnetionProperties;
+    this->callback_.onNetLost = callback->onNetLost;
+    this->callback_.onNetUnavailable = callback->onNetUnavailable;
+    this->callback_.onNetBlockStatusChange = callback->onNetBlockStatusChange;
+}
+
+int32_t NetConnCallbackStubAdapter::NetAvailable(sptr<NetHandle> &netHandle)
+{
+    if (this->callback_.onNetworkAvailable == nullptr || netHandle == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    NetConn_NetHandle netHandleInner;
+    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    this->callback_.onNetworkAvailable(&netHandleInner);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackStubAdapter::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
+                                                          const sptr<NetAllCapabilities> &netAllCap)
+{
+    if (this->callback_.onNetCapabilitiesChange == nullptr || netHandle == nullptr || netAllCap == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    NetConn_NetHandle netHandleInner;
+    NetConn_NetCapabilities netAllCapsInner;
+    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    ret = Conv2NetAllCapabilities(*netAllCap, &netAllCapsInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    this->callback_.onNetCapabilitiesChange(&netHandleInner, &netAllCapsInner);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackStubAdapter::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
+                                                                  const sptr<NetLinkInfo> &info)
+{
+    if (this->callback_.onConnetionProperties == nullptr || netHandle == nullptr || info == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    NetConn_NetHandle netHandleInner;
+    NetConn_ConnectionProperties netInfoInner;
+    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    ret = Conv2NetLinkInfo(*info, &netInfoInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    this->callback_.onConnetionProperties(&netHandleInner, &netInfoInner);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackStubAdapter::NetLost(sptr<NetHandle> &netHandle)
+{
+    if (this->callback_.onNetLost == nullptr || netHandle == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    NetConn_NetHandle netHandleInner;
+    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    this->callback_.onNetLost(&netHandleInner);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackStubAdapter::NetUnavailable()
+{
+    if (this->callback_.onNetUnavailable == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    this->callback_.onNetUnavailable();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackStubAdapter::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+{
+    if (this->callback_.onNetBlockStatusChange == nullptr || netHandle == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    NetConn_NetHandle netHandleInner;
+    int32_t ret = Conv2NetHandle(*netHandle, &netHandleInner);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    this->callback_.onNetBlockStatusChange(&netHandleInner, blocked);
+    return NETMANAGER_SUCCESS;
+}
+
+NetConnCallbackManager &NetConnCallbackManager::GetInstance()
+{
+    static NetConnCallbackManager instance;
+    return instance;
+}
+
+int32_t NetConnCallbackManager::RegisterNetConnCallback(NetConn_NetSpecifier *specifier,
+                                                        NetConn_NetConnCallback *netConnCallback,
+                                                        const uint32_t &timeoutMS, uint32_t *callbackId)
+{
+    sptr<NetConnCallbackStubAdapter> callback = sptr<NetConnCallbackStubAdapter>::MakeSptr(netConnCallback);
+    sptr<NetSpecifier> specifierInner = new NetSpecifier;
+
+    if (specifier != nullptr) {
+        int32_t ret = ConvFromNetAllCapabilities(specifierInner->netCapabilities_, &specifier->caps);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("ConvFromNetAllCapabilities failed");
+            return ret;
+        }
+        if (specifier->bearerPrivateIdentifier != nullptr) {
+            specifierInner->ident_ = std::string(specifier->bearerPrivateIdentifier);
+        }
+        ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifierInner, callback, timeoutMS);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("RegisterNetConnCallback failed");
+            return ret;
+        }
+    } else {
+        int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("RegisterNetConnCallback failed");
+            return ret;
+        }
+    }
+
+    std::lock_guard<std::mutex> lock(this->callbackMapMutex_);
+    *callbackId = this->index_++;
+    this->callbackMap_[*callbackId] = callback;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnCallbackManager::UnregisterNetConnCallback(uint32_t callbackId)
+{
+    std::lock_guard<std::mutex> lock(this->callbackMapMutex_);
+    auto it = this->callbackMap_.find(callbackId);
+    if (it != this->callbackMap_.end()) {
+        int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(it->second);
+        this->callbackMap_.erase(it);
+        return ret;
+    } else {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+}
+
 } // namespace OHOS::NetManagerStandard

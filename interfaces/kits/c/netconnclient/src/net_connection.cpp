@@ -15,8 +15,8 @@
 
 #include "net_connection.h"
 #include "net_conn_client.h"
-#include "net_connection_type.h"
 #include "net_connection_adapter.h"
+#include "net_connection_type.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -172,8 +172,7 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
     return ret;
 }
 
-int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle,
-                                      NetConn_NetCapabilities *netAllCapabilities)
+int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netAllCapabilities)
 {
     if (netHandle == nullptr || netAllCapabilities == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetNetCapabilities received invalid parameters");
@@ -247,4 +246,43 @@ int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle)
 
     int32_t ret = NetConnClient::GetInstance().BindSocket(socketFd, netHandle->netId);
     return ret;
+}
+
+int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
+                                           uint32_t timeoutMS, uint32_t *callbackId)
+{
+    if (specifier == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback specifier is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    if (netConnCallback == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    return NetConnCallbackManager::GetInstance().RegisterNetConnCallback(specifier, netConnCallback, timeoutMS,
+                                                                         callbackId);
+}
+
+int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netConnCallback, uint32_t *callbackId)
+{
+    if (netConnCallback == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    return NetConnCallbackManager::GetInstance().RegisterNetConnCallback(nullptr, netConnCallback, 0, callbackId);
+}
+
+int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId)
+{
+    return NetConnCallbackManager::GetInstance().UnregisterNetConnCallback(callBackId);
 }
