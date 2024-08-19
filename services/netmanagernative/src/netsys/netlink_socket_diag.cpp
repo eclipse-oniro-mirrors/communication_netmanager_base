@@ -120,8 +120,6 @@ int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd)
     Ack ack;
     ssize_t bytesread = recv(fd, &ack, sizeof(ack), MSG_DONTWAIT | MSG_PEEK);
     if (bytesread < 0) {
-        NETNATIVE_LOGE("Get error info from kernel failed errno[%{public}d]: strerror:%{public}s", errno,
-                       strerror(errno));
         return (errno == EAGAIN) ? NETMANAGER_SUCCESS : -errno;
     }
     if (bytesread == static_cast<ssize_t>(sizeof(ack)) && ack.hdr_.nlmsg_type == NLMSG_ERROR) {
@@ -303,6 +301,79 @@ int32_t NetLinkSocketDiag::SetSocketDestroyType(const std::string &netCapabiliti
         socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
     }
     return 0;
+}
+
+void NetLinkSocketDiag::SockDiagUidDumpCallback(uint8_t proto, const inet_diag_msg *msg,
+    const NetLinkSocketDiag::DestroyFilter& needDestroy)
+{
+    NETNATIVE_LOG_D(" SockDiagUidDumpCallback");
+    if (!needDestroy(msg)) {
+        return;
+    }
+
+    ExecuteDestroySocket(proto, msg);
+}
+
+int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
+    const NetLinkSocketDiag::DestroyFilter& needDestroy)
+{
+    NETNATIVE_LOG_D("ProcessSockDiagUidDumpResponse");
+    char buf[KERNEL_BUFFER_SIZE] = {0};
+    ssize_t readBytes = read(dumpSock_, buf, sizeof(buf));
+    if (readBytes < 0) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    while (readBytes > 0) {
+        uint32_t len = static_cast<uint32_t>(readBytes);
+        for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
+                NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
+                    strerror(-err->error));
+                return err->error;
+            } else if (nlh->nlmsg_type == NLMSG_DONE) {
+                NETNATIVE_LOGE("ProcessSockDiagUidDumpResponse nlh->nlmsg_type == NLMSG_DONE");
+                return NETMANAGER_SUCCESS;
+            } else {
+                const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
+                SockDiagUidDumpCallback(proto, msg, needDestroy);
+            }
+        }
+        readBytes = read(dumpSock_, buf, sizeof(buf));
+        if (readBytes < 0) {
+            NETNATIVE_LOGE("ProcessSockDiagUidDumpResponse readBytes < 0");
+            return -errno;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid)
+{
+    NETNATIVE_LOG_D("TCP-RST DestroyLiveSocketsWithUid, uid:%{public}d", uid);
+    if (!CreateNetlinkSocket()) {
+        NETNATIVE_LOGE("Create netlink diag socket failed.");
+        return;
+    }
+    auto needDestroy = [&] (const inet_diag_msg *msg) {
+        return msg != nullptr && uid == msg->idiag_uid && IsMatchNetwork(msg, ipAddr) && !IsLoopbackSocket(msg);
+    };
+    const int32_t proto = IPPROTO_TCP;
+    const uint32_t states = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV);
+    for (const int family : {AF_INET, AF_INET6}) {
+        int32_t ret = SendSockDiagDumpRequest(proto, family, states);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("Failed to dump %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
+            break;
+        }
+        ret = ProcessSockDiagUidDumpResponse(proto, needDestroy);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("Failed to destroy %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
+            break;
+        }
+    }
+
+    NETNATIVE_LOG_D("TCP-RST Destroyed %{public}d sockets", socketsDestroyed_);
 }
 } // namespace nmd
 } // namespace OHOS

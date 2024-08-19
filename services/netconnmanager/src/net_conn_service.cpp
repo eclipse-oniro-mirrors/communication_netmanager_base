@@ -2769,5 +2769,26 @@ int32_t NetConnService::DisableDistributedNetAsync(bool isServer)
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::CloseSocketsUid(int32_t netId, uint32_t uid)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask(
+            [this, netId, uid, &result]() { result = this->CloseSocketsUidAsync(netId, uid); });
+    }
+    return result;
+}
+
+int32_t NetConnService::CloseSocketsUidAsync(int32_t netId, uint32_t uid)
+{
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+        NETMGR_LOG_E("Could not find the corresponding network.");
+        return NET_CONN_ERR_NETID_NOT_FOUND;
+    }
+    iterNetwork->second->CloseSocketsUid(uid);
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

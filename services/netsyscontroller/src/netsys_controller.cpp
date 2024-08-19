@@ -1528,5 +1528,15 @@ int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &i
     // LCOV_EXCL_STOP
     return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
 }
+
+int32_t NetsysController::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    NETMGR_LOG_D("Set CloseSocketsUid: uid[%{public}d]", uid);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->CloseSocketsUid(ipAddr, uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

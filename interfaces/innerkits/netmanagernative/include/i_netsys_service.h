@@ -179,6 +179,7 @@ public:
     virtual int32_t StopClat(const std::string &interfaceName) = 0;
     virtual int32_t ClearFirewallAllRules() = 0;
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
+    virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

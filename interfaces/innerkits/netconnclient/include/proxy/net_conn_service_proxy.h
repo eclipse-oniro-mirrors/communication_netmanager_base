@@ -91,6 +91,7 @@ public:
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override;
+    int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

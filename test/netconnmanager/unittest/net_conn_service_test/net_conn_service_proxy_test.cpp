@@ -697,6 +697,14 @@ HWTEST_F(NetConnServiceProxyTest, DisableVnicNetwork001, TestSize.Level1)
     int32_t ret = instance_->DisableVnicNetwork();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, CloseSocketsUid001, TestSize.Level1)
+{
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = instance_->CloseSocketsUid(netId, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

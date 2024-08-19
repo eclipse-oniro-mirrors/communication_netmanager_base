@@ -770,5 +770,13 @@ bool Network::IsNat464Prefered()
     }
     return true;
 }
+
+
+void Network::CloseSocketsUid(uint32_t uid)
+{
+    for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        NetsysController::GetInstance().CloseSocketsUid(inetAddr.address_, uid);
+    }
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

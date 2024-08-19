@@ -109,6 +109,8 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
         &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
+        &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
@@ -1624,6 +1626,28 @@ int32_t NetConnServiceStub::OnUnregisterPreAirplaneCallback(MessageParcel &data,
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnCloseSocketsUid(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId;
+    NETMGR_LOG_I("OnCloseSocketsUid");
+    if (!data.ReadInt32(netId)) {
+        NETMGR_LOG_E("ReadInt32 error.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    uint32_t uid;
+    if (!data.ReadUint32(uid)) {
+        NETMGR_LOG_E("ReadUint32 error.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = CloseSocketsUid(netId, uid);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("reply.WriteInt32 error");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

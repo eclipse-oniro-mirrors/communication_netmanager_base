@@ -544,6 +544,11 @@ public:
     {
         return 0;
     }
+
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

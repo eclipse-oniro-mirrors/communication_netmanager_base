@@ -462,6 +462,7 @@ public:
 
     int32_t DisableDistributedNet(bool isServer);
 
+    int32_t CloseSocketsUid(int32_t netId, uint32_t uid);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

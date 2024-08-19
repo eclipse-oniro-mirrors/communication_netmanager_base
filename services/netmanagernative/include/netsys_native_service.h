@@ -182,6 +182,7 @@ public:
     int32_t StopClat(const std::string &interfaceName) override;
     int32_t ClearFirewallAllRules() override;
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

@@ -319,6 +319,11 @@ public:
     {
         return 0;
     }
+
+    int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

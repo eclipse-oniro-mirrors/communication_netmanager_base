@@ -68,6 +68,7 @@ public:
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
     
     bool ResumeNetworkInfo();
+    void CloseSocketsUid(uint32_t uid);
 
 private:
     void StopNetDetection();

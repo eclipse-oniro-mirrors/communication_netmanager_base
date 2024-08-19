@@ -162,6 +162,7 @@ private:
     int32_t CmdStopClat(MessageParcel &data, MessageParcel &reply);
     int32_t CmdClearFirewallAllRules(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdCloseSocketsUid(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

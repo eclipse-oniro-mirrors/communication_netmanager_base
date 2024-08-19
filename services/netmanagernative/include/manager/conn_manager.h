@@ -243,6 +243,7 @@ public:
                                    bool isBroker);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes);
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
 
 private:
     int32_t defaultNetId_;

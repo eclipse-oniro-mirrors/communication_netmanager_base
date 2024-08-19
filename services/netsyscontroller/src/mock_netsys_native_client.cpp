@@ -613,5 +613,10 @@ int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, 
 {
     return 0;
 }
+
+int32_t MockNetsysNativeClient::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

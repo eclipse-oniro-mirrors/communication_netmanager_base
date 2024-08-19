@@ -24,7 +24,9 @@
 #include "bpf_mapper.h"
 #include "bpf_path.h"
 #include "local_network.h"
+#include "netlink_socket_diag.h"
 #include "net_manager_constants.h"
+#include "netlink_socket_diag.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
@@ -489,6 +491,13 @@ int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetB
         }
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int ConnManager::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    NetLinkSocketDiag socketDiag;
+    socketDiag.DestroyLiveSocketsWithUid(ipAddr, uid);
     return NETMANAGER_SUCCESS;
 }
 } // namespace nmd

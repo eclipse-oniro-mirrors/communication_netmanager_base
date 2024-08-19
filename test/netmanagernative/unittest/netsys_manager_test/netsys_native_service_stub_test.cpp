@@ -566,6 +566,11 @@ public:
     {
         return 0;
     }
+
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1995,6 +2000,25 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyVnic001, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDestroyVnic(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdCloseSocketsUid001, TestSize.Level1)
+{
+    MessageParcel data;
+    std::string ipAddr = "192.168.1.100";
+    uint32_t netId = 24;
+
+    if (!data.WriteString(ipAddr)) {
+        return;
+    }
+
+    if (!data.WriteUint32(netId)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdCloseSocketsUid(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative
