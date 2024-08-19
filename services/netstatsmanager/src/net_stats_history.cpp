@@ -21,7 +21,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 
 #define CHECK_HANDLER_INSTANCE(handler)                 \
-    if (handler == nullptr) {                           \
+    if ((handler) == nullptr) {                         \
         NETMGR_LOG_E("db handler instance is nullptr"); \
         return NETMANAGER_ERR_INTERNAL;                 \
     }                                                   \

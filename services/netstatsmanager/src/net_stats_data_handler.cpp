@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 
 #define CHECK_HELPER_INSTANCE(helper)                  \
-    if (helper == nullptr) {                           \
+    if ((helper) == nullptr) {                         \
         NETMGR_LOG_E("db helper instance is nullptr"); \
         return NETMANAGER_ERR_INTERNAL;                \
     }                                                  \
