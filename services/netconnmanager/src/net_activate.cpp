@@ -29,12 +29,13 @@ using TimeOutCallback = std::function<void()>;
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                          std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
                          const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
-                         const int32_t registerType)
+                         uint32_t uid, const int32_t registerType)
     : netSpecifier_(specifier),
       netConnCallback_(callback),
       timeoutMS_(timeoutMS),
       timeoutCallback_(timeoutCallback),
       netActEventHandler_(netActEventHandler),
+      uid_(uid),
       registerType_(registerType)
 {
     requestId_ = g_nextRequestId++;
@@ -230,6 +231,11 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
         }
     }
     return result;
+}
+
+uint32_t NetActivate::GetUid() const
+{
+    return uid_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

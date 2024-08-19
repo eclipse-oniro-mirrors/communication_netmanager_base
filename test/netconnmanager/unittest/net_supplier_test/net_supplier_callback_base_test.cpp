@@ -58,5 +58,30 @@ HWTEST_F(NetSupplierCallbackBaseTest, ReleaseNetwork001, TestSize.Level1)
     int32_t ret = supplierCbStub_->ReleaseNetwork(ident, netCaps);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetSupplierCallbackBaseTest, AddRequest001, TestSize.Level1)
+{
+    NetRequest netrequest;
+    netrequest.ident = "testsupid";
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+    netrequest.netCaps = netCaps;
+    netrequest.uid = 0;
+    int32_t ret = supplierCbStub_->AddRequest(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+}
+
+HWTEST_F(NetSupplierCallbackBaseTest, RemoveRequest001, TestSize.Level1)
+{
+    NetRequest netrequest;
+    netrequest.ident = "testsupid";
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+    netrequest.netCaps = netCaps;
+    netrequest.uid = 0;
+    int32_t ret = supplierCbStub_->RemoveRequest(netrequest);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

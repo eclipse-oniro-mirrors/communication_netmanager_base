@@ -1,0 +1,1054 @@
+
+diff --git a/frameworks/native/netconnclient/src/net_supplier_callback_base.cpp b/frameworks/native/netconnclient/src/net_supplier_callback_base.cpp
+index c95cd99f..d189d324 100644
+--- a/frameworks/native/netconnclient/src/net_supplier_callback_base.cpp
++++ b/frameworks/native/netconnclient/src/net_supplier_callback_base.cpp
+@@ -28,5 +28,14 @@ int32_t NetSupplierCallbackBase::ReleaseNetwork(const std::string &ident, const
+ {
+     return 0;
+ }
++
++int32_t NetSupplierCallbackBase::AddRequest(const NetRequest &netrequest)
++{
++    return 0;
++}
++int32_t NetSupplierCallbackBase::RemoveRequest(const NetRequest &netrequest)
++{
++    return 0;
++}
+ } // NetManagerStandard
+ } // OHOS
+\ No newline at end of file
+diff --git a/frameworks/native/netconnclient/src/proxy/net_supplier_callback_stub.cpp b/frameworks/native/netconnclient/src/proxy/net_supplier_callback_stub.cpp
+index ebbfd7af..76a83624 100644
+--- a/frameworks/native/netconnclient/src/proxy/net_supplier_callback_stub.cpp
++++ b/frameworks/native/netconnclient/src/proxy/net_supplier_callback_stub.cpp
+@@ -28,6 +28,10 @@ NetSupplierCallbackStub::NetSupplierCallbackStub()
+         &NetSupplierCallbackStub::OnRequestNetwork;
+     memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK)] =
+         &NetSupplierCallbackStub::OnReleaseNetwork;
++    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_ADD_REQUEST)] =
++        &NetSupplierCallbackStub::OnAddRequest;
++    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REMOVE_REQUEST)] =
++        &NetSupplierCallbackStub::OnRemoveRequest;
+ }
+ 
+ NetSupplierCallbackStub::~NetSupplierCallbackStub() {}
+@@ -100,7 +104,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
+     data.ReadUint32(requestId);
+     std::string requestIdent;
+     data.ReadString(requestIdent);
+-    NetRequest netRequest(registerType, netBearTypes, uid, requestId, requestIdent);
++    NetRequest netRequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
+     RequestNetwork(ident, netCaps, netRequest);
+ 
+     reply.WriteInt32(0);
+@@ -130,6 +134,148 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
+     return NETMANAGER_SUCCESS;
+ }
+ 
++int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel &reply)
++{
++    uint32_t uid = 0;
++    if(!data.ReadUint32(uid)) {
++        NETMGR_LOG_E("Read uid failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    uint32_t requestId = 0;
++    if(!data.ReadUint32(requestId)) {
++        NETMGR_LOG_E("Read requestId failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    uint32_t registerType = 0;
++    if(!data.ReadUint32(registerType)) {
++        NETMGR_LOG_E("Read registerType failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    std::string ident;
++    if(!data.ReadString(ident)) {
++        NETMGR_LOG_E("Read ident failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    std::set<NetBearType> netBearTypes;
++    uint32_t size = 0;
++    int32_t value = 0;
++    if (!data.ReadUint32(size)) {
++        NETMGR_LOG_E("Read size failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++    if (size > MAX_NET_BEARTYPE_NUM) {
++        NETMGR_LOG_E("Net beartype size is too large");
++        return NETMANAGER_ERR_INVALID_PARAMETER;
++    }
++    for (uint32_t i = 0; i < size; i++) {
++        if(!data.ReadInt32(value)) {
++            NETMGR_LOG_E("Read bearType failed");
++            return NETMANAGER_ERR_READ_DATA_FAIL;
++        }
++        if (value <= BEARER_DEFAULT) {
++            netBearTypes.insert(static_cast<NetBearType>(value));
++        }
++    }
++    std::set<NetCap> netCaps;
++    
++    if(!data.ReadUint32(size)) {
++        NETMGR_LOG_E("Read size failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++    if (size > MAX_NET_CAP_NUM) {
++        NETMGR_LOG_E("Net cap size is too large");
++        return NETMANAGER_ERR_INVALID_PARAMETER;
++    }
++    for (uint32_t i = 0; i < size; i++) {
++        if(!data.ReadInt32(value)) {
++            NETMGR_LOG_E("Read Netcap failed");
++            return NETMANAGER_ERR_READ_DATA_FAIL;
++        }
++        if (value < NET_CAPABILITY_END) {
++            netCaps.insert(static_cast<NetCap>(value));
++        }
++    }
++    NetRequest netrequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
++    AddRequest(netrequest);
++    reply.WriteInt32(0);
++    return NETMANAGER_SUCCESS;
++}
++
++int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessageParcel &reply)
++{
++    uint32_t uid = 0;
++    if(!data.ReadUint32(uid)) {
++        NETMGR_LOG_E("Read uid failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    uint32_t requestId = 0;
++    if(!data.ReadUint32(requestId)) {
++        NETMGR_LOG_E("Read requestId failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    uint32_t registerType = 0;
++    if(!data.ReadUint32(registerType)) {
++        NETMGR_LOG_E("Read registerType failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    std::string ident;
++    if(!data.ReadString(ident)) {
++        NETMGR_LOG_E("Read ident failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++
++    std::set<NetBearType> netBearTypes;
++    uint32_t size = 0;
++    int32_t value = 0;
++    if (!data.ReadUint32(size)) {
++        NETMGR_LOG_E("Read size failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++    if (size > MAX_NET_BEARTYPE_NUM) {
++        NETMGR_LOG_E("Net beartype size is too large");
++        return NETMANAGER_ERR_INVALID_PARAMETER;
++    }
++    for (uint32_t i = 0; i < size; i++) {
++        if(!data.ReadInt32(value)) {
++            NETMGR_LOG_E("Read bearType failed");
++            return NETMANAGER_ERR_READ_DATA_FAIL;
++        }
++        if (value <= BEARER_DEFAULT) {
++            netBearTypes.insert(static_cast<NetBearType>(value));
++        }
++    }
++    std::set<NetCap> netCaps;
++    
++    if(!data.ReadUint32(size)) {
++        NETMGR_LOG_E("Read size failed");
++        return NETMANAGER_ERR_READ_DATA_FAIL;
++    }
++    if (size > MAX_NET_CAP_NUM) {
++        NETMGR_LOG_E("Net cap size is too large");
++        return NETMANAGER_ERR_INVALID_PARAMETER;
++    }
++    for (uint32_t i = 0; i < size; i++) {
++        if(!data.ReadInt32(value)) {
++            NETMGR_LOG_E("Read Netcap failed");
++            return NETMANAGER_ERR_READ_DATA_FAIL;
++        }
++        if (value < NET_CAPABILITY_END) {
++            netCaps.insert(static_cast<NetCap>(value));
++        }
++    }
++    NetRequest netrequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
++    RemoveRequest(netrequest);
++    reply.WriteInt32(0);
++    return NETMANAGER_SUCCESS;
++}
++
+ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+     const NetRequest &netrequest)
+ {
+@@ -154,5 +300,29 @@ int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const
+     }
+     return 0;
+ }
++
++int32_t NetSupplierCallbackStub::AddRequest(const NetRequest &netrequest)
++{
++    if (callback_ != nullptr) {
++        auto startTime = std::chrono::steady_clock::now();
++        callback_->AddRequest(netrequest);
++        auto endTime = std::chrono::steady_clock::now();
++        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
++        NETMGR_LOG_I("AddRequest, cost=%{public}lld", durationNs.count());
++    }
++    return 0;
++}
++
++int32_t NetSupplierCallbackStub::RemoveRequest(const NetRequest &netrequest)
++{
++    if (callback_ != nullptr) {
++        auto startTime = std::chrono::steady_clock::now();
++        callback_->RemoveRequest(netrequest);
++        auto endTime = std::chrono::steady_clock::now();
++        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
++        NETMGR_LOG_I("RemoveRequest, cost=%{public}lld", durationNs.count());
++    }
++    return 0;
++}
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+diff --git a/interfaces/innerkits/netconnclient/include/net_supplier_callback_base.h b/interfaces/innerkits/netconnclient/include/net_supplier_callback_base.h
+index 3ef1875d..b0cc7de9 100644
+--- a/interfaces/innerkits/netconnclient/include/net_supplier_callback_base.h
++++ b/interfaces/innerkits/netconnclient/include/net_supplier_callback_base.h
+@@ -27,14 +27,17 @@
+ namespace OHOS {
+ namespace NetManagerStandard {
+ struct NetRequest {
+-    uint32_t registerType = REGISTER;
+-    std::set<NetBearType> bearTypes = {};
+     uint32_t uid = 0;
+     uint32_t requestId = 0;
++    uint32_t registerType = REGISTER;
+     std::string ident;
+-    NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes, const uint32_t uid = 0,
+-        const uint32_t requestId = 0, const std::string ident = "")
+-        : registerType(registerType), bearTypes(netBearTypes), uid(uid), requestId(requestId), ident(ident)
++    std::set<NetBearType> bearTypes;
++    std::set<NetCap> netCaps;
++    NetRequest(const uint32_t uid, const uint32_t reqId = 0, const uint32_t &registerType = UNKOWN,
++        const std::string ident = "", const std::set<NetBearType> &netBearTypes = {},
++        const std::set<NetCap> &netCaps = {})
++        : uid(uid), requestId(reqId), registerType(registerType), ident(ident), bearTypes(netBearTypes),
++          netCaps(netCaps)
+     {}
+     NetRequest() = default;
+ };
+@@ -46,6 +49,8 @@ public:
+                                    const std::set<NetCap> &netCaps,
+                                    const NetRequest &netrequest = {});
+     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
++    virtual int32_t AddRequest(const NetRequest &netrequest);
++    virtual int32_t RemoveRequest(const NetRequest &netrequest);
+ };
+ } // NetManagerStandard
+ } // OHOS
+diff --git a/interfaces/innerkits/netconnclient/include/proxy/conn_ipc_interface_code.h b/interfaces/innerkits/netconnclient/include/proxy/conn_ipc_interface_code.h
+index e815341c..3a97706e 100644
+--- a/interfaces/innerkits/netconnclient/include/proxy/conn_ipc_interface_code.h
++++ b/interfaces/innerkits/netconnclient/include/proxy/conn_ipc_interface_code.h
+@@ -122,6 +122,8 @@ enum class InterfaceCallbackInterfaceCode {
+ enum class SupplierInterfaceCode {
+     NET_SUPPLIER_REQUEST_NETWORK = 0,
+     NET_SUPPLIER_RELEASE_NETWORK = 1,
++    NET_SUPPLIER_ADD_REQUEST = 2,
++    NET_SUPPLIER_REMOVE_REQUEST = 3,
+ };
+ 
+ enum class FactoryResetCallbackInterfaceCode {
+diff --git a/interfaces/innerkits/netconnclient/include/proxy/i_net_supplier_callback.h b/interfaces/innerkits/netconnclient/include/proxy/i_net_supplier_callback.h
+index 2f1abdd4..4a865a79 100644
+--- a/interfaces/innerkits/netconnclient/include/proxy/i_net_supplier_callback.h
++++ b/interfaces/innerkits/netconnclient/include/proxy/i_net_supplier_callback.h
+@@ -37,6 +37,14 @@ public:
+     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+         const NetRequest &netrequest = {}) = 0;
+     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
++    virtual int32_t AddRequest(const NetRequest &netrequest)
++    {
++        return ERR_NONE;
++    }
++    virtual int32_t RemoveRequest(const NetRequest &netrequest)
++    {
++        return ERR_NONE;
++    }
+ };
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+diff --git a/interfaces/innerkits/netconnclient/include/proxy/net_supplier_callback_stub.h b/interfaces/innerkits/netconnclient/include/proxy/net_supplier_callback_stub.h
+index 257bba4b..218cbf90 100644
+--- a/interfaces/innerkits/netconnclient/include/proxy/net_supplier_callback_stub.h
++++ b/interfaces/innerkits/netconnclient/include/proxy/net_supplier_callback_stub.h
+@@ -40,6 +40,8 @@ public:
+     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+         const NetRequest &netRequest = {}) override;
+     int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
++    int32_t AddRequest(const NetRequest &netrequest) override;
++    int32_t RemoveRequest(const NetRequest &netrequest) override;
+ 
+ private:
+     using NetSupplierCallbackFunc = int32_t (NetSupplierCallbackStub::*)(MessageParcel &, MessageParcel &);
+@@ -47,6 +49,8 @@ private:
+ private:
+     int32_t OnRequestNetwork(MessageParcel &data, MessageParcel &reply);
+     int32_t OnReleaseNetwork(MessageParcel &data, MessageParcel &reply);
++    int32_t OnAddRequest(MessageParcel &data, MessageParcel &reply);
++    int32_t OnRemoveRequest(MessageParcel &data, MessageParcel &reply);
+ 
+ private:
+     std::map<uint32_t, NetSupplierCallbackFunc> memberFuncMap_;
+diff --git a/interfaces/innerkits/netconnclient/libnetconn_kits.map b/interfaces/innerkits/netconnclient/libnetconn_kits.map
+index f23e073f..91e69fa6 100644
+--- a/interfaces/innerkits/netconnclient/libnetconn_kits.map
++++ b/interfaces/innerkits/netconnclient/libnetconn_kits.map
+@@ -141,11 +141,19 @@
+       "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+       "OHOS::NetManagerStandard::NetSupplierCallbackBase::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
+       "OHOS::NetManagerStandard::NetSupplierCallbackBase::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
++      "OHOS::NetManagerStandard::NetSupplierCallbackBase::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "OHOS::NetManagerStandard::INetSupplierCallback::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "OHOS::NetManagerStandard::NetSupplierCallbackBase::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "OHOS::NetManagerStandard::INetSupplierCallback::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
+       "OHOS::NetManagerStandard::NetSupplierCallbackStub::NetSupplierCallbackStub()";
+       "OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
+       "OHOS::NetManagerStandard::NetSupplierCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+       "OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
+       "OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
++      "OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
++      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
+       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
+       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
+diff --git a/services/netconnmanager/include/net_activate.h b/services/netconnmanager/include/net_activate.h
+index 64fb3fa7..30105e28 100644
+--- a/services/netconnmanager/include/net_activate.h
++++ b/services/netconnmanager/include/net_activate.h
+@@ -46,7 +46,7 @@ public:
+ public:
+     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
+                 std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
+-                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
++                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler, uint32_t uid = 0,
+                 const int32_t registerType = REGISTER);
+     ~NetActivate();
+     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent = false);
+@@ -59,6 +59,8 @@ public:
+     int32_t GetRegisterType() const;
+     std::set<NetBearType> GetBearType() const;
+     void StartTimeOutNetAvailable();
++    uint32_t GetUid() const;
++
+ private:
+     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
+     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
+@@ -77,6 +79,7 @@ private:
+     std::weak_ptr<INetActivateCallback> timeoutCallback_;
+     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_;
+     std::string activateName_ = "";
++    uint32_t uid_ = 0;
+     int32_t registerType_ = REGISTER;
+ };
+ } // namespace NetManagerStandard
+diff --git a/services/netconnmanager/include/net_conn_service.h b/services/netconnmanager/include/net_conn_service.h
+index c8d5d943..68d0366f 100644
+--- a/services/netconnmanager/include/net_conn_service.h
++++ b/services/netconnmanager/include/net_conn_service.h
+@@ -411,8 +411,8 @@ private:
+     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
+     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
+                                            sptr<NetSupplier> &supplier);
+-    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const uint32_t callingUid = 0);
+-    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
++    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
++    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid);
+     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
+     void FindBestNetworkForAllRequest();
+     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
+diff --git a/services/netconnmanager/include/net_supplier.h b/services/netconnmanager/include/net_supplier.h
+index 288f5405..744fc364 100644
+--- a/services/netconnmanager/include/net_supplier.h
++++ b/services/netconnmanager/include/net_supplier.h
+@@ -123,10 +123,12 @@ public:
+     bool SupplierDisconnection(const std::set<NetCap> &netCaps);
+     void SetRestrictBackground(bool restrictBackground);
+     bool GetRestrictBackground() const;
+-    bool RequestToConnect(uint32_t reqId, const NetRequest &netrequest = {});
+-    int32_t SelectAsBestNetwork(uint32_t reqId);
+-    void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
+-    int32_t CancelRequest(uint32_t reqId);
++    bool RequestToConnect(const NetRequest &netrequest = {});
++    void AddRequest(const NetRequest &netrequest);
++    void RemoveRequest(const NetRequest &netrequest);
++    int32_t SelectAsBestNetwork(const NetRequest &netrequest);
++    void ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest);
++    int32_t CancelRequest(const NetRequest &netrequest);
+     void RemoveBestRequest(uint32_t reqId);
+     std::set<uint32_t> &GetBestRequestList();
+     void SetDefault();
+@@ -154,6 +156,7 @@ private:
+     int32_t netScore_ = 0;
+     std::set<uint32_t> requestList_;
+     std::set<uint32_t> bestReqList_;
++    std::set<uint32_t> uidReqList_;
+     sptr<INetSupplierCallback> netController_ = nullptr;
+     std::shared_ptr<Network> network_ = nullptr;
+     sptr<NetHandle> netHandle_ = nullptr;
+@@ -161,11 +164,7 @@ private:
+     std::string type_ = "";
+     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
+     bool isFirstTimeDetectionDone = false;
+-    enum RegisterType {
+-        UNKOWN,
+-        REGISTER,
+-        REQUEST,
+-    };
++
+ };
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+diff --git a/services/netconnmanager/include/stub/net_supplier_callback_proxy.h b/services/netconnmanager/include/stub/net_supplier_callback_proxy.h
+index 240261cb..f4432d9c 100644
+--- a/services/netconnmanager/include/stub/net_supplier_callback_proxy.h
++++ b/services/netconnmanager/include/stub/net_supplier_callback_proxy.h
+@@ -31,6 +31,8 @@ public:
+     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
+                            const NetRequest &netrequest = {}) override;
+     int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
++    int32_t AddRequest(const NetRequest &netrequest) override;
++    int32_t RemoveRequest(const NetRequest &netrequest) override;
+ 
+ private:
+     bool WriteInterfaceToken(MessageParcel &data);
+diff --git a/services/netconnmanager/src/net_activate.cpp b/services/netconnmanager/src/net_activate.cpp
+index 2a9abe68..d35bd69d 100644
+--- a/services/netconnmanager/src/net_activate.cpp
++++ b/services/netconnmanager/src/net_activate.cpp
+@@ -29,12 +29,13 @@ using TimeOutCallback = std::function<void()>;
+ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
+                          std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
+                          const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
+-                         const int32_t registerType)
++                         uint32_t uid, const int32_t registerType)
+     : netSpecifier_(specifier),
+       netConnCallback_(callback),
+       timeoutMS_(timeoutMS),
+       timeoutCallback_(timeoutCallback),
+       netActEventHandler_(netActEventHandler),
++      uid_(uid),
+       registerType_(registerType)
+ {
+     requestId_ = g_nextRequestId++;
+@@ -231,5 +232,10 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
+     }
+     return result;
+ }
++
++uint32_t NetActivate::GetUid() const
++{
++    return uid_;
++}
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+diff --git a/services/netconnmanager/src/net_conn_service.cpp b/services/netconnmanager/src/net_conn_service.cpp
+index dd722df0..e2f09d6b 100644
+--- a/services/netconnmanager/src/net_conn_service.cpp
++++ b/services/netconnmanager/src/net_conn_service.cpp
+@@ -110,7 +110,7 @@ void NetConnService::CreateDefaultRequest()
+         defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+         std::weak_ptr<INetActivateCallback> timeoutCb;
+         defaultNetActivate_ =
+-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, REQUEST);
++            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, 0, REQUEST);
+         defaultNetActivate_->StartTimeOutNetAvailable();
+         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
+         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
+@@ -659,16 +659,19 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
+         }
+         reqId = iterActive->first;
+         auto netActivate = iterActive->second;
++        NetRequest netRequest;
++        netRequest.requestId = reqId;
++        netRequest.uid = callingUid;
+         if (netActivate) {
+             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+             if (supplier) {
+-                supplier->CancelRequest(reqId);
++                supplier->CancelRequest(netRequest);
+             }
+         }
+         NET_SUPPLIER_MAP::iterator iterSupplier;
+         for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+             if (iterSupplier->second != nullptr) {
+-                iterSupplier->second->CancelRequest(reqId);
++                iterSupplier->second->CancelRequest(netRequest);
+             }
+         }
+         iterActive = netActivates_.erase(iterActive);
+@@ -906,10 +909,11 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
+     }
+     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
+     std::shared_ptr<NetActivate> request =
+-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, registerType);
++        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+     request->StartTimeOutNetAvailable();
+     uint32_t reqId = request->GetRequestId();
+     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
++    NetRequest netrequest(request->GetUid(), reqId);
+     netActivates_[reqId] = request;
+     sptr<NetSupplier> bestNet = nullptr;
+     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
+@@ -918,7 +922,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
+             "Match to optimal supplier:[%{public}d %{public}s] netId[%{public}d] score[%{public}d] "
+             "reqId[%{public}u]",
+             bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore, reqId);
+-        bestNet->SelectAsBestNetwork(reqId);
++        bestNet->SelectAsBestNetwork(netrequest);
+         request->SetServiceSupply(bestNet);
+         CallbackForAvailable(bestNet, callback);
+         if ((bestNet->GetNetSupplierType() == BEARER_CELLULAR) || (bestNet->GetNetSupplierType() == BEARER_WIFI)) {
+@@ -935,7 +939,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
+     }
+ 
+     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
+-    SendRequestToAllNetwork(request, callingUid);
++    SendRequestToAllNetwork(request);
+     return NETMANAGER_SUCCESS;
+ }
+ 
+@@ -949,10 +953,13 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
+                 NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
+                 return;
+             }
++            NetRequest netrequest;
++            netrequest.requestId = reqId;
++            netrequest.uid = iterActivate->second->GetUid();
+             if (iterActivate->second != nullptr) {
+                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
+                 if (pNetService) {
+-                    pNetService->CancelRequest(reqId);
++                    pNetService->CancelRequest(netrequest);
+                 }
+             }
+ 
+@@ -961,7 +968,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
+                 if (iterSupplier->second == nullptr) {
+                     continue;
+                 }
+-                iterSupplier->second->CancelRequest(reqId);
++                iterSupplier->second->CancelRequest(netrequest);
+             }
+         });
+     }
+@@ -1037,7 +1044,7 @@ void NetConnService::FindBestNetworkForAllRequest()
+             NotFindBestSupplier(iterActive->first, iterActive->second, oldSupplier, callback);
+             continue;
+         }
+-        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId());
++        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId(), iterActive->second->GetUid());
+         if (bestSupplier == oldSupplier) {
+             NETMGR_LOG_D("bestSupplier is equal with oldSupplier.");
+             continue;
+@@ -1047,7 +1054,8 @@ void NetConnService::FindBestNetworkForAllRequest()
+         }
+         iterActive->second->SetServiceSupply(bestSupplier);
+         CallbackForAvailable(bestSupplier, callback);
+-        bestSupplier->SelectAsBestNetwork(iterActive->first);
++        NetRequest netRequest(iterActive->second->GetUid(), iterActive->first);
++        bestSupplier->SelectAsBestNetwork(netRequest);
+     }
+ 
+     if (bestSupplier != nullptr) {
+@@ -1106,7 +1114,8 @@ void NetConnService::RequestAllNetworkExceptDefault()
+         return;
+     }
+     // Request activation of all networks except the default network
+-    uint32_t reqId = defaultNetActivate_->GetRequestId();
++    NetRequest netrequest(
++        defaultNetActivate_->GetUid(), defaultNetActivate_->GetRequestId(), defaultNetActivate_->GetRegisterType());
+     for (const auto &netSupplier : netSuppliers_) {
+         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
+             NETMGR_LOG_E("netSupplier is null or is defaultNetSupplier_");
+@@ -1122,7 +1131,7 @@ void NetConnService::RequestAllNetworkExceptDefault()
+         if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second, true)) {
+             continue;
+         }
+-        if (!netSupplier.second->RequestToConnect(reqId)) {
++        if (!netSupplier.second->RequestToConnect(netrequest)) {
+             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed",
+                          netSupplier.second->GetSupplierId(), netSupplier.second->GetNetSupplierIdent().c_str());
+         }
+@@ -1191,8 +1200,9 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
+         if (!iter->second->MatchRequestAndNetwork(supplier, true)) {
+             continue;
+         }
+-        NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
+-        bool result = supplier->RequestToConnect(iter->first, netrequest);
++        NetRequest netrequest(iter->second->GetUid(), iter->first, iter->second->GetRegisterType());
++        netrequest.bearTypes = iter->second->GetBearType();
++        bool result = supplier->RequestToConnect(netrequest);
+         if (!result) {
+             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
+                          supplier->GetNetSupplierIdent().c_str());
+@@ -1200,15 +1210,19 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
+     }
+ }
+ 
+-void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, uint32_t callingUid)
++void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
+ {
+     if (request == nullptr) {
+         NETMGR_LOG_E("request is null");
+         return;
+     }
+ 
+-    uint32_t reqId = request->GetRequestId();
+-    NETMGR_LOG_I("Send request[%{public}d] to all supplier", request->GetRequestId());
++    NetRequest netrequest(request->GetUid(),
++            request->GetRequestId(),
++            request->GetRegisterType(),
++            request->GetNetSpecifier()->ident_,
++            request->GetBearType());
++    NETMGR_LOG_I("Send request[%{public}d] to all supplier", netrequest.requestId);
+     NET_SUPPLIER_MAP::iterator iter;
+     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+         if (iter->second == nullptr) {
+@@ -1217,9 +1231,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
+         if (!request->MatchRequestAndNetwork(iter->second, true)) {
+             continue;
+         }
+-        NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetRequestId(),
+-            request->GetNetSpecifier()->ident_);
+-        bool result = iter->second->RequestToConnect(reqId, netrequest);
++
++        bool result = iter->second->RequestToConnect(netrequest);
+         if (!result) {
+             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
+                          iter->second->GetNetSupplierIdent().c_str());
+@@ -1227,7 +1240,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
+     }
+ }
+ 
+-void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
++void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid)
+ {
+     NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
+     NET_SUPPLIER_MAP::iterator iter;
+@@ -1238,7 +1251,10 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore,
+         if (iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+             continue;
+         }
+-        iter->second->ReceiveBestScore(reqId, bestScore, supplierId);
++        NetRequest netrequest;
++        netrequest.uid = uid;
++        netrequest.requestId = reqId;
++        iter->second->ReceiveBestScore(bestScore, supplierId, netrequest);
+     }
+ }
+ 
+diff --git a/services/netconnmanager/src/net_supplier.cpp b/services/netconnmanager/src/net_supplier.cpp
+index 94596be7..4b286d9e 100644
+--- a/services/netconnmanager/src/net_supplier.cpp
++++ b/services/netconnmanager/src/net_supplier.cpp
+@@ -307,28 +307,30 @@ bool NetSupplier::IsConnected() const
+     return false;
+ }
+ 
+-bool NetSupplier::RequestToConnect(uint32_t reqId, const NetRequest &netrequest)
++bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
+ {
+-    if (requestList_.find(reqId) == requestList_.end()) {
+-        requestList_.insert(reqId);
++    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
++        requestList_.insert(netrequest.requestId);
+     }
++    AddRequest(netrequest);
+     return SupplierConnection(netCaps_.ToSet(), netrequest);
+ }
+ 
+-int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
++int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
+ {
+-    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", reqId, supplierId_,
++    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId, supplierId_,
+                  netSupplierIdent_.c_str());
+-    if (requestList_.find(reqId) == requestList_.end()) {
+-        requestList_.insert(reqId);
++    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
++        requestList_.insert(netrequest.requestId);
+     }
+-    if (bestReqList_.find(reqId) == bestReqList_.end()) {
+-        bestReqList_.insert(reqId);
++    if (bestReqList_.find(netrequest.requestId) == bestReqList_.end()) {
++        bestReqList_.insert(netrequest.requestId);
+     }
++    AddRequest(netrequest);
+     return NETMANAGER_SUCCESS;
+ }
+ 
+-void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
++void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest)
+ {
+     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
+                  netSupplierIdent_.c_str(), supplierId);
+@@ -340,38 +342,79 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
+         SupplierDisconnection(netCaps_.ToSet());
+         return;
+     }
+-    if (requestList_.find(reqId) == requestList_.end()) {
+-        NETMGR_LOG_W("Can not find request[%{public}d]", reqId);
++    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
++        NETMGR_LOG_W("Can not find request[%{public}d]", netrequest.requestId);
+         return;
+     }
+     if (netScore_ >= bestScore) {
+         NETMGR_LOG_D("High priority network, no need to disconnect");
+         return;
+     }
+-    requestList_.erase(reqId);
++    requestList_.erase(netrequest.requestId);
+     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
+                  netSupplierIdent_.c_str(), requestList_.size());
+     if (requestList_.empty()) {
+         SupplierDisconnection(netCaps_.ToSet());
+     }
+-    bestReqList_.erase(reqId);
++    RemoveRequest(netrequest);
+ }
+ 
+-int32_t NetSupplier::CancelRequest(uint32_t reqId)
++int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
+ {
+-    auto iter = requestList_.find(reqId);
++    auto iter = requestList_.find(netrequest.requestId);
+     if (iter == requestList_.end()) {
+         return NET_CONN_ERR_SERVICE_NO_REQUEST;
+     }
+-    NETMGR_LOG_I("CancelRequest reqId:%{public}u", reqId);
+-    requestList_.erase(reqId);
++    NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
++    requestList_.erase(netrequest.requestId);
+     if (requestList_.empty()) {
+         SupplierDisconnection(netCaps_.ToSet());
+     }
+-    bestReqList_.erase(reqId);
++    bestReqList_.erase(netrequest.requestId);
++    RemoveRequest(netrequest);
+     return NETMANAGER_SUCCESS;
+ }
+ 
++void NetSupplier::AddRequest(const NetRequest &netRequest)
++{
++    if (netController_ == nullptr) {
++        NETMGR_LOG_E("netController_ is nullptr");
++        return;
++    }
++    NetRequest request;
++    request.uid = netRequest.uid;
++    request.ident = netSupplierIdent_;
++    request.netCaps = netCaps_.ToSet();
++    NETMGR_LOG_D("execute AddRequest");
++    int32_t errCode = netController_->AddRequest(request);
++    NETMGR_LOG_D("AddRequest errCode[%{public}d]", errCode);
++    if (errCode != REG_OK) {
++        NETMGR_LOG_E("AddRequest fail");
++        return;
++    }
++    return;
++}
++
++void NetSupplier::RemoveRequest(const NetRequest &netrequest)
++{
++    if (netController_ == nullptr) {
++        NETMGR_LOG_E("netController_ is nullptr");
++        return;
++    }
++    NetRequest request;
++    request.uid = netrequest.uid;
++    request.ident = netSupplierIdent_;
++    request.netCaps = netCaps_.ToSet();
++    NETMGR_LOG_D("execute RemoveRequest");
++    int32_t errCode = netController_->RemoveRequest(request);
++    NETMGR_LOG_D("RemoveRequest errCode[%{public}d]", errCode);
++    if (errCode != REG_OK) {
++        NETMGR_LOG_E("RemoveRequest fail");
++        return;
++    }
++    return;
++}
++
+ void NetSupplier::RemoveBestRequest(uint32_t reqId)
+ {
+     auto iter = bestReqList_.find(reqId);
+
+diff --git a/services/netconnmanager/src/stub/net_supplier_callback_proxy.cpp b/services/netconnmanager/src/stub/net_supplier_callback_proxy.cpp
+index 107c79fe..5b0f2fae 100644
+--- a/services/netconnmanager/src/stub/net_supplier_callback_proxy.cpp
++++ b/services/netconnmanager/src/stub/net_supplier_callback_proxy.cpp
+@@ -92,6 +92,135 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, const
+     }
+     return ret;
+ }
++int32_t NetSupplierCallbackProxy::AddRequest(const NetRequest &netRequest)
++{
++    NETMGR_LOG_D(
++        "NetSupplierCallbackProxy::AddRequest: uid:[%{public}d]", netRequest.uid);
++    MessageParcel data;
++    if (!WriteInterfaceToken(data)) {
++        NETMGR_LOG_E("WriteInterfaceToken failed");
++        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.uid)) {
++        NETMGR_LOG_E("Write uid failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.requestId)) {
++        NETMGR_LOG_E("Write requestId failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.registerType)) {
++        NETMGR_LOG_E("Write registerType failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteString(netRequest.ident)) {
++        NETMGR_LOG_E("Write ident failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++
++    uint32_t size = static_cast<uint32_t>(netRequest.bearTypes.size());
++    if(!data.WriteUint32(size)) {
++        NETMGR_LOG_E("Write bearTypes size failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    for (auto netBearType : netRequest.bearTypes) {
++        if(!data.WriteInt32(netBearType)) {
++            NETMGR_LOG_E("Write net BearType failed");
++            return NETMANAGER_ERR_WRITE_DATA_FAIL;
++        }
++    }
++
++    size = static_cast<uint32_t>(netRequest.netCaps.size());
++    if (!data.WriteUint32(size)) {
++        NETMGR_LOG_E("Write net caps size failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    for (auto netCap : netRequest.netCaps) {
++        if(!data.WriteInt32(netCap)) {
++            NETMGR_LOG_E("Write net cap failed");
++            return NETMANAGER_ERR_WRITE_DATA_FAIL;
++        }
++    }
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        NETMGR_LOG_E("Remote is null");
++        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
++    }
++
++    MessageParcel reply;
++    MessageOption option;
++    int32_t ret = remote->SendRequest(
++        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_ADD_REQUEST), data, reply, option);
++    if (ret != ERR_NONE) {
++        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
++    }
++    return ret;
++}
++
++int32_t NetSupplierCallbackProxy::RemoveRequest(const NetRequest &netRequest)
++{
++        NETMGR_LOG_D(
++        "NetSupplierCallbackProxy::RemoveRequest: uid:[%{public}d]", netRequest.uid);
++    MessageParcel data;
++    if (!WriteInterfaceToken(data)) {
++        NETMGR_LOG_E("WriteInterfaceToken failed");
++        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.uid)) {
++        NETMGR_LOG_E("Write uid failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.requestId)) {
++        NETMGR_LOG_E("Write requestId failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteUint32(netRequest.registerType)) {
++        NETMGR_LOG_E("Write registerType failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    if(!data.WriteString(netRequest.ident)) {
++        NETMGR_LOG_E("Write ident failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++
++    uint32_t size = static_cast<uint32_t>(netRequest.bearTypes.size());
++    if(!data.WriteUint32(size)) {
++        NETMGR_LOG_E("Write bearTypes size failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    for (auto netBearType : netRequest.bearTypes) {
++        if(!data.WriteInt32(netBearType)) {
++            NETMGR_LOG_E("Write net BearType failed");
++            return NETMANAGER_ERR_WRITE_DATA_FAIL;
++        }
++    }
++
++    size = static_cast<uint32_t>(netRequest.netCaps.size());
++    if (!data.WriteUint32(size)) {
++        NETMGR_LOG_E("Write net caps size failed");
++        return NETMANAGER_ERR_WRITE_DATA_FAIL;
++    }
++    for (auto netCap : netRequest.netCaps) {
++        if(!data.WriteInt32(netCap)) {
++            NETMGR_LOG_E("Write net cap failed");
++            return NETMANAGER_ERR_WRITE_DATA_FAIL;
++        }
++    }
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        NETMGR_LOG_E("Remote is null");
++        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
++    }
++
++    MessageParcel reply;
++    MessageOption option;
++    int32_t ret = remote->SendRequest(
++        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REMOVE_REQUEST), data, reply, option);
++    if (ret != ERR_NONE) {
++        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
++    }
++    return ret;
++}
+ 
+ bool NetSupplierCallbackProxy::WriteInterfaceToken(MessageParcel &data)
+ {
+diff --git a/test/netconnmanager/unittest/net_conn_manager_test/net_conn_service_test.cpp b/test/netconnmanager/unittest/net_conn_manager_test/net_conn_service_test.cpp
+index 492ab354..816dd57d 100644
+--- a/test/netconnmanager/unittest/net_conn_manager_test/net_conn_service_test.cpp
++++ b/test/netconnmanager/unittest/net_conn_manager_test/net_conn_service_test.cpp
+@@ -894,7 +894,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
+     sptr<NetSupplier> newSupplier = nullptr;
+     NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
+ 
+-    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0);
++    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0, 0);
+     EXPECT_NE(ret, NETSYS_SUCCESS);
+ }
+ 
+diff --git a/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_base_test.cpp b/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_base_test.cpp
+index e06f8d0a..9d646316 100644
+--- a/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_base_test.cpp
++++ b/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_base_test.cpp
+@@ -58,5 +58,29 @@ HWTEST_F(NetSupplierCallbackBaseTest, ReleaseNetwork001, TestSize.Level1)
+     int32_t ret = supplierCbStub_->ReleaseNetwork(ident, netCaps);
+     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+ }
++
++HWTEST_F(NetSupplierCallbackBaseTest, AddRequest001, TestSize.Level1)
++{
++    NetRequest netrequest;
++    netrequest.ident = "testsupid";
++    std::set<NetCap> netCaps;
++    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
++    netrequest.netCaps = netCaps;
++    netrequest.uid = 0;
++    int32_t ret = supplierCbStub_->AddRequest(netrequest);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++
++}
++HWTEST_F(NetSupplierCallbackBaseTest, RemoveRequest001, TestSize.Level1)
++{
++    NetRequest netrequest;
++    netrequest.ident = "testsupid";
++    std::set<NetCap> netCaps;
++    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
++    netrequest.netCaps = netCaps;
++    netrequest.uid = 0;
++    int32_t ret = supplierCbStub_->RemoveRequest(netrequest);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++}
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+\ No newline at end of file
+diff --git a/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_stub_test.cpp b/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_stub_test.cpp
+index ace81609..ddee8f51 100644
+--- a/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_stub_test.cpp
++++ b/test/netconnmanager/unittest/net_supplier_test/net_supplier_callback_stub_test.cpp
+@@ -122,5 +122,61 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
+         static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK), data, reply, option);
+     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+ }
++
++HWTEST_F(NetSupplierCallbackStubTest, AddRequest001, TestSize.Level1)
++{
++    std::string ident = "testsupid";
++    std::set<NetCap> netCaps;
++    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
++    MessageParcel data;
++    if (!data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
++        return;
++    }
++    if (!data.WriteString(ident)) {
++        return;
++    }
++    uint32_t size = static_cast<uint32_t>(netCaps.size());
++    if (!data.WriteUint32(size)) {
++        return;
++    }
++    for (auto netCap : netCaps) {
++        data.WriteInt32(static_cast<uint32_t>(netCap));
++    }
++    int32_t uid = 0;
++    data.WriteInt32(uid);
++    MessageParcel reply;
++    MessageOption option;
++    int32_t ret = supplierCbStub_->OnRemoteRequest(
++        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_ADD_REQUEST), data, reply, option);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++}
++
++HWTEST_F(NetSupplierCallbackStubTest, RemoveRequest001, TestSize.Level1)
++{
++    std::string ident = "testsupid";
++    std::set<NetCap> netCaps;
++    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
++    MessageParcel data;
++    if (!data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
++        return;
++    }
++    if (!data.WriteString(ident)) {
++        return;
++    }
++    uint32_t size = static_cast<uint32_t>(netCaps.size());
++    if (!data.WriteUint32(size)) {
++        return;
++    }
++    for (auto netCap : netCaps) {
++        data.WriteInt32(static_cast<uint32_t>(netCap));
++    }
++    int32_t uid = 0;
++    data.WriteInt32(uid);
++    MessageParcel reply;
++    MessageOption option;
++    int32_t ret = supplierCbStub_->OnRemoteRequest(
++        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REMOVE_REQUEST), data, reply, option);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++}
+ } // namespace NetManagerStandard
+ } // namespace OHOS
+\ No newline at end of file

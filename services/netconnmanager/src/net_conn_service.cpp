@@ -110,7 +110,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
         std::weak_ptr<INetActivateCallback> timeoutCb;
         defaultNetActivate_ =
-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, REQUEST);
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netConnEventHandler_, 0, REQUEST);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
@@ -660,16 +660,19 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
+        NetRequest netRequest;
+        netRequest.requestId = reqId;
+        netRequest.uid = callingUid;
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
-                supplier->CancelRequest(reqId);
+                supplier->CancelRequest(netRequest);
             }
         }
         NET_SUPPLIER_MAP::iterator iterSupplier;
         for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
             if (iterSupplier->second != nullptr) {
-                iterSupplier->second->CancelRequest(reqId);
+                iterSupplier->second->CancelRequest(netRequest);
             }
         }
         iterActive = netActivates_.erase(iterActive);
@@ -906,10 +909,11 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request =
-        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, registerType);
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
+    NetRequest netrequest(request->GetUid(), reqId);
     netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
@@ -918,7 +922,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
             "Match to optimal supplier:[%{public}d %{public}s] netId[%{public}d] score[%{public}d] "
             "reqId[%{public}u]",
             bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore, reqId);
-        bestNet->SelectAsBestNetwork(reqId);
+        bestNet->SelectAsBestNetwork(netrequest);
         request->SetServiceSupply(bestNet);
         CallbackForAvailable(bestNet, callback);
         if ((bestNet->GetNetSupplierType() == BEARER_CELLULAR) || (bestNet->GetNetSupplierType() == BEARER_WIFI)) {
@@ -933,7 +937,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
-    SendRequestToAllNetwork(request, callingUid);
+    SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
 }
 
@@ -947,10 +951,13 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
                 return;
             }
+            NetRequest netrequest;
+            netrequest.requestId = reqId;
+            netrequest.uid = iterActivate->second->GetUid();
             if (iterActivate->second != nullptr) {
                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
                 if (pNetService) {
-                    pNetService->CancelRequest(reqId);
+                    pNetService->CancelRequest(netrequest);
                 }
             }
 
@@ -959,7 +966,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 if (iterSupplier->second == nullptr) {
                     continue;
                 }
-                iterSupplier->second->CancelRequest(reqId);
+                iterSupplier->second->CancelRequest(netrequest);
             }
         });
     }
@@ -1035,7 +1042,7 @@ void NetConnService::FindBestNetworkForAllRequest()
             NotFindBestSupplier(iterActive->first, iterActive->second, oldSupplier, callback);
             continue;
         }
-        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId());
+        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId(), iterActive->second->GetUid());
         if (bestSupplier == oldSupplier) {
             NETMGR_LOG_D("bestSupplier is equal with oldSupplier.");
             continue;
@@ -1045,7 +1052,8 @@ void NetConnService::FindBestNetworkForAllRequest()
         }
         iterActive->second->SetServiceSupply(bestSupplier);
         CallbackForAvailable(bestSupplier, callback);
-        bestSupplier->SelectAsBestNetwork(iterActive->first);
+        NetRequest netRequest(iterActive->second->GetUid(), iterActive->first);
+        bestSupplier->SelectAsBestNetwork(netRequest);
     }
     NETMGR_LOG_I("FindBestNetworkForAllRequest end");
 }
@@ -1100,7 +1108,8 @@ void NetConnService::RequestAllNetworkExceptDefault()
         return;
     }
     // Request activation of all networks except the default network
-    uint32_t reqId = defaultNetActivate_->GetRequestId();
+    NetRequest netrequest(
+        defaultNetActivate_->GetUid(), defaultNetActivate_->GetRequestId(), defaultNetActivate_->GetRegisterType());
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
             NETMGR_LOG_E("netSupplier is null or is defaultNetSupplier_");
@@ -1116,7 +1125,7 @@ void NetConnService::RequestAllNetworkExceptDefault()
         if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second, true)) {
             continue;
         }
-        if (!netSupplier.second->RequestToConnect(reqId)) {
+        if (!netSupplier.second->RequestToConnect(netrequest)) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed",
                          netSupplier.second->GetSupplierId(), netSupplier.second->GetNetSupplierIdent().c_str());
         }
@@ -1185,8 +1194,9 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         if (!iter->second->MatchRequestAndNetwork(supplier, true)) {
             continue;
         }
-        NetRequest netrequest(iter->second->GetRegisterType(), iter->second->GetBearType());
-        bool result = supplier->RequestToConnect(iter->first, netrequest);
+        NetRequest netrequest(iter->second->GetUid(), iter->first, iter->second->GetRegisterType());
+        netrequest.bearTypes = iter->second->GetBearType();
+        bool result = supplier->RequestToConnect(netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
                          supplier->GetNetSupplierIdent().c_str());
@@ -1194,15 +1204,19 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, uint32_t callingUid)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
 {
     if (request == nullptr) {
         NETMGR_LOG_E("request is null");
         return;
     }
 
-    uint32_t reqId = request->GetRequestId();
-    NETMGR_LOG_I("Send request[%{public}d] to all supplier", request->GetRequestId());
+    NetRequest netrequest(request->GetUid(),
+            request->GetRequestId(),
+            request->GetRegisterType(),
+            request->GetNetSpecifier()->ident_,
+            request->GetBearType());
+    NETMGR_LOG_I("Send request[%{public}d] to all supplier", netrequest.requestId);
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -1211,9 +1225,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (!request->MatchRequestAndNetwork(iter->second, true)) {
             continue;
         }
-        NetRequest netrequest(request->GetRegisterType(), request->GetBearType(), callingUid, request->GetRequestId(),
-            request->GetNetSpecifier()->ident_);
-        bool result = iter->second->RequestToConnect(reqId, netrequest);
+
+        bool result = iter->second->RequestToConnect(netrequest);
         if (!result) {
             NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
                          iter->second->GetNetSupplierIdent().c_str());
@@ -1221,7 +1234,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
     }
 }
 
-void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
+void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid)
 {
     NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
     NET_SUPPLIER_MAP::iterator iter;
@@ -1232,7 +1245,10 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
         if (iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
             continue;
         }
-        iter->second->ReceiveBestScore(reqId, bestScore, supplierId);
+        NetRequest netrequest;
+        netrequest.uid = uid;
+        netrequest.requestId = reqId;
+        iter->second->ReceiveBestScore(bestScore, supplierId, netrequest);
     }
 }
 
