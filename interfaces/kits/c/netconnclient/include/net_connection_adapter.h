@@ -41,7 +41,9 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
 
 int32_t ConvFromNetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCapabilities *netAllCaps);
 
-int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy);
+int32_t Conv2HttpProxy(const HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy);
+
+void ConvertNetConn2HttpProxy(const NetConn_HttpProxy &netConn, HttpProxy &httpProxyObj);
 
 class NetConnCallbackStubAdapter : public NetConnCallbackStub {
 public:

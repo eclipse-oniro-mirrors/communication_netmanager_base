@@ -244,6 +244,8 @@ typedef struct NetConn_NetHandleList {
 typedef int (*OH_NetConn_CustomDnsResolver)(const char *host, const char *serv, const struct addrinfo *hint,
                                             struct addrinfo **res);
 
+typedef void (*OH_NetConn_AppHttpProxyChange)(NetConn_HttpProxy *proxy);
+
 typedef struct NetConn_NetSpecifier {
     NetConn_NetCapabilities caps;
     char *bearerPrivateIdentifier;
