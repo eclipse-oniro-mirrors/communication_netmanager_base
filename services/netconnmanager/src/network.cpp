@@ -625,13 +625,6 @@ void Network::ClearDefaultNetWorkNetId()
     int32_t ret = NetsysController::GetInstance().ClearDefaultNetWorkNetId();
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_CLEAR_DEFAULT_NETWORK_FAILED, ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED);
-    } else {
-        std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                prefixLen, netCapabilities);
-        }
     }
 }
 
