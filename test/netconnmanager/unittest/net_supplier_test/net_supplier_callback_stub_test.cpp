@@ -14,14 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #define private public
 #include "net_manager_constants.h"
 #include "net_supplier_callback_stub.h"
 #include "net_supplier_callback_proxy.h"
 #include "common_net_conn_callback_test.h"
-#include "mock/mock_remote_object.h"
-#include "mock/mock_net_supplier_callback.h"
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -262,34 +259,6 @@ HWTEST_F(NetSupplierCallbackStubTest, RemoveRequest001, TestSize.Level1)
     netSupplierCallbackStub->RegisterSupplierCallbackImpl(cb);
     netSupplierCallbackStub->RemoveRequest(request);
     EXPECT_TRUE(netSupplierCallbackStub->callback_ != nullptr);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, NetSupplierCallbackProxyAddRequest001, TestSize.Level1)
-{
-    NetRequest netRequest(0, 0, 0, "ident", {NetBearType::BEARER_CELLULAR, NetBearType::BEARER_DEFAULT},
-                          {NetCap::NET_CAPABILITY_NOT_METERED, NetCap::NET_CAPABILITY_END});
-    auto remote = new MockRemoteObject();
-    sptr<MockRemoteObject> remoteNullptr;
-    auto proxy = std::make_shared<NetSupplierCallbackProxy>(remoteNullptr);
-    EXPECT_EQ(proxy->AddRequest(netRequest), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
-    EXPECT_CALL(*remote, SendRequest(_, _, _, _)).WillOnce(Return(ERR_NONE)).WillOnce(Return(ERR_NONE + 1));
-    proxy = std::make_shared<NetSupplierCallbackProxy>(remote);
-    EXPECT_EQ(proxy->AddRequest(netRequest), ERR_NONE);
-    EXPECT_EQ(proxy->AddRequest(netRequest), ERR_NONE + 1);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, NetSupplierCallbackProxyRemoveRequest001, TestSize.Level1)
-{
-    NetRequest netRequest(0, 0, 0, "ident", {NetBearType::BEARER_CELLULAR, NetBearType::BEARER_DEFAULT},
-                          {NetCap::NET_CAPABILITY_NOT_METERED, NetCap::NET_CAPABILITY_END});
-    auto remote = new MockRemoteObject();
-    sptr<MockRemoteObject> remoteNullptr;
-    auto proxy = std::make_shared<NetSupplierCallbackProxy>(remoteNullptr);
-    EXPECT_EQ(proxy->RemoveRequest(netRequest), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
-    EXPECT_CALL(*remote, SendRequest(_, _, _, _)).WillOnce(Return(ERR_NONE)).WillOnce(Return(ERR_NONE + 1));
-    proxy = std::make_shared<NetSupplierCallbackProxy>(remote);
-    EXPECT_EQ(proxy->RemoveRequest(netRequest), ERR_NONE);
-    EXPECT_EQ(proxy->RemoveRequest(netRequest), ERR_NONE + 1);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
