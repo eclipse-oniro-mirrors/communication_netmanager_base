@@ -162,6 +162,8 @@
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
       "virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
       vtable?for?OHOS::NetManagerStandard::NetSupplierCallbackBase;
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::OnAddRequest(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::OnRemoveRequest(OHOS::MessageParcel&, OHOS::MessageParcel&)";
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::NetDetectionCallbackStub()";
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnNetDetectionResult(OHOS::MessageParcel&, OHOS::MessageParcel&)";
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";

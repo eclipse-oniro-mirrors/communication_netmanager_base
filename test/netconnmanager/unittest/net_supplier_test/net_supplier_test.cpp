@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <memory>
 
 #ifdef GTEST_API_
 #define private public
@@ -21,13 +23,12 @@
 #endif
 
 #include "net_supplier.h"
-#include <gtest/gtest.h>
-#include <memory>
-
+#include "mock/mock_net_supplier_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+using namespace testing;
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
 constexpr uint32_t TEST_SUPPLIERID = 214;
@@ -94,6 +95,32 @@ HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
     uint32_t invalidValue = 100;
     result = supplier->TechToType(static_cast<NetSlotTech>(invalidValue));
     EXPECT_TRUE(result == "3G");
+}
+HWTEST_F(NetSupplierTest, AddRequest001, TestSize.Level1)
+{
+    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, {});
+    NetRequest request;
+    supplier->AddRequest(request);
+    sptr<MockNetSupplierCallback> cb = new MockNetSupplierCallback();
+    supplier->RegisterSupplierCallback(cb);
+    EXPECT_CALL(*cb, AddRequest(_))
+        .WillOnce(Return(0))
+        .WillOnce(Return(0 + 1));
+    supplier->AddRequest(request);
+    supplier->AddRequest(request);
+}
+HWTEST_F(NetSupplierTest, RemoveRequest001, TestSize.Level1)
+{
+    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, {});
+    NetRequest request;
+    supplier->RemoveRequest(request);
+    sptr<MockNetSupplierCallback> cb = new MockNetSupplierCallback();
+    supplier->RegisterSupplierCallback(cb);
+    EXPECT_CALL(*cb, RemoveRequest(_))
+        .WillOnce(Return(0))
+        .WillOnce(Return(0 + 1));
+    supplier->RemoveRequest(request);
+    supplier->RemoveRequest(request);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
