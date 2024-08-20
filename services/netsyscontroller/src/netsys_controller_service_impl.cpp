@@ -915,6 +915,14 @@ int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std:
     return netsysClient_.SetNicTrafficAllowed(ifaceNames, status);
 }
 
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysControllerServiceImpl::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    NETMGR_LOG_I("ProcessVpnStage stage=%{public}d", stage);
+    return netsysClient_.ProcessVpnStage(stage);
+}
+#endif // SUPPORT_SYSVPN
+
 int32_t NetsysControllerServiceImpl::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {
     NETMGR_LOG_D("CloseSocketsUid: uid[%{public}d]", uid);

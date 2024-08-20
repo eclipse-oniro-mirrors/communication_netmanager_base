@@ -1529,6 +1529,19 @@ int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &i
     return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
 }
 
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("ProcessVpnStage netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->ProcessVpnStage(stage);
+}
+#endif // SUPPORT_SYSVPN
+
 int32_t NetsysController::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {
     NETMGR_LOG_D("Set CloseSocketsUid: uid[%{public}d]", uid);

@@ -3176,5 +3176,38 @@ int32_t NetsysNativeServiceProxy::CloseSocketsUid(const std::string &ipAddr, uin
     }
     return result;
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(stage)) {
+        NETNATIVE_LOGE("ProcessVpnStage Write return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("ProcessVpnStage remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("ProcessVpnStage proxy sendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("ProcessVpnStage proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+#endif // SUPPORT_SYSVPN
 } // namespace NetsysNative
 } // namespace OHOS

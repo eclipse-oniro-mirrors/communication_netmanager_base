@@ -944,6 +944,17 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+
+#ifdef SUPPORT_SYSVPN
+    /**
+     * update vpn stage
+     *
+     * @param stage vpn stage to be updated
+     * @return Returns 0 success. Otherwise fail
+     */
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override;
+#endif // SUPPORT_SYSVPN
+
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;

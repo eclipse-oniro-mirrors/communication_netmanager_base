@@ -47,6 +47,15 @@ enum IptablesType {
     IPTYPE_IPV6 = 2,
     IPTYPE_IPV4V6 = 3,
 };
+enum SysVpnStageCode : int32_t {
+    VPN_STAGE_RESTART = 0, // common stage. start charon
+    VPN_STAGE_UP_HOME, // common stage. connect "home" configuration
+    VPN_STAGE_DOWN_HOME, // common stage. disconnect "home" configuration
+    VPN_STAGE_STOP, // common stage. stop charon
+    VPN_STAGE_SWANCTL_LOAD, // ikev2 vpn. load vpn config file
+    VPN_STAGE_L2TP_LOAD, // xl2tp vpn. load vpn config file
+    VPN_STAGE_L2TP_CTL, // xl2tp vpn. start pppd
+};
 class INetsysService : public IRemoteBroker {
 public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -180,6 +189,9 @@ public:
     virtual int32_t ClearFirewallAllRules() = 0;
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
     virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
+#ifdef SUPPORT_SYSVPN
+    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
+#endif // SUPPORT_SYSVPN
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

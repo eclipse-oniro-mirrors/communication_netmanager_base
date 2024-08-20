@@ -147,7 +147,11 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   sources = netsys_native_manager_sources
-
+  if (netmanager_base_enable_feature_sysvpn) {
+    cflags += [ "-DSUPPORT_SYSVPN" ]
+    cflags_cc += [ "-DSUPPORT_SYSVPN" ]
+    sources += [ "src/netsys/netsys_vpn_wrapper.cpp" ]
+  }
   deps = netsys_native_manager_deps
 
   defines = [

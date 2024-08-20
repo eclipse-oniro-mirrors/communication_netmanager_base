@@ -85,6 +85,10 @@ ohos_unittest("netsys_distributed_test") {
     "SHARING_MANAGER_DEPS",
   ]
 
+  if (netmanager_base_enable_feature_sysvpn) {
+    defines += [ "SUPPORT_SYSVPN" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
