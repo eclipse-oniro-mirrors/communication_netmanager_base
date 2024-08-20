@@ -15,13 +15,13 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#define private public
 #include "net_manager_constants.h"
 #include "net_supplier_callback_stub.h"
 #include "net_supplier_callback_proxy.h"
 #include "common_net_conn_callback_test.h"
 #include "mock/mock_remote_object.h"
 #include "mock/mock_net_supplier_callback.h"
-#define private public
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
