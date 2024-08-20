@@ -62,7 +62,6 @@ ohos_unittest("net_supplier_test") {
     "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
     "$THIRD_PARTY_ROOT/openssl:libssl_shared",
     "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -92,8 +91,6 @@ ohos_unittest("net_supplier_test") {
   defines = [
     "NETMGR_LOG_TAG = \"NetConnManager\"",
     "LOG_DOMAIN = 0xD0015B0",
-    "private = public",
-    "protected = public",
   ]
 
   if (enable_netmgr_debug) {

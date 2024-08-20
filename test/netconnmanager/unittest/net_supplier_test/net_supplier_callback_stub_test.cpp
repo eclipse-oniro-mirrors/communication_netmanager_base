@@ -21,7 +21,7 @@
 #include "common_net_conn_callback_test.h"
 #include "mock/mock_remote_object.h"
 #include "mock/mock_net_supplier_callback.h"
-
+#define private public
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
