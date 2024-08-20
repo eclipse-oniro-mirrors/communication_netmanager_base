@@ -558,7 +558,7 @@ int32_t ForkExec(const std::string &command, std::string *out)
     }
     NETMGR_LOG_I("ForkExec");
     pid_t pid = fork();
-    NETMGR_LOG_I("ForkDone");
+    NETMGR_LOG_I("ForkDone %{public}d", pid);
     if (pid < 0) {
         NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
