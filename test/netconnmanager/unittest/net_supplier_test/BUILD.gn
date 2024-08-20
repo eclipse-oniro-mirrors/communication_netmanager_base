@@ -61,7 +61,7 @@ ohos_unittest("net_supplier_test") {
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
     "$THIRD_PARTY_ROOT/openssl:libssl_shared",
-    "//third_party/googletest:gmock",
+    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
