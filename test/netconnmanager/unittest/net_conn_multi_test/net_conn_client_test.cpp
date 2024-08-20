@@ -956,6 +956,31 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNetSupplierInfo003
+ * @tc.desc: Test NetConnClient::UpdateNetSupplierInfo,return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetBearType netBearType = BEARER_CELLULAR;
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    uint32_t supplierId = 0;
+    auto &client = NetConnClient::GetInstance();
+    client.RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+
+    sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
+    netSupplierInfo->isAvailable_ = true;
+    netSupplierInfo->isRoaming_ = true;
+    netSupplierInfo->strength_ = 0x64;
+    netSupplierInfo->frequency_ = 0x10;
+    netSupplierInfo->score_ = 55;
+    int32_t ret = client.UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: GetNetInterfaceConfigurationTest001
  * @tc.desc: Test NetConnClient::GetNetInterfaceConfiguration
  * @tc.type: FUNC

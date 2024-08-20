@@ -233,12 +233,14 @@ HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
     netSupplierInfo->score_ = 90;
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId)->GetNetScore(), 90);
 
     netSupplierInfo->isAvailable_ = false;
     netSupplierInfo->ident_ = "";
     netSupplierInfo->score_ = 0;
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
+    EXPECT_EQ(NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId)->GetNetScore(), 90);
 }
 
 HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
