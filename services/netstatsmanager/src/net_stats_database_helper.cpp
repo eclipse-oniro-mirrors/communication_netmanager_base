@@ -307,7 +307,7 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
         return STATS_ERR_WRITE_DATA_FAIL;
     }
     int32_t idx = 1;
-    statement_.BindInt32(idx, uid);
+    statement_.BindInt32(idx, static_cast<int32_t>(uid));
     ret = statement_.Step();
     statement_.ResetStatementAndClearBindings();
     if (ret != SQLITE_DONE) {
