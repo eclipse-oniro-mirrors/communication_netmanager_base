@@ -49,6 +49,18 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_NetConn_RegisterNetConnCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_RegisterDefaultNetConnCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NetConn_UnregisterNetConnCallback"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NetConn_SetAppHttpProxy"
     },
     {
