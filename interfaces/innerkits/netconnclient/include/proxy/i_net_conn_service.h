@@ -110,6 +110,7 @@ public:
     virtual int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
                                                const std::string &dstAddr) = 0;
     virtual int32_t DisableDistributedNet(bool isServer) = 0;
+    virtual int32_t CloseSocketsUid(int32_t netId, uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

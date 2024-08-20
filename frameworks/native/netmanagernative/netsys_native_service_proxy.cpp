@@ -3143,5 +3143,38 @@ int32_t NetsysNativeServiceProxy::SetNicTrafficAllowed(const std::vector<std::st
     NETNATIVE_LOG_D("SetNicTrafficAllowed WriteParam func out");
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ipAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLOSE_SOCKETS_UID), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("CloseSocketsUid proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
 } // namespace NetsysNative
 } // namespace OHOS

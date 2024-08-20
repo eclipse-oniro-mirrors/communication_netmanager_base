@@ -1430,6 +1430,32 @@ void DisableDistributedNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteBool(isServer);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET), dataParcel);
 }
+
+void CloseSocketsUidTest(const uint8_t *data, size_t size)
+{
+    uint32_t uid = NetConnGetData<uint32_t>();
+    std::string ipAddr = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteUint32(uid);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID), dataParcel);
+
+    MessageParcel dataParcelNoIfName;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoIfName)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
+        return;
+    }
+    dataParcelNoIfName.WriteString(ipAddr);
+    dataParcelNoIfName.WriteUint32(uid);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID), dataParcelNoIfName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1484,5 +1510,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::EnableDistributedClientNetFuzzTest(data, size);
     OHOS::NetManagerStandard::EnableDistributedServerNetFuzzTest(data, size);
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     return 0;
 }

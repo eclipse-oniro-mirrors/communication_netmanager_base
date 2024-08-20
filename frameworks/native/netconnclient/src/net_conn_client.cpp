@@ -975,5 +975,15 @@ std::optional<std::string> NetConnClient::ObtainBundleNameFromBundleMgr()
     dlclose(handler);
     return result;
 }
+
+int32_t NetConnClient::CloseSocketsUid(int32_t netId, uint32_t uid)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->CloseSocketsUid(netId, uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

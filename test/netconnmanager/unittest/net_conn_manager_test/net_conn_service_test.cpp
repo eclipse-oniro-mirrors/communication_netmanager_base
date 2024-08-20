@@ -1156,5 +1156,13 @@ HWTEST_F(NetConnServiceTest, DisableVnicNetwork001, TestSize.Level1)
     int32_t ret = NetConnService::GetInstance()->DisableVnicNetworkAsync();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid001, TestSize.Level1)
+{
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

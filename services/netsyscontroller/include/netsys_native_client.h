@@ -970,6 +970,7 @@ public:
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr);
     int32_t StopClat(const std::string &interfaceName);
     int32_t ClearFirewallAllRules();
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
 
     /**
      * Set NIC Traffic allowed or disallowed

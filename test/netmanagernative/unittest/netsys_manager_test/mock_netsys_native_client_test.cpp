@@ -243,6 +243,11 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest005, TestSi
 
     ret = nativeClient_.StopDhcpService(iface);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    ret = nativeClient_.CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

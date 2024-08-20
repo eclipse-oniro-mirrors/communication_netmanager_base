@@ -971,6 +971,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
+    virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
