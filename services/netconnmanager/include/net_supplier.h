@@ -129,10 +129,12 @@ public:
     bool SupplierDisconnection(const std::set<NetCap> &netCaps);
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
-    bool RequestToConnect(uint32_t reqId, const NetRequest &netrequest = {});
-    int32_t SelectAsBestNetwork(uint32_t reqId);
-    void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
-    int32_t CancelRequest(uint32_t reqId);
+    bool RequestToConnect(const NetRequest &netrequest = {});
+    void AddRequest(const NetRequest &netrequest);
+    void RemoveRequest(const NetRequest &netrequest);
+    int32_t SelectAsBestNetwork(const NetRequest &netrequest);
+    void ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest);
+    int32_t CancelRequest(const NetRequest &netrequest);
     void RemoveBestRequest(uint32_t reqId);
     std::set<uint32_t> &GetBestRequestList();
     void SetDefault();
@@ -160,6 +162,7 @@ private:
     int32_t netScore_ = 0;
     std::set<uint32_t> requestList_;
     std::set<uint32_t> bestReqList_;
+    std::set<uint32_t> uidReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;
     std::shared_ptr<Network> network_ = nullptr;
     sptr<NetHandle> netHandle_ = nullptr;
@@ -167,11 +170,6 @@ private:
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
     bool isFirstTimeDetectionDone = false;
-    enum RegisterType {
-        UNKOWN,
-        REGISTER,
-        REQUEST,
-    };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

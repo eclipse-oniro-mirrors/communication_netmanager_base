@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 
 #ifdef GTEST_API_
 #define private public
@@ -21,9 +22,6 @@
 #endif
 
 #include "net_supplier.h"
-#include <gtest/gtest.h>
-#include <memory>
-
 
 namespace OHOS {
 namespace NetManagerStandard {

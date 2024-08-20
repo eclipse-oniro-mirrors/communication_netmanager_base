@@ -900,7 +900,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
     sptr<NetSupplier> newSupplier = nullptr;
     NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
 
-    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0);
+    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0, 0);
     EXPECT_NE(ret, NETSYS_SUCCESS);
 }
 

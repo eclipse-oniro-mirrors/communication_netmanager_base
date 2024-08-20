@@ -28,6 +28,10 @@ NetSupplierCallbackStub::NetSupplierCallbackStub()
         &NetSupplierCallbackStub::OnRequestNetwork;
     memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK)] =
         &NetSupplierCallbackStub::OnReleaseNetwork;
+    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_ADD_REQUEST)] =
+        &NetSupplierCallbackStub::OnAddRequest;
+    memberFuncMap_[static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REMOVE_REQUEST)] =
+        &NetSupplierCallbackStub::OnRemoveRequest;
 }
 
 NetSupplierCallbackStub::~NetSupplierCallbackStub() {}
@@ -100,7 +104,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     data.ReadUint32(requestId);
     std::string requestIdent;
     data.ReadString(requestIdent);
-    NetRequest netRequest(registerType, netBearTypes, uid, requestId, requestIdent);
+    NetRequest netRequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
     RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
@@ -130,6 +134,114 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetSupplierCallbackStub::OnAddRequest(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    uint32_t requestId = 0;
+    uint32_t registerType = 0;
+    std::string ident;
+    uint32_t size = 0;
+    int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
+                     data.ReadString(ident) && data.ReadUint32(size);
+    if (!result) {
+        NETMGR_LOG_E("Read uid, requestid, registerType, ident or size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::set<NetBearType> netBearTypes;
+    int32_t value = 0;
+    if (size > MAX_NET_BEARTYPE_NUM) {
+        NETMGR_LOG_E("Net beartype size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadInt32(value)) {
+            NETMGR_LOG_E("Read bearType failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (value <= BEARER_DEFAULT) {
+            netBearTypes.insert(static_cast<NetBearType>(value));
+        }
+    }
+    std::set<NetCap> netCaps;
+
+    if (!data.ReadUint32(size)) {
+        NETMGR_LOG_E("Read size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (size > MAX_NET_CAP_NUM) {
+        NETMGR_LOG_E("Net cap size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadInt32(value)) {
+            NETMGR_LOG_E("Read Netcap failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (value < NET_CAPABILITY_END) {
+            netCaps.insert(static_cast<NetCap>(value));
+        }
+    }
+    NetRequest netrequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
+    AddRequest(netrequest);
+    reply.WriteInt32(0);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetSupplierCallbackStub::OnRemoveRequest(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    uint32_t requestId = 0;
+    uint32_t registerType = 0;
+    std::string ident;
+    uint32_t size = 0;
+    int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
+                     data.ReadString(ident) && data.ReadUint32(size);
+    if (!result) {
+        NETMGR_LOG_E("Read uid, requestid, registerType, ident or size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::set<NetBearType> netBearTypes;
+    int32_t value = 0;
+    if (size > MAX_NET_BEARTYPE_NUM) {
+        NETMGR_LOG_E("Net beartype size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadInt32(value)) {
+            NETMGR_LOG_E("Read bearType failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (value <= BEARER_DEFAULT) {
+            netBearTypes.insert(static_cast<NetBearType>(value));
+        }
+    }
+    std::set<NetCap> netCaps;
+
+    if (!data.ReadUint32(size)) {
+        NETMGR_LOG_E("Read size failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (size > MAX_NET_CAP_NUM) {
+        NETMGR_LOG_E("Net cap size is too large");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadInt32(value)) {
+            NETMGR_LOG_E("Read Netcap failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (value < NET_CAPABILITY_END) {
+            netCaps.insert(static_cast<NetCap>(value));
+        }
+    }
+    NetRequest netrequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
+    RemoveRequest(netrequest);
+    reply.WriteInt32(0);
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
     const NetRequest &netrequest)
 {
@@ -151,6 +263,30 @@ int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const 
         auto endTime = std::chrono::steady_clock::now();
         auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
         NETMGR_LOG_I("ReleaseNetwork[%{public}s], cost=%{public}lld", ident.c_str(), durationNs.count());
+    }
+    return 0;
+}
+
+int32_t NetSupplierCallbackStub::AddRequest(const NetRequest &netrequest)
+{
+    if (callback_ != nullptr) {
+        auto startTime = std::chrono::steady_clock::now();
+        callback_->AddRequest(netrequest);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_D("AddRequest, cost=%{public}lld", durationNs.count());
+    }
+    return 0;
+}
+
+int32_t NetSupplierCallbackStub::RemoveRequest(const NetRequest &netrequest)
+{
+    if (callback_ != nullptr) {
+        auto startTime = std::chrono::steady_clock::now();
+        callback_->RemoveRequest(netrequest);
+        auto endTime = std::chrono::steady_clock::now();
+        auto durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+        NETMGR_LOG_D("RemoveRequest, cost=%{public}lld", durationNs.count());
     }
     return 0;
 }
