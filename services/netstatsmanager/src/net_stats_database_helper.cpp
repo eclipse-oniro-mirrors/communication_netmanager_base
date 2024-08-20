@@ -495,7 +495,7 @@ int32_t NetStatsDatabaseHelper::UpdateTableVersion(TableVersion version, const s
     return ExecSql(sql, nullptr, sqlCallback);
 }
 
-int32_t NetStatsDatabaseHelper::UpdateStatsFlag(const std::string &tableName, const uint32_t uid, const uint32_t flag)
+int32_t NetStatsDatabaseHelper::UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag)
 {
     std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(flag) +
                       " WHERE UID = " + std::to_string(uid);

@@ -455,7 +455,7 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
-        if (ident != info.ident_ || (start > info.date_ || end < info.date_)) {
+        if (ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
@@ -509,7 +509,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
-        if (uid != info.uid_ || ident != info.ident_ || (start > info.date_ || end < info.date_)) {
+        if (uid != info.uid_ || ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
