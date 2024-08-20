@@ -15,7 +15,6 @@
 #ifndef NATIVE_NET_CONN_ADAPTER_H
 #define NATIVE_NET_CONN_ADAPTER_H
 
-#include <atomic>
 #include <map>
 #include <mutex>
 
