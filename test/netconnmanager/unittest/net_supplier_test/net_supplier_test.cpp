@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <memory>
 
 #ifdef GTEST_API_
@@ -23,12 +22,10 @@
 #endif
 
 #include "net_supplier.h"
-#include "mock/mock_net_supplier_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-using namespace testing;
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
 constexpr uint32_t TEST_SUPPLIERID = 214;
