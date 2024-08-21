@@ -84,9 +84,12 @@ int32_t NetSysVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
         NETNATIVE_LOGE("Update failed! exec program is not exist");
         return NETMANAGER_ERROR;
     }
-
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+    ExecuteUpdate(stage);
+#else
     std::function<void()> update = std::bind(&NetSysVpnWrapper::ExecuteUpdate, shared_from_this(), stage);
     vpnFfrtQueue_->submit(update);
+#endif // UNITTEST_FORBID_FFRT
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace nmd
