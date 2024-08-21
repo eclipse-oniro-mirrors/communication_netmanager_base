@@ -393,7 +393,7 @@ NetConnCallbackManager &NetConnCallbackManager::GetInstance()
 
 int32_t NetConnCallbackManager::RegisterNetConnCallback(NetConn_NetSpecifier *specifier,
                                                         NetConn_NetConnCallback *netConnCallback,
-                                                        const uint32_t &timeoutMS, uint32_t *callbackId)
+                                                        const uint32_t &timeout, uint32_t *callbackId)
 {
     sptr<NetConnCallbackStubAdapter> callback = sptr<NetConnCallbackStubAdapter>::MakeSptr(netConnCallback);
     sptr<NetSpecifier> specifierInner = new NetSpecifier;
@@ -407,7 +407,7 @@ int32_t NetConnCallbackManager::RegisterNetConnCallback(NetConn_NetSpecifier *sp
         if (specifier->bearerPrivateIdentifier != nullptr) {
             specifierInner->ident_ = std::string(specifier->bearerPrivateIdentifier);
         }
-        ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifierInner, callback, timeoutMS);
+        ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifierInner, callback, timeout);
         if (ret != NETMANAGER_SUCCESS) {
             NETMGR_LOG_E("RegisterNetConnCallback failed");
             return ret;

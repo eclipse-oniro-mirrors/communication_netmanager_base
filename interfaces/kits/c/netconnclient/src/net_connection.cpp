@@ -248,8 +248,24 @@ int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle)
     return ret;
 }
 
+static int32_t RegisterErrorCodeTrans(int32_t err)
+{
+    switch (err) {
+        case NETMANAGER_SUCCESS:                    // fall through
+        case NETMANAGER_ERR_PERMISSION_DENIED:      // fall through
+        case NETMANAGER_ERR_PARAMETER_ERROR:        // fall through
+        case NETMANAGER_ERR_OPERATION_FAILED:       // fall through
+        case NET_CONN_ERR_CALLBACK_NOT_FOUND:       // fall through
+        case NET_CONN_ERR_SAME_CALLBACK:            // fall through
+        case NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM:
+            return err;
+        default:
+            return NETMANAGER_ERR_INTERNAL;
+    }
+}
+
 int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
-                                           uint32_t timeoutMS, uint32_t *callbackId)
+                                           uint32_t timeout, uint32_t *callbackId)
 {
     if (specifier == nullptr) {
         NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback specifier is NULL");
@@ -265,8 +281,9 @@ int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetC
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    return NetConnCallbackManager::GetInstance().RegisterNetConnCallback(specifier, netConnCallback, timeoutMS,
-                                                                         callbackId);
+    int32_t ret = NetConnCallbackManager::GetInstance().RegisterNetConnCallback(specifier, netConnCallback, timeout,
+                                                                                callbackId);
+    return RegisterErrorCodeTrans(ret);
 }
 
 int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netConnCallback, uint32_t *callbackId)
@@ -279,12 +296,15 @@ int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netCo
         NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    return NetConnCallbackManager::GetInstance().RegisterNetConnCallback(nullptr, netConnCallback, 0, callbackId);
+    int32_t ret = NetConnCallbackManager::GetInstance().RegisterNetConnCallback(nullptr, netConnCallback, 0,
+                                                                                callbackId);
+    return RegisterErrorCodeTrans(ret);
 }
 
 int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId)
 {
-    return NetConnCallbackManager::GetInstance().UnregisterNetConnCallback(callBackId);
+    int32_t ret = NetConnCallbackManager::GetInstance().UnregisterNetConnCallback(callBackId);
+    return RegisterErrorCodeTrans(ret);
 }
 
 int32_t OH_NetConn_SetAppHttpProxy(NetConn_HttpProxy *httpProxy)
