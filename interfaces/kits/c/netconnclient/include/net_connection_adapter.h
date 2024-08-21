@@ -63,7 +63,7 @@ class NetConnCallbackManager {
 public:
     static NetConnCallbackManager &GetInstance();
     int32_t RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
-                                    const uint32_t &timeoutMS, uint32_t *callbackId);
+                                    const uint32_t &timeout, uint32_t *callbackId);
     int32_t UnregisterNetConnCallback(uint32_t callbackId);
 
 private:
