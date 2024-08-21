@@ -78,11 +78,12 @@ void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
 void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    std::vector<NetStatsInfo> tmp(stats_.GetUidSimStatsInfo());
-    std::transform(tmp.begin(), tmp.end(), std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
-        info.uid_ = Sim_UID;
-        return info;
-    });
+    std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
+                   std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+                       NetStatsInfo tmpInfo = info;
+                       tmpInfo.uid_ = Sim_UID;
+                       return tmpInfo;
+                   });
 }
 
 void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
