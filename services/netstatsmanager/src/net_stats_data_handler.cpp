@@ -29,12 +29,20 @@ using namespace NetStatsDatabaseDefines;
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->SelectData(infos, UID_TABLE, start, end);
 }
 
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t uid, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->SelectData(uid, start, end, infos);
 }
 
@@ -46,6 +54,10 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->SelectData(iface, start, end, infos);
 }
 
@@ -57,6 +69,10 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->SelectData(iface, uid, start, end, infos);
 }
 
@@ -64,6 +80,10 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
                                                   uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     int32_t ret1;
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
@@ -82,6 +102,10 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
                                            uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     int32_t ret1;
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
@@ -110,6 +134,10 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     if (tableName == UID_TABLE) {
         std::for_each(infos.begin(), infos.end(),
                       [&helper](const auto &info) { helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info); });
@@ -132,24 +160,60 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
 int32_t NetStatsDataHandler::DeleteByUid(uint64_t uid)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->DeleteData(UID_TABLE, uid);
 }
 
 int32_t NetStatsDataHandler::DeleteSimStatsByUid(uint64_t uid)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->DeleteData(UID_SIM_TABLE, uid);
 }
 
 int32_t NetStatsDataHandler::DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return helper->DeleteData(tableName, start, end);
+}
+
+int32_t NetStatsDataHandler::UpdateStatsFlag(uint32_t uid, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsFlag(UID_TABLE, uid, flag);
+}
+
+int32_t NetStatsDataHandler::UpdateSimStatsFlag(uint32_t uid, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsFlag(UID_SIM_TABLE, uid, flag);
 }
 
 int32_t NetStatsDataHandler::ClearData()
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     int32_t ifaceDataRet = helper->ClearData(IFACE_TABLE);
     int32_t uidDataRet = helper->ClearData(UID_TABLE);
     int32_t uidSimDataRet = helper->ClearData(UID_SIM_TABLE);
