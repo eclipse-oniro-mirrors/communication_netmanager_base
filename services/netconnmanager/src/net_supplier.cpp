@@ -77,6 +77,9 @@ void NetSupplier::ResetNetSupplier()
     isFirstTimeDetectionDone = false;
     // Reset network capabilities for checking connectivity finished flag.
     netCaps_.InsertNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    // Reset network verification status to validated.
+    SetNetValid(VERIFICATION_STATE);
+    // Reset checking connectivity flag.
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
 }

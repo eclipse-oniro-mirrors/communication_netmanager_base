@@ -449,7 +449,6 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         bearerType, netConnEventHandler_);
     network->SetNetCaps(netCaps);
     supplier->SetNetwork(network);
-    supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
