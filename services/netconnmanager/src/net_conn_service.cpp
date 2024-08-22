@@ -1524,6 +1524,22 @@ int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::str
         NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    netConnEventHandler_->PostSyncTask([bearerType, &ifaceNames, this]() {
+        auto suppliers = GetNetSupplierFromList(bearerType);
+        for (auto supplier : suppliers) {
+            if (supplier == nullptr) {
+                continue;
+            }
+            std::shared_ptr<Network> network = supplier->GetNetwork();
+            if (network == nullptr) {
+                continue;
+            }
+            std::string ifaceName = network->GetIfaceName();
+            if (!ifaceName.empty()) {
+                ifaceNames.push_back(ifaceName);
+            }
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
 
@@ -1599,22 +1615,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
-    netConnEventHandler_->PostSyncTask([bearerType, &ifaceNames, this]() {
-        auto suppliers = GetNetSupplierFromList(bearerType);
-        for (auto supplier : suppliers) {
-            if (supplier == nullptr) {
-                continue;
-            }
-            std::shared_ptr<Network> network = supplier->GetNetwork();
-            if (network == nullptr) {
-                continue;
-            }
-            std::string ifaceName = network->GetIfaceName();
-            if (!ifaceName.empty()) {
-                ifaceNames.push_back(ifaceName);
-            }
-        }
-    });
+
     return NETMANAGER_SUCCESS;
 }
 
