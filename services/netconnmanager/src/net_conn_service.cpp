@@ -1615,7 +1615,6 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
-
     return NETMANAGER_SUCCESS;
 }
 
