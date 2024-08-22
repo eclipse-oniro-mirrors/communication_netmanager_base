@@ -435,7 +435,7 @@ int32_t NetConnCallbackManager::UnregisterNetConnCallback(uint32_t callbackId)
         this->callbackMap_.erase(it);
         return ret;
     } else {
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
 }
 
