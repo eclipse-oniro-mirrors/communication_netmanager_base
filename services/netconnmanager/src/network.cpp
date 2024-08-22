@@ -250,6 +250,16 @@ NetLinkInfo Network::GetNetLinkInfo() const
     return linkInfo;
 }
 
+std::string Network::GetIfaceName() const
+{
+    return netLinkInfo_.ifaceName_;
+}
+
+std::string Network::GetIdent() const
+{
+    return netLinkInfo_.ident_;
+}
+
 void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
 {
     NETMGR_LOG_D("Network UpdateInterfaces in.");

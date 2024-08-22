@@ -1520,19 +1520,9 @@ int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::str
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
     }
 
-    auto suppliers = GetNetSupplierFromList(bearerType);
-    for (auto supplier : suppliers) {
-        if (supplier == nullptr) {
-            continue;
-        }
-        std::shared_ptr<Network> network = supplier->GetNetwork();
-        if (network == nullptr) {
-            continue;
-        }
-        std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
-        if (!ifaceName.empty()) {
-            ifaceNames.push_back(ifaceName);
-        }
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     return NETMANAGER_SUCCESS;
 }
@@ -1543,22 +1533,28 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
         NETMGR_LOG_E("netType parameter invalid");
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
     }
-
-    auto suppliers = GetNetSupplierFromList(bearerType, ident);
-    if (suppliers.empty()) {
-        NETMGR_LOG_D("supplier is nullptr.");
-        return NET_CONN_ERR_NO_SUPPLIER;
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    auto supplier = suppliers.front();
-    std::shared_ptr<Network> network = supplier->GetNetwork();
-    if (network == nullptr) {
-        NETMGR_LOG_E("network is nullptr");
-        return NET_CONN_ERR_INVALID_NETWORK;
-    }
-
-    ifaceName = network->GetNetLinkInfo().ifaceName_;
-
-    return NETMANAGER_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
+    netConnEventHandler_->PostSyncTask([bearerType, &ifaceName, &ident, &result, this]() {
+        auto suppliers = GetNetSupplierFromList(bearerType, ident);
+        if (suppliers.empty()) {
+            NETMGR_LOG_D("supplier is nullptr.");
+            result = NET_CONN_ERR_NO_SUPPLIER;
+            return;
+        }
+        auto supplier = suppliers.front();
+        std::shared_ptr<Network> network = supplier->GetNetwork();
+        if (network == nullptr) {
+            NETMGR_LOG_E("network is nullptr");
+            result = NET_CONN_ERR_INVALID_NETWORK;
+            return;
+        }
+        ifaceName = network->GetIfaceName();
+    });
+    return result;
 }
 
 int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
@@ -1584,11 +1580,11 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
             if (network == nullptr || !network->IsConnected()) {
                 continue;
             }
-            std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
+            std::string ifaceName = network->GetIfaceName();
             if (ifaceName.empty()) {
                 continue;
             }
-            std::string ident = network->GetNetLinkInfo().ident_;
+            std::string ident = network->GetIdent();
             ifaceNameIdentMaps.EnsureInsert(std::move(ifaceName), std::move(ident));
         }
     });
@@ -1603,6 +1599,22 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
+    netConnEventHandler_->PostSyncTask([bearerType, &ifaceNames, this]() {
+        auto suppliers = GetNetSupplierFromList(bearerType);
+        for (auto supplier : suppliers) {
+            if (supplier == nullptr) {
+                continue;
+            }
+            std::shared_ptr<Network> network = supplier->GetNetwork();
+            if (network == nullptr) {
+                continue;
+            }
+            std::string ifaceName = network->GetIfaceName();
+            if (!ifaceName.empty()) {
+                ifaceNames.push_back(ifaceName);
+            }
+        }
+    });
     return NETMANAGER_SUCCESS;
 }
 
@@ -2391,7 +2403,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
         if (network.second->GetNetId() == netId) {
             continue;
         }
-        if (network.second->GetNetLinkInfo().ifaceName_ != ifaceName) {
+        if (network.second->GetIfaceName() != ifaceName) {
             continue;
         }
         if (network.second->GetNetLinkInfo().HasNetAddr(netAddr)) {
@@ -2411,7 +2423,7 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
         if (!netSupplier.second->IsAvailable()) {
             continue;
         }
-        if (netSupplier.second->GetNetwork()->GetNetLinkInfo().ifaceName_ == ifaceName) {
+        if (netSupplier.second->GetNetwork()->GetIfaceName() == ifaceName) {
             return true;
         }
     }
