@@ -258,7 +258,7 @@ int32_t DnsQualityDiag::send_dns_report()
 int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report)
 {
     if (!report) {
-        NETNATIVE_LOG_D("report is nullptr");
+        NETNATIVE_LOG_E("report is nullptr");
         return 0;
     }
     if (report_.size() < MAX_RESULT_SIZE) {
