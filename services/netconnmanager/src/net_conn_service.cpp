@@ -822,7 +822,6 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     }
     locker.unlock();
     if (oldHttpProxy != netLinkInfo->httpProxy_) {
-        NETMGR_LOG_I("new httpProxy is %{public}s.", netLinkInfo->httpProxy_.ToString().c_str());
         SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
     }
 

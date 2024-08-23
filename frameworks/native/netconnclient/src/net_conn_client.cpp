@@ -587,9 +587,7 @@ void NetConnClient::UnregisterAppHttpProxyCallback(uint32_t callbackid)
 
 int32_t NetConnClient::SetAppHttpProxy(const HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("AppHttpProxy:%{public}s:%{public}d",
-                 httpProxy.GetHost().empty() ? "" : httpProxy.GetHost().c_str(),
-                 httpProxy.GetPort());
+    NETMGR_LOG_I("Enter AppHttpProxy");
 
     if (appHttpProxy_ != httpProxy) {
         appHttpProxy_ = httpProxy;

@@ -435,7 +435,7 @@ bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
         }
     }
 
-    NETMANAGER_BASE_LOGI("set host with ip addr string: %{public}s", host_ips.c_str());
+    NETMANAGER_BASE_LOGI("set host with ip addr");
     int res = predefined_host_set_hosts(host_ips.c_str());
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecSetCustomDNSRule failed %{public}d", res);
@@ -472,7 +472,7 @@ bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context
         return false;
     }
 
-    NETMANAGER_BASE_LOGI("delete host with ip addr string: %{public}s", context->host_.c_str());
+    NETMANAGER_BASE_LOGI("delete host with ip addr");
     int res = predefined_host_remove_host(context->host_.c_str());
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecDeleteCustomDNSRule failed %{public}d", res);
