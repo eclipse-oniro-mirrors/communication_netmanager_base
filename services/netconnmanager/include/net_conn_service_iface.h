@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+/**
+ *  @deprecated use net_conn_client.h to instead
+ */
 class NetConnServiceIface : public NetConnBaseService {
 public:
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
