@@ -38,6 +38,7 @@
  */
 
 #include <stdint.h>
+#include <netdb.h>
 
 #ifdef __cplusplus
 extern "C" {
