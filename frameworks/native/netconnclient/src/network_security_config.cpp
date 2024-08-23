@@ -460,7 +460,10 @@ void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pin
         NETMGR_LOG_D("digest: %{public}s", pin.digest_.c_str());
         pinSet.pins_.push_back(pin);
     }
-    return;
+    auto isOpenMode = cJSON_GetObjectItem(root, "openMode");
+    if (isOpenMode) {
+        pinSet.isOpenMode = cJSON_IsTrue(isOpenMode);
+    }
 }
 
 void NetworkSecurityConfig::ParseJsonBaseConfig(const cJSON* const root, BaseConfig &baseConfig)
@@ -526,6 +529,34 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
+}
+
+bool NetworkSecurityConfig::IsPinOpenMode(const std::string &hostname)
+{
+    if (hostname.empty()) {
+        return false;
+    }
+
+    PinSet *pPinSet = nullptr;
+    for (auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
+            if (hostname == domain.domainName_) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            }
+        }
+        if (pPinSet != nullptr) {
+            break;
+        }
+    }
+
+    if (pPinSet == nullptr) {
+        return false;
+    }
+    return pPinSet->isOpenMode;
 }
 
 int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname, std::string &pins)
