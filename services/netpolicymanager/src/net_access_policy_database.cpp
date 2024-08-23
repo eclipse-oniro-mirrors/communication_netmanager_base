@@ -22,9 +22,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-static const int32_t RDB_VERSION_0 = 0;
-static const int32_t RDB_VERSION_1 = 1;
-static const int32_t RDB_VERSION_2 = 2;
+[[maybe_unused]] const int32_t RDB_VERSION_0 = 0;
+const int32_t RDB_VERSION_1 = 1;
+const int32_t RDB_VERSION_2 = 2;
 const std::string DATABASE_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy.db";
 const std::string NETMANAGER_DB_UID_ACCESS_POLICY_TABLE = "uid_access_policy_infos";
 const std::string SQL_TABLE_COLUMS = std::string(
