@@ -127,7 +127,7 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
         tempStats.txBytes_ = v.txBytes;
         tempStats.rxPackets_ = v.rxPackets;
         tempStats.txPackets_ = v.txPackets;
-        stats.emplace_back(tempStats);
+        stats.emplace_back(std::move(tempStats));
     }
 
     return NETSYS_SUCCESS;
@@ -164,7 +164,7 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         tempStats.txBytes_ = v.txBytes;
         tempStats.rxPackets_ = v.rxPackets;
         tempStats.txPackets_ = v.txPackets;
-        stats.emplace_back(tempStats);
+        stats.emplace_back(std::move(tempStats));
     }
 
     return NETSYS_SUCCESS;
