@@ -54,6 +54,7 @@ void NetAccessPolicyRDB::RdbDataOpenCallback::UpgradeDbVersionTo(NativeRdb::RdbS
         // When upgrading the rdb version to 1, the is_broker field was added, but some users failed the upgrade.
         case RDB_VERSION_2:
             AddIsBroker(store, newVersion);
+            break;
         default:
             NETMGR_LOG_E("no such newVersion: %{public}d", newVersion);
     }
