@@ -296,8 +296,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
-            NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
-                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            NETMGR_LOG_W("Same ip address, there is not need to be deleted");
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
@@ -311,8 +310,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         }
 
         if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
-            NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
-                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            NETMGR_LOG_W("remove route info of ip address");
             netLinkInfo_.routeList_.remove_if([family](const Route &route) {
                 INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
                 if (family == AF_INET) {

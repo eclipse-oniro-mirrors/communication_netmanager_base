@@ -111,7 +111,7 @@ int32_t SelectIpv4Address(const std::string &initV4AddrStr, int prefixLen, std::
 
     in_addr v4Addr = {GetAvailableIpv4Address(initV4Addr, prefixLen)};
     if (v4Addr.s_addr == INADDR_NONE) {
-        NETNATIVE_LOGW("No free IPv4 address in %{public}s/%{public}d", initV4AddrStr.c_str(), prefixLen);
+        NETNATIVE_LOGW("No free IPv4 address in %{public}d", prefixLen);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
@@ -387,7 +387,7 @@ int32_t ConfigureReadSocket(int sockFd, const std::string &addrStr, int ifIndex)
 
     in6_addr addr;
     if (inet_pton(AF_INET6, addrStr.c_str(), &addr) != 1) {
-        NETNATIVE_LOGW("Invalid IPv6 address %{public}s", addrStr.c_str());
+        NETNATIVE_LOGW("Invalid IPv6 address");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
 

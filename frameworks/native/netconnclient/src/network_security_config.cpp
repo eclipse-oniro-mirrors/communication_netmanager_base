@@ -391,7 +391,6 @@ void NetworkSecurityConfig::ParseJsonTrustAnchors(const cJSON* const root, Trust
         cJSON *trustAnchorsItem = cJSON_GetArrayItem(root, i);
         cJSON *certificates = cJSON_GetObjectItem(trustAnchorsItem, TAG_CERTIFICATES.c_str());
         std::string cert_path = cJSON_GetStringValue(certificates);
-        NETMGR_LOG_D("cert_path: %{public}s", cert_path.c_str());
         trustAnchors.certs_.push_back(cert_path);
     }
 
@@ -638,7 +637,6 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
         if (!rehashedCertpath.empty()) {
             certs.push_back(rehashedCertpath);
         }
-        NETMGR_LOG_D("Got cert [%{public}s] [%{public}s]", certPath.c_str(), rehashedCertpath.c_str());
     }
 
     if (certs.empty()) {
