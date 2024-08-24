@@ -147,8 +147,8 @@ std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
 
 bool Network::ReleaseBasicNetwork()
 {
-    NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (!isPhyNetCreated_) {
+        NETMGR_LOG_E("physical network has not created");
         return true;
     }
     NETMGR_LOG_D("Destroy physical network");
