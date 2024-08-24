@@ -382,6 +382,11 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t res = CheckNetManagerAvailable(reply);
+    if (res != NETMANAGER_SUCCESS) {
+        return res;
+    }
+
     int32_t ret = UpdateStatsData();
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
