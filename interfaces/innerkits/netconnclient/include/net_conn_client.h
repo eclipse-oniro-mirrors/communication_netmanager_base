@@ -359,7 +359,6 @@ public:
      *
      * @param netId network id
      * @return Returns 0 success. Otherwise fail.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
     int32_t GetAppNet(int32_t &netId);
