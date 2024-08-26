@@ -536,6 +536,28 @@ void GetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(userId);
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), dataParcel);
 }
+
+/**
+ * @tc.name: NotifyNetAccessPolicyDiagFuzzTest
+ * @tc.desc: Test NetPolicyClient NotifyNetAccessPolicyDiag.
+ * @tc.type: FUNC
+ */
+void NotifyNetAccessPolicyDiagFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    dataParcel.WriteInt32(uid);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -564,5 +586,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CheckPermissionFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::NotifyNetAccessPolicyDiagFuzzTest(data, size);
     return 0;
 }

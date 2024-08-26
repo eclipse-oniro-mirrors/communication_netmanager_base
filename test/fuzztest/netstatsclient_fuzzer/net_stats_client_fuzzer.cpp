@@ -309,6 +309,43 @@ void GetCookieTxBytesFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), dataParcel);
 }
+
+void SetAppStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    uint32_t uid = NetStatsGetData<uint32_t>();
+    std::string iface = NetStatsGetString(STR_LEN);
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteString(iface);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), dataParcel);
+}
+
+void GetTrafficStatsByNetworkFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    uint32_t type = NetStatsGetData<uint32_t>();
+    uint32_t startTime = NetStatsGetData<uint64_t>();
+    uint32_t endTime = NetStatsGetData<uint64_t>();
+    dataParcel.WriteUint32(type);
+    dataParcel.WriteUint64(startTime);
+    dataParcel.WriteUint64(endTime);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), dataParcel);
+}
+
+void GetTrafficStatsByUidNetworkFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    uint32_t uid = NetStatsGetData<uint32_t>();
+    uint32_t startTime = NetStatsGetData<uint64_t>();
+    uint32_t endTime = NetStatsGetData<uint64_t>();
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUint64(startTime);
+    dataParcel.WriteUint64(endTime);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -331,5 +368,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::ResetFactoryFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieRxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieTxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetAppStatsFuzzTest(data, size);
     return 0;
 }
