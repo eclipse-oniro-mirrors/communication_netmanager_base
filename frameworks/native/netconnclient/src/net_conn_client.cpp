@@ -575,6 +575,9 @@ void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpPr
     currentCallbackId_++;
     appHttpProxyCbMap_[id] = callback;
     callbackid = id;
+    if (callback && !appHttpProxy_.GetHost().empty()) {
+        callback(appHttpProxy_);
+    }
     NETMGR_LOG_I("registerCallback id:%{public}d.", id);
 }
 
