@@ -374,6 +374,7 @@ void NetStatsCached::ForceUpdateStats()
         if (isIfaceNameIdentMapLoaded_.load()) {
             NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
             isIfaceNameIdentMapLoaded_.store(false);
+            LoadIfaceNameIdentMaps();
         }
     };
     ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
