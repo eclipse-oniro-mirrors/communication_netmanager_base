@@ -1059,5 +1059,16 @@ HWTEST_F(NetConnServiceStubTest, OnDisableVnicNetwork001, TestSize.Level1)
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceStubTest, CloseSocketsUid001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

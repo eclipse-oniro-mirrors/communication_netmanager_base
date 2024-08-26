@@ -914,5 +914,14 @@ int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std:
     NETMGR_LOG_D("SetNicTrafficAllowed: status = %{public}d", status);
     return netsysClient_.SetNicTrafficAllowed(ifaceNames, status);
 }
+
+int32_t NetsysControllerServiceImpl::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    NETMGR_LOG_D("CloseSocketsUid: uid[%{public}d]", uid);
+    if (mockNetsysClient_.CheckMockApi(MOCK_STOPDHCPSERVICE_API)) {
+        return mockNetsysClient_.CloseSocketsUid(ipAddr, uid);
+    }
+    return netsysClient_.CloseSocketsUid(ipAddr, uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

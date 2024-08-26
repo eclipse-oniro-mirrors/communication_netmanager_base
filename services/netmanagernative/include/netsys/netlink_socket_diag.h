@@ -37,6 +37,7 @@ class NetLinkSocketDiag final {
 public:
     NetLinkSocketDiag() = default;
     ~NetLinkSocketDiag();
+    typedef std::function<bool(const inet_diag_msg *)> DestroyFilter;
 
     /**
      * Destroy all 'active' TCP sockets that no longer exist.
@@ -53,7 +54,7 @@ public:
      * @return The result of the method is returned.
      */
     int32_t SetSocketDestroyType(const std::string &netCapabilities);
-
+    void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
 private:
     static bool InLookBack(uint32_t a);
 
@@ -66,7 +67,8 @@ private:
     int32_t ProcessSockDiagDumpResponse(uint8_t proto, const std::string &ipAddr, bool excludeLoopback);
     int32_t SendSockDiagDumpRequest(uint8_t proto, uint8_t family, uint32_t states);
     void SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr, bool excludeLoopback);
-
+    void SockDiagUidDumpCallback(uint8_t proto, const inet_diag_msg *msg, const DestroyFilter& destroy);
+    int32_t ProcessSockDiagUidDumpResponse(uint8_t proto, const DestroyFilter& destroy);
 private:
     struct SockDiagRequest {
         nlmsghdr nlh_;

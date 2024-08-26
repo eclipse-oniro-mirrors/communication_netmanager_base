@@ -24,10 +24,12 @@
 namespace OHOS::NetManagerStandard {
 RegisterContext::RegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
 {
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    if (conn) {
-        callback_ = conn->GetObserver();
-        conn_ = *conn;
+    if (manager) {
+        auto conn = static_cast<NetConnection *>(manager->GetData());
+        if (conn) {
+            callback_ = conn->GetObserver();
+            conn_ = *conn;
+        }
     }
 }
 

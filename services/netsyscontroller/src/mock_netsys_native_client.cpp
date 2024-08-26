@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,16 +186,16 @@ int32_t MockNetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32
 int32_t MockNetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    NETMGR_LOG_I("Add address: ifName[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), prefixLength);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), prefixLength);
     return 0;
 }
 
@@ -610,6 +610,11 @@ int32_t MockNetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &inte
 }
 
 int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    return 0;
+}
+
+int32_t MockNetsysNativeClient::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {
     return 0;
 }

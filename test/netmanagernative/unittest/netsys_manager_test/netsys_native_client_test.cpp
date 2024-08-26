@@ -441,5 +441,13 @@ HWTEST_F(NetsysNativeClientTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
     int32_t ret = nativeClient_.DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, CloseSocketsUid001, TestSize.Level1)
+{
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    int32_t ret = nativeClient_.CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

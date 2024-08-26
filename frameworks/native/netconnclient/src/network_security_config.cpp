@@ -391,7 +391,6 @@ void NetworkSecurityConfig::ParseJsonTrustAnchors(const cJSON* const root, Trust
         cJSON *trustAnchorsItem = cJSON_GetArrayItem(root, i);
         cJSON *certificates = cJSON_GetObjectItem(trustAnchorsItem, TAG_CERTIFICATES.c_str());
         std::string cert_path = cJSON_GetStringValue(certificates);
-        NETMGR_LOG_D("cert_path: %{public}s", cert_path.c_str());
         trustAnchors.certs_.push_back(cert_path);
     }
 
@@ -460,7 +459,10 @@ void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pin
         NETMGR_LOG_D("digest: %{public}s", pin.digest_.c_str());
         pinSet.pins_.push_back(pin);
     }
-    return;
+    auto isOpenMode = cJSON_GetObjectItem(root, "openMode");
+    if (isOpenMode) {
+        pinSet.isOpenMode = cJSON_IsTrue(isOpenMode);
+    }
 }
 
 void NetworkSecurityConfig::ParseJsonBaseConfig(const cJSON* const root, BaseConfig &baseConfig)
@@ -526,6 +528,34 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
+}
+
+bool NetworkSecurityConfig::IsPinOpenMode(const std::string &hostname)
+{
+    if (hostname.empty()) {
+        return false;
+    }
+
+    PinSet *pPinSet = nullptr;
+    for (auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
+            if (hostname == domain.domainName_) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            }
+        }
+        if (pPinSet != nullptr) {
+            break;
+        }
+    }
+
+    if (pPinSet == nullptr) {
+        return false;
+    }
+    return pPinSet->isOpenMode;
 }
 
 int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname, std::string &pins)
@@ -607,7 +637,6 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
         if (!rehashedCertpath.empty()) {
             certs.push_back(rehashedCertpath);
         }
-        NETMGR_LOG_D("Got cert [%{public}s] [%{public}s]", certPath.c_str(), rehashedCertpath.c_str());
     }
 
     if (certs.empty()) {

@@ -909,5 +909,13 @@ HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowed006, TestSize.Level1)
     auto ret = instance_->SetNicTrafficAllowed(ifaceName, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, CloseSocketsUid001, TestSize.Level1)
+{
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    int32_t ret = instance_->CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -956,6 +956,31 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNetSupplierInfo003
+ * @tc.desc: Test NetConnClient::UpdateNetSupplierInfo,return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetBearType netBearType = BEARER_CELLULAR;
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    uint32_t supplierId = 0;
+    auto &client = NetConnClient::GetInstance();
+    client.RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+
+    sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
+    netSupplierInfo->isAvailable_ = true;
+    netSupplierInfo->isRoaming_ = true;
+    netSupplierInfo->strength_ = 0x64;
+    netSupplierInfo->frequency_ = 0x10;
+    netSupplierInfo->score_ = 55;
+    int32_t ret = client.UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: GetNetInterfaceConfigurationTest001
  * @tc.desc: Test NetConnClient::GetNetInterfaceConfiguration
  * @tc.type: FUNC
@@ -1426,6 +1451,23 @@ HWTEST_F(NetConnClientTest, ObtainBundleNameForSelf001, TestSize.Level1)
 {
     auto result = NetConnClient::ObtainBundleNameForSelf();
     EXPECT_EQ(result, std::nullopt);
+}
+
+HWTEST_F(NetConnClientTest, CloseSocketsUid001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
+{
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

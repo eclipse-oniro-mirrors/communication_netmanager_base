@@ -366,6 +366,7 @@ public:
     int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
                                        const std::string &dstAddr) override;
     int32_t DisableDistributedNet(bool isServer) override;
+    int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -415,8 +416,8 @@ private:
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
                                            sptr<NetSupplier> &supplier);
-    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, const uint32_t callingUid = 0);
-    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
+    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
@@ -476,6 +477,7 @@ private:
     int32_t EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
                                             const std::string &dstAddr);
     int32_t DisableDistributedNetAsync(bool isServer);
+    int32_t CloseSocketsUidAsync(int32_t netId, uint32_t uid);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);

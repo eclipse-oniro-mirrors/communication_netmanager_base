@@ -618,6 +618,9 @@ void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpPr
     currentCallbackId_++;
     appHttpProxyCbMap_[id] = callback;
     callbackid = id;
+    if (callback && !appHttpProxy_.GetHost().empty()) {
+        callback(appHttpProxy_);
+    }
     NETMGR_LOG_I("registerCallback id:%{public}d.", id);
 }
 
@@ -831,6 +834,11 @@ int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::st
     return NetworkSecurityConfig::GetInstance().GetPinSetForHostName(hostname, pins);
 }
 
+bool NetConnClient::IsPinOpenMode(const std::string &hostname)
+{
+    return NetworkSecurityConfig::GetInstance().IsPinOpenMode(hostname);
+}
+
 int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
 {
     return NetworkSecurityConfig::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
@@ -974,6 +982,16 @@ std::optional<std::string> NetConnClient::ObtainBundleNameFromBundleMgr()
     auto result = netBundle->ObtainBundleNameForSelf();
     dlclose(handler);
     return result;
+}
+
+int32_t NetConnClient::CloseSocketsUid(int32_t netId, uint32_t uid)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->CloseSocketsUid(netId, uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

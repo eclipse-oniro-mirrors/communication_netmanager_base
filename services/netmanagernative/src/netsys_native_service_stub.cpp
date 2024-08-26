@@ -300,6 +300,8 @@ void NetsysNativeServiceStub::InitNetVirnicInterfaceMap()
         &NetsysNativeServiceStub::CmdEnableDistributedServerNet;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_DISTRIBUTE_NET)] =
         &NetsysNativeServiceStub::CmdDisableDistributedNet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLOSE_SOCKETS_UID)] =
+        &NetsysNativeServiceStub::CmdCloseSocketsUid;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -2132,6 +2134,16 @@ int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, Me
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdCloseSocketsUid(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to CmdCloseSocketsUid");
+    std::string ipAddr = data.ReadString();
+    uint32_t uid = data.ReadUint32();
+    int32_t result = CloseSocketsUid(ipAddr, uid);
+    reply.WriteInt32(result);
+    return result;
 }
 } // namespace NetsysNative
 } // namespace OHOS

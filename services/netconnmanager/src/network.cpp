@@ -147,8 +147,8 @@ std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
 
 bool Network::ReleaseBasicNetwork()
 {
-    NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (!isPhyNetCreated_) {
+        NETMGR_LOG_E("physical network has not created");
         return true;
     }
     NETMGR_LOG_D("Destroy physical network");
@@ -296,8 +296,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
-            NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
-                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            NETMGR_LOG_W("Same ip address, there is not need to be deleted");
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
@@ -311,8 +310,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         }
 
         if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
-            NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
-                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            NETMGR_LOG_W("remove route info of ip address");
             netLinkInfo_.routeList_.remove_if([family](const Route &route) {
                 INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
                 if (family == AF_INET) {
@@ -625,13 +623,6 @@ void Network::ClearDefaultNetWorkNetId()
     int32_t ret = NetsysController::GetInstance().ClearDefaultNetWorkNetId();
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_CLEAR_DEFAULT_NETWORK_FAILED, ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED);
-    } else {
-        std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
-                                                                prefixLen, netCapabilities);
-        }
     }
 }
 
@@ -769,6 +760,14 @@ bool Network::IsNat464Prefered()
         return false;
     }
     return true;
+}
+
+
+void Network::CloseSocketsUid(uint32_t uid)
+{
+    for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        NetsysController::GetInstance().CloseSocketsUid(inetAddr.address_, uid);
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

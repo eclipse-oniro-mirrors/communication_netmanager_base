@@ -78,6 +78,7 @@ enum class ConnInterfaceCode {
     CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET,
     CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET,
     CMD_NM_DISABLE_DISTRIBUTE_NET,
+    CMD_NM_CLOSE_SOCKETS_UID,
     CMD_NM_END,
 };
 
@@ -125,6 +126,8 @@ enum class InterfaceCallbackInterfaceCode {
 enum class SupplierInterfaceCode {
     NET_SUPPLIER_REQUEST_NETWORK = 0,
     NET_SUPPLIER_RELEASE_NETWORK = 1,
+    NET_SUPPLIER_ADD_REQUEST = 2,
+    NET_SUPPLIER_REMOVE_REQUEST = 3,
 };
 
 enum class FactoryResetCallbackInterfaceCode {

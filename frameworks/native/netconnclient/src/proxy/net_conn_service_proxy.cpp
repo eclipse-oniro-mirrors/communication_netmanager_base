@@ -1749,5 +1749,29 @@ int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool is
     }
     return ret;
 }
+
+int32_t NetConnServiceProxy::CloseSocketsUid(int32_t netId, uint32_t uid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteInt32(netId)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("WriteUint32 failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return reply.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

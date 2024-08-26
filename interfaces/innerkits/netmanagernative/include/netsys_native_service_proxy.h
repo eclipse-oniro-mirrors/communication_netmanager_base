@@ -157,6 +157,7 @@ public:
     int32_t StopClat(const std::string &interfaceName) override;
     int32_t ClearFirewallAllRules() override;
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

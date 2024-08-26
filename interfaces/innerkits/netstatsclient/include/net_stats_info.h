@@ -17,6 +17,7 @@
 #define NET_STATS_INFO_H
 
 #include "parcel.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,12 +31,13 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     uint64_t txBytes_ = 0;
     uint64_t rxPackets_ = 0;
     uint64_t txPackets_ = 0;
+    uint32_t flag_ = STATS_DATA_FLAG_DEFAULT;
 
     inline const std::string UidData() const
     {
-        return std::to_string(uid_) + "," + ident_ + "," + iface_ + "," + std::to_string(date_) +
-               "," + std::to_string(rxBytes_) + "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) +
-               "," + std::to_string(txPackets_);
+        return std::to_string(uid_) + "," + ident_ + "," + iface_ + "," + std::to_string(date_) + "," +
+               std::to_string(rxBytes_) + "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) + "," +
+               std::to_string(txPackets_) + "," + std::to_string(flag_);
     }
 
     inline const std::string IfaceData() const

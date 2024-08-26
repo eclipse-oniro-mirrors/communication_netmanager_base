@@ -162,14 +162,6 @@ int32_t DistributedManager::SetDistributedNicAddress(const std::string &ifName, 
             NETNATIVE_LOGE("ioctl set ip mask failed: %{public}d", errno);
             return NETMANAGER_ERROR;
         }
-
-        sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_dstaddr);
-        sin->sin_family = AF_INET;
-        sin->sin_addr = ipv4Addr;
-        if (ioctl(net4Sock_, SIOCSIFDSTADDR, &ifr) < 0) {
-            NETNATIVE_LOGE("ioctl set ip mask failed: %{public}d", errno);
-            return NETMANAGER_ERROR;
-        }
     }
 
     NETNATIVE_LOGI("set ip address success");
@@ -183,8 +175,7 @@ int32_t DistributedManager::SetDistributedNicUp(const std::string &ifName)
         return NETMANAGER_ERROR;
     }
 
-    ifr.ifr_flags = IFF_UP;
-    ifr.ifr_flags |= IFF_NOARP;
+    ifr.ifr_flags = static_cast<uint16_t>(IFF_UP | IFF_NOARP);
 
     int32_t ret4 = SetDistributedNicResult(net4Sock_, SIOCSIFFLAGS, ifr);
     if (ret4 == NETMANAGER_ERROR || (net4Sock_ < 0)) {

@@ -28,5 +28,15 @@ int32_t NetSupplierCallbackBase::ReleaseNetwork(const std::string &ident, const 
 {
     return 0;
 }
+
+int32_t NetSupplierCallbackBase::AddRequest(const NetRequest &netrequest)
+{
+    return 0;
+}
+
+int32_t NetSupplierCallbackBase::RemoveRequest(const NetRequest &netrequest)
+{
+    return 0;
+}
 } // NetManagerStandard
 } // OHOS

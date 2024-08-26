@@ -27,14 +27,17 @@
 namespace OHOS {
 namespace NetManagerStandard {
 struct NetRequest {
-    uint32_t registerType = REGISTER;
-    std::set<NetBearType> bearTypes = {};
     uint32_t uid = 0;
     uint32_t requestId = 0;
+    uint32_t registerType = REGISTER;
     std::string ident;
-    NetRequest(const uint32_t &registerType, const std::set<NetBearType> &netBearTypes, const uint32_t uid = 0,
-        const uint32_t requestId = 0, const std::string ident = "")
-        : registerType(registerType), bearTypes(netBearTypes), uid(uid), requestId(requestId), ident(ident)
+    std::set<NetBearType> bearTypes;
+    std::set<NetCap> netCaps;
+    NetRequest(const uint32_t uid, const uint32_t reqId = 0, const uint32_t &registerType = UNKOWN,
+        const std::string ident = "", const std::set<NetBearType> &netBearTypes = {},
+        const std::set<NetCap> &netCaps = {})
+        : uid(uid), requestId(reqId), registerType(registerType), ident(ident), bearTypes(netBearTypes),
+          netCaps(netCaps)
     {}
     NetRequest() = default;
 };
@@ -46,6 +49,8 @@ public:
                                    const std::set<NetCap> &netCaps,
                                    const NetRequest &netrequest = {});
     virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
+    virtual int32_t AddRequest(const NetRequest &netrequest);
+    virtual int32_t RemoveRequest(const NetRequest &netrequest);
 };
 } // NetManagerStandard
 } // OHOS

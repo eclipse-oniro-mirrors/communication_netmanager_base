@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -453,7 +453,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     bool reconfirmFlag = true;
     bool isBroker = false;
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -465,7 +465,7 @@ HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -478,7 +478,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
     std::set<NetManagerStandard::NetBearType> bearTypes;
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

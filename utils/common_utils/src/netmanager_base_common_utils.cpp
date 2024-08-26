@@ -558,6 +558,7 @@ int32_t ForkExec(const std::string &command, std::string *out)
     }
     NETMGR_LOG_I("ForkExec");
     pid_t pid = fork();
+    NETMGR_LOG_I("ForkDone %{public}d", pid);
     if (pid < 0) {
         NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
@@ -582,14 +583,13 @@ bool IsValidDomain(const std::string &domain)
     pattern = pattern.replace(pattern.size() - 1, 1, "") + HOST_DOMAIN_PATTERN_TAIL;
     std::regex reg(pattern);
     if (!std::regex_match(domain, reg)) {
-        NETMGR_LOG_E("Domain:%{public}s regex match failed.", domain.c_str());
+        NETMGR_LOG_E("Domain regex match failed.");
         return false;
     }
 
     std::vector<std::string> parts = Split(domain, DOMAIN_DELIMITER);
     if (parts.size() < DOMAIN_VALID_MIN_PART_SIZE || parts.size() > DOMAIN_VALID_MAX_PART_SIZE) {
-        NETMGR_LOG_E("The domain:[%{public}s] parts size:[%{public}d] is invalid", domain.c_str(),
-                     static_cast<int>(parts.size()));
+        NETMGR_LOG_E("The domain parts size:[%{public}d] is invalid", static_cast<int>(parts.size()));
         return false;
     }
 
@@ -599,7 +599,7 @@ bool IsValidDomain(const std::string &domain)
             continue;
         }
         if (tldsList.find(item) != tldsList.end()) {
-            NETMGR_LOG_E("Domain:%{public}s has duplicate tlds:%{public}s", domain.c_str(), item.c_str());
+            NETMGR_LOG_E("Domain has duplicate tlds:%{public}s", item.c_str());
             return false;
         }
         tldsList.insert(item);

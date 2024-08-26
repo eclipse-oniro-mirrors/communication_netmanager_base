@@ -220,6 +220,18 @@ ohos_shared_library("net_access_policy_dialog") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }

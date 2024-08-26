@@ -1481,6 +1481,21 @@ void CmdDisableDistributedNetFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+
+void CloseSocketsUidTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetSysGetString(STR_LEN);
+    uint32_t uid = NetSysGetData<uint32_t>();
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteUint32(uid);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CLOSE_SOCKETS_UID), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1581,5 +1596,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::FirewallSetUidRuleFuzzTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputOthers(data, size);
+    OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     return 0;
 }

@@ -47,6 +47,9 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(ident_)) {
         return false;
     }
+    if (!parcel.WriteInt32(score_)) {
+        return false;
+    }
     return true;
 }
 
@@ -82,6 +85,9 @@ sptr<NetSupplierInfo> NetSupplierInfo::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadString(ptr->ident_)) {
         return nullptr;
     }
+    if (!parcel.ReadInt32(ptr->score_)) {
+        return nullptr;
+    }
     return ptr;
 }
 
@@ -113,6 +119,9 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &o
         return false;
     }
     if (!parcel.WriteString(object->ident_)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(object->score_)) {
         return false;
     }
     return true;
@@ -155,6 +164,10 @@ std::string NetSupplierInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("ident_ = ");
     str.append(ident_);
+
+    str.append(tab);
+    str.append("score_ = ");
+    str.append(std::to_string(score_));
 
     return str;
 }

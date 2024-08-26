@@ -219,6 +219,19 @@ int32_t OHOS_NetConn_UnregisterDnsResolver(void);
  */
 int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle);
 
+int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
+                                           uint32_t timeout, uint32_t *callbackId);
+
+int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netConnCallback, uint32_t *callbackId);
+
+int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId);
+
+int32_t OH_NetConn_SetAppHttpProxy(NetConn_HttpProxy *httpProxy);
+
+int32_t OH_NetConn_RegisterAppHttpProxyCallback(OH_NetConn_AppHttpProxyChange appHttpProxyChange, uint32_t *callbackId);
+
+void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId);
+
 #ifdef __cplusplus
 }
 #endif

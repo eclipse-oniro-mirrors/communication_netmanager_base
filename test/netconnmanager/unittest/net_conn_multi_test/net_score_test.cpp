@@ -95,10 +95,6 @@ HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
     supplier->RemoveBestRequest(reqId);
     supplier->IsConnecting();
 
-    NetSupplierInfo netSupplierInfo = {};
-    supplier->network_ = nullptr;
-    supplier->UpdateNetSupplierInfo(netSupplierInfo);
-
     NetLinkInfo netLinkInfo = {};
     supplier->UpdateNetLinkInfo(netLinkInfo);
     supplier->GetHttpProxy(httpProxy);

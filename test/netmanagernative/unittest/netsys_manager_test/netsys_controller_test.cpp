@@ -760,10 +760,10 @@ void ShowSocketInfo(NetsysNative::NetDiagSocketsInfo &info)
 {
     for (const auto &lt : info.netProtoSocketsInfo_) {
         NETNATIVE_LOGI(
-            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s localAddr_:%{public}s"
-            "foreignAddr_:%{public}s state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d"
+            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s"
+            "state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d"
             "sendQueue_:%{public}d inode_:%{public}d ",
-            lt.protocol_.c_str(), lt.localAddr_.c_str(), lt.foreignAddr_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
+            lt.protocol_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
             lt.programName_.c_str(), lt.recvQueue_, lt.sendQueue_, lt.inode_);
     }
 
@@ -823,10 +823,10 @@ HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
 
     for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
         NETNATIVE_LOGI(
-            "ShowSocketInfo  DiagGetInterfaceConfig  ifaceName_:%{public}s linkEncap_:%{public}s  macAddr_:%{public}s"
-            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "ShowSocketInfo  DiagGetInterfaceConfig  ifaceName_:%{public}s linkEncap_:%{public}s"
+            "ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
             "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d",
-            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), lt.macAddr_.c_str(), lt.ipv4Addr_.c_str(),
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(),
             lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
     }
 
@@ -837,10 +837,10 @@ HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
 
     for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
         NETNATIVE_LOGI(
-            "ShowSocketInfo  DiagGetInterfaceConfig ifaceName_:%{public}s linkEncap_:%{public}s  macAddr_:%{public}s"
-            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "ShowSocketInfo  DiagGetInterfaceConfig ifaceName_:%{public}s linkEncap_:%{public}s"
+            "ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
             "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d ",
-            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), lt.macAddr_.c_str(), lt.ipv4Addr_.c_str(),
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(),
             lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
     }
 }
@@ -1127,6 +1127,14 @@ HWTEST_F(NetsysControllerTest, DestroyVnic001, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().DestroyVnic();
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, CloseSocketsUid001, TestSize.Level1)
+{
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    int32_t result = NetsysController::GetInstance().CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(result, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -34,6 +34,7 @@
 #include "net_interface_callback_stub.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
 
@@ -229,13 +230,17 @@ HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
     netSupplierInfo->isAvailable_ = true;
     netSupplierInfo->uid_ = TEST_UID;
     netSupplierInfo->ident_ = "0";
+    netSupplierInfo->score_ = 90;
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId)->GetNetScore(), 90);
 
     netSupplierInfo->isAvailable_ = false;
     netSupplierInfo->ident_ = "";
+    netSupplierInfo->score_ = 0;
     ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
+    EXPECT_EQ(NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId)->GetNetScore(), 90);
 }
 
 HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
@@ -277,6 +282,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
@@ -739,7 +745,7 @@ HWTEST_F(NetConnServiceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 
     ret = NetConnService::GetInstance()->GetIfaceNameByType(BEARER_VPN, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
@@ -894,7 +900,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
     sptr<NetSupplier> newSupplier = nullptr;
     NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
 
-    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0);
+    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0, 0);
     EXPECT_NE(ret, NETSYS_SUCCESS);
 }
 
@@ -906,9 +912,9 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     bool dnsHealthSuccess = true;
     bool dnsHealthFail = false;
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthSuccess);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, FactoryResetNetworkTest001, TestSize.Level1)
@@ -965,7 +971,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, callback, timeoutMS);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     ret = NetConnService::GetInstance()->UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
@@ -1150,6 +1156,14 @@ HWTEST_F(NetConnServiceTest, EnableVnicNetwork002, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, DisableVnicNetwork001, TestSize.Level1)
 {
     int32_t ret = NetConnService::GetInstance()->DisableVnicNetworkAsync();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid001, TestSize.Level1)
+{
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

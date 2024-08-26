@@ -187,7 +187,6 @@ private:
         }
         std::vector<Key> keys = rdMap.GetAllKeys();
         if (keys.empty()) {
-            NETNATIVE_LOG_D("ClearBpfMap: key is empty");
             return 0;
         }
         BpfMapper<Key, Value> wrMap(path, BPF_F_WRONLY);

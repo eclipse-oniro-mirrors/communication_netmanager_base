@@ -407,6 +407,7 @@ public:
     int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
+    bool IsPinOpenMode(const std::string &hostname);
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
@@ -462,6 +463,7 @@ public:
 
     int32_t DisableDistributedNet(bool isServer);
 
+    int32_t CloseSocketsUid(int32_t netId, uint32_t uid);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

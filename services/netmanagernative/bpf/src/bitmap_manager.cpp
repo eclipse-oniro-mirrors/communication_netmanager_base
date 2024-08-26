@@ -156,6 +156,8 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
     protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
     appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
     uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
+    action_key Key = 1;
+    actionMap_.OrInsert(Key, Bitmap());
 
     BuildNoMarkBitmap(ruleList);
     return NETFIREWALL_SUCCESS;
@@ -208,7 +210,7 @@ int32_t BitmapManager::InsertIp6SegBitmap(const NetFirewallIpParam &item, Bitmap
     if (item.type == SINGLE_IP) {
         ip6Map->OrInsert(item.ipv6.startIp, static_cast<uint32_t>(item.mask), bitmap);
         std::string addrStr = IpParamParser::Addr6ToStr(item.ipv6.startIp);
-        NETNATIVE_LOG_D("InsertIp6SegBitmap ip[%{public}s], mask[%{public}u]", addrStr.c_str(), item.mask);
+        NETNATIVE_LOG_D("InsertIp6SegBitmap ip, mask[%{public}u]", item.mask);
     } else if (item.type == MULTIPLE_IP) {
         std::vector<Ip6Data> ips;
         int32_t ret = IpParamParser::GetIp6AndMask(item.ipv6.startIp, item.ipv6.endIp, ips);
@@ -602,7 +604,7 @@ void IpParamParser::AddIp6(const in6_addr &addr, uint32_t prefixlen, std::vector
     list.emplace_back(info);
 
     std::string startIpStr = IpParamParser::Addr6ToStr(info.data);
-    NETNATIVE_LOG_D("AddIp6 ip[%{public}s], mask[%{public}u]", startIpStr.c_str(), info.prefixlen);
+    NETNATIVE_LOG_D("AddIp6 ip, mask[%{public}u]", info.prefixlen);
 }
 
 void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)

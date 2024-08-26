@@ -77,6 +77,9 @@ void NetSupplier::ResetNetSupplier()
     isFirstTimeDetectionDone = false;
     // Reset network capabilities for checking connectivity finished flag.
     netCaps_.InsertNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    // Reset network verification status to validated.
+    SetNetValid(VERIFICATION_STATE);
+    // Reset checking connectivity flag.
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
 }
@@ -97,6 +100,9 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
     if (!netSupplierInfo_.ident_.empty()) {
         netSupplierIdent_ = netSupplierInfo_.ident_;
+    }
+    if (netSupplierInfo_.score_ != 0) {
+        netScore_ = netSupplierInfo_.score_;
     }
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);
@@ -311,28 +317,30 @@ bool NetSupplier::IsConnected() const
     return false;
 }
 
-bool NetSupplier::RequestToConnect(uint32_t reqId, const NetRequest &netrequest)
+bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
 {
-    if (requestList_.find(reqId) == requestList_.end()) {
-        requestList_.insert(reqId);
+    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
+        requestList_.insert(netrequest.requestId);
     }
+    AddRequest(netrequest);
     return SupplierConnection(netCaps_.ToSet(), netrequest);
 }
 
-int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
+int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
 {
-    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", reqId, supplierId_,
-                 netSupplierIdent_.c_str());
-    if (requestList_.find(reqId) == requestList_.end()) {
-        requestList_.insert(reqId);
+    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId,
+                 supplierId_, netSupplierIdent_.c_str());
+    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
+        requestList_.insert(netrequest.requestId);
     }
-    if (bestReqList_.find(reqId) == bestReqList_.end()) {
-        bestReqList_.insert(reqId);
+    if (bestReqList_.find(netrequest.requestId) == bestReqList_.end()) {
+        bestReqList_.insert(netrequest.requestId);
     }
+    AddRequest(netrequest);
     return NETMANAGER_SUCCESS;
 }
 
-void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
+void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
                  netSupplierIdent_.c_str(), supplierId);
@@ -344,36 +352,77 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         SupplierDisconnection(netCaps_.ToSet());
         return;
     }
-    if (requestList_.find(reqId) == requestList_.end()) {
-        NETMGR_LOG_W("Can not find request[%{public}d]", reqId);
+    if (requestList_.find(netrequest.requestId) == requestList_.end()) {
+        NETMGR_LOG_W("Can not find request[%{public}d]", netrequest.requestId);
         return;
     }
     if (netScore_ >= bestScore) {
         NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
-    requestList_.erase(reqId);
+    requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
     }
-    bestReqList_.erase(reqId);
+    RemoveRequest(netrequest);
 }
 
-int32_t NetSupplier::CancelRequest(uint32_t reqId)
+int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
 {
-    auto iter = requestList_.find(reqId);
+    auto iter = requestList_.find(netrequest.requestId);
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
-    NETMGR_LOG_I("CancelRequest reqId:%{public}u", reqId);
-    requestList_.erase(reqId);
+    NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
+    requestList_.erase(netrequest.requestId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
     }
-    bestReqList_.erase(reqId);
+    bestReqList_.erase(netrequest.requestId);
+    RemoveRequest(netrequest);
     return NETMANAGER_SUCCESS;
+}
+
+void NetSupplier::AddRequest(const NetRequest &netRequest)
+{
+    if (netController_ == nullptr) {
+        NETMGR_LOG_E("netController_ is nullptr");
+        return;
+    }
+    NetRequest request;
+    request.uid = netRequest.uid;
+    request.ident = netSupplierIdent_;
+    request.netCaps = netCaps_.ToSet();
+    NETMGR_LOG_D("execute AddRequest");
+    int32_t errCode = netController_->AddRequest(request);
+    NETMGR_LOG_D("AddRequest errCode[%{public}d]", errCode);
+    if (errCode != REG_OK) {
+        NETMGR_LOG_E("AddRequest fail");
+        return;
+    }
+    return;
+}
+
+void NetSupplier::RemoveRequest(const NetRequest &netrequest)
+{
+    if (netController_ == nullptr) {
+        NETMGR_LOG_E("netController_ is nullptr");
+        return;
+    }
+    NetRequest request;
+    request.uid = netrequest.uid;
+    request.ident = netSupplierIdent_;
+    request.netCaps = netCaps_.ToSet();
+    NETMGR_LOG_D("execute RemoveRequest");
+    int32_t errCode = netController_->RemoveRequest(request);
+    NETMGR_LOG_D("RemoveRequest errCode[%{public}d]", errCode);
+    if (errCode != REG_OK) {
+        NETMGR_LOG_E("RemoveRequest fail");
+        return;
+    }
+    return;
 }
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)

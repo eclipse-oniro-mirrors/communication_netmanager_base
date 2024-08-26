@@ -599,5 +599,10 @@ int32_t NetManagerNative::ClearFirewallAllRules()
 {
     return firewallManager_->ClearAllRules();
 }
+
+int32_t NetManagerNative::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    return connManager_->CloseSocketsUid(ipAddr, uid);
+}
 } // namespace nmd
 } // namespace OHOS

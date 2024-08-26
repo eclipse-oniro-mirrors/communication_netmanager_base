@@ -1060,5 +1060,11 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
     NETNATIVE_LOG_D("SetNicTrafficAllowed iptablesWrapper_ apply success");
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
+int32_t NetsysNativeService::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
+{
+    NETNATIVE_LOGI("CloseSocketsUid uid[%{public}d]", uid);
+    return netsysService_->CloseSocketsUid(ipAddr, uid);
+}
 } // namespace NetsysNative
 } // namespace OHOS

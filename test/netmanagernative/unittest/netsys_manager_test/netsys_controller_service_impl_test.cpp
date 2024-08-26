@@ -82,6 +82,7 @@ void NetsysControllerServiceImplTest::SetUpTestCase()
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_REGISTERNOTIFYCALLBACK_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_STARTDHCPSERVICE_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_STOPDHCPSERVICE_API);
+        instance_->mockNetsysClient_.mockApi_.insert(MOCK_CLOSESOCKETSUID_API);
     }
 }
 
@@ -787,6 +788,14 @@ HWTEST_F(NetsysControllerServiceImplTest, DeleteNetworkAccessPolicy001, TestSize
     uint32_t uid = 0;
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, CloseSocketsUid001, TestSize.Level1)
+{
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    int32_t result = instance_->CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

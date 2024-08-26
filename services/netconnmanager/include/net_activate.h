@@ -46,7 +46,7 @@ public:
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                 std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
-                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
+                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler, uint32_t uid = 0,
                 const int32_t registerType = REGISTER);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent = false);
@@ -59,6 +59,8 @@ public:
     int32_t GetRegisterType() const;
     std::set<NetBearType> GetBearType() const;
     void StartTimeOutNetAvailable();
+    uint32_t GetUid() const;
+
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -77,6 +79,7 @@ private:
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_;
     std::string activateName_ = "";
+    uint32_t uid_ = 0;
     int32_t registerType_ = REGISTER;
 };
 } // namespace NetManagerStandard
