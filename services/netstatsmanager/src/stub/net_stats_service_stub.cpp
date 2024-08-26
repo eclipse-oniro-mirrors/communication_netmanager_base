@@ -382,9 +382,18 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t res = CheckNetManagerAvailable(reply);
-    if (res != NETMANAGER_SUCCESS) {
-        return res;
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     int32_t ret = UpdateStatsData();
