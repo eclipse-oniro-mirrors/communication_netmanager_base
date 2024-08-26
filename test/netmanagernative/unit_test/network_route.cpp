@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -278,12 +278,10 @@ void TestInterfaceSetCfg()
     parcel.ifName = "eth0";
     NETNATIVE_LOGE("ZZZZ:TestInterfaceSetCfg");
     int ret = netsysServiceR_->GetInterfaceConfig(parcel);
-    NETNATIVE_LOGE("before: parcel get ipv4Addr = %{public}s", parcel.ipv4Addr.c_str());
     parcel.ipv4Addr = std::string("192.168.55.121");
     ret = netsysServiceR_->SetInterfaceConfig(parcel);
     NETNATIVE_LOGE("SetInterfaceConfig  ret  %{public}d", ret);
     ret = netsysServiceR_->GetInterfaceConfig(parcel);
-    NETNATIVE_LOGE("after: parcel get ipv4Addr = %{public}s", parcel.ipv4Addr.c_str());
 }
 
 void TestNetGetProcSysNet()

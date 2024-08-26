@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,16 +187,14 @@ int32_t NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged(MessageParce
 int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName,
                                                                  int32_t flags, int32_t scope)
 {
-    NETMGR_LOG_D("OnInterfaceAddressUpdated, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
-                 ifName.c_str(), scope);
+    NETMGR_LOG_D("OnInterfaceAddressUpdated, addr, iface:[%{public}s], scope:[%{public}d]", ifName.c_str(), scope);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName,
                                                                  int32_t flags, int32_t scope)
 {
-    NETMGR_LOG_D("OnInterfaceAddressRemoved, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
-                 ifName.c_str(), scope);
+    NETMGR_LOG_D("OnInterfaceAddressRemoved, addr, iface:[%{public}s], scope:[%{public}d]", ifName.c_str(), scope);
     return NETMANAGER_SUCCESS;
 }
 
