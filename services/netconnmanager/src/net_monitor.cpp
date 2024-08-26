@@ -43,7 +43,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
-constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
+constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t HTTP_PROBE_FAIL_CODE = 0;
