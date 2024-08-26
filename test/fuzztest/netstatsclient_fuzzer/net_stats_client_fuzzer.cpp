@@ -369,5 +369,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetCookieRxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieTxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAppStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetTrafficStatsByNetworkFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetTrafficStatsByUidNetworkFuzzTest(data, size);
     return 0;
 }
