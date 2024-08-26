@@ -241,8 +241,39 @@ typedef struct NetConn_NetHandleList {
  * @since 11
  * @version 1.0
  */
-typedef int (*OH_NetConn_CustomDnsResolver)(const char *host, const char *serv,
-    const struct addrinfo *hint, struct addrinfo **res);
+typedef int (*OH_NetConn_CustomDnsResolver)(const char *host, const char *serv, const struct addrinfo *hint,
+                                            struct addrinfo **res);
+
+typedef void (*OH_NetConn_AppHttpProxyChange)(NetConn_HttpProxy *proxy);
+
+typedef struct NetConn_NetSpecifier {
+    NetConn_NetCapabilities caps;
+    char *bearerPrivateIdentifier;
+} NetConn_NetSpecifier;
+
+typedef void (*OH_NetConn_NetworkAvailable)(NetConn_NetHandle *netHandle);
+
+typedef void (*OH_NetConn_NetCapabilitiesChange)(NetConn_NetHandle *netHandle,
+                                                 NetConn_NetCapabilities *netCapabilities);
+
+typedef void (*OH_NetConn_NetConnectionPropertiesChange)(NetConn_NetHandle *netHandle,
+                                                         NetConn_ConnectionProperties *connConnetionProperties);
+
+typedef void (*OH_NetConn_NetLost)(NetConn_NetHandle *netHandle);
+
+typedef void (*OH_NetConn_NetUnavailable)(void);
+
+typedef void (*OH_NetConn_NetBlockStatusChange)(NetConn_NetHandle *netHandle, bool blocked);
+
+typedef struct NetConn_NetConnCallback {
+    OH_NetConn_NetworkAvailable onNetworkAvailable;
+    OH_NetConn_NetCapabilitiesChange onNetCapabilitiesChange;
+    OH_NetConn_NetConnectionPropertiesChange onConnetionProperties;
+    OH_NetConn_NetLost onNetLost;
+    OH_NetConn_NetUnavailable onNetUnavailable;
+    OH_NetConn_NetBlockStatusChange onNetBlockStatusChange;
+} NetConn_NetConnCallback;
+
 #ifdef __cplusplus
 }
 #endif

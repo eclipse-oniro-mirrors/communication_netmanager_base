@@ -15,8 +15,8 @@
 
 #include "net_connection.h"
 #include "net_conn_client.h"
-#include "net_connection_type.h"
 #include "net_connection_adapter.h"
+#include "net_connection_type.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -172,8 +172,7 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
     return ret;
 }
 
-int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle,
-                                      NetConn_NetCapabilities *netAllCapabilities)
+int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netAllCapabilities)
 {
     if (netHandle == nullptr || netAllCapabilities == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetNetCapabilities received invalid parameters");
@@ -247,4 +246,105 @@ int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle)
 
     int32_t ret = NetConnClient::GetInstance().BindSocket(socketFd, netHandle->netId);
     return ret;
+}
+
+static int32_t RegisterErrorCodeTrans(int32_t err)
+{
+    switch (err) {
+        case NETMANAGER_SUCCESS:                    // fall through
+        case NETMANAGER_ERR_PERMISSION_DENIED:      // fall through
+        case NETMANAGER_ERR_PARAMETER_ERROR:        // fall through
+        case NETMANAGER_ERR_OPERATION_FAILED:       // fall through
+        case NET_CONN_ERR_CALLBACK_NOT_FOUND:       // fall through
+        case NET_CONN_ERR_SAME_CALLBACK:            // fall through
+        case NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM:
+            return err;
+        default:
+            return NETMANAGER_ERR_INTERNAL;
+    }
+}
+
+int32_t OH_NetConn_RegisterNetConnCallback(NetConn_NetSpecifier *specifier, NetConn_NetConnCallback *netConnCallback,
+                                           uint32_t timeout, uint32_t *callbackId)
+{
+    if (specifier == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback specifier is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    if (netConnCallback == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    int32_t ret = NetConnCallbackManager::GetInstance().RegisterNetConnCallback(specifier, netConnCallback, timeout,
+                                                                                callbackId);
+    return RegisterErrorCodeTrans(ret);
+}
+
+int32_t OH_NetConn_RegisterDefaultNetConnCallback(NetConn_NetConnCallback *netConnCallback, uint32_t *callbackId)
+{
+    if (netConnCallback == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t ret = NetConnCallbackManager::GetInstance().RegisterNetConnCallback(nullptr, netConnCallback, 0,
+                                                                                callbackId);
+    return RegisterErrorCodeTrans(ret);
+}
+
+int32_t OH_NetConn_UnregisterNetConnCallback(uint32_t callBackId)
+{
+    int32_t ret = NetConnCallbackManager::GetInstance().UnregisterNetConnCallback(callBackId);
+    return RegisterErrorCodeTrans(ret);
+}
+
+int32_t OH_NetConn_SetAppHttpProxy(NetConn_HttpProxy *httpProxy)
+{
+    if (httpProxy == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_SetAppHttpProxy received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    HttpProxy httpProxyObj;
+    ConvertNetConn2HttpProxy(*httpProxy, httpProxyObj);
+    int32_t ret = NetConnClient::GetInstance().SetAppHttpProxy(httpProxyObj);
+    return ret;
+}
+
+int32_t OH_NetConn_RegisterAppHttpProxyCallback(OH_NetConn_AppHttpProxyChange appHttpProxyChange, uint32_t *callbackId)
+{
+    if (appHttpProxyChange == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterAppHttpProxyCallback received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterAppHttpProxyCallback received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    auto opration = [appHttpProxyChange](const HttpProxy& httpProxy) {
+        NetConn_HttpProxy netHttpProxy;
+        int32_t retConv = Conv2HttpProxy(httpProxy, &netHttpProxy);
+        if (retConv != NETMANAGER_SUCCESS) {
+            appHttpProxyChange(nullptr);
+        } else {
+            appHttpProxyChange(&netHttpProxy);
+        }
+    };
+    uint32_t id;
+    NetConnClient::GetInstance().RegisterAppHttpProxyCallback(opration, id);
+    *callbackId = id;
+    return NETMANAGER_SUCCESS;
+}
+
+void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId)
+{
+    NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackId);
 }
