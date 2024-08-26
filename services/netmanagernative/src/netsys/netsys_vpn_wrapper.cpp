@@ -65,7 +65,7 @@ void NetSysVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
             param.append(VPN_STAGE_STOP);
             break;
         default:
-            NETNATIVE_LOGW("run ExecuteUpdate failed, unknown stage %{public}d", stage);
+            NETNATIVE_LOGE("run ExecuteUpdate failed, unknown stage %{public}d", stage);
             return;
     }
     if (CommonUtils::ForkExec(param) == NETMANAGER_ERROR) {

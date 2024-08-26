@@ -1067,7 +1067,7 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
 #ifdef SUPPORT_SYSVPN
 int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
 {
-    NETNATIVE_LOG_D("ProcessVpnStage stage %{public}d", stage);
+    NETNATIVE_LOGI("ProcessVpnStage stage %{public}d", stage);
     if (NetSysVpnWrapper::GetInstance() == nullptr) {
         NETNATIVE_LOGE("ProcessVpnStage NetSysVpnWrapper is null");
         return NetManagerStandard::NETMANAGER_ERROR;

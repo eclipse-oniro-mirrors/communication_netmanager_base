@@ -974,9 +974,9 @@ public:
 
 #ifdef SUPPORT_SYSVPN
     /**
-     * update vpn stage
+     * process the next vpn stage by SysVpnStageCode
      *
-     * @param stage vpn stage to be updated
+     * @param stage the next vpn stage code
      * @return Returns 0 success. Otherwise fail
      */
     virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
