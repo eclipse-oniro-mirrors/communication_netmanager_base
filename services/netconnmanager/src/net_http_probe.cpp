@@ -378,7 +378,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     std::string proxyIpAddress = GetAddrInfo(proxyDomain);
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
-    bool ret = false;
+    bool ret = true;
     if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
         if (httpCurl_ == nullptr) {
             NETMGR_LOG_E("httpCurl_ is nullptr");
@@ -388,7 +388,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYPORT, proxyPort);
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_HTTPPROXYTUNNEL, 1L);
-        ret = SetResolveOption(ProbeType::PROBE_HTTP, proxyDomain, proxyIpAddress, proxyPort);
+        ret &= SetResolveOption(ProbeType::PROBE_HTTP, proxyDomain, proxyIpAddress, proxyPort);
     }
 
     if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
