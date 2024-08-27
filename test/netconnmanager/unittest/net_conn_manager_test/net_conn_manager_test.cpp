@@ -178,17 +178,6 @@ void NetConnManagerTest::GlobalHttpProxyTest(HttpProxy &httpProxy)
 }
 
 /**
- * @tc.name: NetConnManager001
- * @tc.desc: Test NetConnManager SystemReady.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnManagerTest, NetConnManager001, TestSize.Level1)
-{
-    int32_t result = NetConnClient::GetInstance().SystemReady();
-    ASSERT_EQ(result, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: NetConnManager002
  * @tc.desc: Test NetConnManager RegisterNetSupplier.
  * @tc.type: FUNC

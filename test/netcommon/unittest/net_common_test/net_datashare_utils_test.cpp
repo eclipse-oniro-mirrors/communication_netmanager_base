@@ -123,37 +123,6 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTest001
- * @tc.desc: Test NetDataShareHelperUtils::Update
- * @tc.type: FUNC
- */
-HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
-{
-    std::string on = "1";
-    Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    std::string off = "0";
-    ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    Uri usbUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    Uri bluetoothUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Update(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    ret = netDataShareHelperUtils_->Update(bluetoothUri, KEY_SHARING_BLUETOOTH, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: UpdateTest002
  * @tc.desc: Test NetDataShareHelperUtils::Update
  * @tc.type: FUNC

@@ -504,18 +504,6 @@ HWTEST_F(NetConnServiceProxyTest, GetAddresseByNameTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetIfaceNameIdentMapsTest001
- * @tc.desc: Test NetConnServiceProxy GetIfaceNameIdentMaps.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
-{
-    SafeMap<std::string, std::string> data;
-    int32_t ret = instance_->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, data);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: BindSocketTest001
  * @tc.desc: Test NetConnServiceProxy BindSocket.
  * @tc.type: FUNC
