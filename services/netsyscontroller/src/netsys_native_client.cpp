@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -442,8 +442,7 @@ int32_t NetsysNativeClient::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
-    NETMGR_LOG_D("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    NETMGR_LOG_D("Add address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -455,8 +454,7 @@ int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const
 int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
-    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    NETMGR_LOG_D("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -468,8 +466,7 @@ int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const
 int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength, const std::string &netCapabilities)
 {
-    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
-                 ToAnonymousIp(ipAddr).c_str(), prefixLength);
+    NETMGR_LOG_D("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -480,8 +477,7 @@ int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const
 
 int32_t NetsysNativeClient::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
-    NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),
-                 ToAnonymousIp(ipAddress).c_str());
+    NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s]", ifaceName.c_str());
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
