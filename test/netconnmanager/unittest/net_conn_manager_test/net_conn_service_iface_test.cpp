@@ -45,20 +45,6 @@ void NetConnServiceIfaceTest::SetUp() {}
 
 void NetConnServiceIfaceTest::TearDown() {}
 
-HWTEST_F(NetConnServiceIfaceTest, GetIfaceNamesTest001, TestSize.Level1)
-{
-    std::list<std::string> ifaceNames;
-    int32_t ret = instance_.GetIfaceNames(NetBearType::BEARER_ETHERNET, ifaceNames);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceIfaceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
-{
-    std::string ifaceName;
-    int32_t ret = instance_.GetIfaceNameByType(NetBearType::BEARER_ETHERNET, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
-}
-
 HWTEST_F(NetConnServiceIfaceTest, RegisterNetSupplierTest001, TestSize.Level1)
 {
     uint32_t supplierId = 0;

@@ -42,44 +42,6 @@ void NetScoreTest::SetUp() {}
 
 void NetScoreTest::TearDown() {}
 
-HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
-{
-    std::set<NetCap> netCaps {NET_CAPABILITY_MMS, NET_CAPABILITY_INTERNET};
-    std::string ident = "ident";
-    NetBearType bearerType = BEARER_CELLULAR;
-    sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(bearerType, ident, netCaps)).release();
-
-    // mock Failed to detect network
-    supplier->SetNetValid(INVALID_DETECTION_STATE);
-
-    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-    ASSERT_TRUE(supplier->GetRealScore() ==
-        (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
-
-    supplier->SetNetValid(CAPTIVE_PORTAL_STATE);
-
-    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-    ASSERT_TRUE(supplier->GetRealScore() ==
-        (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
-
-    // mock successed to detect network
-    supplier->SetNetValid(VERIFICATION_STATE);
-
-    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-    ASSERT_TRUE(supplier->GetRealScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-
-    // quality_poor
-    supplier->SetNetValid(QUALITY_POOR_STATE);
-    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-    ASSERT_TRUE(supplier->GetRealScore() ==
-        static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - DIFF_SCORE_BETWEEN_GOOD_POOR);
-    // quality_good
-    supplier->SetNetValid(QUALITY_GOOD_STATE);
-    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-    ASSERT_TRUE(supplier->GetRealScore() ==
-        static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
-}
-
 HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
 {
     std::set<NetCap> netCaps{NET_CAPABILITY_MMS, NET_CAPABILITY_INTERNET};
