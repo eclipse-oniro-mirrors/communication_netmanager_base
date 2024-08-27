@@ -997,6 +997,7 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
      **/
     if (ioctl(ifaceFdTemp, TUNSETIFF, &ifRequest) < 0) {
         NETMGR_LOG_E("The TUNSETIFF of ioctl failed, ifRequest.ifr_name[%{public}s]", ifRequest.ifr_name);
+        close(ifaceFdTemp);
         return NETSYS_ERR_VPN;
     }
 
@@ -1004,6 +1005,7 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
     ifRequest.ifr_flags = IFF_UP;
     if (ioctl(socketFd, SIOCSIFFLAGS, &ifRequest) < 0) {
         NETMGR_LOG_E("The SIOCSIFFLAGS of ioctl failed.");
+        close(ifaceFdTemp);
         return NETSYS_ERR_VPN;
     }
 
