@@ -104,7 +104,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     data.ReadUint32(requestId);
     std::string requestIdent;
     data.ReadString(requestIdent);
-    NetRequest netRequest(uid, requestId, registerType, ident, netBearTypes, netCaps);
+    NetRequest netRequest(uid, requestId, registerType, requestIdent, netBearTypes, netCaps);
     RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
