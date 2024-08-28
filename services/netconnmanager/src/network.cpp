@@ -705,6 +705,7 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         return;
     }
     netMonitor_->UpdateGlobalHttpProxy(httpProxy);
+    StartNetDetection(false);
 }
 
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
