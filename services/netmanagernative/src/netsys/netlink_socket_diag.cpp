@@ -324,7 +324,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagUidDumpResponse(uint8_t proto,
         return NETMANAGER_ERR_INTERNAL;
     }
     while (readBytes > 0) {
-        uint32_t len = static_cast<uint32_t>(readBytes);
+        int len = readBytes;
         for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
             if (nlh->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
