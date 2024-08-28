@@ -59,6 +59,10 @@ public:
         if ((status != napi_ok) || (data == nullptr)) {
             return;
         }
+        if (reinterpret_cast<BaseContext *>(data)->magic_ != BASE_CONTEXT_MAGIC_NUMBER) {
+            NETMANAGER_BASE_LOGE("data has been destructed.");
+            return;
+        }
         auto deleter = [](Context *context) { delete context; };
         std::unique_ptr<Context, decltype(deleter)> context(static_cast<Context *>(data), deleter);
         size_t argc = 2;

@@ -28,6 +28,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t BASE_CONTEXT_MAGIC_NUMBER = 0x18916123;
 using AsyncWorkExecutor = void (*)(napi_env env, void *data);
 using AsyncWorkCallback = void (*)(napi_env env, napi_status status, void *data);
 
@@ -62,6 +63,8 @@ public:
     [[nodiscard]] EventManager *GetManager() const;
     [[nodiscard]] bool IsNeedPromise() const;
     [[nodiscard]] bool IsNeedThrowException() const;
+
+    uint32_t magic_ = BASE_CONTEXT_MAGIC_NUMBER;
 
 protected:
     EventManager *manager_;
