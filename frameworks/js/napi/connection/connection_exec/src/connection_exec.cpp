@@ -573,8 +573,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        int32_t temp = TransErrorCode(errno);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_OPERATION_FAILED);
         return false;
     }
 
@@ -633,8 +632,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        int32_t temp = TransErrorCode(errno);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_OPERATION_FAILED);
         return false;
     }
 
