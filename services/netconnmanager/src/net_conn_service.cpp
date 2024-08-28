@@ -1908,7 +1908,7 @@ void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}s", httpProxy.GetHost().c_str());
+    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}zu", httpProxy.GetHost().length());
     HttpProxy oldHttpProxy;
     LoadGlobalHttpProxy(oldHttpProxy);
     if (oldHttpProxy != httpProxy) {

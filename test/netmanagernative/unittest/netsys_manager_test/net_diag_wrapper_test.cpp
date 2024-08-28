@@ -346,10 +346,10 @@ void ShowSocketInfo(NetDiagSocketsInfo &info)
 {
     for (const auto &lt : info.netProtoSocketsInfo_) {
         NETNATIVE_LOGI(
-            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s localAddr_:%{public}s "
-            "foreignAddr_:%{public}s state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d "
+            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s"
+            "state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d "
             "sendQueue_:%{public}d inode_:%{public}d",
-            lt.protocol_.c_str(), lt.localAddr_.c_str(), lt.foreignAddr_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
+            lt.protocol_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
             lt.programName_.c_str(), lt.recvQueue_, lt.sendQueue_, lt.inode_);
     }
 

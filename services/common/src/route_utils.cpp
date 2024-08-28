@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,7 @@ int32_t RouteUtils::AddRoutesToLocal(const std::string &iface, const std::list<R
     std::list<Route>::const_iterator iter;
     for (iter = routes.begin(); iter != routes.end(); ++iter) {
         if (!(iter->rtnType_ == RTN_UNICAST && iter->destination_.prefixlen_ == 0)) {
-            NETMGR_LOG_D("AddRoutesToLocalNetwork: dest addr[%{public}s], gw addr[%{public}s]",
-                         iter->destination_.address_.c_str(), iter->gateway_.address_.c_str());
+            NETMGR_LOG_D("AddRoutesToLocalNetwork: dest addr, gw addr");
             AddRoute(LOCAL_NET_ID, *iter);
         }
     }
@@ -128,8 +127,7 @@ int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route 
     std::string nextHop;
     std::string dest;
 
-    NETMGR_LOG_D("ModifyRoute: netId[%{public}d], dest addr[%{public}s], gw addr[%{public}s]", netId,
-                 route.destination_.address_.c_str(), route.gateway_.address_.c_str());
+    NETMGR_LOG_D("ModifyRoute: netId[%{public}d], dest addr, gw addr", netId);
 
     switch (route.rtnType_) {
         case RTN_UNICAST:
@@ -170,8 +168,7 @@ int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route 
 void RouteUtils::ToPrefixString(const std::string &src, int32_t prefixLen, std::string &dest)
 {
     dest = MaskAddress(src, prefixLen);
-    NETMGR_LOG_D("ToPrefixString: src addr[%{public}s], src prefixlen[%{public}d], mask dest addr[%{public}s]",
-                 src.c_str(), prefixLen, dest.c_str());
+    NETMGR_LOG_D("ToPrefixString: src addr, src prefixlen[%{public}d], mask dest addr", prefixLen);
     if (!dest.empty()) {
         dest += "/";
         dest += std::to_string(prefixLen);
