@@ -52,9 +52,9 @@ enum SysVpnStageCode : int32_t {
     VPN_STAGE_UP_HOME, // common stage. connect "home" configuration
     VPN_STAGE_DOWN_HOME, // common stage. disconnect "home" configuration
     VPN_STAGE_STOP, // common stage. stop charon
-    VPN_STAGE_SWANCTL_LOAD, // ikev2 vpn. load vpn config file
-    VPN_STAGE_L2TP_LOAD, // xl2tp vpn. load vpn config file
-    VPN_STAGE_L2TP_CTL, // xl2tp vpn. start pppd
+    VPN_STAGE_SWANCTL_LOAD, // ikev2 vpn. load ikev2 vpn config file
+    VPN_STAGE_L2TP_LOAD, // l2tp vpn. load l2tp vpn config file
+    VPN_STAGE_L2TP_CTL, // l2tp vpn. control pppd running
 };
 class INetsysService : public IRemoteBroker {
 public:

@@ -1072,8 +1072,8 @@ int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage
         NETNATIVE_LOGE("ProcessVpnStage NetSysVpnWrapper is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    bool ret = NetSysVpnWrapper::GetInstance()->Update(stage);
-    if (ret) {
+    int32_t ret = NetSysVpnWrapper::GetInstance()->Update(stage);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("ProcessVpnStage failed");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
