@@ -352,6 +352,11 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
     int32_t rc = statement_.Step();
     NETMGR_LOG_I("Step result:%{public}d", rc);
     while (rc != SQLITE_DONE) {
+        if (rc != SQLITE_ROW) {
+            NETMGR_LOG_E("sqlite step error: %{public}d", rc);
+            statement_.ResetStatementAndClearBindings();
+            return STATS_ERR_READ_DATA_FAIL;
+        }
         int32_t i = 0;
         NetStatsInfo info;
         if (statement_.GetColumnCount() == UID_PARAM_NUM) {
