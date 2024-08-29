@@ -84,11 +84,6 @@ int32_t NetConnServiceProxy::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkI
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!netLinkInfo->Marshalling(data)) {
-        NETMGR_LOG_E("proxy Marshalling failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
     if (!data.WriteInt32(uids.size())) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -97,6 +92,11 @@ int32_t NetConnServiceProxy::EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkI
         if (!data.WriteInt32(uid)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
+    }
+
+    if (!netLinkInfo->Marshalling(data)) {
+        NETMGR_LOG_E("proxy Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     int32_t error =
