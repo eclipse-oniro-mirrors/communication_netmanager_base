@@ -129,20 +129,23 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         return;
     }
 
-    std::lock_guard lock(mutex_);
-    if (netStatsService_ == nullptr) {
-        NETMGR_LOG_E("NetConnService_ is nullptr");
-        return;
+    {
+        std::lock_guard lock(mutex_);
+        if (netStatsService_ == nullptr) {
+            NETMGR_LOG_E("NetConnService_ is nullptr");
+            return;
+        }
+
+        sptr<IRemoteObject> local = netStatsService_->AsObject();
+        if (local != remote.promote()) {
+            NETMGR_LOG_E("proxy and stub is not same remote object");
+            return;
+        }
+
+        local->RemoveDeathRecipient(deathRecipient_);
+        netStatsService_ = nullptr;
     }
 
-    sptr<IRemoteObject> local = netStatsService_->AsObject();
-    if (local != remote.promote()) {
-        NETMGR_LOG_E("proxy and stub is not same remote object");
-        return;
-    }
-
-    local->RemoveDeathRecipient(deathRecipient_);
-    netStatsService_ = nullptr;
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
         std::thread t([this]() {
