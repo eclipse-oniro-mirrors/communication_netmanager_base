@@ -3185,28 +3185,29 @@ int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode 
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(stage)) {
-        NETNATIVE_LOGE("ProcessVpnStage Write return error");
+        NETNATIVE_LOGE("ProcessVpnStage write stage error");
         return ERR_FLATTEN_OBJECT;
     }
 
     MessageParcel reply;
     MessageOption option;
-    if (Remote() == nullptr) {
-        NETNATIVE_LOGE("ProcessVpnStage remote pointer is null");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE),
         data, reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("ProcessVpnStage proxy sendRequest failed");
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("ProcessVpnStage proxy SendRequest failed, ret: [%{public}d]", ret);
         return IPC_INVOKER_ERR;
     }
-    int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        NETNATIVE_LOGE("ProcessVpnStage proxy read ret failed");
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("ProcessVpnStage proxy read result failed");
         return IPC_PROXY_TRANSACTION_ERR;
     }
-    return ret;
+    return result;
 }
 #endif // SUPPORT_SYSVPN
 } // namespace NetsysNative
