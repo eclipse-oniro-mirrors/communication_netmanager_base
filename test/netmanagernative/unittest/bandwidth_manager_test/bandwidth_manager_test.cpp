@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <chrono>
+#include <thread>
 
 #include "netsys_controller.h"
 
@@ -39,7 +41,10 @@ void BandwidthManagerTest::SetUpTestCase()
     NetsysController::GetInstance().BandwidthEnableDataSaver(false);
 }
 
-void BandwidthManagerTest::TearDownTestCase() {}
+void BandwidthManagerTest::TearDownTestCase()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
 
 void BandwidthManagerTest::SetUp() {}
 
