@@ -155,21 +155,23 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         NETMGR_LOG_E("remote object is nullptr");
         return;
     }
+    {
+        std::lock_guard lock(mutex_);
+        if (netPolicyService_ == nullptr) {
+            NETMGR_LOG_E("netPolicyService_ is nullptr");
+            return;
+        }
 
-    std::lock_guard lock(mutex_);
-    if (netPolicyService_ == nullptr) {
-        NETMGR_LOG_E("netPolicyService_ is nullptr");
-        return;
+        sptr<IRemoteObject> local = netPolicyService_->AsObject();
+        if (local != remote.promote()) {
+            NETMGR_LOG_E("proxy and stub is not same remote object");
+            return;
+        }
+
+        local->RemoveDeathRecipient(deathRecipient_);
+        netPolicyService_ = nullptr;
     }
 
-    sptr<IRemoteObject> local = netPolicyService_->AsObject();
-    if (local != remote.promote()) {
-        NETMGR_LOG_E("proxy and stub is not same remote object");
-        return;
-    }
-
-    local->RemoveDeathRecipient(deathRecipient_);
-    netPolicyService_ = nullptr;
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
         std::thread t([this]() {
