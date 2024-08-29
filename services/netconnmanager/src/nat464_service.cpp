@@ -34,7 +34,6 @@ Nat464Service::Nat464Service(int32_t netId, const std::string &v6Iface)
     netId_ = netId;
     v6Iface_ = v6Iface;
     v4TunIface_ = std::string(CLAT_PREFIX) + v6Iface;
-    serviceUpdateQueue_ = std::make_unique<ffrt::queue>("Nat464ServiceUpdateState");
     tryStopDiscovery_ = false;
     discoveryCycleMs_ = INITIAL_DISCOVERY_CYCLE_MS;
     discoveryIter_ = 1;
@@ -51,7 +50,7 @@ void Nat464Service::MaybeUpdateV6Iface(const std::string &v6Iface)
 
 void Nat464Service::UpdateService(Nat464UpdateFlag updateFlag)
 {
-    serviceUpdateQueue_->submit([this, updateFlag]() { UpdateServiceState(updateFlag); },
+    serviceUpdateQueue_.submit_h([self = shared_from_this(), updateFlag]() { self->UpdateServiceState(updateFlag); },
                                 ffrt::task_attr().name("UpdateNat464ServiceState"));
 }
 
@@ -90,7 +89,7 @@ void Nat464Service::UpdateServiceState(Nat464UpdateFlag updateFlag)
 void Nat464Service::StartPrefixDiscovery()
 {
     NETMGR_LOG_I("start to discover prefix64 from DNS64 server");
-    ffrt::submit([this]() { DiscoverPrefix(); }, {}, {},
+    ffrt::submit([self = shared_from_this()]() { self->DiscoverPrefix(); }, {}, {},
                  ffrt::task_attr().name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
 }
 
@@ -115,7 +114,7 @@ void Nat464Service::DiscoverPrefix()
         ffrt::this_task::sleep_for(std::chrono::milliseconds(discoveryCycleMs_));
         discoveryIter_ += 1;
         discoveryCycleMs_ *= DISCOVERY_CYCLE_MULTIPLIER;
-        ffrt::submit([this]() { DiscoverPrefix(); }, {}, {},
+        ffrt::submit([self = shared_from_this()]() { self->DiscoverPrefix(); }, {}, {},
                      ffrt::task_attr().name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
     }
 }
