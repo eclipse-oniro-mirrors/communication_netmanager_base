@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <chrono>
+#include <thread>
 
 #include "system_ability_definition.h"
 
@@ -39,7 +41,10 @@ void FirewallManagerTest::SetUpTestCase()
     NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
 }
 
-void FirewallManagerTest::TearDownTestCase() {}
+void FirewallManagerTest::TearDownTestCase()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
 
 void FirewallManagerTest::SetUp() {}
 
