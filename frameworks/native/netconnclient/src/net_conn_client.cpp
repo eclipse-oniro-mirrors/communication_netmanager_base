@@ -612,9 +612,8 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
                                                  uint32_t &callbackid)
 {
-    uint32_t id = currentCallbackId_;
     std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
-
+    uint32_t id = currentCallbackId_;
     currentCallbackId_++;
     appHttpProxyCbMap_[id] = callback;
     callbackid = id;

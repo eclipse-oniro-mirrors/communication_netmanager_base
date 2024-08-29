@@ -579,11 +579,12 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
 int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                         const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
-    if (netsysNativeService_ == nullptr) {
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
         NETMGR_LOG_E("GetAddrInfo netsysNativeService_ is null");
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysNativeService_->GetAddrInfo(hostName, serverName, hints, netId, res);
+    return proxy->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
 
 int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
