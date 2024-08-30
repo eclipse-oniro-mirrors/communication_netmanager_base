@@ -45,16 +45,17 @@ private:
     void ExecuteUpdate(SysVpnStageCode stage);
 
 private:
-    static constexpr const char *VPN_STAGE_RESTART = "restart";
-    static constexpr const char *VPN_STAGE_SWANCTL_LOAD = "swanctl --load-all --file ";
-    static constexpr const char *VPN_STAGE_UP_HOME = "up home";
-    static constexpr const char *VPN_STAGE_DOWN_HOME = "down home";
-    static constexpr const char *VPN_STAGE_STOP = "stop";
-    static constexpr const char *VPN_STAGE_L2TP_LOAD = "xl2tpd -c ";
-    static constexpr const char *VPN_STAGE_L2TP_CTL = "l2tpctl";
-    static constexpr const char *IPSEC_L2TP_CTL = " -C " IPSEC_PIDDIR "/l2tp-control";
-    static constexpr const char *SWAN_CTL_FILE = IPSEC_PIDDIR "/swanctl.conf";
-    static constexpr const char *L2TP_CFG = IPSEC_PIDDIR "/xl2tpd.conf";
+    static constexpr const char *IPSEC_CMD_PATH = "/system/bin/ipsec";
+    const std::string VPN_STAGE_RESTART = "restart";
+    const std::string VPN_STAGE_SWANCTL_LOAD = "swanctl --load-all --file ";
+    const std::string VPN_STAGE_UP_HOME = "up home";
+    const std::string VPN_STAGE_DOWN_HOME = "down home";
+    const std::string VPN_STAGE_STOP = "stop";
+    const std::string VPN_STAGE_L2TP_LOAD = "xl2tpd -c ";
+    const std::string VPN_STAGE_L2TP_CTL = "l2tpctl";
+    const std::string IPSEC_L2TP_CTL = " -C " IPSEC_PIDDIR "/l2tp-control";
+    const std::string SWAN_CTL_FILE = IPSEC_PIDDIR "/swanctl.conf";
+    const std::string L2TP_CFG = IPSEC_PIDDIR "/xl2tpd.conf";
     bool isIpSecAccess_ = false;
     std::shared_ptr<ffrt::queue> vpnFfrtQueue_ = nullptr;
 };

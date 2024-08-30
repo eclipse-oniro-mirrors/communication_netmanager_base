@@ -23,9 +23,6 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
-namespace {
-constexpr const char *IPSEC_CMD_PATH = "/system/bin/ipsec";
-} // namespace
 
 NetSysVpnWrapper::NetSysVpnWrapper()
 {
