@@ -34,7 +34,6 @@ Nat464Service::Nat464Service(int32_t netId, const std::string &v6Iface)
     netId_ = netId;
     v6Iface_ = v6Iface;
     v4TunIface_ = std::string(CLAT_PREFIX) + v6Iface;
-    serviceUpdateQueue_ = std::make_unique<ffrt::queue>("Nat464ServiceUpdateState");
     tryStopDiscovery_ = false;
     discoveryCycleMs_ = INITIAL_DISCOVERY_CYCLE_MS;
     discoveryIter_ = 1;
@@ -51,8 +50,9 @@ void Nat464Service::MaybeUpdateV6Iface(const std::string &v6Iface)
 
 void Nat464Service::UpdateService(Nat464UpdateFlag updateFlag)
 {
-    serviceUpdateQueue_->submit([this, updateFlag]() { UpdateServiceState(updateFlag); },
-                                ffrt::task_attr().name("UpdateNat464ServiceState"));
+    auto handle = serviceUpdateQueue_.submit_h([this, updateFlag]() { UpdateServiceState(updateFlag); },
+                                               ffrt::task_attr().name("UpdateNat464ServiceState"));
+    serviceUpdateQueue_.wait(handle);
 }
 
 void Nat464Service::UpdateServiceState(Nat464UpdateFlag updateFlag)
