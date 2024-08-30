@@ -16,7 +16,7 @@
 #define NAT464_SERVICE_H
 
 #include <string>
-#include <memory>
+
 #include "clat_constants.h"
 #include "ffrt.h"
 #include "inet_addr.h"
@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 
 class NetSupplier;
 
-class Nat464Service : std::enable_shared_from_this<Nat464Service> {
+class Nat464Service {
 public:
     Nat464Service(int32_t netId, const std::string &v6Iface);
 
