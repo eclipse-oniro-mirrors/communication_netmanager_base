@@ -104,7 +104,7 @@ private:
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
-    std::shared_ptr<Nat464Service> nat464Service_;
+    std::unique_ptr<Nat464Service> nat464Service_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
