@@ -36,6 +36,8 @@ public:
     }
 
     /**
+     * update the next vpn stage by SysVpnStageCode
+     *
      * @param param update vpn param
      * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
