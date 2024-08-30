@@ -321,14 +321,6 @@ int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
-    if (netLinkInfo == nullptr) {
-        NETMGR_LOG_E("netLinkInfo ptr is nullptr.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
     std::set<int32_t> uids;
     int32_t size = 0;
     int32_t uid = 0;
@@ -347,6 +339,16 @@ int32_t NetConnServiceStub::OnEnableVnicNetwork(MessageParcel &data, MessageParc
         }
         uids.insert(uid);
     }
+
+    sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
+    if (netLinkInfo == nullptr) {
+        NETMGR_LOG_E("netLinkInfo ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
     int32_t ret = EnableVnicNetwork(netLinkInfo, uids);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
