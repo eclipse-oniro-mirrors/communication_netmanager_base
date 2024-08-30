@@ -222,7 +222,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     netLinkInfo_ = netLinkInfo;
     if (IsNat464Prefered()) {
         if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
         }
         nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
         nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
@@ -671,7 +671,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     SendConnectionChangedBroadcast(netConnState);
     if (IsNat464Prefered()) {
         if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
+            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfo_.ifaceName_);
         }
         nat464Service_->MaybeUpdateV6Iface(netLinkInfo_.ifaceName_);
         nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
