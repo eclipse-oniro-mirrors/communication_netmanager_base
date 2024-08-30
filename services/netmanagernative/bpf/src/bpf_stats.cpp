@@ -127,7 +127,13 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
         tempStats.txBytes_ = v.txBytes;
         tempStats.rxPackets_ = v.rxPackets;
         tempStats.txPackets_ = v.txPackets;
-        stats.emplace_back(std::move(tempStats));
+        auto findRet = std::find_if(stats.begin(), stats.end(),
+                                    [&tempStats](const NetStatsInfo &info) { return info.Equals(tempStats); });
+        if (findRet == stats.end()) {
+            stats.push_back(std::move(tempStats));
+        } else {
+            *findRet += tempStats;
+        }
     }
 
     return NETSYS_SUCCESS;
