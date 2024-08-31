@@ -541,8 +541,8 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     }
     auto waitHandle = std::async(std::launch::async, [childPid]() {
         auto ret = waitpid(childPid, nullptr, 0);
-	NETMGR_LOG_I("waitpid %{public}d done", childPid);
-	return ret;
+        NETMGR_LOG_I("waitpid %{public}d done", childPid);
+        return ret;
         });
     const int32_t waitTime = 10;
     if (waitHandle.wait_for(std::chrono::seconds(waitTime)) != std::future_status::ready) {
