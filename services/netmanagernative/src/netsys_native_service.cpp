@@ -28,7 +28,7 @@
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
 #ifdef SUPPORT_SYSVPN
-#include "netsys_vpn_wrapper.h"
+#include "system_vpn_wrapper.h"
 #endif // SUPPORT_SYSVPN
 #ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
 #include "bpf_ring_buffer.h"
@@ -1068,11 +1068,11 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
 int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
 {
     NETNATIVE_LOGI("ProcessVpnStage stage %{public}d", stage);
-    if (NetSysVpnWrapper::GetInstance() == nullptr) {
-        NETNATIVE_LOGE("ProcessVpnStage NetSysVpnWrapper is null");
+    if (SystemVpnWrapper::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("ProcessVpnStage SystemVpnWrapper is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    int32_t ret = NetSysVpnWrapper::GetInstance()->Update(stage);
+    int32_t ret = SystemVpnWrapper::GetInstance()->Update(stage);
     if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("ProcessVpnStage failed");
         return NetManagerStandard::NETMANAGER_ERROR;

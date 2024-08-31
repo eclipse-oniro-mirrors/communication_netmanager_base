@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETSYS_VPN_WRAPPER_H
-#define NETSYS_VPN_WRAPPER_H
+#ifndef SYSTEM_VPN_WRAPPER_H
+#define SYSTEM_VPN_WRAPPER_H
 
 #include <cstring>
 #include "ffrt.h"
@@ -25,20 +25,20 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetsysNative;
-class NetSysVpnWrapper : public std::enable_shared_from_this<NetSysVpnWrapper> {
+class SystemVpnWrapper : public std::enable_shared_from_this<SystemVpnWrapper> {
 public:
-    NetSysVpnWrapper();
-    ~NetSysVpnWrapper();
-    static std::shared_ptr<NetSysVpnWrapper> &GetInstance()
+    SystemVpnWrapper();
+    ~SystemVpnWrapper();
+    static std::shared_ptr<SystemVpnWrapper> &GetInstance()
     {
-        static std::shared_ptr<NetSysVpnWrapper> instance = std::make_shared<NetSysVpnWrapper>();
+        static std::shared_ptr<SystemVpnWrapper> instance = std::make_shared<SystemVpnWrapper>();
         return instance;
     }
 
     /**
-     * update the next vpn stage by SysVpnStageCode
+     * update system vpn next stage by SysVpnStageCode
      *
-     * @param param update vpn param
+     * @param stage one of the SysVpnStageCode
      * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t Update(SysVpnStageCode stage);
@@ -63,4 +63,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif /* NETSYS_VPN_WRAPPER_H */
+#endif /* SYSTEM_VPN_WRAPPER_H */

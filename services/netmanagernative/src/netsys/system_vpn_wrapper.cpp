@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "netsys_vpn_wrapper.h"
+#include "system_vpn_wrapper.h"
 
 #include <unistd.h>
 #include "netnative_log_wrapper.h"
@@ -24,18 +24,18 @@ namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
 
-NetSysVpnWrapper::NetSysVpnWrapper()
+SystemVpnWrapper::SystemVpnWrapper()
 {
     isIpSecAccess_ = access(IPSEC_CMD_PATH, F_OK) == 0;
-    vpnFfrtQueue_ = std::make_shared<ffrt::queue>("NetSysVpnWrapper");
+    vpnFfrtQueue_ = std::make_shared<ffrt::queue>("SystemVpnWrapper");
 }
 
-NetSysVpnWrapper::~NetSysVpnWrapper()
+SystemVpnWrapper::~SystemVpnWrapper()
 {
     vpnFfrtQueue_.reset();
 }
 
-void NetSysVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
+void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
 {
     NETNATIVE_LOGI("run ExecuteUpdate stage %{public}d", stage);
     std::string param = std::string(IPSEC_CMD_PATH) + " ";
@@ -70,7 +70,7 @@ void NetSysVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
     }
 }
 
-int32_t NetSysVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
+int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
 {
     if (!vpnFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
@@ -84,7 +84,7 @@ int32_t NetSysVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
     ExecuteUpdate(stage);
 #else
-    std::function<void()> update = std::bind(&NetSysVpnWrapper::ExecuteUpdate, shared_from_this(), stage);
+    std::function<void()> update = std::bind(&SystemVpnWrapper::ExecuteUpdate, shared_from_this(), stage);
     vpnFfrtQueue_->submit(update);
 #endif // UNITTEST_FORBID_FFRT
     return NetManagerStandard::NETMANAGER_SUCCESS;
