@@ -125,7 +125,6 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    LoadIfaceNameIdentMaps();
     std::vector<NetStatsInfo> allInfos;
     NetsysController::GetInstance().GetAllStatsInfo(allInfos);
     ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
@@ -198,7 +197,6 @@ void NetStatsCached::CacheUidStats()
         return;
     }
 
-    LoadIfaceNameIdentMaps();
     ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
         std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.iface_ == k) {
@@ -260,7 +258,6 @@ void NetStatsCached::CacheUidSimStats()
         return;
     }
 
-    LoadIfaceNameIdentMaps();
     ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
         std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
             if (item.iface_ == k) {
@@ -360,7 +357,7 @@ void NetStatsCached::WriteUidStats()
 
 void NetStatsCached::WriteUidSimStats()
 {
-    if (!(CheckUidStor() || isForce_)) {
+    if (!(CheckUidSimStor() || isForce_)) {
         return;
     }
     std::for_each(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(), [this](NetStatsInfo &info) {
@@ -376,16 +373,10 @@ void NetStatsCached::WriteUidSimStats()
 
 void NetStatsCached::LoadIfaceNameIdentMaps()
 {
-    if (isIfaceNameIdentMapLoaded_.load()) {
-        NETMGR_LOG_D("ifaceNameIdentMaps has been loaded from netConnClient.");
-        return;
-    }
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
-        return;
     }
-    isIfaceNameIdentMapLoaded_.store(true);
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
@@ -405,10 +396,7 @@ void NetStatsCached::ForceUpdateStats()
         CacheStats();
         WriteStats();
         isForce_ = false;
-        if (isIfaceNameIdentMapLoaded_.load()) {
-            NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
-            isIfaceNameIdentMapLoaded_.store(false);
-        }
+        LoadIfaceNameIdentMaps();
     };
     ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
 }

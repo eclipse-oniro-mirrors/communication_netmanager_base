@@ -226,7 +226,6 @@ private:
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
     std::atomic<int64_t> uninstalledUid_ = -1;
-    std::atomic<bool> isIfaceNameIdentMapLoaded_ = false;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
 
     void LoadIfaceNameIdentMaps();
@@ -249,6 +248,11 @@ private:
     inline bool CheckUidStor()
     {
         return stats_.GetCurrentUidStats() >= trafficThreshold_;
+    }
+
+    inline bool CheckUidSimStor()
+    {
+        return stats_.GetCurrentUidSimStats() >= trafficThreshold_;
     }
 
     inline bool CheckIfaceStor()

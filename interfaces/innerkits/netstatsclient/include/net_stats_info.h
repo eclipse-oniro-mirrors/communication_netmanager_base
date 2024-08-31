@@ -66,7 +66,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
         NetStatsInfo info;
         info.uid_ = other.uid_;
         info.iface_ = other.iface_;
-        info.ident_ = other.ident_;
+        info.ident_ = ident_;
         info.rxPackets_ = (rxPackets_ > other.rxPackets_) ? rxPackets_ - other.rxPackets_ : 0;
         info.rxBytes_ = (rxBytes_ > other.rxBytes_) ? rxBytes_ - other.rxBytes_ : 0;
         info.txPackets_ = (txPackets_ > other.txPackets_) ? txPackets_ - other.txPackets_ : 0;
