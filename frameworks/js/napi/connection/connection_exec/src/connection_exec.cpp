@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,17 +19,18 @@
 #include <cstdint>
 #include <string>
 
-#include "net_handle_interface.h"
 #include "constant.h"
 #include "errorcode_convertor.h"
 #include "napi_utils.h"
+#include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
+#include "net_handle_interface.h"
 #include "net_manager_constants.h"
 #include "netconnection.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
+#include "netmanager_base_permission.h"
 #include "securec.h"
-#include "net_conn_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
 namespace {
@@ -556,6 +557,10 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (!context->IsParseOK()) {
         return false;
     }
+    if (!NetManagerPermission::CheckPermission(Permission::INTERNET)) {
+        NETMANAGER_BASE_LOGE("Permission deny: Request with getAddressesByName But not has INTERNET");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
@@ -614,6 +619,10 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
 {
     if (!context->IsParseOK()) {
         return false;
+    }
+    if (!NetManagerPermission::CheckPermission(Permission::INTERNET)) {
+        NETMANAGER_BASE_LOGE("Permission deny: Request with getAddressByName But not has INTERNET");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
