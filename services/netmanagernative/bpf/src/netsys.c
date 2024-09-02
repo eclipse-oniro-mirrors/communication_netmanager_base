@@ -237,11 +237,11 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     }
 #endif
 
-    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    uint64_t sock_uid = bpf_get_socket_uid(skb);
+    sock_netns_key key_sock_netns1 = sock_uid;
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
     sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
-    uint64_t sock_uid = bpf_get_socket_uid(skb);
     uint64_t network_access_uid = sock_uid;
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         network_access_uid = check_broker_policy(sock_uid);
@@ -277,9 +277,20 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
     }
 
-    if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
-        (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
-        if (filter_sim_stats(skb->local_ip4) == 1) {
+    if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 == *value_sock_netns2) {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+        }
+    } else {
+        if (sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX && filter_sim_stats(skb->local_ip4) == 1) {
             app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                              .ifType = get_iface_type(skb->local_ip4)};
             app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -292,18 +303,6 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
                 __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
                 __sync_fetch_and_add(&value_uid_sim->rxBytes, skb->len);
             }
-        }
-    } else {
-        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-        if (value_uid_if == NULL) {
-            app_uid_if_stats_value newValue = {};
-            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-        }
-        if (value_uid_if != NULL) {
-            __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
         }
     }
     return 1;
@@ -328,11 +327,11 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     }
 #endif
 
-    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(skb);
+    uint64_t sock_uid = bpf_get_socket_uid(skb);
+    sock_netns_key key_sock_netns1 = sock_uid;
     sock_netns_value *value_sock_netns1 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns1);
     sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
     sock_netns_value *value_sock_netns2 = bpf_map_lookup_elem(&sock_netns_map, &key_sock_netns2);
-    uint64_t sock_uid = bpf_get_socket_uid(skb);
     uint64_t network_access_uid = sock_uid;
     if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2) {
         network_access_uid = check_broker_policy(sock_uid);
@@ -368,9 +367,20 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
     }
 
-    if ((sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX) ||
-        (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 != *value_sock_netns2)) {
-        if (filter_sim_stats(skb->local_ip4) == 1) {
+    if (value_sock_netns1 != NULL && value_sock_netns2 != NULL && *value_sock_netns1 == *value_sock_netns2) {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->txPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+        }
+    } else {
+        if (sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX && filter_sim_stats(skb->local_ip4) == 1) {
             app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                              .ifType = get_iface_type(skb->local_ip4)};
             app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -383,18 +393,6 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
                 __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
                 __sync_fetch_and_add(&value_uid_sim->txBytes, skb->len);
             }
-        }
-    } else {
-        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-        if (value_uid_if == NULL) {
-            app_uid_if_stats_value newValue = {};
-            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-        }
-        if (value_uid_if != NULL) {
-            __sync_fetch_and_add(&value_uid_if->txPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
         }
     }
     return 1;
@@ -419,7 +417,8 @@ bpf_map_def SEC("maps") broker_sock_permission_map = {
 SEC("cgroup_sock/inet_create_socket")
 int inet_create_socket(struct bpf_sock *sk)
 {
-    sock_netns_key key_sock_netns1 = bpf_get_socket_cookie(sk);
+    __u64 uid_gid = bpf_get_current_uid_gid();
+    sock_netns_key key_sock_netns1 = uid_gid & 0x00000000FFFFFFFF;
     sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(sk);
     bpf_map_update_elem(&sock_netns_map, &key_sock_netns1, &value_sock_netns1, BPF_NOEXIST);
     sock_netns_key key_sock_netns2 = SOCK_COOKIE_ID_NULL;
@@ -431,7 +430,6 @@ int inet_create_socket(struct bpf_sock *sk)
         map_ptr = &broker_sock_permission_map;
     }
 
-    __u64 uid_gid = bpf_get_current_uid_gid();
     __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
     sock_permission_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which started by appspawn
