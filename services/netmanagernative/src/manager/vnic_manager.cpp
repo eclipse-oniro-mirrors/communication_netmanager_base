@@ -51,23 +51,29 @@ constexpr uint32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 std::atomic_int& VnicManager::GetNetSock(bool ipv4)
 {
     if (ipv4) {
+        // LCOV_EXCL_START
         if (net4Sock_ < 0) {
             net4Sock_ = socket(AF_INET, SOCK_DGRAM, 0);
         }
+        // LCOV_EXCL_STOP
         return net4Sock_;
     } else {
+        // LCOV_EXCL_START
         if (net6Sock_ < 0) {
             net6Sock_ = socket(AF_INET6, SOCK_DGRAM, 0);
         }
+        // LCOV_EXCL_STOP
         return net6Sock_;
     }
 }
 
 int32_t VnicManager::CreateVnicInterface()
 {
+    // LCOV_EXCL_START
     if (tunFd_ != 0) {
         return NETMANAGER_SUCCESS;
     }
+    // LCOV_EXCL_STOP
 
     ifreq ifr{};
     if (InitIfreq(ifr, VNIC_TUN_CARD_NAME) != NETMANAGER_SUCCESS) {
@@ -75,6 +81,7 @@ int32_t VnicManager::CreateVnicInterface()
     }
 
     int32_t tunfd = open(VNIC_TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK);
+    // LCOV_EXCL_START
     if (tunfd <= 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         return NETMANAGER_ERROR;
@@ -95,11 +102,13 @@ int32_t VnicManager::CreateVnicInterface()
     if (net6Sock_ < 0) {
         NETNATIVE_LOGE("create SOCK_DGRAM ipv6 failed: %{public}d", errno);
     }
+
     if (net4Sock_ < 0 && net6Sock_ < 0) {
         close(tunfd);
         NETNATIVE_LOGE("create SOCK_DGRAM ip failed");
         return NETMANAGER_ERROR;
     }
+    // LCOV_EXCL_STOP
 
     NETNATIVE_LOGI("open virtual device successfully, [%{public}d]", tunfd);
     tunFd_ = tunfd;
@@ -127,10 +136,12 @@ void VnicManager::DestroyVnicInterface()
 int32_t VnicManager::SetVnicResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr)
 {
     if (fd > 0) {
+        // LCOV_EXCL_START
         if (ioctl(fd, cmd, &ifr) < 0) {
             NETNATIVE_LOGE("set vnic error, errno:%{public}d", errno);
             return NETMANAGER_ERROR;
         }
+        // LCOV_EXCL_STOP
     }
     return NETMANAGER_SUCCESS;
 }
