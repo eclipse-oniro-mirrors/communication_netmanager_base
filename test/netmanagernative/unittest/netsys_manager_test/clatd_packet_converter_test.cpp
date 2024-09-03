@@ -585,7 +585,8 @@ HWTEST_F(ClatdPacketConverterTest, IsTcpPacketValidTest, TestSize.Level0)
     EXPECT_FALSE(clatdPacketConverter->IsTcpPacketValid(&tcpHeader, packetSize));
     tcpHeader.doff = packetSize / WORD_32BIT_IN_BYTE_UNIT + 1;
     EXPECT_FALSE(clatdPacketConverter->IsTcpPacketValid(&tcpHeader, packetSize));
-    EXPECT_EQ(clatdPacketConverter->ConvertTcpPacket(0, &tcpHeader, 0, 0, packetSize), NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_EQ(clatdPacketConverter->ConvertTcpPacket(0, &tcpHeader, 0, 0, packetSize),
+              NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(ClatdPacketConverterTest, ConvertUdpPacketTest, TestSize.Level0)
