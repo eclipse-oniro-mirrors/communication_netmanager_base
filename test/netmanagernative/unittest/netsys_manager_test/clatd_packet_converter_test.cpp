@@ -551,6 +551,10 @@ HWTEST_F(ClatdPacketConverterTest, ConvertIcmpV6TypeAndCodeTest, TestSize.Level0
     icmp6Code = 0;
     clatdPacketConverter->ConvertIcmpV6TypeAndCode(icmp6Type, icmp6Code, icmpType, icmpCode);
     EXPECT_EQ(icmpType, ICMP_PARAMETERPROB);
+    icmp6Type = ICMP6_DST_UNREACH;
+    icmp6Code = 99;
+    clatdPacketConverter->ConvertIcmpV6TypeAndCode(icmp6Type, icmp6Code, icmpType, icmpCode);
+    EXPECT_EQ(icmpType, ICMP_PARAMETERPROB);
 }
 
 HWTEST_F(ClatdPacketConverterTest, WriteFragHeaderTest, TestSize.Level0)
@@ -567,6 +571,48 @@ HWTEST_F(ClatdPacketConverterTest, WriteFragHeaderTest, TestSize.Level0)
     ipHeader.frag_off = htons(IP_MF);
     clatdPacketConverter->WriteFragHeader(&ip6FragHeader, &ip6Header, &ipHeader);
     EXPECT_EQ(ip6FragHeader.ip6f_offlg & IP6F_MORE_FRAG, IP6F_MORE_FRAG);
+}
+
+HWTEST_F(ClatdPacketConverterTest, IsTcpPacketValidTest, TestSize.Level0)
+{
+    auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
+        V6_TCP_PACKET_TX, sizeof(V6_TCP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
+    tcphdr tcpHeader{};
+    size_t packetSize = 0;
+    EXPECT_FALSE(clatdPacketConverter->IsTcpPacketValid(&tcpHeader, packetSize));
+    packetSize = sizeof(tcphdr);
+    tcpHeader.doff = htons(0);
+    EXPECT_FALSE(clatdPacketConverter->IsTcpPacketValid(&tcpHeader, packetSize));
+    tcpHeader.doff = packetSize / WORD_32BIT_IN_BYTE_UNIT + 1;
+    EXPECT_FALSE(clatdPacketConverter->IsTcpPacketValid(&tcpHeader, packetSize));
+    EXPECT_EQ(clatdPacketConverter->ConvertTcpPacket(0, &tcpHeader, 0, 0, packetSize), NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(ClatdPacketConverterTest, ConvertUdpPacketTest, TestSize.Level0)
+{
+    auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
+        V6_TCP_PACKET_TX, sizeof(V6_TCP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
+    udphdr hdr{};
+    size_t tpLen = 0;
+    EXPECT_EQ(clatdPacketConverter->ConvertUdpPacket(0, &hdr, 0, 0, tpLen), NETMANAGER_ERR_INVALID_PARAMETER);
+    tpLen = sizeof(udphdr);
+    EXPECT_EQ(clatdPacketConverter->ConvertUdpPacket(0, &hdr, 0, 0, tpLen), NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(ClatdPacketConverterTest, ConvertIcmpv6PacketTest, TestSize.Level0)
+{
+    auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
+        V6_TCP_PACKET_TX, sizeof(V6_TCP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
+
+    size_t tpLen = 0;
+    icmp6_hdr hdr{};
+    EXPECT_EQ(clatdPacketConverter->ConvertIcmpv6Packet(0, &hdr, tpLen), NETMANAGER_ERR_INVALID_PARAMETER);
+    int pos = CLATD_TPHDR;
+    tpLen = sizeof(icmp6_hdr);
+    hdr.icmp6_type = ICMP6_TIME_EXCEEDED;
+    EXPECT_EQ(clatdPacketConverter->ConvertIcmpv6Packet(pos, &hdr, tpLen), NETMANAGER_ERR_INVALID_PARAMETER);
+    hdr.icmp6_type = ICMP6_ECHO_REQUEST - 1;
+    EXPECT_EQ(clatdPacketConverter->ConvertIcmpv6Packet(pos, &hdr, tpLen), NETMANAGER_ERR_INVALID_PARAMETER);
 }
 } // namespace nmd
 } // namespace OHOS

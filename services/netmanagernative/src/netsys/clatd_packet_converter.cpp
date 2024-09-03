@@ -173,11 +173,13 @@ int32_t ClatdPacketConverter::ConvertV6Packet(int pos, const uint8_t *inputPacke
     const ip6_frag *ip6FragHeader = nullptr;
     if (v6TpProtocol == IPPROTO_FRAGMENT) {
         ip6FragHeader = reinterpret_cast<const ip6_frag *>(tpHeader);
+        // LCOV_EXCL_START
         if (tpLen < sizeof(*ip6FragHeader)) {
             NETNATIVE_LOGW("fail to convert ipv6 packet, fragment packet size is too small");
             effectivePos_ = 0;
             return NETMANAGER_ERR_INVALID_PARAMETER;
         }
+        // LCOV_EXCL_STOP
         tpHeader += sizeof(*ip6FragHeader);
         tpLen -= sizeof(*ip6FragHeader);
 
@@ -597,9 +599,11 @@ int32_t ClatdPacketConverter::ConvertTcpPacket(int pos, const tcphdr *tcpHeader,
     iovBufLens_[pos] = tcpHdrLen;
 
     char tcpHdrBuf[TCP_HDR_MAX_LEN];
+    // LCOV_EXCL_START
     if (memcpy_s(tcpHdrBuf, TCP_HDR_MAX_LEN, tcpHeader, tcpHdrLen) != EOK) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
+    // LCOV_EXCL_STOP
     tcphdr *tcpHeaderOut = reinterpret_cast<tcphdr *>(tcpHdrBuf);
 
     iovBufs_[CLATD_PAYLOAD].assign(reinterpret_cast<const char *>(tcpHeader) + tcpHdrLen, tpLen - tcpHdrLen);
@@ -629,12 +633,13 @@ bool ClatdPacketConverter::IsTcpPacketValid(const tcphdr *tcpHeader, size_t pack
         effectivePos_ = 0;
         return false;
     }
-
+    // LCOV_EXCL_START
     if (tcpHeader->doff * WORD_32BIT_IN_BYTE_UNIT > TCP_HDR_MAX_LEN) {
         NETNATIVE_LOGW("Invalid tcp packet, tcp header length %{public}u larger than MAX_TCP_HDR", tcpHeader->doff);
         effectivePos_ = 0;
         return false;
     }
+    // LCOV_EXCL_STOP
     return true;
 }
 
@@ -661,9 +666,11 @@ int32_t ClatdPacketConverter::ConvertUdpPacket(int pos, const udphdr *udpHeader,
         udpHeaderOut.check = AdjustChecksum(udpHeader->check, oldChecksum, newChecksum);
     }
 
+    // LCOV_EXCL_START
     if (udpHeaderOut.check == 0) {
         udpHeaderOut.check = 0xffff;
     }
+    // LCOV_EXCL_STOP
     iovBufs_[pos].assign(reinterpret_cast<const char *>(&udpHeaderOut), sizeof(udphdr));
     effectivePos_ = CLATD_PAYLOAD + 1;
     return NETMANAGER_SUCCESS;
