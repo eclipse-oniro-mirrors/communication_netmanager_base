@@ -29,17 +29,9 @@
 #include "netconnection.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_permission.h"
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard {
-namespace {
-constexpr int32_t NO_PERMISSION_CODE = 1;
-constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
-constexpr int32_t PERMISSION_DENIED_CODE = 13;
-constexpr int32_t NET_UNREACHABLE_CODE = 101;
-} // namespace
-
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 {
     napi_value netHandle = NapiUtils::CreateObject(env);
@@ -536,30 +528,31 @@ napi_value ConnectionExec::FactoryResetNetworkCallback(FactoryResetNetworkContex
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-int32_t TransErrorCode(int32_t error)
+int32_t TransErrorCode(int32_t status)
 {
-    switch (error) {
-        case NO_PERMISSION_CODE:
-            return NETMANAGER_ERR_PERMISSION_DENIED;
-        case PERMISSION_DENIED_CODE:
-            return NETMANAGER_ERR_PERMISSION_DENIED;
-        case RESOURCE_UNAVALIEBLE_CODE:
-            return NETMANAGER_ERR_INVALID_PARAMETER;
-        case NET_UNREACHABLE_CODE:
-            return NETMANAGER_ERR_INTERNAL;
+    int32_t ret = 0;
+    switch (status) {
+        case EAI_BADFLAGS:
+            if (errno == EPERM || errno == EACCES) {
+                ret = NETMANAGER_ERR_PERMISSION_DENIED;
+            } else {
+                ret = NETMANAGER_ERR_PARAMETER_ERROR;
+            }
+            break;
+        case EAI_SERVICE:
+            ret = NETMANAGER_ERR_OPERATION_FAILED;
+            break;
         default:
-            return NETMANAGER_ERR_OPERATION_FAILED;
+            ret = NETMANAGER_ERR_INTERNAL;
+            break;
     }
+    return ret;
 }
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
 {
     if (!context->IsParseOK()) {
         return false;
-    }
-    if (!NetManagerPermission::CheckPermission(Permission::INTERNET)) {
-        NETMANAGER_BASE_LOGE("Permission deny: Request with getAddressesByName But not has INTERNET");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
@@ -569,8 +562,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
     if (context->host_.empty()) {
         NETMANAGER_BASE_LOGE("host is empty!");
-        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
     }
 
@@ -578,7 +570,8 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        context->SetErrorCode(NETMANAGER_ERR_OPERATION_FAILED);
+        int32_t temp = TransErrorCode(status);
+        context->SetErrorCode(temp);
         return false;
     }
 
@@ -620,10 +613,6 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (!context->IsParseOK()) {
         return false;
     }
-    if (!NetManagerPermission::CheckPermission(Permission::INTERNET)) {
-        NETMANAGER_BASE_LOGE("Permission deny: Request with getAddressByName But not has INTERNET");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
     uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
@@ -632,8 +621,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
     if (context->host_.empty()) {
         NETMANAGER_BASE_LOGE("host is empty!");
-        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
     }
 
@@ -641,7 +629,8 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        context->SetErrorCode(NETMANAGER_ERR_OPERATION_FAILED);
+        int32_t temp = TransErrorCode(status);
+        context->SetErrorCode(temp);
         return false;
     }
 
