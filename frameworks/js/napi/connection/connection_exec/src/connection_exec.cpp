@@ -32,6 +32,12 @@
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard {
+namespace {
+constexpr int32_t NO_PERMISSION_CODE = 1;
+constexpr int32_t PERMISSION_DENIED_CODE = 13;
+constexpr int32_t NET_UNREACHABLE_CODE = 101;
+} // namespace
+
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 {
     napi_value netHandle = NapiUtils::CreateObject(env);
@@ -528,25 +534,18 @@ napi_value ConnectionExec::FactoryResetNetworkCallback(FactoryResetNetworkContex
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-int32_t TransErrorCode(int32_t status)
+int32_t TransErrorCode(int32_t error)
 {
-    int32_t ret = 0;
-    switch (status) {
-        case EAI_BADFLAGS:
-            if (errno == EPERM || errno == EACCES) {
-                ret = NETMANAGER_ERR_PERMISSION_DENIED;
-            } else {
-                ret = NETMANAGER_ERR_PARAMETER_ERROR;
-            }
-            break;
-        case EAI_SERVICE:
-            ret = NETMANAGER_ERR_OPERATION_FAILED;
-            break;
+    switch (error) {
+        case NO_PERMISSION_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case PERMISSION_DENIED_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case NET_UNREACHABLE_CODE:
+            return NETMANAGER_ERR_INTERNAL;
         default:
-            ret = NETMANAGER_ERR_INTERNAL;
-            break;
+            return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    return ret;
 }
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
@@ -570,7 +569,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        int32_t temp = TransErrorCode(status);
+        int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
     }
@@ -629,7 +628,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);
-        int32_t temp = TransErrorCode(status);
+        int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
     }
