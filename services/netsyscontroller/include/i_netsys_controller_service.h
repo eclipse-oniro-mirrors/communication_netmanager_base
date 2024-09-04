@@ -971,6 +971,17 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
+
+#ifdef SUPPORT_SYSVPN
+    /**
+     * process the next vpn stage by SysVpnStageCode
+     *
+     * @param stage the next vpn stage code
+     * @return Returns 0 success. Otherwise fail
+     */
+    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
+#endif // SUPPORT_SYSVPN
+
     virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard

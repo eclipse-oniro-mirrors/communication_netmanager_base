@@ -31,6 +31,11 @@ config("netsys_controller_include") {
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
+
+  if (netmanager_base_enable_feature_sysvpn) {
+    cflags += [ "-DSUPPORT_SYSVPN" ]
+    cflags_cc += [ "-DSUPPORT_SYSVPN" ]
+  }
 }
 
 ohos_shared_library("netsys_controller") {

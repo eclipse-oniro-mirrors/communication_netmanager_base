@@ -545,6 +545,13 @@ public:
         return 0;
     }
 
+#ifdef SUPPORT_SYSVPN
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override
+    {
+        return 0;
+    }
+#endif // SUPPORT_SYSVPN
+
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override
     {
         return 0;

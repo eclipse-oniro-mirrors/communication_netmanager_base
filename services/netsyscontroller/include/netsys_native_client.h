@@ -980,6 +980,16 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
+
+#ifdef SUPPORT_SYSVPN
+    /**
+     * process the next vpn stage by SysVpnStageCode
+     *
+     * @param stage the next vpn stage code
+     * @return Returns 0 success. Otherwise fail
+     */
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage);
+#endif // SUPPORT_SYSVPN
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
