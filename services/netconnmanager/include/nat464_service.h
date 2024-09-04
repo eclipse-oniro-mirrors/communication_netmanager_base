@@ -53,7 +53,7 @@ private:
     int32_t netId_;
     std::string v6Iface_;
     std::string v4TunIface_;
-    std::unique_ptr<ffrt::queue> serviceUpdateQueue_;
+    static inline ffrt::queue serviceUpdateQueue_{"Nat464ServiceUpdateState"};
 
     std::atomic<bool> tryStopDiscovery_;
     uint32_t discoveryCycleMs_;
