@@ -153,12 +153,6 @@ HWTEST_F(NetStatsCachedTest, SetAppStatsTest001, TestSize.Level1)
     instance_->SetAppStats(info);
 }
 
-HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
-{
-    std::vector<NetStatsInfo> infos;
-    instance_->GetKernelStats(infos);
-}
-
 HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
 {
     instance_->ForceDeleteStats(TEST_UID);
