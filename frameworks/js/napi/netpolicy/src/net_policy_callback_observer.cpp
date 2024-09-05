@@ -136,9 +136,13 @@ napi_value NetPolicyCallbackObserver::CreateMeteredIfacesChangeParam(napi_env en
 
 napi_value NetPolicyCallbackObserver::CreateNetBackgroundPolicyChangeParam(napi_env env, void *data)
 {
-    auto isAllow = static_cast<bool *>(data);
+    auto isAllowPtr = static_cast<bool *>(data);
+    if (isAllowPtr == nullptr) {
+        return nullptr;
+    }
+    bool isAllow = *isAllowPtr;
     napi_value jsValue = NapiUtils::GetBoolean(env, isAllow);
-    delete isAllow;
+    delete isAllowPtr;
     return jsValue;
 }
 
