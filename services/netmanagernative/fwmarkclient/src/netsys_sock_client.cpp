@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <atomic>
+#include <mutex>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -29,6 +30,7 @@ namespace {
 std::atomic_int g_netIdForApp(0);
 std::atomic<const SocketDispatchType*> g_dispatch(nullptr);
 std::atomic_bool g_hookFlag(false);
+std::once_flag g_onceFlag;
 const SocketDispatchType* GetDispatch()
 {
     return g_dispatch.load(std::memory_order_relaxed);
@@ -59,8 +61,10 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
 
 bool ohos_socket_hook_initialize(const SocketDispatchType* disptch, bool*, const char*)
 {
-    g_dispatch.store(disptch);
-    g_hookFlag = true;
+    std::call_once(g_onceFlag, [&]() {
+        g_dispatch.store(disptch);
+        g_hookFlag = true;
+    });
     return true;
 }
 
