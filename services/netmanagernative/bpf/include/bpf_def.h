@@ -80,8 +80,8 @@ typedef struct {
 enum network_bearer_type {
     NETWORK_BEARER_TYPE_INITIAL = 0,
     NETWORK_BEARER_TYPE_CELLULAR,
-    NETWORK_BEARER_TYPE_BLUETOOTH,
     NETWORK_BEARER_TYPE_WIFI,
+    NETWORK_BEARER_TYPE_BLUETOOTH,
 };
 
 // network stats begin
