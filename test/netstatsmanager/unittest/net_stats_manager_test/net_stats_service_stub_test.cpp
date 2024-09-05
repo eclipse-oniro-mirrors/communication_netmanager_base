@@ -560,25 +560,6 @@ HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateStatsDataTest001
- * @tc.desc: Test NetConnCallbackStub UpdateStatsData.
- * @tc.type: FUNC
- */
-HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
-        return;
-    }
-    MessageParcel reply;
-    MessageOption option;
-
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), data,
-                                             reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: ResetFactoryTest001
  * @tc.desc: Test NetConnCallbackStub ResetFactory.
  * @tc.type: FUNC

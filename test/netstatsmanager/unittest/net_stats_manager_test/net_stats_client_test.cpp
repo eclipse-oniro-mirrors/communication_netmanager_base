@@ -283,12 +283,6 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
-{
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;

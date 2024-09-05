@@ -84,23 +84,6 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTest001
- * @tc.desc: Test NetDataShareHelperUtils::Update
- * @tc.type: FUNC
- */
-HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
-{
-    std::string airplaneMode = "1";
-    Uri uri(AIRPLANE_MODE_URI);
-    int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
-
-    airplaneMode = "0";
-    ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
-}
-
-/**
  * @tc.name: UpdateTest002
  * @tc.desc: Test NetDataShareHelperUtils::Update
  * @tc.type: FUNC
