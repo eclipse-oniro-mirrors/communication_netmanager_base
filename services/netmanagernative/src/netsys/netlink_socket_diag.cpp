@@ -286,7 +286,7 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
         }
     }
 
-    NETNATIVE_LOG_D("Destroyed %{public}d sockets", socketsDestroyed_);
+    NETNATIVE_LOGI("Destroyed %{public}d sockets", socketsDestroyed_);
 }
 
 int32_t NetLinkSocketDiag::SetSocketDestroyType(const std::string &netCapabilities)
