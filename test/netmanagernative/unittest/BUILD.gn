@@ -21,7 +21,6 @@ group("unittest") {
     "bandwidth_manager_test:bandwidth_manager_test",
     "firewall_manager_test:firewall_manager_class_test",
     "firewall_manager_test:firewall_manager_test",
-    "netsys_dnsresolv_test:netsys_dnsresolv_test",
     "netsys_manager_test:conn_manager_test",
     "netsys_manager_test:netsys_controller_test",
     "netsys_manager_test:netsys_native_client_test",

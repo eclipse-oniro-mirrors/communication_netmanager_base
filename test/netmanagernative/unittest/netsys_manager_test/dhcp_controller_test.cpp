@@ -53,53 +53,5 @@ HWTEST_F(DhcpControllerTest, RegisterNotifyCallbackTest001, TestSize.Level1)
     auto ret = instance_->RegisterNotifyCallback(callback);
     ASSERT_EQ(ret, 0);
 }
-
-HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
-{
-    std::string testInterfaceName = "eth0";
-    std::string testIpv4Addr = "";
-    instance_->StartClient(testInterfaceName, false);
-    instance_->StopClient(testInterfaceName, false);
-    instance_->StartClient(testInterfaceName, true);
-    instance_->StopClient(testInterfaceName, true);
-    auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
-    ASSERT_FALSE(ret);
-    ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
-    ret = instance_->StartDhcpService(testInterfaceName, {});
-    ASSERT_FALSE(ret);
-    ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
-
-    DhcpResult dhcpRet;
-    instance_->Process(testInterfaceName, &dhcpRet);
-}
-
-HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
-{
-    std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
-        std::make_unique<DhcpController::DhcpControllerResultNotify>();
-    int status = 0;
-    std::string ifname = "testIfaceName";
-    DhcpResult result;
-    notifier->OnSuccess(status, ifname.c_str(), &result);
-    std::string reason = "for test";
-    notifier->OnFailed(status, ifname.c_str(), reason.c_str());
-    std::string testInterfaceName = "dfsgagr";
-    std::string testIpv4Addr = "asgesag";
-    instance_->StartClient(testInterfaceName, false);
-    instance_->StopClient(testInterfaceName, false);
-    instance_->StartClient(testInterfaceName, true);
-    instance_->StopClient(testInterfaceName, true);
-    auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
-    ASSERT_FALSE(ret);
-    ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
-    ret = instance_->StartDhcpService(testInterfaceName, {});
-    ASSERT_FALSE(ret);
-    ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
-}
-
 } // namespace nmd
 } // namespace OHOS

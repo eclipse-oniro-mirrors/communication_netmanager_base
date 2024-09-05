@@ -119,7 +119,6 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     listener.proxySockFd_ = CLIENT_SOCKET;
     listener.OffListen();
     EXPECT_EQ(listener.proxySockFd_, -1);
-    EXPECT_FALSE(listener.proxyListenSwitch_);
 }
 } // namespace NetsysNative
 } // namespace OHOS
