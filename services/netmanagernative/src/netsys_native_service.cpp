@@ -998,14 +998,13 @@ int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewa
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetsysNativeService::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("NetsysNativeService In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    NETNATIVE_LOGI("NetsysNativeService tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     return netsysService_->SetIpTables(tcpPortId, udpPortId);
 }
 
 int32_t NetsysNativeService::ClearIpTables()
 {
-    NETNATIVE_LOGI("NetsysNativeService Clear IpTables In");
-
+    NETNATIVE_LOGI("NetsysNativeService Clear IpTables");
     return netsysService_->ClearIpTables();
 }
 #endif

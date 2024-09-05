@@ -28,7 +28,7 @@ namespace nmd {
 constexpr int32_t MAX_CMD_LENGTH = 256;
 constexpr int32_t MAX_RULE_PORT = 65535;
 
-const char* TcpIptables[] = {
+const char* g_tcpIptables[] = {
     "-w -t nat -N DISTRIBUTED_NET_TCP",
     "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 0.0.0.0/8 -j RETURN",
     "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 10.0.0.0/8 -j RETURN",
@@ -50,7 +50,7 @@ const char* TcpIptables[] = {
 const char g_outputAddTcp[] = 
     "-w -o lo -t nat -A OUTPUT -p tcp -j DISTRIBUTED_NET_TCP";
 
-const char* UdpIptables[] = {
+const char* g_udpIptables[] = {
     "-w -t mangle -N DISTRIBUTED_NET_UDP",
     "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 0.0.0.0/8 -j RETURN",
     "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 10.0.0.0/8 -j RETURN",
@@ -72,7 +72,7 @@ const char* UdpIptables[] = {
 const char g_preroutingAddUdp[] =
     "-w -i lo -t mangle -A PREROUTING -p udp -j DISTRIBUTED_NET_UDP";
 
-const char* IptablesDeleteCmds[] = {
+const char* g_iptablesDeleteCmds[] = {
     "-w -i lo -t mangle -D PREROUTING -p udp -j DISTRIBUTED_NET_UDP",
     "-w -t mangle -F DISTRIBUTED_NET_UDP",
     "-w -t mangle -X DISTRIBUTED_NET_UDP",
@@ -95,7 +95,7 @@ void DistributeNetManager::SetUdpPort(const int32_t udpPortId)
 
 int32_t DistributeNetManager::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("DistributeNetManager In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    NETNATIVE_LOGI("DistributeNetManager tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     SetTcpPort(tcpPortId);
     SetUdpPort(udpPortId);
 
@@ -107,7 +107,7 @@ int32_t DistributeNetManager::SetIpTables(const int32_t tcpPortId, const int32_t
 
 std::string DistributeNetManager::Gen_Rule(const char *inputRules, const int32_t portId)
 {
-    NETNATIVE_LOGI("DistributeNetManager Gen_Rule In portId = %{public}d", portId);
+    NETNATIVE_LOGI("DistributeNetManager Gen_Rule portId = %{public}d", portId);
     char res[MAX_CMD_LENGTH] = {0};  
     if (snprintf(res, MAX_CMD_LENGTH, inputRules, portId) >= MAX_CMD_LENGTH) {
         return "";  
@@ -119,7 +119,7 @@ std::string DistributeNetManager::Gen_Rule(const char *inputRules, const int32_t
 
 int32_t DistributeNetManager::DealRule(const RULES_TYPE type, const int32_t portId)
 {
-    NETNATIVE_LOGI("DistributeNetManager SetIptables In type = %{public}d portId = %{public}d", type, portId);
+    NETNATIVE_LOGI("DistributeNetManager SetIptables type = %{public}d portId = %{public}d", type, portId);
     std::string resultRules;
     std::string response;
     switch (type) {
@@ -152,8 +152,8 @@ int32_t DistributeNetManager::AddTcpIpRules()
 {
     int32_t ret = 0;
     std::string response;
-    for (int i = 0; TcpIptables[i] != nullptr; ++i) {  
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, TcpIptables[i]);  
+    for (int i = 0; g_tcpIptables[i] != nullptr; ++i) {  
+        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_tcpIptables[i]);  
         if (response.empty()) {  
             ret++;  
         }  
@@ -170,8 +170,8 @@ int32_t DistributeNetManager::AddUdpIpRules()
 {
     int32_t ret = 0;
     std::string response;
-    for (int i = 0; UdpIptables[i] != nullptr; ++i) {
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, UdpIptables[i]);
+    for (int i = 0; g_udpIptables[i] != nullptr; ++i) {
+        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_udpIptables[i]);
         if (response.empty()) {
             ret++;
         }
@@ -190,8 +190,8 @@ int32_t DistributeNetManager::ClearIpTables()
 {
     int32_t ret = 0;
     std::string response;
-    for (int i = 0; IptablesDeleteCmds[i] != nullptr; ++i) {
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, IptablesDeleteCmds[i]);
+    for (int i = 0; g_iptablesDeleteCmds[i] != nullptr; ++i) {
+        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_iptablesDeleteCmds[i]);
         if (response.empty()) {
             ret++;
         }

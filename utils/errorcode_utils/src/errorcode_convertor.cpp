@@ -163,9 +163,9 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
     /* Net Watch distributed net Manager*/
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_START_FAIL, "Watch distributed net start failed"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_STOP_FAIL, "Watch distributed net stop failed"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INIT_FAIL, "Failed to initialize the watch distributed net"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_START_FAIL, "Wearable distributed net service start failed"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_STOP_FAIL, "Wearable distributed net service stop failed"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INIT_FAIL, "Failed to initialize the Wearable distributed net service"},
     {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_PORT_ID, "The port id is invalid"},
     {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_UDP_ID, "The udp id is invalid"},
     {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_TCP_ID, "The tcp id is invalid"},

@@ -1432,7 +1432,7 @@ int32_t NetsysController::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetsysController::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETMGR_LOG_I("NetsysController In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    NETMGR_LOG_I("NetsysController tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("SetIpTables netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -1442,7 +1442,7 @@ int32_t NetsysController::SetIpTables(const int32_t tcpPortId, const int32_t udp
 
 int32_t NetsysController::ClearIpTables()
 {
-    NETMGR_LOG_I("NetsysController ClearIpTables In");
+    NETMGR_LOG_I("NetsysController ClearIpTables");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("ClearIpTables netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;

@@ -514,13 +514,13 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetManagerNative::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOG_D("NetManagerNative In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    NETNATIVE_LOG_D("NetManagerNative tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     return iptables_->SetIpTables(tcpPortId, udpPortId);
 }
 
 int32_t NetManagerNative::ClearIpTables()
 {
-    NETNATIVE_LOG_D("NetManagerNative ClearIpTables In");
+    NETNATIVE_LOG_D("NetManagerNative ClearIpTables");
     return iptables_->ClearIpTables();
 }
 #endif

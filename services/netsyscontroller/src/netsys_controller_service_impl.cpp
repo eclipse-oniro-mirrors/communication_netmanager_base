@@ -872,7 +872,7 @@ int32_t NetsysControllerServiceImpl::SetIpTables(const int32_t tcpPortId, const 
 
 int32_t NetsysControllerServiceImpl::ClearIpTables()
 {
-    NETMGR_LOG_I("NetsysControllerServiceImpl ClearIpTables In");
+    NETMGR_LOG_I("NetsysControllerServiceImpl ClearIpTables");
     return netsysClient_.ClearIpTables();
 }
 #endif

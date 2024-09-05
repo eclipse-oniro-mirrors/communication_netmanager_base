@@ -2878,7 +2878,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetsysNativeServiceProxy::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy In tcpRortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy tcpRortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2904,7 +2904,7 @@ int32_t NetsysNativeServiceProxy::SetIpTables(const int32_t tcpPortId, const int
 
 int32_t NetsysNativeServiceProxy::ClearIpTables()
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy Clear Iptables In");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy Clear Iptables");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;

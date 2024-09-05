@@ -855,7 +855,7 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetsysNativeServiceStub::CmdSetIpTables(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub Set IpTables In");
+    NETNATIVE_LOGI("NetsysNativeServiceStub Set IpTables");
     int32_t tcpPort = data.ReadInt32();
     int32_t udpPort = data.ReadInt32();
     NETNATIVE_LOGI("NetsysNativeServiceStub tcpPort = %{public}d udpPort = %{public}d", tcpPort, udpPort);
@@ -870,7 +870,7 @@ int32_t NetsysNativeServiceStub::CmdSetIpTables(MessageParcel &data, MessageParc
 
 int32_t NetsysNativeServiceStub::CmdClearIpTables(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub Clear IpTables In");
+    NETNATIVE_LOGI("NetsysNativeServiceStub Clear IpTables");
 
     int32_t result = ClearIpTables();
     reply.WriteInt32(result);

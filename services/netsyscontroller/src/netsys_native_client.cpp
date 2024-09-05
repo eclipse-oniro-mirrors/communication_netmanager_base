@@ -1619,7 +1619,7 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
 int32_t NetsysNativeClient::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETMGR_LOG_I("NetsysNativeClient In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    NETMGR_LOG_I("NetsysNativeClient tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -1630,7 +1630,7 @@ int32_t NetsysNativeClient::SetIpTables(const int32_t tcpPortId, const int32_t u
 
 int32_t NetsysNativeClient::ClearIpTables()
 {
-    NETMGR_LOG_I("NetsysNativeClient ClearIpTables In");
+    NETMGR_LOG_I("NetsysNativeClient ClearIpTables");
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
