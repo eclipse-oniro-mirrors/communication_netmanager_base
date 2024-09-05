@@ -248,6 +248,8 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
             net_interface_name_id v = {0};
             if (netBearerType == BEARER_WIFI) {
                 v = NETWORK_BEARER_TYPE_WIFI;
+            } else if (netBearerType == BEARER_BLUETOOTH) {
+                v = NETWORK_BEARER_TYPE_BLUETOOTH;
             } else if (netBearerType == BEARER_CELLULAR) {
                 v = NETWORK_BEARER_TYPE_CELLULAR;
             } else {
@@ -470,6 +472,9 @@ int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetB
     for (const auto& bearerType : bearerTypes) {
         if (bearerType == BEARER_CELLULAR) {
             netbearerType = NETWORK_BEARER_TYPE_CELLULAR;
+        }
+        if (bearerType == BEARER_BLUETOOTH) {
+            netbearerType = NETWORK_BEARER_TYPE_BLUETOOTH;
         }
         if (bearerType == BEARER_WIFI) {
             netbearerType = NETWORK_BEARER_TYPE_WIFI;

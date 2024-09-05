@@ -107,6 +107,12 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_SET_IPTABLES)] =
+        &NetsysNativeServiceStub::CmdSetIpTables;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_CLEAR_IPTABLES)] =
+        &NetsysNativeServiceStub::CmdClearIpTables;
+#endif
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
@@ -845,6 +851,34 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
 
     return result;
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
+int32_t NetsysNativeServiceStub::CmdSetIpTables(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub Set IpTables In");
+    int32_t tcpPort = data.ReadInt32();
+    int32_t udpPort = data.ReadInt32();
+    NETNATIVE_LOGI("NetsysNativeServiceStub tcpPort = %{public}d udpPort = %{public}d", tcpPort, udpPort);
+
+    int32_t result = SetIpTables(tcpPort, udpPort);
+
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("CmdSetIpTables has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdClearIpTables(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub Clear IpTables In");
+
+    int32_t result = ClearIpTables();
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("CmdClearIpTables has recved result %{public}d", result);
+
+    return result;
+}
+#endif
 
 int32_t NetsysNativeServiceStub::CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply)
 {

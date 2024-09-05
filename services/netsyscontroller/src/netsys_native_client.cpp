@@ -1616,6 +1616,30 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 }
 #endif
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
+int32_t NetsysNativeClient::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    NETMGR_LOG_I("NetsysNativeClient In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpTables(tcpPortId, udpPortId);
+}
+
+int32_t NetsysNativeClient::ClearIpTables()
+{
+    NETMGR_LOG_I("NetsysNativeClient ClearIpTables In");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->ClearIpTables();
+}
+#endif
+
 int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     auto proxy = GetProxy();

@@ -863,6 +863,20 @@ int32_t NetsysControllerServiceImpl::UnRegisterNetFirewallCallback(
 }
 #endif
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
+int32_t NetsysControllerServiceImpl::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    NETMGR_LOG_I("NetsysControllerServiceImpl tcpPortId=%{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
+    return netsysClient_.SetIpTables(tcpPortId, udpPortId);
+}
+
+int32_t NetsysControllerServiceImpl::ClearIpTables()
+{
+    NETMGR_LOG_I("NetsysControllerServiceImpl ClearIpTables In");
+    return netsysClient_.ClearIpTables();
+}
+#endif
+
 int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_I("SetIpv6PrivacyExtensions: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);

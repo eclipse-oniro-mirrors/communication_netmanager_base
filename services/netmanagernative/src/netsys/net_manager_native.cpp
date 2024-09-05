@@ -43,6 +43,7 @@ NetManagerNative::NetManagerNative()
     : bandwidthManager_(std::make_shared<BandwidthManager>()),
       connManager_(std::make_shared<ConnManager>()),
       firewallManager_(std::make_shared<FirewallManager>()),
+      iptables_(std::make_shared<DistributeNetManager>()),
       routeManager_(std::make_shared<RouteManager>()),
       interfaceManager_(std::make_shared<InterfaceManager>()),
       sharingManager_(std::make_shared<SharingManager>()),
@@ -507,6 +508,20 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 {
     NETNATIVE_LOG_D("NetManagerNative, UnRegisterNetFirewallCallback");
     return dnsManager_->UnRegisterNetFirewallCallback(callback);
+}
+#endif
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
+int32_t NetManagerNative::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    NETNATIVE_LOG_D("NetManagerNative In tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    return iptables_->SetIpTables(tcpPortId, udpPortId);
+}
+
+int32_t NetManagerNative::ClearIpTables()
+{
+    NETNATIVE_LOG_D("NetManagerNative ClearIpTables In");
+    return iptables_->ClearIpTables();
 }
 #endif
 
