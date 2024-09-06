@@ -165,7 +165,7 @@ int32_t DistributeNetManager::AddTcpIpRules()
 {
     int32_t ret = 0; 
     int32_t iptablesResult = ExecuteIptablesCommands(g_tcpIptables);  
-    if (iptablesResult != NETMANAGER_SUCCESS) {   
+    if (iptablesResult != NetManagerStandard::NETMANAGER_SUCCESS) {   
         return iptablesResult;  
     }  
     
@@ -176,7 +176,7 @@ int32_t DistributeNetManager::AddTcpIpRules()
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED;  
     }  
 
-    return NETMANAGER_SUCCESS;  
+    return NetManagerStandard::NETMANAGER_SUCCESS;  
 }
 
 int32_t DistributeNetManager::AddUdpIpRules()
@@ -192,13 +192,13 @@ int32_t DistributeNetManager::AddUdpIpRules()
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED;  
     }  
 
-    return NETMANAGER_SUCCESS;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t DistributeNetManager::DisableWearbleDistributedNetForward()
 { 
     int32_t ret = ExecuteIptablesCommands(g_iptablesDeleteCmds);  
-    if (ret != NETMANAGER_SUCCESS &&  
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS &&  
         ret != NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED) {    
         return ret;  
     }  
@@ -208,7 +208,7 @@ int32_t DistributeNetManager::DisableWearbleDistributedNetForward()
         return dealRuleRet;  
     }  
 
-    return NETMANAGER_SUCCESS;  
+    return NetManagerStandard::ETMANAGER_SUCCESS;  
 }
 } // namespace nmd
 } // namespace OHOS
