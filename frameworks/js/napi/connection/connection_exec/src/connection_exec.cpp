@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,22 +19,21 @@
 #include <cstdint>
 #include <string>
 
-#include "net_handle_interface.h"
 #include "constant.h"
 #include "errorcode_convertor.h"
 #include "napi_utils.h"
+#include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
+#include "net_handle_interface.h"
 #include "net_manager_constants.h"
 #include "netconnection.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "securec.h"
-#include "net_conn_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
 namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
-constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
 } // namespace
@@ -542,8 +541,6 @@ int32_t TransErrorCode(int32_t error)
             return NETMANAGER_ERR_PERMISSION_DENIED;
         case PERMISSION_DENIED_CODE:
             return NETMANAGER_ERR_PERMISSION_DENIED;
-        case RESOURCE_UNAVALIEBLE_CODE:
-            return NETMANAGER_ERR_INVALID_PARAMETER;
         case NET_UNREACHABLE_CODE:
             return NETMANAGER_ERR_INTERNAL;
         default:
@@ -564,8 +561,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
     if (context->host_.empty()) {
         NETMANAGER_BASE_LOGE("host is empty!");
-        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
     }
 
@@ -624,8 +620,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
     if (context->host_.empty()) {
         NETMANAGER_BASE_LOGE("host is empty!");
-        int32_t temp = TransErrorCode(RESOURCE_UNAVALIEBLE_CODE);
-        context->SetErrorCode(temp);
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
     }
 
