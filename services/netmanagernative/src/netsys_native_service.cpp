@@ -996,16 +996,16 @@ int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewa
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeService::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetsysNativeService::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOGI("NetsysNativeService tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    return netsysService_->SetIpTables(tcpPortId, udpPortId);
+    return netsysService_->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysNativeService::ClearIpTables()
+int32_t NetsysNativeService::DisableWearbleDistributedNetForward()
 {
     NETNATIVE_LOGI("NetsysNativeService Clear IpTables");
-    return netsysService_->ClearIpTables();
+    return netsysService_->DisableWearbleDistributedNetForward();
 }
 #endif
 

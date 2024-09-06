@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <mutex>
 
 #define TCP_ADD16 "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -p tcp -j REDIRECT "\
     "--to-ports %d"
@@ -40,7 +39,6 @@ public:
         DEFAULT_RULE
     };
 
-    std::string Gen_Rule(const char *inputRules, const int32_t portId);
     /**
      * @brief Sets the IP tables based on the provided TCP and UDP port IDs
      *
@@ -48,15 +46,16 @@ public:
      * @param udpPortId UDP port ID
      * @return A uint32_t value indicating the result of the operation
      */
-    int32_t SetIpTables(const int32_t tcpPortId, const int32_t udpPortId);
+    int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
     /**
      * @brief Clears the IP tables
      *
      * @return A uint32_t value indicating the result of the operation
      */
-    int32_t ClearIpTables();
+    int32_t DisableWearbleDistributedNetForward();
 private:
+    std::string GenerateRule(const char *inputRules, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
     void SetUdpPort(const int32_t udpPortId);
     int32_t AddTcpIpRules();
@@ -65,8 +64,6 @@ private:
 private:
     int32_t tcpPort_;
     int32_t udpPort_;
-    mutable std::mutex udpPortMutex_;
-    mutable std::mutex tcpPortMutex_;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd

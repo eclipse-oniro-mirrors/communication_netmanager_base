@@ -1430,24 +1430,24 @@ int32_t NetsysController::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysController::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetsysController::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysController tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("SetIpTables netsysService is null");
+        NETMGR_LOG_E("EnableWearbleDistributedNetForward netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->SetIpTables(tcpPortId, udpPortId);
+    return netsysService_->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysController::ClearIpTables()
+int32_t NetsysController::DisableWearbleDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysController ClearIpTables");
+    NETMGR_LOG_I("NetsysController DisableWearbleDistributedNetForward");
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("ClearIpTables netsysService is null");
+        NETMGR_LOG_E("DisableWearbleDistributedNetForward netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->ClearIpTables();
+    return netsysService_->DisableWearbleDistributedNetForward();
 }
 #endif
 

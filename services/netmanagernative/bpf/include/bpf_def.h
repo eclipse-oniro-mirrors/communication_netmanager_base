@@ -74,14 +74,12 @@ typedef struct {
     __u8 configSetFromFlag;
     __u8 diagAckFlag;
     __u32 netIfIndex;
-    __u8 bluetoothPolicy;
 } uid_access_policy_value;
 
 enum network_bearer_type {
     NETWORK_BEARER_TYPE_INITIAL = 0,
     NETWORK_BEARER_TYPE_CELLULAR,
     NETWORK_BEARER_TYPE_WIFI,
-    NETWORK_BEARER_TYPE_BLUETOOTH,
 };
 
 // network stats begin

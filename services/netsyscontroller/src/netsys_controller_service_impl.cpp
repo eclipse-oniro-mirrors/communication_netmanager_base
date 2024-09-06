@@ -864,16 +864,16 @@ int32_t NetsysControllerServiceImpl::UnRegisterNetFirewallCallback(
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysControllerServiceImpl::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetsysControllerServiceImpl::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl tcpPortId=%{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
-    return netsysClient_.SetIpTables(tcpPortId, udpPortId);
+    return netsysClient_.EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysControllerServiceImpl::ClearIpTables()
+int32_t NetsysControllerServiceImpl::DisableWearbleDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysControllerServiceImpl ClearIpTables");
-    return netsysClient_.ClearIpTables();
+    NETMGR_LOG_I("NetsysControllerServiceImpl DisableWearbleDistributedNetForward");
+    return netsysClient_.DisableWearbleDistributedNetForward();
 }
 #endif
 

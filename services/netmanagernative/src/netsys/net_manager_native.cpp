@@ -512,16 +512,16 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetManagerNative::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetManagerNative::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOG_D("NetManagerNative tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    return iptables_->SetIpTables(tcpPortId, udpPortId);
+    return iptables_->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetManagerNative::ClearIpTables()
+int32_t NetManagerNative::DisableWearbleDistributedNetForward()
 {
-    NETNATIVE_LOG_D("NetManagerNative ClearIpTables");
-    return iptables_->ClearIpTables();
+    NETNATIVE_LOG_D("NetManagerNative DisableWearbleDistributedNetForward");
+    return iptables_->DisableWearbleDistributedNetForward();
 }
 #endif
 

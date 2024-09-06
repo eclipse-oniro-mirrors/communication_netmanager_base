@@ -1617,7 +1617,7 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeClient::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetsysNativeClient::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysNativeClient tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     auto proxy = GetProxy();
@@ -1625,18 +1625,18 @@ int32_t NetsysNativeClient::SetIpTables(const int32_t tcpPortId, const int32_t u
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetIpTables(tcpPortId, udpPortId);
+    return proxy->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysNativeClient::ClearIpTables()
+int32_t NetsysNativeClient::DisableWearbleDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysNativeClient ClearIpTables");
+    NETMGR_LOG_I("NetsysNativeClient DisableWearbleDistributedNetForward");
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->ClearIpTables();
+    return proxy->DisableWearbleDistributedNetForward();
 }
 #endif
 

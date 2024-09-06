@@ -22,6 +22,7 @@
 #include "iptables_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "errorcode_convertor.h"
 
 namespace OHOS {
 namespace nmd {
@@ -83,57 +84,69 @@ const char* g_iptablesDeleteCmds[] = {
 
 void DistributeNetManager::SetTcpPort(const int32_t tcpPortId)
 {
-    std::lock_guard<std::mutex> lock(tcpPortMutex_);
     tcpPort_ = tcpPortId;
 }
 
 void DistributeNetManager::SetUdpPort(const int32_t udpPortId)
 {
-    std::lock_guard<std::mutex> lock(udpPortMutex_);
     udpPort_ = udpPortId;
 }
 
-int32_t DistributeNetManager::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t DistributeNetManager::GetTcpPort(const int32_t tcpPortId)
+{
+    return tcpPort_;
+}
+
+int32_t DistributeNetManager::ExecuteIptablesCommands(const char** commands)
+{
+    for (int i = 0; commands[i] != nullptr; ++i) {
+        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);
+        if (!response.empty()) {
+            return NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t DistributeNetManager::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOGI("DistributeNetManager tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    SetTcpPort(tcpPortId);
-    SetUdpPort(udpPortId);
 
-    uint32_t ret = 0;
+    int32_t ret = 0;
     ret += AddTcpIpRules();
     ret += AddUdpIpRules();
     return ret;
 }
 
-std::string DistributeNetManager::Gen_Rule(const char *inputRules, const int32_t portId)
+std::string DistributeNetManager::GenerateRule(const char *inputRules, const int32_t portId)
 {
-    NETNATIVE_LOGI("DistributeNetManager Gen_Rule portId = %{public}d", portId);
+    NETNATIVE_LOGI("DistributeNetManager GenerateRule portId = %{public}d", portId);
     char res[MAX_CMD_LENGTH] = {0};  
     if (snprintf(res, MAX_CMD_LENGTH, inputRules, portId) >= MAX_CMD_LENGTH) {
         return "";  
     }
   
-    NETNATIVE_LOGI("DistributeNetManager Gen_Rule Out rule:%{public}s", res);  
+    NETNATIVE_LOGI("DistributeNetManager GenerateRule Out rule:%{public}s", res);  
     return std::string(res);  
 }
 
 int32_t DistributeNetManager::DealRule(const RULES_TYPE type, const int32_t portId)
 {
-    NETNATIVE_LOGI("DistributeNetManager SetIptables type = %{public}d portId = %{public}d", type, portId);
+    NETNATIVE_LOGI("DistributeNetManager EnableWearbleDistributedNetForward type = %{public}d portId = %{public}d", type, portId);
     std::string resultRules;
     std::string response;
     switch (type) {
         case TCP_ADD_RULE:
-            resultRules = Gen_Rule(TCP_ADD16, portId);
+            resultRules = GenerateRule(TCP_ADD16, portId);
             break;
         case UDP_ADD_RULE:
-            resultRules = Gen_Rule(UDP_ADD16, portId);
+            resultRules = GenerateRule(UDP_ADD16, portId);
             break;
         case INPUT_ADD_RULE:
-            resultRules = Gen_Rule(INPUT_ADD, portId);
+            resultRules = GenerateRule(INPUT_ADD, portId);
             break;
         case INPUT_DEL_RULE:
-            resultRules = Gen_Rule(INPUT_DEL, portId);
+            resultRules = GenerateRule(INPUT_DEL, portId);
             break;
         case DEFAULT_RULE:
             NETNATIVE_LOGE("Rule type is invalid");
@@ -150,54 +163,52 @@ int32_t DistributeNetManager::DealRule(const RULES_TYPE type, const int32_t port
 
 int32_t DistributeNetManager::AddTcpIpRules()
 {
-    int32_t ret = 0;
-    std::string response;
-    for (int i = 0; g_tcpIptables[i] != nullptr; ++i) {  
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_tcpIptables[i]);  
-        if (response.empty()) {  
-            ret++;  
-        }  
+    int32_t ret = 0; 
+    int32_t iptablesResult = ExecuteIptablesCommands(g_tcpIptables);  
+    if (iptablesResult != NETMANAGER_SUCCESS) {   
+        return iptablesResult;  
     }  
-    ret += DealRule(TCP_ADD_RULE, tcpPort_);
-    response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
-    if (response.empty()) {
-        ret++;
-    }
-    return ret;
+    
+    ret += DealRule(TCP_ADD_RULE, tcpPort_);  
+  
+    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);  
+    if (!response.empty()) {    
+        return NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED;  
+    }  
+
+    return NETMANAGER_SUCCESS;  
 }
 
 int32_t DistributeNetManager::AddUdpIpRules()
 {
-    int32_t ret = 0;
-    std::string response;
-    for (int i = 0; g_udpIptables[i] != nullptr; ++i) {
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_udpIptables[i]);
-        if (response.empty()) {
-            ret++;
-        }
+    int32_t iptablesResult = ExecuteIptablesCommands(g_udpIptables);  
+    if (iptablesResult != NETMANAGER_SUCCESS) {  
+        return iptablesResult;  
     }
 
-    ret += DealRule(UDP_ADD_RULE, udpPort_);
-    response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
-    if (response.empty()) {
-        ret++;
-    }
-    ret += DealRule(INPUT_ADD_RULE, tcpPort_);
-    return ret;
+    int32_t dealUdpResult = DealRule(UDP_ADD_RULE, udpPort_);   
+    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);  
+    if (!response.empty()) {  
+        return NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED;  
+    }  
+
+    return NETMANAGER_SUCCESS;
 }
 
-int32_t DistributeNetManager::ClearIpTables()
-{
-    int32_t ret = 0;
-    std::string response;
-    for (int i = 0; g_iptablesDeleteCmds[i] != nullptr; ++i) {
-        response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_iptablesDeleteCmds[i]);
-        if (response.empty()) {
-            ret++;
-        }
-    }
-    ret += DealRule(INPUT_DEL_RULE, tcpPort_);
-    return ret;
+int32_t DistributeNetManager::DisableWearbleDistributedNetForward()
+{ 
+    int32_t ret = ExecuteIptablesCommands(g_iptablesDeleteCmds);  
+    if (ret != NETMANAGER_SUCCESS &&  
+        ret != NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED) {    
+        return ret;  
+    }  
+
+    int32_t dealRuleRet = DealRule(INPUT_DEL_RULE, GetTcpPort());  
+    if (dealRuleRet != 0) {   
+        return dealRuleRet;  
+    }  
+
+    return NETMANAGER_SUCCESS;  
 }
 } // namespace nmd
 } // namespace OHOS

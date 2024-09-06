@@ -2876,7 +2876,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeServiceProxy::SetIpTables(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t NetsysNativeServiceProxy::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOGI("NetsysNativeServiceProxy tcpRortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
     MessageParcel data;
@@ -2895,14 +2895,14 @@ int32_t NetsysNativeServiceProxy::SetIpTables(const int32_t tcpPortId, const int
     int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_SET_IPTABLES),
         data, reply, option);
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("SetIptables SendRequest failed");
+        NETNATIVE_LOGE("EnableWearbleDistributedNetForward SendRequest failed");
         return ret;
     }
 
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::ClearIpTables()
+int32_t NetsysNativeServiceProxy::DisableWearbleDistributedNetForward()
 {
     NETNATIVE_LOGI("NetsysNativeServiceProxy Clear Iptables");
     MessageParcel data;
@@ -2915,7 +2915,7 @@ int32_t NetsysNativeServiceProxy::ClearIpTables()
     int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_CLEAR_IPTABLES),
         data, reply, option);
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("ClearIpTables SendRequest failed");
+        NETNATIVE_LOGE("DisableWearbleDistributedNetForward SendRequest failed");
         return ret;
     }
 

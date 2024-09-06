@@ -150,8 +150,8 @@ public:
     int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    int32_t SetIpTables(const int32_t tcpPortId, const int32_t udpPortId);
-    int32_t ClearIpTables();
+    int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
+    int32_t DisableWearbleDistributedNetForward();
 #endif
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);

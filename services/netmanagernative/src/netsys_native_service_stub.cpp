@@ -109,9 +109,9 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_SET_IPTABLES)] =
-        &NetsysNativeServiceStub::CmdSetIpTables;
+        &NetsysNativeServiceStub::CmdEnableWearbleDistributedNetForward ;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_CLEAR_IPTABLES)] =
-        &NetsysNativeServiceStub::CmdClearIpTables;
+        &NetsysNativeServiceStub::CmdDisableWearbleDistributedNetForward;
 #endif
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
@@ -853,28 +853,25 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeServiceStub::CmdSetIpTables(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdEnableWearbleDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub Set IpTables");
+    NETNATIVE_LOGI("NetsysNativeServiceStub EnableWearbleDistributedNetForward");
+
     int32_t tcpPort = data.ReadInt32();
     int32_t udpPort = data.ReadInt32();
-    NETNATIVE_LOGI("NetsysNativeServiceStub tcpPort = %{public}d udpPort = %{public}d", tcpPort, udpPort);
-
-    int32_t result = SetIpTables(tcpPort, udpPort);
-
+    int32_t result = EnableWearbleDistributedNetForward(tcpPort, udpPort);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("CmdSetIpTables has recved result %{public}d", result);
 
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdClearIpTables(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdDisableWearbleDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub Clear IpTables");
+    NETNATIVE_LOGI("NetsysNativeServiceStub DisableWearbleDistributedNetForward");
 
-    int32_t result = ClearIpTables();
+    int32_t result = DisableWearbleDistributedNetForward();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("CmdClearIpTables has recved result %{public}d", result);
+    NETNATIVE_LOGI("CmdDisableWearbleDistributedNetForward has recved result %{public}d", result);
 
     return result;
 }

@@ -911,8 +911,8 @@ public:
 #endif
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    int32_t SetIpTables(const int32_t tcpPortId, const int32_t udpPortId) override;
-    int32_t ClearIpTables() override;
+    int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) override;
+    int32_t DisableWearbleDistributedNetForward() override;
 #endif
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;

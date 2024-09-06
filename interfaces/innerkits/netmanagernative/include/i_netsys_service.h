@@ -179,8 +179,8 @@ public:
     virtual int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
 #endif
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    virtual int32_t SetIpTables(const int32_t tcpPortId, const int32_t udpPortId) = 0;
-    virtual int32_t ClearIpTables() = 0;
+    virtual int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) = 0;
+    virtual int32_t DisableWearbleDistributedNetForward() = 0;
 #endif
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
