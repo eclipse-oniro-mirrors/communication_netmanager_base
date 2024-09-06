@@ -433,7 +433,7 @@ private:
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                      uint32_t &supplierId);
-    int32_t UnregisterNetSupplierAsync(uint32_t supplierId);
+    int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
@@ -481,6 +481,9 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
+    void SendSupplierBehaviorEvent(sptr<NetSupplier> supplier, std::shared_ptr<Network> network,
+                                   NetBearType bearerType, const std::string &ident, int32_t netId);
+    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier);
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
