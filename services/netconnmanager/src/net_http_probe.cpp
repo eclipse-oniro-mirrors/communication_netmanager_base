@@ -372,7 +372,6 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     }
 
     std::string proxyDomain = ExtractDomainFormUrl(proxyHost);
-
     if (proxyDomain.empty()) {
         NETMGR_LOG_E("Extract proxy domain from host return empty.");
         return true;
