@@ -211,13 +211,13 @@ bool Network::ReleaseVirtualNetwork()
 bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("update net link information process");
+    UpdateStatsCached(netLinkInfo);
     UpdateInterfaces(netLinkInfo);
     UpdateIpAddrs(netLinkInfo);
     UpdateRoutes(netLinkInfo);
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
-    UpdateStatsCached(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
     if (IsNat464Prefered()) {
