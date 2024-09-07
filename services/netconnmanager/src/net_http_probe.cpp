@@ -431,26 +431,6 @@ bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
     return true;
 }
 
-bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
-{
-    NETMGR_LOG_E("xcy SetUserInfo in");
-    HttpProxy tempProxy;
-    auto userInfoHelp = NetProxyUserinfo::GetInstance();
-    userInfoHelp.GetHttpProxyHostPass(tempProxy);
-    auto username = tempProxy.GetUsername();
-    auto passwd = tempProxy.GetPassword();
-    if (!username.empty()) {
-        NETMGR_LOG_E("xcy username in [%{public}s]", username.c_str());
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-        if (!passwd.empty()) {
-            NETMGR_LOG_E("xcy passwd in [%{public}s]", passwd.c_str());
-            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
-        }
-    }
-    return true;
-}
-
 bool NetHttpProbe::SetResolveOption(ProbeType probeType, const std::string &domain, const std::string &ipAddress,
                                     int32_t port)
 {
