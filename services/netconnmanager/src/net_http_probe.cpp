@@ -392,7 +392,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYTYPE, proxyType);
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_HTTPPROXYTUNNEL, 1L);
         if (!SetUserInfo(httpCurl_)) {
-            NETMGR_LOG_E("SetUserInfo failed");
+            NETMGR_LOG_E("Set http userInfo failed");
         }
         ret &= SetResolveOption(ProbeType::PROBE_HTTP, proxyDomain, proxyIpAddress, proxyPort);
     }
@@ -407,7 +407,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_PROXYTYPE, proxyType);
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_HTTPPROXYTUNNEL, 1L);
         if (!SetUserInfo(httpsCurl_)) {
-            NETMGR_LOG_E("SetUserInfo failed");
+            NETMGR_LOG_E("Set https userInfo failed");
         }
         ret &= SetResolveOption(ProbeType::PROBE_HTTPS, proxyDomain, proxyIpAddress, proxyPort);
     }
@@ -417,18 +417,15 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
 
 bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
 {
-    NETMGR_LOG_E("xcy SetUserInfo in");
     HttpProxy tempProxy;
     auto userInfoHelp = NetProxyUserinfo::GetInstance();
     userInfoHelp.GetHttpProxyHostPass(tempProxy);
     auto username = tempProxy.GetUsername();
     auto passwd = tempProxy.GetPassword();
     if (!username.empty()) {
-        NETMGR_LOG_E("xcy username in [%{public}s]", username.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
         if (!passwd.empty()) {
-            NETMGR_LOG_E("xcy passwd in [%{public}s]", passwd.c_str());
             NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
         }
     }
