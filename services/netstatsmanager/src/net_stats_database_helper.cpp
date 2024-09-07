@@ -300,8 +300,21 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
 
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t uid)
 {
-    std::string sql = "DELETE FROM " + tableName + " WHERE UID = " + std::to_string(uid);
-    return ExecSql(sql, nullptr, sqlCallback);
+    std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    statement_.BindInt32(idx, uid);
+    ret = statement_.Step();
+    statement_.ResetStatementAndClearBindings();
+    if (ret != SQLITE_DONE) {
+        NETMGR_LOG_E("Step failed ret:%{public}d", ret);
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsDatabaseHelper::Close()
@@ -385,6 +398,13 @@ int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t 
 int32_t NetStatsDatabaseHelper::Upgrade()
 {
     auto ret = ExecTableUpgrade(UID_TABLE, Version_1);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_TABLE, Version_1);
+    }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_2);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_2);
+    }
     return ret;
 }
 
@@ -408,6 +428,13 @@ int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, T
             NETMGR_LOG_E("ExecTableUpgrade version_1 failed. ret = %{public}d", ret);
         }
         oldVersion = Version_1;
+    }
+    if (oldVersion < Version_2 && newVersion >= Version_2) {
+        ret = DeleteData(tableName, Sim_UID);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade Version_2 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_2;
     }
     if (oldVersion != newVersion) {
         NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
