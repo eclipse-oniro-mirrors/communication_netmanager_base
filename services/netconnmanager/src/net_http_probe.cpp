@@ -24,6 +24,7 @@
 #include "netsys_controller.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_proxy_userinfo.h"
 
 #define NETPROBE_CURL_EASY_SET_OPTION(handle, opt, data)                                                     \
     do {                                                                                                     \
@@ -371,6 +372,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     }
 
     std::string proxyDomain = ExtractDomainFormUrl(proxyHost);
+
     if (proxyDomain.empty()) {
         NETMGR_LOG_E("Extract proxy domain from host return empty.");
         return true;
@@ -379,6 +381,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
     bool ret = true;
+    auto proxyType = (proxyHost.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
     if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
         if (httpCurl_ == nullptr) {
             NETMGR_LOG_E("httpCurl_ is nullptr");
@@ -386,8 +389,11 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         }
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXY, proxyHost.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYPORT, proxyPort);
-        NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+        NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_PROXYTYPE, proxyType);
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_HTTPPROXYTUNNEL, 1L);
+        if (!SetUserInfo(httpCurl_)) {
+            NETMGR_LOG_E("SetUserInfo failed");
+        }
         ret &= SetResolveOption(ProbeType::PROBE_HTTP, proxyDomain, proxyIpAddress, proxyPort);
     }
 
@@ -398,12 +404,35 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         }
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_PROXY, proxyHost.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_PROXYPORT, proxyPort);
-        NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+        NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_PROXYTYPE, proxyType);
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_HTTPPROXYTUNNEL, 1L);
+        if (!SetUserInfo(httpsCurl_)) {
+            NETMGR_LOG_E("SetUserInfo failed");
+        }
         ret &= SetResolveOption(ProbeType::PROBE_HTTPS, proxyDomain, proxyIpAddress, proxyPort);
     }
     useHttpProxy = true;
     return ret;
+}
+
+bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
+{
+    NETMGR_LOG_E("xcy SetUserInfo in");
+    HttpProxy tempProxy;
+    auto userInfoHelp = NetProxyUserinfo::GetInstance();
+    userInfoHelp.GetHttpProxyHostPass(tempProxy);
+    auto username = tempProxy.GetUsername();
+    auto passwd = tempProxy.GetPassword();
+    if (!username.empty()) {
+        NETMGR_LOG_E("xcy username in [%{public}s]", username.c_str());
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+        if (!passwd.empty()) {
+            NETMGR_LOG_E("xcy passwd in [%{public}s]", passwd.c_str());
+            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
+        }
+    }
+    return true;
 }
 
 bool NetHttpProbe::SetResolveOption(ProbeType probeType, const std::string &domain, const std::string &ipAddress,
