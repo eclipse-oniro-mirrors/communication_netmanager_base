@@ -61,6 +61,8 @@ private:
     void SendHttpProbeRequest();
     void RecvHttpProbeResponse();
     int32_t LoadProxy(std::string &proxyHost, int32_t &proxyPort);
+    bool SetUserInfo(CURL *curlHandler);
+    bool SetProxyInfo(CURL *curlHandler, const std::string &proxyHost, int32_t proxyPort);
 
 private:
     static std::mutex initCurlMutex_;
