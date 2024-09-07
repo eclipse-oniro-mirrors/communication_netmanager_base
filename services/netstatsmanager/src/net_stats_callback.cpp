@@ -66,13 +66,10 @@ int32_t NetStatsCallback::NotifyNetIfaceStatsChanged(const std::string &iface)
 {
     NETMGR_LOG_D("NotifyNetIfaceStatsChanged info: iface[%{public}s]", iface.c_str());
     std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
-    for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
-        if ((*it) == nullptr || (*it)->NetIfaceStatsChanged(iface) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
-            netStatsCallback_.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    auto iter = std::remove_if(netStatsCallback_.begin(), netStatsCallback_.end(), [&iface](const auto &item) {
+        return item == nullptr || item->NetIfaceStatsChanged(iface) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    });
+    netStatsCallback_.erase(iter, netStatsCallback_.end());
     return NETMANAGER_SUCCESS;
 }
 
@@ -80,13 +77,10 @@ int32_t NetStatsCallback::NotifyNetUidStatsChanged(const std::string &iface, uin
 {
     NETMGR_LOG_D("UpdateIfacesStats info: iface[%{public}s] uid[%{public}d]", iface.c_str(), uid);
     std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
-    for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
-        if ((*it) == nullptr || (*it)->NetUidStatsChanged(iface, uid) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
-            netStatsCallback_.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    auto iter = std::remove_if(netStatsCallback_.begin(), netStatsCallback_.end(), [&iface, uid](const auto &item) {
+        return item == nullptr || item->NetUidStatsChanged(iface, uid) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    });
+    netStatsCallback_.erase(iter, netStatsCallback_.end());
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
