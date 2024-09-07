@@ -380,7 +380,6 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
     bool ret = true;
-    auto proxyType = (proxyHost.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
     if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
         if (!SetProxyInfo(httpCurl_, proxyHost, proxyPort)) {
             NETMGR_LOG_E("Set proxy info failed.");
@@ -398,23 +397,6 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     return ret;
 }
 
-bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
-{
-    HttpProxy tempProxy;
-    auto userInfoHelp = NetProxyUserinfo::GetInstance();
-    userInfoHelp.GetHttpProxyHostPass(tempProxy);
-    auto username = tempProxy.GetUsername();
-    auto passwd = tempProxy.GetPassword();
-    if (!username.empty()) {
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-        if (!passwd.empty()) {
-            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
-        }
-    }
-    return true;
-}
-
 bool NetHttpProbe::SetProxyInfo(CURL *curlHandler, const std::string &proxyHost, int32_t proxyPort)
 {
     auto proxyType = (proxyHost.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
@@ -428,6 +410,23 @@ bool NetHttpProbe::SetProxyInfo(CURL *curlHandler, const std::string &proxyHost,
     NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_HTTPPROXYTUNNEL, 1L);
     if (!SetUserInfo(curlHandler)) {
         NETMGR_LOG_E("Set user info failed.");
+    }
+    return true;
+}
+
+bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
+{
+    HttpProxy tempProxy;
+    auto userInfoHelp = NetProxyUserinfo::GetInstance();
+    userInfoHelp.GetHttpProxyHostPass(tempProxy);
+    auto username = tempProxy.GetUsername();
+    auto passwd = tempProxy.GetPassword();
+    if (!username.empty()) {
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
+        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+        if (!passwd.empty()) {
+            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
+        }
     }
     return true;
 }
