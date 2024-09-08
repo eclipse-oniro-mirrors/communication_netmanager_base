@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace nmd {
-class DistributeNetManager {
+class WearbleDistributedNet {
 public:
     enum RULES_TYPE {
         TCP_ADD_RULE,
@@ -39,31 +39,28 @@ public:
         DEFAULT_RULE
     };
 
-    /**
-     * @brief Sets the IP tables based on the provided TCP and UDP port IDs
-     *
-     * @param tcpPortId TCP port ID
-     * @param udpPortId UDP port ID
-     * @return A uint32_t value indicating the result of the operation
-     */
+    /**  
+    * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports.  
+    *  
+    * @param tcpPortId The TCP port ID to enable forwarding for.  
+    * @param udpPortId The UDP port ID to enable forwarding for.  
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
+    */  
     int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
-    /**
-     * @brief Clears the IP tables
-     *
-     * @return A uint32_t value indicating the result of the operation
-     */
+    /**  
+    * @brief Disables the wearable distributed network forwarding by removing configured rules.  
+    *  
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
+    */ 
     int32_t DisableWearbleDistributedNetForward();
 private:
+    int32_t EstablishTcpIpRulesForNetworkDistribution();
+    int32_t EstablishUdpIpRulesForNetworkDistribution();
     std::string GenerateRule(const char *inputRules, const int32_t portId);
-    void SetTcpPort(const int32_t tcpPortId);
-    void SetUdpPort(const int32_t udpPortId);
-    int32_t AddTcpIpRules();
-    int32_t AddUdpIpRules();
-    int32_t DealRule(const RULES_TYPE type, const int32_t portId);
-private:
-    int32_t tcpPort_;
-    int32_t udpPort_;
+    int32_t GetTcpPort();
+    int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
+    const char* GetRuleTemplate(const RULES_TYPE type);
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd
