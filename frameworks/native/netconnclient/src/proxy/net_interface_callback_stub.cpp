@@ -60,7 +60,7 @@ int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessagePar
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)
+int32_t NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated(MessageParcel data, MessageParcel &reply)
 {
     std::string addr;
     if (!data.ReadString(addr)) {
