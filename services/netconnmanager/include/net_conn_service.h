@@ -481,8 +481,6 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
-    void SendSupplierBehaviorEvent(sptr<NetSupplier> supplier, std::shared_ptr<Network> network,
-                                   NetBearType bearerType, const std::string &ident, int32_t netId);
     int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier);
 private:
     enum ServiceRunningState {
