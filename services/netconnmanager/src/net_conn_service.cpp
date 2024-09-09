@@ -452,14 +452,6 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     supplier->SetUid(callingUid);
     // save supplier
-    SendSupplierBehaviorEvent(supplier, network, bearerType, ident, netId);
-    return NETMANAGER_SUCCESS;
-}
-
-void NetConnService::SendSupplierBehaviorEvent(sptr<NetSupplier> supplier, std::shared_ptr<Network> network,
-                                               NetBearType bearerType, const std::string &ident, int32_t netId)
-{
-    int32_t supplierId = supplier->GetSupplierUid();
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
     networks_[netId] = network;
@@ -468,6 +460,7 @@ void NetConnService::SendSupplierBehaviorEvent(sptr<NetSupplier> supplier, std::
     EventReport::SendSupplierBehaviorEvent(eventInfo);
     NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}d %{public}s] netId[%{public}d]",
                  supplierId, supplier->GetUid(), ident.c_str(), netId);
+    return NETMANAGER_SUCCESS;
 }
 
 void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteObject)
@@ -604,7 +597,8 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
         return NET_CONN_ERR_NO_SUPPLIER;
     }
     if (!ignoreUid && CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UnregisterNetSupplierAsync uid is not equal to callingUid.");
+        NETMGR_LOG_E("UnregisterNetSupplierAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     NETMGR_LOG_I("Unregister supplier[%{public}d, %{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s]",
@@ -645,7 +639,6 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier)
 {
     int32_t uid = supplier->GetUid();
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    NETMGR_LOG_I("uid and callingUid is [%{public}d, %{public}d]", uid, callingUid);
     return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
 }
 
@@ -794,7 +787,8 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     }
 
     if (CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UpdateNetSupplierInfoAsync uid is not equal to callingUid.");
+        NETMGR_LOG_E("UpdateNetSupplierInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
@@ -841,7 +835,8 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     }
 
     if (CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("UpdateNetLinkInfoAsync uid is not equal to callingUid.");
+        NETMGR_LOG_E("UpdateNetLinkInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     HttpProxy oldHttpProxy;
