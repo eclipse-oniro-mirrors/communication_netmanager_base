@@ -44,7 +44,7 @@ private:
     using NetInterfaceStateCallbackFunc = int32_t (NetInterfaceStateCallbackStub::*)(MessageParcel &, MessageParcel &);
 
 private:
-    int32_t CmdInterfaceAddressUpdated(MessageParcel data, MessageParcel &reply);
+    int32_t CmdInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceAddressRemoved(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceAdded(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceRemoved(MessageParcel &data, MessageParcel &reply);
