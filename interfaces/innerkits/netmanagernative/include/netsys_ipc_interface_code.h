@@ -129,6 +129,9 @@ enum class NetsysInterfaceCode {
     NETSYS_ENABLE_DISTRIBUTE_SERVER_NET,
     NETSYS_DISABLE_DISTRIBUTE_NET,
     NETSYS_CLOSE_SOCKETS_UID,
+#ifdef SUPPORT_SYSVPN
+    NETSYS_PROCESS_VPN_STAGE,
+#endif // SUPPORT_SYSVPN
 };
 
 enum class NotifyInterfaceCode {

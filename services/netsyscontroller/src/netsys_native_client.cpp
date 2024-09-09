@@ -473,7 +473,8 @@ int32_t NetsysNativeClient::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
-    NETMGR_LOG_D("Add address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_D("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -485,7 +486,8 @@ int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const
 int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
-    NETMGR_LOG_D("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -497,7 +499,8 @@ int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const
 int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength, const std::string &netCapabilities)
 {
-    NETMGR_LOG_D("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -508,7 +511,8 @@ int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const
 
 int32_t NetsysNativeClient::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
-    NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s]", ifaceName.c_str());
+    NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s], ipAddr[%{public}s]",
+        ifaceName.c_str(), ToAnonymousIp(ipAddress).c_str());
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -1707,6 +1711,18 @@ int32_t NetsysNativeClient::SetNicTrafficAllowed(const std::vector<std::string> 
     }
     return proxy->SetNicTrafficAllowed(ifaceNames, status);
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysNativeClient::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->ProcessVpnStage(stage);
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t NetsysNativeClient::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {

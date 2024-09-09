@@ -27,6 +27,9 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#ifdef SUPPORT_SYSVPN
+#include "system_vpn_wrapper.h"
+#endif // SUPPORT_SYSVPN
 #ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
 #include "bpf_ring_buffer.h"
 #endif
@@ -1060,6 +1063,23 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
     NETNATIVE_LOG_D("SetNicTrafficAllowed iptablesWrapper_ apply success");
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    NETNATIVE_LOGI("ProcessVpnStage stage %{public}d", stage);
+    if (SystemVpnWrapper::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("ProcessVpnStage SystemVpnWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    int32_t ret = SystemVpnWrapper::GetInstance()->Update(stage);
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("ProcessVpnStage failed");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t NetsysNativeService::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {

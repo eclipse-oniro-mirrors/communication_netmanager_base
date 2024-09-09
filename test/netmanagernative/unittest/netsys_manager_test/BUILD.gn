@@ -95,6 +95,10 @@ ohos_unittest("netsys_native_manager_test") {
     "SHARING_MANAGER_DEPS",
   ]
 
+  if (netmanager_base_enable_feature_sysvpn) {
+    defines += [ "SUPPORT_SYSVPN" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -192,6 +196,7 @@ ohos_unittest("netsys_controller_test") {
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",

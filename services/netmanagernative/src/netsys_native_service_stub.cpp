@@ -54,6 +54,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitStaticArpToInterfaceMap();
     InitNetVnicInterfaceMap();
     InitNetVirnicInterfaceMap();
+#ifdef SUPPORT_SYSVPN
+    InitVpnOpToInterfaceMap();
+#endif // SUPPORT_SYSVPN
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -195,6 +198,14 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback;
 #endif
 }
+
+#ifdef SUPPORT_SYSVPN
+void NetsysNativeServiceStub::InitVpnOpToInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE)] =
+        &NetsysNativeServiceStub::CmdProcessVpnStage;
+}
+#endif
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
 {
@@ -2135,6 +2146,28 @@ int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, Me
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    int32_t stage = 0;
+    if (!data.ReadInt32(stage)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = ProcessVpnStage(static_cast<NetsysNative::SysVpnStageCode>(stage));
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdProcessVpnStage result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t NetsysNativeServiceStub::CmdCloseSocketsUid(MessageParcel &data, MessageParcel &reply)
 {

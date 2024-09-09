@@ -172,6 +172,7 @@ int32_t SharingManager::IpDisableForwarding(const std::string &requestor)
 
 int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
+    DisableNat(downstreamIface, upstreamIface);
     CheckInited();
     if (downstreamIface == upstreamIface) {
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", downstreamIface.c_str(),

@@ -91,6 +91,21 @@ bpf_map_def SEC("maps") app_cookie_stats_map = {
     .numa_node = 0,
 };
 
+static inline __u32 get_data_len(struct __sk_buff *skb)
+{
+    __u32 length = skb->len;
+    if (skb->vlan_present == 1) {
+        length += VLAN_HEADER_LENGTH;
+    }
+    if (skb->family == AF_INET) {
+        length += IPV4_HEADERS_LENGTH;
+    }
+    if (skb->family == AF_INET6) {
+        length += IPV6_HEADERS_LENGTH;
+    }
+    return length;
+}
+
 SEC("socket/iface/stats")
 int socket_iface_stats(struct __sk_buff *skb)
 {
@@ -287,10 +302,10 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         }
         if (value_uid_if != NULL) {
             __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+            __sync_fetch_and_add(&value_uid_if->rxBytes, get_data_len(skb));
         }
     } else {
-        if (sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX && filter_sim_stats(skb->local_ip4) == 1) {
+        if (filter_sim_stats(skb->local_ip4) == 1) {
             app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                              .ifType = get_iface_type(skb->local_ip4)};
             app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -301,7 +316,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
             }
             if (value_uid_sim != NULL) {
                 __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
-                __sync_fetch_and_add(&value_uid_sim->rxBytes, skb->len);
+                __sync_fetch_and_add(&value_uid_sim->rxBytes, get_data_len(skb));
             }
         }
     }
@@ -377,10 +392,10 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         }
         if (value_uid_if != NULL) {
             __sync_fetch_and_add(&value_uid_if->txPackets, 1);
-            __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+            __sync_fetch_and_add(&value_uid_if->txBytes, get_data_len(skb));
         }
     } else {
-        if (sock_uid >= SIM_UID_MIN && sock_uid < SIM_UID_MAX && filter_sim_stats(skb->local_ip4) == 1) {
+        if (filter_sim_stats(skb->local_ip4) == 1) {
             app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                              .ifType = get_iface_type(skb->local_ip4)};
             app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -391,7 +406,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
             }
             if (value_uid_sim != NULL) {
                 __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
-                __sync_fetch_and_add(&value_uid_sim->txBytes, skb->len);
+                __sync_fetch_and_add(&value_uid_sim->txBytes, get_data_len(skb));
             }
         }
     }

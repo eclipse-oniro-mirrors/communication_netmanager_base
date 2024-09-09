@@ -953,7 +953,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
     NetConnService::GetInstance()->UpdateGlobalHttpProxy(proxy);
     NetConnService::GetInstance()->OnNetActivateTimeOut(testInt);
-    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId);
+    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId, true);
     sptr<NetSupplier> supplier = nullptr;
     NetConnService::GetInstance()->CallbackForSupplier(supplier, CallbackType::CALL_TYPE_AVAILABLE);
 

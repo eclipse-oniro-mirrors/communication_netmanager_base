@@ -234,6 +234,16 @@ int32_t NetSupplier::GetSupplierUid() const
     return netSupplierInfo_.uid_;
 }
 
+int32_t NetSupplier::GetUid() const
+{
+    return uid_;
+}
+
+void NetSupplier::SetUid(int32_t uid)
+{
+    uid_ = uid;
+}
+
 bool NetSupplier::IsAvailable() const
 {
     return netSupplierInfo_.isAvailable_;

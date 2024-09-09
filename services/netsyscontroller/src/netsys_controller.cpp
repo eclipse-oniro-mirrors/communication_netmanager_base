@@ -348,7 +348,8 @@ int32_t NetsysController::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -361,7 +362,8 @@ int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const s
 int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -374,7 +376,8 @@ int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const s
 int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength, const std::string &netCapabilities)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -852,8 +855,8 @@ int32_t NetsysController::SetIpAddress(int32_t socketFd, const std::string &ipAd
 	    (prefixLen <= 0) || (static_cast<uint32_t>(prefixLen) > IPV4_MAX_LENGTH)) {
         NETMGR_LOG_E(
             "The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
-            "prefixLen[%{public}d].",
-            socketFd, prefixLen);
+            "ipAddress[%{public}s], prefixLen[%{public}d].",
+            socketFd, ToAnonymousIp(ipAddress).c_str(), prefixLen);
         return NETSYS_ERR_VPN;
     }
     // LCOV_EXCL_START This will never happen.
@@ -915,7 +918,8 @@ int32_t NetsysController::RegisterCallback(sptr<NetsysControllerCallback> callba
 
 int32_t NetsysController::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
 {
-    NETMGR_LOG_I("StartDhcpService: iface[%{public}s]", iface.c_str());
+    NETMGR_LOG_I("StartDhcpService: iface[%{public}s], ipv4addr[%{public}s]",
+        iface.c_str(), ToAnonymousIp(ipv4addr).c_str());
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -1524,6 +1528,19 @@ int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &i
     // LCOV_EXCL_STOP
     return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("ProcessVpnStage netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->ProcessVpnStage(stage);
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t NetsysController::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {

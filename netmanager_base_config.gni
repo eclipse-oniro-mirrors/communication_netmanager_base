@@ -61,6 +61,7 @@ declare_args() {
   enable_server_support_ipv6 = false
   netmanager_base_enable_feature_net_firewall = false
   netmanager_base_enable_feature_net_bluetooth = false
+  netmanager_base_enable_feature_sysvpn = false
   netmanager_base_enable_netsys_access_policy_diag_listen = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
