@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#define private public
 #include "networkshare_upstreammonitor.h"
 #undef private
 

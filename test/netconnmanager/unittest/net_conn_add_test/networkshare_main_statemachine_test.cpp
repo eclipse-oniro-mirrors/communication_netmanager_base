@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#define private public
 #include "networkshare_main_statemachine.h"
 #undef private
 #include "networkshare_state_common.h"

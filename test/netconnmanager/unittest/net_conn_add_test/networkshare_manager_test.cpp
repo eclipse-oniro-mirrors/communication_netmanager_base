@@ -24,7 +24,7 @@
 #include "netmanager_ext_test_security.h"
 #include "netmgr_ext_log_wrapper.h"
 #include "netshare_result_callback_stub.h"
-#define private public
+
 #include "networkshare_client.h"
 #undef private
 #include "networkshare_constants.h"
