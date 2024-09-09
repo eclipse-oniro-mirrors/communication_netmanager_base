@@ -37,20 +37,26 @@
 #include "net_http_proxy_tracker.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
+#include "tiny_count_down_latch.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
+constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
+constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
-constexpr int32_t HTTP_PROBE_FAIL_CODE = 0;
+constexpr int32_t ONE_URL_DETECT_NUM = 2;
+constexpr int32_t ALL_DETECT_THREAD_NUM = 4;
 constexpr const char NEW_LINE_STR = '\n';
-constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
-constexpr const char *HTTPS_URL_HEADER = "HttpsProbeUrl:";
+constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
+const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
+const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
+const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -65,11 +71,11 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
                        const std::weak_ptr<INetMonitorCallback> &callback)
-    : netId_(netId), netMonitorCallback_(callback)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback)
 {
-    httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo);
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
+    GetHttpProbeUrlFromConfig();
 }
 
 void NetMonitor::Start()
@@ -106,40 +112,28 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
         isDetecting_ = false;
         needDetectionWithoutProxy_ = true;
-        needCallback_ = true;
         result = VERIFICATION_STATE;
     } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
         NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
         detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
-        needCallback_ = true;
         result = CAPTIVE_PORTAL_STATE;
     } else if (probeResult.IsNeedPortal()) {
         NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
         detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
-        needCallback_ = true;
         result = CAPTIVE_PORTAL_STATE;
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
-        needCallback_ = true;
-        if (probeResult.GetCode() == HTTP_PROBE_FAIL_CODE && HasGlobalHttpProxy() && needDetectionWithoutProxy_) {
-            NETMGR_LOG_E("Net[%{public}d] first probe failed with global http proxy, try without proxy", netId_);
-            ProbeWithoutGlobalHttpProxy();
-            needDetectionWithoutProxy_ = false;
-            needCallback_ = false;
-            detectionDelay_ = 0;
-        } else {
-            detectionDelay_ *= DOUBLE;
-            if (detectionDelay_ == 0) {
-                detectionDelay_ = INIT_DETECTION_DELAY_MS;
-            } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
-                detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
-            }
+        detectionDelay_ *= DOUBLE;
+        if (detectionDelay_ == 0) {
+            detectionDelay_ = INIT_DETECTION_DELAY_MS;
+        } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
+            detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
         }
         NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
         result = INVALID_DETECTION_STATE;
     }
     auto monitorCallback = netMonitorCallback_.lock();
-    if (monitorCallback && needCallback_) {
+    if (monitorCallback) {
         monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
     }
     struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
@@ -152,55 +146,113 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
-    NetHttpProbeResult probeResult = SendHttpProbe(PROBE_HTTP_HTTPS);
+    NetHttpProbeResult probeResult = SendProbe();
     if (isDetecting_) {
         NetDetectionStatus result = UNKNOWN_STATE;
         ProcessDetection(probeResult, result);
     }
 }
 
-NetHttpProbeResult NetMonitor::SendHttpProbe(ProbeType probeType)
+NetHttpProbeResult NetMonitor::SendProbe()
 {
-    std::lock_guard<std::mutex> locker(probeMtx_);
-    std::string httpProbeUrl;
-    std::string httpsProbeUrl;
-    GetHttpProbeUrlFromConfig(httpProbeUrl, httpsProbeUrl);
-    if (httpProbeUrl.empty() || httpsProbeUrl.empty()) {
-        NETMGR_LOG_E("Net:[%{public}d] httpProbeUrl is nullptr", netId_);
-        return NetHttpProbeResult(NetMonitorResponseCode::NO_CONTENT, nullptr);
+    NETMGR_LOG_I("start net detection");
+    std::lock_guard<std::mutex> monitorLocker(probeMtx_);
+    std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
+    std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
+    std::shared_ptr<ProbeThread> primaryHttpThread = std::make_shared<ProbeThread>(
+        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
+    std::shared_ptr<ProbeThread> primaryHttpsThread = std::make_shared<ProbeThread>(
+        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
+    {
+        std::lock_guard<std::mutex> proxyLocker(proxyMtx_);
+        primaryHttpThread->UpdateGlobalHttpProxy(globalHttpProxy_);
+        primaryHttpsThread->UpdateGlobalHttpProxy(globalHttpProxy_);
     }
+    primaryHttpThread->Start();
+    primaryHttpsThread->Start();
 
-    if (httpProbe_ == nullptr) {
-        NETMGR_LOG_E("Net:[%{public}d] httpProbe_ is nullptr", netId_);
-        return NetHttpProbeResult();
+    latch->Await(std::chrono::milliseconds(PRIMARY_DETECTION_RESULT_WAIT_MS));
+    NetHttpProbeResult httpProbeResult = GetThreadDetectResult(primaryHttpThread, ProbeType::PROBE_HTTP);
+    NetHttpProbeResult httpsProbeResult = GetThreadDetectResult(primaryHttpsThread, ProbeType::PROBE_HTTPS);
+    if (httpProbeResult.IsNeedPortal()) {
+        NETMGR_LOG_I("http detect result: portal");
+        return httpProbeResult;
     }
-
-    if (httpProbe_->SendProbe(probeType, httpProbeUrl, httpsProbeUrl) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Net:[%{public}d] send probe failed.", netId_);
-        return NetHttpProbeResult();
+    if (httpsProbeResult.IsSuccessful()) {
+        NETMGR_LOG_I("https detect result: success");
+        return httpsProbeResult;
     }
-
-    if (httpProbe_->GetHttpProbeResult().IsNeedPortal()) {
-        return httpProbe_->GetHttpProbeResult();
-    }
-
-#ifdef NEED_REPORT_PARTIAL_CONNECTION
-    if (httpProbe_->HasProbeType(probeType, ProbeType::PROBE_HTTP) &&
-        httpProbe_->HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
-        if (httpProbe_->GetHttpProbeResult().IsSuccessful() && httpProbe_->GetHttpsProbeResult().IsFailed) {
-            // return probe result: PARTIAL;
-        }
-    }
-#endif
-
-    if (httpProbe_->HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
-        return httpProbe_->GetHttpsProbeResult();
-    }
-
-    return httpProbe_->GetHttpProbeResult();
+    NETMGR_LOG_I("backup url detection start");
+    std::shared_ptr<ProbeThread> fallbackHttpThread = std::make_shared<ProbeThread>(netId_,
+        netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> fallbackHttpsThread = std::make_shared<ProbeThread>(netId_,
+        netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, fallbackHttpUrl_, fallbackHttpsUrl_);
+    fallbackHttpThread->ProbeWithoutGlobalHttpProxy();
+    fallbackHttpsThread->ProbeWithoutGlobalHttpProxy();
+    fallbackHttpThread->Start();
+    fallbackHttpsThread->Start();
+    latchAll->Await(std::chrono::milliseconds(ALL_DETECTION_RESULT_WAIT_MS));
+    httpProbeResult = GetThreadDetectResult(primaryHttpThread, ProbeType::PROBE_HTTP);
+    httpsProbeResult = GetThreadDetectResult(primaryHttpsThread, ProbeType::PROBE_HTTPS);
+    NetHttpProbeResult fallbackHttpProbeResult = GetThreadDetectResult(fallbackHttpThread, ProbeType::PROBE_HTTP);
+    NetHttpProbeResult fallbackHttpsProbeResult = GetThreadDetectResult(fallbackHttpsThread, ProbeType::PROBE_HTTPS);
+    return ProcessThreadDetectResult(httpProbeResult, httpsProbeResult, fallbackHttpProbeResult,
+        fallbackHttpsProbeResult);
 }
 
-void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl)
+NetHttpProbeResult NetMonitor::GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType)
+{
+    NetHttpProbeResult result;
+    if (!probeThread->IsDetecting()) {
+        if (probeType == ProbeType::PROBE_HTTP) {
+            return probeThread->GetHttpProbeResult();
+        } else {
+            return probeThread->GetHttpsProbeResult();
+        }
+    }
+    return result;
+}
+
+NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& httpProbeResult,
+    NetHttpProbeResult& httpsProbeResult, NetHttpProbeResult& fallbackHttpProbeResult,
+    NetHttpProbeResult& fallbackHttpsProbeResult)
+{
+    if (httpProbeResult.IsNeedPortal()) {
+        NETMGR_LOG_I("primary http detect result: portal");
+        return httpProbeResult;
+    }
+    if (fallbackHttpProbeResult.IsNeedPortal()) {
+        NETMGR_LOG_I("fallback http detect result: portal");
+        return fallbackHttpProbeResult;
+    }
+    if (httpsProbeResult.IsSuccessful()) {
+        NETMGR_LOG_I("primary https detect result: success");
+        return httpsProbeResult;
+    }
+    if (fallbackHttpsProbeResult.IsSuccessful()) {
+        NETMGR_LOG_I("fallback https detect result: success");
+        return fallbackHttpsProbeResult;
+    }
+    if (httpProbeResult.IsSuccessful() && fallbackHttpProbeResult.IsSuccessful()) {
+        NETMGR_LOG_I("both primary http and fallback http detect result success");
+        return httpProbeResult;
+    }
+    return httpsProbeResult;
+}
+
+void NetMonitor::LoadGlobalHttpProxy()
+{
+    NetHttpProxyTracker httpProxyTracker;
+    httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
+}
+
+void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    std::unique_lock<std::mutex> proxyLocker(proxyMtx_);
+    globalHttpProxy_ = httpProxy;
+}
+
+void NetMonitor::GetHttpProbeUrlFromConfig()
 {
     if (!std::filesystem::exists(URL_CFG_FILE)) {
         NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
@@ -218,42 +270,31 @@ void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &ht
     std::string content = oss.str();
     auto pos = content.find(HTTP_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += strlen(HTTP_URL_HEADER);
-        httpUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        pos += HTTP_URL_HEADER.length();
+        httpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
 
     pos = content.find(HTTPS_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += strlen(HTTPS_URL_HEADER);
-        httpsUrl = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        pos += HTTPS_URL_HEADER.length();
+        httpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
-    NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s]", httpUrl.c_str(), httpsUrl.c_str());
-}
 
-void NetMonitor::LoadGlobalHttpProxy()
-{
-    HttpProxy globalHttpProxy;
-    NetHttpProxyTracker httpProxyTracker;
-    httpProxyTracker.ReadFromSettingsData(globalHttpProxy);
-    UpdateGlobalHttpProxy(globalHttpProxy);
-}
-
-void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
-{
-    if (httpProbe_) {
-        httpProbe_->UpdateGlobalHttpProxy(httpProxy);
+    pos = content.find(FALLBACK_HTTP_URL_HEADER);
+    if (pos != std::string::npos) {
+        pos += FALLBACK_HTTP_URL_HEADER.length();
+        fallbackHttpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
+
+    pos = content.find(FALLBACK_HTTPS_URL_HEADER);
+    if (pos != std::string::npos) {
+        pos += FALLBACK_HTTPS_URL_HEADER.length();
+        fallbackHttpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
+        " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
+        fallbackHttpsUrl_.c_str());
 }
 
-bool NetMonitor::HasGlobalHttpProxy()
-{
-    return httpProbe_->HasGlobalHttpProxy();
-}
-
-void NetMonitor::ProbeWithoutGlobalHttpProxy()
-{
-    std::lock_guard<std::mutex> locker(probeMtx_);
-    httpProbe_->ProbeWithoutGlobalHttpProxy();
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
