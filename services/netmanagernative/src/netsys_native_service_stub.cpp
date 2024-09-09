@@ -107,11 +107,11 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_SET_IPTABLES)] =
-        &NetsysNativeServiceStub::CmdEnableWearbleDistributedNetForward ;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_CLEAR_IPTABLES)] =
-        &NetsysNativeServiceStub::CmdDisableWearbleDistributedNetForward;
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD)] =
+        &NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD)] =
+        &NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward;
 #endif
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
@@ -852,26 +852,26 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
     return result;
 }
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeServiceStub::CmdEnableWearbleDistributedNetForward(MessageParcel &data, MessageParcel &reply)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub EnableWearbleDistributedNetForward");
+    NETNATIVE_LOGI("NetsysNativeServiceStub EnableWearableDistributedNetForward");
 
     int32_t tcpPort = data.ReadInt32();
     int32_t udpPort = data.ReadInt32();
-    int32_t result = EnableWearbleDistributedNetForward(tcpPort, udpPort);
+    int32_t result = EnableWearableDistributedNetForward(tcpPort, udpPort);
     reply.WriteInt32(result);
 
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdDisableWearbleDistributedNetForward(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceStub DisableWearbleDistributedNetForward");
+    NETNATIVE_LOGI("NetsysNativeServiceStub DisableWearableDistributedNetForward");
 
-    int32_t result = DisableWearbleDistributedNetForward();
+    int32_t result = DisableWearableDistributedNetForward();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("CmdDisableWearbleDistributedNetForward has recved result %{public}d", result);
+    NETNATIVE_LOGI("CmdDisableWearableDistributedNetForward has recved result %{public}d", result);
 
     return result;
 }

@@ -146,9 +146,9 @@ public:
     int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
     int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
 #endif
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) override;
-    int32_t DisableWearbleDistributedNetForward() override;
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) override;
+    int32_t DisableWearableDistributedNetForward() override;
 #endif
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
                                    bool isBroker) override;

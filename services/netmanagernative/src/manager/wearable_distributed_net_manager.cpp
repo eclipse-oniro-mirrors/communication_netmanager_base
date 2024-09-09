@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include "wearable_distributed_net_service_manager.h"
+#include "wearable_distributed_net_manager.h"
 #include "net_manager_constants.h"
 #include "iptables_wrapper.h"
 #include "netmanager_base_common_utils.h"
@@ -48,7 +48,7 @@ const char* g_tcpIptables[] = {
     "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 255.255.255.255/32 -j RETURN"
 };
 
-const char g_outputAddTcp[] = 
+const char g_outputAddTcp[] =
     "-w -o lo -t nat -A OUTPUT -p tcp -j DISTRIBUTED_NET_TCP";
 
 const char* g_udpIptables[] = {
@@ -82,78 +82,85 @@ const char* g_iptablesDeleteCmds[] = {
     "-w -t nat -X DISTRIBUTED_NET_TCP"
 };
 
-int32_t WearbleDistributedNet::GetTcpPort()
+void WearableDistributedNet::SetTcpPort(const int32_t tcpPortId)
+{
+    tcpPort_ = tcpPortId;
+}
+
+int32_t WearableDistributedNet::GetTcpPort()
 {
     return tcpPort_;
 }
 
-int32_t WearbleDistributedNet::ExecuteIptablesCommands(const char** commands)
+int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
 {
-    for (int i = 0; commands[i] != nullptr; ++i) {
-        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);
-        if (!response.empty()) {
+    for (int32_t i = 0; commands[i] != nullptr; ++i) {
+        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);  
+        if (response.empty()) {
+            NETNATIVE_LOGE("Failed to execute iptables command: %{public}s, error: %{public}s", commands[i], response.c_str());
             return NETMANAGER_ERROR;
         }
     }
     return NETMANAGER_SUCCESS;
 }
 
-int32_t WearbleDistributedNet::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("WearbleDistributedNet tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    int32_t ret = AddTcpIpRules();  
-    if (ret != NETMANAGER_SUCCESS) {  
-        return ret;  
-    }  
-    ret = AddUdpIpRules();  
-    if (ret != NETMANAGER_SUCCESS) {  
+    NETNATIVE_LOGI("WearableDistributedNet tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
+    int32_t ret = EstablishTcpIpRulesForNetworkDistribution();
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    ret = EstablishUdpIpRulesForNetworkDistribution();
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;  
     }
 
-    return NETMANAGER_SUCCESS;  
+    return NETMANAGER_SUCCESS;
 }
 
-std::string WearbleDistributedNet::GenerateRule(const char *inputRules, const int32_t portId)
+std::string WearableDistributedNet::GenerateRule(const char *inputRules, const int32_t portId)
 {
-    NETNATIVE_LOGI("WearbleDistributedNet GenerateRule portId = %{public}d", portId);
+    NETNATIVE_LOGI("WearableDistributedNet GenerateRule portId = %{public}d", portId);
     char res[MAX_CMD_LENGTH] = {0};
-    if (snprintf(res, MAX_CMD_LENGTH, inputRules, portId) >= MAX_CMD_LENGTH) {
+    if (sprintf_s(res, MAX_CMD_LENGTH, inputRules, portId) == -1) {
         return "";
     }
   
-    NETNATIVE_LOGI("WearbleDistributedNet GenerateRule Out rule:%{public}s", res);
+    NETNATIVE_LOGI("WearableDistributedNet GenerateRule Out rule:%{public}s", res);
     return std::string(res);
 }
 
-int32_t WearbleDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t portId)
+int32_t WearableDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t portId)
 {
- 
-    std::string resultRules = GenerateRule(GetRuleTemplate(type), portId);  
-    if (resultRules.empty()) {  
-        return NETMANAGER_ERR_INVALID_PARAMETER;  
-    }  
-  
-    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, resultRules);  
-    return response.empty() ? NETMANAGER_SUCCESS : NETMANAGER_ERROR; 
+    NETNATIVE_LOGI("WearableDistributedNet DealRule type = %d portId = %d", type, portId);
+    std::string resultRules;
+    switch (type) {
+        case TCP_ADD_RULE:
+            resultRules = GenerateRule(TCP_ADD16, portId);
+            break;
+        case UDP_ADD_RULE:
+            resultRules = GenerateRule(UDP_ADD16, portId);
+            break;
+        case INPUT_ADD_RULE:
+            resultRules = GenerateRule(INPUT_ADD, portId);
+            break;
+        case INPUT_DEL_RULE:
+            resultRules = GenerateRule(INPUT_DEL, portId);
+            break;
+        default:
+            NETNATIVE_LOGE("Invalid rule type");
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (resultRules.empty()) {
+        NETNATIVE_LOGE("Failed to generate rule");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, resultRules);
+    return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
-const char* WearbleDistributedNet::GetRuleTemplate(const RULES_TYPE type)  
-{  
-    switch (type) {  
-        case TCP_ADD_RULE:  
-            return TCP_ADD16;  
-        case UDP_ADD_RULE:  
-            return UDP_ADD16;  
-        case INPUT_ADD_RULE:  
-            return INPUT_ADD;  
-        case INPUT_DEL_RULE:  
-            return INPUT_DEL;  
-        default:  
-            return nullptr;  
-    }  
-}
-
-int32_t WearbleDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
+int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
 {
     if (ExecuteIptablesCommands(g_tcpIptables) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
@@ -162,15 +169,15 @@ int32_t WearbleDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
         return NETMANAGER_ERROR;
     }
     std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
-    return response.empty() ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
-int32_t WearbleDistributedNet::EstablishUdpIpRulesForNetworkDistribution()
+int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId)
 {
     if (ExecuteIptablesCommands(g_udpIptables) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
-    if (ApplyRule(UDP_ADD_RULE, 0) != NETMANAGER_SUCCESS) {
+    if (ApplyRule(UDP_ADD_RULE, udpPortId) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
     std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
@@ -180,7 +187,7 @@ int32_t WearbleDistributedNet::EstablishUdpIpRulesForNetworkDistribution()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t WearbleDistributedNet::DisableWearbleDistributedNetForward()
+int32_t WearableDistributedNet::DisableWearableDistributedNetForward()
 {
     if (ExecuteIptablesCommands(g_iptablesDeleteCmds) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;

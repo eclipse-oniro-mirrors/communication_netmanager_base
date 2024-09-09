@@ -161,17 +161,17 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKVPN_ERROR_REFUSE_CREATE_VPN, "VPN creation denied, please check the user type"},
     {NETWORKVPN_ERROR_VPN_EXIST, "VPN exist already, please execute destroy first"},
     {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-    /* Net Watch distributed net Manager*/
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_START_FAIL, "Wearable distributed net service start failed"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_STOP_FAIL, "Wearable distributed net service stop failed"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INIT_FAIL, "Failed to initialize the Wearable distributed net service"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_PORT_ID, "The port id is invalid"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_UDP_PORT_ID, "The udp port id is invalid"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_TCP_PORT_ID, "The tcp port id is invalid"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_RULE_TYPE, "The wearable distributed net service is invalid"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_INVALID_SUPPLIER_ID, "The supplier id is invalid"},
-    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_SERVICE_ERR_IPTABLES_COMMAND_FAILED, "The iptables command is failed"},
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    /* Wearable distributed net Manager*/
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_START_FAIL, "Wearable distributed net start failed"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_STOP_FAIL, "Wearable distributed net stop failed"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INIT_FAIL, "Failed to initialize the Wearable distributed net"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_PORT_ID, "The port id is invalid"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_UDP_PORT_ID, "The udp port id is invalid"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_TCP_PORT_ID, "The tcp port id is invalid"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_RULE_TYPE, "The wearable distributed net is invalid"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_SUPPLIER_ID, "The supplier id is invalid"},
+    {NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_IPTABLES_COMMAND_FAILED, "The iptables command is failed"},
 #endif
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /* Net firewall Manager */

@@ -1429,25 +1429,25 @@ int32_t NetsysController::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 }
 #endif
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysController::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysController::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysController tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("EnableWearbleDistributedNetForward netsysService is null");
+        NETMGR_LOG_E("EnableWearableDistributedNetForward netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
+    return netsysService_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysController::DisableWearbleDistributedNetForward()
+int32_t NetsysController::DisableWearableDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysController DisableWearbleDistributedNetForward");
+    NETMGR_LOG_I("NetsysController DisableWearableDistributedNetForward");
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("DisableWearbleDistributedNetForward netsysService is null");
+        NETMGR_LOG_E("DisableWearableDistributedNetForward netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->DisableWearbleDistributedNetForward();
+    return netsysService_->DisableWearableDistributedNetForward();
 }
 #endif
 

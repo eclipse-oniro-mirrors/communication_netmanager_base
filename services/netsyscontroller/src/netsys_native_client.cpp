@@ -1616,8 +1616,8 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 }
 #endif
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeClient::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeClient::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysNativeClient tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     auto proxy = GetProxy();
@@ -1625,18 +1625,18 @@ int32_t NetsysNativeClient::EnableWearbleDistributedNetForward(const int32_t tcp
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
+    return proxy->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysNativeClient::DisableWearbleDistributedNetForward()
+int32_t NetsysNativeClient::DisableWearableDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysNativeClient DisableWearbleDistributedNetForward");
+    NETMGR_LOG_I("NetsysNativeClient DisableWearableDistributedNetForward");
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->DisableWearbleDistributedNetForward();
+    return proxy->DisableWearableDistributedNetForward();
 }
 #endif
 

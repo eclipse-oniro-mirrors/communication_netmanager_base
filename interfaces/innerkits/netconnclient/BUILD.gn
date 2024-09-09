@@ -66,8 +66,8 @@ ohos_static_library("net_conn_parcel") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
-  if (netmanager_base_enable_feature_wearable_distributed_net_service) {
-    defines = [ "FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE" ]
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines = [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
@@ -139,8 +139,8 @@ ohos_shared_library("net_conn_manager_if") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  if (netmanager_base_enable_feature_wearable_distributed_net_service) {
-    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE" ]
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

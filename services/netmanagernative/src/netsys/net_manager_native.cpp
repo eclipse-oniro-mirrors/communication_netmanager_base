@@ -43,7 +43,7 @@ NetManagerNative::NetManagerNative()
     : bandwidthManager_(std::make_shared<BandwidthManager>()),
       connManager_(std::make_shared<ConnManager>()),
       firewallManager_(std::make_shared<FirewallManager>()),
-      iptables_(std::make_shared<DistributeNetManager>()),
+      wearableDistributedNet_(std::make_shared<WearableDistributedNet>()),
       routeManager_(std::make_shared<RouteManager>()),
       interfaceManager_(std::make_shared<InterfaceManager>()),
       sharingManager_(std::make_shared<SharingManager>()),
@@ -511,17 +511,17 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 }
 #endif
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetManagerNative::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetManagerNative::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOG_D("NetManagerNative tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    return iptables_->EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
+    return iptables_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetManagerNative::DisableWearbleDistributedNetForward()
+int32_t NetManagerNative::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOG_D("NetManagerNative DisableWearbleDistributedNetForward");
-    return iptables_->DisableWearbleDistributedNetForward();
+    NETNATIVE_LOG_D("NetManagerNative DisableWearableDistributedNetForward");
+    return iptables_->DisableWearableDistributedNetForward();
 }
 #endif
 

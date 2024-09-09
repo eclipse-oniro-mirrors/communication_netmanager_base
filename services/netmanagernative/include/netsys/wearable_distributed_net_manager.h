@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace nmd {
-class WearbleDistributedNet {
+class WearableDistributedNet {
 public:
     enum RULES_TYPE {
         TCP_ADD_RULE,
@@ -46,21 +46,23 @@ public:
     * @param udpPortId The UDP port ID to enable forwarding for.  
     * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
     */  
-    int32_t EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
+    int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
     /**  
     * @brief Disables the wearable distributed network forwarding by removing configured rules.  
     *  
     * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
     */ 
-    int32_t DisableWearbleDistributedNetForward();
+    int32_t DisableWearableDistributedNetForward();
 private:
     int32_t EstablishTcpIpRulesForNetworkDistribution();
-    int32_t EstablishUdpIpRulesForNetworkDistribution();
+    int32_t EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId);
     std::string GenerateRule(const char *inputRules, const int32_t portId);
-    int32_t GetTcpPort();
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
-    const char* GetRuleTemplate(const RULES_TYPE type);
+    void SetTcpPort(const int32_t tcpPortId);
+    int32_t GetTcpPort();
+private:
+    int32_t tcpPort_;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd

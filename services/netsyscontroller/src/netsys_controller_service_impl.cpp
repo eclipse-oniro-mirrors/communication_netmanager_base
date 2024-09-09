@@ -863,17 +863,17 @@ int32_t NetsysControllerServiceImpl::UnRegisterNetFirewallCallback(
 }
 #endif
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysControllerServiceImpl::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysControllerServiceImpl::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl tcpPortId=%{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
-    return netsysClient_.EnableWearbleDistributedNetForward(tcpPortId, udpPortId);
+    return netsysClient_.EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
-int32_t NetsysControllerServiceImpl::DisableWearbleDistributedNetForward()
+int32_t NetsysControllerServiceImpl::DisableWearableDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysControllerServiceImpl DisableWearbleDistributedNetForward");
-    return netsysClient_.DisableWearbleDistributedNetForward();
+    NETMGR_LOG_I("NetsysControllerServiceImpl DisableWearableDistributedNetForward");
+    return netsysClient_.DisableWearableDistributedNetForward();
 }
 #endif
 

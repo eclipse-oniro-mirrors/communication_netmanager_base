@@ -2875,10 +2875,10 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
 }
 #endif
 
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_SERVICE_ENABLE
-int32_t NetsysNativeServiceProxy::EnableWearbleDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeServiceProxy::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy tcpRortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy tcpPortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2895,16 +2895,16 @@ int32_t NetsysNativeServiceProxy::EnableWearbleDistributedNetForward(const int32
     int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_SET_IPTABLES),
         data, reply, option);
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("EnableWearbleDistributedNetForward SendRequest failed");
+        NETNATIVE_LOGE("EnableWearableDistributedNetForward SendRequest failed");
         return ret;
     }
 
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DisableWearbleDistributedNetForward()
+int32_t NetsysNativeServiceProxy::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy Clear Iptables");
+    NETNATIVE_LOGI("NetsysNativeServiceProxy DisableWearableDistributedNetForward");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2915,7 +2915,7 @@ int32_t NetsysNativeServiceProxy::DisableWearbleDistributedNetForward()
     int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_CLEAR_IPTABLES),
         data, reply, option);
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("DisableWearbleDistributedNetForward SendRequest failed");
+        NETNATIVE_LOGE("DisableWearableDistributedNetForward SendRequest failed");
         return ret;
     }
 
