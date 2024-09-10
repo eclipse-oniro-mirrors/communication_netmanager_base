@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <cstddef>
 #include <cstdlib>
+#include <future>
 #include <netinet/in.h>
 #include <regex>
 #include <sstream>
@@ -533,7 +534,17 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
-    pid_t pidRet = waitpid(childPid, nullptr, 0);
+    auto waitHandle = std::async(std::launch::async, [childPid]() {
+        auto ret = waitpid(childPid, nullptr, 0);
+        NETMGR_LOG_I("waitpid %{public}d done", childPid);
+        return ret;
+        });
+    const int32_t waitTime = 10;
+    if (waitHandle.wait_for(std::chrono::seconds(waitTime)) != std::future_status::ready) {
+        NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
+        return NETMANAGER_ERROR;
+    }
+    pid_t pidRet = waitHandle.get();
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
