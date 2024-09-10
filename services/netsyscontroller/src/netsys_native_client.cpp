@@ -1619,7 +1619,6 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 int32_t NetsysNativeClient::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETMGR_LOG_I("NetsysNativeClient tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -1630,7 +1629,7 @@ int32_t NetsysNativeClient::EnableWearableDistributedNetForward(const int32_t tc
 
 int32_t NetsysNativeClient::DisableWearableDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysNativeClient DisableWearableDistributedNetForward");
+    NETMGR_LOG_I("NetsysNativeClient DisableWearable Distributed Net Forward");
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

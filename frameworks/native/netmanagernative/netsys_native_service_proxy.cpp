@@ -2878,7 +2878,6 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 int32_t NetsysNativeServiceProxy::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy tcpPortId = %{public}d udpPortId=%{public}d", tcpPortId, udpPortId);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
