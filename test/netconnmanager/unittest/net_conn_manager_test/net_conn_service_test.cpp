@@ -1166,5 +1166,81 @@ HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid001, TestSize.Level1)
     int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, SystemReadyTest002, TestSize.Level1)
+{
+    if (!NetConnService::GetInstance()->registerToService_) {
+        NetConnService::GetInstance()->state_ = NetConnService::STATE_STOPPED;
+    }
+
+    NetConnService::GetInstance()->OnStart();
+    int32_t ret = NetConnService::GetInstance()->SystemReady();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, UnregisterNetSupplierTest001, TestSize.Level1)
+{
+    uint32_t supplierId = 0;
+    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
+    int32_t ret = NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, RegisterNetSupplierCallbackAsync001, TestSize.Level1)
+{
+    uint32_t supplierId = -1;
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
+    ASSERT_NE(callback, nullptr);
+    auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallbackAsync(supplierId, callback);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
+HWTEST_F(NetConnServiceTest, RequestNetConnectionAsyncTest001, TestSize.Level1)
+{
+    uint32_t callingUid = 1;
+    sptr<NetSpecifier> netSpecifier = nullptr;
+    sptr<INetConnCallback> uidCallback = nullptr;
+    int32_t ret = NetConnService::GetInstance()->RequestNetConnectionAsync(netSpecifier, uidCallback, 0, callingUid);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthSyncTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    bool dnsHealthSuccess = true;
+    int32_t ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    EXPECT_EQ(ret, NET_DETECTION_FAIL);
+    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
+        NetBearType::BEARER_ETHERNET, nullptr);
+    std::map<int32_t, std::shared_ptr<Network>> networks;
+    networks[1] = network;
+    NetConnService::GetInstance()->networks_ = networks;
+    ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NNetDetectionForDnsHealthSyncTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    bool dnsHealthSuccess = true;
+    int32_t ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    EXPECT_EQ(ret, NET_DETECTION_FAIL);
+    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
+        NetBearType::BEARER_ETHERNET, nullptr);
+    std::map<int32_t, std::shared_ptr<Network>> networks;
+    networks[1] = network;
+    NetConnService::GetInstance()->networks_ = networks;
+    ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetIfaceNameIdentMapsTest002, TestSize.Level1)
+{
+    SafeMap<std::string, std::string> data;
+    auto ret = NetConnService::GetInstance()->GetIfaceNameIdentMaps((NetBearType)-1, data);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
+    ret = NetConnService::GetInstance()->GetIfaceNameIdentMaps(BEARER_CELLULAR, data);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
