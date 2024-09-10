@@ -27,6 +27,7 @@
 #include "net_conn_types.h"
 #include "net_http_probe.h"
 #include "net_link_info.h"
+#include "probe_thread.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -62,13 +63,6 @@ public:
     void Stop();
 
     /**
-     * Set network socket parameter
-     *
-     * @return Socket parameter setting result
-     */
-    int32_t SetSocketParameter(int32_t sockFd);
-
-    /**
      * Is network monitor detecting
      *
      * @return Status value of whether the network is detecting
@@ -88,25 +82,34 @@ public:
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
 private:
-    NetHttpProbeResult SendHttpProbe(ProbeType probeType);
-    void GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl);
     void LoadGlobalHttpProxy();
-    bool HasGlobalHttpProxy();
-    void ProbeWithoutGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
+    NetHttpProbeResult SendProbe();
+    NetHttpProbeResult ProcessThreadDetectResult(NetHttpProbeResult& httpProbeResult,
+        NetHttpProbeResult& httpsProbeResult, NetHttpProbeResult& fallbackHttpProbeResult,
+        NetHttpProbeResult& fallbackHttpsProbeResult);
+    NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
+    void GetHttpProbeUrlFromConfig();
 
 private:
     uint32_t netId_ = 0;
     NetBearType netBearType_;
+    NetLinkInfo netLinkInfo_;
     std::atomic<bool> isDetecting_ = false;
-    bool needCallback_ = true;
     std::mutex detectionMtx_;
     std::mutex probeMtx_;
     std::condition_variable detectionCond_;
+    std::mutex primaryDetectMutex_;
+    std::condition_variable primaryDetectionCond_;
     uint32_t detectionDelay_ = 0;
     std::weak_ptr<INetMonitorCallback> netMonitorCallback_;
-    std::unique_ptr<NetHttpProbe> httpProbe_;
     bool needDetectionWithoutProxy_ = true;
+    HttpProxy globalHttpProxy_;
+    std::string httpUrl_;
+    std::string httpsUrl_;
+    std::string fallbackHttpUrl_;
+    std::string fallbackHttpsUrl_;
+    std::mutex proxyMtx_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

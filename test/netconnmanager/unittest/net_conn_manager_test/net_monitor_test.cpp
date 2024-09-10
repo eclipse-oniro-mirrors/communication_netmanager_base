@@ -76,16 +76,17 @@ HWTEST_F(NetMonitorTest, SendHttpProbe001, TestSize.Level1)
 {
     std::string domain;
     std::string urlPath;
-    NetHttpProbeResult probeResult = instance_->SendHttpProbe(PROBE_HTTP_HTTPS);
+    NetHttpProbeResult probeResult = instance_->SendProbe();
     EXPECT_EQ(probeResult.IsFailed(), true);
 }
 
 HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
 {
-    std::string httpUrl, httpsUrl;
-    instance_->GetHttpProbeUrlFromConfig(httpUrl, httpsUrl);
-    EXPECT_EQ(httpUrl.empty(), false);
-    EXPECT_EQ(httpsUrl.empty(), false);
+    instance_->GetHttpProbeUrlFromConfig();
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -62,6 +62,7 @@ ohos_shared_library("net_manager_common") {
     "common_utils/src/netmanager_base_common_utils.cpp",
     "common_utils/src/netmanager_base_permission.cpp",
     "common_utils/src/netmanager_hitrace.cpp",
+    "common_utils/src/tiny_count_down_latch.cpp",
     "errorcode_utils/src/errorcode_convertor.cpp",
     "log/src/net_mgr_log_wrapper.cpp",
   ]
