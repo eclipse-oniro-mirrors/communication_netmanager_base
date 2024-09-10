@@ -515,13 +515,13 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 int32_t NetManagerNative::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     NETNATIVE_LOG_D("NetManagerNative tcpPortId = %{public}d udpPortId = %{public}d", tcpPortId, udpPortId);
-    return iptables_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
+    return wearableDistributedNet_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
 int32_t NetManagerNative::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOG_D("NetManagerNative DisableWearableDistributedNetForward");
-    return iptables_->DisableWearableDistributedNetForward();
+    NETNATIVE_LOG_D("NetManagerNative Disable Wearable Distributed Net Forward");
+    return wearableDistributedNet_->DisableWearableDistributedNetForward();
 }
 #endif
 

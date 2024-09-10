@@ -1004,7 +1004,7 @@ int32_t NetsysNativeService::EnableWearableDistributedNetForward(const int32_t t
 
 int32_t NetsysNativeService::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOGI("NetsysNativeService Clear IpTables");
+    NETNATIVE_LOGI("NetsysNativeService Disable Wearable Distributed NetForward");
     return netsysService_->DisableWearableDistributedNetForward();
 }
 #endif

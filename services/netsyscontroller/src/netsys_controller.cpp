@@ -1447,7 +1447,7 @@ int32_t NetsysController::DisableWearableDistributedNetForward()
         NETMGR_LOG_E("DisableWearableDistributedNetForward netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->DisableWearableDistributedNetForward();
+    return netsysService_->Disablenet_manager_constants.hForward();
 }
 #endif
 

@@ -162,7 +162,7 @@ private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;
     std::shared_ptr<FirewallManager> firewallManager_ = nullptr;
-    std::shared_ptr<WearableDistributedNet> iptables_ = nullptr;
+    std::shared_ptr<WearableDistributedNet> wearableDistributedNet_ = nullptr;
     std::shared_ptr<RouteManager> routeManager_ = nullptr;
     std::shared_ptr<InterfaceManager> interfaceManager_ = nullptr;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
