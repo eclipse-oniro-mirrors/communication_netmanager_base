@@ -93,5 +93,100 @@ HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
     result = supplier->TechToType(static_cast<NetSlotTech>(invalidValue));
     EXPECT_TRUE(result == "3G");
 }
+
+HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
+{
+    NetSupplierInfo netSupplierInfo{};
+    netSupplierInfo.isAvailable_ = false;
+    netSupplierInfo.ident_ = "ident_";
+    netSupplierInfo.score_ = 1;
+    supplier->network_ = nullptr;
+    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {
+        std::cout << "supplierId:" << supplierId;
+        std::cout << " IfValid:" << ifValid << std::endl;
+    };
+    std::shared_ptr<Network> network = std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID,
+        detectionHandler, NetBearType::BEARER_ETHERNET, nullptr);
+
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+    EXPECT_FALSE(supplier->netSupplierInfo_.ident_.empty());
+    EXPECT_TRUE(supplier->netScore_ == 1);
+    EXPECT_FALSE(supplier->netSupplierInfo_.isAvailable_);
+    netSupplierInfo.isAvailable_ = true;
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+    EXPECT_TRUE(supplier->netSupplierInfo_.isAvailable_);
+    EXPECT_TRUE(supplier->network_ == nullptr);
+    EXPECT_TRUE(supplier->netSupplierInfo_.isAvailable_);
+
+    supplier->network_ = network;
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+    EXPECT_TRUE(supplier->network_ != nullptr);
+}
+
+HWTEST_F(NetSupplierTest, UpdateNetLinkInfoTest001, TestSize.Level1)
+{
+    NetLinkInfo netLinkInfo{};
+    supplier->netSupplierIdent_ = "simId";
+
+    int32_t ret = supplier->UpdateNetLinkInfo(netLinkInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetSupplierTest, SupplierConnectionTest001, TestSize.Level1)
+{
+    NetLinkInfo netLinkInfo{};
+    std::set<NetCap> netCaps;
+    NetRequest netRequest;
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    supplier->netSupplierIdent_ = "Supplier";
+    bool ret = supplier->SupplierConnection(netCaps, netRequest);
+    EXPECT_TRUE(ret);
+
+    supplier->netSupplierInfo_.isAvailable_ = false;
+    supplier->netSupplierIdent_ = "simId";
+    sptr<INetSupplierCallback> callback;
+    supplier->netController_ = callback;
+    ret = supplier->SupplierConnection(netCaps, netRequest);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetSupplierTest, SupplierDisconnectionTest001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    supplier->netSupplierIdent_ = "simId";
+    sptr<INetSupplierCallback> callback;
+    supplier->netController_ = callback;
+    bool ret = supplier->SupplierDisconnection(netCaps);
+    EXPECT_FALSE(ret);
+
+    supplier->netSupplierInfo_.isAvailable_ = false;
+    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+    ret = supplier->SupplierDisconnection(netCaps);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetSupplierTest, IsConnectedTest001, TestSize.Level1)
+{
+    supplier->network_ = nullptr;
+    bool ret = supplier->IsConnected();
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetSupplierTest, ReceiveBestScoreTest001, TestSize.Level1)
+{
+    int32_t bestScore = 1;
+    uint32_t supplierId = 0;
+    supplier->supplierId_ = 0;
+    NetRequest netrequest;
+    supplier->InitNetScore();
+    supplier->ReceiveBestScore(bestScore, supplierId, netrequest);
+    EXPECT_TRUE(supplierId == supplier->supplierId_);
+
+    supplierId = 1;
+    supplier->requestList_.insert(1);
+    supplier->ReceiveBestScore(bestScore, supplierId, netrequest);
+    EXPECT_FALSE(supplier->requestList_.empty());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
