@@ -64,6 +64,11 @@
             <filefilter name="defaultFilter" desc="Filters not to check">
                 <filteritem type="filepath" name="services/etc/init/initHosts" desc="Add host initialization data"/>
             </filefilter>
+            <filefilter name="defaultPolicyFilter" desc="Filters for compatibility, license header policies">
+                <filteritem type="filepath" name="LICENSE" desc="license file"/>
+                <filteritem type="filepath" name="services/netmanagernative/bpf/src/netsys.c" desc="The netsys.c is dual licensed"/>
+                <filteritem type="filepath" name="services/netmanagernative/bpf/include/bpf_def.h" desc="The bpf_def.h is dual licensed"/>
+            </filefilter>
         </filefilterlist>
     </oatconfig>
 </configuration>
