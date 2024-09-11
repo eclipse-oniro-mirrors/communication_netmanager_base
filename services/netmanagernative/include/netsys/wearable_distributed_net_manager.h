@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETSYS_WEARABLE_DISTRIBUTED_NET_SERVICE_MANAGER_H
-#define NETSYS_WEARABLE_DISTRIBUTED_NET_SERVICE_MANAGER_H
+#ifndef NETSYS_WEARABLE_DISTRIBUTED_NET_MANAGER_H
+#define NETSYS_WEARABLE_DISTRIBUTED_NET_MANAGER_H
 
 #include <string>
 #include <vector>
@@ -39,7 +39,7 @@ public:
         DEFAULT_RULE
     };
 
-    /**  
+    /*  
     * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports.  
     *  
     * @param tcpPortId The TCP port ID to enable forwarding for.  
@@ -48,7 +48,7 @@ public:
     */  
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
-    /**  
+    /*  
     * @brief Disables the wearable distributed network forwarding by removing configured rules.  
     *  
     * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
@@ -57,6 +57,7 @@ public:
 private:
     int32_t EstablishTcpIpRulesForNetworkDistribution();
     int32_t EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId);
+    int32_t ExecuteIptablesCommands(const char** commands);
     std::string GenerateRule(const char *inputRules, const int32_t portId);
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
@@ -66,4 +67,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd
-#endif // NETSYS_WEARABLE_DISTRIBUTED_NET_SERVICE_MANAGER_H
+#endif // NETSYS_WEARABLE_DISTRIBUTED_NET_MANAGER_H

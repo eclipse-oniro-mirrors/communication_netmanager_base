@@ -95,13 +95,9 @@ int32_t WearableDistributedNet::GetTcpPort()
 
 int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
 {
-    if (commands == nullptr) {
-        NETNATIVE_LOGE("Invalid commands array");
-        return NETMANAGER_ERROR;
-    }
     for (int32_t i = 0; commands[i] != nullptr; ++i) {
-        if (commands[i] == nullptr || strlen(commands[i]) < 1) {
-            NETNATIVE_LOGE("Null or empty command found at index: %{public}d", i);
+        if ( strlen(commands[i]) > MAX_CMD_LENGTH) {
+            NETNATIVE_LOGE("Invalid command found at index: %{public}d", i);
             return NETMANAGER_ERROR;
         }
         std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);  
@@ -116,19 +112,21 @@ int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
 int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     if (tcpPortId <= 0 || tcpPortId > MAX_PORT_ID) {
-        NETMGR_EXT_LOG_E("Invalid TCP port ID");
+        NETNATIVE_LOGE("Invalid TCP port ID");
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_TCP_PORT_ID;
     }
     if (udpPortId <= 0 || udpPortId > MAX_PORT_ID) {
-        NETMGR_EXT_LOG_E("Invalid UDP port ID");
+        NETNATIVE_LOGE("Invalid UDP port ID");
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_UDP_PORT_ID;
     }
     int32_t ret = EstablishTcpIpRulesForNetworkDistribution();
     if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to establish TCP IP rules for network distribution");
         return ret;
     }
-    ret = EstablishUdpIpRulesForNetworkDistribution();
+    ret = EstablishUdpIpRulesForNetworkDistribution(udpPortId);
     if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to establish UDP IP rules for network distribution");
         return ret;  
     }
 
@@ -142,8 +140,8 @@ std::string WearableDistributedNet::GenerateRule(const char *inputRules, const i
         return "";
     }
     size_t inputRulesLength = strlen(inputRules);
-    if (inputRulesLength == 0) {
-        NETNATIVE_LOGE("Input rules are empty");
+    if (inputRulesLength > MAX_CMD_LENGTH) {
+        NETNATIVE_LOGE("Input rules are invalid");
         return "";
     }
     char res[MAX_CMD_LENGTH] = {0};
@@ -184,9 +182,11 @@ int32_t WearableDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t p
 int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
 {
     if (ExecuteIptablesCommands(g_tcpIptables) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to execute TCP iptables commands");
         return NETMANAGER_ERROR;
     }
     if (ApplyRule(TCP_ADD_RULE, GetTcpPort()) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to apply TCP add rule");
         return NETMANAGER_ERROR;
     }
     std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
@@ -195,25 +195,28 @@ int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
 
 int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId)
 {
+    NETNATIVE_LOGI("Establishing UDP IP rules for network distribution");
     if (ExecuteIptablesCommands(g_udpIptables) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to execute UDP iptables commands");
         return NETMANAGER_ERROR;
     }
     if (ApplyRule(UDP_ADD_RULE, udpPortId) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to apply UDP add rule");
         return NETMANAGER_ERROR;
     }
     std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
-    if (response.empty()) {
-        return NETMANAGER_ERROR;
-    }
-    return NETMANAGER_SUCCESS;
+    return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t WearableDistributedNet::DisableWearableDistributedNetForward()
 {
+    NETNATIVE_LOGI("Disabling wearable distributed net forward");
     if (ExecuteIptablesCommands(g_iptablesDeleteCmds) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to execute iptables delete commands");
         return NETMANAGER_ERROR;
     }
     if (ApplyRule(INPUT_DEL_RULE, GetTcpPort()) != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to apply input delete rule");
         return NETMANAGER_ERROR;
     }
     return NETMANAGER_SUCCESS;
