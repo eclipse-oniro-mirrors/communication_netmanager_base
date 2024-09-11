@@ -27,6 +27,7 @@
 #include <thread>
 #include <pthread.h>
 #include <unistd.h>
+#include <string>
 
 #include "net_monitor.h"
 #include "dns_config_client.h"
@@ -52,11 +53,15 @@ constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 2;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 4;
 constexpr const char NEW_LINE_STR = '\n';
+constexpr const char CR_STR = '\r';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
 const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
 const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
 const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
 const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
+const std::string ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
+const std::string ADD_RANDOM_CFG_VALUE = "true";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -75,6 +80,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 {
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
+    GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
 }
 
@@ -272,6 +278,10 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     if (pos != std::string::npos) {
         pos += HTTP_URL_HEADER.length();
         httpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        if (isNeedSuffix_) {
+            uint64_t ranNum = CommonUtils::GenRandomNumber();
+            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);
+        }
     }
 
     pos = content.find(HTTPS_URL_HEADER);
@@ -294,6 +304,29 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
         " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
         fallbackHttpsUrl_.c_str());
+}
+
+void NetMonitor::GetDetectUrlConfig()
+{
+    if (!std::filesystem::exists(DETECT_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", DETECT_CFG_FILE);
+        return;
+    }
+
+    std::ifstream file(DETECT_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(ADD_RANDOM_CFG_PREFIX);
+    if (pos != std::string::npos) {
+        pos += ADD_RANDOM_CFG_PREFIX.length();
+        std::string value = content.substr(pos, content.find(CR_STR, pos) - pos);
+        isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;
+    }
 }
 
 } // namespace NetManagerStandard

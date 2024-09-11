@@ -90,6 +90,7 @@ private:
         NetHttpProbeResult& fallbackHttpsProbeResult);
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
     void GetHttpProbeUrlFromConfig();
+    void GetDetectUrlConfig();
 
 private:
     uint32_t netId_ = 0;
@@ -110,6 +111,7 @@ private:
     std::string fallbackHttpUrl_;
     std::string fallbackHttpsUrl_;
     std::mutex proxyMtx_;
+    bool isNeedSuffix_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
