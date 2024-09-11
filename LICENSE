@@ -1,6 +1,6 @@
 Copyright (c) 2024 Huawei Device Co., Ltd. All rights reserved.
 
-Because of netsys.c and bpf_def.h running at kernel mode,while other files
+Because of netsys.c and bpf_def.h running at kernel mode, while other files
 running at user mode therefor, other files use Apache License. The netsys.c
 and bpf_def.h are dual licensed: you can use them either under the terms of
 the GPL V2, or the 3-Clause BSD license, at your option.
