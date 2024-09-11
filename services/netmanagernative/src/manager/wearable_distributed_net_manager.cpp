@@ -95,6 +95,10 @@ int32_t WearableDistributedNet::GetTcpPort()
 
 int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
 {
+    if (commands == nullptr) {
+        NETNATIVE_LOGE("Invalid commands array");
+        return NETMANAGER_ERROR;
+    }
     for (int32_t i = 0; commands[i] != nullptr; ++i) {
         if ( strlen(commands[i]) > MAX_CMD_LENGTH) {
             NETNATIVE_LOGE("Invalid command found at index: %{public}d", i);

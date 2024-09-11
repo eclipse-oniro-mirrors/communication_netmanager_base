@@ -1433,7 +1433,7 @@ int32_t NetsysController::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 int32_t NetsysController::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("EnableWearableDistributedNetForward netsysService is null");
+        NETMGR_LOG_E("NetsysService is null in EnableWearableDistributedNetForward");
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
@@ -1441,9 +1441,8 @@ int32_t NetsysController::EnableWearableDistributedNetForward(const int32_t tcpP
 
 int32_t NetsysController::DisableWearableDistributedNetForward()
 {
-    NETMGR_LOG_I("NetsysController DisableWearableDistributedNetForward");
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("Disable Wearable Distributed Net Forward netsysService is null");
+        NETMGR_LOG_E("NetsysService is null in DisableWearableDistributedNetForward");
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->Disablenet_manager_constants.hForward();

@@ -514,12 +514,13 @@ int32_t NetManagerNative::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 int32_t NetManagerNative::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
+    NETNATIVE_LOG_D("Enabling wearable distributed net forward for TCP port and UDP port");
     return wearableDistributedNet_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
 int32_t NetManagerNative::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOG_D("NetManagerNative Disable Wearable Distributed Net Forward");
+    NETNATIVE_LOG_D("NetManagerNative disable Wearable Distributed Net Forward");
     return wearableDistributedNet_->DisableWearableDistributedNetForward();
 }
 #endif

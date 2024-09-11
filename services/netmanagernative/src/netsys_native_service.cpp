@@ -998,6 +998,7 @@ int32_t NetsysNativeService::UnRegisterNetFirewallCallback(const sptr<INetFirewa
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 int32_t NetsysNativeService::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
+    NETNATIVE_LOGI("Enabling wearable distributed net forward for TCP port: %{public}d and UDP port");
     return netsysService_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
