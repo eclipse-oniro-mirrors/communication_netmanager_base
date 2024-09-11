@@ -49,7 +49,7 @@ public:
                 const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler,
                 const int32_t registerType = REGISTER);
     ~NetActivate();
-    bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
+    bool MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCheckIdent = false);
     void SetRequestId(uint32_t reqId);
     uint32_t GetRequestId() const;
     sptr<NetSupplier> GetServiceSupply() const;
@@ -60,7 +60,7 @@ public:
     std::set<NetBearType> GetBearType() const;
     void StartTimeOutNetAvailable();
 private:
-    bool CompareByNetworkIdent(const std::string &ident);
+    bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
     bool CompareByNetworkNetType(NetBearType bearerType);
     bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);

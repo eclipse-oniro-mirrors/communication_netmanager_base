@@ -94,7 +94,13 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
             netBearTypes.insert(static_cast<NetBearType>(value));
         }
     }
-    NetRequest netRequest(registerType, netBearTypes);
+    uint32_t uid = 0;
+    data.ReadUint32(uid);
+    uint32_t requestId = 0;
+    data.ReadUint32(requestId);
+    std::string requestIdent;
+    data.ReadString(requestIdent);
+    NetRequest netRequest(registerType, netBearTypes, uid, requestId, requestIdent);
     RequestNetwork(ident, netCaps, netRequest);
 
     reply.WriteInt32(0);
