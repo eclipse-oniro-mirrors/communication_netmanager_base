@@ -139,7 +139,6 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint
     uint32_t resNum = std::min<uint32_t>(MAX_RESULTS, static_cast<uint32_t>(cacheRes.size()));
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&resNum), sizeof(resNum))) {
         DNS_CONFIG_PRINT("send errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
@@ -156,7 +155,6 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * resNum)) {
         DNS_CONFIG_PRINT("send errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
     DNS_CONFIG_PRINT("ProcGetCacheCommand end");
@@ -181,7 +179,6 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint
     uint32_t resNum = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&resNum), sizeof(resNum))) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
@@ -193,7 +190,6 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint
     AddrInfo addrInfo[MAX_RESULTS] = {};
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * resNum)) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
@@ -258,21 +254,18 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     int32_t queryret;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
         NETNATIVE_LOGE("read4 errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
     uint32_t ai_size = MAX_RESULTS;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
         NETNATIVE_LOGE("read5 errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
     struct QueryParam param;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
         NETNATIVE_LOGE("read6 errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
@@ -281,7 +274,6 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
         AddrInfo addrInfo[MAX_RESULTS] = {};
         if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
             NETNATIVE_LOGE("read errno %{public}d", errno);
-            close(clientSockFd);
             return;
         }
         DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name,
@@ -309,7 +301,6 @@ void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
     int32_t fd = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&fd), sizeof(int32_t))) {
         NETNATIVE_LOGE("read errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
     NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d, %{public}d", netId, fd);

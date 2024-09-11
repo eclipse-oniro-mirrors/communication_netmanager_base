@@ -14,5 +14,4 @@
 [cfi]
 type:*OHOS::Parcel*
 type:*OHOS::RefBase*
-type:*OHOS::NetManagerStandard*
 fun:*Marshalling*
