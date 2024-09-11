@@ -60,6 +60,9 @@ private:
     const std::string L2TP_CFG = IPSEC_PIDDIR "/xl2tpd.conf";
     bool isIpSecAccess_ = false;
     std::shared_ptr<ffrt::queue> vpnFfrtQueue_ = nullptr;
+    const std::string OPENVPN_CONFIG_FILE = IPSEC_PIDDIR "/config.ovpn";
+    const std::string VPN_STAGE_OPENVPN_RESTART = "restartopenvpn --config ";
+    const std::string VPN_STAGE_OPENVPN_STOP = "stopopenvpn";
 };
 } // namespace nmd
 } // namespace OHOS
