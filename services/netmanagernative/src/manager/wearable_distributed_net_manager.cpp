@@ -105,10 +105,7 @@ int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
             return NETMANAGER_ERROR;
         }
         std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]); 
-        if (response.empty()) {
-            NETNATIVE_LOGE("Failed to execute iptables command: %{public}s, error: %{public}s", commands[i], response.c_str());
-            return NETMANAGER_ERROR;
-        }
+        return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
     }
     return NETMANAGER_SUCCESS;
 }

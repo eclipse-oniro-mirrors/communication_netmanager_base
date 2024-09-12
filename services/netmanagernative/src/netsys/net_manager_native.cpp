@@ -520,7 +520,7 @@ int32_t NetManagerNative::EnableWearableDistributedNetForward(const int32_t tcpP
 
 int32_t NetManagerNative::DisableWearableDistributedNetForward()
 {
-    NETNATIVE_LOG_D("NetManagerNative disable Wearable Distributed Net Forward");
+    NETNATIVE_LOG_D("NetManagerNative disable wearable distributed net forward");
     return wearableDistributedNet_->DisableWearableDistributedNetForward();
 }
 #endif
