@@ -44,6 +44,9 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     for (auto bearType : netrequest.bearTypes) {
         data.WriteUint32(static_cast<uint32_t>(bearType));
     }
+    data.WriteUint32(netrequest.uid);
+    data.WriteUint32(netrequest.requestId);
+    data.WriteString(netrequest.ident);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");

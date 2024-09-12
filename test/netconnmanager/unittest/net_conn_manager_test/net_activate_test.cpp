@@ -146,20 +146,27 @@ HWTEST_F(NetActivateTest, CompareByNetworkIdentTest001, TestSize.Level1)
 HWTEST_F(NetActivateTest, CompareByNetworkIdent001, TestSize.Level1)
 {
     std::string ident;
-    bool ret = instance_->CompareByNetworkIdent(ident);
+    bool ret = instance_->CompareByNetworkIdent(ident, BEARER_DEFAULT, false);
     EXPECT_EQ(ret, true);
 
     ident = "test1234";
-    ret = instance_->CompareByNetworkIdent(ident);
+    ret = instance_->CompareByNetworkIdent(ident, BEARER_DEFAULT, false);
     EXPECT_EQ(ret, true);
 
     instance_->netSpecifier_->ident_ = "test1234";
-    ret = instance_->CompareByNetworkIdent(ident);
+    ret = instance_->CompareByNetworkIdent(ident, BEARER_DEFAULT, false);
     EXPECT_EQ(ret, true);
 
     ident = "test5678";
-    ret = instance_->CompareByNetworkIdent(ident);
+    ret = instance_->CompareByNetworkIdent(ident, BEARER_DEFAULT, false);
     EXPECT_EQ(ret, false);
+
+    instance_->netSpecifier_->ident_ = "wifi";
+    ret = instance_->CompareByNetworkIdent(ident, BEARER_DEFAULT, true);
+    EXPECT_EQ(ret, true);
+
+    ret = instance_->CompareByNetworkIdent(ident, BEARER_WIFI, true);
+    EXPECT_EQ(ret, true);
 }
 
 HWTEST_F(NetActivateTest, CompareByNetworkCapabilities001, TestSize.Level1)
