@@ -247,7 +247,6 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     uint32_t usedtime;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read3 errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 
