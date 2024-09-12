@@ -88,6 +88,8 @@ ohos_shared_library("net_conn_manager_if") {
     "-O2",
   ]
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_conn_client.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_handle.cpp",
