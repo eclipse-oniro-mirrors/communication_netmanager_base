@@ -542,18 +542,14 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
-
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -589,18 +585,15 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -636,18 +629,15 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -684,18 +674,15 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -731,18 +718,15 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -778,18 +762,15 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
         }
 
         // the policy configuration needs to be reconfirmed or the network bearer changes
-        if (value->configSetFromFlag ||
-            ((value->netIfIndex != NETWORK_BEARER_TYPE_INITIAL) && (value->netIfIndex != *net_bear_type))) {
+        if (value->configSetFromFlag) {
             if (socket_ringbuf_event_submit(uid) != 0) {
                 value->diagAckFlag = 1;
             }
         }
-        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
-    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
