@@ -45,7 +45,7 @@ public:
     * @param tcpPortId The TCP port ID to enable forwarding for.
     * @param udpPortId The UDP port ID to enable forwarding for.
     * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.
-    */  
+    */
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
     /**

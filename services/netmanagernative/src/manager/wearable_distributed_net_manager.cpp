@@ -100,11 +100,12 @@ int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
         return NETMANAGER_ERROR;
     }
     for (int32_t i = 0; commands[i] != nullptr; ++i) {
-        if ( strlen(commands[i]) > MAX_CMD_LENGTH) {
+        if (strlen(commands[i]) > MAX_CMD_LENGTH) {
             NETNATIVE_LOGE("Invalid command found at index: %{public}d", i);
             return NETMANAGER_ERROR;
         }
-        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]); 
+        std::string response =
+            IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);
         return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
     }
     return NETMANAGER_SUCCESS;
@@ -176,7 +177,8 @@ int32_t WearableDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t p
         NETNATIVE_LOGE("Failed to generate rule");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, resultRules);
+    std::string response =
+        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, resultRules);
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
@@ -190,7 +192,8 @@ int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
         NETNATIVE_LOGE("Failed to apply TCP add rule");
         return NETMANAGER_ERROR;
     }
-    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
+    std::string response =
+        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
@@ -205,7 +208,8 @@ int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const 
         NETNATIVE_LOGE("Failed to apply UDP add rule");
         return NETMANAGER_ERROR;
     }
-    std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
+    std::string response =
+        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
