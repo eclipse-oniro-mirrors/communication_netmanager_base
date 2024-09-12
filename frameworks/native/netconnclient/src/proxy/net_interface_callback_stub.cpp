@@ -62,25 +62,10 @@ int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessagePar
 
 int32_t NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)
 {
-    std::string addr;
-    if (!data.ReadString(addr)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    std::string ifName;
-    if (!data.ReadString(ifName)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    int32_t flags = 0;
-    if (!data.ReadInt32(flags)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-
-    int32_t scope = 0;
-    if (!data.ReadInt32(scope)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
+    std::string addr = data.ReadString();
+    std::string ifName = data.ReadString();
+    int32_t flags = data.ReadInt32();
+    int32_t scope = data.ReadInt32();
 
     int32_t result = OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     if (!reply.WriteInt32(result)) {

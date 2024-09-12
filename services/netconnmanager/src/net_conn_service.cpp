@@ -319,7 +319,7 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask(
-            [this, supplierId, &result]() { result = this->UnregisterNetSupplierAsync(supplierId); });
+            [this, supplierId, &result]() { result = this->UnregisterNetSupplierAsync(supplierId, false); });
     }
     return result;
 }
@@ -449,6 +449,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         bearerType, netConnEventHandler_);
     network->SetNetCaps(netCaps);
     supplier->SetNetwork(network);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    supplier->SetUid(callingUid);
     // save supplier
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
@@ -456,8 +458,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     locker.unlock();
     struct EventInfo eventInfo = {.netId = netId, .bearerType = bearerType, .ident = ident, .supplierId = supplierId};
     EventReport::SendSupplierBehaviorEvent(eventInfo);
-    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}s] netId[%{public}d]", supplierId,
-                 ident.c_str(), netId);
+    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}d %{public}s] netId[%{public}d]",
+                 supplierId, supplier->GetUid(), ident.c_str(), netId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -485,7 +487,7 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
         }
         if (tmpSupplierId != INVALID_SUPPLIER_ID) {
             NETMGR_LOG_I("OnNetSupplierRemoteDied UnregisterNetSupplier SupplierId %{public}u", tmpSupplierId);
-            UnregisterNetSupplierAsync(tmpSupplierId);
+            UnregisterNetSupplierAsync(tmpSupplierId, true);
         }
     });
 }
@@ -585,7 +587,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
     return ActivateNetwork(netSpecifier, callback, timeoutMS, REQUEST, callingUid);
 }
 
-int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
+int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid)
 {
     NETMGR_LOG_I("UnregisterNetSupplier service in, supplierId[%{public}d]", supplierId);
     // Remove supplier from the list based on supplierId
@@ -594,8 +596,13 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
         NETMGR_LOG_E("supplier doesn't exist.");
         return NET_CONN_ERR_NO_SUPPLIER;
     }
-    NETMGR_LOG_I("Unregister supplier[%{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s]",
-                 supplier->GetSupplierId(), supplier->GetNetSupplierIdent().c_str(),
+    if (!ignoreUid && CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UnregisterNetSupplierAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    NETMGR_LOG_I("Unregister supplier[%{public}d, %{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s]",
+                 supplier->GetSupplierId(), supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(),
                  defaultNetSupplier_ ? defaultNetSupplier_->GetSupplierId() : 0,
                  defaultNetSupplier_ ? defaultNetSupplier_->GetNetSupplierIdent().c_str() : "null");
 
@@ -626,6 +633,13 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UnregisterNetSupplier supplierId[%{public}d] out", supplierId);
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier)
+{
+    int32_t uid = supplier->GetUid();
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
@@ -771,8 +785,14 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         EventReport::SendSupplierFaultEvent(eventInfo);
         return NET_CONN_ERR_NO_SUPPLIER;
     }
-    NETMGR_LOG_I("Update supplier[%{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
-                 supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
+
+    if (CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UpdateNetSupplierInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
+                 supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
 
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
@@ -814,6 +834,11 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         return NET_CONN_ERR_NO_SUPPLIER;
     }
 
+    if (CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UpdateNetLinkInfoAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
+                     supplier->GetUid(), IPCSkeleton::GetCallingUid());
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     HttpProxy oldHttpProxy;
     supplier->GetHttpProxy(oldHttpProxy);
     // According to supplier id, get network from the list

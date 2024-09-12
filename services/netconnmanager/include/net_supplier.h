@@ -95,6 +95,8 @@ public:
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
     int32_t GetSupplierUid() const;
+    int32_t GetUid() const;
+    void SetUid(int32_t uid);
     bool IsAvailable() const;
     std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
@@ -170,6 +172,7 @@ private:
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
     bool isFirstTimeDetectionDone = false;
+    int32_t uid_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
