@@ -39,20 +39,20 @@ public:
         DEFAULT_RULE
     };
 
-    /*  
-    * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports.  
-    *  
-    * @param tcpPortId The TCP port ID to enable forwarding for.  
-    * @param udpPortId The UDP port ID to enable forwarding for.  
-    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
+    /**
+    * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports.
+    *
+    * @param tcpPortId The TCP port ID to enable forwarding for.
+    * @param udpPortId The UDP port ID to enable forwarding for.
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.
     */  
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
-    /*  
-    * @brief Disables the wearable distributed network forwarding by removing configured rules.  
-    *  
-    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.  
-    */ 
+    /**
+    * @brief Disables the wearable distributed network forwarding by removing configured rules.
+    *
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.
+    */
     int32_t DisableWearableDistributedNetForward();
 private:
     int32_t EstablishTcpIpRulesForNetworkDistribution();

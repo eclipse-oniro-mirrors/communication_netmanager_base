@@ -104,7 +104,7 @@ int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
             NETNATIVE_LOGE("Invalid command found at index: %{public}d", i);
             return NETMANAGER_ERROR;
         }
-        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);  
+        std::string response = IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]); 
         if (response.empty()) {
             NETNATIVE_LOGE("Failed to execute iptables command: %{public}s, error: %{public}s", commands[i], response.c_str());
             return NETMANAGER_ERROR;
@@ -131,7 +131,7 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
     ret = EstablishUdpIpRulesForNetworkDistribution(udpPortId);
     if (ret != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to establish UDP IP rules for network distribution");
-        return ret;  
+        return ret;
     }
 
     return NETMANAGER_SUCCESS;
