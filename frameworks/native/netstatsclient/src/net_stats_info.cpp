@@ -82,16 +82,17 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
 bool NetStatsInfo::Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos)
 {
     uint32_t vSize = statsInfos.size();
-    if (!parcel.WriteUint32(vSize)) {
-        return false;
-    }
     if (vSize > STATS_INFO_MAX_SIZE) {
         NETMGR_LOG_E("Size of the statsInfos exceeds maximum.");
         return false;
     }
+    if (!parcel.WriteUint32(vSize)) {
+        NETMGR_LOG_E("Write size of the statsInfos fail.");
+        return false;
+    }
 
-    std::for_each(statsInfos.begin(), statsInfos.end(), [&parcel](const auto &info) { info.Marshalling(parcel); });
-    return true;
+    return std::all_of(statsInfos.begin(), statsInfos.end(),
+                       [&parcel](const auto &info) { return info.Marshalling(parcel); });
 }
 
 bool NetStatsInfo::Marshalling(Parcel &parcel, const std::unordered_map<uint32_t, NetStatsInfo> &statsInfos)
@@ -102,18 +103,18 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const std::unordered_map<uint32_t
         return false;
     }
     if (!parcel.WriteUint32(vSize)) {
+        NETMGR_LOG_E("Write size of the statsInfos fail.");
         return false;
     }
-    std::for_each(statsInfos.begin(), statsInfos.end(), [&parcel](const std::pair<uint32_t, NetStatsInfo> &info) {
-        info.second.Marshalling(parcel);
-    });
-    return true;
+    return std::all_of(statsInfos.begin(), statsInfos.end(),
+                       [&parcel](const auto &info) { return info.second.Marshalling(parcel); });
 }
 
 bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos)
 {
     uint32_t vSize = 0;
     if (!parcel.ReadUint32(vSize)) {
+        NETMGR_LOG_E("Read size of the statsInfos fail.");
         return false;
     }
 
@@ -124,7 +125,10 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &stat
     statsInfos.reserve(vSize);
     for (uint32_t i = 0; i < vSize; i++) {
         NetStatsInfo tmpData;
-        NetStatsInfo::Unmarshalling(parcel, tmpData);
+        if (!NetStatsInfo::Unmarshalling(parcel, tmpData)) {
+            NETMGR_LOG_E("Unmarshalling the statsInfo fail.");
+            return false;
+        }
         statsInfos.push_back(std::move(tmpData));
     }
 
@@ -135,6 +139,7 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::unordered_map<uint32_t, Ne
 {
     uint32_t vSize = 0;
     if (!parcel.ReadUint32(vSize)) {
+        NETMGR_LOG_E("Read size of the statsInfos fail.");
         return false;
     }
     if (vSize > STATS_INFO_MAX_SIZE) {
@@ -143,7 +148,10 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::unordered_map<uint32_t, Ne
     }
     for (uint32_t i = 0; i < vSize; i++) {
         NetStatsInfo tmpData;
-        NetStatsInfo::Unmarshalling(parcel, tmpData);
+        if (!NetStatsInfo::Unmarshalling(parcel, tmpData)) {
+            NETMGR_LOG_E("Unmarshalling the statsInfo fail.");
+            return false;
+        }
         statsInfos.emplace(tmpData.uid_, std::move(tmpData));
     }
     return true;
