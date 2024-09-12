@@ -15,6 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "net_manager_constants.h"
 #include "route_manager.h"
 
@@ -579,6 +584,214 @@ HWTEST_F(RouteManagerTest, UpdateVnicUidRangesRule001, TestSize.Level1)
 
     ret = RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest007, TestSize.Level1)
+{
+    uint16_t testNetId = 0;
+    std::string testInterfaceName = "rmnet0";
+    auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    testNetId = 1;
+    ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(RouteManagerTest, ModifyPhysicalNetworkPermissionTest007, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    const std::string testInterfaceName = "eth1";
+    auto ret =
+        RouteManager::ModifyPhysicalNetworkPermission(testNetId, testInterfaceName, PERMISSION_NONE, PERMISSION_NONE);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, UpdateVirtualNetworkTest002, TestSize.Level1)
+{
+    NetManagerStandard::UidRange uidRange{};
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    uidRanges.push_back(uidRange);
+    uint16_t testNetId = 0;
+    std::string testInterfaceName = "rmnet0";
+    bool add = true;
+    auto ret = RouteManager::UpdateVirtualNetwork(testNetId, testInterfaceName, uidRanges, add);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest006, TestSize.Level1)
+{
+    uint32_t table = 1;
+    uid_t uidStart = 1;
+    bool add = true;
+    int32_t ret = RouteManager::UpdateVpnUidRangeRule(table, uidStart, uidStart, true);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, UpdateOutputInterfaceRulesWithUidTest001, TestSize.Level1)
+{
+    const std::string interface = "interface";
+    uint32_t table = 1;
+    NetworkPermission permission = PERMISSION_NETWORK;
+    uid_t uidStart = 1;
+    bool add = true;
+    int32_t ret =
+        RouteManager::UpdateOutputInterfaceRulesWithUid(interface, table, permission, uidStart, uidStart, add);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, AddInterfaceToLocalNetworkTest005, TestSize.Level1)
+{
+    uint16_t testNetId = 1;
+    std::string testInterfaceName = "eth0";
+    auto ret = RouteManager::AddInterfaceToLocalNetwork(testNetId, testInterfaceName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, AddClatTunInterfaceTest002, TestSize.Level1)
+{
+    const std::string interfaceName = "eth0";
+    const std::string dstAddr = "127.0.0.1";
+    const std::string nxtHop = "nxtHop";
+    auto ret = RouteManager::AddClatTunInterface(interfaceName, dstAddr, nxtHop);
+    EXPECT_EQ(ret, -1);
+
+    ret = RouteManager::AddClatTunInterface(interfaceName, dstAddr, nxtHop);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, RemoveClatTunInterfaceTest002, TestSize.Level1)
+{
+    const std::string interfaceName = "eth0";
+    std::map<std::string, uint32_t> interfaceToTable;
+    interfaceToTable[interfaceName] = RT_TABLE_UNSPEC;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    auto ret = RouteManager::RemoveClatTunInterface(interfaceName);
+    EXPECT_EQ(ret, -1);
+
+    interfaceToTable[interfaceName] = 1;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    ret = RouteManager::RemoveClatTunInterface(interfaceName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(RouteManagerTest, UpdateClatTunInterfaceTest001, TestSize.Level1)
+{
+    const std::string interfaceName = "eth0";
+    std::map<std::string, uint32_t> interfaceToTable;
+    interfaceToTable[interfaceName] = RT_TABLE_UNSPEC;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    auto ret = RouteManager::UpdateClatTunInterface(interfaceName, PERMISSION_NONE, true);
+    EXPECT_EQ(ret, -1);
+
+    interfaceToTable[interfaceName] = 1;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    ret = RouteManager::UpdateClatTunInterface(interfaceName, PERMISSION_NONE, true);
+    EXPECT_EQ(ret, 0);
+    ret = RouteManager::UpdateClatTunInterface(interfaceName, PERMISSION_NONE, false);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, ClearRoutesTest001, TestSize.Level1)
+{
+    int32_t netId = 0;
+    const std::string interfaceName = "eth0";
+    std::map<std::string, uint32_t> interfaceToTable;
+    interfaceToTable[interfaceName] = RT_TABLE_UNSPEC;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    auto ret = RouteManager::ClearRoutes(interfaceName, netId);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, UpdatePhysicalNetworkTest001, TestSize.Level1)
+{
+    int32_t netId = 0;
+    const std::string interfaceName = "eth0";
+    int32_t ret = RouteManager::UpdatePhysicalNetwork(netId, interfaceName, PERMISSION_NONE, true);
+    EXPECT_LE(ret, 0);
+    ret = RouteManager::UpdatePhysicalNetwork(netId, interfaceName, PERMISSION_NONE, false);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, UpdateIncomingPacketMarkTest001, TestSize.Level1)
+{
+    int32_t netId = 0;
+    const std::string interfaceName = "eth0";
+
+    int32_t ret = RouteManager::UpdateIncomingPacketMark(netId, interfaceName, PERMISSION_NONE, true);
+    EXPECT_EQ(ret, 0);
+    ret = RouteManager::UpdateIncomingPacketMark(netId, interfaceName, PERMISSION_NONE, false);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, UpdateSharingNetworkTest001, TestSize.Level1)
+{
+    uint16_t netId = 1;
+    const std::string inputInterface = "eth0";
+    const std::string outputInterface = "eth0";
+    int32_t ret = RouteManager::UpdateSharingNetwork(netId, inputInterface, outputInterface);
+    EXPECT_EQ(ret, -1);
+
+    std::map<std::string, uint32_t> interfaceToTable;
+    interfaceToTable[inputInterface] = 1;
+    RouteManager::interfaceToTable_ = interfaceToTable;
+    ret = RouteManager::UpdateSharingNetwork(netId, inputInterface, outputInterface);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(RouteManagerTest, UpdateRuleInfoTest001, TestSize.Level1)
+{
+    uint32_t action = 1;
+    uint8_t ruleType = 1;
+    RuleInfo ruleInfo{0, 1, 1, 0, "ruleIif", "ruleOif", "ruleSrcIp", "ruleDstIp"};
+    uid_t uidStart = 0;
+    uid_t uidEnd = 1;
+
+    int32_t ret = RouteManager::UpdateRuleInfo(action, ruleType, ruleInfo, uidStart, uidEnd);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    ruleInfo.ruleMask = 1;
+    ret = RouteManager::UpdateRuleInfo(action, ruleType, ruleInfo, uidStart, uidEnd);
+    EXPECT_EQ(ret, -ENOTUNIQ); // -76
+    uint8_t family = 1;
+    ret = RouteManager::SendRuleToKernelEx(action, family, ruleType, ruleInfo, uidStart, uidEnd);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(RouteManagerTest, UpdateDistributedRuleTest001, TestSize.Level1)
+{
+    uint32_t action = 1;
+    uint8_t ruleType = 1;
+    RuleInfo ruleInfo{0, 1, 1, 0, "ruleIif", "ruleOif", "ruleSrcIp", "ruleDstIp:"};
+    uid_t uidStart = 0;
+    uid_t uidEnd = 1;
+
+    int32_t ret = RouteManager::UpdateDistributedRule(action, ruleType, ruleInfo, uidStart, uidEnd);
+    EXPECT_EQ(ret, -ENOTUNIQ); // -76
+    ruleInfo.ruleTable = 1;
+    ret = RouteManager::UpdateDistributedRule(action, ruleType, ruleInfo, uidStart, uidEnd);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(RouteManagerTest, SendRouteToKernelTest005, TestSize.Level1)
+{
+    uint16_t action = 1;
+    uint16_t routeFlag = 1;
+    rtmsg msg{};
+    RouteInfo routeInfo{1, "", "http/a:6:0:df", ""};
+    uint32_t index = 0;
+
+    int32_t ret = RouteManager::SendRouteToKernel(action, routeFlag, msg, routeInfo, index);
+    EXPECT_EQ(ret, -1);
+    routeInfo.routeNextHop = "http/a:6:0:df";
+    ret = RouteManager::SendRouteToKernel(action, routeFlag, msg, routeInfo, index);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, GetRouteTableFromTypeTest005, TestSize.Level1)
+{
+    RouteManager::TableType tableType = RouteManager::INTERNAL_DEFAULT;
+    std::string interfaceName = "eth0";
+    uint32_t ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
+    EXPECT_EQ(ret, 1);
 }
 } // namespace nmd
 } // namespace OHOS
