@@ -23,9 +23,11 @@ static constexpr uint32_t STATS_INFO_MAX_SIZE = 5000;
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint64(startTime_)) {
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}u", startTime_);
         return false;
     }
     if (!parcel.WriteUint64(endTime_)) {
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}u", endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, info_);
@@ -34,9 +36,11 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.WriteUint64(statsSequence.startTime_)) {
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}u", statsSequence.startTime_);
         return false;
     }
     if (!parcel.WriteUint64(statsSequence.endTime_)) {
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}u", statsSequence.endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, statsSequence.info_);
@@ -50,19 +54,21 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
         return false;
     }
     if (!parcel.WriteUint32(vSize)) {
+        NETMGR_LOG_E("Write statsInfoSequence size failed. size=%{public}u", vSize);
         return false;
     }
-    std::for_each(statsSequence.begin(), statsSequence.end(),
-                  [&parcel](const NetStatsInfoSequence &info) { info.Marshalling(parcel); });
-    return true;
+    return std::all_for(statsSequence.begin(), statsSequence.end(),
+                        [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
 }
 
 bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.ReadUint64(statsSequence.startTime_)) {
+        NETMGR_LOG_E("Read statsInfoSequence startTime failed.");
         return false;
     }
     if (!parcel.ReadUint64(statsSequence.endTime_)) {
+        NETMGR_LOG_E("Read statsInfoSequence endTime failed.");
         return false;
     }
     return NetStatsInfo::Unmarshalling(parcel, statsSequence.info_);
@@ -72,6 +78,7 @@ bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, std::vector<NetStatsInf
 {
     uint32_t vSize = 0;
     if (!parcel.ReadUint32(vSize)) {
+        NETMGR_LOG_E("Read statsInfoSequence size failed");
         return false;
     }
     if (vSize > STATS_INFO_MAX_SIZE) {
@@ -81,8 +88,11 @@ bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, std::vector<NetStatsInf
     statsSequence.reserve(vSize);
     for (uint32_t i = 0; i < vSize; i++) {
         NetStatsInfoSequence tmp;
-        NetStatsInfoSequence::Unmarshalling(parcel, tmp);
-        statsSequence.push_back(tmp);
+        if (!NetStatsInfoSequence::Unmarshalling(parcel, tmp)) {
+            NETMGR_LOG_E("Unmarshalling the statsInfoSequence fail.");
+            return false;
+        }
+        statsSequence.push_back(std::move(tmp));
     }
     return true;
 }
