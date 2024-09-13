@@ -47,13 +47,19 @@ ohos_unittest("netsys_wrapper_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "wifi:wifi_sdk",
   ]
 
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
+
+  if (defined(global_parts_info) &&
+    defined(global_parts_info.communication_wifi) &&
+    global_parts_info.communication_wifi) {
+    defines += [ "WIFI_SUPPORT" ]
+    external_deps += [ "wifi:wifi_sdk" ]
+  }
 
   external_deps += [ "hilog:libhilog" ]
 
