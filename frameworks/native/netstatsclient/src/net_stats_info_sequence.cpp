@@ -57,7 +57,7 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
         NETMGR_LOG_E("Write statsInfoSequence size failed. size=%{public}u", vSize);
         return false;
     }
-    return std::all_for(statsSequence.begin(), statsSequence.end(),
+    return std::all_of(statsSequence.begin(), statsSequence.end(),
                         [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
 }
 
