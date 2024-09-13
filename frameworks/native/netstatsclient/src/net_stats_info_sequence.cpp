@@ -58,7 +58,7 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
         return false;
     }
     return std::all_of(statsSequence.begin(), statsSequence.end(),
-                        [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
+                       [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
 }
 
 bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence)
