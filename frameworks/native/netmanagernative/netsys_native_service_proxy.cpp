@@ -2888,11 +2888,10 @@ int32_t NetsysNativeServiceProxy::EnableWearableDistributedNetForward(const int3
     if (!data.WriteInt32(udpPortId)) {
         return ERR_FLATTEN_OBJECT;
     }
-
     MessageParcel reply;
     MessageOption option;
-    int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("EnableWearableDistributedNetForward SendRequest failed");
@@ -2909,11 +2908,10 @@ int32_t NetsysNativeServiceProxy::DisableWearableDistributedNetForward()
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-
     MessageParcel reply;
     MessageOption option;
-    int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("DisableWearableDistributedNetForward SendRequest failed");

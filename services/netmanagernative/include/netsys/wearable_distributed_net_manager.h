@@ -16,9 +16,11 @@
 #ifndef NETSYS_WEARABLE_DISTRIBUTED_NET_MANAGER_H
 #define NETSYS_WEARABLE_DISTRIBUTED_NET_MANAGER_H
 
+#include <cstdint>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <cstdint>
+#include "cJSON.h"
 
 #define TCP_ADD16 "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -p tcp -j REDIRECT "\
     "--to-ports %d"
@@ -40,30 +42,62 @@ public:
     };
 
     /**
-    * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports.
+    * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports
     *
-    * @param tcpPortId The TCP port ID to enable forwarding for.
-    * @param udpPortId The UDP port ID to enable forwarding for.
-    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.
+    * @param tcpPortId The TCP port ID to enable forwarding for
+    * @param udpPortId The UDP port ID to enable forwarding for
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail
     */
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
 
     /**
-    * @brief Disables the wearable distributed network forwarding by removing configured rules.
+    * @brief Disables the wearable distributed network forwarding by removing configured rules
     *
-    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail.
+    * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail
     */
     int32_t DisableWearableDistributedNetForward();
+
+    /**
+ 　　* @brief Reads the system's iptables configuration from a JSON file and processes the relevant iptables settings
+ 　　*
+ 　　* This function reads a JSON configuration file located at NETWORK_CONFIG_PATH, parses it, and then extracts
+ 　　* the iptables configuration. It specifically looks for the iptables component flag to decide whether to
+ 　　* proceed with reading and applying iptables interfaces or not
+ 　　*
+ 　　* @return true if the configuration was successfully read and processed, false otherwise
+ 　　*/
+    bool ReadSystemIptablesConfiguration();
+
 private:
     int32_t EstablishTcpIpRulesForNetworkDistribution();
     int32_t EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId);
-    int32_t ExecuteIptablesCommands(const char** commands);
-    std::string GenerateRule(const char *inputRules, const int32_t portId);
+    int32_t ExecuteIptablesCommands(const std::vector<std::string>& commands);
+    std::string GenerateRule(const std::string& inputRules, const int32_t portId);
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
     int32_t GetTcpPort();
+
+    bool ReadIptablesInterfaces(const cJSON &json);
+    std::string ReadJsonFile(const std::string &filePath);
+    const std::vector<std::string>& GetTcpIptables();
+    const std::string& GetOutputAddTcp();
+    const std::vector<std::string>& GetUdpIptables();
+    const std::string& GetUdpoutput();
+    const std::vector<std::string>& GetIptablesDeleteCmds();
+
+    bool ParseTcpIptables(const cJSON &json);
+    bool ParseTcpOutputRule(const cJSON &json);
+    bool ParseUdpIptables(const cJSON &json);
+    bool ParseUdpOutputRule(const cJSON &json);
+    bool ParseIptablesDeleteCmds(const cJSON &json);
+  
 private:
     int32_t tcpPort_;
+    std::vector<std::string> tcpIptables_;
+    std::string tcpOutput_;
+    std::vector<std::string> udpIptables_;
+    std::string udpOutput_;
+    std::vector<std::string> iptablesDeleteCmds_;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd

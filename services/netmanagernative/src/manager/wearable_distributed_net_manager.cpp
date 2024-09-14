@@ -12,76 +12,191 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iostream>
-#include "wearable_distributed_net_manager.h"
-#include "net_manager_constants.h"
+#include "errorcode_convertor.h"
 #include "iptables_wrapper.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "errorcode_convertor.h"
+#include "wearable_distributed_net_manager.h"
 
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
-constexpr int32_t MAX_CMD_LENGTH = 256;
-constexpr int32_t MAX_PORT_ID = 65535;
+const int32_t MAX_CMD_LENGTH = 256;
+const int32_t MAX_PORT_ID = 65535;
 
-const char* g_tcpIptables[] = {
-    "-w -t nat -N DISTRIBUTED_NET_TCP",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 0.0.0.0/8 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 10.0.0.0/8 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 100.64.0.0/10 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 127.0.0.0/8 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 169.254.0.0/16 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 172.16.0.0/12 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 192.0.0.0/29 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 192.0.2.0/24 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 192.168.0.0/16 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 198.18.0.0/15 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 198.51.100.0/24 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 203.0.113.0/24 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 224.0.0.0/4 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 240.0.0.0/4 -j RETURN",
-    "-w -o lo -t nat -A DISTRIBUTED_NET_TCP -d 255.255.255.255/32 -j RETURN"
-};
+const std::string CONFIG_KEY_NETFORWARD_COMPONENT_FLAG = "config_wearable_distributed_net_forward";
+const std::string TCP_IPTABLES = "tcpiptables";
+const std::string TCP_OUTPUT = "tcpoutput";
+const std::string UDP_IPTABLES = "udpiptables";
+const std::string UDP_OUTPUT = "udpoutput";
+const std::string IPTABLES_DELETE_CMDS = "iptablesdeletecmds";
 
-const char g_outputAddTcp[] =
-    "-w -o lo -t nat -A OUTPUT -p tcp -j DISTRIBUTED_NET_TCP";
+const std::vector<std::string>& WearableDistributedNet::GetTcpIptables()
+{
+    return tcpIptables_;
+}
 
-const char* g_udpIptables[] = {
-    "-w -t mangle -N DISTRIBUTED_NET_UDP",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 0.0.0.0/8 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 10.0.0.0/8 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 100.64.0.0/10 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 127.0.0.0/8 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 169.254.0.0/16 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 172.16.0.0/12 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 192.0.0.0/29 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 192.0.2.0/24 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 192.168.0.0/16 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 198.18.0.0/15 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 198.51.100.0/24 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 203.0.113.0/24 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 224.0.0.0/4 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 240.0.0.0/4 -j RETURN",
-    "-w -i lo -t mangle -A DISTRIBUTED_NET_UDP -d 255.255.255.255/32 -j RETURN"
-};
+const std::string& WearableDistributedNet::GetOutputAddTcp()
+{
+    return tcpOutput_;
+}
 
-const char g_preroutingAddUdp[] =
-    "-w -i lo -t mangle -A PREROUTING -p udp -j DISTRIBUTED_NET_UDP";
+const std::vector<std::string>& WearableDistributedNet::GetUdpIptables()
+{
+    return udpIptables_;
+}
 
-const char* g_iptablesDeleteCmds[] = {
-    "-w -i lo -t mangle -D PREROUTING -p udp -j DISTRIBUTED_NET_UDP",
-    "-w -t mangle -F DISTRIBUTED_NET_UDP",
-    "-w -t mangle -X DISTRIBUTED_NET_UDP",
-    "-w -o lo -t nat -D OUTPUT -p tcp -j DISTRIBUTED_NET_TCP",
-    "-w -t nat -F DISTRIBUTED_NET_TCP",
-    "-w -t nat -X DISTRIBUTED_NET_TCP"
-};
+const std::string& WearableDistributedNet::GetUdpoutput()
+{
+    return udpOutput_;
+}
+
+const std::vector<std::string>& WearableDistributedNet::GetIptablesDeleteCmds()
+{
+    return iptablesDeleteCmds_;
+}
+
+bool WearableDistributedNet::ReadSystemIptablesConfiguration()
+{
+    const auto &jsonStr = ReadJsonFile(NETWORK_CONFIG_PATH);
+    if (jsonStr.length() == 0) {
+        NETNATIVE_LOGE("ReadConfigData config file is return empty");
+        return false;
+    }
+    cJSON *json = cJSON_Parse(jsonStr.c_str());
+    if (json == nullptr) {
+        NETNATIVE_LOGE("Json parse failed");
+        return false;
+    }
+    cJSON *jsonIptables = cJSON_GetObjectItem(json, CONFIG_KEY_NETFORWARD_COMPONENT_FLAG.c_str());
+    if (jsonIptables == nullptr) {
+        NETNATIVE_LOGE("ReadConfigData not find");
+        cJSON_Delete(json);
+        return false;
+    }
+    bool result = ReadIptablesInterfaces(*jsonIptables);
+    if (result == false) {
+        NETNATIVE_LOGE("Failed to read iptables interfaces");
+        cJSON_Delete(json);
+        return false;
+    }
+    cJSON_Delete(json);
+    return true;
+}
+
+std::string WearableDistributedNet::ReadJsonFile(const std::string &filePath)
+{
+    std::ifstream infile;
+    std::string lineConfigInfo;
+    std::string allConfigInfo;
+    infile.open(filePath);
+    if (!infile.is_open()) {
+        NETNATIVE_LOGE("ReadJsonFile filePath failed");
+        return allConfigInfo;
+    }
+    while (getline(infile, lineConfigInfo)) {
+        allConfigInfo.append(lineConfigInfo);
+    }
+    infile.close();
+    return allConfigInfo;
+}
+
+bool WearableDistributedNet::ParseTcpIptables(const cJSON &json)
+{
+    cJSON *tcpIptablesObj = cJSON_GetObjectItem(&json, TCP_IPTABLES.c_str());
+    for (int32_t i = 0; i < cJSON_GetArraySize(tcpIptablesObj); i++) {
+        cJSON *tcpIptablesItem = cJSON_GetArrayItem(tcpIptablesObj, i);
+        if (tcpIptablesItem == nullptr) {
+            NETNATIVE_LOGE("Invalid item in TCP iptables array");
+            return false;
+        }
+        const auto tcpIptablesValue = tcpIptablesItem->valuestring;
+        tcpIptables_.push_back(std::string(tcpIptablesValue));
+    }
+    return true;
+}
+
+bool WearableDistributedNet::ParseTcpOutputRule(const cJSON &json)
+{
+    cJSON *tcpOutputJsonItem = cJSON_GetObjectItem(&json, TCP_OUTPUT.c_str());
+    if (tcpOutputJsonItem == nullptr) {
+        NETNATIVE_LOGE("Failed to find tcpOutputJsonItem information");
+        return false;
+    }
+    tcpOutput_ = cJSON_GetStringValue(tcpOutputJsonItem);
+    return true;
+}
+
+bool WearableDistributedNet::ParseUdpIptables(const cJSON &json)
+{
+    cJSON *udpIptablesObj = cJSON_GetObjectItem(&json, UDP_IPTABLES.c_str());
+    for (int32_t i = 0; i < cJSON_GetArraySize(udpIptablesObj); i++) {
+        cJSON *udpIptablesItem = cJSON_GetArrayItem(udpIptablesObj, i);
+        if (udpIptablesItem == nullptr) {
+            NETNATIVE_LOGE("Invalid item in UDP iptables array");
+            return false;
+        }
+        const auto udpIptablesValue = udpIptablesItem->valuestring;
+        udpIptables_.push_back(std::string(udpIptablesValue));
+    }
+    return true;
+}
+
+bool WearableDistributedNet::ParseUdpOutputRule(const cJSON &json)
+{
+    cJSON *udpOutputItem = cJSON_GetObjectItem(&json, UDP_OUTPUT.c_str());
+    if (udpOutputItem == nullptr) {
+        NETNATIVE_LOGE("Failed to find udpOutputItem information");
+        return false;
+    }
+    udpOutput_ = cJSON_GetStringValue(udpOutputItem);
+    return true;
+}
+
+bool WearableDistributedNet::ParseIptablesDeleteCmds(const cJSON &json)
+{
+    cJSON *iptablesDeleteCmdsObj = cJSON_GetObjectItem(&json, IPTABLES_DELETE_CMDS.c_str());
+    for (int32_t i = 0; i < cJSON_GetArraySize(iptablesDeleteCmdsObj); i++) {
+        cJSON *iptablesDeleteCmdsItem = cJSON_GetArrayItem(iptablesDeleteCmdsObj, i);
+        if (iptablesDeleteCmdsItem == nullptr) {
+            NETNATIVE_LOGE("Invalid item in iptables delete commands array");
+            return false;
+        }
+        const auto iptablesDeleteCmdsValue = iptablesDeleteCmdsItem->valuestring;
+        iptablesDeleteCmds_.push_back(std::string(iptablesDeleteCmdsValue));
+    }
+    return true;
+}
+
+bool WearableDistributedNet::ReadIptablesInterfaces(const cJSON &json)
+{
+    auto logErrorAndFail = [&](const char* functionName) {
+        NETNATIVE_LOGE("%{public}s failed", functionName);
+        return false;
+    };
+    if (!ParseTcpIptables(json)) {
+        return logErrorAndFail("ParseTcpIptables");
+    }
+    if (!ParseTcpOutputRule(json)) {
+        return logErrorAndFail("ParseTcpOutputRule");
+    }
+    if (!ParseUdpIptables(json)) {
+        return logErrorAndFail("ParseUdpIptables");
+    }
+    if (!ParseUdpOutputRule(json)) {
+        return logErrorAndFail("ParseUdpOutputRule");
+    }
+    if (!ParseIptablesDeleteCmds(json)) {
+        return logErrorAndFail("ParseIptablesDeleteCmds");
+    }
+    return true;
+}
 
 void WearableDistributedNet::SetTcpPort(const int32_t tcpPortId)
 {
@@ -93,19 +208,19 @@ int32_t WearableDistributedNet::GetTcpPort()
     return tcpPort_;
 }
 
-int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
+int32_t WearableDistributedNet::ExecuteIptablesCommands(const std::vector<std::string>& commands)
 {
-    if (commands == nullptr) {
+    if (commands.empty()) {
         NETNATIVE_LOGE("Invalid commands array");
         return NETMANAGER_ERROR;
     }
-    for (int32_t i = 0; commands[i] != nullptr; ++i) {
-        if (strlen(commands[i]) > MAX_CMD_LENGTH) {
-            NETNATIVE_LOGE("Invalid command found at index: %{public}d", i);
+    for (const auto &command : commands) {
+        if (command.length() > MAX_CMD_LENGTH) {
+            NETNATIVE_LOGE("Invalid command found at index");
             return NETMANAGER_ERROR;
         }
         std::string response =
-            IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, commands[i]);
+            IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, command);
         return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
     }
     return NETMANAGER_SUCCESS;
@@ -113,6 +228,10 @@ int32_t WearableDistributedNet::ExecuteIptablesCommands(const char** commands)
 
 int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
 {
+    if (!ReadSystemIptablesConfiguration()) {
+        NETNATIVE_LOGE("Failed to read system iptables configuration");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     if (tcpPortId <= 0 || tcpPortId > MAX_PORT_ID) {
         NETNATIVE_LOGE("Invalid TCP port ID");
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_TCP_PORT_ID;
@@ -135,19 +254,18 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
     return NETMANAGER_SUCCESS;
 }
 
-std::string WearableDistributedNet::GenerateRule(const char *inputRules, const int32_t portId)
+std::string WearableDistributedNet::GenerateRule(const std::string& inputRules, const int32_t portId)
 {
-    if (inputRules == nullptr) {
+    if (inputRules.empty()) {
         NETNATIVE_LOGE("Input rules are null");
         return "";
     }
-    size_t inputRulesLength = strlen(inputRules);
-    if (inputRulesLength > MAX_CMD_LENGTH) {
+    if (inputRules.length() > MAX_CMD_LENGTH) {
         NETNATIVE_LOGE("Input rules are invalid");
         return "";
     }
     char res[MAX_CMD_LENGTH] = {0};
-    if (sprintf_s(res, MAX_CMD_LENGTH, inputRules, portId) == -1) {
+    if (sprintf_s(res, MAX_CMD_LENGTH, inputRules.c_str(), portId) == -1) {
         return "";
     }
     return std::string(res);
@@ -184,7 +302,8 @@ int32_t WearableDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t p
 
 int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
 {
-    if (ExecuteIptablesCommands(g_tcpIptables) != NETMANAGER_SUCCESS) {
+    NETNATIVE_LOGI("Establishing TCP IP rules for network distribution");
+    if (ExecuteIptablesCommands(GetTcpIptables()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to execute TCP iptables commands");
         return NETMANAGER_ERROR;
     }
@@ -193,14 +312,14 @@ int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
         return NETMANAGER_ERROR;
     }
     std::string response =
-        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_outputAddTcp);
+        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, GetOutputAddTcp());
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId)
 {
     NETNATIVE_LOGI("Establishing UDP IP rules for network distribution");
-    if (ExecuteIptablesCommands(g_udpIptables) != NETMANAGER_SUCCESS) {
+    if (ExecuteIptablesCommands(GetUdpIptables()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to execute UDP iptables commands");
         return NETMANAGER_ERROR;
     }
@@ -209,14 +328,14 @@ int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const 
         return NETMANAGER_ERROR;
     }
     std::string response =
-        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, g_preroutingAddUdp);
+        IptablesWrapper::GetInstance()->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, GetUdpoutput());
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t WearableDistributedNet::DisableWearableDistributedNetForward()
 {
     NETNATIVE_LOGI("Disabling wearable distributed net forward");
-    if (ExecuteIptablesCommands(g_iptablesDeleteCmds) != NETMANAGER_SUCCESS) {
+    if (ExecuteIptablesCommands(GetIptablesDeleteCmds()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to execute iptables delete commands");
         return NETMANAGER_ERROR;
     }

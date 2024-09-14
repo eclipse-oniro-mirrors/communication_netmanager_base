@@ -170,6 +170,7 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "NETSYS_DNS_MONITOR=0",
+    "NETWORK_CONFIG_PATH = \"/system/etc/communication/netmanager_base/wearable_distributed_net_forward.json\"",
   ]
 
   external_deps = [
@@ -184,6 +185,7 @@ ohos_shared_library("netsys_native_manager") {
     "iptables:iptables-save",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "cJSON:cjson",
   ]
 
   if (build_selinux) {
@@ -326,4 +328,11 @@ ohos_shared_library("netsys_client") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
+}
+
+ohos_prebuilt_etc("wearable_distributed_net_forward") {
+  source = "$NETMANAGER_BASE_ROOT/services/netmanagernative/config/wearable_distributed_net_forward.json"
+  install_enable = true
+  relative_install_dir = "communication/netmanager_base"
+  part_name = "netmanager_base"
 }

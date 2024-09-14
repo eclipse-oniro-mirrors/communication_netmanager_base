@@ -856,7 +856,6 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("NetsysNativeServiceStub enable wearable distributed net forward");
-
     int32_t tcpPort = data.ReadInt32();
     int32_t udpPort = data.ReadInt32();
     int32_t result = EnableWearableDistributedNetForward(tcpPort, udpPort);
@@ -868,7 +867,6 @@ int32_t NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward(MessageP
 int32_t NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("NetsysNativeServiceStub disable wearable distributed net forward");
-
     int32_t result = DisableWearableDistributedNetForward();
     reply.WriteInt32(result);
 
