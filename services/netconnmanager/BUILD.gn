@@ -26,6 +26,7 @@ config("net_conn_manager_config") {
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
   ]

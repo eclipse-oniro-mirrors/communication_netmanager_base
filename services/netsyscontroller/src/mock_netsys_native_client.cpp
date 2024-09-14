@@ -186,16 +186,16 @@ int32_t MockNetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32
 int32_t MockNetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), prefixLength);
+    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     return 0;
 }
 
 int32_t MockNetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     return 0;
 }
 
