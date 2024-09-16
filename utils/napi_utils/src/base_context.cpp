@@ -104,6 +104,10 @@ napi_value BaseContext::CreatePromise()
 {
     napi_value result = nullptr;
     NAPI_CALL(env_, napi_create_promise(env_, &deferred_, &result));
+    deferredBack1_ = deferred_;
+    deferredBack2_ = deferred_;
+    deferredBack3_ = deferred_;
+    deferredBack4_ = deferred_;
     return result;
 }
 
