@@ -980,9 +980,9 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
             }
             NetRequest netrequest;
             netrequest.requestId = reqId;
-            netrequest.uid = iterActivate->second->GetUid();
             if (iterActivate->second != nullptr) {
                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
+                netrequest.uid = iterActivate->second->GetUid();
                 if (pNetService) {
                     pNetService->CancelRequest(netrequest);
                 }
