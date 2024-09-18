@@ -39,7 +39,7 @@ public:
     ClatdPacketConverter(const uint8_t *inputPacket, size_t inputPacketSize, ClatdConvertType convertType,
                          const in_addr &v4Addr, const in6_addr &v6Addr, const in6_addr &prefixAddr);
 
-    int32_t ConvertPacket();
+    int32_t ConvertPacket(bool skip_csum);
 
     void GetConvertedPacket(std::vector<iovec> &iovPackets, int &effectivePos);
 
@@ -73,7 +73,7 @@ private:
     int32_t ConvertUdpPacket(int pos, const udphdr *udpHeader, uint32_t oldChecksum, uint32_t newChecksum,
                              size_t tpLen);
     void WritePayload(int pos, const uint8_t *tpHeader, size_t tpLen);
-    void WriteTunHeader();
+    void WriteTunHeader(bool skip_csum);
 
     const uint8_t *inputPacket_;
     size_t inputPacketSize_;
