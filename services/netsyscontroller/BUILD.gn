@@ -60,6 +60,7 @@ ohos_shared_library("netsys_controller") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/netconnclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
   ]
