@@ -23,7 +23,6 @@ ohos_fuzztest("CommonFuzzTest") {
   fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/common_fuzzer"
 
   include_dirs = [
-    "$ETHERNETMANAGER_SOURCE_DIR/include",
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/netpolicyclient/include",
@@ -37,6 +36,12 @@ ohos_fuzztest("CommonFuzzTest") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
   ]
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.communication_netmanager_ext) &&
+      global_parts_info.communication_netmanager_ext) {
+    include_dirs += [ "$ETHERNETMANAGER_SOURCE_DIR/include" ]
+  }
+
   cflags = [
     "-g",
     "-O0",
@@ -46,7 +51,6 @@ ohos_fuzztest("CommonFuzzTest") {
   sources = [ "common_fuzzer.cpp" ]
 
   deps = [
-    "$ETHERNETMANAGER_SOURCE_DIR:ethernet_manager",
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
@@ -61,6 +65,13 @@ ohos_fuzztest("CommonFuzzTest") {
     "DH_LOG_TAG=\"NetPolicyClientFuzzTest\"",
     "LOG_DOMAIN=0xD004100",
   ]
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.communication_netmanager_ext) &&
+      global_parts_info.communication_netmanager_ext) {
+    deps += [ "$ETHERNETMANAGER_SOURCE_DIR:ethernet_manager" ]
+    defines += [ "NETMANAGER_EXT_SUPPORT" ]
+  }
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
