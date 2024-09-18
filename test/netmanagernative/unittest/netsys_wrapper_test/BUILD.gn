@@ -54,13 +54,6 @@ ohos_unittest("netsys_wrapper_test") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.communication_wifi) &&
-      global_parts_info.communication_wifi) {
-    defines += [ "WIFI_SUPPORT" ]
-    external_deps += [ "wifi:wifi_sdk" ]
-  }
-
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
