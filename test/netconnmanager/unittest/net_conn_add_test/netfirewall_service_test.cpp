@@ -245,11 +245,6 @@ HWTEST_F(NetFirewallServiceTest, Dump, TestSize.Level1)
     EXPECT_EQ(instance_->Dump(fd, args), FIREWALL_SUCCESS);
 }
 
-/**
- * @tc.name: GetDumpMessage
- * @tc.desc: Test NetFirewallServiceTest GetDumpMessage.
- * @tc.type: FUNC
- */
 HWTEST_F(NetFirewallServiceTest, GetDumpMessage, TestSize.Level1)
 {
     std::string message;
