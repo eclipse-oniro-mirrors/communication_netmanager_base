@@ -233,11 +233,6 @@ HWTEST_F(NetFirewallServiceTest, OnStop, TestSize.Level1)
     EXPECT_EQ(instance_->state_, NetFirewallService::ServiceRunningState::STATE_NOT_START);
 }
 
-/**
- * @tc.name: Dump
- * @tc.desc: Test NetFirewallServiceTest Dump.
- * @tc.type: FUNC
- */
 HWTEST_F(NetFirewallServiceTest, Dump, TestSize.Level1)
 {
     int32_t fd = 1;
