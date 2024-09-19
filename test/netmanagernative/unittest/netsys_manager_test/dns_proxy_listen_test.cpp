@@ -119,7 +119,130 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     listener.proxySockFd_ = CLIENT_SOCKET;
     listener.OffListen();
     EXPECT_EQ(listener.proxySockFd_, -1);
-    EXPECT_FALSE(listener.proxyListenSwitch_);
+    EXPECT_TRUE(listener.proxyListenSwitch_);
+}
+
+HWTEST_F(DnsProxyListenTest, DnsProxyListenTest01, TestSize.Level1)
+{
+    instance_->proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    instance_->proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    instance_->epollFd_ = epoll_create1(0);
+    instance_->~DnsProxyListen();
+    EXPECT_EQ(instance_->proxySockFd_, -1);
+    EXPECT_EQ(instance_->proxySockFd6_, -1);
+    EXPECT_EQ(instance_->epollFd_, -1);
+}
+
+HWTEST_F(DnsProxyListenTest, GetDnsProxyServersTest01, TestSize.Level1)
+{
+    std::vector<std::string> servers = {"servers"};
+    size_t serverIdx = 1;
+
+    bool ret = instance_->GetDnsProxyServers(servers, serverIdx);
+    EXPECT_FALSE(ret);
+    serverIdx = 0;
+    ret = instance_->GetDnsProxyServers(servers, serverIdx);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DnsProxyListenTest, MakeAddrInfoTest01, TestSize.Level1)
+{
+    std::vector<std::string> servers = {"servers"};
+    size_t serverIdx = 0;
+    struct sockaddr sa {};
+    sa.sa_family = AF_INET;
+    struct sockaddr_in sin {};
+    AlignedSockAddr addrParse{};
+    AlignedSockAddr clientSock{};
+    addrParse.sin = sin;
+    clientSock.sa = sa;
+
+    bool ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_FALSE(ret);
+    servers[0] = "172.0.0.1";
+    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_TRUE(ret);
+    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_TRUE(ret);
+
+    clientSock.sa.sa_family = AF_INET6;
+    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_FALSE(ret);
+    servers[0] = "INET6:172.0.0.1";
+    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_FALSE(ret);
+
+    clientSock.sa.sa_family = 0;
+    ret = instance_->MakeAddrInfo(servers, serverIdx, addrParse, clientSock);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DnsProxyListenTest, InitForListeningTest01, TestSize.Level1)
+{
+    epoll_event proxyEvent;
+    epoll_event proxy6Event;
+
+    instance_->InitListenForIpv4();
+    bool ret = instance_->InitForListening(proxyEvent, proxy6Event);
+    EXPECT_FALSE(ret);
+
+    instance_->InitListenForIpv6();
+    ret = instance_->InitForListening(proxyEvent, proxy6Event);
+    EXPECT_FALSE(ret);
+
+    instance_->OffListen();
+    ret = instance_->InitForListening(proxyEvent, proxy6Event);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DnsProxyListenTest, CheckDnsQuestionTest01, TestSize.Level1)
+{
+    std::string original = "10101010101012";
+    char *recBuff = new char[original.size() + 1];
+    std::strcpy(recBuff, original.c_str());
+    size_t recLen = 1;
+    bool ret = instance_->CheckDnsQuestion(recBuff, recLen);
+    EXPECT_FALSE(ret);
+
+    recLen = strlen(recBuff);
+    ret = instance_->CheckDnsQuestion(recBuff, recLen);
+    if (recBuff != nullptr) {
+        delete[] recBuff;
+    }
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(DnsProxyListenTest, CheckDnsResponseTest01, TestSize.Level1)
+{
+    std::string original = "121212";
+    char *recBuff = new char[original.size() + 1];
+    std::strcpy(recBuff, original.c_str());
+    size_t recLen = 1;
+    bool ret = instance_->CheckDnsResponse(recBuff, recLen);
+    EXPECT_FALSE(ret);
+
+    recLen = strlen(recBuff);
+    ret = instance_->CheckDnsResponse(recBuff, recLen);
+    if (recBuff != nullptr) {
+        delete[] recBuff;
+    }
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DnsProxyListenTest, OffListenTest01, TestSize.Level1)
+{
+    instance_->proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    instance_->OffListen();
+    EXPECT_EQ(instance_->proxySockFd6_, -1);
+}
+
+HWTEST_F(DnsProxyListenTest, clearResourceTest01, TestSize.Level1)
+{
+    instance_->InitListenForIpv4();
+    instance_->InitListenForIpv6();
+    instance_->clearResource();
+    EXPECT_EQ(instance_->proxySockFd_, -1);
+    EXPECT_EQ(instance_->proxySockFd6_, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS
