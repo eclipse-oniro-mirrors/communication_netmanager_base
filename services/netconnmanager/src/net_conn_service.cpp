@@ -676,7 +676,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
-        NetRequest netRequest(callingUid, reqId);
+        NetRequest netRequest(netActivate->GetUid(), reqId);
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
