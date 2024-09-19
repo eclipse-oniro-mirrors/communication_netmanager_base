@@ -61,6 +61,12 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
         case SysVpnStageCode::VPN_STAGE_STOP:
             param.append(VPN_STAGE_STOP);
             break;
+        case SysVpnStageCode::VPN_STAGE_OPENVPN_RESTART:
+            param.append(VPN_STAGE_OPENVPN_RESTART).append(OPENVPN_CONFIG_FILE);
+            break;
+        case SysVpnStageCode::VPN_STAGE_OPENVPN_STOP:
+            param.append(VPN_STAGE_OPENVPN_STOP);
+            break;
         default:
             NETNATIVE_LOGE("run ExecuteUpdate failed, unknown stage %{public}d", stage);
             return;
