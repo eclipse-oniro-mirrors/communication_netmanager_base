@@ -27,10 +27,6 @@
 #include "refbase.h"
 #include "singleton.h"
 
-
-#define private public
-#define protected public
-
 #include <string>
 
 #include "i_netfirewall_service.h"

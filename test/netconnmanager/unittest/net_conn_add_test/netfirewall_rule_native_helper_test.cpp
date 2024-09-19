@@ -19,9 +19,6 @@
 #include "netmanager_ext_test_security.h"
 #include "net_manager_constants.h"
 
-#define private public
-#define protected public
-
 #include "netfirewall_rule_native_helper.h"
 
 namespace OHOS {
