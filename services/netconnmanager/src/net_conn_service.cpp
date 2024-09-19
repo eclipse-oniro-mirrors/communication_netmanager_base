@@ -2683,7 +2683,7 @@ int32_t NetConnService::EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkI
 
     if (vnicCreated.load()) {
         NETMGR_LOG_E("Enable Vnic Network already");
-        return NET_CONN_ERR_INVALID_NETWORK;
+        return NETWORKVPN_ERROR_VNIC_EXIST;
     }
 
     uint16_t mtu = netLinkInfo->mtu_;
