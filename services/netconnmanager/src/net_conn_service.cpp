@@ -458,8 +458,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     locker.unlock();
     struct EventInfo eventInfo = {.netId = netId, .bearerType = bearerType, .ident = ident, .supplierId = supplierId};
     EventReport::SendSupplierBehaviorEvent(eventInfo);
-    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}d %{public}s] netId[%{public}d]",
-                 supplierId, supplier->GetUid(), ident.c_str(), netId);
+    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}s] netId[%{public}d]",
+                 supplierId, ident.c_str(), netId);
     return NETMANAGER_SUCCESS;
 }
 
