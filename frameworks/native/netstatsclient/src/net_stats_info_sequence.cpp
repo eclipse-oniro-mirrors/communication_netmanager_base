@@ -23,11 +23,11 @@ static constexpr uint32_t STATS_INFO_MAX_SIZE = 5000;
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint64(startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}u", startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", startTime_);
         return false;
     }
     if (!parcel.WriteUint64(endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}u", endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, info_);
@@ -36,11 +36,11 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.WriteUint64(statsSequence.startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}u", statsSequence.startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", statsSequence.startTime_);
         return false;
     }
     if (!parcel.WriteUint64(statsSequence.endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}u", statsSequence.endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", statsSequence.endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, statsSequence.info_);
@@ -57,8 +57,8 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
         NETMGR_LOG_E("Write statsInfoSequence size failed. size=%{public}u", vSize);
         return false;
     }
-    return std::all_for(statsSequence.begin(), statsSequence.end(),
-                        [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
+    return std::all_of(statsSequence.begin(), statsSequence.end(),
+                       [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
 }
 
 bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence)
