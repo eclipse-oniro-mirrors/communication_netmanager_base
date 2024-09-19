@@ -215,8 +215,7 @@ void NetStatsCached::CacheUidStats()
         auto currentStats = info - *findRet;
         stats_.PushUidStats(currentStats);
     });
-    lastUidStatsInfo_.clear();
-    lastUidStatsInfo_ = std::move(statsInfos);
+    lastUidStatsInfo_.swap(statsInfos);
 }
 
 void NetStatsCached::CacheAppStats()
@@ -276,8 +275,7 @@ void NetStatsCached::CacheUidSimStats()
         auto currentStats = info - *findRet;
         stats_.PushUidSimStats(currentStats);
     });
-    lastUidSimStatsInfo_.clear();
-    lastUidSimStatsInfo_ = std::move(statsInfos);
+    lastUidSimStatsInfo_.swap(statsInfos);
 }
 
 void NetStatsCached::CacheIfaceStats()
