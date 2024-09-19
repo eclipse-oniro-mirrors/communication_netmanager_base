@@ -197,35 +197,25 @@ HWTEST_F(DnsProxyListenTest, InitForListeningTest01, TestSize.Level1)
 
 HWTEST_F(DnsProxyListenTest, CheckDnsQuestionTest01, TestSize.Level1)
 {
-    std::string original = "10101010101012";
-    char *recBuff = new char[original.size() + 1];
-    std::strcpy(recBuff, original.c_str());
+    char recBuff[] = "10101010101012";
     size_t recLen = 1;
     bool ret = instance_->CheckDnsQuestion(recBuff, recLen);
     EXPECT_FALSE(ret);
 
     recLen = strlen(recBuff);
     ret = instance_->CheckDnsQuestion(recBuff, recLen);
-    if (recBuff != nullptr) {
-        delete[] recBuff;
-    }
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(DnsProxyListenTest, CheckDnsResponseTest01, TestSize.Level1)
 {
-    std::string original = "121212";
-    char *recBuff = new char[original.size() + 1];
-    std::strcpy(recBuff, original.c_str());
+    char recBuff[] = "120212";
     size_t recLen = 1;
     bool ret = instance_->CheckDnsResponse(recBuff, recLen);
     EXPECT_FALSE(ret);
 
     recLen = strlen(recBuff);
     ret = instance_->CheckDnsResponse(recBuff, recLen);
-    if (recBuff != nullptr) {
-        delete[] recBuff;
-    }
     EXPECT_FALSE(ret);
 }
 
