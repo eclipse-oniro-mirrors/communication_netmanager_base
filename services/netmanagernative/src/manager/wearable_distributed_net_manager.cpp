@@ -19,9 +19,9 @@
 #include <string>
 #include "errorcode_convertor.h"
 #include "iptables_wrapper.h"
-#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "net_manager_constants.h"
 #include "wearable_distributed_net_manager.h"
 
 namespace OHOS {
@@ -37,27 +37,27 @@ const std::string UDP_IPTABLES = "udpiptables";
 const std::string UDP_OUTPUT = "udpoutput";
 const std::string IPTABLES_DELETE_CMDS = "iptablesdeletecmds";
 
-const std::vector<std::string>& WearableDistributedNet::GetTcpIptables()
+const std::vector<std::string> &WearableDistributedNet::GetTcpIptables()
 {
     return tcpIptables_;
 }
 
-const std::string& WearableDistributedNet::GetOutputAddTcp()
+const std::string &WearableDistributedNet::GetOutputAddTcp()
 {
     return tcpOutput_;
 }
 
-const std::vector<std::string>& WearableDistributedNet::GetUdpIptables()
+const std::vector<std::string> &WearableDistributedNet::GetUdpIptables()
 {
     return udpIptables_;
 }
 
-const std::string& WearableDistributedNet::GetUdpoutput()
+const std::string &WearableDistributedNet::GetUdpoutput()
 {
     return udpOutput_;
 }
 
-const std::vector<std::string>& WearableDistributedNet::GetIptablesDeleteCmds()
+const std::vector<std::string> &WearableDistributedNet::GetIptablesDeleteCmds()
 {
     return iptablesDeleteCmds_;
 }
@@ -176,7 +176,7 @@ bool WearableDistributedNet::ParseIptablesDeleteCmds(const cJSON &json)
 
 bool WearableDistributedNet::ReadIptablesInterfaces(const cJSON &json)
 {
-    auto logErrorAndFail = [&](const char* functionName) {
+    auto logErrorAndFail = [&](const char *functionName) {
         NETNATIVE_LOGE("%{public}s failed", functionName);
         return false;
     };
@@ -203,12 +203,12 @@ void WearableDistributedNet::SetTcpPort(const int32_t tcpPortId)
     tcpPort_ = tcpPortId;
 }
 
-int32_t WearableDistributedNet::GetTcpPort()
+const int32_t WearableDistributedNet::GetTcpPort()
 {
     return tcpPort_;
 }
 
-int32_t WearableDistributedNet::ExecuteIptablesCommands(const std::vector<std::string>& commands)
+int32_t WearableDistributedNet::ExecuteIptablesCommands(const std::vector<std::string> &commands)
 {
     if (commands.empty()) {
         NETNATIVE_LOGE("Invalid commands array");
@@ -240,12 +240,12 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
         NETNATIVE_LOGE("Invalid UDP port ID");
         return NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_UDP_PORT_ID;
     }
-    int32_t ret = EstablishTcpIpRulesForNetworkDistribution();
+    int32_t ret = EstablishTcpIpRules();
     if (ret != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to establish TCP IP rules for network distribution");
         return ret;
     }
-    ret = EstablishUdpIpRulesForNetworkDistribution(udpPortId);
+    ret = EstablishUdpIpRules(udpPortId);
     if (ret != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to establish UDP IP rules for network distribution");
         return ret;
@@ -254,7 +254,7 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
     return NETMANAGER_SUCCESS;
 }
 
-std::string WearableDistributedNet::GenerateRule(const std::string& inputRules, const int32_t portId)
+const std::string &WearableDistributedNet::GenerateRule(const std::string &inputRules, const int32_t portId)
 {
     if (inputRules.empty()) {
         NETNATIVE_LOGE("Input rules are null");
@@ -300,7 +300,7 @@ int32_t WearableDistributedNet::ApplyRule(const RULES_TYPE type, const int32_t p
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
-int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
+int32_t WearableDistributedNet::EstablishTcpIpRules()
 {
     NETNATIVE_LOGI("Establishing TCP IP rules for network distribution");
     if (ExecuteIptablesCommands(GetTcpIptables()) != NETMANAGER_SUCCESS) {
@@ -316,7 +316,7 @@ int32_t WearableDistributedNet::EstablishTcpIpRulesForNetworkDistribution()
     return response.empty() ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
-int32_t WearableDistributedNet::EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId)
+int32_t WearableDistributedNet::EstablishUdpIpRules(const int32_t udpPortId)
 {
     NETNATIVE_LOGI("Establishing UDP IP rules for network distribution");
     if (ExecuteIptablesCommands(GetUdpIptables()) != NETMANAGER_SUCCESS) {

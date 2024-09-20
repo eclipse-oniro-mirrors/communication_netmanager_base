@@ -94,6 +94,10 @@ ohos_shared_library("netsys_controller") {
     defines += [ "SYS_FUNC" ]
   }
 
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
   if (netmanager_base_enable_feature_net_firewall) {
     defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }

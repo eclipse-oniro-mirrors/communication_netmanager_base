@@ -44,8 +44,8 @@ public:
     /**
     * @brief Enables the wearable distributed network forwarding by configuring TCP and UDP ports
     *
-    * @param tcpPortId The TCP port ID to enable forwarding for
-    * @param udpPortId The UDP port ID to enable forwarding for
+    * @param tcpPortId The TCP port ID
+    * @param udpPortId The UDP port ID
     * @return NETMANAGER_SUCCESS if successful, NETMANAGER_ERROR if any of the operations fail
     */
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
@@ -69,21 +69,21 @@ public:
     bool ReadSystemIptablesConfiguration();
 
 private:
-    int32_t EstablishTcpIpRulesForNetworkDistribution();
-    int32_t EstablishUdpIpRulesForNetworkDistribution(const int32_t udpPortId);
-    int32_t ExecuteIptablesCommands(const std::vector<std::string>& commands);
-    std::string GenerateRule(const std::string& inputRules, const int32_t portId);
+    int32_t EstablishTcpIpRules();
+    int32_t EstablishUdpIpRules(const int32_t udpPortId);
+    int32_t ExecuteIptablesCommands(const std::vector<std::string> &commands);
+    std::string &GenerateRule(const std::string &inputRules, const int32_t portId);
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
-    int32_t GetTcpPort();
+    const int32_t GetTcpPort();
 
     bool ReadIptablesInterfaces(const cJSON &json);
     std::string ReadJsonFile(const std::string &filePath);
-    const std::vector<std::string>& GetTcpIptables();
-    const std::string& GetOutputAddTcp();
-    const std::vector<std::string>& GetUdpIptables();
-    const std::string& GetUdpoutput();
-    const std::vector<std::string>& GetIptablesDeleteCmds();
+    const std::vector<std::string> &GetTcpIptables();
+    const std::string &GetOutputAddTcp();
+    const std::vector<std::string> &GetUdpIptables();
+    const std::string &GetUdpoutput();
+    const std::vector<std::string> &GetIptablesDeleteCmds();
 
     bool ParseTcpIptables(const cJSON &json);
     bool ParseTcpOutputRule(const cJSON &json);
