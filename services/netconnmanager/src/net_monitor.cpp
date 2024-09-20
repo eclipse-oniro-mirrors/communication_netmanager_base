@@ -56,6 +56,9 @@ constexpr const char NEW_LINE_STR = '\n';
 constexpr const char CR_STR = '\r';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
+constexpr const char *SETTINGS_DATASHARE_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
 const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
 const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
@@ -248,6 +251,10 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& htt
 
 void NetMonitor::LoadGlobalHttpProxy()
 {
+    if (!CheckIfSettingsDataReady()) {
+        NETMGR_LOG_E("data_share is not ready");
+        return;
+    }
     NetHttpProxyTracker httpProxyTracker;
     httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
 }
@@ -329,5 +336,45 @@ void NetMonitor::GetDetectUrlConfig()
     }
 }
 
+bool NetMonitor::CheckIfSettingsDataReady()
+{
+    if (isDataShareReady_) {
+        return true;
+    }
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("GetSystemAbilityManager failed.");
+        return false;
+    }
+    sptr<IRemoteObject> dataShareSa = saManager->GetSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    if (dataShareSa == nullptr) {
+        NETMGR_LOG_E("Get dataShare SA Failed.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return false;
+    }
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+            DataShare::DataShareHelper::Create(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    NETMGR_LOG_I("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == DataShare::E_OK) {
+        NETMGR_LOG_I("create data_share helper success");
+        auto helper = ret.second;
+        if (helper != nullptr) {
+            bool releaseRet = helper->Release();
+            NETMGR_LOG_I("release data_share helper, releaseRet=%{public}d", releaseRet);
+        }
+        isDataShareReady_ = true;
+        return true;
+    } else if (ret.first == DataShare::E_DATA_SHARE_NOT_READY) {
+        NETMGR_LOG_E("create data_share helper failed");
+        isDataShareReady_ = false;
+        return false;
+    }
+    NETMGR_LOG_E("data_share unknown.");
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

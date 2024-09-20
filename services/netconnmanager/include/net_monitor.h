@@ -23,8 +23,11 @@
 
 #include "refbase.h"
 
+#include "system_ability.h"
+#include "system_ability_definition.h"
 #include "i_net_monitor_callback.h"
 #include "net_conn_types.h"
+#include "net_datashare_utils.h"
 #include "net_http_probe.h"
 #include "net_link_info.h"
 #include "probe_thread.h"
@@ -91,6 +94,7 @@ private:
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
+    bool CheckIfSettingsDataReady();
 
 private:
     uint32_t netId_ = 0;
@@ -112,6 +116,7 @@ private:
     std::string fallbackHttpsUrl_;
     std::mutex proxyMtx_;
     bool isNeedSuffix_ = false;
+    bool isDataShareReady_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
