@@ -18,6 +18,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+std::unique_ptr<NetDataShareHelperUtils> NetDataShareHelperUtilsIface::dataShareHelperUtils_ =
+    std::make_unique<NetDataShareHelperUtils>();
 
 int32_t NetDataShareHelperUtilsIface::Query(const std::string &strUri, const std::string &key, std::string &value)
 {
@@ -51,6 +53,18 @@ int32_t NetDataShareHelperUtilsIface::Delete(const std::string &strUri, const st
     Uri uri(strUri);
     int32_t ret = dataShareHelperUtils->Delete(uri, key);
     return ret;
+}
+
+int32_t NetDataShareHelperUtilsIface::RegisterObserver(const std::string &strUri, const std::function<void()> &onChange)
+{
+    Uri uri(strUri);
+    return dataShareHelperUtils_->RegisterObserver(uri, onChange);
+}
+
+int32_t NetDataShareHelperUtilsIface::UnregisterObserver(const std::string &strUri, int32_t callbackId)
+{
+    Uri uri(strUri);
+    return dataShareHelperUtils_->UnregisterObserver(uri, callbackId);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
