@@ -53,7 +53,6 @@ constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 2;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 4;
 constexpr const char NEW_LINE_STR = '\n';
-constexpr const char CR_STR = '\r';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
 constexpr const char *SETTINGS_DATASHARE_URI =
@@ -331,9 +330,11 @@ void NetMonitor::GetDetectUrlConfig()
     auto pos = content.find(ADD_RANDOM_CFG_PREFIX);
     if (pos != std::string::npos) {
         pos += ADD_RANDOM_CFG_PREFIX.length();
-        std::string value = content.substr(pos, content.find(CR_STR, pos) - pos);
+        std::string value = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        value = CommonUtils::Trim(value);
         isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;
     }
+    NETMGR_LOG_I("is need add suffix (%{public}d)", isNeedSuffix_);
 }
 
 bool NetMonitor::CheckIfSettingsDataReady()
