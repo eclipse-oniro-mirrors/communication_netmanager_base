@@ -19,7 +19,6 @@
 #include <arpa/inet.h>
 #include <cstddef>
 #include <cstdlib>
-#include <future>
 #include <netinet/in.h>
 #include <regex>
 #include <sstream>
@@ -27,6 +26,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <thread>
 #include <type_traits>
 #include <unistd.h>
 #include <vector>
@@ -516,6 +516,13 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     _exit(-1);
 }
 
+struct ParentProcessHelper {
+    bool waitDoneFlag = false;
+    pid_t ret = 0;
+    std::mutex parentMutex;
+    std::condition_variable parentCv;
+};
+
 int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childPid, std::string *out)
 {
     if (count != PIPE_FD_NUM) {
@@ -540,17 +547,26 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
-    auto waitHandle = std::async(std::launch::async, [childPid]() {
-        auto ret = waitpid(childPid, nullptr, 0);
+    auto helper = std::make_shared<ParentProcessHelper>();
+    auto parentThread = std::thread([helper, childPid]() {
+        std::unique_lock locker(helper->parentMutex);
+        helper->ret = waitpid(childPid, nullptr, 0);
+        helper->waitDoneFlag = true;
+        helper->parentCv.notify_all();
         NETMGR_LOG_I("waitpid %{public}d done", childPid);
-        return ret;
-        });
+    });
+    std::string threadName = "ExecParentThread";
+    pthread_setname_np(parentThread.native_handle(), threadName.c_str());
+    parentThread.detach();
     const int32_t waitTime = 10;
-    if (waitHandle.wait_for(std::chrono::seconds(waitTime)) != std::future_status::ready) {
+    std::unique_lock uLock(helper->parentMutex);
+    auto waitRet = helper->parentCv.wait_for(uLock, std::chrono::seconds(waitTime),
+                                             [&helper] { return helper->waitDoneFlag; });
+    if (!waitRet) {
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         return NETMANAGER_ERROR;
     }
-    pid_t pidRet = waitHandle.get();
+    pid_t pidRet = helper->ret;
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
