@@ -15,8 +15,10 @@
 
 #include "net_datashare_utils.h"
 
+#include <atomic>
 #include <vector>
 
+#include "data_ability_observer_stub.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -31,6 +33,22 @@ constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 
 constexpr int INVALID_VALUE = -1;
 } // namespace
+
+class NetDataAbilityObserver : public AAFwk::DataAbilityObserverStub {
+public:
+    explicit NetDataAbilityObserver(std::function<void()> onChange) : onChange_(std::move(onChange)) {}
+    void OnChange() override
+    {
+        if (onChange_) {
+            onChange_();
+        }
+    }
+    void OnChangeExt(const AAFwk::ChangeInfo &) override {}
+    void OnChangePreferences(const std::string &) override {}
+
+private:
+    std::function<void()> onChange_;
+};
 
 NetDataShareHelperUtils::NetDataShareHelperUtils() {}
 
@@ -162,6 +180,39 @@ int32_t NetDataShareHelperUtils::Delete(Uri &uri, const std::string &key)
     dataShareHelper->NotifyChange(uri);
     dataShareHelper->Release();
     NETMGR_LOG_I("Delete success");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetDataShareHelperUtils::RegisterObserver(const Uri &uri, const std::function<void()> &onChange)
+{
+    static std::atomic<int32_t> callbackId;
+    auto dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
+    if (observer == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    dataShareHelper->RegisterObserver(uri, observer);
+    auto id = ++callbackId;
+    callbacks_.emplace(id, observer);
+    return id;
+}
+
+int32_t NetDataShareHelperUtils::UnregisterObserver(const Uri &uri, int32_t callbackId)
+{
+    auto dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        NETMGR_LOG_E("dataShareHelper is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    auto it = callbacks_.find(callbackId);
+    if (it == callbacks_.end() || it->second == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    dataShareHelper->UnregisterObserver(uri, it->second);
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
