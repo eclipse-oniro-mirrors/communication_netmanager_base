@@ -970,8 +970,8 @@ HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
     if (!data.WriteUint32(bearerType)) {
         return;
     }
-    bool isBetter = true;
-    if (!data.WriteBool(isBetter)) {
+    uint32_t goodState = 6;
+    if (!data.WriteUint32(goodState)) {
         return;
     }
     uint32_t supplierId = 100;
