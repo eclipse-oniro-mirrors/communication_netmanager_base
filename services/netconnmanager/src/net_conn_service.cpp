@@ -2602,7 +2602,7 @@ int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, uint32_t det
 
 int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
-    NETMGR_LOG_I("update supplier score by type[%{public}d], isBetter[%{public}d], supplierId:%{public}d",
+    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
         bearerType, detectionStatus, supplierId);
     NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
     if (state == QUALITY_POOR_STATE) {
