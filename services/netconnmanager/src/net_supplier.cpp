@@ -531,7 +531,7 @@ int32_t NetSupplier::GetNetScore() const
 int32_t NetSupplier::GetRealScore()
 {
     // Notice: the order is important here:
-    // 1. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
+    // 1.If the user chooses to use this network, return MAX_SCORE
     if (isAcceptUnvaliad) {
         return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::MAX_SCORE);
     }
