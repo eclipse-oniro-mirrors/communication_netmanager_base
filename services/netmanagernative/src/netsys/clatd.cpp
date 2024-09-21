@@ -214,13 +214,15 @@ void Clatd::ProcessV6Packet()
     }
 
     int packetLen = readLen - offsetof(ClatdReadV6Buf, payload);
-    if ((tpStatus & TP_STATUS_CSUMNOTREADY) && MaybeCalculateL4Checksum(packetLen, readBuf) != NETMANAGER_SUCCESS) {
-        return;
+    bool skip_csum = false;
+    if ((tpStatus & TP_STATUS_CSUMNOTREADY) || (tpStatus & TP_STATUS_CSUM_VALID)) {
+        NETNATIVE_LOGW("skip csum for packet which length is %{public}zd", readLen);
+        skip_csum = true;
     }
 
     ClatdPacketConverter converter = ClatdPacketConverter(readBuf.payload + tpNet, packetLen - tpNet,
                                                           CONVERT_FROM_V6_TO_V4, v4Addr_, v6Addr_, prefixAddr_);
-    if (converter.ConvertPacket() != NETMANAGER_SUCCESS) {
+    if (converter.ConvertPacket(skip_csum) != NETMANAGER_SUCCESS) {
         return;
     }
     std::vector<iovec> iovPackets(CLATD_MAX);
@@ -259,7 +261,8 @@ void Clatd::ProcessV4Packet()
 
     ClatdPacketConverter converter =
         ClatdPacketConverter(readBuf.payload, packetLen, CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
-    if (converter.ConvertPacket() != NETMANAGER_SUCCESS) {
+    bool skip_csum = false;
+    if (converter.ConvertPacket(skip_csum) != NETMANAGER_SUCCESS) {
         return;
     }
     std::vector<iovec> iovPackets(CLATD_MAX);
@@ -282,8 +285,8 @@ int32_t Clatd::ReadV6Packet(msghdr &msgHdr, ssize_t &readLen)
         NETNATIVE_LOGW("recvmsg failed: socket closed");
         isSocketClosed_ = true;
         return NETMANAGER_ERR_OPERATION_FAILED;
-    } else if (static_cast<size_t>(readLen) >= sizeof(ClatdReadTunBuf)) {
-        NETNATIVE_LOGW("recvmsg failed: packet oversize");
+    } else if (static_cast<size_t>(readLen) >= sizeof(ClatdReadV6Buf)) {
+        NETNATIVE_LOGW("recvmsg failed: packet oversize, readLen: %{public}zu, sizeof(ClatdReadV6Buf): %{public}zu", static_cast<size_t>(readLen), sizeof(ClatdReadV6Buf));
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;
