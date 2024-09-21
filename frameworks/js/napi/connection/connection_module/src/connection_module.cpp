@@ -466,9 +466,16 @@ napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callb
 
 napi_value ConnectionModule::NetConnectionInterface::Register(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<RegisterContext>(env, info, FUNCTION_REGISTER, nullptr,
-                                                      ConnectionAsyncWork::NetConnectionAsyncWork::ExecRegister,
-                                                      ConnectionAsyncWork::NetConnectionAsyncWork::RegisterCallback);
+    return ModuleTemplate::Interface<RegisterContext>(
+        env, info, FUNCTION_REGISTER,
+        [](napi_env theEnv, napi_value thisVal, RegisterContext *context) -> bool {
+            if (context && context->GetManager() && !context->GetManager()->GetRef()) {
+                context->GetManager()->SetRef(NapiUtils::CreateReference(theEnv, thisVal));
+            }
+            return true;
+        },
+        ConnectionAsyncWork::NetConnectionAsyncWork::ExecRegister,
+        ConnectionAsyncWork::NetConnectionAsyncWork::RegisterCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::Unregister(napi_env env, napi_callback_info info)
@@ -477,10 +484,15 @@ napi_value ConnectionModule::NetConnectionInterface::Unregister(napi_env env, na
         env, info, FUNCTION_UNREGISTER,
         [](napi_env theEnv, napi_value thisVal, UnregisterContext *context) -> bool {
             if (context && context->GetManager()) {
+                if (context->GetManager()->GetRef()) {
+                    NapiUtils::DeleteReference(theEnv, context->GetManager()->GetRef());
+                    context->GetManager()->SetRef(nullptr);
+                }
                 context->GetManager()->DeleteAllListener();
             }
             return true;
-        }, ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister,
+        },
+        ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister,
         ConnectionAsyncWork::NetConnectionAsyncWork::UnregisterCallback);
 }
 

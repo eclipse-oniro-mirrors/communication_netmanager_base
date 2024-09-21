@@ -128,6 +128,16 @@ void EventManager::DeleteAllListener()
     listeners_.clear();
 }
 
+napi_ref EventManager::GetRef() const
+{
+    return ref_;
+}
+
+void EventManager::SetRef(napi_ref ref)
+{
+    ref_ = ref;
+}
+
 UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType, EventManager *eventManager)
     : data(theData), env(theEnv), type(std::move(eventType)), manager(eventManager)
 {
