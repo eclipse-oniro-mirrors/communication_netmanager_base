@@ -23,6 +23,7 @@
 #include "i_net_conn_callback.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_types.h"
 #include "net_factoryreset_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "net_interface_config.h"
