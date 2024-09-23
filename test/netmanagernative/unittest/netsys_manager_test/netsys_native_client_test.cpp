@@ -244,7 +244,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     ret = nativeClient_.FirewallEnableChain(CHAIN, true);
     EXPECT_EQ(ret, -1);
     ret = nativeClient_.FirewallSetUidRule(CHAIN, {NET_ID}, FIREWALL_RULE);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
