@@ -70,6 +70,13 @@ ohos_prebuilt_etc("initHosts") {
   subsystem_name = "communication"
 }
 
+## Install detectionconfig.conf to /system/etc
+ohos_prebuilt_etc("detectionconfig.conf") {
+  source = "detectionconfig.conf"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
 ohos_prebuilt_etc("wearable_distributed_net_forward") {
   source = "wearable_distributed_net_forward.json"
   relative_install_dir = "init"

@@ -54,13 +54,17 @@ public:
     bool IsValid() const;
     void SetInvalid();
 
+    napi_ref GetRef() const;
+    void SetRef(napi_ref ref);
+
 private:
     std::mutex mutexForListenersAndEmitByUv_;
     std::mutex mutexForEmitAndEmitByUv_;
     std::mutex mutex_;
     std::list<EventListener> listeners_;
-    void *data_;
+    void *data_ = nullptr;
     std::atomic_bool isValid_;
+    napi_ref ref_ = nullptr;
 };
 
 struct UvWorkWrapper {

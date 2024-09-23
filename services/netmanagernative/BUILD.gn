@@ -30,6 +30,7 @@ config("netsys_native_manager_config") {
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include/netsys",
   ]
   defines = []
   if (netmanager_base_enable_feature_net_firewall) {

@@ -458,8 +458,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     locker.unlock();
     struct EventInfo eventInfo = {.netId = netId, .bearerType = bearerType, .ident = ident, .supplierId = supplierId};
     EventReport::SendSupplierBehaviorEvent(eventInfo);
-    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}d %{public}s] netId[%{public}d]",
-                 supplierId, supplier->GetUid(), ident.c_str(), netId);
+    NETMGR_LOG_I("RegisterNetSupplier service out, supplier[%{public}d %{public}s] netId[%{public}d]",
+                 supplierId, ident.c_str(), netId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -676,7 +676,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
-        NetRequest netRequest(callingUid, reqId);
+        NetRequest netRequest(netActivate->GetUid(), reqId);
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
@@ -980,9 +980,9 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
             }
             NetRequest netrequest;
             netrequest.requestId = reqId;
-            netrequest.uid = iterActivate->second->GetUid();
             if (iterActivate->second != nullptr) {
                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
+                netrequest.uid = iterActivate->second->GetUid();
                 if (pNetService) {
                     pNetService->CancelRequest(netrequest);
                 }
@@ -1818,10 +1818,26 @@ int32_t NetConnService::GetDelayNotifyTime()
                                 param, SYS_PARAMETER_SIZE);
     std::string time = param;
     if (code <= 0 || !IsValidDecValue(time)) {
-        delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        try {
+            delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     } else {
-        auto tmp = std::stoi(time);
-        delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        try {
+            auto tmp = std::stoi(time);
+            delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     }
     NETMGR_LOG_D("delay time is %{public}d", delayTime);
     return delayTime;
@@ -2683,7 +2699,7 @@ int32_t NetConnService::EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkI
 
     if (vnicCreated.load()) {
         NETMGR_LOG_E("Enable Vnic Network already");
-        return NET_CONN_ERR_INVALID_NETWORK;
+        return NETWORKVPN_ERROR_VNIC_EXIST;
     }
 
     uint16_t mtu = netLinkInfo->mtu_;

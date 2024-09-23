@@ -64,20 +64,25 @@ public:
     [[nodiscard]] bool IsNeedPromise() const;
     [[nodiscard]] bool IsNeedThrowException() const;
 
+    napi_deferred deferredBack1_ = nullptr;
+    napi_deferred deferredBack2_ = nullptr;
+    napi_deferred deferredBack3_ = nullptr;
+    napi_deferred deferredBack4_ = nullptr;
+
     uint32_t magic_ = BASE_CONTEXT_MAGIC_NUMBER;
 
 protected:
-    EventManager *manager_;
+    EventManager *manager_ = nullptr;
 
 private:
-    napi_env env_;
+    napi_env env_ = nullptr;
     bool parseOK_;
     bool requestOK_;
     int32_t errorCode_;
     std::string errorMessage_;
-    napi_ref callback_;
-    napi_async_work asyncWork_;
-    napi_deferred deferred_;
+    napi_ref callback_ = nullptr;
+    napi_async_work asyncWork_ = nullptr;
+    napi_deferred deferred_ = nullptr;
     std::string asyncWorkName_;
     bool needPromise_;
     bool needThrowException_;

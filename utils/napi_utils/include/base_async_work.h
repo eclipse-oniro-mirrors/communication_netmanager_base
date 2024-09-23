@@ -63,6 +63,14 @@ public:
             NETMANAGER_BASE_LOGE("data has been destructed.");
             return;
         }
+        auto baseContext = reinterpret_cast<BaseContext *>(data);
+        if (baseContext->GetDeferred() != baseContext->deferredBack1_ ||
+            baseContext->GetDeferred() != baseContext->deferredBack2_ ||
+            baseContext->GetDeferred() != baseContext->deferredBack3_ ||
+            baseContext->GetDeferred() != baseContext->deferredBack4_) {
+            return;
+        }
+        
         auto deleter = [](Context *context) { delete context; };
         std::unique_ptr<Context, decltype(deleter)> context(static_cast<Context *>(data), deleter);
         size_t argc = 2;

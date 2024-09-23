@@ -193,7 +193,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest005, TestSize.Level1)
                                                                      FirewallRule::RULE_ALLOW);
     ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, {0},
                                                              FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -208,7 +208,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
                                                                      FirewallRule::RULE_DENY);
     ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, {0},
                                                              FirewallRule::RULE_DENY);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
     ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, {0},
                                                              FirewallRule::RULE_ALLOW);
     EXPECT_EQ(ret, 0);

@@ -96,19 +96,16 @@ int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
     uint32_t nameLen = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&nameLen), sizeof(nameLen))) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
         return -1;
     }
 
     if (nameLen > MAX_HOST_NAME_LEN) {
         DNS_CONFIG_PRINT("MAX_HOST_NAME_LEN is %{public}u, but get %{public}u", MAX_HOST_NAME_LEN, nameLen);
-        close(clientSockFd);
         return -1;
     }
 
     if (!PollRecvData(clientSockFd, name, nameLen)) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
         return -1;
     }
     DNS_CONFIG_PRINT("ProcGetKeyForCache end");
@@ -215,13 +212,11 @@ bool DnsResolvListen::ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, u
 {
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read1 errno %{public}d", errno);
-        close(clientSockFd);
         return false;
     }
 
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read2 errno %{public}d", errno);
-        close(clientSockFd);
         return false;
     }
 
@@ -247,7 +242,6 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     uint32_t usedtime;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
         NETNATIVE_LOGE("read3 errno %{public}d", errno);
-        close(clientSockFd);
         return;
     }
 

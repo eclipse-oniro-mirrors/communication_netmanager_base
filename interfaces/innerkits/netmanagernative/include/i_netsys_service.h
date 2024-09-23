@@ -55,6 +55,8 @@ enum SysVpnStageCode : int32_t {
     VPN_STAGE_SWANCTL_LOAD, // ikev2 vpn. load ikev2 vpn config file
     VPN_STAGE_L2TP_LOAD, // l2tp vpn. load l2tp vpn config file
     VPN_STAGE_L2TP_CTL, // l2tp vpn. control pppd running
+    VPN_STAGE_OPENVPN_RESTART, // openvpn. restart openvpn
+    VPN_STAGE_OPENVPN_STOP, // openvpn. stop openvpn
 };
 class INetsysService : public IRemoteBroker {
 public:

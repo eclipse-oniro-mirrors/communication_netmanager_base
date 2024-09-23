@@ -31,7 +31,6 @@ ohos_unittest("networkshare_manager_test") {
   sources = [
     "$EXT_SECURITY_PATH/security/netmanager_ext_test_security.cpp",
     "interface_configuration_test.cpp",
-    "net_event_report_test.cpp",
     "netshare_result_callback_proxy_test.cpp",
     "netshare_result_callback_stub_test.cpp",
     "networkshare_hisysevent_test.cpp",

@@ -143,6 +143,10 @@ enum {
 };
 #endif
 
+enum {
+    NETWORKVPN_ERROR_VNIC_EXIST = 2206001,
+};
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 enum {
     FIREWALL_SUCCESS = 0,

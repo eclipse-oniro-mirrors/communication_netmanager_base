@@ -28,6 +28,7 @@
 #include "net_policy_traffic.h"
 #include "system_ability_definition.h"
 #include "netmanager_base_test_security.h"
+#include "net_policy_callback_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -79,6 +80,140 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag001, TestSize.Level1)
 {
     uint32_t uid = 10000;
     auto ret = instance_->NotifyNetAccessPolicyDiag(uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag002, TestSize.Level1)
+{
+    instance_->Init();
+    instance_->netPolicyRule_ = nullptr;
+    auto ret = instance_->SetPolicyByUid(0, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    uint32_t policy = 0;
+    ret = instance_->GetPolicyByUid(0, policy);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    std::vector<uint32_t> uids;
+    ret = instance_->GetUidsByPolicy(0, uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag003, TestSize.Level1)
+{
+    std::string ifaceName = "faces";
+    bool isAllowed = true;
+    std::vector<std::string> newMeteredIfaces;
+    newMeteredIfaces.push_back("faces");
+    instance_->netPolicyTraffic_->UpdateMeteredIfaces(newMeteredIfaces);
+    auto ret = instance_->IsUidNetAllowed(0, ifaceName, isAllowed);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag004, TestSize.Level1)
+{
+    sptr<IRemoteObject> impl = new (std::nothrow) IPCObjectStub();
+    sptr<NetPolicyCallbackProxy> callback = new (std::nothrow) NetPolicyCallbackProxy(impl);
+    auto ret = instance_->RegisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    instance_->netPolicyCallback_ = std::make_shared<NetPolicyCallback>();
+    ret = instance_->RegisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag005, TestSize.Level1)
+{
+    sptr<IRemoteObject> impl = new (std::nothrow) IPCObjectStub();
+    sptr<NetPolicyCallbackProxy> callback = new (std::nothrow) NetPolicyCallbackProxy(impl);
+    auto ret = instance_->UnregisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    instance_->netPolicyCallback_ = nullptr;
+    ret = instance_->UnregisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    instance_->netPolicyCallback_ = std::make_shared<NetPolicyCallback>();
+    ret = instance_->UnregisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag006, TestSize.Level1)
+{
+    instance_->netPolicyTraffic_ = nullptr;
+    std::vector<NetQuotaPolicy> quotaPolicies;
+    auto ret = instance_->SetNetQuotaPolicies(quotaPolicies);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->GetNetQuotaPolicies(quotaPolicies);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    instance_->netPolicyFirewall_ = nullptr;
+    std::string simId;
+    ret = instance_->ResetPolicies(simId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag007, TestSize.Level1)
+{
+    instance_->netPolicyRule_ = nullptr;
+    auto ret = instance_->SetBackgroundPolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    bool backgroundPolicy = true;
+    ret = instance_->GetBackgroundPolicy(backgroundPolicy);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    uint32_t backgroundPolicyOfUid = 0;
+    ret = instance_->GetBackgroundPolicyByUid(0, backgroundPolicyOfUid);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    std::vector<uint32_t> uids;
+    instance_->netPolicyFirewall_ = nullptr;
+    ret = instance_->SetDeviceIdleTrustlist(uids, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    instance_->netPolicyFirewall_ = std::make_shared<NetPolicyFirewall>();
+    for (int i = 0; i <= 1001; i++) {
+        instance_->netPolicyFirewall_->powerSaveAllowedList_.insert(i);
+    }
+    
+    ret = instance_->SetDeviceIdleTrustlist(uids, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    instance_->netPolicyTraffic_ = nullptr;
+    std::string message;
+    ret = instance_->GetDumpMessage(message);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag008, TestSize.Level1)
+{
+    instance_->netPolicyRule_ = nullptr;
+    instance_->netPolicyFirewall_ = nullptr;
+    instance_->netPolicyTraffic_ = nullptr;
+    auto ret = instance_->FactoryResetPolicies();
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    instance_->netPolicyRule_ = nullptr;
+    std::vector<std::string> ifaceNames;
+    ret = instance_->SetNicTrafficAllowed(ifaceNames, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    instance_->netPolicyRule_ = nullptr;
+    ret = instance_->DeleteNetworkAccessPolicy(0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    instance_->netPolicyRule_ = nullptr;
+    NetworkAccessPolicy policy;
+    ret = instance_->SetNetworkAccessPolicy(0, policy, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag009, TestSize.Level1)
+{
+    std::shared_ptr<NetPolicyService> netPolicy = std::make_shared<NetPolicyService>();
+    instance_->netFactoryResetCallback_ = new NetPolicyService::FactoryResetCallBack(netPolicy);
+    instance_->RegisterFactoryResetCallback();
+    EXPECT_EQ(NetManagerCenter::GetInstance().connService_, nullptr);
+    
+    instance_->netPolicyRule_ = nullptr;
+    AccessPolicyParameter parameter = {true, 0, 0};
+    AccessPolicySave policys;
+    auto ret = instance_->GetNetworkAccessPolicy(parameter, policys);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

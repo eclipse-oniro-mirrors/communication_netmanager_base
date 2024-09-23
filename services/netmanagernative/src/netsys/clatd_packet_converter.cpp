@@ -52,7 +52,7 @@ ClatdPacketConverter::ClatdPacketConverter(const uint8_t *inputPacket, size_t in
 {
 }
 
-int32_t ClatdPacketConverter::ConvertPacket()
+int32_t ClatdPacketConverter::ConvertPacket(bool skip_csum)
 {
     int32_t ret;
     if (convertType_ == CONVERT_FROM_V4_TO_V6) {
@@ -65,7 +65,7 @@ int32_t ClatdPacketConverter::ConvertPacket()
         if (ret != NETMANAGER_SUCCESS) {
             NETNATIVE_LOGW("fail to convert ipv6 packet");
         } else if (effectivePos_ > 0) {
-            WriteTunHeader();
+            WriteTunHeader(skip_csum);
         }
     } else {
         NETNATIVE_LOGW("invalid convert type");
@@ -684,10 +684,14 @@ void ClatdPacketConverter::WritePayload(int pos, const uint8_t *tpHeader, size_t
     effectivePos_ = CLATD_MAX;
 }
 
-void ClatdPacketConverter::WriteTunHeader()
+void ClatdPacketConverter::WriteTunHeader(bool skip_csum)
 {
     tun_pi tunProtocolInfo;
-    tunProtocolInfo.flags = 0;
+    if (skip_csum) {
+        tunProtocolInfo.flags = htons(TP_CSUM_UNNECESSARY);
+    } else {
+        tunProtocolInfo.flags = 0;
+    }
     tunProtocolInfo.proto = htons(ETH_P_IP);
     iovBufLens_[CLATD_TUNHDR] = sizeof(tun_pi);
     iovBufs_[CLATD_TUNHDR].assign(reinterpret_cast<const char *>(&tunProtocolInfo), sizeof(tun_pi));
