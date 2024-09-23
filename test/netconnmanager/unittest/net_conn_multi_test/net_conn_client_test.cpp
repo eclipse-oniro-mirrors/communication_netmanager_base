@@ -1414,17 +1414,15 @@ HWTEST_F(NetConnClientTest, UnregisterPreAirplaneCallback, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    uint32_t poorState = 4;
     uint32_t supplierId = 100;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, poorState, supplierId);
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, QUALITY_POOR_STATE, supplierId);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
 {
-    uint32_t poorState = 4;
     uint32_t supplierId = 100;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, poorState, supplierId);
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, QUALITY_POOR_STATE, supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
