@@ -75,7 +75,7 @@ private:
     std::string &GenerateRule(const std::string &inputRules, const int32_t portId);
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
-    const int32_t GetTcpPort();
+    int32_t GetTcpPort();
 
     bool ReadIptablesInterfaces(const cJSON &json);
     std::string ReadJsonFile(const std::string &filePath);

@@ -117,9 +117,8 @@ if (netmanager_base_enable_feature_net_firewall) {
 }
 
 if (netmanager_base_enable_feature_wearable_distributed_net) {
-  netsys_native_manager_sources += [
-    "src/manager/wearable_distributed_net_manager.cpp",
-  ]
+  netsys_native_manager_sources +=
+      [ "src/manager/wearable_distributed_net_manager.cpp" ]
 }
 
 ohos_shared_library("netsys_native_manager") {
@@ -170,10 +169,11 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "NETSYS_DNS_MONITOR=0",
-    "NETWORK_CONFIG_PATH = \"/system/etc/communication/netmanager_base/wearable_distributed_net_forward.json\"",
+    "NETWORK_CONFIG_PATH = \"/system/etc/init/wearable_distributed_net_forward.json\"",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
@@ -185,7 +185,6 @@ ohos_shared_library("netsys_native_manager") {
     "iptables:iptables-save",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "cJSON:cjson",
   ]
 
   if (build_selinux) {
@@ -233,6 +232,7 @@ ohos_static_library("netsys_native_manager_static") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
@@ -328,11 +328,4 @@ ohos_shared_library("netsys_client") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
-}
-
-ohos_prebuilt_etc("wearable_distributed_net_forward") {
-  source = "$NETMANAGER_BASE_ROOT/services/netmanagernative/config/wearable_distributed_net_forward.json"
-  install_enable = true
-  relative_install_dir = "communication/netmanager_base"
-  part_name = "netmanager_base"
 }

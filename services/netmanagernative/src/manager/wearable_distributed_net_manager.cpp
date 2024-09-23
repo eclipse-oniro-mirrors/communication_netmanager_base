@@ -203,7 +203,7 @@ void WearableDistributedNet::SetTcpPort(const int32_t tcpPortId)
     tcpPort_ = tcpPortId;
 }
 
-const int32_t WearableDistributedNet::GetTcpPort()
+int32_t WearableDistributedNet::GetTcpPort()
 {
     return tcpPort_;
 }

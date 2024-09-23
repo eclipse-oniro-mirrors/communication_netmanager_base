@@ -1,5 +1,5 @@
 {
-  "config_wearable_distributed_net_forward":[
+  "config_wearable_distributed_net_forward": [
     {
       "tcpiptables": [
         "-w -t nat -N DISTRIBUTED_NET_TCP",

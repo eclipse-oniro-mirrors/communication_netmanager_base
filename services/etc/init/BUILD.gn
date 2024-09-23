@@ -69,3 +69,10 @@ ohos_prebuilt_etc("initHosts") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+ohos_prebuilt_etc("wearable_distributed_net_forward") {
+  source = "wearable_distributed_net_forward.json"
+  relative_install_dir = "init"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
