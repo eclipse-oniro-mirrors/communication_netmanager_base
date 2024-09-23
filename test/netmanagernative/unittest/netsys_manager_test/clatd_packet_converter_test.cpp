@@ -168,7 +168,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateUdpTest001, Test
     inet_pton(AF_INET6, V6ADDR_UDP_ICMP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V4_UDP_PACKET_TX, sizeof(V4_UDP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
@@ -187,7 +187,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateUdpTest002, Test
     inet_pton(AF_INET6, V6ADDR_UDP_ICMP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V6_UDP_PACKET_RX, sizeof(V6_UDP_PACKET_RX), CONVERT_FROM_V6_TO_V4, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
@@ -206,7 +206,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateTcpTest001, Test
     inet_pton(AF_INET6, V6ADDR_TCP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V4_TCP_PACKET_TX, sizeof(V4_TCP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
@@ -225,7 +225,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateTcpTest002, Test
     inet_pton(AF_INET6, V6ADDR_TCP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V6_TCP_PACKET_RX, sizeof(V6_TCP_PACKET_RX), CONVERT_FROM_V6_TO_V4, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
@@ -244,7 +244,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateIcmpTest001, Tes
     inet_pton(AF_INET6, V6ADDR_UDP_ICMP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V4_ICMP_PACKET_TX, sizeof(V4_ICMP_PACKET_TX), CONVERT_FROM_V4_TO_V6, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
@@ -263,7 +263,7 @@ HWTEST_F(ClatdPacketConverterTest, ClatdPacketConverterTranslateIcmpTest002, Tes
     inet_pton(AF_INET6, V6ADDR_UDP_ICMP, &v6Addr_);
     auto clatdPacketConverter = std::make_unique<ClatdPacketConverter>(
         V6_ICMP_PACKET_RX, sizeof(V6_ICMP_PACKET_RX), CONVERT_FROM_V6_TO_V4, v4Addr_, v6Addr_, prefixAddr_);
-    EXPECT_EQ(clatdPacketConverter->ConvertPacket(), NETMANAGER_SUCCESS);
+    EXPECT_EQ(clatdPacketConverter->ConvertPacket(false), NETMANAGER_SUCCESS);
 
     std::vector<iovec> iovPackets(CLATD_MAX);
     int effectivePos = 0;
