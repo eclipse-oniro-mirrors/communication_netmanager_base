@@ -1094,8 +1094,7 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
         NetConnService::GetInstance()->netSuppliers_[supplierId]);
-    uint32_t poorState = 4;
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, poorState, supplierId);
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, QUALITY_POOR_STATE, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     auto supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
     supplier->SetDetectionDone();
@@ -1111,8 +1110,7 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
     int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
         netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    uint32_t goodState = 6;
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, goodState, supplierId);
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI, QUALITY_GOOD_STATE, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
