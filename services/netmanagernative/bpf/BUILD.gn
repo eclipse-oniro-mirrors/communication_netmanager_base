@@ -83,7 +83,7 @@ ohos_shared_library("netsys_bpf_utils") {
     "ipc:ipc_core",
     "libbpf:libbpf",
   ]
-
+  use_exceptions = true
   deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
 
   if (netmanager_base_enable_feature_net_firewall) {
