@@ -510,6 +510,10 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_I("Enter StartNetDetection");
+    if (isSleepFlag_) {
+        NETMGR_LOG_W("Sleep status, not allow detection");
+        return;
+    }
     if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
@@ -520,6 +524,11 @@ void Network::StartNetDetection(bool needReport)
         InitNetMonitor();
         return;
     }
+}
+
+void Network::UpdateIsSleepFlag(bool isSleepFlag)
+{
+    isSleepFlag_ = isSleepFlag;
 }
 
 void Network::SetNetCaps(const std::set<NetCap> &netCaps)

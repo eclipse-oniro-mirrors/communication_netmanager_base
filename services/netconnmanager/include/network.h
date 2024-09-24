@@ -62,6 +62,7 @@ public:
     bool IsConnecting() const;
     bool IsConnected() const;
     void UpdateNetConnState(NetConnState netConnState);
+    void UpdateIsSleepFlag(bool isSleepFlag);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
@@ -69,9 +70,9 @@ public:
     
     bool ResumeNetworkInfo();
     void CloseSocketsUid(uint32_t uid);
+    void StopNetDetection();
 
 private:
-    void StopNetDetection();
     bool CreateBasicNetwork();
     bool CreateVirtualNetwork();
     bool ReleaseBasicNetwork();
@@ -106,6 +107,7 @@ private:
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
     std::unique_ptr<Nat464Service> nat464Service_;
+    bool isSleepFlag_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

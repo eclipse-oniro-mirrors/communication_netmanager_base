@@ -145,6 +145,8 @@ bool NetConnService::Init()
 
     SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
                          [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+    SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
 
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
@@ -640,6 +642,38 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier)
     int32_t uid = supplier->GetUid();
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
+}
+
+void NetConnService::StopAllNetDetecion()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+    }
+    pNetwork->StopNetDetection();
+    pNetwork->UpdateIsSleepFlag(true);
+}
+
+void NetConnService::StartAllNetDetecion()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+    }
+    pNetwork->StartNetDetection(false);
+    pNetwork->UpdateIsSleepFlag(false);
 }
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
@@ -2403,6 +2437,22 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HttpProxy httpProxy;
         LoadGlobalHttpProxy(httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
+    }
+    if (action == "usual.event.POWER_MANAGER_STATE_CHANGED") {
+        int code = data.GetCode();
+        int STATE_ENTER_FORCESLEEP = 0X30;
+        int STATE_EXIT_FORCESLEEP = 0X31;
+        int STATE_ENTER_SLEEP_NOT_FORCE = 0x40;
+        int STATE_EXIT_FORCESLEEP_NOT_FORCE = 0x41;
+        if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
+            NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+            std::unique_lock<std::mutex> lock(sleepEventMutex_);
+            StopAllNetDetection();
+        } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_FORCESLEEP_NOT_FORCE) {
+            NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+            std::unique_lock<std::mutex> lock(sleepEventMutex_);
+            StartAllNetDetecion();
+        }
     }
 }
 
