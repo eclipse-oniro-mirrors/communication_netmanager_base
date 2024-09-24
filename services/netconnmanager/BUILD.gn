@@ -140,6 +140,10 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
   }
 
+  if (netmanager_base_feature_support_powermanager) {
+    defines += [ "FEATURE_SUPPORT_POWERMANAGER" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

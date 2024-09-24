@@ -145,6 +145,10 @@ bool NetConnService::Init()
 
     SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
                          [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#endif
 
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
@@ -641,6 +645,40 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier)
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
 }
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+void NetConnService::StopAllNetDetection()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        pNetwork->StopNetDetection();
+        pNetwork->UpdateForbidDetectionFlag(true);
+    }
+}
+
+void NetConnService::StartAllNetDetecion()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+    }
+    pNetwork->StartNetDetection(false);
+    pNetwork->UpdateForbidDetectionFlag(false);
+}
+#endif
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
@@ -2404,6 +2442,28 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         LoadGlobalHttpProxy(httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
     }
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (action == "usual.event.POWER_MANAGER_STATE_CHANGED") {
+        int code = data.GetCode();
+        if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
+            NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+            std::unique_lock<std::mutex> lock(sleepEventMutex_);
+            if (netConnEventHandler_) {
+                netConnEventHandler_->PostSyncTask([this]() {
+                    this->StopAllNetDetection();
+                });
+            }
+        } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_FORCESLEEP_NOT_FORCE) {
+            NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+            std::unique_lock<std::mutex> lock(sleepEventMutex_);
+            if (netConnEventHandler_) {
+                netConnEventHandler_->PostSyncTask([this]() {
+                    this->StartAllNetDetecion();
+                });
+            }
+        }
+    }
+#endif
 }
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)

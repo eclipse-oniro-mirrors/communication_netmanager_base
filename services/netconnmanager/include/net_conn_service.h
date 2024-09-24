@@ -482,6 +482,10 @@ private:
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
     int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier);
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    void StopAllNetDetection();
+    void StartAllNetDetection();
+#endif
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
@@ -506,6 +510,9 @@ private:
     std::mutex globalHttpProxyMutex_;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
     std::recursive_mutex netManagerMutex_;
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    std::mutex sleepEventMutex_;
+#endif
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
