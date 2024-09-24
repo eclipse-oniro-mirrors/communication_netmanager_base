@@ -67,6 +67,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+    "$THIRD_PARTY_ROOT/cJSON/include",
   ]
 
   deps = [

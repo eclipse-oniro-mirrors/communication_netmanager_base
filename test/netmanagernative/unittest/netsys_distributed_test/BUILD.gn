@@ -52,6 +52,7 @@ ohos_unittest("netsys_distributed_test") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$THIRD_PARTY_ROOT/cJSON/include",
   ]
 
   deps = [

@@ -37,6 +37,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
+    "$THIRD_PARTY_ROOT/cJSON/include",
   ]
 
   cflags = [
