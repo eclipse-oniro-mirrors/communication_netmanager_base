@@ -42,6 +42,7 @@ ohos_executable("test_netsys_native_manager") {
 
   external_deps = [
     "ability_base:want",
+    "cJSON:cjson",
     "c_utils:utils",
     "ffrt:libffrt",
     "ipc:ipc_core",

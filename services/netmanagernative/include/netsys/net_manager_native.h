@@ -32,7 +32,9 @@
 #include "sharing_manager.h"
 #include "uid_range.h"
 #include "net_all_capabilities.h"
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 #include "wearable_distributed_net_manager.h"
+#endif
 
 namespace OHOS {
 namespace nmd {
