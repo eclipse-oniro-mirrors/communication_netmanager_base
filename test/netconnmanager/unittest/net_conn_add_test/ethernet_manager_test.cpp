@@ -404,5 +404,35 @@ HWTEST_F(EthernetManagerTest, OnInterfaceAddressUpdatedTest001, TestSize.Level1)
     int ret = devinterfacestatecallback.OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
 }
+
+HWTEST_F(EthernetManagerTest, OnInterfaceAddressRemovedTest001, TestSize.Level1)
+{
+    EthernetManagement ethernetmanagement;
+    EthernetManagement::DevInterfaceStateCallback devinterfacestatecallback(ethernetmanagement);
+    std::string addr;
+    std::string ifName;
+    int flags = 0;
+    int scope = 0;
+    int ret = devinterfacestatecallback.OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
+}
+
+HWTEST_F(EthernetManagerTest, OnInterfaceAddedTest001, TestSize.Level1)
+{
+    EthernetManagement ethernetmanagement;
+    EthernetManagement::DevInterfaceStateCallback devinterfacestatecallback(ethernetmanagement);
+    std::string iface = "eth0";
+    int ret = devinterfacestatecallback.OnInterfaceAdded(iface);
+    EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
+}
+
+HWTEST_F(EthernetManagerTest, OnInterfaceRemovedTest001, TestSize.Level1)
+{
+    EthernetManagement ethernetmanagement;
+    EthernetManagement::DevInterfaceStateCallback devinterfacestatecallback(ethernetmanagement);
+    std::string iface = "eth0";
+    int ret = devinterfacestatecallback.OnInterfaceRemoved(iface);
+    EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
