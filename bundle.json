@@ -72,8 +72,7 @@
             "third_party": [
                 "curl",
                 "libuv",
-                "libbpf",
-                "cJSON"
+                "libbpf"
             ]
         },
         "build": {
