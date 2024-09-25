@@ -55,10 +55,11 @@ static constexpr int IPV4_HDR_MIN_LEN = 20;
 static constexpr int IPV6_HDR_LEN = 40;
 static constexpr int FRAG_HDR_LEN = 8;
 static constexpr int MTU_DELTA = IPV6_HDR_LEN - IPV4_HDR_MIN_LEN + FRAG_HDR_LEN;
-static constexpr int CLAT_MAX_MTU = 1500 + MTU_DELTA;
+static constexpr int CLAT_MAX_MTU = 65536 + MTU_DELTA;
 static constexpr int CLAT_DATA_LINK_HDR_LEN = 22; // 14 bytes ethernet header + at most 8 bytes VLAN Tag
 
 static constexpr int CLAT_IPV6_MIN_MTU = 1280;
+static constexpr uint16_t TP_CSUM_UNNECESSARY = 1;
 
 static constexpr const char *CLAT_PREFIX = "tunv4-";
 static constexpr int CLAT_PREFIX_BYTE_LEN = 12;
