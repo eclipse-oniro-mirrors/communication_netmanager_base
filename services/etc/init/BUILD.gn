@@ -87,6 +87,6 @@ ohos_prebuilt_etc("hosts") {
 
 group("hosts_lnk") {
   if (netmanager_base_enable_feature_hosts) {
-    deps = [":hosts"]
+    deps = [ ":hosts" ]
   }
 }
