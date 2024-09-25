@@ -27,6 +27,7 @@
 #include <thread>
 #include <pthread.h>
 #include <unistd.h>
+#include <string>
 
 #include "net_monitor.h"
 #include "dns_config_client.h"
@@ -56,10 +57,13 @@ constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *SETTINGS_DATASHARE_URI =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
 const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
 const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
 const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
 const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
+const std::string ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
+const std::string ADD_RANDOM_CFG_VALUE = "true";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -78,6 +82,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 {
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
+    GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
 }
 
@@ -279,6 +284,10 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     if (pos != std::string::npos) {
         pos += HTTP_URL_HEADER.length();
         httpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        if (isNeedSuffix_) {
+            uint64_t ranNum = CommonUtils::GenRandomNumber();
+            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);
+        }
     }
 
     pos = content.find(HTTPS_URL_HEADER);
@@ -343,5 +352,30 @@ bool NetMonitor::CheckIfSettingsDataReady()
     NETMGR_LOG_E("data_share unknown.");
     return true;
 }
+void NetMonitor::GetDetectUrlConfig()
+{
+    if (!std::filesystem::exists(DETECT_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", DETECT_CFG_FILE);
+        return;
+    }
+
+    std::ifstream file(DETECT_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(ADD_RANDOM_CFG_PREFIX);
+    if (pos != std::string::npos) {
+        pos += ADD_RANDOM_CFG_PREFIX.length();
+        std::string value = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        value = CommonUtils::Trim(value);
+        isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;
+    }
+    NETMGR_LOG_I("is need add suffix (%{public}d)", isNeedSuffix_);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
