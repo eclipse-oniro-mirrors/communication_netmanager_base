@@ -62,6 +62,14 @@ using DebugType = enum debug_type;
 using CtKey = struct ct_tuple;
 using CtVaule = struct ct_entry;
 
+struct NetAddrInfo {
+    uint32_t aiFamily;
+    union {
+        struct in_addr sin;
+        struct in6_addr sin6;
+    } aiAddr;
+};
+
 /**
  * @brief Callback impl for LoadSystemAbility
  */
@@ -176,6 +184,9 @@ public:
         return isBpfLoaded_;
     }
 
+    void AddDomainCache(const NetAddrInfo &addrInfo);
+    void ClearDomainCache();
+
 private:
     template <typename Key, typename Value> int ClearBpfMap(const char *path, const Key &key, Value &val)
     {
@@ -277,6 +288,7 @@ private:
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;
     std::vector<sptr<NetFirewallIpRule>> firewallIpRules_;
+    std::vector<NetAddrInfo> domainCache_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_BPF_NET_FIREWALL_H */
