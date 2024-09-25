@@ -25,7 +25,7 @@
         "features": [
             "netmanager_base_enable_netsys_access_policy_diag_listen",
             "netmanager_base_enable_feature_net_firewall",
-	        "netmanager_base_enable_feature_net_bluetooth",
+            "netmanager_base_enable_feature_net_bluetooth",
             "netmanager_base_enable_feature_sysvpn",
             "netmanager_base_enable_feature_hosts"
         ],
