@@ -16,6 +16,8 @@
 #ifndef NET_DATASHARE_UTILS_IFACE_H
 #define NET_DATASHARE_UTILS_IFACE_H
 
+#include <functional>
+#include <memory>
 #include <string>
 
 namespace OHOS {
@@ -33,12 +35,17 @@ constexpr const char *KEY_SHARING_USB = "settings.netmanager.sharing_usb";
 constexpr const char *KEY_SHARING_BLUETOOTH = "settings.netmanager.sharing_bluetooth";
 } // namespace
 
+class NetDataShareHelperUtils;
+
 class NetDataShareHelperUtilsIface final {
 public:
     static int32_t Query(const std::string &strUri, const std::string &key, std::string &value);
     static int32_t Insert(const std::string &strUri, const std::string &key, const std::string &value);
     static int32_t Update(const std::string &strUri, const std::string &key, const std::string &value);
     static int32_t Delete(const std::string &strUri, const std::string &key);
+    static int32_t RegisterObserver(const std::string &strUri, const std::function<void()> &onChange);
+    static int32_t UnregisterObserver(const std::string &strUri, int32_t callbackId);
+    static std::unique_ptr<NetDataShareHelperUtils> dataShareHelperUtils_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
