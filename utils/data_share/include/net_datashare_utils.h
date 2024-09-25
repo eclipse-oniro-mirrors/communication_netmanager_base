@@ -16,6 +16,8 @@
 #ifndef NET_DATASHARE_UTILS_H
 #define NET_DATASHARE_UTILS_H
 
+#include <functional>
+#include <map>
 #include <memory>
 #include <utility>
 
@@ -53,9 +55,12 @@ public:
     int32_t Insert(Uri &uri, const std::string &key, const std::string &value);
     int32_t Update(Uri &uri, const std::string &key, const std::string &value);
     int32_t Delete(Uri &uri, const std::string &key);
+    int32_t RegisterObserver(const Uri &uri, const std::function<void()> &onChange);
+    int32_t UnregisterObserver(const Uri &uri, int32_t callbackId);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    std::map<int32_t, sptr<AAFwk::IDataAbilityObserver>> callbacks_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
