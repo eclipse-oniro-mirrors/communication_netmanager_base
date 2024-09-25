@@ -289,7 +289,7 @@ public:
         return 0;
     }
 
-    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) override
+    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override
     {
         return 0;
     }

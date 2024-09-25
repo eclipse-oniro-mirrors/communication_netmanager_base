@@ -24,6 +24,7 @@
 #include "net_conn_service_stub_test.h"
 #include "net_interface_callback_stub.h"
 #include "netmanager_base_test_security.h"
+#include "net_conn_types.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -970,8 +971,7 @@ HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
     if (!data.WriteUint32(bearerType)) {
         return;
     }
-    bool isBetter = true;
-    if (!data.WriteBool(isBetter)) {
+    if (!data.WriteUint32(QUALITY_GOOD_STATE)) {
         return;
     }
     uint32_t supplierId = 100;
