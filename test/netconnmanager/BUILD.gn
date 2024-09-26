@@ -19,6 +19,7 @@ group("unittest") {
     "unittest/net_conn_manager_test:net_conn_manager_test",
     "unittest/net_conn_multi_test:net_conn_multi_test",
     "unittest/net_conn_multi_test:net_conn_multi_vnic_test",
+    "unittest/net_conn_service_regional_test:net_conn_service_regional_test",
     "unittest/net_conn_service_test:net_conn_service_test",
     "unittest/net_factoryreset_callback_test:net_factoryreset_callback_test",
     "unittest/net_info_test:net_info_test",

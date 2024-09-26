@@ -83,5 +83,50 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     result = VpnManager::GetInstance().SendVpnInterfaceFdToClient(testNumber, testNumber);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest002, TestSize.Level1)
+{
+    VpnManager::GetInstance().tunFd_ = 1;
+    auto ret = VpnManager::GetInstance().CreateVpnInterface();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest003, TestSize.Level1)
+{
+    auto ret = VpnManager::GetInstance().SetVpnMtu("eth0", 1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest004, TestSize.Level1)
+{
+    std::string ifName;
+    std::string tunAddr = "fe80::af71:b0c7:e3f7:3c0f%5";
+    auto ret = VpnManager::GetInstance().SetVpnAddress(ifName, tunAddr, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest005, TestSize.Level1)
+{
+    std::string ifName;
+    std::string tunAddr = "127.0.0.1";
+    auto ret = VpnManager::GetInstance().SetVpnAddress(ifName, tunAddr, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest006, TestSize.Level1)
+{
+    VpnManager::GetInstance().net4Sock_ = -1;
+    VpnManager::GetInstance().net6Sock_ = -1;
+    auto ret = VpnManager::GetInstance().SetVpnUp();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, VpnManagerBranchTest007, TestSize.Level1)
+{
+    VpnManager::GetInstance().net4Sock_ = -1;
+    VpnManager::GetInstance().net6Sock_ = -1;
+    auto ret = VpnManager::GetInstance().SetVpnDown();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
