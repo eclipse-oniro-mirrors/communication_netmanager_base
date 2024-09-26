@@ -2458,7 +2458,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
             std::unique_lock<std::mutex> lock(sleepEventMutex_);
             if (netConnEventHandler_) {
                 netConnEventHandler_->PostSyncTask([this]() {
-                    this->StartAllNetDetecion();
+                    this->StartAllNetDetection();
                 });
             }
         }
