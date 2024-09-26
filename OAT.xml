@@ -63,6 +63,7 @@
             </filefilter>
             <filefilter name="defaultFilter" desc="Filters not to check">
                 <filteritem type="filepath" name="services/etc/init/initHosts" desc="Add host initialization data"/>
+                <filteritem type="filepath" name="services/etc/init/hosts" desc="Add host lnk"/>
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="Filters for compatibility, license header policies">
                 <filteritem type="filepath" name="LICENSE" desc="license file"/>

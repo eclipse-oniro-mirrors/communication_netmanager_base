@@ -910,14 +910,14 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
     return ret;
 }
 
-int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
+int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr.");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->UpdateSupplierScore(bearerType, isBetter, supplierId);
+    return proxy->UpdateSupplierScore(bearerType, detectionStatus, supplierId);
 }
 
 std::optional<int32_t> NetConnClient::ObtainTargetApiVersionForSelf()
