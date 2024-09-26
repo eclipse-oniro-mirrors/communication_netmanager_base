@@ -37,6 +37,7 @@ config("netsys_native_manager_config") {
   if (netmanager_base_enable_feature_net_firewall) {
     defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
+
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
@@ -52,6 +53,7 @@ netsys_native_manager_sources = [
   "src/manager/bandwidth_manager.cpp",
   "src/manager/clat_manager.cpp",
   "src/manager/conn_manager.cpp",
+  "src/manager/distributed_manager.cpp",
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
   "src/manager/interface_manager.cpp",
@@ -156,7 +158,11 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   sources = netsys_native_manager_sources
-
+  if (netmanager_base_enable_feature_sysvpn) {
+    cflags += [ "-DSUPPORT_SYSVPN" ]
+    cflags_cc += [ "-DSUPPORT_SYSVPN" ]
+    sources += [ "src/netsys/system_vpn_wrapper.cpp" ]
+  }
   deps = netsys_native_manager_deps
 
   defines = [
@@ -243,6 +249,7 @@ ohos_static_library("netsys_native_manager_static") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "UNITTEST_FORBID_FFRT=1",
+    "NETWORK_CONFIG_PATH =  \"/system/etc/communication/netmanager_base/iptables_interfaces.json\"",
   ]
 
   if (build_selinux) {
@@ -273,6 +280,10 @@ ohos_static_library("netsys_native_manager_static") {
   subsystem_name = "communication"
 }
 
+config("netsys_client_public_config") {
+  include_dirs = [ "include/netsys" ]
+}
+
 ohos_shared_library("netsys_client") {
   sanitize = {
     cfi = true
@@ -281,6 +292,8 @@ ohos_shared_library("netsys_client") {
     all_ubsan = true
     debug = false
   }
+
+  public_configs = [ ":netsys_client_public_config" ]
 
   branch_protector_ret = "pac_ret"
 
@@ -308,6 +321,7 @@ ohos_shared_library("netsys_client") {
 
   deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
 
+  external_deps = [ "c_utils:utils" ]
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
