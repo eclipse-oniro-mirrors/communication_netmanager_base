@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include <arpa/inet.h>
+#include <gtest/gtest.h>
 
 #include "bpf_netfirewall.h"
 
