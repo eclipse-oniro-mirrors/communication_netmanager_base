@@ -103,7 +103,7 @@ public:
     virtual int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) = 0;
     virtual int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
     virtual int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
-    virtual int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId) = 0;
+    virtual int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) = 0;
     virtual int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) = 0;
     virtual int32_t DisableVnicNetwork() = 0;
     virtual int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) = 0;
