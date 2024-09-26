@@ -2447,7 +2447,6 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         int code = data.GetCode();
         if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
             NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
-            std::unique_lock<std::mutex> lock(sleepEventMutex_);
             if (netConnEventHandler_) {
                 netConnEventHandler_->PostSyncTask([this]() {
                     this->StopAllNetDetection();
@@ -2455,10 +2454,9 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
             }
         } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_FORCESLEEP_NOT_FORCE) {
             NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
-            std::unique_lock<std::mutex> lock(sleepEventMutex_);
             if (netConnEventHandler_) {
                 netConnEventHandler_->PostSyncTask([this]() {
-                    this->StartAllNetDetecion();
+                    this->StartAllNetDetection();
                 });
             }
         }
