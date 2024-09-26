@@ -321,7 +321,6 @@ ohos_shared_library("netsys_client") {
 
   deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
 
-  external_deps = [ "c_utils:utils" ]
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
