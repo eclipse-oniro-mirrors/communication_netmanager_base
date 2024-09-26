@@ -143,12 +143,12 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
 }
 
 
-static __always_inline bool match_dns_query(struct match_tuple *tuple)
+static __always_inline bool matchDnsQuery(const struct match_tuple *tuple)
 {
     if (tuple->protocol == IPPROTO_UDP && bpf_htons(tuple->sport) == DNS_PROXY_PORT) {
-        default_action_key default_key = DEFAULT_ACT_OUT_KEY;
-        enum sk_action *default_action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &default_key);
-        return default_action && *default_action != SK_PASS;
+        default_action_key key = DEFAULT_ACT_OUT_KEY;
+        enum sk_action *action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &key);
+        return action && *action != SK_PASS;
     }
     return false;
 }
@@ -192,7 +192,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         return SK_PASS;
     }
     // Outbound DNS queries need to be released
-    if (!match_dns_query(&tuple) && match_action(&tuple, &key) != SK_PASS) {
+    if (!matchDnsQuery(&tuple) && match_action(&tuple, &key) != SK_PASS) {
         log_intercept(&tuple);
         send_sock_tcp_reset(&tuple, skb, EGRESS);
         return SK_DROP;

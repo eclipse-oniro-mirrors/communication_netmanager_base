@@ -349,24 +349,24 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, struct b
     return true;
 }
 
-static __always_inline bool match_domain(struct match_tuple *tuple)
+static __always_inline bool matchDomain(const struct match_tuple *tuple)
 {
     if (!tuple || tuple->dir == INGRESS) {
         return false;
     }
     domain_value *result = NULL;
     if (tuple->family == AF_INET) {
-        struct ipv4_lpm_key lpm_key = {
+        struct ipv4_lpm_key key = {
             .prefixlen = IPV4_MAX_PREFIXLEN,
             .data = tuple->ipv4.saddr,
         };
-        result = bpf_map_lookup_elem(&DOMAIN_IPV4_MAP, &lpm_key);
+        result = bpf_map_lookup_elem(&DOMAIN_IPV4_MAP, &key);
     } else {
-        struct ipv6_lpm_key lpm_key = {
+        struct ipv6_lpm_key key = {
             .prefixlen = IPV6_MAX_PREFIXLEN,
             .data = tuple->ipv6.saddr,
         };
-        result = bpf_map_lookup_elem(&DOMAIN_IPV6_MAP, &lpm_key);
+        result = bpf_map_lookup_elem(&DOMAIN_IPV6_MAP, &key);
     }
     return result != NULL;
 }
@@ -410,7 +410,7 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, st
             }
         }
     // If the outbound does not match the IP rule, check if there are any domain name rules
-    } else if (match_domain(tuple)) {
+    } else if (matchDomain(tuple)) {
         log_dbg(DBG_MATCH_DOMAIN, tuple->dir, sk_act);
         sk_act = SK_PASS;
     }
