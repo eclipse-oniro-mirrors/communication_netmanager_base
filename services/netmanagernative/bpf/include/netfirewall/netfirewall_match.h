@@ -349,7 +349,7 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, struct b
     return true;
 }
 
-static __always_inline bool matchDomain(const struct match_tuple *tuple)
+static __always_inline bool MatchDomain(const struct match_tuple *tuple)
 {
     if (!tuple || tuple->dir == INGRESS) {
         return false;
@@ -410,7 +410,7 @@ static __always_inline enum sk_action match_action(struct match_tuple *tuple, st
             }
         }
     // If the outbound does not match the IP rule, check if there are any domain name rules
-    } else if (matchDomain(tuple)) {
+    } else if (MatchDomain(tuple)) {
         log_dbg(DBG_MATCH_DOMAIN, tuple->dir, sk_act);
         sk_act = SK_PASS;
     }
