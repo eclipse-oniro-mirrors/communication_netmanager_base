@@ -674,8 +674,32 @@ void NetConnService::StartAllNetDetection()
             NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
             continue;
         }
-        pNetwork->StartNetDetection(false);
         pNetwork->UpdateForbidDetectionFlag(false);
+    }
+    std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
+    if (pDefaultNetwork == nullptr) {
+        NETMGR_LOG_E("pDefaultNetwork is null");
+        return;
+    }
+    pDefaultNetwork->StartNetDetection(false);
+}
+
+void NetConnService::HandlePowerMgrEvent(int code)
+{
+    if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
+        NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostSyncTask([this]() {
+                this->StopAllNetDetection();
+            });
+        }
+    } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_SLEEP_NOT_FORCE) {
+        NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostSyncTask([this]() {
+                this->StartAllNetDetection();
+            });
+        }
     }
 }
 #endif
@@ -2445,21 +2469,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (action == "usual.event.POWER_MANAGER_STATE_CHANGED") {
         int code = data.GetCode();
-        if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
-            NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
-            if (netConnEventHandler_) {
-                netConnEventHandler_->PostSyncTask([this]() {
-                    this->StopAllNetDetection();
-                });
-            }
-        } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_FORCESLEEP_NOT_FORCE) {
-            NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
-            if (netConnEventHandler_) {
-                netConnEventHandler_->PostSyncTask([this]() {
-                    this->StartAllNetDetection();
-                });
-            }
-        }
+        HandlePowerMgrEvent(code);
     }
 #endif
 }
@@ -2663,23 +2673,23 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, isBetter, &supplierId, &result]() {
-            result = this->UpdateSupplierScoreAsync(bearerType, isBetter, supplierId);
+        netConnEventHandler_->PostSyncTask([this, bearerType, detectionStatus, &supplierId, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, detectionStatus, supplierId);
         });
     }
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
-    NETMGR_LOG_I("update supplier score by type[%{public}d], isBetter[%{public}d], supplierId:%{public}d",
-        bearerType, isBetter, supplierId);
-    NetDetectionStatus state = isBetter ? QUALITY_GOOD_STATE : QUALITY_POOR_STATE;
-    if (!isBetter) {
+    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
+        bearerType, detectionStatus, supplierId);
+    NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
+    if (state == QUALITY_POOR_STATE) {
         // In poor network, supplierId should be an output parameter.
         std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
         if (suppliers.empty()) {

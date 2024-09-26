@@ -23,7 +23,7 @@ constexpr int32_t MAX_IPV4_ADDRESS_LEN = 32;
 constexpr int32_t STATE_ENTER_FORCESLEEP = 0x30;
 constexpr int32_t STATE_EXIT_FORCESLEEP = 0x31;
 constexpr int32_t STATE_ENTER_SLEEP_NOT_FORCE = 0x40;
-constexpr int32_t STATE_EXIT_FORCESLEEP_NOT_FORCE = 0x41;
+constexpr int32_t STATE_EXIT_SLEEP_NOT_FORCE = 0x41;
 
 enum NetMonitorResponseCode {
     OK = 200,
@@ -41,7 +41,8 @@ enum NetDetectionStatus {
     CAPTIVE_PORTAL_STATE,
     QUALITY_POOR_STATE,
     QUALITY_NORMAL_STATE,
-    QUALITY_GOOD_STATE
+    QUALITY_GOOD_STATE,
+    ACCEPT_UNVALIDATED
 };
 using NetDetectionStateHandler = std::function<void(NetDetectionStatus netDetectionState,
     const std::string &urlRedirect)>;
