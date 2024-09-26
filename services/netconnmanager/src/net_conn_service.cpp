@@ -663,7 +663,7 @@ void NetConnService::StopAllNetDetection()
     }
 }
 
-void NetConnService::StartAllNetDetecion()
+void NetConnService::StartAllNetDetection()
 {
     for (const auto& pNetSupplier : netSuppliers_) {
         if (pNetSupplier.second == nullptr) {
@@ -674,9 +674,9 @@ void NetConnService::StartAllNetDetecion()
             NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
             continue;
         }
+        pNetwork->StartNetDetection(false);
+        pNetwork->UpdateForbidDetectionFlag(false);
     }
-    pNetwork->StartNetDetection(false);
-    pNetwork->UpdateForbidDetectionFlag(false);
 }
 #endif
 

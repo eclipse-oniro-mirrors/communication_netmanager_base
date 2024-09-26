@@ -512,7 +512,7 @@ void Network::StartNetDetection(bool needReport)
     NETMGR_LOG_I("Enter StartNetDetection");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (forbidDetectionFlag_) {
-        NETMGR_LOG_W("Sleep status, not allow detection");
+        NETMGR_LOG_W("Sleep status, forbid detection");
         return;
     }
 #endif
