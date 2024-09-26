@@ -22,8 +22,7 @@
 #include "netfirewall_ct.h"
 #include "netfirewall_event.h"
 
-#define DNS_PROXY_PORT      53
-#define DNS_TSL_PROXY_PORT  853
+#define FIREWALL_DNS_QUERY_PORT 53
 
 /**
  * @brief if tcp socket was intercepted, need send reset packet to peer
@@ -145,10 +144,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
 
 static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
 {
-    // udp:53 tcp:53 tls:853
-    if (((tuple->protocol == IPPROTO_UDP || tuple->protocol == IPPROTO_TCP) &&
-         bpf_htons(tuple->sport) == DNS_PROXY_PORT) ||
-        (tuple->protocol == IPPROTO_TCP && bpf_htons(tuple->sport) == DNS_TSL_PROXY_PORT)) {
+    if (bpf_htons(tuple->sport) == FIREWALL_DNS_QUERY_PORT) {
         default_action_key key = DEFAULT_ACT_OUT_KEY;
         enum sk_action *action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &key);
         return action && *action != SK_PASS;
