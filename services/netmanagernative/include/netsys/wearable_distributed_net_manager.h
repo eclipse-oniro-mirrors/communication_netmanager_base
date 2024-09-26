@@ -72,7 +72,7 @@ private:
     int32_t EstablishTcpIpRules();
     int32_t EstablishUdpIpRules(const int32_t udpPortId);
     int32_t ExecuteIptablesCommands(const std::vector<std::string> &commands);
-    const std::string &GenerateRule(const std::string &inputRules, const int32_t portId);
+    std::string GenerateRule(const std::string &inputRules, const int32_t portId);
     int32_t ApplyRule(const RULES_TYPE type, const int32_t portId);
     void SetTcpPort(const int32_t tcpPortId);
     int32_t GetTcpPort();

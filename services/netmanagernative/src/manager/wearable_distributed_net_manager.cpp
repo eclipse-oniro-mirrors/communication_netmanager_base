@@ -254,7 +254,7 @@ int32_t WearableDistributedNet::EnableWearableDistributedNetForward(const int32_
     return NETMANAGER_SUCCESS;
 }
 
-const std::string &WearableDistributedNet::GenerateRule(const std::string &inputRules, const int32_t portId)
+std::string WearableDistributedNet::GenerateRule(const std::string &inputRules, const int32_t portId)
 {
     if (inputRules.empty()) {
         NETNATIVE_LOGE("Input rules are null");

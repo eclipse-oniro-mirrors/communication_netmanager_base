@@ -32,11 +32,11 @@ config("netsys_native_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/include/netsys",
   ]
+
   defines = []
   if (netmanager_base_enable_feature_net_firewall) {
     defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
-
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
@@ -52,7 +52,6 @@ netsys_native_manager_sources = [
   "src/manager/bandwidth_manager.cpp",
   "src/manager/clat_manager.cpp",
   "src/manager/conn_manager.cpp",
-  "src/manager/distributed_manager.cpp",
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
   "src/manager/interface_manager.cpp",
@@ -157,11 +156,7 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   sources = netsys_native_manager_sources
-  if (netmanager_base_enable_feature_sysvpn) {
-    cflags += [ "-DSUPPORT_SYSVPN" ]
-    cflags_cc += [ "-DSUPPORT_SYSVPN" ]
-    sources += [ "src/netsys/system_vpn_wrapper.cpp" ]
-  }
+
   deps = netsys_native_manager_deps
 
   defines = [
@@ -278,10 +273,6 @@ ohos_static_library("netsys_native_manager_static") {
   subsystem_name = "communication"
 }
 
-config("netsys_client_public_config") {
-  include_dirs = [ "include/netsys" ]
-}
-
 ohos_shared_library("netsys_client") {
   sanitize = {
     cfi = true
@@ -290,8 +281,6 @@ ohos_shared_library("netsys_client") {
     all_ubsan = true
     debug = false
   }
-
-  public_configs = [ ":netsys_client_public_config" ]
 
   branch_protector_ret = "pac_ret"
 
