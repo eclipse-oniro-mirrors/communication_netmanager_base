@@ -343,7 +343,7 @@ int32_t WearableDistributedNet::DisableWearableDistributedNetForward()
         NETNATIVE_LOGE("Failed to apply input delete rule");
         return NETMANAGER_ERROR;
     }
-    return NETMANAGER_SUCCESS
+    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS
