@@ -288,7 +288,6 @@ private:
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;
     std::vector<sptr<NetFirewallIpRule>> firewallIpRules_;
-    std::vector<NetAddrInfo> domainCache_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_BPF_NET_FIREWALL_H */

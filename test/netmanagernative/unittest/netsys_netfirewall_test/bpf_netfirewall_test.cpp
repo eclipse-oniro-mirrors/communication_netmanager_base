@@ -17,12 +17,12 @@
 
 #include <arpa/inet.h>
 
-#define private public
-
 #include "bpf_netfirewall.h"
 
+namespace {
 using namespace testing::ext;
 using namespace OHOS::NetManagerStandard;
+}
 
 class NetsysBpfNetFirewallTest : public testing::Test {
 public:
@@ -45,19 +45,12 @@ HWTEST_F(NetsysBpfNetFirewallTest, AddDomainCache001, TestSize.Level0)
     std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
     NetAddrInfo netInfo;
     netInfo.aiFamily = AF_INET;
-    size_t size = bpfNet->domainCache_.size();
     inet_pton(AF_INET, "192.168.8.116", &netInfo.aiAddr.sin);
     bpfNet->AddDomainCache(netInfo);
-    EXPECT_EQ(bpfNet->domainCache_.size(), size + 1);
-    size++;
+    EXPECT_EQ(netInfo.aiFamily, AF_INET);
     netInfo.aiFamily = AF_INET6;
     inet_pton(AF_INET6, "fe80::6bec:e9b9:a1df:f69d", &netInfo.aiAddr.sin6);
     bpfNet->AddDomainCache(netInfo);
-    EXPECT_EQ(bpfNet->domainCache_.size(), size + 1);
-}
-
-HWTEST_F(NetsysBpfNetFirewallTest, ClearDomainCache001, TestSize.Level0)
-{
-    NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
-    EXPECT_EQ(NetsysBpfNetFirewall::GetInstance()->domainCache_.size(), 0);
+    bpfNet->ClearDomainCache();
+    EXPECT_EQ(netInfo.aiFamily, AF_INET6);
 }

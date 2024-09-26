@@ -774,7 +774,7 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
 
 void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
 {
-    domainCache_.emplace_back(std::move(addrInfo));
+    NETNATIVE_LOGI("AddDomainCache");
     domain_value value = 1;
     if (addrInfo.aiFamily == AF_INET) {
         Ipv4LpmKey key = { 0 };
@@ -787,17 +787,16 @@ void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
         key.data = addrInfo.aiAddr.sin6;
         WriteBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), key, value);
     }
-    NETNATIVE_LOGI("AddDomainCache size=%{public}zu", domainCache_.size());
 }
 
 void NetsysBpfNetFirewall::ClearDomainCache()
 {
+    NETNATIVE_LOG_D("ClearDomainCache");
     Ipv4LpmKey ip4Key = {};
     Ipv6LpmKey ip6Key = {};
     domain_value value;
     ClearBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), ip4Key, value);
     ClearBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), ip6Key, value);
-    domainCache_.clear();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
