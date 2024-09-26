@@ -62,6 +62,7 @@ public:
     bool IsConnecting() const;
     bool IsConnected() const;
     void UpdateNetConnState(NetConnState netConnState);
+    void UpdateIsSleepFlag(bool isSleepFlag);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
