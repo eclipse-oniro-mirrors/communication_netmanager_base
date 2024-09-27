@@ -428,7 +428,7 @@ private:
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
-                                     uint32_t &supplierId);
+                                     uint32_t &supplierId, int32_t callingUid);
     int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid, int32_t callingUid);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,

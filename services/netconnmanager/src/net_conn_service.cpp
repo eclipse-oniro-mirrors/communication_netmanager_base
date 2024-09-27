@@ -373,7 +373,7 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, supplierId, &netSupplierInfo, &result]() {
-            result = this->UpdateNetSupplierInfoAsync(supplierId, netSupplierInfo);
+            result = this->UpdateNetSupplierInfoAsync(supplierId, netSupplierInfo, callingUid);
         });
     }
     return result;
@@ -598,7 +598,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
         NETMGR_LOG_E("supplier doesn't exist.");
         return NET_CONN_ERR_NO_SUPPLIER;
     }
-    if (!ignoreUid && CheckAndCompareUid(supplier) != NETMANAGER_SUCCESS) {
+    if (!ignoreUid && CheckAndCompareUid(supplier, callingUid) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UnregisterNetSupplierAsync uid[%{public}d] is not equal to callingUid[%{public}d].",
                      supplier->GetUid(), callingUid);
         return NETMANAGER_ERR_INVALID_PARAMETER;
@@ -1028,10 +1028,10 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
             reqId = iterActive->first;
             if (iterActive->second) {
                 auto specifier = iterActive->second->GetNetSpecifier();
-                registerType = (specifier != nullptr && specifier->netCapabilities_.netCaps_.count(
-                                                            NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0)
-                                   ? REQUEST
-                                   : REGISTER;
+                registerType = (specifier != nullptr &&
+                    specifier->netCapabilities_.netCaps_.count(
+                        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
+                        REQUEST : REGISTER;
             }
             return true;
         }
