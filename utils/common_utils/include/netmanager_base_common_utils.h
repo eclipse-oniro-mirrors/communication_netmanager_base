@@ -76,6 +76,7 @@ bool IsUrlRegexValid(const std::string &regex);
 std::string InsertCharBefore(const std::string &input, const char from, const char preChar, const char nextChar);
 std::string ReplaceCharacters(const std::string &input);
 bool UrlRegexParse(const std::string &str, const std::string &patternStr);
+uint64_t GenRandomNumber();
 
 inline uint64_t GetCurrentSecond()
 {

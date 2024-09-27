@@ -466,7 +466,7 @@ int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<u
     for (auto &uid : uids) {
         auto ret = firewallManager_->SetUidRule(chainType, uid, rule);
         if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
-            return ret;
+            NETNATIVE_LOGE("SetUidRule fail, uid is %{public}u, ret is %{public}d", uid, ret);
         }
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

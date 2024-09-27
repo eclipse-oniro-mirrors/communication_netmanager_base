@@ -28,6 +28,8 @@
 #define USER_ID_DIVIDOR 200000
 #define DEFAULT_USER_ID 100
 #define BITMAP_LEN 63
+#define IPV4_MAX_PREFIXLEN 32
+#define IPV6_MAX_PREFIXLEN 128
 
 struct bitmap {
     __u32 val[BITMAP_LEN];
@@ -65,6 +67,7 @@ enum debug_type {
     DBG_MATCH_ACTION,
     DBG_TCP_FLAGS,
     DBG_CT_LOOKUP,
+    DBG_MATCH_DOMAIN,
 };
 
 struct debug_event {
@@ -136,6 +139,7 @@ typedef __be16 port_key;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
+typedef __u8 domain_value;
 
 typedef enum {
     CURRENT_USER_ID_KEY = 1,

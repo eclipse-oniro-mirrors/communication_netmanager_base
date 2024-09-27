@@ -62,6 +62,14 @@ using DebugType = enum debug_type;
 using CtKey = struct ct_tuple;
 using CtVaule = struct ct_entry;
 
+struct NetAddrInfo {
+    uint32_t aiFamily;
+    union {
+        struct in_addr sin;
+        struct in6_addr sin6;
+    } aiAddr;
+};
+
 /**
  * @brief Callback impl for LoadSystemAbility
  */
@@ -175,6 +183,9 @@ public:
     {
         return isBpfLoaded_;
     }
+
+    void AddDomainCache(const NetAddrInfo &addrInfo);
+    void ClearDomainCache();
 
 private:
     template <typename Key, typename Value> int ClearBpfMap(const char *path, const Key &key, Value &val)

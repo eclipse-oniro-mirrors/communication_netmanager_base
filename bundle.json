@@ -25,8 +25,9 @@
         "features": [
             "netmanager_base_enable_netsys_access_policy_diag_listen",
             "netmanager_base_enable_feature_net_firewall",
-	    "netmanager_base_enable_feature_net_bluetooth",
-            "netmanager_base_enable_feature_sysvpn"
+            "netmanager_base_enable_feature_net_bluetooth",
+            "netmanager_base_enable_feature_sysvpn",
+            "netmanager_base_enable_feature_hosts"
         ],
         "adapted_system_type": [
             "standard"
@@ -112,6 +113,8 @@
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
                     "//foundation/communication/netmanager_base/services/etc/init:initHosts",
+                    "//foundation/communication/netmanager_base/services/etc/init:detectionconfig.conf",
+                    "//foundation/communication/netmanager_base/services/etc/init:hosts_lnk",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",
                     "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
                     "//foundation/communication/netmanager_base/services/netpolicymanager:net_access_policy_dialog"
@@ -212,7 +215,7 @@
                         ],
                         "header_base": "//foundation/communication/netmanager_base/utils/bundle_utils/include"
                     }
-                }, 
+                },
                 {
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_parcel",
