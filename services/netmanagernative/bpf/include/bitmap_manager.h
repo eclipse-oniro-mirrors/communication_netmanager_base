@@ -166,8 +166,6 @@ const int32_t IPV6_BIT_COUNT = 128;
 const int32_t IPV4_BIT_COUNT = 32;
 const int32_t IPV6_BYTE_COUNT = 16;
 const int32_t IPV6_SEGMENT_COUNT = 8;
-const int32_t IPV4_MAX_PREFIXLEN = 32;
-const int32_t IPV6_MAX_PREFIXLEN = 128;
 const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {

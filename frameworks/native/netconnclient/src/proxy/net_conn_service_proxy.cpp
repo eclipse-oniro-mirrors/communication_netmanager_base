@@ -1715,7 +1715,7 @@ int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirpla
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
+int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1727,7 +1727,7 @@ int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool is
     if (!data.WriteUint32(type)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    if (!data.WriteBool(isBetter)) {
+    if (!data.WriteUint32(detectionStatus)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteUint32(supplierId)) {

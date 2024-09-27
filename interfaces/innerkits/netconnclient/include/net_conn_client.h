@@ -429,7 +429,7 @@ public:
 
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
 
-    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
+    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
 
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
 

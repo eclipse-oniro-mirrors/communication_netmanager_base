@@ -401,7 +401,15 @@ private:
                     return false;
                 }
             } else if (section->get_name() == "version") {
-                kernVersion_ = std::stoi(section->get_data());
+                try {
+                    kernVersion_ = std::stoi(section->get_data());
+                } catch (const std::invalid_argument& e) {
+                    NETNATIVE_LOGE("invalid_argument");
+                    return false;
+                } catch (const std::out_of_range& e) {
+                    NETNATIVE_LOGE("out_of_range");
+                    return false;
+                }
                 if (kernVersion_ == 0) {
                     return false;
                 }

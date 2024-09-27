@@ -148,7 +148,7 @@ private:
 
     bool checkEmpty4InterceptDomain(const std::string &hostName);
 
-    bool IsInterceptDomain(int32_t appUid, const std::string &host);
+    bool IsInterceptDomain(int32_t appUid, const std::string &host, bool &isMatchAllow);
 
     void NotifyDomianIntercept(int32_t appUid, const std::string &host);
 
