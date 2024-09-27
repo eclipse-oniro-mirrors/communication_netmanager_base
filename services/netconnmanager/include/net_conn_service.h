@@ -433,7 +433,7 @@ private:
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                      uint32_t &supplierId);
-    int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid);
+    int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid, int32_t callingUid);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
@@ -442,8 +442,8 @@ private:
     int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
-    int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
-    int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
+    int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo, int32_t callingUid);
+    int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo, int32_t callingUid);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
     int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t& supplierId);
@@ -481,7 +481,7 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
-    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier);
+    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
