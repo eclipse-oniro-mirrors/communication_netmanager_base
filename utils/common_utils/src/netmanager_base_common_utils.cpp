@@ -555,7 +555,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         helper->parentCv.notify_all();
         NETMGR_LOG_I("waitpid %{public}d done", childPid);
     });
-#ifndef MAC_PLATFORM
+#ifndef CROSS_PLATFORM
     pthread_setname_np(parentThread.native_handle(), "ExecParentThread");
 #endif
     parentThread.detach();
