@@ -104,6 +104,164 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
+HWTEST_F(InterfaceManagerTest, SetMtuTest004, TestSize.Level1)
+{
+    char *interfaceName = nullptr;
+    char *mtuValue = nullptr;
+    auto ret = InterfaceManager::SetMtu(interfaceName, mtuValue);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, ModifyAddressTest001, TestSize.Level1)
+{
+    std::string interfaceName = "lo";
+    std::string addr = "127.0.0.1";
+    auto ret = InterfaceManager::ModifyAddress(0, interfaceName.c_str(), addr.c_str(), 0);
+    EXPECT_EQ(ret, -1);
+
+    addr = "fe80::af71:b0c7:e3f7:3c0f%5";
+    ret = InterfaceManager::ModifyAddress(0, interfaceName.c_str(), addr.c_str(), 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, DelAddressTest004, TestSize.Level1)
+{
+    std::string interfaceName = "eth0";
+    std::string addr = "127.0.0.1";
+    std::string netCapabilities;
+    auto ret = InterfaceManager::DelAddress(interfaceName.c_str(), addr.c_str(), 0, netCapabilities);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, GetIfaceConfigTest003, TestSize.Level1)
+{
+    std::string ifName;
+    nmd::InterfaceConfigurationParcel ifaceConfig = InterfaceManager::GetIfaceConfig(ifName);
+    EXPECT_EQ(true, ifaceConfig.ifName.empty());
+}
+
+HWTEST_F(InterfaceManagerTest, SetIfaceConfigTest002, TestSize.Level1)
+{
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+    ifaceConfig.ifName = "";
+    
+    ifaceConfig.flags.push_back("flag");
+    auto ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_EQ(ret, -1);
+
+    ifaceConfig.ifName = "lo";
+    ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIfaceConfigTest003, TestSize.Level1)
+{
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+    ifaceConfig.ifName = "lo";
+    ifaceConfig.flags.push_back("down");
+    auto ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIfaceConfigTest004, TestSize.Level1)
+{
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+    ifaceConfig.ifName = "lo";
+    ifaceConfig.flags.push_back("up");
+    auto ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIpAddressTest003, TestSize.Level1)
+{
+    std::string ifaceName;
+    std::string ipAddress = "127.0.0.1";
+    auto ret = InterfaceManager::SetIpAddress(ifaceName, ipAddress);
+    EXPECT_EQ(ret, -1);
+
+    ipAddress.clear();
+    ret = InterfaceManager::SetIpAddress(ifaceName, ipAddress);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIpAddressTest004, TestSize.Level1)
+{
+    std::string ifaceName = "lo";
+    std::string ipAddress = "127.0.0.1";
+    auto ret = InterfaceManager::SetIpAddress(ifaceName, ipAddress);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIffUpTest001, TestSize.Level1)
+{
+    std::string ifaceName;
+    auto ret = InterfaceManager::SetIffUp(ifaceName);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIffUpTest003, TestSize.Level1)
+{
+    std::string ifaceName = "lo";
+    auto ret = InterfaceManager::SetIffUp(ifaceName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, AddStaticArpTest002, TestSize.Level1)
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    auto ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, DelStaticArpTest002, TestSize.Level1)
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    auto ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, AssembleArpTest001, TestSize.Level1)
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    arpreq req;
+    auto ret = InterfaceManager::AssembleArp(ipAddr, macAddr, ifName, req);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "127.0.0.1";
+    ret = InterfaceManager::AssembleArp(ipAddr, macAddr, ifName, req);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, AssembleArpTest002, TestSize.Level1)
+{
+    std::string ipAddr = "127.0.0.1";
+    std::string macAddr = "08:00:20:0A:8C:6D";
+    std::string ifName;
+    arpreq req;
+    std::string addr = "08:00:20:0A:8C:6D";
+    memcpy_s(req.arp_ha.sa_data, 14, addr.data(), addr.size());
+    auto ret = InterfaceManager::AssembleArp(ipAddr, macAddr, ifName, req);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(InterfaceManagerTest, MacStringToArrayTest001, TestSize.Level1)
+{
+    std::string macAddr;
+    sockaddr macSock;
+    auto ret = InterfaceManager::MacStringToArray(macAddr, macSock);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+
+    macAddr = "08:00:20:0A:8C:6D";
+    ret = InterfaceManager::MacStringToArray(macAddr, macSock);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
 {
     std::string interfaceName = "eth0";

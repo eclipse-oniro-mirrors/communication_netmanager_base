@@ -676,7 +676,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
-        NetRequest netRequest(callingUid, reqId);
+        NetRequest netRequest(netActivate->GetUid(), reqId);
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
@@ -1815,10 +1815,26 @@ int32_t NetConnService::GetDelayNotifyTime()
         GetParameter(CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES, NO_DELAY_TIME_CONFIG, param, SYS_PARAMETER_SIZE);
     std::string time = param;
     if (code <= 0 || !IsValidDecValue(time)) {
-        delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        try {
+            delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     } else {
-        auto tmp = std::stoi(time);
-        delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        try {
+            auto tmp = std::stoi(time);
+            delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     }
     NETMGR_LOG_D("delay time is %{public}d", delayTime);
     return delayTime;
@@ -2582,23 +2598,23 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t &supplierId)
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, isBetter, &supplierId, &result]() {
-            result = this->UpdateSupplierScoreAsync(bearerType, isBetter, supplierId);
+        netConnEventHandler_->PostSyncTask([this, bearerType, detectionStatus, &supplierId, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, detectionStatus, supplierId);
         });
     }
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t &supplierId)
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
 {
-    NETMGR_LOG_I("update supplier score by type[%{public}d], isBetter[%{public}d], supplierId:%{public}d", bearerType,
-                 isBetter, supplierId);
-    NetDetectionStatus state = isBetter ? QUALITY_GOOD_STATE : QUALITY_POOR_STATE;
-    if (!isBetter) {
+    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
+        bearerType, detectionStatus, supplierId);
+    NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
+    if (state == QUALITY_POOR_STATE) {
         // In poor network, supplierId should be an output parameter.
         std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
         if (suppliers.empty()) {

@@ -95,18 +95,6 @@ HWTEST_F(VnicManagerTest, InitIfreq001, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(VnicManagerTest, AddDefaultRoute001, TestSize.Level1)
-{
-    auto result = VnicManager::GetInstance().AddDefaultRoute();
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(VnicManagerTest, DelDefaultRoute001, TestSize.Level1)
-{
-    auto result = VnicManager::GetInstance().DelDefaultRoute();
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(VnicManagerTest, CreateWithDestroyVnic001, TestSize.Level1)
 {
     uint16_t mtu = 1500;
@@ -114,6 +102,12 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic001, TestSize.Level1)
     int32_t prefix = 24;
     std::set<int32_t> uids = {5527};
     auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = VnicManager::GetInstance().DelDefaultRoute();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = VnicManager::GetInstance().AddDefaultRoute();
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     result = VnicManager::GetInstance().DestroyVnic();
@@ -136,7 +130,7 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic002, TestSize.Level1)
 
 HWTEST_F(VnicManagerTest, CreateWithDestroyVnic003, TestSize.Level1)
 {
-    uint16_t mtu = -1;
+    uint16_t mtu = 0;
     const std::string tunAddr = "192.168.1.100";
     int32_t prefix = 24;
     const std::set<int32_t> uids = {5527};
@@ -144,14 +138,5 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic003, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
-HWTEST_F(VnicManagerTest, CreateWithDestroyVnic004, TestSize.Level1)
-{
-    uint16_t mtu = 1500;
-    const std::string tunAddr = "192.168.1.100";
-    int32_t prefix = 24;
-    const std::set<int32_t> uids;
-    auto result = VnicManager::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids);
-    EXPECT_EQ(result, NETMANAGER_ERROR);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -227,4 +227,23 @@ bpf_map_def SEC("maps") CURRENT_UID_MAP = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") DOMAIN_IPV4_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct ipv4_lpm_key),
+    .value_size = sizeof(domain_value),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+bpf_map_def SEC("maps") DOMAIN_IPV6_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct ipv6_lpm_key),
+    .value_size = sizeof(domain_value),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 #endif // NET_FIREWALL_MAP_H

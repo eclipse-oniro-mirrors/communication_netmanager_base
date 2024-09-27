@@ -140,5 +140,61 @@ HWTEST_F(DNSParamCacheTest, DestroyNetworkCacheTest, TestSize.Level1)
     ret = dnsParCache.DestroyNetworkCache(netId);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(DNSParamCacheTest, EnableIpv6Test01, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.EnableIpv6(netId);
+    EXPECT_FALSE(dnsParCache.IsIpv6Enable(netId));
+}
+
+HWTEST_F(DNSParamCacheTest, IsIpv6EnableTest01, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint16_t netId = 0;
+    EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
+
+    bool ret = dnsParCache.IsIpv6Enable(netId);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(DNSParamCacheTest, GetResolverConfigTest05, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
+    servers.resize(MAX_SERVER_NUM + 1);
+    uint16_t netId = 0;
+    std::string hostName = "hoseName";
+    dnsParCache.GetDnsCache(netId, hostName);
+    AddrInfo addrInfo;
+    addrInfo.aiFlags = 100;
+    for (size_t i = 0; i < MAX_SERVER_NUM; i++) {
+        dnsParCache.CreateCacheForNet(i);
+        dnsParCache.SetDnsCache(i, hostName.append(std::to_string(i)), addrInfo);
+        servers.emplace_back(hostName.append(std::to_string(i)));
+    }
+
+    uint16_t baseTimeoutMsec = 100;
+    uint8_t retryCount = 2;
+    int32_t ret = dnsParCache.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
+
+    uint32_t uid = 1;
+    ret = dnsParCache.GetResolverConfig(netId, uid, servers, domains, baseTimeoutMsec, retryCount);
+    EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
+    ret = dnsParCache.GetResolverConfig(netId, uid, servers, domains, baseTimeoutMsec, retryCount);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetDnsCacheTest01, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint16_t netId = 0;
+    std::string hostName = "";
+    auto ret = dnsParCache.GetDnsCache(netId, hostName);
+    EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
+}
 } // namespace NetsysNative
 } // namespace OHOS

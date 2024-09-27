@@ -62,7 +62,7 @@
       "OHOS::NetManagerStandard::NetConnClient::RegisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
-      "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(OHOS::NetManagerStandard::NetBearType, bool, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(OHOS::NetManagerStandard::NetBearType, unsigned int, unsigned int&)";
       "OHOS::NetManagerStandard::NetConnClient::EnableVnicNetwork(OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&, std::__h::set<int, std::__h::less<int>, std::__h::allocator<int>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::DisableVnicNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::IsAPIVersionSupported(int)";

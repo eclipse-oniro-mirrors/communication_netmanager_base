@@ -700,6 +700,9 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
         case DBG_CT_LOOKUP:
             NETNATIVE_LOG_D("%{public}s ct lookup status: %{public}u", direction, ev->arg1);
             break;
+        case DBG_MATCH_DOMAIN:
+            NETNATIVE_LOG_D("egress match domain, action PASS");
+            break;
         default:
             break;
     }
@@ -767,6 +770,33 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
         return -1;
     }
     return 0;
+}
+
+void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
+{
+    NETNATIVE_LOGI("AddDomainCache");
+    domain_value value = 1;
+    if (addrInfo.aiFamily == AF_INET) {
+        Ipv4LpmKey key = { 0 };
+        key.prefixlen = IPV4_MAX_PREFIXLEN;
+        key.data = addrInfo.aiAddr.sin.s_addr;
+        WriteBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), key, value);
+    } else {
+        Ipv6LpmKey key = { 0 };
+        key.prefixlen = IPV6_MAX_PREFIXLEN;
+        key.data = addrInfo.aiAddr.sin6;
+        WriteBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), key, value);
+    }
+}
+
+void NetsysBpfNetFirewall::ClearDomainCache()
+{
+    NETNATIVE_LOG_D("ClearDomainCache");
+    Ipv4LpmKey ip4Key = {};
+    Ipv6LpmKey ip6Key = {};
+    domain_value value;
+    ClearBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), ip4Key, value);
+    ClearBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), ip6Key, value);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

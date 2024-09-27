@@ -193,5 +193,33 @@ HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
     }
     EXPECT_FALSE(found);
 }
+
+HWTEST_F(NetStatsCachedTest, SetAppStatsTest002, TestSize.Level1)
+{
+    PushStatsInfo info;
+    info.netBearType_ = 1;
+    info.uid_ = 1001; // 1001
+    info.iface_ = "eth0";
+    info.simId_ = 1;
+    instance_->SetAppStats(info);
+    const NetStatsInfo &addedInfo = instance_->uidPushStatsInfo_.back();
+    EXPECT_TRUE(addedInfo.ident_ != std::to_string(info.simId_));
+}
+
+HWTEST_F(NetStatsCachedTest, GetIncreasedStatsTest002, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.uid_ = 1001; // 1001
+    NetStatsInfo ret = instance_->GetIncreasedStats(info);
+    EXPECT_EQ(ret.uid_, info.uid_);
+}
+
+HWTEST_F(NetStatsCachedTest, GetIncreasedSimStatsTest002, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.uid_ = 1001; // 1001
+    NetStatsInfo ret = instance_->GetIncreasedSimStats(info);
+    EXPECT_EQ(ret.uid_, info.uid_);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
