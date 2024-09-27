@@ -22,6 +22,9 @@
 #include "netfirewall_ct.h"
 #include "netfirewall_event.h"
 
+#define FIREWALL_DNS_QUERY_PORT         53
+#define FIREWALL_DNS_OVER_QUERY_PORT    853
+
 /**
  * @brief if tcp socket was intercepted, need send reset packet to peer
  *
@@ -140,6 +143,17 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
     return SK_PASS;
 }
 
+static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
+{
+    __be16 port = bpf_htons(tuple->sport);
+    if (port == FIREWALL_DNS_QUERY_PORT || port == FIREWALL_DNS_OVER_QUERY_PORT) {
+        default_action_key key = DEFAULT_ACT_OUT_KEY;
+        enum sk_action *action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &key);
+        return action && *action != SK_PASS;
+    }
+    return false;
+}
+
 /**
  * @brief Determine egress packet drop or not
  *
@@ -178,8 +192,8 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
     if (!match_action_key(&tuple, &key)) {
         return SK_PASS;
     }
-
-    if (match_action(&tuple, &key) != SK_PASS) {
+    // Outbound DNS queries need to be released
+    if (!MatchDnsQuery(&tuple) && match_action(&tuple, &key) != SK_PASS) {
         log_intercept(&tuple);
         send_sock_tcp_reset(&tuple, skb, EGRESS);
         return SK_DROP;

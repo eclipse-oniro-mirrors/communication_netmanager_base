@@ -48,6 +48,8 @@
 #define DEFAULT_ACTION_MAP def_act_map
 #define CT_MAP ct_map
 #define CURRENT_UID_MAP current_uid_map
+#define DOMAIN_IPV4_MAP domain_ipv4_map
+#define DOMAIN_IPV6_MAP domain_ipv6_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x
