@@ -79,11 +79,11 @@ private:
 
     bool ReadIptablesInterfaces(const cJSON &json);
     std::string ReadJsonFile(const std::string &filePath);
-    const std::vector<std::string> &GetTcpIptables();
-    const std::string &GetOutputAddTcp();
-    const std::vector<std::string> &GetUdpIptables();
-    const std::string &GetUdpoutput();
-    const std::vector<std::string> &GetIptablesDeleteCmds();
+    std::vector<std::string> GetTcpIptables();
+    std::string GetOutputAddTcp();
+    std::vector<std::string> GetUdpIptables();
+    std::string GetUdpoutput();
+    std::vector<std::string> GetIptablesDeleteCmds();
 
     bool ParseTcpIptables(const cJSON &json);
     bool ParseTcpOutputRule(const cJSON &json);

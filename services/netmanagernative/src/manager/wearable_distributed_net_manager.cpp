@@ -30,34 +30,33 @@ using namespace NetManagerStandard;
 const int32_t MAX_CMD_LENGTH = 256;
 const int32_t MAX_PORT_ID = 65535;
 
-const std::string CONFIG_KEY_NETFORWARD_COMPONENT_FLAG = "config_wearable_distributed_net_forward";
 const std::string TCP_IPTABLES = "tcpiptables";
 const std::string TCP_OUTPUT = "tcpoutput";
 const std::string UDP_IPTABLES = "udpiptables";
 const std::string UDP_OUTPUT = "udpoutput";
 const std::string IPTABLES_DELETE_CMDS = "iptablesdeletecmds";
 
-const std::vector<std::string> &WearableDistributedNet::GetTcpIptables()
+std::vector<std::string> WearableDistributedNet::GetTcpIptables()
 {
     return tcpIptables_;
 }
 
-const std::string &WearableDistributedNet::GetOutputAddTcp()
+std::string WearableDistributedNet::GetOutputAddTcp()
 {
     return tcpOutput_;
 }
 
-const std::vector<std::string> &WearableDistributedNet::GetUdpIptables()
+std::vector<std::string> WearableDistributedNet::GetUdpIptables()
 {
     return udpIptables_;
 }
 
-const std::string &WearableDistributedNet::GetUdpoutput()
+std::string WearableDistributedNet::GetUdpoutput()
 {
     return udpOutput_;
 }
 
-const std::vector<std::string> &WearableDistributedNet::GetIptablesDeleteCmds()
+std::vector<std::string> WearableDistributedNet::GetIptablesDeleteCmds()
 {
     return iptablesDeleteCmds_;
 }
@@ -74,13 +73,7 @@ bool WearableDistributedNet::ReadSystemIptablesConfiguration()
         NETNATIVE_LOGE("Json parse failed");
         return false;
     }
-    cJSON *jsonIptables = cJSON_GetObjectItem(json, CONFIG_KEY_NETFORWARD_COMPONENT_FLAG.c_str());
-    if (jsonIptables == nullptr) {
-        NETNATIVE_LOGE("ReadConfigData not find");
-        cJSON_Delete(json);
-        return false;
-    }
-    bool result = ReadIptablesInterfaces(*jsonIptables);
+    bool result = ReadIptablesInterfaces(*json);
     if (result == false) {
         NETNATIVE_LOGE("Failed to read iptables interfaces");
         cJSON_Delete(json);
@@ -109,7 +102,7 @@ std::string WearableDistributedNet::ReadJsonFile(const std::string &filePath)
 
 bool WearableDistributedNet::ParseTcpIptables(const cJSON &json)
 {
-    cJSON *tcpIptablesObj = cJSON_GetObjectItem(&json, TCP_IPTABLES.c_str());
+    cJSON *tcpIptablesObj = cJSON_GetObjectItemCaseSensitive(&json, TCP_IPTABLES.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(tcpIptablesObj); i++) {
         cJSON *tcpIptablesItem = cJSON_GetArrayItem(tcpIptablesObj, i);
         if (tcpIptablesItem == nullptr) {
@@ -124,7 +117,7 @@ bool WearableDistributedNet::ParseTcpIptables(const cJSON &json)
 
 bool WearableDistributedNet::ParseTcpOutputRule(const cJSON &json)
 {
-    cJSON *tcpOutputJsonItem = cJSON_GetObjectItem(&json, TCP_OUTPUT.c_str());
+    cJSON *tcpOutputJsonItem = cJSON_GetObjectItemCaseSensitive(&json, TCP_OUTPUT.c_str());
     if (tcpOutputJsonItem == nullptr) {
         NETNATIVE_LOGE("Failed to find tcpOutputJsonItem information");
         return false;
@@ -135,7 +128,7 @@ bool WearableDistributedNet::ParseTcpOutputRule(const cJSON &json)
 
 bool WearableDistributedNet::ParseUdpIptables(const cJSON &json)
 {
-    cJSON *udpIptablesObj = cJSON_GetObjectItem(&json, UDP_IPTABLES.c_str());
+    cJSON *udpIptablesObj = cJSON_GetObjectItemCaseSensitive(&json, UDP_IPTABLES.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(udpIptablesObj); i++) {
         cJSON *udpIptablesItem = cJSON_GetArrayItem(udpIptablesObj, i);
         if (udpIptablesItem == nullptr) {
@@ -150,7 +143,7 @@ bool WearableDistributedNet::ParseUdpIptables(const cJSON &json)
 
 bool WearableDistributedNet::ParseUdpOutputRule(const cJSON &json)
 {
-    cJSON *udpOutputItem = cJSON_GetObjectItem(&json, UDP_OUTPUT.c_str());
+    cJSON *udpOutputItem = cJSON_GetObjectItemCaseSensitive(&json, UDP_OUTPUT.c_str());
     if (udpOutputItem == nullptr) {
         NETNATIVE_LOGE("Failed to find udpOutputItem information");
         return false;
@@ -161,7 +154,7 @@ bool WearableDistributedNet::ParseUdpOutputRule(const cJSON &json)
 
 bool WearableDistributedNet::ParseIptablesDeleteCmds(const cJSON &json)
 {
-    cJSON *iptablesDeleteCmdsObj = cJSON_GetObjectItem(&json, IPTABLES_DELETE_CMDS.c_str());
+    cJSON *iptablesDeleteCmdsObj = cJSON_GetObjectItemCaseSensitive(&json, IPTABLES_DELETE_CMDS.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(iptablesDeleteCmdsObj); i++) {
         cJSON *iptablesDeleteCmdsItem = cJSON_GetArrayItem(iptablesDeleteCmdsObj, i);
         if (iptablesDeleteCmdsItem == nullptr) {
@@ -210,10 +203,6 @@ int32_t WearableDistributedNet::GetTcpPort()
 
 int32_t WearableDistributedNet::ExecuteIptablesCommands(const std::vector<std::string> &commands)
 {
-    if (commands.empty()) {
-        NETNATIVE_LOGE("Invalid commands array");
-        return NETMANAGER_ERROR;
-    }
     for (const auto &command : commands) {
         if (command.length() > MAX_CMD_LENGTH) {
             NETNATIVE_LOGE("Invalid command found at index");
@@ -306,7 +295,7 @@ int32_t WearableDistributedNet::EstablishTcpIpRules()
     if (ExecuteIptablesCommands(GetTcpIptables()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to execute TCP iptables commands");
         return NETMANAGER_ERROR;
-    }
+    } 
     if (ApplyRule(TCP_ADD_RULE, GetTcpPort()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to apply TCP add rule");
         return NETMANAGER_ERROR;
