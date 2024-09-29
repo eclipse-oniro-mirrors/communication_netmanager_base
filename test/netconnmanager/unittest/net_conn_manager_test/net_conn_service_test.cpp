@@ -37,6 +37,7 @@
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
