@@ -16,38 +16,38 @@
 #ifndef NET_CONN_SERVICE_H
 #define NET_CONN_SERVICE_H
 
-#include <condition_variable>
 #include <cstdint>
 #include <functional>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <vector>
+#include <thread>
+#include <condition_variable>
 
 #include "singleton.h"
 #include "system_ability.h"
 
-#include "common_event_data.h"
-#include "common_event_manager.h"
-#include "common_event_subscriber.h"
-#include "common_event_support.h"
-#include "dns_result_call_back.h"
 #include "http_proxy.h"
 #include "net_activate.h"
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
-#include "net_factoryreset_callback.h"
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
+#include "dns_result_call_back.h"
+#include "net_factoryreset_callback.h"
+#include "common_event_data.h"
+#include "common_event_manager.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-using EventReceiver = std::function<void(const EventFwk::CommonEventData &)>;
+using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
 namespace {
 const int32_t PRIMARY_USER_ID = 100;
 }
@@ -160,7 +160,7 @@ public:
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
     int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
-                                 const uint32_t timeoutMS) override;
+                                    const uint32_t timeoutMS) override;
     /**
      * Unregister net connection callback
      *
@@ -337,19 +337,23 @@ public:
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
-    int32_t AddNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                            const std::string &nextHop) override;
-    int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                               const std::string &nextHop) override;
-    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
-    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
-    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
-    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
+    int32_t AddNetworkRoute(int32_t netId, const std::string &ifName,
+                            const std::string &destination, const std::string &nextHop) override;
+    int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName,
+                               const std::string &destination, const std::string &nextHop) override;
+    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength) override;
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength) override;
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName) override;
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName) override;
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type) override;
     int32_t GetSlotType(std::string &type) override;
     int32_t FactoryResetNetwork() override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
-    int32_t IsPreferCellularUrl(const std::string &url, bool &preferCellular) override;
+    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
@@ -434,7 +438,7 @@ private:
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
     int32_t RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                      const uint32_t &timeoutMS, const uint32_t callingUid);
+                                         const uint32_t &timeoutMS, const uint32_t callingUid);
     int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
@@ -449,8 +453,10 @@ private:
     void LoadGlobalHttpProxy(HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
-    void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType = REGISTER);
-    int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType = REGISTER);
+    void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
+        const RegisterType registerType = REGISTER);
+    int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
+        const RegisterType registerType = REGISTER);
 
     void OnNetSysRestart();
 
@@ -465,7 +471,7 @@ private:
     {
         return userId == PRIMARY_USER_ID;
     }
-    uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>> &suppliers, uint32_t &supplierId);
+    uint32_t FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId);
     int32_t EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
     int32_t DisableVnicNetworkAsync();
     int32_t EnableDistributedClientNetAsync(const std::string &virnicAddr, const std::string &iif);
