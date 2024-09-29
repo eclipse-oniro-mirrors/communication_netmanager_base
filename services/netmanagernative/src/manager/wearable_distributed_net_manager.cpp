@@ -203,7 +203,7 @@ int32_t WearableDistributedNet::GetTcpPort()
 
 int32_t WearableDistributedNet::ExecuteIptablesCommands(const std::vector<std::string> &commands)
 {
-    for (const auto &command : commands) {
+    for (auto command : commands) {
         if (command.length() > MAX_CMD_LENGTH) {
             NETNATIVE_LOGE("Invalid command found at index");
             return NETMANAGER_ERROR;
