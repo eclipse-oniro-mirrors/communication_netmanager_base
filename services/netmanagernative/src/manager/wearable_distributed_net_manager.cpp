@@ -295,7 +295,7 @@ int32_t WearableDistributedNet::EstablishTcpIpRules()
     if (ExecuteIptablesCommands(GetTcpIptables()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to execute TCP iptables commands");
         return NETMANAGER_ERROR;
-    } 
+    }
     if (ApplyRule(TCP_ADD_RULE, GetTcpPort()) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("Failed to apply TCP add rule");
         return NETMANAGER_ERROR;
