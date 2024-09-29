@@ -92,10 +92,7 @@ group("hosts_lnk") {
 }
 
 ohos_prebuilt_etc("wearable_distributed_net_forward") {
-  if (netmanager_base_enable_feature_wearable_distributed_net) {
-    defines = [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
-    source = "wearable_distributed_net_forward.json"
-    part_name = "netmanager_base"
-    subsystem_name = "communication"
-  }
+  source = "wearable_distributed_net_forward.json" 
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }
