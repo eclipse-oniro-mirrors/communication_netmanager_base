@@ -84,12 +84,12 @@ inline uint64_t GetCurrentSecond()
         .count();
 }
 
-inline bool IsSameNaturalDay(uint32_t t1, uint32_t t2)
+inline bool IsSameNaturalDay(uint32_t timestamp1, uint32_t timestamp2)
 {
     std::time_t tt1 =
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(t1)));
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(timestamp1)));
     std::time_t tt2 =
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(t2)));
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(timestamp2)));
     std::tm tm1 = *std::localtime(&tt1);
     std::tm tm2 = *std::localtime(&tt2);
 

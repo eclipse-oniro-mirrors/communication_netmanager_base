@@ -548,22 +548,21 @@ int32_t NetStatsService::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
                                                           cookie);
 }
 
-void NetStatsService::MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences,
-                                        const NetStatsInfo &info,
-                                        uint32_t currentTime)
+void NetStatsService::MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
+                                        uint32_t currentTimestamp)
 {
     NetStatsInfoSequence tmp;
     tmp.startTime_ = info.date_;
     tmp.endTime_ = info.date_;
     tmp.info_ = info;
-    if (info.date_ > currentTime - DAY_SECONDS) {
+    uint32_t previousTimestamp = currentTimestamp > DAY_SECONDS ? currentTimestamp - DAY_SECONDS : 0;
+    if (info.date_ > previousTimestamp) {
         statsInfoSequences.push_back(std::move(tmp));
         return;
     }
-    auto findRet =
-        std::find_if(statsInfoSequences.begin(), statsInfoSequences.end(), [&info, &currentTime](const auto &item) {
-            return item.endTime_ < currentTime - DAY_SECONDS &&
-                   CommonUtils::IsSameNaturalDay(info.date_, item.endTime_);
+    auto findRet = std::find_if(
+        statsInfoSequences.begin(), statsInfoSequences.end(), [&info, previousTimestamp](const auto &item) {
+            return item.endTime_ < previousTimestamp && CommonUtils::IsSameNaturalDay(info.date_, item.endTime_);
         });
     if (findRet == statsInfoSequences.end()) {
         statsInfoSequences.push_back(std::move(tmp));
