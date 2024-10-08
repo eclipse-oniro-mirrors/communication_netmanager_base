@@ -35,6 +35,7 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
+#include "net_policy_client.h"
 #include "net_datashare_utils.h"
 #include "net_http_proxy_tracker.h"
 #include "net_manager_center.h"
@@ -173,6 +174,7 @@ bool NetConnService::Init()
         NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
     }
     AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
+    AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     NETMGR_LOG_I("Init end");
     return true;
 }
@@ -720,41 +722,9 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     }
     NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
     DecreaseNetConnCallbackCntForUid(callingUid, registerType);
-    
-    NET_ACTIVATE_MAP::iterator iterActive;
-    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
-        if (!iterActive->second) {
-            ++iterActive;
-            continue;
-        }
-        sptr<INetConnCallback> saveCallback = iterActive->second->GetNetCallback();
-        if (saveCallback == nullptr) {
-            ++iterActive;
-            continue;
-        }
-        if (callback->AsObject().GetRefPtr() != saveCallback->AsObject().GetRefPtr()) {
-            ++iterActive;
-            continue;
-        }
-        reqId = iterActive->first;
-        auto netActivate = iterActive->second;
-        NetRequest netRequest(netActivate->GetUid(), reqId);
-        if (netActivate) {
-            sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
-            if (supplier) {
-                supplier->CancelRequest(netRequest);
-            }
-        }
-        NET_SUPPLIER_MAP::iterator iterSupplier;
-        for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
-            if (iterSupplier->second != nullptr) {
-                iterSupplier->second->CancelRequest(netRequest);
-            }
-        }
-        iterActive = netActivates_.erase(iterActive);
-        RemoveClientDeathRecipient(callback);
-    }
-    NETMGR_LOG_I("end, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
+    DecreaseNetActivatesForUid(callingUid, callback);
+    DecreaseNetActivates(callingUid, callback, reqId);
+
     return NETMANAGER_SUCCESS;
 }
 
@@ -792,6 +762,64 @@ void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
             netUidRequest.erase(requestNetwork);
         }
     }
+}
+
+void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback)
+{
+    auto it = netUidActivates_.find(callingUid);
+    if (it != netUidActivates_.end()) {
+        std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
+        for (auto iter = activates.begin(); iter != activates.end();) {
+            if ((*iter)->GetNetCallback() == callback) {
+                iter = activates.erase(iter);
+                break;
+            } else {
+                ++iter;
+            }
+        }
+        if (activates.empty()) {
+            netUidActivates_.erase(it);
+        }
+    }
+}
+
+void NetConnService::DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback,
+                                          uint32_t reqId)
+{
+    NET_ACTIVATE_MAP::iterator iterActive;
+    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
+        if (!iterActive->second) {
+            ++iterActive;
+            continue;
+        }
+        sptr<INetConnCallback> saveCallback = iterActive->second->GetNetCallback();
+        if (saveCallback == nullptr) {
+            ++iterActive;
+            continue;
+        }
+        if (callback->AsObject().GetRefPtr() != saveCallback->AsObject().GetRefPtr()) {
+            ++iterActive;
+            continue;
+        }
+        reqId = iterActive->first;
+        auto netActivate = iterActive->second;
+        NetRequest netRequest(netActivate->GetUid(), reqId);
+        if (netActivate) {
+            sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+            if (supplier) {
+                supplier->CancelRequest(netRequest);
+            }
+        }
+        NET_SUPPLIER_MAP::iterator iterSupplier;
+        for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+            if (iterSupplier->second != nullptr) {
+                iterSupplier->second->CancelRequest(netRequest);
+            }
+        }
+        iterActive = netActivates_.erase(iterActive);
+        RemoveClientDeathRecipient(callback);
+    }
+    NETMGR_LOG_I("end, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
 }
 
 int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback,
@@ -1004,6 +1032,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
     NetRequest netrequest(request->GetUid(), reqId);
     netActivates_[reqId] = request;
+    netUidActivates_[callingUid].push_back(request);
+    NETMGR_LOG_I("netUidActivates_ [size:%{public}zu]", netUidActivates_.size());
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
@@ -2312,6 +2342,37 @@ int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint32_t policy)
+{
+    NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
+    if (client_.defaultNetSupplier_ == nullptr) {
+        NETMGR_LOG_E("defaultNetSupplier_ is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    if (client_.netConnEventHandler_) {
+        client_.netConnEventHandler_->PostSyncTask([this, uid, policy]() { sendNetPolicyChange(uid, policy); });
+        return NETMANAGER_SUCCESS;
+    }
+    return NETMANAGER_ERROR;
+}
+
+void NetConnService::NetPolicyCallback::sendNetPolicyChange(uint32_t uid, uint32_t policy)
+{
+    auto it = client_.netUidActivates_.find(uid);
+    if (it != client_.netUidActivates_.end()) {
+        sptr<NetHandle> defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
+        bool Metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+        bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, Metered);
+        std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
+        for (auto &activate : activates) {
+            if (activate->GetNetCallback()) {
+                NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
+                activate->GetNetCallback()->NetBlockStatusChange(defaultNetHandle, newBlocked);
+            }
+        }
+    }
+}
+
 int32_t NetConnService::AddNetworkRoute(int32_t netId, const std::string &ifName,
                                         const std::string &destination, const std::string &nextHop)
 {
@@ -2428,6 +2489,13 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
                 NETMGR_LOG_E("Register to sa manager failed");
             }
             registerToService_ = true;
+        }
+    } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {
+        policyCallback_ = new (std::nothrow) NetPolicyCallback(*this);
+        std::shared_ptr<NetPolicyClient> netPolicy = DelayedSingleton<NetPolicyClient>::GetInstance();
+        int32_t registerRet = netPolicy->RegisterNetPolicyCallback(policyCallback_);
+        if (registerRet != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }
     }
 }
