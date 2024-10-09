@@ -510,6 +510,12 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_I("Enter StartNetDetection");
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (forbidDetectionFlag_) {
+        NETMGR_LOG_W("Sleep status, forbid detection");
+        return;
+    }
+#endif
     if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
@@ -521,6 +527,13 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
 }
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+void Network::UpdateForbidDetectionFlag(bool forbidDetectionFlag)
+{
+    forbidDetectionFlag_ = forbidDetectionFlag;
+}
+#endif
 
 void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 {

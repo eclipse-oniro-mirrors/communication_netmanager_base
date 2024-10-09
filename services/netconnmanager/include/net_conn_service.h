@@ -483,7 +483,10 @@ private:
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
     int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
-
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    void StopAllNetDetection();
+    void StartAllNetDetection();
+#endif
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
@@ -558,6 +561,7 @@ private:
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
+    void HandlePowerMgrEvent(int code);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;

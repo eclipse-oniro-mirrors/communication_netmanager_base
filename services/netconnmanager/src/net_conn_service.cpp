@@ -72,7 +72,8 @@ constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
 } // namespace
 
-const bool REGISTER_LOCAL_RESULT = SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
+const bool REGISTER_LOCAL_RESULT =
+    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
@@ -143,7 +144,11 @@ bool NetConnService::Init()
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
     SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
-                         [this](auto &&PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
+                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#endif
 
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
@@ -440,8 +445,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     // create network
     bool isContainInternal = netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end();
     int32_t netId = isContainInternal ? GenerateInternalNetId() : GenerateNetId();
-    NETMGR_LOG_D("GenerateNetId is: [%{public}d], bearerType: %{public}d, supplierId: %{public}d", netId, bearerType,
-                 supplierId);
+    NETMGR_LOG_D("GenerateNetId is: [%{public}d], bearerType: %{public}d, supplierId: %{public}d",
+        netId, bearerType, supplierId);
     if (netId == INVALID_NET_ID) {
         NETMGR_LOG_E("GenerateNetId fail");
         return NET_CONN_ERR_INVALID_NETWORK;
@@ -554,6 +559,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("FindSameCallback callUid:%{public}u reqId:%{public}u", callingUid,
                      reqId);
+        return NET_CONN_ERR_SAME_CALLBACK;
     }
     NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
     int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
@@ -642,6 +648,64 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
     int32_t uid = supplier->GetUid();
     return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
 }
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+void NetConnService::StopAllNetDetection()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        pNetwork->StopNetDetection();
+        pNetwork->UpdateForbidDetectionFlag(true);
+    }
+}
+
+void NetConnService::StartAllNetDetection()
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        pNetwork->UpdateForbidDetectionFlag(false);
+    }
+    std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
+    if (pDefaultNetwork == nullptr) {
+        NETMGR_LOG_E("pDefaultNetwork is null");
+        return;
+    }
+    pDefaultNetwork->StartNetDetection(false);
+}
+
+void NetConnService::HandlePowerMgrEvent(int code)
+{
+    if (code == STATE_ENTER_FORCESLEEP || code == STATE_ENTER_SLEEP_NOT_FORCE) {
+        NETMGR_LOG_I("on receive enter sleep, code %{public}d.", code);
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostSyncTask([this]() {
+                this->StopAllNetDetection();
+            });
+        }
+    } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_SLEEP_NOT_FORCE) {
+        NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostSyncTask([this]() {
+                this->StartAllNetDetection();
+            });
+        }
+    }
+}
+#endif
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
@@ -1140,7 +1204,6 @@ void NetConnService::RequestAllNetworkExceptDefault()
     // Request activation of all networks except the default network
     NetRequest netrequest(
         defaultNetActivate_->GetUid(), defaultNetActivate_->GetRequestId(), defaultNetActivate_->GetRegisterType());
-                          defaultNetActivate_->GetRegisterType());
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
             NETMGR_LOG_E("netSupplier is null or is defaultNetSupplier_");
@@ -1574,11 +1637,11 @@ int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::str
     }
     netConnEventHandler_->PostSyncTask([bearerType, &ifaceNames, this]() {
         auto suppliers = GetNetSupplierFromList(bearerType);
-        for (auto supplier: suppliers) {
+        for (auto supplier : suppliers) {
             if (supplier == nullptr) {
                 continue;
             }
-            std::shared_ptr <Network> network = supplier->GetNetwork();
+            std::shared_ptr<Network> network = supplier->GetNetwork();
             if (network == nullptr) {
                 continue;
             }
@@ -1641,11 +1704,11 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
         NETMGR_LOG_I("Enter GetIfaceNameIdentMaps, netBearType=%{public}d", bearerType);
         ifaceNameIdentMaps.Clear();
         auto suppliers = GetNetSupplierFromList(bearerType);
-        for (auto supplier : suppliers) {
+        for (auto supplier: suppliers) {
             if (supplier == nullptr || !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
                 continue;
             }
-            std::shared_ptr<Network> network = supplier->GetNetwork();
+             std::shared_ptr <Network> network = supplier->GetNetwork();
             if (network == nullptr || !network->IsConnected()) {
                 continue;
             }
@@ -2319,7 +2382,7 @@ int32_t NetConnService::GetSlotType(std::string &type)
                 result =  NETMANAGER_ERR_LOCAL_PTR_NULL;
             } else {
                 type = defaultNetSupplier_->GetSupplierType();
-                result = NETMANAGER_SUCCESS;
+                result =  NETMANAGER_SUCCESS;
             }
         });
     }
@@ -2408,6 +2471,12 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         LoadGlobalHttpProxy(httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
     }
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (action == "usual.event.POWER_MANAGER_STATE_CHANGED") {
+        int code = data.GetCode();
+        HandlePowerMgrEvent(code);
+    }
+#endif
 }
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
