@@ -1708,7 +1708,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
             if (supplier == nullptr || !supplier->HasNetCap(NET_CAPABILITY_INTERNET)) {
                 continue;
             }
-             std::shared_ptr <Network> network = supplier->GetNetwork();
+            std::shared_ptr <Network> network = supplier->GetNetwork();
             if (network == nullptr || !network->IsConnected()) {
                 continue;
             }
