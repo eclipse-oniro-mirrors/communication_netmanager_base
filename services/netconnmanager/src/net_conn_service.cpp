@@ -1033,7 +1033,6 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     NetRequest netrequest(request->GetUid(), reqId);
     netActivates_[reqId] = request;
     netUidActivates_[callingUid].push_back(request);
-    NETMGR_LOG_I("netUidActivates_ [size:%{public}zu]", netUidActivates_.size());
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
@@ -2350,22 +2349,22 @@ int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint
         return NETMANAGER_ERROR;
     }
     if (client_.netConnEventHandler_) {
-        client_.netConnEventHandler_->PostSyncTask([this, uid, policy]() { sendNetPolicyChange(uid, policy); });
+        client_.netConnEventHandler_->PostSyncTask([this, uid, policy]() { SendNetPolicyChange(uid, policy); });
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERROR;
 }
 
-void NetConnService::NetPolicyCallback::sendNetPolicyChange(uint32_t uid, uint32_t policy)
+void NetConnService::NetPolicyCallback::SendNetPolicyChange(uint32_t uid, uint32_t policy)
 {
     auto it = client_.netUidActivates_.find(uid);
     if (it != client_.netUidActivates_.end()) {
         sptr<NetHandle> defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
-        bool Metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
-        bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, Metered);
+        bool metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+        bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, metered);
         std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
         for (auto &activate : activates) {
-            if (activate->GetNetCallback()) {
+            if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(client_.defaultNetSupplier_)) {
                 NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
                 activate->GetNetCallback()->NetBlockStatusChange(defaultNetHandle, newBlocked);
             }

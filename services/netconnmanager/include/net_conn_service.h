@@ -402,7 +402,7 @@ private:
         int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
 
     private:
-        void sendNetPolicyChange(uint32_t uid, uint32_t policy);
+        void SendNetPolicyChange(uint32_t uid, uint32_t policy);
 
     private:
         NetConnService &client_;
