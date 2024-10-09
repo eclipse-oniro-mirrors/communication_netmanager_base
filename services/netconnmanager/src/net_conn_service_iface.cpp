@@ -92,10 +92,6 @@ int32_t NetConnServiceIface::RegisterNetFactoryResetCallback(const sptr<INetFact
     return NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
 }
 
-bool NetConnServiceIface::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
-{
-    return NetConnService::GetInstance()->IsAddrInOtherNetwork(ifaceName, netId, netAddr);
-}
 bool NetConnServiceIface::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
     return NetConnService::GetInstance()->IsIfaceNameInUse(ifaceName, netId);

@@ -2531,23 +2531,6 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
     return 0;
 }
 
-bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr)
-{
-    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto &network : networks_) {
-        if (network.second->GetNetId() == netId) {
-            continue;
-        }
-        if (network.second->GetIfaceName() != ifaceName) {
-            continue;
-        }
-        if (network.second->GetNetLinkInfo().HasNetAddr(netAddr)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);

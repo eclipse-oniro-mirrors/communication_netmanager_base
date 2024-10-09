@@ -88,7 +88,6 @@ private:
     void ResetNetlinkInfo();
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
-    bool IsAddrInOtherNetwork(const INetAddr &netAddr);
     bool IsIfaceNameInUse();
     bool IsNat464Prefered();
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
@@ -112,6 +111,7 @@ private:
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;
 #endif
+    bool isNeedResume_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
