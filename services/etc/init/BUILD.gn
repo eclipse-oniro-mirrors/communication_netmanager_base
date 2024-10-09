@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_prebuilt_etc("netmanager_trust") {
   source = "netmanager_trust.json"
@@ -68,4 +69,17 @@ ohos_prebuilt_etc("initHosts") {
   source = "initHosts"
   part_name = "netmanager_base"
   subsystem_name = "communication"
+}
+
+ohos_prebuilt_etc("hosts") {
+  source = "hosts"
+  symlink_path = "../../data/service/el1/network/hosts_user/hosts"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+group("hosts_lnk") {
+  if (netmanager_base_enable_feature_hosts) {
+    deps = [ ":hosts" ]
+  }
 }
