@@ -547,11 +547,11 @@ private:
         {
             client_.OnNetSupplierRemoteDied(remote);
         }
-
+ 
     private:
         NetConnService &client_;
     };
-
+ 
     void OnRemoteDied(const wptr<IRemoteObject> &remoteObject);
     void OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteObject);
     void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);
