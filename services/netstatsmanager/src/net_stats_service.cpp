@@ -32,6 +32,7 @@
 #include "net_stats_constants.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_service_common.h"
+#include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
 #include "netmanager_hitrace.h"
 #include "netsys_controller.h"
@@ -45,6 +46,7 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
 };
+constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 constexpr const char* UID = "uid";
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
@@ -508,18 +510,14 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
+    std::for_each(allInfo.begin(), allInfo.end(), [this, &infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
         if (uid != info.uid_ || ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
             return;
         }
-        NetStatsInfoSequence tmp;
-        tmp.startTime_ = info.date_;
-        tmp.endTime_ = info.date_;
-        tmp.info_ = info;
-        infos.push_back(std::move(tmp));
+        MergeTrafficStats(infos, info, end);
     });
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
     return NETMANAGER_SUCCESS;
@@ -548,6 +546,29 @@ int32_t NetStatsService::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
 {
     return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
                                                           cookie);
+}
+
+void NetStatsService::MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
+                                        uint32_t currentTimestamp)
+{
+    NetStatsInfoSequence tmp;
+    tmp.startTime_ = info.date_;
+    tmp.endTime_ = info.date_;
+    tmp.info_ = info;
+    uint32_t previousTimestamp = currentTimestamp > DAY_SECONDS ? currentTimestamp - DAY_SECONDS : 0;
+    if (info.date_ > previousTimestamp) {
+        statsInfoSequences.push_back(std::move(tmp));
+        return;
+    }
+    auto findRet = std::find_if(
+        statsInfoSequences.begin(), statsInfoSequences.end(), [&info, previousTimestamp](const auto &item) {
+            return item.endTime_ < previousTimestamp && CommonUtils::IsSameNaturalDay(info.date_, item.endTime_);
+        });
+    if (findRet == statsInfoSequences.end()) {
+        statsInfoSequences.push_back(std::move(tmp));
+        return;
+    }
+    (*findRet).info_ += info;
 }
 
 bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
