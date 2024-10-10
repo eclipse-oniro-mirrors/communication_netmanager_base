@@ -202,7 +202,7 @@ static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_ty
         (!netAccessPolicyValue->wifiPolicy)) {
         return 0;
     }
-     if (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_INITIAL) {
+    if (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_INITIAL) {
         void *net_bear_map_ptr = &net_bear_type_map;
         net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
         net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
@@ -210,12 +210,10 @@ static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_ty
             return 1;
         }
 
-        if (((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR)) &&
-            (!netAccessPolicyValue->cellularPolicy)) {
+        if (((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR)) && (!netAccessPolicyValue->cellularPolicy)) {
             return 0;
         }
-        if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI)) &&
-            (!netAccessPolicyValue->wifiPolicy)) {
+        if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI)) && (!netAccessPolicyValue->wifiPolicy)) {
             return 0;
         }
     }
