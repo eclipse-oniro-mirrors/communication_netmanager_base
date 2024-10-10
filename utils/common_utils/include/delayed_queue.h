@@ -35,10 +35,10 @@ public:
                 {
                     std::lock_guard<std::mutex> guard(mutex_);
                     for (const auto &elem : elems_[index_]) {
-                        auto sharedElem = elem.lock();
-                        if (sharedElem) {
-                            sharedElem->Execute();
+                        if (elem) {
+                            elem->Execute();
                         }
+                        indexMap_.erase(elem);
                     }
                     elems_[index_].clear();
                 }
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    void Put(const std::weak_ptr<T> &elem)
+    void Put(const std::shared_ptr<T> &elem)
     {
         std::lock_guard<std::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
@@ -85,8 +85,8 @@ private:
     std::atomic_bool needRun_;
     std::condition_variable needRunCondition_;
     std::mutex needRunMutex_;
-    std::array<std::set<std::weak_ptr<T>, std::owner_less<std::weak_ptr<T>>>, ARRAY_SIZE + DELAYED_COUNT> elems_;
-    std::map<std::weak_ptr<T>, int, std::owner_less<std::weak_ptr<T>>> indexMap_;
+    std::array<std::set<std::shared_ptr<T>, std::owner_less<std::shared_ptr<T>>>, ARRAY_SIZE + DELAYED_COUNT> elems_;
+    std::map<std::shared_ptr<T>, int, std::owner_less<std::shared_ptr<T>>> indexMap_;
 };
 } // namespace OHOS::NetManagerStandard
 
