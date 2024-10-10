@@ -246,7 +246,7 @@ int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::s
     NETMGR_LOG_D("RegisterNetSupplier out netcaps size = %{public}zu.", tmp.size());
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, &ident, tmp, &supplierId, &callingUid, &result]() {
+        netConnEventHandler_->PostSyncTask([this, bearerType, &ident, tmp, &supplierId, callingUid, &result]() {
             result = this->RegisterNetSupplierAsync(bearerType, ident, tmp, supplierId, callingUid);
         });
     }
@@ -277,7 +277,7 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
 
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, &netSpecifier, &callback, timeoutMS, &callingUid, &result]() {
+        netConnEventHandler_->PostSyncTask([this, &netSpecifier, &callback, timeoutMS, callingUid, &result]() {
             result = this->RegisterNetConnCallbackAsync(netSpecifier, callback, timeoutMS, callingUid);
         });
     }
@@ -377,7 +377,7 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
     int32_t result = NETMANAGER_ERROR;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, supplierId, &netSupplierInfo, &callingUid, &result]() {
+        netConnEventHandler_->PostSyncTask([this, supplierId, &netSupplierInfo, callingUid, &result]() {
             result = this->UpdateNetSupplierInfoAsync(supplierId, netSupplierInfo, callingUid);
         });
     }
@@ -389,7 +389,7 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
     int32_t result = NETMANAGER_ERROR;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, supplierId, &netLinkInfo, &callingUid, &result]() {
+        netConnEventHandler_->PostSyncTask([this, supplierId, &netLinkInfo, callingUid, &result]() {
             result = this->UpdateNetLinkInfoAsync(supplierId, netLinkInfo, callingUid);
         });
     }
@@ -483,7 +483,7 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
     NETMGR_LOG_I("OnNetSupplierRemoteDied, callingUid=%{public}u", callingUid);
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
 
-    netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, &callingUid, &callback]() {
+    netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, callingUid, &callback]() {
         for (const auto &supplier : netSuppliers_) {
             if (supplier.second == nullptr || supplier.second->GetSupplierCallback() == nullptr) {
                 continue;
