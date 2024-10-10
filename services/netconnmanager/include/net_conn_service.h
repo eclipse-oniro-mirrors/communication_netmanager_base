@@ -359,7 +359,6 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
-    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
