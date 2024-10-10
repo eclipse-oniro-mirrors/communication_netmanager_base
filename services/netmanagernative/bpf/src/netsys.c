@@ -538,9 +538,12 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
+
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -581,10 +584,12 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -625,10 +630,12 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -670,10 +677,12 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -714,10 +723,12 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -758,10 +769,12 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
