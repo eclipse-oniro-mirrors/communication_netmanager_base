@@ -308,7 +308,7 @@ ohos_shared_library("netsys_client") {
 
   external_deps = [
     "c_utils:utils",
-    "hilog:libhilog"
+    "hilog:libhilog",
   ]
 
   defines = [
