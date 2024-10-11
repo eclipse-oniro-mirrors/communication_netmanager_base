@@ -381,16 +381,19 @@ void DnsResolvListen::StartListen()
         socklen_t len = sizeof(clientAddr);
 
         int clientSockFd = accept(serverSockFd_, (sockaddr *)&clientAddr, &len);
-        if (clientSockFd < 0) {
-            DNS_CONFIG_PRINT("accept errno %{public}d", errno);
-            continue;
+        {
+            OHOS::NetManagerStandard::RaiiXCollieTimer timer("dnsresolvlisten", 1);
+            if (clientSockFd < 0) {
+                DNS_CONFIG_PRINT("accept errno %{public}d", errno);
+                continue;
+            }
+            if (!MakeNonBlock(clientSockFd)) {
+                DNS_CONFIG_PRINT("MakeNonBlock errno %{public}d", errno);
+                close(clientSockFd);
+                continue;
+            }
+            this->ProcCommand(clientSockFd);
         }
-        if (!MakeNonBlock(clientSockFd)) {
-            DNS_CONFIG_PRINT("MakeNonBlock errno %{public}d", errno);
-            close(clientSockFd);
-            continue;
-        }
-        this->ProcCommand(clientSockFd);
     }
 }
 } // namespace OHOS::nmd
