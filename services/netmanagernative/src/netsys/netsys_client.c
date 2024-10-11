@@ -20,12 +20,20 @@
 
 #include "app_net_client.h"
 #include "dns_config_client.h"
+#include "hilog/log_c.h"
 #include <netdb.h>
 #include <securec.h>
 #include <stdbool.h>
 #include <sys/select.h>
 #include <sys/un.h>
 #include <unistd.h>
+
+#undef LOG_TAG
+#ifndef NETMGRNATIVE_LOG_TAG
+#define LOG_TAG "NetsysNativeService"
+#else
+#define LOG_TAG NETMGRNATIVE_LOG_TAG
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -164,17 +172,17 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
     }
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
+        HILOG_ERROR(LOG_CORE, "send failed %{public}d", errno);
         return CloseSocketReturn(sockFd, -errno);
     }
 
     if (!PollRecvData(sockFd, (char *)(config), sizeof(struct ResolvConfig))) {
-        DNS_CONFIG_PRINT("receive failed %d", errno);
+        HILOG_ERROR(LOG_CORE, "receive failed %{public}d", errno);
         return CloseSocketReturn(sockFd, -errno);
     }
 
     if (config->error < 0) {
-        DNS_CONFIG_PRINT("get Config error: %d", config->error);
+        HILOG_ERROR(LOG_CORE, "get Config error: %{public}d", config->error);
         return CloseSocketReturn(sockFd, config->error);
     }
 
