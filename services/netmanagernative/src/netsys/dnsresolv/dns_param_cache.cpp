@@ -252,7 +252,8 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         if (addrInfo.aiFamily == AF_INET) {
             netInfo.aiAddr.sin = addrInfo.aiAddr.sin.sin_addr;
         } else {
-            netInfo.aiAddr.sin6 = addrInfo.aiAddr.sin6.sin6_addr;
+            memcpy_s(&netInfo.aiAddr.sin6, sizeof(addrInfo.aiAddr.sin6.sin6_addr), &addrInfo.aiAddr.sin6.sin6_addr,
+                     sizeof(addrInfo.aiAddr.sin6.sin6_addr));
         }
         OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->AddDomainCache(netInfo);
     }
