@@ -46,16 +46,13 @@ enum stream_dir {
 };
 
 enum event_type {
-    EVENT_INVALID = -1,
     EVENT_INTERCEPT = 1,
     EVENT_DEBUG,
     EVENT_TUPLE_DEBUG,
 };
 
 enum debug_type {
-    DBG_UNSPEC = 0,
     DBG_GENERIC, /* Generic, no message, useful to dump random integers */
-    DBG_LOOKUP_FAIL,
     DBG_MATCH_SADDR,
     DBG_MATCH_DADDR,
     DBG_MATCH_SPORT,
@@ -65,7 +62,6 @@ enum debug_type {
     DBG_MATCH_UID,
     DBG_ACTION_KEY,
     DBG_MATCH_ACTION,
-    DBG_TCP_FLAGS,
     DBG_CT_LOOKUP,
     DBG_MATCH_DOMAIN,
 };
