@@ -240,7 +240,7 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     }
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = GetCallingUid();
+    int32_t appUid = static_cast<int32_t>(GetCallingUid());
     bool isMatchAllow = false;
     if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
         DNS_CONFIG_PRINT("SetDnsCache failed: domain was Intercepted: %{public}s,", hostName.c_str());
@@ -274,7 +274,7 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
 
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = GetCallingUid();
+    int32_t appUid = static_cast<int32_t>(GetCallingUid());
     bool isMatchAllow = false;
     if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
         NotifyDomianIntercept(appUid, hostName);
