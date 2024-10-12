@@ -415,10 +415,10 @@ std::string IpParamParser::Ip4ToStr(uint32_t ip)
 
 uint32_t IpParamParser::GetMask(uint32_t startIp, uint32_t endIp)
 {
-    uint32_t i = IPV4_BIT_COUNT - 1;
+    int32_t i = static_cast<int32_t>(IPV4_BIT_COUNT - 1);
     for (; i >= 0; --i) {
         if (((startIp >> i) & VALUE_ONE) != ((endIp >> i) & VALUE_ONE)) {
-            return IPV4_BIT_COUNT - i - 1;
+            return IPV4_BIT_COUNT - static_cast<uint32_t>(i) - 1;
         }
     }
     return IPV4_BIT_COUNT;
@@ -444,10 +444,10 @@ uint32_t IpParamParser::Find(uint32_t ip, uint32_t start, uint32_t value)
     if (start >= IPV4_BIT_COUNT) {
         return IPV4_BIT_COUNT;
     }
-    uint32_t i = IPV4_BIT_COUNT - start - 1;
+    int32_t i = static_cast<int32_t>(IPV4_BIT_COUNT - start - 1);
     for (; i >= 0; --i) {
         if (((ip >> i) & VALUE_ONE) == value) {
-            return IPV4_BIT_COUNT - i - 1;
+            return IPV4_BIT_COUNT - static_cast<uint32_t>(i) - 1;
         }
     }
     return IPV4_BIT_COUNT;
@@ -543,12 +543,12 @@ uint32_t IpParamParser::GetIp6Prefixlen(const in6_addr &start, const in6_addr &e
         if (start.s6_addr[i] == end.s6_addr[i]) {
             continue;
         }
-        for (uint32_t j = BIT_PER_BYTE - 1; j >= 0; --j) {
+        for (int32_t j = static_cast<int32_t>(BIT_PER_BYTE - 1); j >= 0; --j) {
             uint8_t byte = (1 << j);
             if ((start.s6_addr[i] & byte) == (end.s6_addr[i] & byte)) {
                 continue;
             } else {
-                prefixlen = i * BIT_PER_BYTE + BIT_PER_BYTE - j - 1;
+                prefixlen = i * BIT_PER_BYTE + BIT_PER_BYTE - static_cast<uint32_t>(j) - 1;
                 return prefixlen;
             }
         }
@@ -587,11 +587,11 @@ uint32_t IpParamParser::FindIp6(const in6_addr &addr, uint32_t startBit, uint8_t
     uint32_t startBits = startBit % BIT_PER_BYTE;
     uint32_t startBytes = startBit / BIT_PER_BYTE;
     for (uint32_t i = startBytes; i < IPV6_BYTE_COUNT; ++i) {
-        uint32_t j = (i == startBytes) ? (BIT_PER_BYTE - startBits - 1) : (BIT_PER_BYTE - 1);
+        int32_t j = (i == startBytes) ? (BIT_PER_BYTE - startBits - 1) : (BIT_PER_BYTE - 1);
         for (; j >= 0; --j) {
             uint8_t tmp = ((addr.s6_addr[i] >> j) & VALUE_ONE);
             if (tmp == value) {
-                return i * BIT_PER_BYTE + BIT_PER_BYTE - j - 1;
+                return i * BIT_PER_BYTE + BIT_PER_BYTE - static_cast<uint32_t>(j) - 1;
             }
         }
     }
@@ -626,10 +626,10 @@ void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)
     }
 
     uint32_t off = BIT_PER_BYTE - bits - 1;
-    for (uint32_t i = bytes; i >= 0; --i) {
+    for (int32_t i = static_cast<int32_t>(bytes); i >= 0; --i) {
         for (uint32_t j = 0; j < BIT_PER_BYTE; ++j) {
             uint8_t byte = (1 << j);
-            if (needSetZero && (i == bytes && j <= off)) {
+            if (needSetZero && (static_cast<int32_t>(i) == bytes && j <= off)) {
                 addr.s6_addr[i] &= (~byte);
                 continue;
             }
