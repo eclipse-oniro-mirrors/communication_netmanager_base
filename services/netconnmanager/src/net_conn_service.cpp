@@ -681,6 +681,10 @@ void NetConnService::StartAllNetDetection()
         }
         pNetwork->UpdateForbidDetectionFlag(false);
     }
+    if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
+        NETMGR_LOG_E("defaultNetSupplier_ is  null or IsNetValidated");
+        return;
+    }
     std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
     if (pDefaultNetwork == nullptr) {
         NETMGR_LOG_E("pDefaultNetwork is null");
