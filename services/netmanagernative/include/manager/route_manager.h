@@ -79,7 +79,7 @@ public:
      * @return Returns 0, add route table successfully, otherwise it will fail
      */
     static int32_t AddRoute(TableType tableType, const std::string &interfaceName, const std::string &destinationName,
-                            const std::string &nextHop);
+                            const std::string &nextHop, bool& routeRepeat);
 
     /**
      * The interface is remove route table
