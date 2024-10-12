@@ -23,6 +23,9 @@
 #include "dns_param_cache.h"
 #include "netsys_client.h"
 #include "init_socket.h"
+#ifndef UNITTEST_FORBID_FFRT
+#include "raii_xcollie_timer.h"
+#endif
 #ifdef USE_SELINUX
 #include "selinux/selinux.h"
 #endif
@@ -382,7 +385,9 @@ void DnsResolvListen::StartListen()
 
         int clientSockFd = accept(serverSockFd_, (sockaddr *)&clientAddr, &len);
         {
+#ifndef UNITTEST_FORBID_FFRT
             OHOS::NetManagerStandard::RaiiXCollieTimer timer("dnsresolvlisten", 1);
+#endif
             if (clientSockFd < 0) {
                 DNS_CONFIG_PRINT("accept errno %{public}d", errno);
                 continue;

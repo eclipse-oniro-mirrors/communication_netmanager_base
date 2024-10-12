@@ -67,6 +67,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include/"
   ]
 
   deps = [
@@ -84,6 +85,7 @@ ohos_unittest("netsys_native_manager_test") {
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "ffrt:libffrt",
+    "hicollie:libhicollie",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
