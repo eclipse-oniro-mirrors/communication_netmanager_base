@@ -36,7 +36,8 @@ enum NetDetectionStatus {
     CAPTIVE_PORTAL_STATE,
     QUALITY_POOR_STATE,
     QUALITY_NORMAL_STATE,
-    QUALITY_GOOD_STATE
+    QUALITY_GOOD_STATE,
+    ACCEPT_UNVALIDATED
 };
 using NetDetectionStateHandler = std::function<void(NetDetectionStatus netDetectionState,
     const std::string &urlRedirect)>;

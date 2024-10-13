@@ -1479,12 +1479,12 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
 int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t type = 0;
-    bool isBetter;
+    uint32_t detectionStatus = 0;
     uint32_t supplierId;
     if (!data.ReadUint32(type)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    if (!data.ReadBool(isBetter)) {
+    if (!data.ReadUint32(detectionStatus)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
@@ -1494,7 +1494,7 @@ int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(type);
-    int32_t ret = UpdateSupplierScore(bearerType, isBetter, supplierId);
+    int32_t ret = UpdateSupplierScore(bearerType, detectionStatus, supplierId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
