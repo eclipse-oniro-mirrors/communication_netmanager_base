@@ -432,6 +432,7 @@ int32_t InterfaceManager::AddStaticArp(const std::string &ipAddr, const std::str
                                        const std::string &ifName)
 {
     arpreq req = {};
+    req.arp_flags = ATF_PERM;
     int32_t res = AssembleArp(ipAddr, macAddr, ifName, req);
     if (res != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("AssembleArp error");
@@ -452,6 +453,7 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
                                        const std::string &ifName)
 {
     arpreq req = {};
+    req.arp_flags = ATF_PERM;
     int32_t res = AssembleArp(ipAddr, macAddr, ifName, req);
     if (res != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("AssembleArp error");
@@ -503,7 +505,7 @@ int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::stri
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    req.arp_flags = ATF_COM;
+    req.arp_flags |= ATF_COM;
 
     return NETMANAGER_SUCCESS;
 }
