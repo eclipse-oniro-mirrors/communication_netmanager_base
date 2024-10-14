@@ -23,6 +23,7 @@
 #include "i_net_conn_callback.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_types.h"
 #include "net_factoryreset_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "net_interface_config.h"
@@ -1375,9 +1376,9 @@ HWTEST_F(NetConnClientTest, UnregisterPreAirplaneCallback, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    bool isBetter = false;
     uint32_t supplierId = 100;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter, supplierId);
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI,
+        QUALITY_POOR_STATE, supplierId);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard

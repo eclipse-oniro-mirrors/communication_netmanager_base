@@ -54,7 +54,8 @@ enum class NetTypeScoreValue : int32_t {
     WIFI_VALUE = 7 * NET_TYPE_SCORE_INTERVAL,
     ETHERNET_VALUE = 8 * NET_TYPE_SCORE_INTERVAL,
     VPN_VALUE = 9 * NET_TYPE_SCORE_INTERVAL,
-    WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL
+    WIFI_AWARE_VALUE = 10 * NET_TYPE_SCORE_INTERVAL,
+    MAX_SCORE = 10 * NET_TYPE_SCORE_INTERVAL
 };
 
 static inline NetTypeScore netTypeScore_ = {
@@ -162,6 +163,7 @@ private:
     std::string type_ = "";
     NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
     bool isFirstTimeDetectionDone = false;
+    bool isAcceptUnvaliad = false;
     enum RegisterType {
         UNKOWN,
         REGISTER,

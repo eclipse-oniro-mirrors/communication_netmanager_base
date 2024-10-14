@@ -75,6 +75,8 @@ void NetSupplier::ResetNetSupplier()
     netQuality_ = QUALITY_NORMAL_STATE;
     // Reset network detection progress.
     isFirstTimeDetectionDone = false;
+    //Reset User Selection
+    isAcceptUnvaliad = false;
     // Reset network capabilities for checking connectivity finished flag.
     netCaps_.InsertNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
@@ -423,6 +425,9 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         netQuality_ = QUALITY_POOR_STATE;
     } else if (netState == QUALITY_GOOD_STATE) {
         netQuality_ = QUALITY_GOOD_STATE;
+    } else if (netState == ACCEPT_UNVALIDATED) {
+        netQuality_ = ACCEPT_UNVALIDATED;
+        isAcceptUnvaliad = true;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
@@ -467,17 +472,22 @@ int32_t NetSupplier::GetNetScore() const
 int32_t NetSupplier::GetRealScore()
 {
     // Notice: the order is important here:
-    // 1. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
+    // 1.If the user chooses to use this network, return MAX_SCORE
+    if (isAcceptUnvaliad) {
+        return static_cast<int32_t>(NetManagerStandard::NetTypeScoreValue::MAX_SCORE);
+    }
+ 
+    // 2. If network detection is not complete in the first time, subtract NET_VALID_SCORE.
     if (IsInFirstTimeDetecting()) {
         return netScore_ - NET_VALID_SCORE;
     }
-
-    // 2. If network is not validated, subtract NET_VALID_SCORE.
+ 
+    // 3. If network is not validated, subtract NET_VALID_SCORE.
     if (!IsNetValidated()) {
         return netScore_ - NET_VALID_SCORE;
     }
-
-    // 3. Deduct DIFF_SCORE_BETWEEN_GOOD_POOR for poor network quality (reported by the supplier).
+ 
+    // 4. Deduct DIFF_SCORE_BETWEEN_GOOD_POOR for poor network quality (reported by the supplier).
     if (IsNetQualityPoor()) {
         return netScore_ - DIFF_SCORE_BETWEEN_GOOD_POOR;
     }
