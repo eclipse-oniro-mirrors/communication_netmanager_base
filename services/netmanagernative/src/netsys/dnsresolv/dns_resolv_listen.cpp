@@ -23,9 +23,6 @@
 #include "dns_param_cache.h"
 #include "netsys_client.h"
 #include "init_socket.h"
-#ifndef UNITTEST_FORBID_FFRT
-#include "raii_xcollie_timer.h"
-#endif
 #ifdef USE_SELINUX
 #include "selinux/selinux.h"
 #endif
