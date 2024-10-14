@@ -149,7 +149,7 @@ ohos_static_library("net_conn_manager_static") {
   }
 
   branch_protector_ret = "pac_ret"
-
+  use_exceptions = true
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
     "src/dns_result_call_back.cpp",
@@ -176,6 +176,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
+  use_exceptions = true
 
   configs = [ ":net_conn_manager_config" ]
 
