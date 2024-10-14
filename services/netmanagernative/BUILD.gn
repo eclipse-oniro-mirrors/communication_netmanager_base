@@ -167,7 +167,6 @@ ohos_shared_library("netsys_native_manager") {
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
-    "hicollie:libhicollie",
     "init:libbegetutil",
     "ipc:ipc_core",
     "iptables:iptables",
