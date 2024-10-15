@@ -20,8 +20,8 @@
 
 #include "app_net_client.h"
 #include "dns_config_client.h"
-#include <netdb.h>
 #include "hilog/log_c.h"
+#include <netdb.h>
 #include <securec.h>
 #include <stdbool.h>
 #include <sys/select.h>
