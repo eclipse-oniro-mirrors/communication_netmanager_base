@@ -21,11 +21,19 @@
 #include "app_net_client.h"
 #include "dns_config_client.h"
 #include <netdb.h>
+#include "hilog/log_c.h"
 #include <securec.h>
 #include <stdbool.h>
 #include <sys/select.h>
 #include <sys/un.h>
 #include <unistd.h>
+
+#undef LOG_TAG
+#ifndef NETMGRNATIVE_LOG_TAG
+#define LOG_TAG "NetsysNativeService"
+#else
+#define LOG_TAG NETMGRNATIVE_LOG_TAG
+#endif
 
 #ifdef __cplusplus
 extern "C" {
