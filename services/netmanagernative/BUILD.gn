@@ -301,11 +301,16 @@ ohos_shared_library("netsys_client") {
 
   deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   defines = [
     "NETSYS_CONFIG_DEBUG=0",
     "NETSYS_CLIENT_DEBUG=0",
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "LOG_DOMAIN = 0xD0015B0",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]
