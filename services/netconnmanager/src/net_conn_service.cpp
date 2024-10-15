@@ -1771,10 +1771,26 @@ int32_t NetConnService::GetDelayNotifyTime()
                                 param, SYS_PARAMETER_SIZE);
     std::string time = param;
     if (code <= 0 || !IsValidDecValue(time)) {
-        delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        try {
+            delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     } else {
-        auto tmp = std::stoi(time);
-        delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        try {
+            auto tmp = std::stoi(time);
+            delayTime = tmp > static_cast<int32_t>(MAX_DELAY_TIME) ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+        } catch (const std::invalid_argument& e) {
+            NETMGR_LOG_E("invalid_argument");
+            return delayTime;
+        } catch (const std::out_of_range& e) {
+            NETMGR_LOG_E("out_of_range");
+            return delayTime;
+        }
     }
     NETMGR_LOG_D("delay time is %{public}d", delayTime);
     return delayTime;
