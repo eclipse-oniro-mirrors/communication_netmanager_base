@@ -37,6 +37,8 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$THIRD_PARTY_ROOT/curl/include",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
   ]
 
   cflags = [
@@ -75,11 +77,13 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",

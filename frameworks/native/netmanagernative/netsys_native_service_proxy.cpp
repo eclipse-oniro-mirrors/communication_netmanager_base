@@ -2719,7 +2719,7 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
     uint32_t offset = 0;
     uint32_t remain;
     while (it != ruleList.end()) {
-        remain = ruleList.end() - it;
+        remain = static_cast<uint32_t>(ruleList.end() - it);
         offset = std::min(remain, pageSize);
         MessageParcel data;
         if (!WriteInterfaceToken(data)) {

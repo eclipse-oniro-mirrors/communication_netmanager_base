@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,6 +226,26 @@ int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver)
 }
 
 int32_t OHOS_NetConn_UnregisterDnsResolver()
+{
+    int32_t ret = removednsresolvehook();
+    return ret;
+}
+
+int32_t OH_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver)
+{
+    if (resolver == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterDnsResolver received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    int32_t ret = setdnsresolvehook(resolver);
+    if (ret < 0) {
+        ret = NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    return ret;
+}
+
+int32_t OH_NetConn_UnregisterDnsResolver()
 {
     int32_t ret = removednsresolvehook();
     return ret;

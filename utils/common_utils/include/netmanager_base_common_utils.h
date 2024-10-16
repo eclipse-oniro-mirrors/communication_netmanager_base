@@ -84,6 +84,20 @@ inline uint64_t GetCurrentSecond()
         .count();
 }
 
+inline bool IsSameNaturalDay(uint32_t current, uint32_t another)
+{
+    std::time_t tt1 =
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(current)));
+    std::time_t tt2 =
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(another)));
+    std::tm *tm1 = std::localtime(&tt1);
+    std::tm *tm2 = std::localtime(&tt2);
+    if (tm1 == nullptr || tm2 == nullptr) {
+        return false;
+    }
+    return tm1->tm_year == tm2->tm_year && tm1->tm_mon == tm2->tm_mon && tm1->tm_mday == tm2->tm_mday;
+}
+
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 

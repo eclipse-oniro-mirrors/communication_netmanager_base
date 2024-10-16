@@ -27,7 +27,8 @@
             "netmanager_base_enable_feature_net_firewall",
             "netmanager_base_enable_feature_wearable_distributed_net",
             "netmanager_base_enable_feature_sysvpn",
-            "netmanager_base_enable_feature_hosts"
+            "netmanager_base_enable_feature_hosts",
+            "netmanager_base_feature_support_powermanager"
         ],
         "adapted_system_type": [
             "standard"
@@ -44,6 +45,7 @@
                 "safwk",
                 "hilog",
                 "dhcp",
+                "hicollie",
                 "eventhandler",
                 "ability_base",
                 "access_token",

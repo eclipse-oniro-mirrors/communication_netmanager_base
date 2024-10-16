@@ -69,9 +69,12 @@ public:
     
     bool ResumeNetworkInfo();
     void CloseSocketsUid(uint32_t uid);
+    void StopNetDetection();
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
+#endif
 
 private:
-    void StopNetDetection();
     bool CreateBasicNetwork();
     bool CreateVirtualNetwork();
     bool ReleaseBasicNetwork();
@@ -85,7 +88,6 @@ private:
     void ResetNetlinkInfo();
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
-    bool IsAddrInOtherNetwork(const INetAddr &netAddr);
     bool IsIfaceNameInUse();
     bool IsNat464Prefered();
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
@@ -106,6 +108,10 @@ private:
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
     std::unique_ptr<Nat464Service> nat464Service_;
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    bool forbidDetectionFlag_ = false;
+#endif
+    bool isNeedResume_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

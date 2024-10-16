@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr uint32_t FIREWALL_MAX_LIST_SIZE = 100;
+}
 // Firewall IP parameters
 bool NetFirewallIpParam::Marshalling(Parcel &parcel) const
 {
@@ -205,6 +208,7 @@ sptr<NetFirewallDnsParam> NetFirewallDnsParam::Unmarshalling(Parcel &parcel)
 template <typename T> bool NetFirewallUtils::MarshallingList(const std::vector<T> &list, Parcel &parcel)
 {
     uint32_t size = static_cast<uint32_t>(list.size());
+    size = std::min(size, FIREWALL_MAX_LIST_SIZE);
     if (!parcel.WriteUint32(size)) {
         NETMGR_LOG_E("write netAddrList size to parcel failed");
         return false;
@@ -229,6 +233,7 @@ template <typename T> bool NetFirewallUtils::UnmarshallingList(Parcel &parcel, s
         NETMGR_LOG_E("Read UnmarshallingList list size failed");
         return false;
     }
+    size = std::min(size, FIREWALL_MAX_LIST_SIZE);
     for (uint32_t i = 0; i < size; i++) {
         auto value = T::Unmarshalling(parcel);
         if (value == nullptr) {

@@ -426,7 +426,11 @@ bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
         NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
         if (!passwd.empty()) {
             NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
+        } else {
+            NETMGR_LOG_I("passwd is empty.");
         }
+    } else {
+        NETMGR_LOG_I("username is empty.");
     }
     return true;
 }

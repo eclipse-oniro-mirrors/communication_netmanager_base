@@ -70,5 +70,13 @@
     {
         "first_introduced": "12",
         "name": "OH_NetConn_UnregisterAppHttpProxyCallback"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_NetConn_RegisterDnsResolver"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_NetConn_UnregisterDnsResolver"
     }
 ]

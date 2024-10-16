@@ -130,11 +130,6 @@ bool Network::CreateVirtualNetwork()
     return true;
 }
 
-bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
-{
-    return NetConnServiceIface().IsAddrInOtherNetwork(netLinkInfo_.ifaceName_, netId_, netAddr);
-}
-
 bool Network::IsIfaceNameInUse()
 {
     return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
@@ -156,7 +151,7 @@ bool Network::ReleaseBasicNetwork()
     std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
     NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
         supplierId_, netId_, netCapabilities.c_str());
-    if (!IsIfaceNameInUse()) {
+    if (!IsIfaceNameInUse() || isNeedResume_) {
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
@@ -173,6 +168,7 @@ bool Network::ReleaseBasicNetwork()
                 NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
             }
         }
+        isNeedResume_ = false;
     } else {
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
@@ -213,8 +209,11 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("update net link information process");
     UpdateStatsCached(netLinkInfo);
     UpdateInterfaces(netLinkInfo);
-    UpdateIpAddrs(netLinkInfo);
-    UpdateRoutes(netLinkInfo);
+    bool isIfaceNameInUse = NetConnServiceIface().IsIfaceNameInUse(netLinkInfo.ifaceName_, netId_);
+    if (!isIfaceNameInUse || netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+        UpdateIpAddrs(netLinkInfo);
+        UpdateRoutes(netLinkInfo);
+    }
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
@@ -292,9 +291,6 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfo_.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-        if (IsAddrInOtherNetwork(inetAddr)) {
-            continue;
-        }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                 CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -332,9 +328,6 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 {
     NETMGR_LOG_I("HandleUpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
-        if (IsAddrInOtherNetwork(inetAddr)) {
-            continue;
-        }
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -510,6 +503,12 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_I("Enter StartNetDetection");
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    if (forbidDetectionFlag_) {
+        NETMGR_LOG_W("Sleep status, forbid detection");
+        return;
+    }
+#endif
     if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
@@ -521,6 +520,13 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
 }
+
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+void Network::UpdateForbidDetectionFlag(bool forbidDetectionFlag)
+{
+    forbidDetectionFlag_ = forbidDetectionFlag;
+}
+#endif
 
 void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 {
@@ -723,7 +729,9 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
 bool Network::ResumeNetworkInfo()
 {
     NetLinkInfo nli = netLinkInfo_;
-
+    if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+        isNeedResume_ = true;
+    }
     NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
         NETMGR_LOG_E("%s release existed basic network failed", __FUNCTION__);

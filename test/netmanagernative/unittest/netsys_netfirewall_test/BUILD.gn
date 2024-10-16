@@ -17,7 +17,10 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_unittest("netsys_netfirewall_test") {
   module_out_path = "netmanager_base/netsys_netfirewall_test"
 
-  sources = [ "netsys_netfirewall_test.cpp" ]
+  sources = [
+    "bpf_netfirewall_test.cpp",
+    "netsys_netfirewall_test.cpp",
+  ]
 
   include_dirs = [
     "$NETSYSNATIVE_SOURCE_DIR/bpf/include",
