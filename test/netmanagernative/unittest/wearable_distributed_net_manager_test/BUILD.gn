@@ -28,8 +28,6 @@ ohos_unittest("wearable_distributed_net_manager_test") {
   sources = [ "wearable_distributed_net_manager_test.cpp" ]
 
   include_dirs = [
-    "$INNERKITS_ROOT/dnsresolverclient/include",
-    "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$NETSYSNATIVE_SOURCE_DIR/include",
@@ -38,6 +36,7 @@ ohos_unittest("wearable_distributed_net_manager_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/test",
     "$THIRD_PARTY_ROOT/cJSON/include",
+    "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
   ]
 
   deps = [
