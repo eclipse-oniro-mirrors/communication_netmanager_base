@@ -60,14 +60,14 @@ public:
     /**
  　　* @brief Reads the system's iptables configuration from a JSON file and processes the relevant iptables settings
  　　*
- 　　* This function reads a JSON configuration file located at NETWORK_CONFIG_PATH, parses it, and then extracts
+ 　　* This function reads a JSON configuration file located at IPTABLES_CONFIG_PATH, parses it, and then extracts
  　　* the iptables configuration. It specifically looks for the iptables component flag to decide whether to
  　　* proceed with reading and applying iptables interfaces or not
  　　*
  　　* @return true if the configuration was successfully read and processed, false otherwise
  　　*/
     bool ReadSystemIptablesConfiguration();
-
+    
 private:
     int32_t EstablishTcpIpRules();
     int32_t EstablishUdpIpRules(const int32_t udpPortId);
@@ -78,7 +78,7 @@ private:
     int32_t GetTcpPort();
 
     bool ReadIptablesInterfaces(const cJSON &json);
-    std::string ReadJsonFile(const std::string &filePath);
+    std::string ReadJsonFile();
     std::vector<std::string> GetTcpIptables();
     std::string GetOutputAddTcp();
     std::vector<std::string> GetUdpIptables();
@@ -98,6 +98,7 @@ private:
     std::vector<std::string> udpIptables_;
     std::string udpOutput_;
     std::vector<std::string> iptablesDeleteCmds_;
+    std::string config_path_ = IPTABLES_CONFIG_PATH;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd
