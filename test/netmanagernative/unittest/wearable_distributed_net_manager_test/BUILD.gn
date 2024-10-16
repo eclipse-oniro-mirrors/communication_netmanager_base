@@ -36,6 +36,7 @@ ohos_unittest("wearable_distributed_net_manager_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/test",
     "$THIRD_PARTY_ROOT/cJSON/include",
+    "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
   ]
 
