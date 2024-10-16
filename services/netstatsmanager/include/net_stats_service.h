@@ -73,6 +73,8 @@ public:
 private:
     bool Init();
     void GetDumpMessage(std::string &message);
+    void MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
+                           uint32_t currentTime);
     bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames);
 
 private:

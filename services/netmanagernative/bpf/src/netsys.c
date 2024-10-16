@@ -179,6 +179,16 @@ static inline net_bear_type_map_value check_socket_fwmark(__u32 mark)
     return net_bear_mark_type;
 }
 
+bpf_map_def SEC("maps") net_bear_type_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(net_bear_id_key),
+    .value_size = sizeof(net_bear_type_map_value),
+    .max_entries = IFACE_NAME_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_type,
                                         uid_access_policy_value *netAccessPolicyValue)
 {
@@ -191,6 +201,21 @@ static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_ty
          (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI)) &&
         (!netAccessPolicyValue->wifiPolicy)) {
         return 0;
+    }
+    if (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_INITIAL) {
+        void *net_bear_map_ptr = &net_bear_type_map;
+        net_bear_id_key net_bear_id = DEFAULT_NETWORK_BEARER_MAP_KEY;
+        net_bear_type_map_value *net_bear_type = bpf_map_lookup_elem(net_bear_map_ptr, &net_bear_id);
+        if (net_bear_type == NULL) {
+            return 1;
+        }
+
+        if (((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR)) && (!netAccessPolicyValue->cellularPolicy)) {
+            return 0;
+        }
+        if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI)) && (!netAccessPolicyValue->wifiPolicy)) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -463,15 +488,6 @@ int inet_release_socket(struct bpf_sock *sk)
     return 1;
 }
 // internet permission end
-bpf_map_def SEC("maps") net_bear_type_map = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(net_bear_id_key),
-    .value_size = sizeof(net_bear_type_map_value),
-    .max_entries = IFACE_NAME_MAP_SIZE,
-    .map_flags = 0,
-    .inner_map_idx = 0,
-    .numa_node = 0,
-};
 
 bpf_map_def SEC("maps") ringbuf_map = {
     .type = BPF_MAP_TYPE_RINGBUF,
@@ -538,9 +554,12 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
+
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -581,10 +600,12 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -625,10 +646,12 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -670,10 +693,12 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -714,10 +739,12 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }
@@ -758,10 +785,12 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
                 value->diagAckFlag = 1;
             }
         }
+        value->netIfIndex = *net_bear_type;
         bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
         return 0;
     }
 
+    value->netIfIndex = *net_bear_type;
     bpf_map_update_elem(map_ptr, &uid, value, BPF_NOEXIST);
     return 1;
 }

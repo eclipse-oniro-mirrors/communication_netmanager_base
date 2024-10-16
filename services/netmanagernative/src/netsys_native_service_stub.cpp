@@ -1882,7 +1882,7 @@ int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, Messag
         return ERR_FLATTEN_OBJECT;
     }
     std::vector<sptr<NetFirewallBaseRule>> ruleList;
-    for (int i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         sptr<NetFirewallBaseRule> rule = nullptr;
         if (ruleType == NetFirewallRuleType::RULE_IP) {
             rule = NetFirewallIpRule::Unmarshalling(data);

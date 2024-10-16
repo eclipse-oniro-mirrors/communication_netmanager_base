@@ -40,7 +40,6 @@ ohos_unittest("net_conn_multi_test") {
     "net_score_test.cpp",
     "network_security_config_test.cpp",
     "network_test.cpp",
-    "probe_thread_test.cpp",
   ]
 
   include_dirs = [
@@ -52,6 +51,8 @@ ohos_unittest("net_conn_multi_test") {
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
@@ -89,6 +90,7 @@ ohos_unittest("net_conn_multi_test") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",

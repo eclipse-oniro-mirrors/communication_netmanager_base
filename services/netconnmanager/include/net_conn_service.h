@@ -39,6 +39,8 @@
 #include "network.h"
 #include "dns_result_call_back.h"
 #include "net_factoryreset_callback.h"
+#include "net_policy_callback_stub.h"
+#include "net_policy_service.h"
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
@@ -63,6 +65,7 @@ class NetConnService : public SystemAbility,
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
     using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
     using NET_UIDREQUEST_MAP = std::map<uint32_t, uint32_t>;
+    using NET_UIDACTIVATE_MAP = std::map<uint32_t, std::vector<std::shared_ptr<NetActivate>>>;
 
 public:
     class NetConnListener : public EventFwk::CommonEventSubscriber {
@@ -356,7 +359,6 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
-    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
@@ -391,6 +393,18 @@ private:
     private:
         std::mutex mutex_;
         std::vector<sptr<INetInterfaceStateCallback>> ifaceStateCallbacks_;
+    };
+
+    class NetPolicyCallback : public NetPolicyCallbackStub {
+    public:
+        NetPolicyCallback(NetConnService &client) : client_(client) {}
+        int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
+
+    private:
+        void SendNetPolicyChange(uint32_t uid, uint32_t policy);
+
+    private:
+        NetConnService &client_;
     };
 
 protected:
@@ -432,8 +446,8 @@ private:
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
-                                     uint32_t &supplierId);
-    int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid);
+                                     uint32_t &supplierId, int32_t callingUid);
+    int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid, int32_t callingUid);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
@@ -442,8 +456,9 @@ private:
     int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
-    int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
-    int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
+    int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo,
+                                       int32_t callingUid);
+    int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo, int32_t callingUid);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
     int32_t UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
@@ -481,7 +496,13 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
-    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier);
+    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    void StopAllNetDetection();
+    void StartAllNetDetection();
+#endif
+    void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
+    void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
@@ -498,6 +519,7 @@ private:
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
+    NET_UIDACTIVATE_MAP netUidActivates_;
     std::atomic<bool> vnicCreated = false;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
@@ -511,6 +533,7 @@ private:
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
     sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
+    sptr<NetPolicyCallback> policyCallback_ = nullptr;
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
@@ -556,6 +579,7 @@ private:
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
+    void HandlePowerMgrEvent(int code);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;

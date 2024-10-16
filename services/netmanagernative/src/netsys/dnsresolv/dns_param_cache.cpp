@@ -19,6 +19,7 @@
 
 #include "netmanager_base_common_utils.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "bpf_netfirewall.h"
 #include "netfirewall_parcel.h"
 #include <ctime>
 #endif
@@ -34,10 +35,6 @@ void GetVectorData(const std::vector<std::string> &data, std::string &result)
 }
 constexpr int RES_TIMEOUT = 5000;    // min. milliseconds between retries
 constexpr int RES_DEFAULT_RETRY = 2; // Default
-
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-constexpr int32_t USER_ID_DIVIDOR  = 200000;
-#endif
 } // namespace
 
 DnsParamCache::DnsParamCache() : defaultNetId_(0) {}
@@ -243,10 +240,22 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     }
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = GetCallingUid();
-    if (IsInterceptDomain(appUid, hostName)) {
+    int32_t appUid = static_cast<int32_t>(GetCallingUid());
+    bool isMatchAllow = false;
+    if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
         DNS_CONFIG_PRINT("SetDnsCache failed: domain was Intercepted: %{public}s,", hostName.c_str());
         return;
+    }
+    if (isMatchAllow && (addrInfo.aiFamily == AF_INET || addrInfo.aiFamily == AF_INET6)) {
+        NetAddrInfo netInfo;
+        netInfo.aiFamily = addrInfo.aiFamily;
+        if (addrInfo.aiFamily == AF_INET) {
+            netInfo.aiAddr.sin = addrInfo.aiAddr.sin.sin_addr;
+        } else {
+            memcpy_s(&netInfo.aiAddr.sin6, sizeof(addrInfo.aiAddr.sin6.sin6_addr), &addrInfo.aiAddr.sin6.sin6_addr,
+                     sizeof(addrInfo.aiAddr.sin6.sin6_addr));
+        }
+        OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->AddDomainCache(netInfo);
     }
 #endif
     auto it = serverConfigMap_.find(netId);
@@ -266,8 +275,9 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
 
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = GetCallingUid();
-    if (IsInterceptDomain(appUid, hostName)) {
+    int32_t appUid = static_cast<int32_t>(GetCallingUid());
+    bool isMatchAllow = false;
+    if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
         NotifyDomianIntercept(appUid, hostName);
         AddrInfo fakeAddr = { 0 };
         fakeAddr.aiFamily = AF_UNSPEC;
@@ -390,6 +400,7 @@ int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
             if (isFinish) {
                 ret = SetFirewallDomainRules(firewallDomainRules_);
                 firewallDomainRules_.clear();
+                OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
             }
             break;
         }
@@ -443,7 +454,7 @@ bool DnsParamCache::checkEmpty4InterceptDomain(const std::string &hostName)
     return !domainDenyLsmTrie_ || domainDenyLsmTrie_->Empty();
 }
 
-bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostName)
+bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostName, bool &isMatchAllow)
 {
     if (checkEmpty4InterceptDomain(hostName)) {
         return false;
@@ -472,11 +483,11 @@ bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostNam
     if (domainDenyLsmTrie_->LongestSuffixMatch(host, rules)) {
         wildcardDenyAction = GetFirewallRuleAction(appUid, rules);
     }
-    bool isAllow = (exactAllowAction != FirewallRuleAction::RULE_INVALID) ||
+    isMatchAllow = (exactAllowAction != FirewallRuleAction::RULE_INVALID) ||
                    (wildcardAllowAction != FirewallRuleAction::RULE_INVALID);
     bool isDeny = (exactDenyAction != FirewallRuleAction::RULE_INVALID) ||
                   (wildcardDenyAction != FirewallRuleAction::RULE_INVALID);
-    if (isAllow) {
+    if (isMatchAllow) {
         // Apply default rules in case of conflict
         return isDeny && (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
     }
@@ -585,6 +596,7 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             if (domainDenyLsmTrie_) {
                 domainDenyLsmTrie_ = nullptr;
             }
+            OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
             break;
         }
         case NetFirewallRuleType::RULE_ALL: {
@@ -599,6 +611,7 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             if (domainDenyLsmTrie_) {
                 domainDenyLsmTrie_ = nullptr;
             }
+            OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
             break;
         }
         default:

@@ -37,6 +37,7 @@
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -273,11 +274,6 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest002, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = NetConnService::GetInstance()->IsIfaceNameInUse("rmnet0", 100);
     EXPECT_FALSE(ret);
-
-    ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 1, netAddr);
-    EXPECT_FALSE(ret);
-    ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 100, netAddr);
-    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
@@ -947,13 +943,14 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     uint32_t supplierId = 0;
     std::string testString = "test";
     int32_t testInt = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::set<NetCap> netCaps;
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
     NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_BLUETOOTH, testString, netCaps, supplierId);
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
     NetConnService::GetInstance()->UpdateGlobalHttpProxy(proxy);
     NetConnService::GetInstance()->OnNetActivateTimeOut(testInt);
-    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId, true);
+    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId, true, callingUid);
     sptr<NetSupplier> supplier = nullptr;
     NetConnService::GetInstance()->CallbackForSupplier(supplier, CallbackType::CALL_TYPE_AVAILABLE);
 
@@ -1074,8 +1071,9 @@ HWTEST_F(NetConnServiceTest, FindSupplierWithInternetByBearerType001, TestSize.L
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
     netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
     uint32_t supplierId = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
-        netCaps, supplierId);
+        netCaps, supplierId, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::vector<sptr<NetSupplier>> suppliers =
@@ -1089,8 +1087,9 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
     netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
     uint32_t supplierId = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
-        netCaps, supplierId);
+        netCaps, supplierId, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
         NetConnService::GetInstance()->netSuppliers_[supplierId]);
@@ -1108,8 +1107,9 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
     netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
     uint32_t supplierId = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
-        netCaps, supplierId);
+        netCaps, supplierId, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
         QUALITY_GOOD_STATE, supplierId);

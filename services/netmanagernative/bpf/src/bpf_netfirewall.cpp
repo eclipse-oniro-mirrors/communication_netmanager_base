@@ -428,7 +428,7 @@ void NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewal
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("sport_map=%{public}d", key);
+            NETNATIVE_LOG_D("sport_map=%{public}u", key);
             WriteBpfMap(GET_MAP_PATH(ingress, sport), key, rule);
         }
     }
@@ -446,7 +446,7 @@ void NetsysBpfNetFirewall::WriteDstPortBpfMap(BitmapManager &manager, NetFirewal
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("dport_map=%{public}d", key);
+            NETNATIVE_LOG_D("dport_map=%{public}u", key);
             WriteBpfMap(GET_MAP_PATH(ingress, dport), key, rule);
         }
     }
@@ -464,7 +464,7 @@ void NetsysBpfNetFirewall::WriteProtoBpfMap(BitmapManager &manager, NetFirewallR
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("proto_map=%{public}d", key);
+            NETNATIVE_LOG_D("proto_map=%{public}u", key);
             WriteBpfMap(GET_MAP_PATH(ingress, proto), key, rule);
         }
     }
@@ -482,7 +482,7 @@ void NetsysBpfNetFirewall::WriteAppUidBpfMap(BitmapManager &manager, NetFirewall
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("appuid_map=%{public}d", key);
+            NETNATIVE_LOG_D("appuid_map=%{public}u", key);
             WriteBpfMap(GET_MAP_PATH(ingress, appuid), key, rule);
         }
     }
@@ -500,7 +500,7 @@ void NetsysBpfNetFirewall::WriteUidBpfMap(BitmapManager &manager, NetFirewallRul
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("uidMap=%{public}d", key);
+            NETNATIVE_LOG_D("uidMap=%{public}u", key);
             WriteBpfMap(GET_MAP_PATH(ingress, uid), key, rule);
         }
     }
@@ -518,7 +518,7 @@ void NetsysBpfNetFirewall::WriteActionBpfMap(BitmapManager &manager, NetFirewall
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("action_map=%{public}d", val.Get()[0]);
+            NETNATIVE_LOG_D("action_map=%{public}u", val.Get()[0]);
             WriteBpfMap(GET_MAP_PATH(ingress, action), key, rule);
         }
     }
@@ -639,31 +639,12 @@ void NetsysBpfNetFirewall::HandleInterceptEvent(InterceptEvent *ev)
 
     NETNATIVE_LOGI("%{public}s intercept: sport=%{public}u dport=%{public}u protocol=%{public}u appuid=%{public}u",
         (ev->dir == INGRESS) ? "ingress" : "egress", ntohs(ev->sport), ntohs(ev->dport), ev->protocol, ev->appuid);
-    if (ev->family == AF_INET) {
-        in_addr in;
-        in.s_addr = ev->ipv4.saddr;
-        NETNATIVE_LOGI("\tsaddr=%{public}s", inet_ntoa(in));
-
-        in.s_addr = ev->ipv4.daddr;
-        NETNATIVE_LOGI("\tdaddr=%{public}s", inet_ntoa(in));
-    } else {
-        char buf[INET6_ADDRSTRLEN] = {};
-        inet_ntop(AF_INET6, &(ev->ipv6.saddr), buf, INET6_ADDRSTRLEN);
-        NETNATIVE_LOGI("\tsaddr6=%{public}s", buf);
-
-        memset_s(buf, INET6_ADDRSTRLEN, 0, INET6_ADDRSTRLEN);
-        inet_ntop(AF_INET6, &(ev->ipv6.daddr), buf, INET6_ADDRSTRLEN);
-        NETNATIVE_LOGI("\tdaddr6=%{public}s", buf);
-    }
 }
 
 void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
 {
     const char *direction = ev->dir == INGRESS ? ">" : "<";
     switch (ev->type) {
-        case DBG_LOOKUP_FAIL:
-            NETNATIVE_LOG_D("bpf map lookup: fail");
-            break;
         case DBG_MATCH_SADDR: {
             in_addr in;
             in.s_addr = ev->arg1;
@@ -699,6 +680,9 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
             break;
         case DBG_CT_LOOKUP:
             NETNATIVE_LOG_D("%{public}s ct lookup status: %{public}u", direction, ev->arg1);
+            break;
+        case DBG_MATCH_DOMAIN:
+            NETNATIVE_LOG_D("egress match domain, action PASS");
             break;
         default:
             break;
@@ -767,6 +751,33 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
         return -1;
     }
     return 0;
+}
+
+void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
+{
+    NETNATIVE_LOGI("AddDomainCache");
+    domain_value value = 1;
+    if (addrInfo.aiFamily == AF_INET) {
+        Ipv4LpmKey key = { 0 };
+        key.prefixlen = IPV4_MAX_PREFIXLEN;
+        key.data = addrInfo.aiAddr.sin.s_addr;
+        WriteBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), key, value);
+    } else {
+        Ipv6LpmKey key = { 0 };
+        key.prefixlen = IPV6_MAX_PREFIXLEN;
+        key.data = addrInfo.aiAddr.sin6;
+        WriteBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), key, value);
+    }
+}
+
+void NetsysBpfNetFirewall::ClearDomainCache()
+{
+    NETNATIVE_LOG_D("ClearDomainCache");
+    Ipv4LpmKey ip4Key = {};
+    Ipv6LpmKey ip6Key = {};
+    domain_value value;
+    ClearBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), ip4Key, value);
+    ClearBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), ip6Key, value);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

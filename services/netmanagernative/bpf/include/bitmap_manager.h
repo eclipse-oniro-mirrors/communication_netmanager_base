@@ -162,12 +162,10 @@ struct BitmapHash {
 };
 
 const uint32_t BIT_PER_BYTE = 8;
-const int32_t IPV6_BIT_COUNT = 128;
-const int32_t IPV4_BIT_COUNT = 32;
-const int32_t IPV6_BYTE_COUNT = 16;
-const int32_t IPV6_SEGMENT_COUNT = 8;
-const int32_t IPV4_MAX_PREFIXLEN = 32;
-const int32_t IPV6_MAX_PREFIXLEN = 128;
+const uint32_t IPV6_BIT_COUNT = 128;
+const uint32_t IPV4_BIT_COUNT = 32;
+const uint32_t IPV6_BYTE_COUNT = 16;
+const uint32_t IPV6_SEGMENT_COUNT = 8;
 const uint32_t VALUE_ONE = 1;
 
 struct Ip4Data {
@@ -223,7 +221,7 @@ public:
      * @return ip mask
      */
 
-    static int32_t GetMask(uint32_t startIp, uint32_t endIp);
+    static uint32_t GetMask(uint32_t startIp, uint32_t endIp);
 
     /**
      * find value of bit from ip4 uint32_t from right to left
@@ -234,7 +232,7 @@ public:
      * @param value find value 0 or 1
      * @return if founded return bit index of ip, otherwise return IPV4_BIT_COUNT
      */
-    static int32_t Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value);
+    static uint32_t Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value);
 
     /**
      * find value of bit from ip4 uint32_t from right to left
@@ -244,7 +242,7 @@ public:
      * @param value find value 0 or 1
      * @return if founded return bit index of ip, otherwise return IPV4_BIT_COUNT
      */
-    static int32_t Find(uint32_t ip, uint32_t start, uint32_t value);
+    static uint32_t Find(uint32_t ip, uint32_t start, uint32_t value);
 
     /**
      * get broadcast ip from mask and ip, set ip to next ip of broadcast
@@ -310,7 +308,7 @@ public:
      * @param value find value 0 or 1
      * @return if founded return index of bit of addr, otherwise return IPV6_BIT_COUNT
      */
-    static int32_t RfindIp6(const in6_addr &addr, uint32_t startBit, uint32_t endBit, uint8_t value);
+    static uint32_t RfindIp6(const in6_addr &addr, uint32_t startBit, uint32_t endBit, uint8_t value);
 
     /**
      * find value of bit from ip6 from right to left
@@ -320,7 +318,7 @@ public:
      * @param value find value 0 or 1
      * @return if founded return bit index of addr, otherwise return IPV6_BIT_COUNT
      */
-    static int32_t FindIp6(const in6_addr &addr, uint32_t startBit, uint8_t value);
+    static uint32_t FindIp6(const in6_addr &addr, uint32_t startBit, uint8_t value);
 };
 
 struct Ip4RuleBitmap {
@@ -733,7 +731,7 @@ public:
         return actionMap_;
     }
 
-    static uint16_t Hltons(int32_t n);
+    static uint16_t Hltons(uint32_t n);
 
     static uint16_t Nstohl(uint16_t n);
 

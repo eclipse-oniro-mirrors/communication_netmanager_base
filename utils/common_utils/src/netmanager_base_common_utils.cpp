@@ -555,8 +555,9 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         helper->parentCv.notify_all();
         NETMGR_LOG_I("waitpid %{public}d done", childPid);
     });
-    std::string threadName = "ExecParentThread";
-    pthread_setname_np(parentThread.native_handle(), threadName.c_str());
+#ifndef CROSS_PLATFORM
+    pthread_setname_np(parentThread.native_handle(), "ExecParentThread");
+#endif
     parentThread.detach();
     const int32_t waitTime = 10;
     std::unique_lock uLock(helper->parentMutex);
