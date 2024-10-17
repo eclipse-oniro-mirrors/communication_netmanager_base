@@ -505,7 +505,9 @@ int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::stri
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    static_cast<unsigned int>(req.arp_flags)|= ATF_COM;
+    auto uFlags = static_cast<unsigned int>(req.arp_flags);
+    uFlags |= ATF_COM;
+    req.arp_flags = static_cast<int>(uFlags);
 
     return NETMANAGER_SUCCESS;
 }
