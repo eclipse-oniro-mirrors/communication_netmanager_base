@@ -88,11 +88,11 @@ std::string WearableDistributedNet::ReadJsonFile()
     std::ifstream infile;
     std::string lineConfigInfo;
     std::string allConfigInfo;
-    if (configpath_.empty()) {
+    if (configPath_.empty()) {
         NETNATIVE_LOGE("Config file path is empty");
         return "";
     }
-    infile.open(configpath_, std::ios::in);
+    infile.open(configPath_, std::ios::in);
     if (!infile.is_open()) {
         NETNATIVE_LOGE("ReadJsonFile filePath failed");
         return allConfigInfo;

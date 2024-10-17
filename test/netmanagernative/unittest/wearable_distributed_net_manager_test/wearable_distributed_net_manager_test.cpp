@@ -290,7 +290,7 @@ HWTEST_F(WearableDistributedNetManagerTest, EnableWearableDistributedNetForward,
 HWTEST_F(WearableDistributedNetManagerTest, ReadSystemIptablesConfiguration, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = createTempFile("");
+    net.configPath_ = createTempFile("");
     bool result = net.ReadSystemIptablesConfiguration();
     EXPECT_FALSE(result);
 }
@@ -298,7 +298,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadSystemIptablesConfiguration, Tes
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = "./path";
+    net.configPath_ = "./path";
     std::string result = net.ReadJsonFile();
     EXPECT_EQ(result, "");
 }
@@ -306,7 +306,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile001, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = createTempFile(R"({"key": "value"})");
+    net.configPath_ = createTempFile(R"({"key": "value"})");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ(R"({"key": "value"})", result);
 }
@@ -314,7 +314,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile001, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile002, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = "non_existent_file.json";
+    net.configPath_ = "non_existent_file.json";
     std::string result = net.ReadJsonFile();
     EXPECT_EQ("", result);
 }
@@ -322,7 +322,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile002, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile003, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = createTempFile("");
+    net.configPath_ = createTempFile("");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ("", result);
 }
@@ -330,7 +330,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile003, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile004, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = createTempFile(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})");
+    net.configPath_ = createTempFile(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})", result);
 }
@@ -338,7 +338,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile004, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile005, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configpath_ = "invalid_file_path.json";
+    net.configPath_ = "invalid_file_path.json";
     std::string expected = "";
     std::string actual = net.ReadJsonFile();
     EXPECT_EQ(expected, actual);

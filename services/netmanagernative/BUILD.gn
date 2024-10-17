@@ -171,7 +171,7 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "NETSYS_DNS_MONITOR=0",
-    "NETWORK_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 
   external_deps = [
@@ -249,7 +249,7 @@ ohos_static_library("netsys_native_manager_static") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "UNITTEST_FORBID_FFRT=1",
-    "NETWORK_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 
   if (build_selinux) {
