@@ -43,7 +43,8 @@ NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullp
     buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
 }
 
-NetConnClient::~NetConnClient() {
+NetConnClient::~NetConnClient()
+{
     DlCloseRemoveDeathRecipient();
 }
 
