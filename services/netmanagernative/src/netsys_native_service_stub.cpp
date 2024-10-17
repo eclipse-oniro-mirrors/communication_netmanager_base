@@ -859,7 +859,9 @@ int32_t NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward(MessageP
     int32_t tcpPort = data.ReadInt32();
     int32_t udpPort = data.ReadInt32();
     int32_t result = EnableWearableDistributedNetForward(tcpPort, udpPort);
-    reply.WriteInt32(result);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
 
     return result;
 }
@@ -868,7 +870,9 @@ int32_t NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward(Message
 {
     NETNATIVE_LOGI("NetsysNativeServiceStub disable wearable distributed net forward");
     int32_t result = DisableWearableDistributedNetForward();
-    reply.WriteInt32(result);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
 
     return result;
 }

@@ -98,7 +98,7 @@ private:
     std::vector<std::string> udpIptables_;
     std::string udpOutput_;
     std::vector<std::string> iptablesDeleteCmds_;
-    std::string config_path_ = IPTABLES_CONFIG_PATH;
+    std::string configPath_ = IPTABLES_CONFIG_PATH;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd

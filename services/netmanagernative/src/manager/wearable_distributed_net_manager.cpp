@@ -88,7 +88,11 @@ std::string WearableDistributedNet::ReadJsonFile()
     std::ifstream infile;
     std::string lineConfigInfo;
     std::string allConfigInfo;
-    infile.open(config_path_);
+    if (configpath_.empty()) {
+        NETNATIVE_LOGE("Config file path is empty");
+        return "";
+    }
+    infile.open(configpath_, std::ios::in);
     if (!infile.is_open()) {
         NETNATIVE_LOGE("ReadJsonFile filePath failed");
         return allConfigInfo;
@@ -169,24 +173,25 @@ bool WearableDistributedNet::ParseIptablesDeleteCmds(const cJSON &json)
 
 bool WearableDistributedNet::ReadIptablesInterfaces(const cJSON &json)
 {
-    auto logErrorAndFail = [&](const char *functionName) {
-        NETNATIVE_LOGE("%{public}s failed", functionName);
-        return false;
-    };
     if (!ParseTcpIptables(json)) {
-        return logErrorAndFail("ParseTcpIptables");
+        NETNATIVE_LOGE("ParseTcpIptables failed");
+        return false;
     }
     if (!ParseTcpOutputRule(json)) {
-        return logErrorAndFail("ParseTcpOutputRule");
+        NETNATIVE_LOGE("ParseTcpOutputRule failed");
+        return false;
     }
     if (!ParseUdpIptables(json)) {
-        return logErrorAndFail("ParseUdpIptables");
+        NETNATIVE_LOGE("ParseUdpIptables failed");
+        return false;
     }
     if (!ParseUdpOutputRule(json)) {
-        return logErrorAndFail("ParseUdpOutputRule");
+        NETNATIVE_LOGE("ParseUdpOutputRule failed");
+        return false;
     }
     if (!ParseIptablesDeleteCmds(json)) {
-        return logErrorAndFail("ParseIptablesDeleteCmds");
+        NETNATIVE_LOGE("ParseIptablesDeleteCmds failed");
+        return false;
     }
     return true;
 }
