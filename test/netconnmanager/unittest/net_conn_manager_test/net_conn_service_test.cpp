@@ -74,6 +74,8 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
+constexpr int32_t MAIN_USERID = 100;
+constexpr int32_t INVALID_USERID = 1;
 
 class TestDnsService : public DnsBaseService {
 public:
@@ -648,11 +650,46 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest014, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest015, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
+    // user is existed, so return succ.
+    httpProxy.SetUserId(MAIN_USERID);
+    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest016, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {TEST_LONG_EXCLUSION_LIST}};
+    // user is not existed, so return error.
+    httpProxy.SetUserId(INVALID_USERID);
+    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
 HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
     HttpProxy getGlobalHttpProxy;
     int32_t ret = NetConnService::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest002, TestSize.Level1)
+{
+    HttpProxy getGlobalHttpProxy;
+    getGlobalHttpProxy.SetUserId(MAIN_USERID);
+    int32_t ret = NetConnService::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest003, TestSize.Level1)
+{
+    HttpProxy getGlobalHttpProxy;
+    getGlobalHttpProxy.SetUserId(INVALID_USERID);
+    int32_t ret = NetConnService::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost().empty());
 }
 
 HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest001, TestSize.Level1)
@@ -671,10 +708,35 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest002, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetCallingUserIdTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest004, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(MAIN_USERID);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest005, TestSize.Level1)
+{
+    int32_t bindNetId = NET_ID;
+    HttpProxy defaultHttpProxy;
+    defaultHttpProxy.SetUserId(INVALID_USERID);
+    int32_t ret = NetConnService::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
 {
     int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    int32_t ret = NetConnService::GetInstance()->GetLocalUserId(userId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetActiveUserIdTest001, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
