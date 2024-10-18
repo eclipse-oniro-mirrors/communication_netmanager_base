@@ -426,7 +426,7 @@ uint32_t IpParamParser::GetMask(uint32_t startIp, uint32_t endIp)
 
 uint32_t IpParamParser::Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value)
 {
-    if (start > end) {
+    if (start > end || end >= IPV4_BIT_COUNT) {
         return IPV4_BIT_COUNT;
     }
     uint32_t startIndex = IPV4_BIT_COUNT - end - 1;
@@ -456,14 +456,14 @@ uint32_t IpParamParser::Find(uint32_t ip, uint32_t start, uint32_t value)
 void IpParamParser::ChangeStart(uint32_t mask, uint32_t &ip)
 {
     bool needSetZero = true;
-    if (mask > IPV4_MAX_PREFIXLEN) {
+    if (mask > IPV4_MAX_PREFIXLEN || mask >= IPV4_BIT_COUNT) {
         return;
     } else if (mask == IPV4_MAX_PREFIXLEN) {
         needSetZero = false;
     }
-    for (int32_t i = 0; i <= (IPV4_BIT_COUNT - 1); ++i) {
+    for (uint32_t i = 0; i <= (IPV4_BIT_COUNT - 1); ++i) {
         uint32_t byte = (1 << i);
-        if (needSetZero && (i <= (IPV4_BIT_COUNT - static_cast<int32_t>(mask) - 1))) {
+        if (needSetZero && (i <= (IPV4_BIT_COUNT - mask - 1))) {
             ip &= (~byte);
             continue;
         }
@@ -587,7 +587,7 @@ uint32_t IpParamParser::FindIp6(const in6_addr &addr, uint32_t startBit, uint8_t
     uint32_t startBits = startBit % BIT_PER_BYTE;
     uint32_t startBytes = startBit / BIT_PER_BYTE;
     for (uint32_t i = startBytes; i < IPV6_BYTE_COUNT; ++i) {
-        int32_t j = (i == startBytes) ? (BIT_PER_BYTE - startBits - 1) : (BIT_PER_BYTE - 1);
+        int32_t j = static_cast<int32_t>((i == startBytes) ? (BIT_PER_BYTE - startBits - 1) : (BIT_PER_BYTE - 1));
         for (; j >= 0; --j) {
             uint8_t tmp = ((addr.s6_addr[i] >> j) & VALUE_ONE);
             if (tmp == value) {
@@ -629,7 +629,7 @@ void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)
     for (int32_t i = static_cast<int32_t>(bytes); i >= 0; --i) {
         for (uint32_t j = 0; j < BIT_PER_BYTE; ++j) {
             uint8_t byte = (1 << j);
-            if (needSetZero && (static_cast<int32_t>(i) == bytes && j <= off)) {
+            if (needSetZero && (i == static_cast<int32_t>(bytes) && j <= off)) {
                 addr.s6_addr[i] &= (~byte);
                 continue;
             }
