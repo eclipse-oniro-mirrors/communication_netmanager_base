@@ -2890,11 +2890,12 @@ int32_t NetsysNativeServiceProxy::EnableWearableDistributedNetForward(const int3
     }
     MessageParcel reply;
     MessageOption option;
-    if (Remote() == nullptr) {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
         NETNATIVE_LOGE("Remote is null in EnableWearableDistributedNetForward");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = remote->SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
         data, reply, option);
     if (ret != ERR_NONE) {
@@ -2914,11 +2915,12 @@ int32_t NetsysNativeServiceProxy::DisableWearableDistributedNetForward()
     }
     MessageParcel reply;
     MessageOption option;
-    if (Remote() == nullptr) {
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
         NETNATIVE_LOGE("Remote is null in DisableWearableDistributedNetForward");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    int32_t ret = Remote()->SendRequest(
+    int32_t ret = remote->SendRequest(
         static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
         data, reply, option);
     if (ret != ERR_NONE) {
