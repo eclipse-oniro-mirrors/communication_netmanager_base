@@ -463,7 +463,7 @@ void IpParamParser::ChangeStart(uint32_t mask, uint32_t &ip)
     }
     for (uint32_t i = 0; i <= (IPV4_BIT_COUNT - 1); ++i) {
         uint32_t byte = (1 << i);
-        if (needSetZero && (i <= (IPV4_BIT_COUNT - mask- 1))) {
+        if (needSetZero && (i <= (IPV4_BIT_COUNT - mask - 1))) {
             ip &= (~byte);
             continue;
         }
