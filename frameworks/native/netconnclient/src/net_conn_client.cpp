@@ -43,7 +43,10 @@ NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullp
     buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
 }
 
-NetConnClient::~NetConnClient() {}
+NetConnClient::~NetConnClient()
+{
+    DlCloseRemoveDeathRecipient();
+}
 
 NetConnClient &NetConnClient::GetInstance()
 {
@@ -584,6 +587,24 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
     }
+}
+
+void NetConnClient::DlCloseRemoveDeathRecipient()
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return;
+    }
+
+    auto serviceRemote = proxy->AsObject();
+    if (serviceRemote == nullptr) {
+        NETMGR_LOG_E("serviceRemote is nullptr");
+        return;
+    }
+
+    serviceRemote->RemoveDeathRecipient(deathRecipient_);
+    NETMGR_LOG_I("RemoveDeathRecipient success");
 }
 
 int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)

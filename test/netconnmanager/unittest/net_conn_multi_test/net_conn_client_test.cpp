@@ -1468,6 +1468,7 @@ HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
     int32_t netId = 100;
     uint32_t uid = 20020157;
     int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
+    NetConnClient::GetInstance().DlCloseRemoveDeathRecipient();
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard
