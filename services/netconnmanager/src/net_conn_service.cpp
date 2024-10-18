@@ -824,12 +824,12 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     locker.unlock();
+    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
+    FindBestNetworkForAllRequest();
+    
     if (oldHttpProxy != netLinkInfo->httpProxy_) {
         SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
     }
-
-    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
-    FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetLinkInfo service out.");
     return NETMANAGER_SUCCESS;
 }
