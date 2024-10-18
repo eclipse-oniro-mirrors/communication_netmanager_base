@@ -1429,6 +1429,26 @@ int32_t NetsysController::UnRegisterNetFirewallCallback(const sptr<NetsysNative:
 }
 #endif
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysController::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("NetsysService is null in EnableWearableDistributedNetForward");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
+}
+
+int32_t NetsysController::DisableWearableDistributedNetForward()
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("NetsysService is null in DisableWearableDistributedNetForward");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DisableWearableDistributedNetForward();
+}
+#endif
+
 int32_t NetsysController::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     // LCOV_EXCL_START This will never happen.

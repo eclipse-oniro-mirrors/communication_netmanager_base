@@ -25,7 +25,7 @@
         "features": [
             "netmanager_base_enable_netsys_access_policy_diag_listen",
             "netmanager_base_enable_feature_net_firewall",
-            "netmanager_base_enable_feature_net_bluetooth",
+            "netmanager_base_enable_feature_wearable_distributed_net",
             "netmanager_base_enable_feature_sysvpn",
             "netmanager_base_enable_feature_hosts",
             "netmanager_base_feature_support_powermanager"
@@ -115,6 +115,7 @@
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
                     "//foundation/communication/netmanager_base/services/etc/init:initHosts",
+                    "//foundation/communication/netmanager_base/services/etc/init:wearable_distributed_net_forward",
                     "//foundation/communication/netmanager_base/services/etc/init:detectionconfig.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:hosts_lnk",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",

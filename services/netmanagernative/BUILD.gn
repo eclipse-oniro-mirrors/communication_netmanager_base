@@ -30,10 +30,16 @@ config("netsys_native_manager_config") {
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include/netsys",
   ]
 
+  defines = []
   if (netmanager_base_enable_feature_net_firewall) {
-    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 }
 
@@ -112,6 +118,11 @@ if (netmanager_base_enable_feature_net_firewall) {
   ]
 }
 
+if (netmanager_base_enable_feature_wearable_distributed_net) {
+  netsys_native_manager_sources +=
+      [ "src/manager/wearable_distributed_net_manager.cpp" ]
+}
+
 ohos_shared_library("netsys_native_manager") {
   sanitize = {
     cfi = true
@@ -160,9 +171,11 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "NETSYS_DNS_MONITOR=0",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
@@ -221,6 +234,7 @@ ohos_static_library("netsys_native_manager_static") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
@@ -235,6 +249,7 @@ ohos_static_library("netsys_native_manager_static") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "UNITTEST_FORBID_FFRT=1",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 
   if (build_selinux) {
@@ -307,6 +322,7 @@ ohos_shared_library("netsys_client") {
   deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
   ]

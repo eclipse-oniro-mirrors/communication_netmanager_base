@@ -30,7 +30,7 @@
 #include "net_specifier.h"
 #include "net_supplier_info.h"
 
-#ifdef FEATURE_NET_BLUETOOTH_ENABLE
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 #define BLUETOOTH_SCORE_FACTOR 8
 #else
 #define BLUETOOTH_SCORE_FACTOR 5

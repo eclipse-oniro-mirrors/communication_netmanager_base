@@ -1616,6 +1616,30 @@ int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNativ
 }
 #endif
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeClient::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    NETMGR_LOG_I("Enabling wearable distributed net forward for TCP port and UDP port");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
+}
+
+int32_t NetsysNativeClient::DisableWearableDistributedNetForward()
+{
+    NETMGR_LOG_I("Disabling wearable distributed net forward");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DisableWearableDistributedNetForward();
+}
+#endif
+
 int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     auto proxy = GetProxy();

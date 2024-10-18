@@ -180,6 +180,10 @@ public:
     virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
     virtual int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
 #endif
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    virtual int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) = 0;
+    virtual int32_t DisableWearableDistributedNetForward() = 0;
+#endif
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,

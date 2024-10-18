@@ -40,4 +40,7 @@ group("unittest") {
       "netsys_netfirewall_test:suffix_match_trie_test",
     ]
   }
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    deps += [ "wearable_distributed_net_manager_test:wearable_distributed_net_manager_test" ]
+  }
 }

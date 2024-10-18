@@ -90,3 +90,9 @@ group("hosts_lnk") {
     deps = [ ":hosts" ]
   }
 }
+
+ohos_prebuilt_etc("wearable_distributed_net_forward") {
+  source = "wearable_distributed_net_forward.json"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}

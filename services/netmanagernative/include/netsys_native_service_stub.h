@@ -156,6 +156,10 @@ private:
     int32_t CmdRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNetFirewallCallback(MessageParcel &data, MessageParcel &reply);
 #endif
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    int32_t CmdEnableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDisableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply);
+#endif
     int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);

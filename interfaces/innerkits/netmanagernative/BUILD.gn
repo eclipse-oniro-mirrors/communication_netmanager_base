@@ -26,6 +26,7 @@ config("net_native_manager_if_config") {
   ]
 
   cflags = []
+  defines = []
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
@@ -39,7 +40,10 @@ config("net_native_manager_if_config") {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
   if (netmanager_base_enable_feature_net_firewall) {
-    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 }
 

@@ -141,8 +141,8 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "SYS_FUNC" ]
   }
 
-  if (netmanager_base_enable_feature_net_bluetooth) {
-    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
   if (netmanager_base_feature_support_powermanager) {

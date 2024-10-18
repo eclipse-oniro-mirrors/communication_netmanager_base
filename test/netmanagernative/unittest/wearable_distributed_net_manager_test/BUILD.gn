@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_executable("test_netsys_native_manager") {
+ohos_unittest("wearable_distributed_net_manager_test") {
+  module_out_path = "netmanager_base/netsys_native_manager_test"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -23,25 +25,30 @@ ohos_executable("test_netsys_native_manager") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [
-    "network_route.cpp",
-    "resolver_config.cpp",
-    "test.cpp",
-    "test_notify_callback.cpp",
-  ]
+  sources = [ "wearable_distributed_net_manager_test.cpp" ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/test",
+    "$THIRD_PARTY_ROOT/cJSON/include",
+    "$INNERKITS_ROOT/include",
+    "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
   ]
 
-  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static" ]
+  deps = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+  ]
 
   external_deps = [
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
     "ffrt:libffrt",
@@ -53,7 +60,16 @@ ohos_executable("test_netsys_native_manager") {
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
 
   external_deps += [ "hilog:libhilog" ]
 

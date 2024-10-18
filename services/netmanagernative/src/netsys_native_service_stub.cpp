@@ -107,6 +107,12 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD)] =
+        &NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD)] =
+        &NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward;
+#endif
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
@@ -845,6 +851,32 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
 
     return result;
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeServiceStub::CmdEnableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub enable wearable distributed net forward");
+    int32_t tcpPort = data.ReadInt32();
+    int32_t udpPort = data.ReadInt32();
+    int32_t result = EnableWearableDistributedNetForward(tcpPort, udpPort);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDisableWearableDistributedNetForward(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceStub disable wearable distributed net forward");
+    int32_t result = DisableWearableDistributedNetForward();
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    return result;
+}
+#endif
 
 int32_t NetsysNativeServiceStub::CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply)
 {

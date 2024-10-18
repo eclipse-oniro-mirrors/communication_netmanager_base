@@ -2875,6 +2875,63 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetFirewallCallback(const sptr<INetF
 }
 #endif
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+int32_t NetsysNativeServiceProxy::EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(tcpPortId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(udpPortId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null in EnableWearableDistributedNetForward");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("EnableWearableDistributedNetForward SendRequest failed");
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::DisableWearableDistributedNetForward()
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy DisableWearableDistributedNetForward");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null in DisableWearableDistributedNetForward");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_WEARABLE_DISTRIBUTED_NET_FORWARD),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("DisableWearableDistributedNetForward SendRequest failed");
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+#endif
+
 int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     NETNATIVE_LOGI("Begin to SetIpv6PrivacyExtensions");

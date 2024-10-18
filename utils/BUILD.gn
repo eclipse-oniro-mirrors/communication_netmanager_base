@@ -76,8 +76,8 @@ ohos_shared_library("net_manager_common") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (netmanager_base_enable_feature_net_bluetooth) {
-    defines += [ "FEATURE_NET_BLUETOOTH_ENABLE" ]
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
 
   if (is_standard_system) {

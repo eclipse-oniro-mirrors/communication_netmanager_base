@@ -32,6 +32,9 @@
 #include "sharing_manager.h"
 #include "uid_range.h"
 #include "net_all_capabilities.h"
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+#include "wearable_distributed_net_manager.h"
+#endif
 
 namespace OHOS {
 namespace nmd {
@@ -148,6 +151,10 @@ public:
     int32_t RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
     int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
+    int32_t DisableWearableDistributedNetForward();
+#endif
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
@@ -157,6 +164,9 @@ private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;
     std::shared_ptr<FirewallManager> firewallManager_ = nullptr;
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    std::shared_ptr<WearableDistributedNet> wearableDistributedNet_ = nullptr;
+#endif
     std::shared_ptr<RouteManager> routeManager_ = nullptr;
     std::shared_ptr<InterfaceManager> interfaceManager_ = nullptr;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
