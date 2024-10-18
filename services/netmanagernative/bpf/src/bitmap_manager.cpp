@@ -426,7 +426,7 @@ uint32_t IpParamParser::GetMask(uint32_t startIp, uint32_t endIp)
 
 uint32_t IpParamParser::Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value)
 {
-    if (start > end) {
+    if (start > end || end >= IPV4_BIT_COUNT) {
         return IPV4_BIT_COUNT;
     }
     uint32_t startIndex = IPV4_BIT_COUNT - end - 1;
@@ -456,14 +456,14 @@ uint32_t IpParamParser::Find(uint32_t ip, uint32_t start, uint32_t value)
 void IpParamParser::ChangeStart(uint32_t mask, uint32_t &ip)
 {
     bool needSetZero = true;
-    if (mask > IPV4_MAX_PREFIXLEN) {
+    if (mask > IPV4_MAX_PREFIXLEN || mask >= IPV4_BIT_COUNT) {
         return;
     } else if (mask == IPV4_MAX_PREFIXLEN) {
         needSetZero = false;
     }
-    for (int32_t i = 0; i <= static_cast<int32_t>(IPV4_BIT_COUNT - 1); ++i) {
+    for (uint32_t i = 0; i <= (IPV4_BIT_COUNT - 1); ++i) {
         uint32_t byte = (1 << i);
-        if (needSetZero && (i <= static_cast<int32_t>(IPV4_BIT_COUNT - mask - 1))) {
+        if (needSetZero && (i <= (IPV4_BIT_COUNT - mask- 1))) {
             ip &= (~byte);
             continue;
         }
