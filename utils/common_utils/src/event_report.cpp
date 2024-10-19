@@ -57,6 +57,7 @@ void EventReport::SendSupplierBehaviorEvent(const EventInfo &eventInfo)
     HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_SUPPLER_STAT, HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_NET_SUPPLIER_REGISTER_BEARERTYPE, eventInfo.bearerType, EVENT_KEY_NET_SUPPLIER_REGISTER_IDENT,
         eventInfo.ident, EVENT_KEY_NET_SUPPLIER_REGISTER_SUPPLIERID, eventInfo.supplierId,
+        EVENT_KEY_NET_MONITOR_NETID, eventInfo.netId,
         EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERID, eventInfo.updateSupplierId,
         EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO, eventInfo.supplierInfo, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID,
         eventInfo.updateNetlinkId, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO, eventInfo.netlinkInfo);
