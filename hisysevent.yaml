@@ -37,6 +37,7 @@ NET_CONN_SUPPLER_FAULT:
 
 NET_CONN_SUPPLER_STAT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: send supplier behavior event}
+  NETID: {type: INT32, desc: net id}
   REGISTER_BEARERTYPE: {type: INT32, desc: register bearer type code}
   REGISTER_IDENT: {type: STRING, desc: register ident code}
   REGISTER_SUPPLIERID: {type: INT32, desc: register supplier id}

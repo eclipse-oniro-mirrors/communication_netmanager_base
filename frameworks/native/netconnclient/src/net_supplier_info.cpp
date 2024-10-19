@@ -129,45 +129,35 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &o
 
 std::string NetSupplierInfo::ToString(const std::string &tab) const
 {
-    std::string str;
-    str.append(tab);
-    str.append("[NetSupplierInfo]");
+    std::string str = "{";
+    str.append(tab).append("isAvailable_");
+    str.append(tab).append(":").append(std::to_string(isAvailable_)).append(",");
 
-    str.append(tab);
-    str.append("isAvailable_ = ");
-    str.append(std::to_string(isAvailable_));
+    str.append(tab).append("isRoaming_");
+    str.append(tab).append(":").append(std::to_string(isRoaming_)).append(",");
 
-    str.append(tab);
-    str.append("isRoaming_ = ");
-    str.append(std::to_string(isRoaming_));
+    str.append(tab).append("strength_");
+    str.append(tab).append(":").append(std::to_string(strength_)).append(",");
 
-    str.append(tab);
-    str.append("strength_ = ");
-    str.append(std::to_string(strength_));
+    str.append(tab).append("frequency_");
+    str.append(tab).append(":").append(std::to_string(frequency_)).append(",");
 
-    str.append(tab);
-    str.append("frequency_ = ");
-    str.append(std::to_string(frequency_));
+    str.append(tab).append("linkUpBandwidthKbps_");
+    str.append(tab).append(":").append(std::to_string(linkUpBandwidthKbps_)).append(",");
 
-    str.append(tab);
-    str.append("linkUpBandwidthKbps_ = ");
-    str.append(std::to_string(linkUpBandwidthKbps_));
+    str.append(tab).append("linkDownBandwidthKbps_");
+    str.append(tab).append(":").append(std::to_string(linkDownBandwidthKbps_)).append(",");
 
-    str.append(tab);
-    str.append("linkDownBandwidthKbps_ = ");
-    str.append(std::to_string(linkDownBandwidthKbps_));
+    str.append(tab).append("uid_");
+    str.append(tab).append(":").append(std::to_string(uid_)).append(",");
 
-    str.append(tab);
-    str.append("uid_ = ");
-    str.append(std::to_string(uid_));
+    if (!ident_.empty()) {
+        str.append(tab).append("ident_");
+        str.append(tab).append(":").append(ident_).append(",");
+    }
 
-    str.append(tab);
-    str.append("ident_ = ");
-    str.append(ident_);
-
-    str.append(tab);
-    str.append("score_ = ");
-    str.append(std::to_string(score_));
+    str.append(tab).append("score_");
+    str.append(tab).append(":").append(std::to_string(score_)).append("}");
 
     return str;
 }

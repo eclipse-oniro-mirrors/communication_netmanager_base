@@ -872,8 +872,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         EventReport::SendSupplierFaultEvent(eventInfo);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    eventInfo.supplierInfo = netSupplierInfo->ToString(" ");
-    EventReport::SendSupplierBehaviorEvent(eventInfo);
+    eventInfo.supplierInfo = netSupplierInfo->ToString("\"");
 
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
@@ -889,6 +888,9 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
                      supplier->GetUid(), callingUid);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    eventInfo.bearerType = supplier->GetNetSupplierType();
+    eventInfo.netId = supplier->GetNetId();
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
     NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
                  supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
 
@@ -922,7 +924,6 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     eventInfo.netlinkInfo = netLinkInfo->ToString(" ");
-    EventReport::SendSupplierBehaviorEvent(eventInfo);
 
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
@@ -938,6 +939,9 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
                      supplier->GetUid(), callingUid);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    eventInfo.bearerType = supplier->GetNetSupplierType();
+    eventInfo.netId = supplier->GetNetId();
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
     HttpProxy oldHttpProxy;
     supplier->GetHttpProxy(oldHttpProxy);
     // According to supplier id, get network from the list
