@@ -20,6 +20,7 @@
 
 #include "event_handler.h"
 #include "ffrt.h"
+#include "dns_config_client.h"
 
 namespace OHOS {
 namespace nmd {
@@ -45,6 +46,7 @@ private:
     static void ProcCommand(int clientSockFd);
     static int32_t ProcGetKeyForCache(int clientSockFd, char *name);
     static bool ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid);
+    static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
 
     int32_t serverSockFd_;
 };
