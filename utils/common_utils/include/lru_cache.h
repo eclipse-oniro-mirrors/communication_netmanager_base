@@ -23,7 +23,7 @@
 #include <vector>
 
 namespace OHOS::NetManagerStandard {
-static constexpr const size_t DEFAULT_CAPABILITY = 100;
+static constexpr const size_t DEFAULT_CAPABILITY = 600;
 template <typename T> class LRUCache {
 public:
     LRUCache() : capacity_(DEFAULT_CAPABILITY) {}

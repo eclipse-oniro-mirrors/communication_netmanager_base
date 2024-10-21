@@ -26,7 +26,7 @@
 #include "lru_cache.h"
 
 namespace OHOS::nmd {
-static constexpr size_t DEFAULT_DELAYED_COUNT = 30;
+static constexpr size_t DEFAULT_DELAYED_COUNT = 60 * 10;
 
 class DnsResolvConfig {
 public:

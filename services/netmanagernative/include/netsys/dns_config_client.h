@@ -34,7 +34,7 @@ extern "C" {
 #define DNS_CONFIG_PRINT(fmt, ...)
 #endif
 
-#define MAX_SERVER_NUM 4
+#define MAX_SERVER_NUM 5
 #define MAX_SERVER_LENGTH 50
 #define DNS_SOCKET_PATH "/dev/unix/socket/dnsproxyd"
 #define DNS_SOCKET_NAME "dnsproxyd"
