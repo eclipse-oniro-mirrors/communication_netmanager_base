@@ -119,7 +119,7 @@ int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const st
 }
 
 int32_t RouteManager::AddRoute(TableType tableType, const std::string &interfaceName,
-                               const std::string &destinationName, const std::string &nextHop)
+                               const std::string &destinationName, const std::string &nextHop, bool& routeRepeat)
 {
     NETNATIVE_LOGI("AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
@@ -130,7 +130,13 @@ int32_t RouteManager::AddRoute(TableType tableType, const std::string &interface
         return -1;
     }
 
-    return UpdateRouteRule(RTM_NEWROUTE, NLM_F_CREATE | NLM_F_EXCL, routeInfo);
+    int32_t ret = UpdateRouteRule(RTM_NEWROUTE, NLM_F_CREATE | NLM_F_EXCL, routeInfo);
+    if (ret == EEXIST) {
+        routeRepeat = true;
+    } else {
+        routeRepeat = false;
+    }
+    return ret;
 }
 
 int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interfaceName,
@@ -709,7 +715,8 @@ int32_t RouteManager::AddClatTunInterface(const std::string &interfaceName, cons
 {
     NETNATIVE_LOGI("AddClatTunInterface, interfaceName:%{public}s; dstAddr:%{public}s; nxtHop:%{public}s;",
                    interfaceName.c_str(), dstAddr.c_str(), nxtHop.c_str());
-    if (int32_t ret = AddRoute(RouteManager::INTERFACE, interfaceName, dstAddr, nxtHop)) {
+    bool routeRepeat = false;
+    if (int32_t ret = AddRoute(RouteManager::INTERFACE, interfaceName, dstAddr, nxtHop, routeRepeat)) {
         NETNATIVE_LOGE("AddRoute err, error is %{public}d", ret);
         return ret;
     }

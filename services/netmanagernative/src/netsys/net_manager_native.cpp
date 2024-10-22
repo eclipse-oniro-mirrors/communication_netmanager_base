@@ -177,8 +177,9 @@ int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string ad
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
                                           std::string nextHop)
 {
-    auto ret = connManager_->AddRoute(netId, interfaceName, destination, nextHop);
-    if (!ret) {
+    bool routeRepeat = false;
+    auto ret = connManager_->AddRoute(netId, interfaceName, destination, nextHop, routeRepeat);
+    if (!ret || routeRepeat) {
         dnsManager_->EnableIpv6(netId, destination, nextHop);
     }
     return ret;
@@ -283,7 +284,8 @@ nmd::MarkMaskParcel NetManagerNative::GetFwmarkForNetwork(int32_t netId)
 
 int32_t NetManagerNative::NetworkAddRouteParcel(int32_t netId, RouteInfoParcel parcel)
 {
-    return connManager_->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
+    bool routeRepeat = false;
+    return connManager_->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop, routeRepeat);
 }
 
 int32_t NetManagerNative::NetworkRemoveRouteParcel(int32_t netId, RouteInfoParcel parcel)

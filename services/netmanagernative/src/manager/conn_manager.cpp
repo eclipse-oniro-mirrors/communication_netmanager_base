@@ -302,9 +302,10 @@ int32_t ConnManager::ReinitRoute()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t ConnManager::AddRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
+int32_t ConnManager::AddRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop,
+                              bool& routeRepeat)
 {
-    return RouteManager::AddRoute(GetTableType(netId), interfaceName, destination, nextHop);
+    return RouteManager::AddRoute(GetTableType(netId), interfaceName, destination, nextHop, routeRepeat);
 }
 
 int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
