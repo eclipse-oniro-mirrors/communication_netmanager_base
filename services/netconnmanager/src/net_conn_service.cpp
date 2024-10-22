@@ -58,6 +58,7 @@ constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_SPECIFIER = "The parameter of netSpecifier or callback is null";
 constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier by id:";
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
+constexpr const char *ERROR_MSG_UPDATE_ERROR_UID = "Update net link info by error uid";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *HTTP_URL_HEADER = "HttpProbeUrl:";
@@ -648,7 +649,15 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
 int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid)
 {
     int32_t uid = supplier->GetUid();
-    return uid != callingUid ? NETMANAGER_ERR_INVALID_PARAMETER : NETMANAGER_SUCCESS;
+    if (uid != callingUid) {
+        struct EventInfo eventInfo = {
+            .errorType = static_cast<int32_t>(NETMANAGER_ERR_INVALID_PARAMETER),
+            .errorMsg = std::string(ERROR_MSG_UPDATE_ERROR_UID) +
+                        std::to_string(callingUid)
+        };
+        EventReport::SendSupplierFaultEvent(eventInfo);
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
