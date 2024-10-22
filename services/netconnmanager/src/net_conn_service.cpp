@@ -650,7 +650,7 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
 {
     int32_t uid = supplier->GetUid();
     if (uid != callingUid) {
-        struct EventInfo eventInfo = {.errorType = static_cast<int32_t>(NETMANAGER_ERR_INVALID_PARAMETER);
+        struct EventInfo eventInfo = {.errorType = static_cast<int32_t>(NETMANAGER_ERR_INVALID_PARAMETER),
              .errorMsg = std::string(ERROR_MSG_UPDATE_ERROR_UID).append(std::to_string(callingUid))};
         EventReport::SendSupplierFaultEvent(eventInfo);
     }
