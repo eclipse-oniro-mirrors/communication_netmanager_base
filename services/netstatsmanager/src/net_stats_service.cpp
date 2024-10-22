@@ -514,7 +514,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
         if (uid != info.uid_ || ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
         }
-        if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED)
+        if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
             return;
         }
         MergeTrafficStats(infos, info, end);
