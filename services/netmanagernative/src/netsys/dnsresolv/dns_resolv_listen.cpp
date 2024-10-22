@@ -17,7 +17,6 @@
 #include <sys/stat.h>
 #include <thread>
 
-#include "dns_config_client.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
 #include "dns_param_cache.h"
@@ -32,9 +31,11 @@
 #include "dns_resolv_listen.h"
 #include "dns_quality_diag.h"
 #include "fwmark_client.h"
+#include "parameters.h"
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
+const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_backup";
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
@@ -75,7 +76,8 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uin
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
-        for (size_t i = 0; i < std::min<size_t>(MAX_SERVER_NUM, servers.size()); i++) {
+        size_t i = 0;
+        for (; i < std::min<size_t>(MAX_SERVER_NUM - 1, servers.size()); i++) {
             if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), servers[i].c_str(),
                          servers[i].length()) < 0) {
                 DNS_CONFIG_PRINT("mem copy failed");
@@ -83,6 +85,8 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uin
             }
             DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
         }
+        // the last one is for baidu DNS Server
+        AddPublicDnsServers(sendData, i);
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfig))) {
         DNS_CONFIG_PRINT("send failed");
@@ -392,5 +396,26 @@ void DnsResolvListen::StartListen()
         }
         this->ProcCommand(clientSockFd);
     }
+}
+
+void DnsResolvListen::AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize)
+{
+    std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
+    size_t i = 0;
+    for (; i < serverSize; i++) {
+        if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
+            return;
+        }
+    }
+    if (i >= MAX_SERVER_NUM) {
+        NETNATIVE_LOGI("Invalid serverSize or mPublicDns already exists");
+        return;
+    }
+    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), publicDnsServer.c_str(),
+            publicDnsServer.length() + 1) != ERR_OK) {
+        DNS_CONFIG_PRINT("mem copy failed");
+        return;
+    }
+    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 } // namespace OHOS::nmd
