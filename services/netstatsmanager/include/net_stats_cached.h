@@ -40,6 +40,8 @@ public:
 
     void ForceDeleteStats(uint32_t uid);
 
+    void ForceArchiveStats(uint32_t uid);
+
     int32_t StartCached();
 
     void SetCycleThreshold(uint32_t threshold);
@@ -223,7 +225,7 @@ private:
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
-
+    std::atomic<int64_t> uninstalledUid_ = -1;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
 
     void LoadIfaceNameIdentMaps();

@@ -128,6 +128,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     if (paramCount == UID_PARAM_NUM) {
         statement_.BindText(++idx, info.ident_);
     }
+    statement_.BindInt64(++idx, info.flag_);
     ret = statement_.Step();
     statement_.ResetStatementAndClearBindings();
     if (ret != SQLITE_DONE) {
@@ -371,6 +372,7 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
         if (statement_.GetColumnCount() == UID_PARAM_NUM) {
             statement_.GetColumnString(++i, info.ident_);
         }
+        statement_.GetColumnInt(++i, info.flag_);
         infos.emplace_back(info);
         rc = statement_.Step();
         NETMGR_LOG_D("Step result:%{public}d", rc);
@@ -405,6 +407,14 @@ int32_t NetStatsDatabaseHelper::Upgrade()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_2);
     }
+    ret = ExecTableUpgrade(UID_TABLE, Version_3);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_TABLE, Version_3);
+    }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_3);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_3);
+    }
     return ret;
 }
 
@@ -435,6 +445,14 @@ int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, T
             NETMGR_LOG_E("ExecTableUpgrade Version_2 failed. ret = %{public}d", ret);
         }
         oldVersion = Version_2;
+    }
+    if (oldVersion < Version_3 && newVersion >= Version_3) {
+        std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Flag INTEGER NOT NULL DEFAULT 0;";
+        ret = ExecSql(sql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade version_3 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_3;
     }
     if (oldVersion != newVersion) {
         NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
@@ -479,6 +497,13 @@ int32_t NetStatsDatabaseHelper::UpdateTableVersion(TableVersion version, const s
 {
     std::string sql = "INSERT OR REPLACE INTO "+ std::string(VERSION_TABLE) + "(Name, Version) VALUES('" +
                       tableName + "', " + std::to_string(version) + ");";
+    return ExecSql(sql, nullptr, sqlCallback);
+}
+
+int32_t NetStatsDatabaseHelper::UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag)
+{
+    std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(flag) +
+                      " WHERE UID = " + std::to_string(uid);
     return ExecSql(sql, nullptr, sqlCallback);
 }
 } // namespace NetManagerStandard

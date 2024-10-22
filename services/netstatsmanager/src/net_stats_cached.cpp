@@ -78,8 +78,9 @@ void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStats
     std::lock_guard<ffrt::mutex> lock(lock_);
     std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
                    std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
-                       info.uid_ = Sim_UID;
-                       return info;
+                       NetStatsInfo tmpInfo = info;
+                       tmpInfo.uid_ = Sim_UID;
+                       return tmpInfo;
                    });
 }
 
@@ -339,6 +340,11 @@ void NetStatsCached::WriteUidStats()
     if (!(CheckUidStor() || isForce_)) {
         return;
     }
+    std::for_each(stats_.GetUidStatsInfo().begin(), stats_.GetUidStatsInfo().end(), [this](NetStatsInfo &info) {
+        if (info.uid_ == uninstalledUid_) {
+            info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+        }
+    });
     auto handler = std::make_unique<NetStatsDataHandler>();
     handler->WriteStatsData(stats_.GetUidStatsInfo(), NetStatsDatabaseDefines::UID_TABLE);
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
@@ -350,6 +356,11 @@ void NetStatsCached::WriteUidSimStats()
     if (!(CheckUidSimStor() || isForce_)) {
         return;
     }
+    std::for_each(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(), [this](NetStatsInfo &info) {
+        if (info.uid_ == uninstalledUid_) {
+            info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+        }
+    });
     auto handler = std::make_unique<NetStatsDataHandler>();
     handler->WriteStatsData(stats_.GetUidSimStatsInfo(), NetStatsDatabaseDefines::UID_SIM_TABLE);
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_SIM_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
@@ -409,6 +420,24 @@ void NetStatsCached::ForceDeleteStats(uint32_t uid)
     uidPushStatsInfo_.erase(std::remove_if(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(),
                                            [uid](const auto &item) { return item.uid_ == uid; }),
                             uidPushStatsInfo_.end());
+}
+
+void NetStatsCached::ForceArchiveStats(uint32_t uid)
+{
+    std::function<void()> netCachedStats = [this, uid]() {
+        CacheStats();
+        {
+            std::lock_guard<ffrt::mutex> lock(lock_);
+            isForce_ = true;
+            uninstalledUid_ = uid;
+            WriteUidStats();
+            WriteUidSimStats();
+            uninstalledUid_ = -1;
+            isForce_ = false;
+        }
+        ForceDeleteStats(uid);
+    };
+    ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetForceArchiveStats"));
 }
 
 void NetStatsCached::Reset() {}
