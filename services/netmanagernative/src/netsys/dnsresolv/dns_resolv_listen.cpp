@@ -31,9 +31,11 @@
 #include "dns_resolv_listen.h"
 #include "dns_quality_diag.h"
 #include "fwmark_client.h"
+#include "parameters.h"
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
+const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers.baidu";
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
@@ -398,14 +400,10 @@ void DnsResolvListen::StartListen()
 
 void DnsResolvListen::AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize)
 {
-    char mPublicDns[MAX_SERVER_LENGTH + 1]{};
-    if (sprintf_s(mPublicDns, sizeof(mPublicDns), "%s.%s.%s.%s", "180", "76", "76", "76") < 0) {
-        DNS_CONFIG_PRINT("mPublicDns init failed");
-        return;
-    }
+    std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
     size_t i = 0;
     for (; i < serverSize; i++) {
-        if (strcmp(sendData.nameservers[i], mPublicDns) == 0) {
+        if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
             return;
         }
     }
@@ -413,8 +411,8 @@ void DnsResolvListen::AddPublicDnsServers(ResolvConfig &sendData, size_t serverS
         NETNATIVE_LOGI("Invalid serverSize or mPublicDns already exists");
         return;
     }
-    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), mPublicDns,
-            sizeof(mPublicDns)) < 0) {
+    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), publicDnsServer.c_str(),
+            publicDnsServer.length() + 1) != ERR_OK) {
         DNS_CONFIG_PRINT("mem copy failed");
         return;
     }
