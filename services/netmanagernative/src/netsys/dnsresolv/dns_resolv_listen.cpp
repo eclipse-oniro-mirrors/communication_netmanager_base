@@ -35,7 +35,7 @@
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
-const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers.baidu";
+const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_backup";
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
