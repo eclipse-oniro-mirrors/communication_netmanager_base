@@ -1651,6 +1651,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
+    // executed in the caller process, so load http proxy from local user which the process belongs.
     LoadGlobalHttpProxy(LOCAL, httpProxy);
     if (httpProxy.GetHost().empty()) {
         httpProxy.SetPort(0);
@@ -1663,6 +1664,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     auto startTime = std::chrono::steady_clock::now();
+    // executed in the caller process, so load http proxy from local user which the process belongs.
     LoadGlobalHttpProxy(LOCAL, httpProxy);
     if (!httpProxy.GetHost().empty()) {
         NETMGR_LOG_I("Return global http proxy as default.");
@@ -1907,6 +1909,7 @@ void NetConnService::ActiveHttpProxy()
         HttpProxy tempProxy;
         {
             auto userInfoHelp = NetProxyUserinfo::GetInstance();
+            // executed in the SA process, so load http proxy from current active user.
             LoadGlobalHttpProxy(ACTIVE, tempProxy);
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
@@ -1971,6 +1974,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}zu", httpProxy.GetHost().length());
     HttpProxy oldHttpProxy;
+    // executed in the caller process, so load http proxy from local user which the process belongs
     LoadGlobalHttpProxy(LOCAL, oldHttpProxy);
     if (oldHttpProxy != httpProxy) {
         HttpProxy newHttpProxy = httpProxy;
@@ -2085,6 +2089,10 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
     return result;
 }
 
+// Query the global http proxy of a specified user type.
+// The user type can be ACTIVE or LOCAL.
+// The ACTIVE is the user in active state on the foreground.
+// The LOCAL is the user to which the application process belongs.
 void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy)
 {
     int32_t userId;
@@ -2413,6 +2421,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NETMGR_LOG_I("on receive data_share ready.");
         isDataShareReady_ = true;
         HttpProxy httpProxy;
+        // executed in the SA process, so load http proxy from current active user.
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
     }
