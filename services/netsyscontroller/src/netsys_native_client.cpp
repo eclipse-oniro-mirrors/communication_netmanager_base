@@ -889,7 +889,7 @@ int32_t NetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallb
     return NETMANAGER_SUCCESS;
 }
 
-sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
+__attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
 {
     std::lock_guard lock(mutex_);
     if (netsysNativeService_) {
