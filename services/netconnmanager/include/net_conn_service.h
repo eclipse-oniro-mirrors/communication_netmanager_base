@@ -496,7 +496,7 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
-    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
+    int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid, EventInfo eventInfo);
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void StopAllNetDetection();
     void StartAllNetDetection();
