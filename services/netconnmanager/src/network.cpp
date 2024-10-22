@@ -158,13 +158,11 @@ bool Network::ReleaseBasicNetwork()
                                                                 prefixLen);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
-            auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-            NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
-                                                               route.gateway_.address_);
             if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
                 route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
                 auto family = GetAddrFamily(route.destination_.address_);
                 std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+                auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
                 NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
             }
         }
@@ -175,6 +173,11 @@ bool Network::ReleaseBasicNetwork()
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
                                                                 prefixLen, netCapabilities);
         }
+    }
+    for (const auto &route : netLinkInfo_.routeList_) {
+        auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+        NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
+                                                           route.gateway_.address_);
     }
     NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
     NetsysController::GetInstance().NetworkDestroy(netId_);
@@ -212,8 +215,8 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     bool isIfaceNameInUse = NetConnServiceIface().IsIfaceNameInUse(netLinkInfo.ifaceName_, netId_);
     if (!isIfaceNameInUse || netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         UpdateIpAddrs(netLinkInfo);
-        UpdateRoutes(netLinkInfo);
     }
+    UpdateRoutes(netLinkInfo);
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
