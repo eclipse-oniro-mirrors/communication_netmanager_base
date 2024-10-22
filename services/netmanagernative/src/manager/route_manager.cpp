@@ -131,7 +131,7 @@ int32_t RouteManager::AddRoute(TableType tableType, const std::string &interface
     }
 
     int32_t ret = UpdateRouteRule(RTM_NEWROUTE, NLM_F_CREATE | NLM_F_EXCL, routeInfo);
-    if (ret == -17) {
+    if (ret == EEXIST) {
         routeRepeat = true;
     } else {
         routeRepeat = false;
