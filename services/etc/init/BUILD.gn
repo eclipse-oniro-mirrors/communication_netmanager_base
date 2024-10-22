@@ -27,13 +27,6 @@ ohos_prebuilt_etc("netsysnative_trust") {
   subsystem_name = "communication"
 }
 
-ohos_prebuilt_etc("netsysnative_dns_servers.para") {
-  source = "netsysnative_dns_servers.para"
-  module_install_dir = "/etc/param"
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-}
-
 ## Install netmanager_base.rc/netmanager_base.rc to /system/etc/init
 ohos_prebuilt_etc("netmanager_base.rc") {
   source = "netmanager_base.cfg"
