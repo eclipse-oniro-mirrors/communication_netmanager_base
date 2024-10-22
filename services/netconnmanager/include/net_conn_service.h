@@ -417,6 +417,10 @@ private:
         REGISTER,
         REQUEST,
     };
+    enum UserIdType {
+        ACTIVE,
+        LOCAL,
+    };
     bool Init();
     void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -464,7 +468,7 @@ private:
     int32_t UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
-    void LoadGlobalHttpProxy(HttpProxy &httpProxy);
+    void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -480,7 +484,8 @@ private:
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
-    int32_t GetCallingUserId(int32_t &userId);
+    int32_t GetLocalUserId(int32_t &userId);
+    int32_t GetActiveUserId(int32_t &userId);
     inline bool IsPrimaryUserId(const int32_t userId)
     {
         return userId == PRIMARY_USER_ID;

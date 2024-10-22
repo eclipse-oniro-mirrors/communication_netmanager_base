@@ -671,10 +671,17 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest002, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetCallingUserIdTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, GetLocalUserIdTest001, TestSize.Level1)
 {
     int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    int32_t ret = NetConnService::GetInstance()->GetLocalUserId(userId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetActiveUserIdTest001, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
