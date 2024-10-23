@@ -614,22 +614,6 @@ void NetsysBpfNetFirewall::HandleTupleEvent(TupleEvent *ev)
         "%{public}s tuple: sport=%{public}u dport=%{public}u protocol=%{public}u appuid=%{public}u uid=%{public}u",
         (ev->dir == INGRESS) ? "> ingress" : "< egress", ntohs(ev->sport), ntohs(ev->dport), ev->protocol, ev->appuid,
         ev->uid);
-    if (ev->family == AF_INET) {
-        in_addr in;
-        in.s_addr = ev->ipv4.saddr;
-        NETNATIVE_LOG_D("\tsaddr=%{public}s", inet_ntoa(in));
-
-        in.s_addr = ev->ipv4.daddr;
-        NETNATIVE_LOG_D("\tdaddr=%{public}s", inet_ntoa(in));
-    } else {
-        char buf[INET6_ADDRSTRLEN] = {};
-        inet_ntop(AF_INET6, &(ev->ipv6.saddr), buf, INET6_ADDRSTRLEN);
-        NETNATIVE_LOG_D("\tsaddr6=%{public}s", buf);
-
-        memset_s(buf, INET6_ADDRSTRLEN, 0, INET6_ADDRSTRLEN);
-        inet_ntop(AF_INET6, &(ev->ipv6.daddr), buf, INET6_ADDRSTRLEN);
-        NETNATIVE_LOG_D("\tdaddr6=%{public}s", buf);
-    }
     NETNATIVE_LOG_D("\trstpacket=%{public}u", ev->rst);
 }
 
@@ -645,18 +629,6 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
 {
     const char *direction = ev->dir == INGRESS ? ">" : "<";
     switch (ev->type) {
-        case DBG_MATCH_SADDR: {
-            in_addr in;
-            in.s_addr = ev->arg1;
-            NETNATIVE_LOG_D("%{public}s saddr: %{public}s bitmap: %{public}x", direction, inet_ntoa(in), ev->arg2);
-            break;
-        }
-        case DBG_MATCH_DADDR: {
-            in_addr in;
-            in.s_addr = ev->arg1;
-            NETNATIVE_LOG_D("%{public}s daddr: %{public}s bitmap: %{public}x", direction, inet_ntoa(in), ev->arg2);
-            break;
-        }
         case DBG_MATCH_SPORT:
             NETNATIVE_LOG_D("%{public}s sport: %{public}u bitmap: %{public}x", direction, ntohs(ev->arg1), ev->arg2);
             break;
