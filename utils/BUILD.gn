@@ -86,7 +86,11 @@ ohos_shared_library("net_manager_common") {
 
   public_configs = [ ":netmgr_common_config" ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
 
   external_deps += [
     "access_token:libaccesstoken_sdk",
