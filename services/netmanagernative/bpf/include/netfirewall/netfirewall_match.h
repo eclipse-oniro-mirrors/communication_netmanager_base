@@ -165,7 +165,6 @@ static __always_inline bool match_addrs(struct match_tuple *tuple, struct bitmap
 
         result = lookup_map(GET_MAP(ingress, saddr), &lpm_key, &other_lpm_key);
         if (result) {
-            log_dbg2(DBG_MATCH_SADDR, tuple->dir, (__u32)tuple->ipv4.saddr, result->val[0]);
             bitmap_and(key->val, result->val);
             result = NULL;
         }
@@ -173,7 +172,6 @@ static __always_inline bool match_addrs(struct match_tuple *tuple, struct bitmap
         lpm_key.data = tuple->ipv4.daddr;
         result = lookup_map(GET_MAP(ingress, daddr), &lpm_key, &other_lpm_key);
         if (result) {
-            log_dbg2(DBG_MATCH_DADDR, tuple->dir, (__u32)tuple->ipv4.daddr, result->val[0]);
             bitmap_and(key->val, result->val);
         }
     } else {

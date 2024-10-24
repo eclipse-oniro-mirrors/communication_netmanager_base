@@ -53,8 +53,6 @@ enum event_type {
 
 enum debug_type {
     DBG_GENERIC, /* Generic, no message, useful to dump random integers */
-    DBG_MATCH_SADDR,
-    DBG_MATCH_DADDR,
     DBG_MATCH_SPORT,
     DBG_MATCH_DPORT,
     DBG_MATCH_PROTO,
