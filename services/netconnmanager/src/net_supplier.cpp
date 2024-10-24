@@ -255,8 +255,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (netSupplierInfo_.isAvailable_ && (netRequest.ident.empty()) &&
-        netSupplierIdent_.substr(0, strlen(SIMID_IDENT_PREFIX)) != SIMID_IDENT_PREFIX) {
+    if (netSupplierInfo_.isAvailable_ && netRequest.ident.empty()) {
         NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
@@ -289,8 +288,7 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (!netSupplierInfo_.isAvailable_ &&
-        netSupplierIdent_.substr(0, strlen(SIMID_IDENT_PREFIX)) != SIMID_IDENT_PREFIX) {
+    if (!netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
