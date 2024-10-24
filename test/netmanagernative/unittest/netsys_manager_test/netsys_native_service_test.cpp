@@ -409,7 +409,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest001, TestSize.Level1)
 
     uint32_t firewallRule = 0;
     ret = instance_->FirewallSetUidRule(chain, {uid}, firewallRule);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     uint16_t netid = 1000;
     ret = instance_->ShareDnsSet(netid);

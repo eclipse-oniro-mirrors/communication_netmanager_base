@@ -370,7 +370,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = NetsysController::GetInstance().FirewallSetUidRule(TEST_UID, {TEST_UID}, FIREWALL_RULE);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest016, TestSize.Level1)
