@@ -2586,6 +2586,7 @@ void NetConnService::OnNetSysRestart()
 {
     NETMGR_LOG_I("OnNetSysRestart");
 
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -2603,12 +2604,10 @@ void NetConnService::OnNetSysRestart()
 
         iter->second->ResumeNetworkInfo();
     }
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
     }
-    locker.unlock();
     FindBestNetworkForAllRequest();
 }
 
