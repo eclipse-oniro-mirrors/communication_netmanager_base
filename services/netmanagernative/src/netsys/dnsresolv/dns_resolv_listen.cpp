@@ -415,9 +415,9 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
             return FixedLengthReceiverState::ONERROR;
         }
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-        ProcSetCacheCommand(data, netId, uid, addrInfo, size);
+        ProcSetCacheCommand(name, netId, uid, addrInfo, size);
 #else
-        ProcSetCacheCommand(data, netId, addrInfo, size);
+        ProcSetCacheCommand(name, netId, addrInfo, size);
 #endif
         return FixedLengthReceiverState::DATA_ENOUGH;
     };
