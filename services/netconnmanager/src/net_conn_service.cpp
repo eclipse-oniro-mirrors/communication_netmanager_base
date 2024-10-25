@@ -2591,7 +2591,6 @@ void NetConnService::RecoverNetSys()
         if (iter->second == nullptr) {
             continue;
         }
-
         NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
             iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
             iter->second->GetRealScore(), iter->second->IsConnected());
@@ -2600,7 +2599,6 @@ void NetConnService::RecoverNetSys()
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
         }
-
         iter->second->ResumeNetworkInfo();
     }
     if (defaultNetSupplier_ != nullptr) {
@@ -2612,15 +2610,12 @@ void NetConnService::RecoverNetSys()
 
 void NetConnService::OnNetSysRestart()
 {
-
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this]() {
             NETMGR_LOG_I("OnNetSysRestart");
             this->RecoverNetSys();
         });
     }
-
-    
 }
 
 int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
