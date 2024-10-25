@@ -2582,35 +2582,41 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
     return false;
 }
 
+void NetConnService::RecoverNetSys()
+{
+    NETMGR_LOG_I("RecoverNetSys");
+
+    NET_SUPPLIER_MAP::iterator iter;
+    for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+        if (iter->second == nullptr) {
+            continue;
+        }
+
+        NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
+            iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
+            iter->second->GetRealScore(), iter->second->IsConnected());
+
+        if ((!iter->second->IsConnected()) || (!IsSupplierMatchRequestAndNetwork(iter->second))) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
+            continue;
+        }
+
+        iter->second->ResumeNetworkInfo();
+    }
+    if (defaultNetSupplier_ != nullptr) {
+        defaultNetSupplier_->ClearDefault();
+        defaultNetSupplier_ = nullptr;
+    }
+    FindBestNetworkForAllRequest();
+}
+
 void NetConnService::OnNetSysRestart()
 {
 
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this]() {
             NETMGR_LOG_I("OnNetSysRestart");
-
-            NET_SUPPLIER_MAP::iterator iter;
-            for (iter = this->netSuppliers_.begin(); iter != this->netSuppliers_.end(); ++iter) {
-                if (iter->second == nullptr) {
-                    continue;
-                }
-        
-                NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
-                    iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
-                    iter->second->GetRealScore(), iter->second->IsConnected());
-        
-                if ((!iter->second->IsConnected()) || (!this->IsSupplierMatchRequestAndNetwork(iter->second))) {
-                    NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
-                    continue;
-                }
-        
-                iter->second->ResumeNetworkInfo();
-            }
-            if (this->defaultNetSupplier_ != nullptr) {
-                this->defaultNetSupplier_->ClearDefault();
-                this->defaultNetSupplier_ = nullptr;
-            }
-            this->FindBestNetworkForAllRequest();
+            this->RecoverNetSys();
         });
     }
 
