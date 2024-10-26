@@ -480,6 +480,7 @@ private:
     sptr<INetConnService> GetProxy();
     void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    void DlCloseRemoveDeathRecipient();
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
     static std::optional<std::string> ObtainBundleNameFromBundleMgr();
 
