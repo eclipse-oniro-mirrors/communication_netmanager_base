@@ -317,8 +317,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
             DNS_CONFIG_PRINT("memcpy_s failed");
             return -1;
         }
-        if (tmp->ai_canonname &&
-            strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) != 0) {
+        if (strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) != 0) {
             DNS_CONFIG_PRINT("strcpy_s failed");
             return -1;
         }
