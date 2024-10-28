@@ -14,102 +14,44 @@
  */
 
 #include <arpa/inet.h>
+#include <sys/stat.h>
+#include <thread>
 
-#include "dns_config_client.h"
-#include "dns_param_cache.h"
-#include "init_socket.h"
-#include "net_conn_client.h"
 #include "net_handle.h"
+#include "net_conn_client.h"
+#include "dns_param_cache.h"
 #include "netsys_client.h"
+#include "init_socket.h"
 #ifdef USE_SELINUX
 #include "selinux/selinux.h"
 #endif
+#include "singleton.h"
+#include <ipc_skeleton.h>
 
-#include "dns_quality_diag.h"
 #include "dns_resolv_listen.h"
-#include "epoller.h"
+#include "dns_quality_diag.h"
 #include "fwmark_client.h"
 #include "parameters.h"
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
 const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_backup";
-using namespace NetManagerStandard;
-
-class DnsResolvListenInternal {
-public:
-    DnsResolvListenInternal() = default;
-    ~DnsResolvListenInternal()
-    {
-        if (serverSockFd_ > 0) {
-            close(serverSockFd_);
-        }
-    }
-
-    void StartListen();
-
-private:
-    static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
-                                    AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId, uint32_t callingUid);
-#endif
-    static void ProcSetCacheCommand(const std::string &name, uint16_t netId, AddrInfo addrInfo[MAX_RESULTS],
-                                    uint32_t resNum);
-    static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
-    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
-    static void ProcGetDefaultNetworkCommand(int clientSockFd);
-    static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
-    static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
-
-    ReceiverRunner ProcCommand();
-    ReceiverRunner ProcBindSocket(uint32_t netId);
-    ReceiverRunner ProcGetKeyLengthForCache(CommandType command, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetKeyForCache(CommandType command, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetCacheSize(const std::string &name, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetCacheContent(const std::string &name, uint16_t netId, uint32_t uid, uint32_t resNum);
-    ReceiverRunner ProcPostDnsThreadResult(uint16_t netId);
-    ReceiverRunner ProcGetKeyLengthForCache(uint16_t netId, uint32_t uid, uint32_t pid);
-    ReceiverRunner ProcGetKeyForCache(uint16_t netId, uint32_t uid, uint32_t pid);
-    ReceiverRunner ProcGetPostParam(const std::string &name, uint16_t netId, uint32_t uid, uint32_t pid);
-    struct PostParam {
-        uint32_t usedTime = 0;
-        int32_t queryRet = 0;
-        uint32_t aiSize = 0;
-        QueryParam param{};
-    };
-    ReceiverRunner ProcPostDnsResult(const std::string &name, uint16_t netId, uint32_t uid, uint32_t pid,
-                                     const PostParam &param);
-
-    int32_t serverSockFd_ = -1;
-    std::shared_ptr<EpollServer> server_;
-};
-
-void DnsResolvListenInternal::AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize)
+DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
-    std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
-    size_t i = 0;
-    for (; i < serverSize; i++) {
-        if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
-            return;
-        }
-    }
-    if (i >= MAX_SERVER_NUM) {
-        NETNATIVE_LOGI("Invalid serverSize or mPublicDns already exists");
-        return;
-    }
-    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), publicDnsServer.c_str(),
-                 publicDnsServer.length() + 1) != ERR_OK) {
-        DNS_CONFIG_PRINT("mem copy failed");
-        return;
-    }
-    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
+    NETNATIVE_LOGE("DnsResolvListen start");
 }
 
-void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid)
+DnsResolvListen::~DnsResolvListen()
 {
-    NETNATIVE_LOG_D("DnsResolvListenInternal::ProcGetConfigCommand uid = [%{public}u]", uid);
+    NETNATIVE_LOGE("DnsResolvListen end");
+    if (serverSockFd_ > 0) {
+        close(serverSockFd_);
+    }
+}
+
+void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid)
+{
+    NETNATIVE_LOG_D("DnsResolvListen::ProcGetConfigCommand uid = [%{public}u]", uid);
     ResolvConfig sendData = {0};
     std::vector<std::string> servers;
     std::vector<std::string> domains;
@@ -120,13 +62,13 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
     DnsParamCache::GetInstance().SetCallingUid(uid);
 #endif
 
-    int status;
+    int status = -1;
     if (DnsParamCache::GetInstance().IsVpnOpen() && netId == 0) {
-        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers, domains,
-                                                                baseTimeoutMsec, retryCount);
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers,
+                                                                domains, baseTimeoutMsec, retryCount);
     } else {
-        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers, domains,
-                                                                baseTimeoutMsec, retryCount);
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers,
+                                                                domains, baseTimeoutMsec, retryCount);
     }
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
@@ -152,15 +94,45 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
     DNS_CONFIG_PRINT("ProcGetConfigCommand end");
 }
 
-void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId)
+int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
 {
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    ProcGetCacheCommand(name, clientSockFd, netId, 0);
+    DNS_CONFIG_PRINT("ProcGetKeyForCache");
+    uint32_t nameLen = 0;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&nameLen), sizeof(nameLen))) {
+        DNS_CONFIG_PRINT("read errno %{public}d", errno);
+        return -1;
+    }
+
+    if (nameLen > MAX_HOST_NAME_LEN) {
+        DNS_CONFIG_PRINT("MAX_HOST_NAME_LEN is %{public}u, but get %{public}u", MAX_HOST_NAME_LEN, nameLen);
+        return -1;
+    }
+
+    if (!PollRecvData(clientSockFd, name, nameLen)) {
+        DNS_CONFIG_PRINT("read errno %{public}d", errno);
+        return -1;
+    }
+    DNS_CONFIG_PRINT("ProcGetKeyForCache end");
+    return 0;
 }
 
-void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId,
-                                                  uint32_t callingUid)
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 {
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ProcGetCacheCommand(clientSockFd, netId, 0);
+}
+
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
+{
+#endif
+    DNS_CONFIG_PRINT("ProcGetCacheCommand");
+    char name[MAX_HOST_NAME_LEN] = {0};
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
+        return;
+    }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
     DnsParamCache::GetInstance().SetCallingUid(callingUid);
 #endif
     auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
@@ -177,8 +149,8 @@ void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int c
 
     AddrInfo addrInfo[MAX_RESULTS] = {};
     for (uint32_t i = 0; i < resNum; i++) {
-        if (memcpy_s(reinterpret_cast<char *>(&addrInfo[i]), sizeof(AddrInfo), reinterpret_cast<char *>(&cacheRes[i]),
-                     sizeof(AddrInfo)) != 0) {
+        if (memcpy_s(reinterpret_cast<char *>(&addrInfo[i]), sizeof(AddrInfo),
+                     reinterpret_cast<char *>(&cacheRes[i]), sizeof(AddrInfo)) != 0) {
             return;
         }
     }
@@ -189,17 +161,39 @@ void DnsResolvListenInternal::ProcGetCacheCommand(const std::string &name, int c
     DNS_CONFIG_PRINT("ProcGetCacheCommand end");
 }
 
-void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId,
-                                                  AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum)
+void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
 {
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-    ProcSetCacheCommand(name, netId, 0, addrInfo, resNum);
+    ProcSetCacheCommand(clientSockFd, netId, 0);
 }
 
-void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
-                                                  AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum)
+void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid)
 {
 #endif
+    DNS_CONFIG_PRINT("ProcSetCacheCommand");
+    char name[MAX_HOST_NAME_LEN] = {0};
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
+        return;
+    }
+
+    uint32_t resNum = 0;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&resNum), sizeof(resNum))) {
+        DNS_CONFIG_PRINT("read errno %{public}d", errno);
+        return;
+    }
+
+    resNum = std::min<uint32_t>(MAX_RESULTS, resNum);
+    if (resNum == 0) {
+        return;
+    }
+
+    AddrInfo addrInfo[MAX_RESULTS] = {};
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * resNum)) {
+        DNS_CONFIG_PRINT("read errno %{public}d", errno);
+        return;
+    }
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     DnsParamCache::GetInstance().SetCallingUid(callingUid);
 #endif
@@ -210,7 +204,7 @@ void DnsResolvListenInternal::ProcSetCacheCommand(const std::string &name, uint1
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
 }
 
-void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
+void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
 {
     int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
@@ -218,26 +212,156 @@ void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t ne
     }
 }
 
-void DnsResolvListenInternal::ProcGetDefaultNetworkCommand(int clientSockFd)
+bool DnsResolvListen::ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid)
 {
-    NetHandle netHandle;
-    NetConnClient::GetInstance().GetDefaultNet(netHandle);
-    int netId = netHandle.GetNetId();
-    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d", netId);
-    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netId), sizeof(int))) {
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read1 errno %{public}d", errno);
+        return false;
+    }
+
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read2 errno %{public}d", errno);
+        return false;
+    }
+
+    return true;
+}
+
+void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
+{
+    char name[MAX_HOST_NAME_LEN] = {0};
+    uint32_t netid = netId;
+    uint32_t uid;
+    uint32_t pid;
+
+    if (!ProcPostDnsThreadResult(clientSockFd, uid, pid)) {
+        return;
+    }
+    
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
+        return;
+    }
+
+    uint32_t usedtime;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read3 errno %{public}d", errno);
+        return;
+    }
+
+    int32_t queryret;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read4 errno %{public}d", errno);
+        return;
+    }
+
+    uint32_t ai_size = MAX_RESULTS;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
+        NETNATIVE_LOGE("read5 errno %{public}d", errno);
+        return;
+    }
+
+    struct QueryParam param;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
+        NETNATIVE_LOGE("read6 errno %{public}d", errno);
+        return;
+    }
+
+    if ((queryret == 0) && (ai_size > 0)) {
+        ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
+        AddrInfo addrInfo[MAX_RESULTS] = {};
+        if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
+            NETNATIVE_LOGE("read errno %{public}d", errno);
+            return;
+        }
+        DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name,
+                                                      ai_size, queryret, param, addrInfo);
+    } else {
+        DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name, 0, queryret, param, nullptr);
+    }
+}
+
+void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId)
+{
+    // Todo recv data
+    OHOS::NetManagerStandard::NetHandle netHandle;
+    OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
+    int netid = netHandle.GetNetId();
+    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d", netid);
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netid), sizeof(int))) {
         NETNATIVE_LOGE("send failed");
     }
 }
 
-void DnsResolvListenInternal::ProcBindSocketCommand(int32_t remoteFd, uint16_t netId)
+void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
 {
-    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d, %{public}d", netId, remoteFd);
-    if (OHOS::nmd::FwmarkClient().BindSocket(remoteFd, netId) != NETMANAGER_SUCCESS) {
+    // Todo recv data
+    int32_t fd = 0;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&fd), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read errno %{public}d", errno);
+        return;
+    }
+    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d, %{public}d", netId, fd);
+    if (OHOS::nmd::FwmarkClient().BindSocket(fd, netId) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("BindSocket to netid failed");
     }
 }
 
-void DnsResolvListenInternal::StartListen()
+void DnsResolvListen::ProcCommand(int clientSockFd)
+{
+    char buff[sizeof(RequestInfo)] = {0};
+    if (!PollRecvData(clientSockFd, buff, sizeof(buff))) {
+        DNS_CONFIG_PRINT("read errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    auto info = reinterpret_cast<RequestInfo *>(buff);
+    auto netId = info->netId;
+    auto uid = info->uid;
+
+    NETNATIVE_LOG_D("netId = [%{public}u], uid = [%{public}u], command = [%{public}u]",
+                    netId, uid, info->command);
+
+    switch (info->command) {
+        case GET_CONFIG:
+            ProcGetConfigCommand(clientSockFd, netId, uid);
+            break;
+        case GET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcGetCacheCommand(clientSockFd, netId, uid);
+#else
+            ProcGetCacheCommand(clientSockFd, netId);
+#endif
+            break;
+        case SET_CACHE:
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            ProcSetCacheCommand(clientSockFd, netId, uid);
+#else
+            ProcSetCacheCommand(clientSockFd, netId);
+#endif
+            break;
+        case JUDGE_IPV6:
+            ProcJudgeIpv6Command(clientSockFd, netId);
+            break;
+        case POST_DNS_RESULT:
+            ProcPostDnsResultCommand(clientSockFd, netId);
+            break;
+        case GET_DEFAULT_NETWORK:
+            ProcGetDefaultNetworkCommand(clientSockFd, netId);
+            break;
+        case BIND_SOCKET:
+            ProcBindSocketCommand(clientSockFd, netId);
+            break;
+        default:
+            DNS_CONFIG_PRINT("invalid command %{public}u", info->command);
+            break;
+    }
+
+    close(clientSockFd);
+}
+
+void DnsResolvListen::StartListen()
 {
     NETNATIVE_LOGE("Enter StartListen");
 
@@ -251,290 +375,47 @@ void DnsResolvListenInternal::StartListen()
     if (listen(serverSockFd_, MAX_LISTEN_NUM) < 0) {
         NETNATIVE_LOGE("listen errno %{public}d", errno);
         close(serverSockFd_);
-        serverSockFd_ = -1;
         return;
     }
 
-    if (!MakeNonBlock(serverSockFd_)) {
-        close(serverSockFd_);
-        serverSockFd_ = -1;
-        return;
-    }
     NETNATIVE_LOGE("begin listen");
-    server_ = std::make_shared<EpollServer>(serverSockFd_, sizeof(RequestInfo), ProcCommand());
-    server_->Run();
+
+    while (true) {
+        sockaddr_un clientAddr = {0};
+        socklen_t len = sizeof(clientAddr);
+
+        int clientSockFd = accept(serverSockFd_, (sockaddr *)&clientAddr, &len);
+        if (clientSockFd < 0) {
+            DNS_CONFIG_PRINT("accept errno %{public}d", errno);
+            continue;
+        }
+        if (!MakeNonBlock(clientSockFd)) {
+            DNS_CONFIG_PRINT("MakeNonBlock errno %{public}d", errno);
+            close(clientSockFd);
+            continue;
+        }
+        this->ProcCommand(clientSockFd);
+    }
 }
 
-ReceiverRunner DnsResolvListenInternal::ProcCommand()
+void DnsResolvListen::AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize)
 {
-    // single thread, captrue <this> is safe
-    return [this](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
+    std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
+    size_t i = 0;
+    for (; i < serverSize; i++) {
+        if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
+            return;
         }
-        if (data.size() < sizeof(RequestInfo)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto info = reinterpret_cast<const RequestInfo *>(data.data());
-        auto netId = info->netId;
-        auto uid = info->uid;
-
-        switch (info->command) {
-            case GET_CONFIG:
-                ProcGetConfigCommand(fd, netId, uid);
-                return FixedLengthReceiverState::DATA_ENOUGH;
-            case GET_CACHE:
-            case SET_CACHE:
-                if (server_) {
-                    server_->AddReceiver(fd, sizeof(uint32_t),
-                                         ProcGetKeyLengthForCache(static_cast<CommandType>(info->command),
-                                                                  static_cast<uint16_t>(info->netId), info->uid));
-                }
-                return FixedLengthReceiverState::CONTINUE;
-            case POST_DNS_RESULT:
-                server_->AddReceiver(fd, sizeof(uint32_t) + sizeof(uint32_t),
-                                     ProcPostDnsThreadResult(static_cast<uint16_t>(info->netId)));
-                return FixedLengthReceiverState::CONTINUE;
-            case JUDGE_IPV6:
-                ProcJudgeIpv6Command(fd, netId);
-                return FixedLengthReceiverState::DATA_ENOUGH;
-            case GET_DEFAULT_NETWORK:
-                ProcGetDefaultNetworkCommand(fd);
-                return FixedLengthReceiverState::DATA_ENOUGH;
-            case BIND_SOCKET:
-                server_->AddReceiver(fd, sizeof(int32_t), ProcBindSocket(netId));
-                return FixedLengthReceiverState::CONTINUE;
-            default:
-                return FixedLengthReceiverState::ONERROR;
-        }
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcBindSocket(uint32_t netId)
-{
-    return [this, netId](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        // fd is AF_UNIX fd
-        // remoteFd is the TCP/UDP socket which is from app process
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(int32_t)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        int32_t remoteFd = *p;
-        ProcBindSocketCommand(remoteFd, netId);
-        return FixedLengthReceiverState::DATA_ENOUGH;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForCache(CommandType command, uint16_t netId, uint32_t uid)
-{
-    return [this, command, netId, uid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(uint32_t)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t nameLen = *p;
-        if (nameLen > MAX_HOST_NAME_LEN) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        server_->AddReceiver(fd, nameLen, ProcGetKeyForCache(command, netId, uid));
-        return FixedLengthReceiverState::CONTINUE;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetKeyForCache(CommandType command, uint16_t netId, uint32_t uid)
-{
-    return [this, command, netId, uid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.empty()) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        switch (command) {
-            case SET_CACHE:
-                server_->AddReceiver(fd, sizeof(uint32_t), ProcGetCacheSize(data, netId, uid));
-                return FixedLengthReceiverState::CONTINUE;
-            case GET_CACHE:
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-                ProcGetCacheCommand(data, fd, netId, uid);
-#else
-                ProcGetCacheCommand(data, fd, netId);
-#endif
-                return FixedLengthReceiverState::DATA_ENOUGH;
-            default:
-                return FixedLengthReceiverState::ONERROR;
-        }
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetCacheSize(const std::string &name, uint16_t netId, uint32_t uid)
-{
-    return [this, name, netId, uid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(uint32_t)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t resNum = *p;
-        resNum = std::min<uint32_t>(MAX_RESULTS, resNum);
-        if (resNum == 0) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        server_->AddReceiver(fd, sizeof(AddrInfo) * resNum, ProcGetCacheContent(name, netId, uid, resNum));
-        return FixedLengthReceiverState::CONTINUE;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &name, uint16_t netId, uint32_t uid,
-                                                            uint32_t resNum)
-{
-    return [this, name, netId, uid, resNum](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(AddrInfo) * resNum) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto size = std::min<uint32_t>(MAX_RESULTS, resNum);
-        AddrInfo addrInfo[MAX_RESULTS]{};
-        if (memcpy_s(addrInfo, sizeof(AddrInfo) * MAX_RESULTS, data.data(), sizeof(AddrInfo) * size) != EOK) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-        ProcSetCacheCommand(name, netId, uid, addrInfo, size);
-#else
-        ProcSetCacheCommand(name, netId, addrInfo, size);
-#endif
-        return FixedLengthReceiverState::DATA_ENOUGH;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcPostDnsThreadResult(uint16_t netId)
-{
-    return [this, netId](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(uint32_t) + sizeof(uint32_t)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        struct UidPid {
-            uint32_t uid = 0;
-            uint32_t pid = 0;
-        };
-
-        auto uidPid = reinterpret_cast<const UidPid *>(data.data());
-        auto uid = uidPid->uid;
-        auto pid = uidPid->pid;
-        server_->AddReceiver(fd, sizeof(uint32_t), ProcGetKeyLengthForCache(netId, uid, pid));
-        return FixedLengthReceiverState::CONTINUE;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForCache(uint16_t netId, uint32_t uid, uint32_t pid)
-{
-    return [this, netId, uid, pid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(uint32_t)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t nameLen = *p;
-        if (nameLen > MAX_HOST_NAME_LEN) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        server_->AddReceiver(fd, nameLen, ProcGetKeyForCache(netId, uid, pid));
-        return FixedLengthReceiverState::CONTINUE;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetKeyForCache(uint16_t netId, uint32_t uid, uint32_t pid)
-{
-    return [this, netId, uid, pid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.empty()) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        server_->AddReceiver(fd, sizeof(uint32_t) + sizeof(int32_t) + sizeof(uint32_t) + sizeof(QueryParam),
-                             ProcGetPostParam(data, netId, uid, pid));
-        return FixedLengthReceiverState::CONTINUE;
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcGetPostParam(const std::string &name, uint16_t netId, uint32_t uid,
-                                                         uint32_t pid)
-{
-    return [this, name, netId, uid, pid](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-        if (server_ == nullptr) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-        if (data.size() < sizeof(uint32_t) + sizeof(int32_t) + sizeof(uint32_t) + sizeof(QueryParam)) {
-            return FixedLengthReceiverState::ONERROR;
-        }
-
-        auto p = reinterpret_cast<const PostParam *>(data.data());
-        auto param = *p;
-        if (param.queryRet == 0 && param.aiSize > 0) {
-            auto size = std::min<uint32_t>(MAX_RESULTS, param.aiSize);
-            param.aiSize = size;
-            server_->AddReceiver(fd, sizeof(AddrInfo) * size, ProcPostDnsResult(name, netId, uid, pid, param));
-            return FixedLengthReceiverState::CONTINUE;
-        } else {
-            DnsQualityDiag::GetInstance().ReportDnsResult(netId, uid, pid, static_cast<int32_t>(param.usedTime),
-                                                          const_cast<char *>(name.c_str()), 0, param.queryRet,
-                                                          param.param, nullptr);
-            return FixedLengthReceiverState::DATA_ENOUGH;
-        }
-    };
-}
-
-ReceiverRunner DnsResolvListenInternal::ProcPostDnsResult(const std::string &name, uint16_t netId, uint32_t uid,
-                                                          uint32_t pid, const PostParam &param)
-{
-    return
-        [this, name, netId, uid, pid, param](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
-            if (server_ == nullptr) {
-                return FixedLengthReceiverState::ONERROR;
-            }
-            if (data.size() < sizeof(AddrInfo) * param.aiSize) {
-                return FixedLengthReceiverState::ONERROR;
-            }
-            auto size = std::min<uint32_t>(MAX_RESULTS, param.aiSize);
-            AddrInfo addrInfo[MAX_RESULTS]{};
-            if (memcpy_s(addrInfo, sizeof(AddrInfo) * MAX_RESULTS, data.data(), sizeof(AddrInfo) * size) != EOK) {
-                return FixedLengthReceiverState::ONERROR;
-            }
-            DnsQualityDiag::GetInstance().ReportDnsResult(netId, uid, pid, static_cast<int32_t>(param.usedTime),
-                                                          const_cast<char *>(name.c_str()), size, param.queryRet,
-                                                          param.param, addrInfo);
-            return FixedLengthReceiverState::DATA_ENOUGH;
-        };
-}
-
-void DnsResolvListen::StartListen()
-{
-    (void)this;
-    DnsResolvListenInternal dnsResolvListenInternal;
-    dnsResolvListenInternal.StartListen();
+    }
+    if (i >= MAX_SERVER_NUM) {
+        NETNATIVE_LOGI("Invalid serverSize or mPublicDns already exists");
+        return;
+    }
+    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), publicDnsServer.c_str(),
+            publicDnsServer.length() + 1) != ERR_OK) {
+        DNS_CONFIG_PRINT("mem copy failed");
+        return;
+    }
+    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 } // namespace OHOS::nmd
