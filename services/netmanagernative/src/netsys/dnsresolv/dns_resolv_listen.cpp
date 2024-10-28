@@ -276,7 +276,12 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
             return FixedLengthReceiverState::ONERROR;
         }
 
-        auto info = reinterpret_cast<const RequestInfo *>(data.data());
+        RequestInfo requestInfo{};
+        if (memcpy_s(&requestInfo, sizeof(RequestInfo), data.data(), sizeof(RequestInfo)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+
+        auto info = &requestInfo;
         auto netId = info->netId;
         auto uid = info->uid;
 
@@ -323,8 +328,10 @@ ReceiverRunner DnsResolvListenInternal::ProcBindSocket(uint32_t netId)
             return FixedLengthReceiverState::ONERROR;
         }
 
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        int32_t remoteFd = *p;
+        int32_t remoteFd;
+        if (memcpy_s(&remoteFd, sizeof(int32_t), data.data(), sizeof(int32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         ProcBindSocketCommand(remoteFd, netId);
         return FixedLengthReceiverState::DATA_ENOUGH;
     };
@@ -340,8 +347,10 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForCache(CommandType com
             return FixedLengthReceiverState::ONERROR;
         }
 
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t nameLen = *p;
+        uint32_t nameLen;
+        if (memcpy_s(&nameLen, sizeof(uint32_t), data.data(), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         if (nameLen > MAX_HOST_NAME_LEN) {
             return FixedLengthReceiverState::ONERROR;
         }
@@ -387,8 +396,10 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheSize(const std::string &name
             return FixedLengthReceiverState::ONERROR;
         }
 
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t resNum = *p;
+        uint32_t resNum;
+        if (memcpy_s(&resNum, sizeof(uint32_t), data.data(), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         resNum = std::min<uint32_t>(MAX_RESULTS, resNum);
         if (resNum == 0) {
             return FixedLengthReceiverState::ONERROR;
@@ -433,14 +444,14 @@ ReceiverRunner DnsResolvListenInternal::ProcPostDnsThreadResult(uint16_t netId)
             return FixedLengthReceiverState::ONERROR;
         }
 
-        struct UidPid {
-            uint32_t uid = 0;
-            uint32_t pid = 0;
-        };
-
-        auto uidPid = reinterpret_cast<const UidPid *>(data.data());
-        auto uid = uidPid->uid;
-        auto pid = uidPid->pid;
+        uint32_t uid;
+        uint32_t pid;
+        if (memcpy_s(&uid, sizeof(uint32_t), data.data(), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+        if (memcpy_s(&pid, sizeof(uint32_t), data.data() + sizeof(uint32_t), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         server_->AddReceiver(fd, sizeof(uint32_t), ProcGetKeyLengthForCache(netId, uid, pid));
         return FixedLengthReceiverState::CONTINUE;
     };
@@ -455,8 +466,10 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForCache(uint16_t netId,
         if (data.size() < sizeof(uint32_t)) {
             return FixedLengthReceiverState::ONERROR;
         }
-        auto p = reinterpret_cast<const int32_t *>(data.data());
-        uint32_t nameLen = *p;
+        uint32_t nameLen;
+        if (memcpy_s(&nameLen, sizeof(uint32_t), data.data(), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
         if (nameLen > MAX_HOST_NAME_LEN) {
             return FixedLengthReceiverState::ONERROR;
         }
@@ -492,8 +505,22 @@ ReceiverRunner DnsResolvListenInternal::ProcGetPostParam(const std::string &name
             return FixedLengthReceiverState::ONERROR;
         }
 
-        auto p = reinterpret_cast<const PostParam *>(data.data());
-        auto param = *p;
+        PostParam param{};
+        if (memcpy_s(&param.usedTime, sizeof(uint32_t), data.data(), sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+        if (memcpy_s(&param.queryRet, sizeof(int32_t), data.data() + sizeof(uint32_t), sizeof(int32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+        if (memcpy_s(&param.aiSize, sizeof(uint32_t), data.data() + sizeof(uint32_t) + sizeof(int32_t),
+                     sizeof(uint32_t)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+        if (memcpy_s(&param.param, sizeof(QueryParam),
+                     data.data() + sizeof(uint32_t) + sizeof(int32_t) + sizeof(uint32_t), sizeof(QueryParam)) != EOK) {
+            return FixedLengthReceiverState::ONERROR;
+        }
+
         if (param.queryRet == 0 && param.aiSize > 0) {
             auto size = std::min<uint32_t>(MAX_RESULTS, param.aiSize);
             param.aiSize = size;
