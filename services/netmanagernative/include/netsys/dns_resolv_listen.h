@@ -20,36 +20,15 @@
 
 #include "event_handler.h"
 #include "ffrt.h"
-#include "dns_config_client.h"
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::nmd {
 class DnsResolvListen {
 public:
-    DnsResolvListen();
-    ~DnsResolvListen();
+    DnsResolvListen() = default;
+    ~DnsResolvListen() = default;
 
     void StartListen();
-
-private:
-    static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    static void ProcSetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid);
-    static void ProcGetCacheCommand(int clientSockFd, uint16_t netId, uint32_t callingUid);
-#endif
-    static void ProcSetCacheCommand(int clientSockFd, uint16_t netId);
-    static void ProcGetCacheCommand(int clientSockFd, uint16_t netId);
-    static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
-    static void ProcPostDnsResultCommand(int clientSockFd, uint16_t netId);
-    static void ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId);
-    static void ProcBindSocketCommand(int clientSockFd, uint16_t netId);
-    static void ProcCommand(int clientSockFd);
-    static int32_t ProcGetKeyForCache(int clientSockFd, char *name);
-    static bool ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid);
-    static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
-
-    int32_t serverSockFd_;
 };
-} // namespace nmd
-} // namespace OHOS
+} // namespace OHOS::nmd
+
 #endif // NETSYS_DNSRESOLV_DNS_RESOLV_LISTEN_H
