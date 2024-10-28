@@ -472,6 +472,7 @@ private:
     int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
         const RegisterType registerType = REGISTER);
 
+    void RecoverNetSys();
     void OnNetSysRestart();
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);

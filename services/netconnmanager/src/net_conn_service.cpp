@@ -2582,16 +2582,15 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
     return false;
 }
 
-void NetConnService::OnNetSysRestart()
+void NetConnService::RecoverNetSys()
 {
-    NETMGR_LOG_I("OnNetSysRestart");
+    NETMGR_LOG_I("RecoverNetSys");
 
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
             continue;
         }
-
         NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
             iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
             iter->second->GetRealScore(), iter->second->IsConnected());
@@ -2600,16 +2599,23 @@ void NetConnService::OnNetSysRestart()
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
         }
-
         iter->second->ResumeNetworkInfo();
     }
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
     }
-    locker.unlock();
     FindBestNetworkForAllRequest();
+}
+
+void NetConnService::OnNetSysRestart()
+{
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this]() {
+            NETMGR_LOG_I("OnNetSysRestart");
+            this->RecoverNetSys();
+        });
+    }
 }
 
 int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
