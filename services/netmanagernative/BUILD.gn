@@ -41,6 +41,10 @@ config("netsys_native_manager_config") {
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
+
+  if (is_emulator) {
+    defines += [ "EMLULATOR_PLATFORM" ]
+  }
 }
 
 netsys_native_manager_sources = [
