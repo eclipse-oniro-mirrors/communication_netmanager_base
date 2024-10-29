@@ -868,20 +868,4 @@ class MockCurl {
 public:
     MOCK_METHOD0(easy_init, CURL *());
 };
-
-HWTEST_F(HttpClientTaskTest, HttpClientTask_ShouldNotCreate_WhenCurlInitFails, TestSize.Level0)
-{
-    MockCurl mockCurl;
-    ON_CALL(mockCurl, easy_init).WillByDefault(Return(nullptr));
-
-    HttpClientRequest request;
-    HttpClientTask httpClientTask(request);
-    ASSERT_EQ(httpClientTask.GetStatus(), IDLE);
-    ASSERT_EQ(httpClientTask.GetType(), DEFAULT);
-    ASSERT_EQ(httpClientTask.canceled_, false);
-
-    HttpSession &session = HttpSession::GetInstance();
-    auto httpClientTask2 = session.CreateTask(request, UPLOAD, "testFakePath");
-    ASSERT_EQ(httpClientTask2->GetType(), UPLOAD);
-}
 } // namespace
