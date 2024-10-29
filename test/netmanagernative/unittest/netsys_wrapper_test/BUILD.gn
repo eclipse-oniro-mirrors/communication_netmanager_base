@@ -55,8 +55,7 @@ ohos_unittest("netsys_wrapper_test") {
     "ffrt:libffrt",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "wifi:wifi_sdk",
+    "samgr:samgr_proxy"
   ]
 
   defines = [
