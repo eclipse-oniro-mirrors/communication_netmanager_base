@@ -32,7 +32,6 @@ ohos_unittest("netsys_wrapper_test") {
     "netsys_wrapper_test.cpp",
     "wrapper_decoder_test.cpp",
     "wrapper_distributor_test.cpp",
-    "wrapper_listener_test.cpp",
   ]
 
   include_dirs = [
@@ -57,6 +56,56 @@ ohos_unittest("netsys_wrapper_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
+  ]
+
+  defines = [
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_unittest("netsys_wrapper_fault_through_test") {
+  module_out_path = "netmanager_base/manager_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [ "wrapper_listener_test.cpp" ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/dnsresolverclient/include",
+    "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+  ]
+
+  deps = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
   ]
 
   defines = [
