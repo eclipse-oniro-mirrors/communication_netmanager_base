@@ -56,12 +56,14 @@ public:
     int32_t Step(std::vector<NetStatsInfo> &infos);
     int32_t ExecSql(const std::string &sql, void *recv, SqlCallback callback);
     int32_t Upgrade();
+    int32_t UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag);
 
 private:
     enum TableVersion : int32_t {
         Version_0 = 0,
         Version_1,
         Version_2,
+        Version_3,
     };
 
 private:

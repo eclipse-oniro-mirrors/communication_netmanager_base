@@ -15,18 +15,28 @@
 
 #include "net_stats_history.h"
 
+#include "net_mgr_log_wrapper.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 
 int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint64_t start, uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsData(recv, start, end);
 }
 
 int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint32_t uid, uint64_t start, uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsData(recv, uid, start, end);
 }
 
@@ -34,6 +44,10 @@ int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, const std::
                                     uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsData(recv, iface, start, end);
 }
 
@@ -41,6 +55,10 @@ int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, const std::
                                     uint64_t start, uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsData(recv, iface, uid, start, end);
 }
 
@@ -48,6 +66,10 @@ int32_t NetStatsHistory::GetHistoryByIdent(std::vector<NetStatsInfo> &recv, cons
                                            uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsDataByIdent(recv, ident, start, end);
 }
 
@@ -55,6 +77,10 @@ int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint32_t ui
                                     uint64_t start, uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("NetStatsDataHandler instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return handler->ReadStatsData(recv, uid, ident, start, end);
 }
 } // namespace NetManagerStandard
