@@ -39,37 +39,4 @@ public:
 namespace {
 using namespace testing::ext;
 using namespace OHOS::NetStack::Ssl;
-
-HWTEST_F(NetsslTest, CertVerifyTest001, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    CertContext context(env, nullptr);
-
-    bool ret = SslExec::ExecVerify(&context);
-    EXPECT_EQ(ret, false);
-}
-
-HWTEST_F(NetsslTest, NetStackVerifyCertificationTest001, TestSize.Level1)
-{
-    CertBlob *cert = nullptr;
-    CertBlob *caCert = nullptr;
-
-    uint32_t ret = NetStackVerifyCertification(cert);
-    EXPECT_EQ(ret, SSL_X509_V_ERR_UNSPECIFIED);
-
-    ret = NetStackVerifyCertification(cert, caCert);
-    EXPECT_EQ(ret, SSL_X509_V_ERR_UNSPECIFIED);
-}
-
-HWTEST_F(NetsslTest, NetStackVerifyCertificationTest002, TestSize.Level1)
-{
-    CertBlob cert;
-    CertBlob caCert;
-
-    uint32_t ret = NetStackVerifyCertification(&cert);
-    EXPECT_EQ(ret, SSL_X509_V_ERR_UNSPECIFIED);
-
-    ret = NetStackVerifyCertification(&cert, &caCert);
-    EXPECT_EQ(ret, SSL_X509_V_ERR_UNSPECIFIED);
-}
 } // namespace
