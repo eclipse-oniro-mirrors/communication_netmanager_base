@@ -137,9 +137,15 @@ void RunForClientFd(int32_t clientSockfd)
     iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
     int32_t socketFd = -1;
     Cmsgu cmsgu;
-    (void)memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg));
+    if (memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg)) != EOK) {
+        CloseSocket(&clientSockfd, -1, ERROR_CODE_RECVMSG_FAILED);
+        return;
+    }
     msghdr message;
-    (void)memset_s(&message, sizeof(message), 0, sizeof(message));
+    if (memset_s(&message, sizeof(message), 0, sizeof(message)) != EOK) {
+        CloseSocket(&clientSockfd, -1, ERROR_CODE_RECVMSG_FAILED);
+        return;
+    }
     message = {.msg_iov = &iov, .msg_iovlen = 1, .msg_control = cmsgu.cmsg, .msg_controllen = sizeof(cmsgu.cmsg)};
     int32_t ret = recvmsg(clientSockfd, &message, 0);
     if (ret < 0) {
