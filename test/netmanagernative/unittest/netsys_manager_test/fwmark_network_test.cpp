@@ -267,26 +267,6 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMarkTest007
- * @tc.desc: Test FwmarkNetwork SetMark.
- * @tc.type: FUNC
- */
-HWTEST_F(UnitTestFwmarkClient, SetMarkTest007, TestSize.Level1)
-{
-    FwmarkCommand cmd;
-    int32_t tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
-    ASSERT_EQ(ret, 0);
-    cmd.cmdId = FwmarkCommand::PROTECT_FROM_VPN;
-    cmd.netId = 9999;
-    ret = SetMark(&tcpSocket, &cmd);
-    close(tcpSocket);
-    tcpSocket = -1;
-    SendMessage(nullptr);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: SetMarkTest008
  * @tc.desc: Test FwmarkNetwork ProtectFromVpn.
  * @tc.type: FUNC

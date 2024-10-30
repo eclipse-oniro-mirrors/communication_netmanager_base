@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2024. All rights reserved.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@
 namespace OHOS::NetManagerStandard::FwmarkTool {
 typedef int FileDescriptor;
 using RecvMsgRunner = std::function<void(FileDescriptor fd)>;
+static constexpr size_t MAX_EPOLL_EVENTS = 32;
 
 bool MakeNonBlock(int sock)
 {
@@ -117,7 +118,6 @@ public:
     void Run()
     {
         while (true) {
-            static constexpr size_t MAX_EPOLL_EVENTS = 32;
             static constexpr int waitTimeoutMs = 5000;
             if (!epoller_) {
                 return;
@@ -136,38 +136,43 @@ public:
                 receivers_.clear();
                 continue;
             }
-            for (int idx = 0; idx < eventsToHandle; ++idx) {
-                if (serverFd_ == events[idx].data.fd) {
-                    sockaddr_un clientAddr{};
-                    socklen_t len = sizeof(clientAddr);
-                    auto clientFd = accept(serverFd_, reinterpret_cast<sockaddr *>(&clientAddr), &len);
-                    if (!MakeNonBlock(clientFd)) {
-                        close(clientFd);
-                        continue;
-                    }
-                    if (clientFd > 0) {
-                        epoller_->RegisterMe(clientFd);
-                        receivers_.insert(clientFd);
-                    }
-                } else if (receivers_.count(events[idx].data.fd) > 0) {
-                    epoller_->UnregisterMe(events[idx].data.fd);
-                    receivers_.erase(events[idx].data.fd);
-                    if (runner_) {
-                        runner_(events[idx].data.fd);
-                    } else {
-                        close(events[idx].data.fd);
-                    }
-                } else {
-                    // maybe not my fd, just UnregisterMe
-                    // this may not happen
-                    // not in receivers and not serverFd, just unregister
-                    epoller_->UnregisterMe(events[idx].data.fd);
-                }
-            }
+            RunForReceivers(events, eventsToHandle);
         }
     }
 
 private:
+    void RunForReceivers(epoll_event events[MAX_EPOLL_EVENTS], int eventsToHandle)
+    {
+        for (int idx = 0; idx < eventsToHandle; ++idx) {
+            if (serverFd_ == events[idx].data.fd) {
+                sockaddr_un clientAddr{};
+                socklen_t len = sizeof(clientAddr);
+                auto clientFd = accept(serverFd_, reinterpret_cast<sockaddr *>(&clientAddr), &len);
+                if (!MakeNonBlock(clientFd)) {
+                    close(clientFd);
+                    continue;
+                }
+                if (clientFd > 0) {
+                    epoller_->RegisterMe(clientFd);
+                    receivers_.insert(clientFd);
+                }
+            } else if (receivers_.count(events[idx].data.fd) > 0) {
+                epoller_->UnregisterMe(events[idx].data.fd);
+                receivers_.erase(events[idx].data.fd);
+                if (runner_) {
+                    runner_(events[idx].data.fd);
+                } else {
+                    close(events[idx].data.fd);
+                }
+            } else {
+                // maybe not my fd, just UnregisterMe
+                // this may not happen
+                // not in receivers and not serverFd, just unregister
+                epoller_->UnregisterMe(events[idx].data.fd);
+            }
+        }
+    }
+
     std::shared_ptr<Epoller> epoller_;
     FileDescriptor serverFd_ = 0;
     RecvMsgRunner runner_;
