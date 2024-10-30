@@ -185,7 +185,7 @@ int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap
     }
     if (item.type == SINGLE_IP) {
         uint32_t ipInt = item.ipv4.startIp.s_addr;
-        ip4Map->OrInsert(ipInt, static_cast<uint32_t>(item.mask), bitmap);
+        ip4Map->OrInsert(ntohl(ipInt), static_cast<uint32_t>(item.mask), bitmap);
         NETNATIVE_LOG_D("InsertIpBitmap ipp[%{public}u] ipn[%{public}s] mask[%{public}u]", ipInt,
             item.GetStartIp().c_str(), item.mask);
     } else if (item.type == MULTIPLE_IP) {
@@ -195,7 +195,7 @@ int32_t BitmapManager::InsertIp4SegBitmap(const NetFirewallIpParam &item, Bitmap
             return ret;
         }
         for (auto &ipData : ips) {
-            ip4Map->OrInsert(htonl(ipData.data), ipData.mask, bitmap);
+            ip4Map->OrInsert(ipData.data, ipData.mask, bitmap);
             NETNATIVE_LOG_D("InsertIpBitmap ip[%{public}u], mask[%{public}u]", htonl(ipData.data), ipData.mask);
         }
     }
