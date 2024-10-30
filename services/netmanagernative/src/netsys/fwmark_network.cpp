@@ -16,11 +16,11 @@
 #include "fwmark_network.h"
 
 #include <cerrno>
+#include <pthread.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <thread>
-#include <pthread.h>
 #include <unistd.h>
 
 #include "fwmark.h"
@@ -30,10 +30,12 @@
 #ifdef USE_SELINUX
 #include "selinux/selinux.h"
 #endif
+#include "fwmark_epoller.h"
 #include "securec.h"
 
 namespace OHOS {
 namespace nmd {
+using namespace NetManagerStandard;
 static constexpr const uint16_t NETID_UNSET = 0;
 static constexpr const int32_t NO_ERROR_CODE = 0;
 static constexpr const int32_t ERROR_CODE_RECVMSG_FAILED = -1;
@@ -43,7 +45,10 @@ static constexpr const int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
 static constexpr const int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
 static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
 static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
-
+union Cmsgu {
+    cmsghdr cmh;
+    char cmsg[CMSG_SPACE(sizeof(0))];
+};
 void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
     if (socket == nullptr) {
@@ -126,55 +131,41 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
     return ret;
 }
 
-void SendMessage(int32_t *serverSockfd)
+void RunForClientFd(int32_t clientSockfd)
 {
-    if (serverSockfd == nullptr) {
-        NETNATIVE_LOGE("SendMessage failed, serverSockfd is nullptr");
+    FwmarkCommand fwmCmd{};
+    iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
+    int32_t socketFd = -1;
+    Cmsgu cmsgu;
+    (void)memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg));
+    msghdr message;
+    (void)memset_s(&message, sizeof(message), 0, sizeof(message));
+    message = {.msg_iov = &iov, .msg_iovlen = 1, .msg_control = cmsgu.cmsg, .msg_controllen = sizeof(cmsgu.cmsg)};
+    int32_t ret = recvmsg(clientSockfd, &message, 0);
+    if (ret < 0) {
+        CloseSocket(&clientSockfd, ret, ERROR_CODE_RECVMSG_FAILED);
         return;
     }
-    int32_t clientSockfd;
-    struct sockaddr_un clientAddr;
-    socklen_t len = sizeof(clientAddr);
-    while (true) {
-        clientSockfd = accept(*serverSockfd, reinterpret_cast<struct sockaddr *>(&clientAddr), &len);
-        FwmarkCommand fwmCmd;
-        iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
-        int32_t socketFd = -1;
-        union {
-            cmsghdr cmh;
-            char cmsg[CMSG_SPACE(sizeof(socketFd))];
-        } cmsgu;
-        (void)memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg));
-        msghdr message;
-        (void)memset_s(&message, sizeof(message), 0, sizeof(message));
-        message = {.msg_iov = &iov, .msg_iovlen = 1, .msg_control = cmsgu.cmsg, .msg_controllen = sizeof(cmsgu.cmsg)};
-        int32_t ret = recvmsg(clientSockfd, &message, 0);
-        if (ret < 0) {
-            CloseSocket(&clientSockfd, ret, ERROR_CODE_RECVMSG_FAILED);
-            continue;
+    cmsghdr *const cmsgh = CMSG_FIRSTHDR(&message);
+    if (cmsgh && cmsgh->cmsg_level == SOL_SOCKET && cmsgh->cmsg_type == SCM_RIGHTS &&
+        cmsgh->cmsg_len == CMSG_LEN(sizeof(socketFd))) {
+        if (memcpy_s(&socketFd, sizeof(socketFd), CMSG_DATA(cmsgh), sizeof(socketFd)) != 0) {
+            return;
         }
-        cmsghdr *const cmsgh = CMSG_FIRSTHDR(&message);
-        if (cmsgh && cmsgh->cmsg_level == SOL_SOCKET && cmsgh->cmsg_type == SCM_RIGHTS &&
-            cmsgh->cmsg_len == CMSG_LEN(sizeof(socketFd))) {
-            int rst = memcpy_s(&socketFd, sizeof(socketFd), CMSG_DATA(cmsgh), sizeof(socketFd));
-            if (rst != 0) {
-                return;
-            }
-        }
-        if (socketFd < 0) {
-            CloseSocket(&clientSockfd, ret, ERROR_CODE_SOCKETFD_INVALID);
-            continue;
-        }
-        if ((ret = SetMark(&socketFd, &fwmCmd)) != 0) {
-            CloseSocket(&clientSockfd, ret, ERROR_CODE_SET_MARK);
-            continue;
-        }
-        if ((ret = write(clientSockfd, &ret, sizeof(ret))) < 0) {
-            CloseSocket(&clientSockfd, ret, ERROR_CODE_WRITE_FAILED);
-            continue;
-        }
-        CloseSocket(&clientSockfd, ret, NO_ERROR_CODE);
     }
+    if (socketFd < 0) {
+        CloseSocket(&clientSockfd, ret, ERROR_CODE_SOCKETFD_INVALID);
+        return;
+    }
+    if ((ret = SetMark(&socketFd, &fwmCmd)) != 0) {
+        CloseSocket(&clientSockfd, ret, ERROR_CODE_SET_MARK);
+        return;
+    }
+    if ((ret = write(clientSockfd, &ret, sizeof(ret))) < 0) {
+        CloseSocket(&clientSockfd, ret, ERROR_CODE_WRITE_FAILED);
+        return;
+    }
+    CloseSocket(&clientSockfd, ret, NO_ERROR_CODE);
 }
 
 void StartListener()
@@ -188,7 +179,13 @@ void StartListener()
         serverSockfd = -1;
         return;
     }
-    SendMessage(&serverSockfd);
+    if (!FwmarkTool::MakeNonBlock(serverSockfd)) {
+        close(serverSockfd);
+        serverSockfd = -1;
+        return;
+    }
+    FwmarkTool::FwmarkEpollServer server(serverSockfd, RunForClientFd);
+    server.Run();
     close(serverSockfd);
     serverSockfd = -1;
 }
@@ -198,14 +195,13 @@ FwmarkNetwork::FwmarkNetwork()
     ListenerClient();
 }
 
-FwmarkNetwork::~FwmarkNetwork() {}
+FwmarkNetwork::~FwmarkNetwork() = default;
 
 void FwmarkNetwork::ListenerClient()
 {
-    std::thread startListener(StartListener);
-    std::string threadName = "FwmarkListen";
-    pthread_setname_np(startListener.native_handle(), threadName.c_str());
-    startListener.detach();
+    std::thread t(StartListener);
+    pthread_setname_np(t.native_handle(), "FwmarkListen");
+    t.detach();
     NETNATIVE_LOGI("FwmarkNetwork: StartListener");
 }
 } // namespace nmd
