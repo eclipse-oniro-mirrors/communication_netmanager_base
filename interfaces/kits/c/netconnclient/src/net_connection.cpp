@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <netdb.h>
+
 #include "net_connection.h"
 #include "net_conn_client.h"
 #include "net_connection_adapter.h"
