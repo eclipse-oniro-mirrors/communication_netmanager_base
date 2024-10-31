@@ -22,7 +22,6 @@
 #include <dlfcn.h>
 #include <regex>
 #include <sstream>
-#include <chrono>
 #include <securec.h>
 
 #include "openssl/evp.h"
