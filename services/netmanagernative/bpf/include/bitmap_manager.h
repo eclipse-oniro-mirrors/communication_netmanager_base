@@ -363,13 +363,13 @@ public:
         std::vector<Ip4RuleBitmapVector::iterator> matches;
         uint32_t networkAddr = GetNetworkAddress(addr, mask);
         for (auto it = ruleBitmapVec_.begin(); it != ruleBitmapVec_.end(); ++it) {
-            if (it->data == addr || GetNetworkAddress(it->data, it->mask) == networkAddr) {
+            if (it->data == htonl(addr) || GetNetworkAddress(ntohl(it->data), it->mask) == networkAddr) {
                 matches.emplace_back(it);
             }
         }
         if (matches.empty()) {
             Ip4RuleBitmap ruleBitmap;
-            ruleBitmap.data = addr;
+            ruleBitmap.data = htonl(addr);
             ruleBitmap.mask = mask;
             ruleBitmap.bitmap = bitmap;
             ruleBitmapVec_.emplace_back(std::move(ruleBitmap));
@@ -400,7 +400,7 @@ private:
      */
     inline uint32_t GetNetworkAddress(uint32_t addr, uint32_t mask)
     {
-        return ntohl(addr) & (0xFFFFFFFF >> (IPV4_MAX_PREFIXLEN - mask));
+        return addr & (0xFFFFFFFF << (IPV4_MAX_PREFIXLEN - mask));
     }
 
 private:
