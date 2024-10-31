@@ -854,6 +854,16 @@ int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::st
     return NetworkSecurityConfig::GetInstance().GetPinSetForHostName(hostname, pins);
 }
 
+bool NetConnClient::TrustUser0Ca()
+{
+    return NetworkSecurityConfig::GetInstance().TrustUser0Ca();
+}
+
+bool NetConnClient::TrustUserCa()
+{
+    return NetworkSecurityConfig::GetInstance().TrustUserCa();
+}
+
 bool NetConnClient::IsPinOpenMode(const std::string &hostname)
 {
     return NetworkSecurityConfig::GetInstance().IsPinOpenMode(hostname);

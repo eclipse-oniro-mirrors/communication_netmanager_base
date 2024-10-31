@@ -22,6 +22,7 @@
 #include <dlfcn.h>
 #include <regex>
 #include <sstream>
+#include <chrono>
 #include <securec.h>
 
 #include "openssl/evp.h"
@@ -526,6 +527,16 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
     ParseJsonBaseConfig(baseConfig, baseConfig_);
     ParseJsonDomainConfigs(domainConfig, domainConfigs_);
 
+    auto trustUser0Ca = cJSON_GetObjectItem(root, "trust-global-user-ca");
+    if (trustUser0Ca) {
+        trustUser0Ca_ = cJSON_IsTrue(trustUser0Ca);
+    }
+
+    auto trustUserCa = cJSON_GetObjectItem(root, "trust-current-user-ca");
+    if (trustUserCa) {
+        trustUserCa_ = cJSON_IsTrue(trustUserCa);
+    }
+
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
 }
@@ -672,5 +683,14 @@ void NetworkSecurityConfig::DumpConfigs()
     }
 }
 
+bool NetworkSecurityConfig::TrustUser0Ca()
+{
+    return trustUser0Ca_;
+}
+
+bool NetworkSecurityConfig::TrustUserCa()
+{
+    return trustUserCa_;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

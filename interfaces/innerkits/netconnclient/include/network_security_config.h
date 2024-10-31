@@ -61,6 +61,8 @@ public:
     static NetworkSecurityConfig& GetInstance();
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
     bool IsPinOpenMode(const std::string &hostname);
+    bool TrustUser0Ca();
+    bool TrustUserCa();
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
 private:
@@ -91,6 +93,8 @@ private:
     ~NetworkSecurityConfig();
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
+    bool trustUser0Ca_ = true;
+    bool trustUserCa_ = true;
 };
 
 }
