@@ -210,6 +210,7 @@
       "VTT for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "VTT?for?OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
+      "OHOS::NetManagerStandard::NetConnClient::DlCloseRemoveDeathRecipient()";
     };
   local:
    *;
