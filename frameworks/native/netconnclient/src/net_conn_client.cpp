@@ -504,6 +504,7 @@ sptr<INetConnService> NetConnClient::GetProxy()
 
 int32_t NetConnClient::SetAirplaneMode(bool state)
 {
+    NETMGR_LOG_I("SetAirplaneMode client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
