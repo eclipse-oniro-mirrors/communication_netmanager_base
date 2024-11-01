@@ -18,6 +18,7 @@
 
 static const uint32_t WLAN_IPv4[] = {172, 17, 1, 2};
 static const uint32_t CELLULAR_IPv4[] = {172, 17, 0, 2};
+static const uint32_t CELLULAR_IPv42[] = {127, 0, 0, 6};
 static const int32_t IFACE_TYPE_CELLULAR = 1;
 static const int32_t IFACE_TYPE_WIFI = 2;
 static const int32_t APP_STATS_MAP_SIZE = 5000;
