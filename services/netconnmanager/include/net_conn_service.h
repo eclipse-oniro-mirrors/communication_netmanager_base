@@ -418,6 +418,7 @@ private:
         REQUEST,
     };
     bool Init();
+    void SetCurlOptions(CURL *curl, HttpProxy tempProxy);
     void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
