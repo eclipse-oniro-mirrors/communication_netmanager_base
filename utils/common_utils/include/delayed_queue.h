@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.  Licensed under the Apache
+ * License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -25,16 +25,33 @@
 #include <set>
 #include <thread>
 
+#ifndef CROSS_PLATFORM
+#include "netnative_log_wrapper.h"
+#endif
+
 namespace OHOS::NetManagerStandard {
 template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueue {
 public:
     DelayedQueue() : index_(0), needRun_(true)
     {
         pthread_ = std::thread([this]() {
+#ifndef CROSS_PLATFORM
+            size_t allCounter = 0;
+#endif
             while (needRun_) {
                 {
                     std::lock_guard<std::mutex> guard(mutex_);
-                    for (const auto &elem : elems_[index_]) {
+#ifndef CROSS_PLATFORM
+                    size_t counter = 0;
+                    for (auto &temp : elems_) {
+                        counter += temp.size();
+                    }
+                    if (allCounter != counter) {
+                        NETNATIVE_LOGI("dns:%{public}zu", counter);
+                        allCounter = counter;
+                    }
+#endif
+		    for (const auto &elem : elems_[index_]) {
                         if (elem) {
                             elem->Execute();
                         }
