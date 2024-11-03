@@ -234,7 +234,7 @@ static inline __u64 check_broker_policy(uint64_t uid)
 
 static inline __u32 filter_sim_stats(__u32 ipv4)
 {
-    if (IS_MATCHED_IP(ipv4, WLAN_IPv4) || IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
+    if (IS_MATCHED_IP(ipv4, WLAN_IPv4) || IS_MATCHED_IP(ipv4, CELLULAR_IPv4) || IS_MATCHED_IP(ipv4, CELLULAR_IPv42)) {
         return 1;
     }
     return 0;
@@ -245,7 +245,7 @@ static inline __u32 get_iface_type(__u32 ipv4)
     if (IS_MATCHED_IP(ipv4, WLAN_IPv4)) {
         return IFACE_TYPE_WIFI;
     }
-    if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4)) {
+    if (IS_MATCHED_IP(ipv4, CELLULAR_IPv4) || IS_MATCHED_IP(ipv4, CELLULAR_IPv42)) {
         return IFACE_TYPE_CELLULAR;
     }
     return 0;
