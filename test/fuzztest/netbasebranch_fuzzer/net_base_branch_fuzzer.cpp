@@ -79,7 +79,7 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     }
     int32_t testId = GetNetBranchFuzzData<int32_t>();
     std::shared_ptr<NetHttpProbe> instance_ =
-        std::make_shared<NetHttpProbe>(testId, NetBearType::BEARER_DEFAULT, NetLinkInfo());
+        std::make_shared<NetHttpProbe>(testId, NetBearType::BEARER_DEFAULT, NetLinkInfo(), ProbeType::PROBE_HTTP);
     instance_->GetHttpProbeResult();
     instance_->GetHttpsProbeResult();
     std::string host = GetStringFromData(STR_LEN);
@@ -93,8 +93,6 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     instance_->CheckCurlGlobalInitState();
     ProbeType probeType = ProbeType::PROBE_HTTP_HTTPS;
     instance_->InitHttpCurl(probeType);
-    ProbeType hasProbeType = ProbeType::PROBE_HTTP_HTTPS;
-    instance_->HasProbeType(probeType, hasProbeType);
     instance_->CleanHttpCurl();
     instance_->ExtractDomainFormUrl(httpUrl);
     std::string testString = "";

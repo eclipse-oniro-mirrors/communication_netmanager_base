@@ -191,10 +191,10 @@ NetHttpProbeResult NetMonitor::SendProbe()
         return httpsProbeResult;
     }
     NETMGR_LOG_I("backup url detection start");
-    std::shared_ptr<ProbeThread> fallbackHttpThread = std::make_shared<ProbeThread>(netId_,
-        netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, fallbackHttpUrl_, fallbackHttpsUrl_);
-    std::shared_ptr<ProbeThread> fallbackHttpsThread = std::make_shared<ProbeThread>(netId_,
-        netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> fallbackHttpThread = std::make_shared<ProbeThread>(netId_, netBearType_,
+        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> fallbackHttpsThread = std::make_shared<ProbeThread>(netId_, netBearType_,
+        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
     fallbackHttpThread->ProbeWithoutGlobalHttpProxy();
     fallbackHttpsThread->ProbeWithoutGlobalHttpProxy();
     fallbackHttpThread->Start();
@@ -202,8 +202,10 @@ NetHttpProbeResult NetMonitor::SendProbe()
     latchAll->Await(std::chrono::milliseconds(ALL_DETECTION_RESULT_WAIT_MS));
     httpProbeResult = GetThreadDetectResult(primaryHttpThread, ProbeType::PROBE_HTTP);
     httpsProbeResult = GetThreadDetectResult(primaryHttpsThread, ProbeType::PROBE_HTTPS);
-    NetHttpProbeResult fallbackHttpProbeResult = GetThreadDetectResult(fallbackHttpThread, ProbeType::PROBE_HTTP);
-    NetHttpProbeResult fallbackHttpsProbeResult = GetThreadDetectResult(fallbackHttpsThread, ProbeType::PROBE_HTTPS);
+    NetHttpProbeResult fallbackHttpProbeResult =
+        GetThreadDetectResult(fallbackHttpThread, ProbeType::PROBE_HTTP_FALLBACK);
+    NetHttpProbeResult fallbackHttpsProbeResult =
+        GetThreadDetectResult(fallbackHttpsThread, ProbeType::PROBE_HTTPS_FALLBACK);
     return ProcessThreadDetectResult(httpProbeResult, httpsProbeResult, fallbackHttpProbeResult,
         fallbackHttpsProbeResult);
 }
@@ -212,7 +214,7 @@ NetHttpProbeResult NetMonitor::GetThreadDetectResult(std::shared_ptr<ProbeThread
 {
     NetHttpProbeResult result;
     if (!probeThread->IsDetecting()) {
-        if (probeType == ProbeType::PROBE_HTTP) {
+        if (probeType == ProbeType::PROBE_HTTP || probeType == ProbeType::PROBE_HTTP_FALLBACK) {
             return probeThread->GetHttpProbeResult();
         } else {
             return probeThread->GetHttpsProbeResult();

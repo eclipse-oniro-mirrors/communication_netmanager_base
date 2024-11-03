@@ -57,7 +57,7 @@ ProbeThread::ProbeThread(uint32_t netId, NetBearType bearType, const NetLinkInfo
     : netId_(netId), probeType_(probeType), latch_(latch), latchAll_(latchAll), httpProbeUrl_(httpUrl),
     httpsProbeUrl_(httpsUrl)
 {
-    httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo);
+    httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo, probeType);
 }
 
 ProbeThread::~ProbeThread()
@@ -124,12 +124,12 @@ void ProbeThread::SendHttpProbe(ProbeType probeType)
 
 bool ProbeThread::IsConclusiveResult()
 {
-    if (httpProbe_->HasProbeType(probeType_, ProbeType::PROBE_HTTP) &&
+    if ((probeType_ == ProbeType::PROBE_HTTP || probeType_ == ProbeType::PROBE_HTTP_FALLBACK) &&
         httpProbe_->GetHttpProbeResult().IsNeedPortal()) {
         NETMGR_LOG_I("http url detection result: portal");
         return true;
     }
-    if (httpProbe_->HasProbeType(probeType_, ProbeType::PROBE_HTTPS) &&
+    if ((probeType_ == ProbeType::PROBE_HTTPS || probeType_ == ProbeType::PROBE_HTTPS_FALLBACK) &&
         httpProbe_->GetHttpsProbeResult().IsSuccessful()) {
         NETMGR_LOG_I("https url detection result: success");
         return true;
