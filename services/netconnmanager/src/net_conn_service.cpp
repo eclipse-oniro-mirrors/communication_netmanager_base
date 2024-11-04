@@ -72,6 +72,9 @@ constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdat
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
 constexpr uint16_t DEFAULT_MTU = 1500;
+constexpr int32_t SUCCESS_CODE = 204;
+constexpr int32_t RETRY_TIMES = 3;
+constexpr long AUTH_TIME_OUT = 5L;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -2021,6 +2024,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 void NetConnService::ActiveHttpProxy()
 {
     NETMGR_LOG_D("ActiveHttpProxy thread start");
+    uint32_t retryTimes = RETRY_TIMES;
     while (httpProxyThreadNeedRun_.load()) {
         NETMGR_LOG_D("Keep global http-proxy active every 2 minutes");
         CURL *curl = nullptr;
@@ -2030,36 +2034,53 @@ void NetConnService::ActiveHttpProxy()
             LoadGlobalHttpProxy(tempProxy);
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
-        auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
-            std::string httpUrl;
-            GetHttpUrlFromConfig(httpUrl);
-            if (httpUrl.empty()) {
-                NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
-                continue;
-            }
             curl = curl_easy_init();
-            curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
-            curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
-            curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
-            curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
-            curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-            if (!tempProxy.password_.empty()) {
-                curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
-            }
+            SetCurlOptions(curl, tempProxy);
         }
         if (curl) {
+            long response_code;
             auto ret = curl_easy_perform(curl);
-            NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy %{public}d", static_cast<int>(ret));
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+            NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy ret: %{public}d, code: %{public}d", static_cast<int>(ret),
+                         static_cast<int32_t>(response_code));
+            if (response_code != SUCCESS_CODE && retryTimes == 0) {
+                retryTimes = RETRY_TIMES;
+            }
             curl_easy_cleanup(curl);
         }
         if (httpProxyThreadNeedRun_.load()) {
-            std::unique_lock lock(httpProxyThreadMutex_);
-            httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+            if (retryTimes == 0) {
+                std::unique_lock lock(httpProxyThreadMutex_);
+                auto notifyRet = httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+                retryTimes = (notifyRet == std::cv_status::timeout) ? 0 : RETRY_TIMES;
+            } else {
+                retryTimes--;
+            }
         } else {
             NETMGR_LOG_W("ActiveHttpProxy has been clear.");
         }
+    }
+}
+
+void NetConnService::SetCurlOptions(CURL *curl, HttpProxy tempProxy)
+{
+    std::string httpUrl;
+    GetHttpUrlFromConfig(httpUrl);
+    if (httpUrl.empty()) {
+        NETMGR_LOG_E("ActiveHttpProxy thread get url failed!");
+        return;
+    }
+    auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
+    curl_easy_setopt(curl, CURLOPT_URL, httpUrl.c_str());
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, AUTH_TIME_OUT);
+    curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
+    curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
+    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
+    curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
+    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+    if (!tempProxy.password_.empty()) {
+        curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
     }
 }
 
@@ -2094,7 +2115,6 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     LoadGlobalHttpProxy(oldHttpProxy);
     if (oldHttpProxy != httpProxy) {
         HttpProxy newHttpProxy = httpProxy;
-        httpProxyThreadCv_.notify_all();
         int32_t userId;
         int32_t ret = GetCallingUserId(userId);
         if (ret != NETMANAGER_SUCCESS) {
@@ -2116,6 +2136,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         globalHttpProxyCache_.EnsureInsert(userId, newHttpProxy);
         SendHttpProxyChangeBroadcast(newHttpProxy);
         UpdateGlobalHttpProxy(newHttpProxy);
+        httpProxyThreadCv_.notify_all();
     }
     if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
         NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
