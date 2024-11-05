@@ -44,7 +44,7 @@ public:
 
 void NetHttpProbeTest::SetUpTestCase()
 {
-    instance_ = std::make_shared<NetHttpProbe>(TEST_NETID, NetBearType::BEARER_DEFAULT, NetLinkInfo());
+    instance_ = std::make_shared<NetHttpProbe>(TEST_NETID, NetBearType::BEARER_DEFAULT, NetLinkInfo(), PROBE_HTTP);
 }
 
 void NetHttpProbeTest::TearDownTestCase() {}
@@ -63,12 +63,6 @@ HWTEST_F(NetHttpProbeTest, SendProbeTest001, TestSize.Level1)
     instance_->UpdateGlobalHttpProxy(httpProxy);
     int32_t ret = instance_->SendProbe(PROBE_HTTP_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
-}
-
-HWTEST_F(NetHttpProbeTest, HasProbeType001, TestSize.Level1)
-{
-    bool ret = instance_->HasProbeType(ProbeType::PROBE_HTTP, ProbeType::PROBE_HTTP_HTTPS);
-    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetHttpProbeTest, NetHttpProbeBranchTest001, TestSize.Level1)
@@ -144,9 +138,9 @@ HWTEST_F(NetHttpProbeTest, SetHttpOptions001, TestSize.Level1)
     ASSERT_FALSE(ret);
     ret = instance_->SetHttpOptions(probeType, instance_->httpCurl_, url);
     ASSERT_FALSE(ret);
-    ret = instance_->InitHttpCurl(probeType);
+    ret = instance_->InitHttpCurl(ProbeType::PROBE_HTTP);
     ASSERT_TRUE(ret);
-    ret = instance_->SetHttpOptions(probeType, instance_->httpCurl_, TEST_HTTPS_URL);
+    ret = instance_->SetHttpOptions(ProbeType::PROBE_HTTP, instance_->httpCurl_, TEST_HTTPS_URL);
     ASSERT_TRUE(ret);
 }
 

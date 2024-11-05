@@ -25,6 +25,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_proxy_userinfo.h"
+#include "netmanager_base_common_utils.h"
 
 #define NETPROBE_CURL_EASY_SET_OPTION(handle, opt, data)                                                     \
     do {                                                                                                     \
@@ -40,6 +41,13 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int PERFORM_POLL_INTERVAL_MS = 50;
+constexpr int64_t HTTP_OK_CODE = 200;
+constexpr int32_t DEFAULT_CONTENT_LENGTH_VALUE = -1;
+constexpr int32_t MIN_VALID_CONTENT_LENGTH_VALUE = 5;
+constexpr int32_t FAIL_CODE = 599;
+constexpr int32_t PORTAL_CODE = 302;
+constexpr int32_t HTTP_RES_CODE_BAD_REQUEST = 400;
+constexpr int32_t HTTP_RES_CODE_CLIENT_ERRORS_MAX = 499;
 constexpr int CURL_CONNECT_TIME_OUT_MS = 10000;
 constexpr int CURL_OPERATE_TIME_OUT_MS = 10000;
 constexpr int32_t DOMAIN_IP_ADDR_LEN_MAX = 128;
@@ -47,6 +55,17 @@ constexpr int32_t DEFAULT_HTTP_PORT = 80;
 constexpr int32_t DEFAULT_HTTPS_PORT = 443;
 constexpr const char *ADDR_SEPARATOR = ",";
 constexpr const char *SYMBOL_COLON = ":";
+const std::string DEFAULT_USER_AGENT = std::string("User-Agent: Mozilla/5.0 (X11; Linux x86_64) ") +
+    std::string("AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36");
+constexpr const char *CONNECTION_PROPERTY = "Connection: close";
+constexpr const char *ACCEPT_ENCODING = "Accept-Encoding: gzip";
+const std::string CONNECTION_CLOSE_VALUE = "close";
+const std::string CONNECTION_KEY = "Connection:";
+const std::string CONTENT_LENGTH_KEY = "Content-Length:";
+const std::string KEY_WORDS_REDIRECTION = "location.replace";
+const std::string HTML_TITLE_HTTP_EN = "http://";
+const std::string HTML_TITLE_HTTPS_EN = "https://";
+constexpr const char NEW_LINE_STR = '\n';
 } // namespace
 
 std::mutex NetHttpProbe::initCurlMutex_;
@@ -79,8 +98,8 @@ void NetHttpProbe::CurlGlobalCleanup()
     }
 }
 
-NetHttpProbe::NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo)
-    : netId_(netId), netBearType_(bearType), netLinkInfo_(netLinkInfo)
+NetHttpProbe::NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo, ProbeType probeType)
+    : netId_(netId), netBearType_(bearType), netLinkInfo_(netLinkInfo), probeType_(probeType)
 {
     isCurlInit_ = NetHttpProbe::CurlGlobalInit();
 }
@@ -94,9 +113,7 @@ NetHttpProbe::~NetHttpProbe()
 int32_t NetHttpProbe::SendProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl)
 {
     NETMGR_LOG_I("Send net:[%{public}d] %{public}s probe in", netId_,
-                 ((probeType == ProbeType::PROBE_HTTP_HTTPS)
-                      ? "HTTP&HTTPS"
-                      : ((probeType == ProbeType::PROBE_HTTPS) ? "https" : "http")));
+        ((IsHttpsDetect(probeType)) ? "https" : "http"));
     ClearProbeResult();
     if (!CheckCurlGlobalInitState()) {
         return NETMANAGER_ERR_INTERNAL;
@@ -260,11 +277,6 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
     return ipAddress;
 }
 
-bool NetHttpProbe::HasProbeType(ProbeType inputProbeType, ProbeType hasProbeType)
-{
-    return (inputProbeType & hasProbeType) != 0;
-}
-
 bool NetHttpProbe::InitHttpCurl(ProbeType probeType)
 {
     curlMulti_ = curl_multi_init();
@@ -273,7 +285,7 @@ bool NetHttpProbe::InitHttpCurl(ProbeType probeType)
         return false;
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
+    if (IsHttpDetect(probeType)) {
         httpCurl_ = curl_easy_init();
         if (!httpCurl_) {
             NETMGR_LOG_E("httpCurl_ init failed");
@@ -281,7 +293,7 @@ bool NetHttpProbe::InitHttpCurl(ProbeType probeType)
         }
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
+    if (IsHttpsDetect(probeType)) {
         httpsCurl_ = curl_easy_init();
         if (!httpsCurl_) {
             NETMGR_LOG_E("httpsCurl_ init failed");
@@ -303,19 +315,33 @@ bool NetHttpProbe::SetCurlOptions(ProbeType probeType, const std::string &httpUr
         return false;
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
+    if (IsHttpDetect(probeType)) {
         if (!SetHttpOptions(ProbeType::PROBE_HTTP, httpCurl_, httpUrl)) {
             return false;
         }
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
+    if (IsHttpsDetect(probeType)) {
         if (!SetHttpOptions(ProbeType::PROBE_HTTPS, httpsCurl_, httpsUrl)) {
             return false;
         }
     }
 
     return true;
+}
+
+size_t NetHttpProbe::HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata)
+{
+    std::string* data = static_cast<std::string*>(userdata);
+    NETMGR_LOG_D("recv data size:[%{public}zu] nitems:[%{public}zu]", size, nitems);
+    if (size * nitems > CURL_MAX_HTTP_HEADER) {
+        NETMGR_LOG_E("recv data error, greater than 100K");
+        return 0;
+    }
+    if (data != nullptr && buffer != nullptr) {
+        data->append(buffer, size * nitems);
+    }
+    return size * nitems;
 }
 
 bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::string &url)
@@ -328,12 +354,19 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
         NETMGR_LOG_E("Probe url is empty");
         return false;
     }
+    struct curl_slist *list = nullptr;
+    list = curl_slist_append(list, DEFAULT_USER_AGENT.c_str());
+    list = curl_slist_append(list, CONNECTION_PROPERTY);
+    list = curl_slist_append(list, ACCEPT_ENCODING);
+    if (!list) {
+        NETMGR_LOG_E("add request header properties failed.");
+        return false;
+    }
 
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_VERBOSE, 0L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_FORBID_REUSE, 1L);
-    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 0L);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
-    if (probeType == ProbeType::PROBE_HTTPS) {
+    if (IsHttpsDetect(probeType)) {
         /* the connection succeeds regardless of the peer certificate validation */
         NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         /* the connection succeeds regardless of the names in the certificate. */
@@ -345,6 +378,11 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
     /* transfer operation timeout time */
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_TIMEOUT_MS, CURL_OPERATE_TIME_OUT_MS);
     NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_INTERFACE, netLinkInfo_.ifaceName_.c_str());
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADERFUNCTION, NetHttpProbe::HeaderCallback);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADERDATA, &respHeader_);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HEADER, 1L);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_HTTPHEADER, list);
+    NETPROBE_CURL_EASY_SET_OPTION(curl, CURLOPT_ERRORBUFFER, errBuffer);
 
     CURLMcode code = curl_multi_add_handle(curlMulti_, curl);
     if (code != CURLM_OK) {
@@ -380,14 +418,14 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
     bool ret = true;
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
+    if (IsHttpDetect(probeType)) {
         if (!SetProxyInfo(httpCurl_, proxyHost, proxyPort)) {
             NETMGR_LOG_E("Set proxy info failed.");
         }
         ret &= SetResolveOption(ProbeType::PROBE_HTTP, proxyDomain, proxyIpAddress, proxyPort);
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
+    if (IsHttpsDetect(probeType)) {
         if (!SetProxyInfo(httpsCurl_, proxyHost, proxyPort)) {
             NETMGR_LOG_E("Set proxy info failed.");
         }
@@ -449,12 +487,12 @@ bool NetHttpProbe::SetResolveOption(ProbeType probeType, const std::string &doma
     }
 
     std::string resolve = domain + SYMBOL_COLON + std::to_string(port) + SYMBOL_COLON + ipAddress;
-    if (probeType == ProbeType::PROBE_HTTP) {
+    if (IsHttpDetect(probeType)) {
         httpResolveList_ = curl_slist_append(httpResolveList_, resolve.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(httpCurl_, CURLOPT_RESOLVE, httpResolveList_);
     }
 
-    if (probeType == ProbeType::PROBE_HTTPS) {
+    if (IsHttpsDetect(probeType)) {
         httpsResolveList_ = curl_slist_append(httpsResolveList_, resolve.c_str());
         NETPROBE_CURL_EASY_SET_OPTION(httpsCurl_, CURLOPT_RESOLVE, httpsResolveList_);
     }
@@ -471,7 +509,7 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
 
     std::string httpDomain;
     std::string httpsDomain;
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
+    if (IsHttpDetect(probeType)) {
         httpDomain = ExtractDomainFormUrl(httpUrl);
         if (httpDomain.empty()) {
             NETMGR_LOG_E("The http domain extracted from [%{public}s] is empty", httpUrl.c_str());
@@ -479,7 +517,7 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
         }
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
+    if (IsHttpsDetect(probeType)) {
         httpsDomain = ExtractDomainFormUrl(httpsUrl);
         if (httpsDomain.empty()) {
             NETMGR_LOG_E("The https domain extracted from [%{public}s] is empty", httpsUrl.c_str());
@@ -495,13 +533,13 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
                SetResolveOption(ProbeType::PROBE_HTTPS, httpsDomain, ipAddress, DEFAULT_HTTPS_PORT);
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
+    if (IsHttpDetect(probeType)) {
         NETMGR_LOG_I("Get net[%{public}d] ip addr for HTTP probe url ", netId_);
         ipAddress = GetAddrInfo(httpDomain);
         return SetResolveOption(ProbeType::PROBE_HTTP, httpDomain, ipAddress, DEFAULT_HTTP_PORT);
     }
 
-    if (HasProbeType(probeType, ProbeType::PROBE_HTTPS)) {
+    if (IsHttpsDetect(probeType)) {
         NETMGR_LOG_I("Get net[%{public}d] ip addr for HTTPS probe url ", netId_);
         ipAddress = GetAddrInfo(httpsDomain);
         return SetResolveOption(ProbeType::PROBE_HTTPS, httpsDomain, ipAddress, DEFAULT_HTTPS_PORT);
@@ -529,6 +567,73 @@ void NetHttpProbe::SendHttpProbeRequest()
     } while (running);
 }
 
+std::string NetHttpProbe::GetHeaderField(std::string key)
+{
+    std::string result = "";
+    if (respHeader_.empty()) {
+        NETMGR_LOG_I("net[%{public}d], probeType[%{public}d] response header empty", netId_, probeType_);
+        return result;
+    }
+    size_t start = respHeader_.find(key);
+    if (start != std::string::npos) {
+        start += key.length();
+        size_t end = respHeader_.find(NEW_LINE_STR, start);
+        result = respHeader_.substr(start, end - start);
+        result = CommonUtils::Trim(result);
+    }
+    NETMGR_LOG_I("net[%{public}d], probeType[%{public}d], key:[%{public}s]", netId_, probeType_, key.c_str());
+    return result;
+}
+
+int64_t NetHttpProbe::CheckRespCode(int64_t respCode)
+{
+    NETMGR_LOG_D("net[%{public}d], response code before check:[%{public}lld]", netId_, respCode);
+    if (respCode == HTTP_OK_CODE) {
+        std::string contentLengthValue = GetHeaderField(CONTENT_LENGTH_KEY);
+        int32_t lengthValue = contentLengthValue.empty() ? DEFAULT_CONTENT_LENGTH_VALUE :
+            CommonUtils::StrToInt(contentLengthValue, DEFAULT_CONTENT_LENGTH_VALUE);
+        if (lengthValue == DEFAULT_CONTENT_LENGTH_VALUE) {
+            if (respHeader_.empty()) {
+                NETMGR_LOG_I("net[%{public}d], response code 200 with content length -1, consider as fail", netId_);
+                return FAIL_CODE;
+            }
+        } else if (lengthValue < MIN_VALID_CONTENT_LENGTH_VALUE) {
+            NETMGR_LOG_I("net[%{public}d], response code 200, content length less 5, consider as fail", netId_);
+            return FAIL_CODE;
+        }
+
+        std::string value = GetHeaderField(CONNECTION_KEY);
+        value = CommonUtils::ToLower(value);
+        if (CONNECTION_CLOSE_VALUE.compare(value) == 0 &&
+            probeType_ == ProbeType::PROBE_HTTP) {
+            NETMGR_LOG_I("net[%{public}d] http detection, response code 200 with connection close, consider as fail",
+                netId_);
+            return FAIL_CODE;
+        }
+    }
+    int64_t result = respCode;
+    if (IsHttpDetect(probeType_)) {
+        result = CheckClientErrorRespCode(result);
+    }
+    return result;
+}
+
+int64_t NetHttpProbe::CheckClientErrorRespCode(int64_t respCode)
+{
+    int64_t result = respCode;
+    if (respCode >= HTTP_RES_CODE_BAD_REQUEST && respCode <= HTTP_RES_CODE_CLIENT_ERRORS_MAX) {
+        std::string errMsg(errBuffer);
+        if ((errMsg.find(HTML_TITLE_HTTP_EN) != std::string::npos ||
+            errMsg.find(HTML_TITLE_HTTPS_EN) != std::string::npos) &&
+            errMsg.find(KEY_WORDS_REDIRECTION) != std::string::npos) {
+            NETMGR_LOG_I("net[%{public}d] http return [%{public}lld], reset url in content, consider as portal",
+                netId_, respCode);
+            result = PORTAL_CODE;
+        }
+    }
+    return result;
+}
+
 void NetHttpProbe::RecvHttpProbeResponse()
 {
     if (!curlMulti_) {
@@ -550,7 +655,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
 
         int64_t responseCode = 0;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_RESPONSE_CODE, &responseCode);
-
+        responseCode = CheckRespCode(responseCode);
         std::string redirectUrl;
         char* url = nullptr;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &url);
@@ -574,6 +679,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
         }
     }
 }
+
 int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
 {
     std::lock_guard<std::mutex> locker(proxyMtx_);
@@ -593,5 +699,16 @@ void NetHttpProbe::ProbeWithoutGlobalHttpProxy()
 {
     defaultUseGlobalHttpProxy_ = false;
 }
+
+bool NetHttpProbe::IsHttpDetect(ProbeType probeType)
+{
+    return probeType == ProbeType::PROBE_HTTP || probeType == ProbeType::PROBE_HTTP_FALLBACK;
+}
+
+bool NetHttpProbe::IsHttpsDetect(ProbeType probeType)
+{
+    return probeType == ProbeType::PROBE_HTTPS || probeType == ProbeType::PROBE_HTTPS_FALLBACK;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
