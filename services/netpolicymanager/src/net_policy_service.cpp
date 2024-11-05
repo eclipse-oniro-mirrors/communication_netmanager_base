@@ -589,8 +589,8 @@ bool NetPolicyService::CheckNetworkAccessIsBroker(uint32_t uid)
 
     std::string bundleName = "";
     bundleMgrProxy->GetBundleNameForUid(uid, bundleName);
-    if (bundleName == "myappliction.apps") {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+    if (bundleName == "myappliction.apps" || bundleName == "myappliction1.apps") {
+        NETMGR_LOG_D("BundleName is myappliction.");
         return true;
     }
     return false;
