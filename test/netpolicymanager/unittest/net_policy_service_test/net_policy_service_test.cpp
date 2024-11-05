@@ -85,7 +85,6 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag001, TestSize.Level1)
 
 HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag002, TestSize.Level1)
 {
-    instance_->Init();
     instance_->netPolicyRule_ = nullptr;
     auto ret = instance_->SetPolicyByUid(0, 0);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
