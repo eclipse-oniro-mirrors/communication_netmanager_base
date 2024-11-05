@@ -44,6 +44,7 @@ public:
     int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t timeoutMS) override;
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
+    int32_t UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId) override;
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;

@@ -301,6 +301,17 @@ int32_t NetConnClient::UnRegisterNetDetectionCallback(int32_t netId, const sptr<
     return proxy->UnRegisterNetDetectionCallback(netId, callback);
 }
 
+int32_t NetConnClient::UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId)
+{
+    NETMGR_LOG_I("Update net caps.");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateNetCaps(netCaps, supplierId);
+}
+
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
     NETMGR_LOG_I("UpdateNetSupplierInfo client in.");

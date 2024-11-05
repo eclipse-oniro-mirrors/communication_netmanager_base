@@ -367,6 +367,17 @@ int32_t NetConnService::RegUnRegNetDetectionCallback(int32_t netId, const sptr<I
     return result;
 }
 
+int32_t NetConnService::UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, netCaps, &supplierId, &result]() {
+            result = this->UpdateNetCapsAsync(netCaps, supplierId);
+        });
+    }
+    return result;
+}
+
 int32_t NetConnService::UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState)
 {
     int32_t result = NETMANAGER_ERROR;
@@ -860,6 +871,26 @@ int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const s
         return NETMANAGER_SUCCESS;
     }
     return iterNetwork->second->UnRegisterNetDetectionCallback(callback);
+}
+
+int32_t NetConnService::UpdateNetCapsAsync(const std::set<NetCap> &netCaps, const uint32_t supplierId)
+{
+    NETMGR_LOG_I("Update net caps async.");
+    auto supplier = FindNetSupplier(supplierId);
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("supplier is not exists.");
+        return NET_CONN_ERR_NO_SUPPLIER;
+    }
+
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    auto network = supplier->GetNetwork();
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    network->SetNetCaps(netCaps);
+    supplier->SetNetwork(network);
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState)

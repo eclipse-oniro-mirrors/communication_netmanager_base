@@ -65,6 +65,7 @@ private:
     int32_t OnUpdateNetLinkInfo(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUpdateNetCaps(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNames(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameIdentMaps(MessageParcel &data, MessageParcel &reply);

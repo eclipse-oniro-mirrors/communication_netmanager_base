@@ -172,6 +172,16 @@ public:
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
 
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
+
+    /**
+     * update net capabilities
+     *
+     * @param netCaps netcap set
+     * @param supplierId The id of the network supplier
+     * @return Returns 0, update net caps of the network successfully, otherwise it will fail
+     */
+    int32_t UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId) override;
+
     /**
      * The interface is update network connection status information
      *
@@ -454,6 +464,7 @@ private:
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
     int32_t RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
+    int32_t UpdateNetCapsAsync(const std::set<NetCap> &netCaps, const uint32_t supplierId);
     int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
