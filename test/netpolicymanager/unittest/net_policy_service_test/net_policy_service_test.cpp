@@ -43,17 +43,17 @@ public:
     static inline std::shared_ptr<NetPolicyService> instance_ = nullptr;
 };
 
-void UtNetPolicyService::SetUpTestCase() {}
-
-void UtNetPolicyService::TearDownTestCase() {}
-
-void UtNetPolicyService::SetUp()
+void UtNetPolicyService::SetUpTestCase()
 {
     instance_ = DelayedSingleton<NetPolicyService>::GetInstance();
     instance_->netPolicyRule_ = std::make_shared<NetPolicyRule>();
     instance_->netPolicyFirewall_ = std::make_shared<NetPolicyFirewall>();
     instance_->netPolicyTraffic_ = std::make_shared<NetPolicyTraffic>();
 }
+
+void UtNetPolicyService::TearDownTestCase() {}
+
+void UtNetPolicyService::SetUp() {}
 
 void UtNetPolicyService::TearDown() {}
 
