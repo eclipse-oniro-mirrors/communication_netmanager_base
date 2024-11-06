@@ -517,7 +517,7 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
 }
 
 struct ParentProcessHelper {
-    bool waitDoneFlag = false;
+    std::atomic_bool waitDoneFlag = false;
     pid_t ret = 0;
     std::mutex parentMutex;
     std::condition_variable parentCv;
@@ -549,7 +549,6 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     }
     auto helper = std::make_shared<ParentProcessHelper>();
     auto parentThread = std::thread([helper, childPid]() {
-        std::unique_lock locker(helper->parentMutex);
         helper->ret = waitpid(childPid, nullptr, 0);
         helper->waitDoneFlag = true;
         helper->parentCv.notify_all();
@@ -562,7 +561,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     const int32_t waitTime = 10;
     std::unique_lock uLock(helper->parentMutex);
     auto waitRet = helper->parentCv.wait_for(uLock, std::chrono::seconds(waitTime),
-                                             [&helper] { return helper->waitDoneFlag; });
+                                             [&helper] { return helper->waitDoneFlag.load(); });
     if (!waitRet) {
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         return NETMANAGER_ERROR;
