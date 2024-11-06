@@ -587,7 +587,7 @@ std::string NetHttpProbe::GetHeaderField(std::string key)
 
 int64_t NetHttpProbe::CheckRespCode(int64_t respCode)
 {
-    NETMGR_LOG_D("net[%{public}d], response code before check:[%{public}lld]", netId_, respCode);
+    NETMGR_LOG_D("net[%{public}d], response code before check:%{public}" PRId64, netId_, respCode);
     if (respCode == HTTP_OK_CODE) {
         std::string contentLengthValue = GetHeaderField(CONTENT_LENGTH_KEY);
         int32_t lengthValue = contentLengthValue.empty() ? DEFAULT_CONTENT_LENGTH_VALUE :
@@ -626,7 +626,7 @@ int64_t NetHttpProbe::CheckClientErrorRespCode(int64_t respCode)
         if ((errMsg.find(HTML_TITLE_HTTP_EN) != std::string::npos ||
             errMsg.find(HTML_TITLE_HTTPS_EN) != std::string::npos) &&
             errMsg.find(KEY_WORDS_REDIRECTION) != std::string::npos) {
-            NETMGR_LOG_I("net[%{public}d] http return [%{public}lld], reset url in content, consider as portal",
+            NETMGR_LOG_I("net[%{public}d] reset url in content, consider as portal when http return %{public}" PRId64,
                 netId_, respCode);
             result = PORTAL_CODE;
         }
