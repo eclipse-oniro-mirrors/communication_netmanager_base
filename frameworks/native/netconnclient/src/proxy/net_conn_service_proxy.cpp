@@ -1165,6 +1165,10 @@ int32_t NetConnServiceProxy::GetGlobalHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
+    if (!data.WriteInt32(httpProxy.GetUserId())) {
+        NETMGR_LOG_E("WriteUserId failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
 
     MessageParcel reply;
     int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
@@ -1195,6 +1199,10 @@ int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &h
     }
 
     if (!data.WriteInt32(bindNetId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt32(httpProxy.GetUserId())) {
+        NETMGR_LOG_E("WriteUserId failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 

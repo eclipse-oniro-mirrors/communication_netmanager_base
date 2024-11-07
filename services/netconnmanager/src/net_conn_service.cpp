@@ -1030,13 +1030,6 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     info.data = "Global HttpProxy Changed";
     info.ordered = false;
     std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
-    int32_t userId;
-    int32_t ret = GetCallingUserId(userId);
-    if (ret == NETMANAGER_SUCCESS) {
-        param.emplace("UserId", std::to_string(userId));
-    } else {
-        NETMGR_LOG_E("SendHttpProxyChangeBroadcast get calling userId fail.");
-    }
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
@@ -1774,7 +1767,14 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    LoadGlobalHttpProxy(httpProxy);
+    NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    if (httpProxy.GetUserId() > 0) {
+        // if the valid userId is given. so load http proxy from specified user.
+        LoadGlobalHttpProxy(SPECIFY, httpProxy);
+    } else {
+        // executed in the caller process, so load http proxy from local user which the process belongs.
+        LoadGlobalHttpProxy(LOCAL, httpProxy);
+    }
     if (httpProxy.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
@@ -1785,8 +1785,15 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
+    NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
     auto startTime = std::chrono::steady_clock::now();
-    LoadGlobalHttpProxy(httpProxy);
+    if (httpProxy.GetUserId() > 0) {
+        // if the valid userId is given. so load http proxy from specified user.
+        LoadGlobalHttpProxy(SPECIFY, httpProxy);
+    } else {
+        // executed in the caller process, so load http proxy from local user which the process belongs.
+        LoadGlobalHttpProxy(LOCAL, httpProxy);
+    }
     if (!httpProxy.GetHost().empty()) {
         NETMGR_LOG_I("Return global http proxy as default.");
         return NETMANAGER_SUCCESS;
@@ -2031,7 +2038,8 @@ void NetConnService::ActiveHttpProxy()
         HttpProxy tempProxy;
         {
             auto userInfoHelp = NetProxyUserinfo::GetInstance();
-            LoadGlobalHttpProxy(tempProxy);
+            // executed in the SA process, so load http proxy from current active user.
+            LoadGlobalHttpProxy(ACTIVE, tempProxy);
             userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
@@ -2110,18 +2118,28 @@ void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}zu", httpProxy.GetHost().length());
+    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}zu, userId= %{public}d", httpProxy.GetHost().length(),
+                 httpProxy.GetUserId());
     HttpProxy oldHttpProxy;
-    LoadGlobalHttpProxy(oldHttpProxy);
+    int32_t userId;
+    if (httpProxy.GetUserId() > 0) {
+        oldHttpProxy.SetUserId(httpProxy.GetUserId());
+        // if the valid userId is given. so load http proxy from specified user.
+        LoadGlobalHttpProxy(SPECIFY, oldHttpProxy);
+        userId = httpProxy.GetUserId();
+    } else {
+        // executed in the caller process, so load http proxy from local user which the process belongs
+        LoadGlobalHttpProxy(LOCAL, oldHttpProxy);
+        userId = oldHttpProxy.GetUserId();
+    }
+    if (!IsValidUserId(userId)) {
+        NETMGR_LOG_E("GlobalHttpProxy userId is not exist. userId[%{public}d]", userId);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NETMGR_LOG_I("GlobalHttpProxy userId is %{public}d", userId);
     if (oldHttpProxy != httpProxy) {
         HttpProxy newHttpProxy = httpProxy;
-        int32_t userId;
-        int32_t ret = GetCallingUserId(userId);
-        if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
-            return ret;
-        }
-        NETMGR_LOG_I("GlobalHttpProxy userId is %{public}d", userId);
+        newHttpProxy.SetUserId(userId);
         NetHttpProxyTracker httpProxyTracker;
         if (IsPrimaryUserId(userId)) {
             if (!httpProxyTracker.WriteToSettingsData(newHttpProxy)) {
@@ -2153,7 +2171,18 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetCallingUserId(int32_t &userId)
+int32_t NetConnService::GetLocalUserId(int32_t &userId)
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (ret != 0) {
+        NETMGR_LOG_E("GetOsAccountLocalIdFromUid failed. uid is %{public}d, ret is %{public}d", uid, ret);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetActiveUserId(int32_t &userId)
 {
     std::vector<int> activeIds;
     int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
@@ -2167,6 +2196,20 @@ int32_t NetConnService::GetCallingUserId(int32_t &userId)
     }
     userId = activeIds[0];
     return NETMANAGER_SUCCESS;
+}
+
+bool NetConnService::IsValidUserId(int32_t userId)
+{
+    if (userId < 0) {
+        return false;
+    }
+    bool isValid = false;
+    auto ret = AccountSA::OsAccountManager::IsOsAccountExists(userId, isValid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("IsOsAccountExists is failed. ret[%{public}d], userId[%{public}d]", ret, userId);
+        return false;
+    }
+    return isValid;
 }
 
 int32_t NetConnService::SetAppNet(int32_t netId)
@@ -2215,14 +2258,33 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSu
     return result;
 }
 
-void NetConnService::LoadGlobalHttpProxy(HttpProxy &httpProxy)
+// Query the global http proxy of a specified user type.
+// The user type can be ACTIVE or LOCAL.
+// The ACTIVE is the user in active state on the foreground.
+// The LOCAL is the user to which the application process belongs.
+void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy)
 {
-    int32_t userId;
-    int32_t ret = GetCallingUserId(userId);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("LoadGlobalHttpProxy get calling userId fail.");
+    int32_t userId = -1;
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (userIdType == ACTIVE) {
+        ret = GetActiveUserId(userId);
+    } else if (userIdType == LOCAL) {
+        ret = GetLocalUserId(userId);
+    } else if (userIdType == SPECIFY) {
+        userId = httpProxy.GetUserId();
+    } else {
+        NETMGR_LOG_E("LoadGlobalHttpProxy invalid userIdType.");
         return;
     }
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("LoadGlobalHttpProxy get userId fail.");
+        return;
+    }
+    if (!IsValidUserId(userId)) {
+        NETMGR_LOG_E("LoadGlobalHttpProxy userId is not exist. userId[%{public}d]", httpProxy.GetUserId());
+        return;
+    }
+    NETMGR_LOG_I("LoadGlobalHttpProxy userId = %{public}d", userId);
     if (globalHttpProxyCache_.Find(userId, httpProxy)) {
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database. userId=%{public}d", userId);
         return;
@@ -2238,6 +2300,7 @@ void NetConnService::LoadGlobalHttpProxy(HttpProxy &httpProxy)
     } else {
         httpProxyTracker.ReadFromSettingsDataUser(tmpHttpProxy, userId);
     }
+    tmpHttpProxy.SetUserId(userId);
     {
         std::lock_guard guard(globalHttpProxyMutex_);
         httpProxy = tmpHttpProxy;
@@ -2573,7 +2636,8 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NETMGR_LOG_I("on receive data_share ready.");
         isDataShareReady_ = true;
         HttpProxy httpProxy;
-        LoadGlobalHttpProxy(httpProxy);
+        // executed in the SA process, so load http proxy from current active user.
+        LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
     }
 #ifdef FEATURE_SUPPORT_POWERMANAGER

@@ -1175,7 +1175,14 @@ int32_t NetConnServiceStub::OnSetGlobalHttpProxy(MessageParcel &data, MessagePar
 
 int32_t NetConnServiceStub::OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t userId = -1;
+    if (!data.ReadInt32(userId)) {
+        NETMGR_LOG_E("ReadUserId failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
     HttpProxy httpProxy;
+    httpProxy.SetUserId(userId);
     int32_t result = GetGlobalHttpProxy(httpProxy);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -1198,7 +1205,13 @@ int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessagePa
     if (!data.ReadInt32(bindNetId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+    int32_t userId = -1;
+    if (!data.ReadInt32(userId)) {
+        NETMGR_LOG_E("ReadUserId failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     HttpProxy httpProxy;
+    httpProxy.SetUserId(userId);
     int32_t result = GetDefaultHttpProxy(bindNetId, httpProxy);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
