@@ -371,7 +371,7 @@ int32_t NetConnService::UpdateNetCaps(const std::set<NetCap> &netCaps, const uin
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, netCaps, &supplierId, &result]() {
+        netConnEventHandler_->PostSyncTask([this, &netCaps, supplierId, &result]() {
             result = this->UpdateNetCapsAsync(netCaps, supplierId);
         });
     }
@@ -890,6 +890,8 @@ int32_t NetConnService::UpdateNetCapsAsync(const std::set<NetCap> &netCaps, cons
     }
     network->SetNetCaps(netCaps);
     supplier->SetNetwork(network);
+    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
+    FindBestNetworkForAllRequest();
     return NETMANAGER_SUCCESS;
 }
 

@@ -479,7 +479,9 @@ int32_t NetConnServiceStub::OnUpdateNetCaps(MessageParcel &data, MessageParcel &
     if (!data.ReadUint32(netCapsSize)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    netCapsSize = netCapsSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : netCapsSize;
+    if (netCapsSize > MAX_NET_CAP_NUM) {
+        return NETMANAGER_EXT_ERR_IPC_CONNECT_STUB_FAIL;
+    }
     for (uint32_t netCapIndex = 0; netCapIndex < netCapsSize; ++netCapIndex) {
         if (!data.ReadUint32(netCapVal)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
