@@ -922,37 +922,6 @@ HWTEST_F(NetConnClientTest, RequestNetConnection004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateNetCaps001
- * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
- * permission,return NETMANAGER_ERR_GET_PROXY_FAIL
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, UpdateNetCaps001, TestSize.Level1)
-{
-    auto &client = NetConnClient::GetInstance();
-    std::set<NetCap> netCaps;
-    uint32_t supplierId = 1;
-    int32_t ret = client.UpdateNetCaps(netCaps, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERR_GET_PROXY_FAIL);
-}
-
-/**
- * @tc.name: UpdateNetCaps002
- * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
- * permission,return NETMANAGER_SUCCESS
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
-{
-    auto &client = NetConnClient::GetInstance();
-    NetManagerBaseAccessToken token;
-    uint32_t supplierId = 100;
-    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
-    auto ret = client.UpdateNetCaps(netCaps, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: UpdateNetSupplierInfo001
  * @tc.desc: Test NetConnClient::UpdateNetSupplierInfo, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED

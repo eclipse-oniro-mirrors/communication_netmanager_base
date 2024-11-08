@@ -81,6 +81,11 @@ public:
         return 0;
     }
 
+    int32_t UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId) override
+    {
+        return 0;
+    }
+
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override
     {
         return 0;
