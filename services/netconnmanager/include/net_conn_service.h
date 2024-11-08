@@ -529,6 +529,7 @@ private:
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
     NET_UIDACTIVATE_MAP netUidActivates_;
+    std::mutex uidActivateMutex_;
     std::atomic<bool> vnicCreated = false;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
