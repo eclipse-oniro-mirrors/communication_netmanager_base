@@ -55,6 +55,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
         &NetConnServiceStub::OnUnregisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS)] = {
+        &NetConnServiceStub::OnUpdateNetCaps, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO)] = {
         &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
@@ -463,6 +465,39 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         if (!reply.WriteUint32(supplierId)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUpdateNetCaps(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("On update net caps.");
+    std::set<NetCap> netCaps;
+    uint32_t netCapsSize = 0;
+    uint32_t netCapVal = 0;
+
+    if (!data.ReadUint32(netCapsSize)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (netCapsSize > MAX_NET_CAP_NUM) {
+        return NETMANAGER_EXT_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    for (uint32_t netCapIndex = 0; netCapIndex < netCapsSize; ++netCapIndex) {
+        if (!data.ReadUint32(netCapVal)) {
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (netCapVal < NET_CAPABILITY_END) {
+            netCaps.insert(static_cast<NetCap>(netCapVal));
+        }
+    }
+
+    uint32_t supplierId = 0;
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = UpdateNetCaps(netCaps, supplierId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }

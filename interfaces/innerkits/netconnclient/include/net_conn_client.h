@@ -97,6 +97,17 @@ public:
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<NetSupplierCallbackBase> &callback);
 
     /**
+     * update net capabilities
+     *
+     * @param netCaps netcap set
+     * @param supplierId The id of the network supplier
+     * @return Returns 0, update net caps of the network successfully, otherwise it will fail
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId);
+
+    /**
      * The interface is update network connection status information
      *
      * @param supplierId The id of the network supplier

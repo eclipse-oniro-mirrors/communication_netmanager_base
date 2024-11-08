@@ -63,6 +63,7 @@
       "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(OHOS::NetManagerStandard::NetBearType, unsigned int, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::UpdateNetCaps(std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::EnableVnicNetwork(OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&, std::__h::set<int, std::__h::less<int>, std::__h::allocator<int>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::DisableVnicNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::IsAPIVersionSupported(int)";

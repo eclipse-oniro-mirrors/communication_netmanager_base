@@ -422,6 +422,41 @@ int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<INetConnCallba
     return replyParcel.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::UpdateNetCaps(const std::set<NetCap> &netCaps, const uint32_t supplierId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    uint32_t netCapsSize = static_cast<uint32_t>(netCaps.size());
+    if (!data.WriteUint32(netCapsSize)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    for (const auto &cap : netCaps) {
+        if (!data.WriteUint32(static_cast<uint32_t>(cap))) {
+            return NETMANAGER_ERR_WRITE_DATA_FAIL;
+        }
+    }
+
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t result = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS), data, reply);
+    if (result != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("RemoteSendRequest failed");
+        return result;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
 int32_t NetConnServiceProxy::UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState)
 {
     NETMGR_LOG_I("Test NetConnServiceProxy::UpdateNetStateForTest(), begin");
