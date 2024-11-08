@@ -71,9 +71,9 @@ private:
     bool SetUserInfo(CURL *curlHandler);
     bool SetProxyInfo(CURL *curlHandler, const std::string &proxyHost, int32_t proxyPort);
     static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
-    int64_t CheckRespCode(int64_t respCode);
-    std::string GetHeaderField(std::string key);
-    int64_t CheckClientErrorRespCode(int64_t respCode);
+    int32_t CheckRespCode(int32_t respCode);
+    std::string GetHeaderField(const std::string key);
+    int32_t CheckClientErrorRespCode(int32_t respCode);
 
 private:
     static std::mutex initCurlMutex_;
