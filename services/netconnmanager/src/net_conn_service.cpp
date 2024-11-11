@@ -1645,17 +1645,23 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
-    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    auto iterNetwork = networks_.find(netId);
-    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
-        return NET_CONN_ERR_INVALID_NETWORK;
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-
-    info = iterNetwork->second->GetNetLinkInfo();
-    if (info.mtu_ == 0) {
-        info.mtu_ = DEFAULT_MTU;
-    }
-    return NETMANAGER_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
+    netConnEventHandler_->PostSyncTask([netId, &info, &result, this]() {
+        auto iterNetwork = networks_.find(netId);
+        if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+            result = NET_CONN_ERR_INVALID_NETWORK;
+            return;
+        }
+        info = iterNetwork->second->GetNetLinkInfo();
+        if (info.mtu_ == 0) {
+            info.mtu_ = DEFAULT_MTU;
+        }
+    });
+    return result;
 }
 
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
@@ -1792,7 +1798,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iter = networks_.find(bindNetId);
     if ((iter != networks_.end()) && (iter->second != nullptr)) {
-        httpProxy = iter->second->GetNetLinkInfo().httpProxy_;
+        httpProxy = iter->second->GetHttpProxy();
         NETMGR_LOG_I("Return bound network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
