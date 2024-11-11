@@ -796,6 +796,7 @@ void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
 
 void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback)
 {
+    std::lock_guard guard(uidActivateMutex_);
     auto it = netUidActivates_.find(callingUid);
     if (it != netUidActivates_.end()) {
         std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
@@ -1083,7 +1084,10 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
     NetRequest netrequest(request->GetUid(), reqId);
     netActivates_[reqId] = request;
-    netUidActivates_[callingUid].push_back(request);
+    {
+        std::lock_guard guard(uidActivateMutex_);
+        netUidActivates_[callingUid].push_back(request);
+    }
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
@@ -2496,17 +2500,27 @@ int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint
 
 void NetConnService::NetPolicyCallback::SendNetPolicyChange(uint32_t uid, uint32_t policy)
 {
-    auto it = client_.netUidActivates_.find(uid);
-    if (it != client_.netUidActivates_.end()) {
-        sptr<NetHandle> defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
-        bool metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
-        bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, metered);
-        std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
-        for (auto &activate : activates) {
-            if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(client_.defaultNetSupplier_)) {
-                NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
-                activate->GetNetCallback()->NetBlockStatusChange(defaultNetHandle, newBlocked);
-            }
+    sptr<NetHandle> defaultNetHandle = nullptr;
+    bool metered = false;
+    bool newBlocked = false;
+    {
+        std::lock_guard<std::recursive_mutex> locker(client_.netManagerMutex_);
+        defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
+        metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+    }
+    newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, metered);
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    {
+        std::lock_guard guard(client_.uidActivateMutex_);
+        auto it = client_.netUidActivates_.find(uid);
+        if (it != client_.netUidActivates_.end()) {
+            activates = it->second;
+        }
+    }
+    for (auto &activate : activates) {
+        if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(client_.defaultNetSupplier_)) {
+            NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
+            activate->GetNetCallback()->NetBlockStatusChange(defaultNetHandle, newBlocked);
         }
     }
 }
