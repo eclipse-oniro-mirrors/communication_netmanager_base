@@ -27,11 +27,17 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum ProbeType : uint32_t { PROBE_HTTP = 1, PROBE_HTTPS = 2, PROBE_HTTP_HTTPS = 3 };
+enum ProbeType : uint32_t {
+    PROBE_HTTP = 1,
+    PROBE_HTTPS = 2,
+    PROBE_HTTP_HTTPS = 3,
+    PROBE_HTTP_FALLBACK = 4,
+    PROBE_HTTPS_FALLBACK = 5
+};
 
 class NetHttpProbe {
 public:
-    NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo);
+    NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo, ProbeType probeType);
     ~NetHttpProbe();
 
     int32_t SendProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl);
@@ -39,7 +45,8 @@ public:
     NetHttpProbeResult GetHttpsProbeResult() const;
     void UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
-    bool HasProbeType(ProbeType inputProbeType, ProbeType hasProbeType);
+    bool IsHttpDetect(ProbeType probeType);
+    bool IsHttpsDetect(ProbeType probeType);
     void ProbeWithoutGlobalHttpProxy();
 
 private:
@@ -63,6 +70,10 @@ private:
     int32_t LoadProxy(std::string &proxyHost, int32_t &proxyPort);
     bool SetUserInfo(CURL *curlHandler);
     bool SetProxyInfo(CURL *curlHandler, const std::string &proxyHost, int32_t proxyPort);
+    static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
+    int64_t CheckRespCode(int64_t respCode);
+    std::string GetHeaderField(std::string key);
+    int64_t CheckClientErrorRespCode(int64_t respCode);
 
 private:
     static std::mutex initCurlMutex_;
@@ -82,6 +93,9 @@ private:
     curl_slist *httpsResolveList_ = nullptr;
     NetHttpProbeResult httpProbeResult_;
     NetHttpProbeResult httpsProbeResult_;
+    std::string respHeader_;
+    ProbeType probeType_;
+    char errBuffer[CURL_ERROR_SIZE] = {0};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
