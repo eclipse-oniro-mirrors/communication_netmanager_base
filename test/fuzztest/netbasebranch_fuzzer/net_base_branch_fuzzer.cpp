@@ -74,7 +74,7 @@ SecureData GetSecureDataFromData(int8_t strlen)
 
 void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size < 1)) {
+    if (data == nullptr) {
         return;
     }
     int32_t testId = GetNetBranchFuzzData<int32_t>();
@@ -115,7 +115,7 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
 
 void NetPolicyRuleBranchFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size < 1)) {
+    if (data == nullptr) {
         return;
     }
     std::shared_ptr<NetPolicyRule> netPolicyRule = std::make_shared<NetPolicyRule>();
