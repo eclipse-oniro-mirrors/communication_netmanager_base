@@ -1200,6 +1200,10 @@ int32_t NetConnServiceStub::OnSetGlobalHttpProxy(MessageParcel &data, MessagePar
     if (!HttpProxy::Unmarshalling(data, httpProxy)) {
         return ERR_FLATTEN_OBJECT;
     }
+    if (httpProxy.GetUserId() == 0) {
+        httpProxy.SetUserId(PRIMARY_USER_ID);
+        NETMGR_LOG_I("SetGlobalHttpProxy change userId");
+    }
 
     int32_t ret = SetGlobalHttpProxy(httpProxy);
     if (!reply.WriteInt32(ret)) {
