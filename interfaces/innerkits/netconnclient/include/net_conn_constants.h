@@ -19,6 +19,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int32_t PRIMARY_USER_ID = 100;
 enum NetConnResultCode {
     NET_CONN_ERR_INVALID_SUPPLIER_ID = 2101002,
     NET_CONN_ERR_NET_TYPE_NOT_FOUND = 2101003,

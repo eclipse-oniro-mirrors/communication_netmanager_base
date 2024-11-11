@@ -1805,6 +1805,9 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    if (httpProxy.GetUserId() == 0) {
+        httpProxy.SetUserId(PRIMARY_USER_ID);
+    }
     if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.
         LoadGlobalHttpProxy(SPECIFY, httpProxy);
@@ -1823,6 +1826,9 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    if (httpProxy.GetUserId() == 0) {
+        httpProxy.SetUserId(PRIMARY_USER_ID);
+    }
     auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.

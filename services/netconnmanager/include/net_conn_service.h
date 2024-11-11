@@ -31,6 +31,7 @@
 
 #include "http_proxy.h"
 #include "net_activate.h"
+#include "net_conn_constants.h"
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
@@ -50,9 +51,6 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
-namespace {
-const int32_t PRIMARY_USER_ID = 100;
-}
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
