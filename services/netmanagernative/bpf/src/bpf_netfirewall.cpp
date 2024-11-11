@@ -15,22 +15,24 @@
 
 #include <arpa/inet.h>
 #include <cstdio>
+#include <ctime>
 #include <libbpf.h>
 #include <linux/bpf.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <regex>
 #include <securec.h>
+#include <string>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <vector>
-#include <ctime>
 
 #include "bpf_loader.h"
 #include "bpf_netfirewall.h"
-#include "netnative_log_wrapper.h"
-#include "iservice_registry.h"
 #include "bpf_ring_buffer.h"
 #include "ffrt_inner.h"
+#include "iservice_registry.h"
+#include "netnative_log_wrapper.h"
 
 using namespace std;
 using namespace OHOS;
@@ -222,11 +224,31 @@ void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direct
     ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);
 }
 
-int32_t NetsysBpfNetFirewall::ClearFirewallRules()
+int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
 {
-    firewallIpRules_.clear();
-    ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
-    ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP: {
+            firewallIpRules_.clear();
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            break;
+        }
+        case NetFirewallRuleType::RULE_DOMAIN: {
+            firewallDomainRules_.clear();
+            ClearDomainRules();
+            break;
+        }
+        case NetFirewallRuleType::RULE_ALL: {
+            firewallIpRules_.clear();
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
+            ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
+            firewallDomainRules_.clear();
+            ClearDomainRules();
+            break;
+        }
+        default:
+            break;
+    }
     return NETFIREWALL_SUCCESS;
 }
 
@@ -254,7 +276,8 @@ int32_t NetsysBpfNetFirewall::SetBpfFirewallRules(const std::vector<sptr<NetFire
     return NETFIREWALL_SUCCESS;
 }
 
-int32_t NetsysBpfNetFirewall::SetFirewallRules(const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
+int32_t NetsysBpfNetFirewall::SetFirewallRules(NetFirewallRuleType type,
+    const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish)
 {
     NETNATIVE_LOGI("SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(), isFinish);
     if (!isBpfLoaded_) {
@@ -265,15 +288,108 @@ int32_t NetsysBpfNetFirewall::SetFirewallRules(const std::vector<sptr<NetFirewal
         NETNATIVE_LOGE("SetFirewallRules: rules is empty");
         return NETFIREWALL_ERR;
     }
-    for (const auto &rule : ruleList) {
-        firewallIpRules_.emplace_back(firewall_rule_cast<NetFirewallIpRule>(rule));
-    }
     int32_t ret = NETFIREWALL_SUCCESS;
-    if (isFinish) {
-        ret = SetFirewallIpRules(firewallIpRules_);
-        firewallIpRules_.clear();
+    switch (type) {
+        case NetFirewallRuleType::RULE_IP: {
+            for (const auto &rule : ruleList) {
+                firewallIpRules_.emplace_back(firewall_rule_cast<NetFirewallIpRule>(rule));
+            }
+            if (isFinish) {
+                ret = SetFirewallIpRules(firewallIpRules_);
+                firewallIpRules_.clear();
+            }
+            break;
+        }
+        case NetFirewallRuleType::RULE_DOMAIN: {
+            for (const auto &rule : ruleList) {
+                firewallDomainRules_.emplace_back(firewall_rule_cast<NetFirewallDomainRule>(rule));
+            }
+            if (isFinish) {
+                ret = SetFirewallDomainRules(firewallDomainRules_);
+                firewallDomainRules_.clear();
+            }
+            break;
+        }
+        default:
+            break;
     }
     return ret;
+}
+
+int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
+{
+    if (ruleList.empty()) {
+        NETNATIVE_LOGE("SetFirewallDomainRules: rules is empty");
+        return NETFIREWALL_ERR;
+    }
+    DomainValue domainVaule = 0;
+    bool isWildcard = false;
+    ClearDomainRules();
+    int ret = 0;
+    for (const auto &rule : ruleList) {
+        if (rule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
+            domainVaule = 1;
+        } else {
+            domainVaule = 0;
+        }
+        for (const auto &param : rule->domains) {
+            if (param.isWildcard) {
+                isWildcard = true;
+            } else {
+                isWildcard = false;
+            }
+            DomainHashKey key = { 0 };
+            GetDomainHashKey(param.domain, key);
+            ret = SetBpfFirewallDomainRules(rule->ruleAction, key, domainVaule, isWildcard);
+        }
+    }
+    return ret;
+}
+
+void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHashKey &out)
+{
+    if (domain.empty()) {
+        NETNATIVE_LOGE("GetDomainHashKey: domain is empty");
+        return;
+    }
+    std::string text(domain);
+    text.erase(std::remove(text.begin(), text.end(), '*'), text.end());
+
+    std::regex delimit("\\.");
+    std::vector<std::string> v(std::sregex_token_iterator(text.begin(), text.end(), delimit, -1),
+        std::sregex_token_iterator());
+
+    int i = 0;
+    for (auto &s : v) {
+        int strLen = s.length();
+        out.data[i++] = (uint8_t)strLen;
+        memcpy_s(out.data + i, strLen, (uint8_t *)s.c_str(), strLen);
+        i += strLen;
+    }
+}
+
+int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
+    bool isWildcard)
+{
+    NETNATIVE_LOG_D("SetBpfFirewallDomainRules: action=%{public}d, value=%{public}d, is=%{public}d",
+        (action == FirewallRuleAction::RULE_ALLOW), value, isWildcard);
+    int32_t ret = 0;
+    if (action == FirewallRuleAction::RULE_ALLOW) {
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
+    } else if (action == FirewallRuleAction::RULE_DENY) {
+        ret = WriteBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, value);
+    }
+    return ret;
+}
+
+void NetsysBpfNetFirewall::ClearDomainRules()
+{
+    NETNATIVE_LOG_D("ClearDomainRules");
+    ClearDomainCache();
+    DomainHashKey key = { 0 };
+    DomainValue value;
+    ClearBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
+    ClearBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, value);
 }
 
 int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList)
@@ -655,6 +771,9 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
             break;
         case DBG_MATCH_DOMAIN:
             NETNATIVE_LOG_D("egress match domain, action PASS");
+            break;
+        case DBG_MATCH_DOMAIN_ACTION:
+            NETNATIVE_LOG_D("%{public}s domain action: %{public}s", direction, (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
             break;
         default:
             break;

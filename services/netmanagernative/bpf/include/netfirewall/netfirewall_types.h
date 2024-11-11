@@ -31,6 +31,15 @@
 #define IPV4_MAX_PREFIXLEN 32
 #define IPV6_MAX_PREFIXLEN 128
 
+#define DNS_PORT 53
+#define DNS_QR_DEFALUT_MASK 15
+#define DNS_QRS_IPV4_TYPE 1
+#define DNS_QRS_IPV4_LEN 4
+#define DNS_QRS_IPV6_TYPE 28
+#define DNS_QRS_IPV6_LEN 16
+#define DNS_DOMAIN_LEN 253
+#define DNS_ANSWER_CNT 32
+
 struct bitmap {
     __u32 val[BITMAP_LEN];
 };
@@ -62,6 +71,11 @@ enum debug_type {
     DBG_MATCH_ACTION,
     DBG_CT_LOOKUP,
     DBG_MATCH_DOMAIN,
+    DBG_MATCH_DOMAIN_ACTION,
+};
+
+struct domain_hash_key {
+        __u8 data[DNS_DOMAIN_LEN];
 };
 
 struct debug_event {
@@ -152,6 +166,15 @@ struct ipv4_lpm_key {
 struct ipv6_lpm_key {
         __u32 prefixlen;
         ip6_key data;
+};
+
+struct dnshdr {
+    __be16 id;
+    __be16 flag;
+    __be16 qdcount;
+    __be16 ancount;
+    __be16 nscount;
+    __be16 arcount;
 };
 
 #endif // NET_FIREWALL_TYPES_H

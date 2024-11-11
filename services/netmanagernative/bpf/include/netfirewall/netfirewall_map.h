@@ -246,4 +246,23 @@ bpf_map_def SEC("maps") DOMAIN_IPV6_MAP = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") DOMAIN_PASS_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(struct domain_hash_key),
+    .value_size = sizeof(domain_value),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") DOMAIN_DENY_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(struct domain_hash_key),
+    .value_size = sizeof(domain_value),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
 #endif // NET_FIREWALL_MAP_H
