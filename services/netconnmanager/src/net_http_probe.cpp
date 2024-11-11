@@ -41,7 +41,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int PERFORM_POLL_INTERVAL_MS = 50;
-constexpr int64_t HTTP_OK_CODE = 200;
+constexpr int32_t HTTP_OK_CODE = 200;
 constexpr int32_t DEFAULT_CONTENT_LENGTH_VALUE = -1;
 constexpr int32_t MIN_VALID_CONTENT_LENGTH_VALUE = 5;
 constexpr int32_t FAIL_CODE = 599;
@@ -59,6 +59,7 @@ const std::string DEFAULT_USER_AGENT = std::string("User-Agent: Mozilla/5.0 (X11
     std::string("AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36");
 constexpr const char *CONNECTION_PROPERTY = "Connection: close";
 constexpr const char *ACCEPT_ENCODING = "Accept-Encoding: gzip";
+constexpr const char *ACCEPT = "Accept:";
 const std::string CONNECTION_CLOSE_VALUE = "close";
 const std::string CONNECTION_KEY = "Connection:";
 const std::string CONTENT_LENGTH_KEY = "Content-Length:";
@@ -355,8 +356,9 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
         return false;
     }
     struct curl_slist *list = nullptr;
-    list = curl_slist_append(list, DEFAULT_USER_AGENT.c_str());
+    list = curl_slist_append(list, ACCEPT);
     list = curl_slist_append(list, CONNECTION_PROPERTY);
+    list = curl_slist_append(list, DEFAULT_USER_AGENT.c_str());
     list = curl_slist_append(list, ACCEPT_ENCODING);
     if (!list) {
         NETMGR_LOG_E("add request header properties failed.");
@@ -567,7 +569,7 @@ void NetHttpProbe::SendHttpProbeRequest()
     } while (running);
 }
 
-std::string NetHttpProbe::GetHeaderField(std::string key)
+std::string NetHttpProbe::GetHeaderField(const std::string key)
 {
     std::string result = "";
     if (respHeader_.empty()) {
@@ -585,9 +587,9 @@ std::string NetHttpProbe::GetHeaderField(std::string key)
     return result;
 }
 
-int64_t NetHttpProbe::CheckRespCode(int64_t respCode)
+int32_t NetHttpProbe::CheckRespCode(int32_t respCode)
 {
-    NETMGR_LOG_D("net[%{public}d], response code before check:%{public}" PRId64, netId_, respCode);
+    NETMGR_LOG_D("net[%{public}d], response code before check:%{public}d", netId_, respCode);
     if (respCode == HTTP_OK_CODE) {
         std::string contentLengthValue = GetHeaderField(CONTENT_LENGTH_KEY);
         int32_t lengthValue = contentLengthValue.empty() ? DEFAULT_CONTENT_LENGTH_VALUE :
@@ -611,22 +613,22 @@ int64_t NetHttpProbe::CheckRespCode(int64_t respCode)
             return FAIL_CODE;
         }
     }
-    int64_t result = respCode;
+    int32_t result = respCode;
     if (IsHttpDetect(probeType_)) {
         result = CheckClientErrorRespCode(result);
     }
     return result;
 }
 
-int64_t NetHttpProbe::CheckClientErrorRespCode(int64_t respCode)
+int32_t NetHttpProbe::CheckClientErrorRespCode(int32_t respCode)
 {
-    int64_t result = respCode;
+    int32_t result = respCode;
     if (respCode >= HTTP_RES_CODE_BAD_REQUEST && respCode <= HTTP_RES_CODE_CLIENT_ERRORS_MAX) {
         std::string errMsg(errBuffer);
         if ((errMsg.find(HTML_TITLE_HTTP_EN) != std::string::npos ||
             errMsg.find(HTML_TITLE_HTTPS_EN) != std::string::npos) &&
             errMsg.find(KEY_WORDS_REDIRECTION) != std::string::npos) {
-            NETMGR_LOG_I("net[%{public}d] reset url in content, consider as portal when http return %{public}" PRId64,
+            NETMGR_LOG_I("net[%{public}d] reset url in content, consider as portal when http return %{public}d",
                 netId_, respCode);
             result = PORTAL_CODE;
         }
@@ -655,7 +657,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
 
         int64_t responseCode = 0;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_RESPONSE_CODE, &responseCode);
-        responseCode = CheckRespCode(responseCode);
+        responseCode = CheckRespCode(static_cast<int32_t>(responseCode));
         std::string redirectUrl;
         char* url = nullptr;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &url);
