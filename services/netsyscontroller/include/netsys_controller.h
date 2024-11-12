@@ -973,10 +973,9 @@ public:
 
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
 private:
-    NetsysController() = default;
+    NetsysController();
 
 private:
-    bool initFlag_ = false;
     sptr<INetsysControllerService> netsysService_;
 };
 } // namespace NetManagerStandard

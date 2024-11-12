@@ -27,30 +27,16 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t IPV4_MAX_LENGTH = 32;
 
-void NetsysController::Init()
+NetsysController::NetsysController()
 {
     NETMGR_LOG_I("netsys Init");
-    // LCOV_EXCL_START This will never happen.
-    if (initFlag_) {
-        NETMGR_LOG_I("netsys initialization is complete");
-        return;
-    }
-    // LCOV_EXCL_STOP
     netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     netsysService_->Init();
-    initFlag_ = true;
 }
 
 NetsysController &NetsysController::GetInstance()
 {
     static NetsysController singleInstance_;
-    static std::mutex mutex_;
-    if (!singleInstance_.initFlag_) {
-        std::unique_lock<std::mutex> lock(mutex_);
-        if (!singleInstance_.initFlag_) {
-            singleInstance_.Init();
-        }
-    }
     return singleInstance_;
 }
 
