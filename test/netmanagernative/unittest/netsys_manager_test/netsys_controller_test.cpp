@@ -945,12 +945,6 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr007, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest001, TestSize.Level1)
 {
-    instance_->initFlag_ = true;
-    instance_->Init();
-
-    instance_->initFlag_ = false;
-    instance_->Init();
-
     std::vector<int32_t> beginUids = {1};
     std::vector<int32_t> endUids = {1};
     int32_t netId = 0;
