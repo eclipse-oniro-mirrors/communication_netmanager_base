@@ -44,10 +44,6 @@ static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 fa
     return ret;
 }
 
-/*
-return 0: invalid domain name
-return other: offset
-*/
 static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
@@ -69,10 +65,6 @@ static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u
     return offset;
 }
 
-/*
-return 0: invalid queries payload
-return other: offset
-*/
 static __always_inline __u16 parse_queries(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
@@ -128,10 +120,6 @@ static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dn
     return offset;
 }
 
-/*
-return 0: pass
-return 1: drop
-*/
 static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
 {
     if (qu_num == 1) {
@@ -152,10 +140,6 @@ static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 d
     return 0;
 }
 
-/*
-return 0: pass
-return 1: drop
-*/
 static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
     __u16 as_num)
 {
@@ -201,7 +185,6 @@ static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u
     return 0;
 }
 
-// intercept ingress/egress dns packet
 static __always_inline enum sk_action match_dns_query(const struct __sk_buff *skb)
 {
     if (!skb) {

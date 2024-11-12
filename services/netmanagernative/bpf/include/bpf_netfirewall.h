@@ -288,7 +288,8 @@ private:
 
     void GetDomainHashKey(const std::string &domain, DomainHashKey &out);
 
-    int32_t SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value, bool isWildcard);
+    int32_t SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
+        bool isWildcard);
 
     void ClearDomainRules();
 

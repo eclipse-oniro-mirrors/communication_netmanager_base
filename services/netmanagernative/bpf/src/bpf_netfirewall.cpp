@@ -368,8 +368,8 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
     }
 }
 
-int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
-    bool isWildcard)
+int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key,
+    DomainValue value, bool isWildcard)
 {
     NETNATIVE_LOG_D("SetBpfFirewallDomainRules: action=%{public}d, value=%{public}d, is=%{public}d",
         (action == FirewallRuleAction::RULE_ALLOW), value, isWildcard);

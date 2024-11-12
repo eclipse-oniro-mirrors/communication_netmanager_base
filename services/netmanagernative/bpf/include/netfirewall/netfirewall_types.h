@@ -75,7 +75,7 @@ enum debug_type {
 };
 
 struct domain_hash_key {
-        __u8 data[DNS_DOMAIN_LEN];
+    __u8 data[DNS_DOMAIN_LEN];
 };
 
 struct debug_event {
