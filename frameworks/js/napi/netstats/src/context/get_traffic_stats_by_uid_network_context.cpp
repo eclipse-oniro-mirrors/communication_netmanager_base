@@ -49,6 +49,14 @@ void GetTrafficStatsByUidNetworkContext::ParseParams(napi_value *params, size_t 
     if (!CheckNetworkParams(params, paramsCount)) {
         return;
     }
+    if (NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_1], NET_BEAR_TYPE) < 0 ||
+        NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_1], START_TIME) < 0 ||
+        NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_1], END_TIME) < 0 ||
+        NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_1], SIM_ID) < 0) {
+        NETMANAGER_BASE_LOGE("checkParamsValue is invalid");
+        SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        SetNeedThrowException(true);
+    }
     netBearType_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_1], NET_BEAR_TYPE);
     startTime_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_1], START_TIME);
     endTime_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_1], END_TIME);

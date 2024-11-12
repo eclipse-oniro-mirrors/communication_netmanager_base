@@ -92,7 +92,7 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
     std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
-        return NETMANAGER_ERROR;
+        return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
     }
     infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
     return NETMANAGER_SUCCESS;
@@ -120,7 +120,7 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
     }
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
-        return NETMANAGER_ERROR;
+        return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
     }
     infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
     return NETMANAGER_SUCCESS;

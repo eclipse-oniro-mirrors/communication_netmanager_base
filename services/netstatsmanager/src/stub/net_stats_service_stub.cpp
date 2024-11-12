@@ -15,6 +15,7 @@
 
 #include "net_stats_service_stub.h"
 
+#include "net_all_capabilities.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_network.h"
@@ -462,7 +463,16 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByNetwork(MessageParcel &data, Mes
     }
     sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
     if (network == nullptr) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+        NETMGR_LOG_E("network is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     int32_t result = GetTrafficStatsByNetwork(infos, network);
@@ -489,7 +499,16 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByUidNetwork(MessageParcel &data, 
     }
     sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
     if (network == nullptr) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+        NETMGR_LOG_E("network is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->type_ > static_cast<uint32_t>(BEARER_DEFAULT)) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     std::vector<NetStatsInfoSequence> infos;
     int32_t result = GetTrafficStatsByUidNetwork(infos, uid, network);
