@@ -204,7 +204,7 @@ void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (data == nullptr) {
         return;
     }
     NetManagerBaseAccessToken token;
@@ -470,7 +470,7 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (data == nullptr) {
         return;
     }
 
@@ -656,7 +656,7 @@ void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (data == nullptr) {
         return;
     }
 

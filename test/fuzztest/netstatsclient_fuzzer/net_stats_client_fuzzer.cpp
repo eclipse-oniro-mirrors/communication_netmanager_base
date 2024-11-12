@@ -127,7 +127,7 @@ void CheckParamVaild(MessageParcel &dataParcel, const uint8_t *data, size_t size
 
 void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (data == nullptr) {
         return;
     }
 
@@ -147,7 +147,7 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if (data == nullptr) {
         return;
     }
 
