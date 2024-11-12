@@ -17,10 +17,11 @@
 
 #include <linux/bpf.h>
 
-#include "netfirewall_def.h"
-#include "netfirewall_match.h"
 #include "netfirewall_ct.h"
+#include "netfirewall_def.h"
+#include "netfirewall_domain.h"
 #include "netfirewall_event.h"
+#include "netfirewall_match.h"
 
 #define FIREWALL_DNS_QUERY_PORT         53
 #define FIREWALL_DNS_OVER_QUERY_PORT    853
@@ -103,6 +104,10 @@ static __always_inline bool get_ct_tuple(struct match_tuple *match_tpl, struct c
  */
 static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buff *skb)
 {
+    if (match_dns_query(skb) == SK_DROP) {
+        return SK_DROP;
+    }
+
     struct match_tuple tuple = { 0 };
     if (!get_match_tuple(skb, &tuple, INGRESS)) {
         return SK_PASS;
@@ -162,6 +167,10 @@ static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
  */
 static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff *skb)
 {
+    if (match_dns_query(skb) == SK_DROP) {
+        return SK_DROP;
+    }
+
     struct match_tuple tuple = { 0 };
     if (!get_match_tuple(skb, &tuple, EGRESS)) {
         return SK_PASS;

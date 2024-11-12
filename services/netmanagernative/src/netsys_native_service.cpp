@@ -928,9 +928,9 @@ int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
     int32_t ret = NETSYS_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP:
-            ret = bpfNetFirewall_->SetFirewallRules(ruleList, isFinish);
-            break;
         case NetFirewallRuleType::RULE_DOMAIN:
+            ret = bpfNetFirewall_->SetFirewallRules(type, ruleList, isFinish);
+            break;
         case NetFirewallRuleType::RULE_DNS:
             ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
             break;
@@ -962,14 +962,14 @@ int32_t NetsysNativeService::ClearFirewallRules(NetFirewallRuleType type)
     int32_t ret = NETSYS_SUCCESS;
     switch (type) {
         case NetFirewallRuleType::RULE_IP:
-            ret = bpfNetFirewall_->ClearFirewallRules();
+        case NetFirewallRuleType::RULE_DOMAIN:
+            ret = bpfNetFirewall_->ClearFirewallRules(type);
             break;
         case NetFirewallRuleType::RULE_DNS:
-        case NetFirewallRuleType::RULE_DOMAIN:
             ret = netsysService_->ClearFirewallRules(type);
             break;
         case NetFirewallRuleType::RULE_ALL:
-            ret = bpfNetFirewall_->ClearFirewallRules();
+            ret = bpfNetFirewall_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
             ret += netsysService_->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
             break;
         default:

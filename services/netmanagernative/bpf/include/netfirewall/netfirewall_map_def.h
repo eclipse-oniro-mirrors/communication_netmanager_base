@@ -50,6 +50,8 @@
 #define CURRENT_UID_MAP current_uid_map
 #define DOMAIN_IPV4_MAP domain_ipv4_map
 #define DOMAIN_IPV6_MAP domain_ipv6_map
+#define DOMAIN_PASS_MAP domain_pass_map
+#define DOMAIN_DENY_MAP domain_deny_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x

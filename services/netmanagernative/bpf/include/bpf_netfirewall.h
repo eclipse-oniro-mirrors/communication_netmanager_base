@@ -62,6 +62,9 @@ using DebugType = enum debug_type;
 using CtKey = struct ct_tuple;
 using CtVaule = struct ct_entry;
 
+using DomainHashKey = struct domain_hash_key;
+using DomainValue = domain_value;
+
 struct NetAddrInfo {
     uint32_t aiFamily;
     union {
@@ -115,11 +118,13 @@ public:
     /**
      * Set firewall rules to native
      *
+     * @param type type of NetFirewallRuleType
      * @param ruleList list of NetFirewallIpRule
      * @param isFinish transmit finish or not
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallRules(const std::vector<sptr<NetFirewallBaseRule>> &ruleList, bool isFinish);
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                             bool isFinish);
 
     /**
      * Set firewall default action
@@ -141,9 +146,10 @@ public:
     /**
      * Clear all bpf maps
      *
+     * @param type type of NetFirewallRuleType
      * @return  0 if success or -1 if an error occurred
      */
-    int32_t ClearFirewallRules();
+    int32_t ClearFirewallRules(NetFirewallRuleType type);
 
     /**
      * Register callback for recevie intercept event
@@ -278,6 +284,15 @@ private:
 
     int32_t SetFirewallIpRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList);
 
+    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
+
+    void GetDomainHashKey(const std::string &domain, DomainHashKey &out);
+
+    int32_t SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key, DomainValue value,
+        bool isWildcard);
+
+    void ClearDomainRules();
+
     static std::shared_ptr<NetsysBpfNetFirewall> instance_;
     static bool isBpfLoaded_;
     static bool keepListen_;
@@ -288,6 +303,7 @@ private:
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;
     std::vector<sptr<NetFirewallIpRule>> firewallIpRules_;
+    std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_BPF_NET_FIREWALL_H */
