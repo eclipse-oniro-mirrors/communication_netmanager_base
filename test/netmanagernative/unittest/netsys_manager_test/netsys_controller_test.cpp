@@ -89,11 +89,7 @@ public:
     sptr<NetsysNative::NetDiagCallbackStubTest> netDiagCallback = new NetsysNative::NetDiagCallbackStubTest();
 };
 
-void NetsysControllerTest::SetUpTestCase()
-{
-    instance_ = std::make_shared<NetsysController>();
-    instance_->Init();
-}
+void NetsysControllerTest::SetUpTestCase() {}
 
 void NetsysControllerTest::TearDownTestCase() {}
 
