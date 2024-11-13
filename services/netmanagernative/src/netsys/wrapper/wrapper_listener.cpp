@@ -21,6 +21,7 @@
 #include <memory>
 #include <poll.h>
 #include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 #include <pthread.h>
@@ -81,6 +82,8 @@ int32_t WrapperListener::Stop()
     if (socket_ > -1) {
         close(socket_);
     }
+    const int32_t exitDelay = 1500;
+    std::this_thread::sleep_for(std::chrono::milliseconds(exitDelay));
 
     return NetlinkResult::OK;
 }
