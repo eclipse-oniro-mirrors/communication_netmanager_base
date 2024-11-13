@@ -252,6 +252,11 @@ NetLinkInfo Network::GetNetLinkInfo() const
     return linkInfo;
 }
 
+HttpProxy Network::GetHttpProxy() const
+{
+    return netLinkInfo_.httpProxy_;
+}
+
 std::string Network::GetIfaceName() const
 {
     return netLinkInfo_.ifaceName_;

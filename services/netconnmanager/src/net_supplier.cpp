@@ -208,7 +208,7 @@ void NetSupplier::GetHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("network_ is nullptr.");
         return;
     }
-    httpProxy = network_->GetNetLinkInfo().httpProxy_;
+    httpProxy = network_->GetHttpProxy();
 }
 
 uint32_t NetSupplier::GetSupplierId() const
