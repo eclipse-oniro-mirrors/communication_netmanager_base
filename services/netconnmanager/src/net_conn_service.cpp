@@ -1014,8 +1014,8 @@ int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
     NETMGR_LOG_I("Enter NetDetection, netId=[%{public}d]", netId);
     auto iterNetwork = networks_.find(netId);
-    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
-        NETMGR_LOG_E("Could not find the corresponding network.");
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr) || !iterNetwork->second->IsConnected()) {
+        NETMGR_LOG_E("Could not find the corresponding network or network is not connected.");
         return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     iterNetwork->second->StartNetDetection(true);
