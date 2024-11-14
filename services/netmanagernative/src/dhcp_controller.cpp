@@ -91,7 +91,7 @@ void DhcpController::StartClient(const std::string &iface, bool bIpv6)
     NETNATIVE_LOGI("DhcpController StartDhcpClient iface[%{public}s] ipv6[%{public}d]", iface.c_str(), bIpv6);
     RouterConfig config;
     config.bIpv6 = bIpv6;
-    strncpy(config.ifname, iface.c_str(), INTERFACE_MAX_LEN);
+    strncpy_s(config.ifname, INTERFACE_MAX_LEN, iface.c_str(), iface.length());
     if (StartDhcpClient(config) != DHCP_SUCCESS) {
         NETNATIVE_LOGE("Start dhcp client failed");
     }
