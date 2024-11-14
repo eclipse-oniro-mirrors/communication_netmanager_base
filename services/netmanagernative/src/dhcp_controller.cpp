@@ -19,6 +19,7 @@
 #include "netnative_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include <securec.h>
+#include <string.h>
 
 namespace OHOS {
 namespace nmd {
