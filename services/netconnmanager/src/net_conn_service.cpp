@@ -2203,6 +2203,8 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         globalHttpProxyCache_.EnsureInsert(userId, newHttpProxy);
         SendHttpProxyChangeBroadcast(newHttpProxy);
         UpdateGlobalHttpProxy(newHttpProxy);
+    }
+    if (!httpProxy.GetHost().empty()) {
         httpProxyThreadCv_.notify_all();
     }
     if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
