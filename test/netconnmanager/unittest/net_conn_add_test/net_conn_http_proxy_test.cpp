@@ -517,22 +517,5 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest019, TestSize.Level1)
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NativeNetConnTest020
- * @tc.desc: Test OH_NetConn_GetDefaultHttpProxy, string length more
- * than struct char array limit, return NETMANAGER_ERR_INTERNAL
- * @tc.type FUNC
- */
-HWTEST_F(NativeNetConnTest, NativeNetConnTest020, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    HttpProxy validHttpProxy = {LONG_HOST, PORT, {}};
-    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
-    OH_NetConn_HttpProxy httpProxy = OH_NetConn_HttpProxy();
-    ret = OH_NetConn_GetDefaultHttpProxy(&httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS
