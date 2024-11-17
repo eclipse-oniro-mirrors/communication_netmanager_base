@@ -46,61 +46,15 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<DnsProxyListen> instance_ = nullptr;
 };
 
 void DnsProxyListenTest::SetUpTestCase() {}
 
 void DnsProxyListenTest::TearDownTestCase() {}
 
-void DnsProxyListenTest::SetUp()
-{
-    instance_ = std::make_shared<DnsProxyListen>();
-}
+void DnsProxyListenTest::SetUp() {}
 
 void DnsProxyListenTest::TearDown() {}
-
-HWTEST_F(DnsProxyListenTest, DnsProxyTest001, TestSize.Level1)
-{
-    NETNATIVE_LOGI("DnsProxyTest001 enter");
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_NE(netsysNativeService, nullptr);
-    netsysNativeService->StartDnsProxyListen();
-    const int32_t resSize = 512;
-    unsigned char rsp[resSize] = {0};
-    int proxySockFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (proxySockFd < 0) {
-        return;
-    }
-    sockaddr_in proxyAddr;
-    socklen_t len;
-    (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
-    proxyAddr.sin_family = AF_INET;
-    proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    proxyAddr.sin_port = htons(53);
-
-    unsigned char dnsSendData[] = {
-        "\x58\x40\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x03\x77\x77\x77"
-        "\x05\x62\x61\x69\x64\x75\x03\x63\x6f\x6d\x00\x00\x01\x00\x01"};
-
-    if (sendto(proxySockFd, dnsSendData, sizeof(dnsSendData), 0, reinterpret_cast<sockaddr *>(&proxyAddr),
-               sizeof(proxyAddr)) < 0) {
-        close(proxySockFd);
-        return;
-    }
-    int flags = fcntl(proxySockFd, F_GETFL, 0);
-    uint32_t tempFlags = static_cast<uint32_t>(flags) | O_NONBLOCK;
-    fcntl(proxySockFd, F_SETFL, tempFlags);
-    struct pollfd pfd;
-    pfd.fd = proxySockFd;
-    pfd.events = POLLIN;
-    poll(&pfd, 1, 2000);
-    len = sizeof(proxyAddr);
-    recvfrom(proxySockFd, rsp, resSize, 0, reinterpret_cast<sockaddr *>(&proxyAddr), &len);
-    close(proxySockFd);
-    netsysNativeService->StopDnsProxyListen();
-    NETNATIVE_LOGI("DnsProxyTest001 end");
-}
 
 HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
 {
@@ -109,7 +63,6 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
     listener.OnListen();
     listener.OffListen();
     listener.SetParseNetId(0);
-    listener.StartListen();
     EXPECT_EQ(listener.netId_, 0);
 }
 

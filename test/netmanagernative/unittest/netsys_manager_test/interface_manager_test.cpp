@@ -81,7 +81,7 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest002, TestSize.Level1)
 HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
 {
     std::string interfaceName = "eth0";
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
     if (eth0NotExist) {
         return;
@@ -267,7 +267,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr = "";
     int32_t prefixLength = 0;
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
     if (eth0NotExist) {
         return;
@@ -289,7 +289,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest003, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr;
     int32_t prefixLength = 45;
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
     if (eth0NotExist) {
         return;
@@ -320,7 +320,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr = "";
     int32_t prefixLength = 0;
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
     if (eth0NotExist) {
         return;
@@ -342,7 +342,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest003, TestSize.Level1)
     std::string interfaceName = "eth0";
     int32_t prefixLength = 45;
     std::string addr;
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
     if (eth0NotExist) {
         return;
