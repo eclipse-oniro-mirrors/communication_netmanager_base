@@ -2218,7 +2218,8 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::CreateActiveHttpProxyThread(HttpProxy &httpProxy) {
+void NetConnService::CreateActiveHttpProxyThread(HttpProxy &httpProxy)
+{
     httpProxyThreadNeedRun_ = true;
     std::thread t([this]() { ActiveHttpProxy(); });
     std::string threadName = "ActiveHttpProxy";
