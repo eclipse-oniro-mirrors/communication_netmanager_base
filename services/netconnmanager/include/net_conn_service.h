@@ -482,7 +482,7 @@ private:
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
-    void CreateActiveHttpProxyThread(HttpProxy &httpProxy);
+    void CreateActiveHttpProxyThread();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
         const RegisterType registerType = REGISTER);
     int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
