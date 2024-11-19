@@ -251,6 +251,7 @@ public:
     }
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
+    int32_t RefreshNetworkAccessPolicyFromConfig();
 
     /**
      * Set NIC Traffic allowed or disallowed
@@ -272,6 +273,9 @@ private:
     void OnNetSysRestart();
     void UpdateNetAccessPolicyToMapFromDB();
     bool CheckNetworkAccessIsBroker(uint32_t uid);
+    void OverwriteNetAccessPolicyToDBFromConfig();
+    void UpdateNetworkAccessPolicyFromConfig(const std::string &bundleName, NetworkAccessPolicy &policy);
+    int32_t GetActivatedOsAccountId(int32_t &userId);
 
 private:
     enum ServiceRunningState {

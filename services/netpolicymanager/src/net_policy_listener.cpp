@@ -43,6 +43,9 @@ void NetPolicyListener::OnReceiveEvent(const CommonEventData &data)
         netPolicyService_->DeleteNetworkAccessPolicy(uid);
         NETMGR_LOG_I("packet remove uid:[%{public}d]", uid);
     }
+    if (wantAction == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        netPolicyService_->RefreshNetworkAccessPolicyFromConfig();
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

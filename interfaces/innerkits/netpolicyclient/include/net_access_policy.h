@@ -31,6 +31,11 @@ public:
     bool wifiAllow;     // true means allow. false means deny.
     bool cellularAllow;  // true means allow. false means deny.
 
+    // true means can't switch status of wifiAllow and value is true, false means can be switched.
+    bool wifiSwitchDisable = false;
+    // true means can't switch status of cellularAllow and value is true, false means can be switched.
+    bool cellularSwitchDisable = false;
+
     static int32_t Marshalling(Parcel &parcel, AccessPolicySave& policies, bool flag);
     static int32_t Unmarshalling(Parcel &parcel, AccessPolicySave& policies, bool flag);
 };
