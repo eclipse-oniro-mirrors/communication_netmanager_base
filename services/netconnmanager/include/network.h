@@ -45,6 +45,7 @@ public:
     NetLinkInfo GetNetLinkInfo() const;
     std::string GetIfaceName() const;
     std::string GetIdent() const;
+    HttpProxy GetHttpProxy() const;
     void UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &newNetLinkInfo);
