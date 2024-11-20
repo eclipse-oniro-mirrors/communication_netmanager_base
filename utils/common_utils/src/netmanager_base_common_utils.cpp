@@ -518,7 +518,7 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
 
 struct ParentProcessHelper {
     std::atomic_bool waitDoneFlag = false;
-    pid_t ret = 0;
+    std::atomic<pid_t> ret = 0;
     std::mutex parentMutex;
     std::condition_variable parentCv;
 };
@@ -548,8 +548,9 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     auto helper = std::make_shared<ParentProcessHelper>();
+    std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
     auto parentThread = std::thread([helper, childPid]() {
-        helper->ret = waitpid(childPid, nullptr, 0);
+        helper->ret.store(waitpid(childPid, nullptr, 0));
         helper->waitDoneFlag = true;
         helper->parentCv.notify_all();
         NETMGR_LOG_I("waitpid %{public}d done", childPid);
@@ -566,7 +567,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         return NETMANAGER_ERROR;
     }
-    pid_t pidRet = helper->ret;
+    pid_t pidRet = helper->ret.load();
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
