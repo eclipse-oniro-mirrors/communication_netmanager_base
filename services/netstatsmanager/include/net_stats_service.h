@@ -28,6 +28,7 @@
 #include "net_stats_network.h"
 #include "net_stats_service_stub.h"
 #include "netlink_manager.h"
+#include "net_bundle.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -76,6 +77,11 @@ private:
     void MergeTrafficStats(std::vector<NetStatsInfoSequence> &statsInfoSequences, const NetStatsInfo &info,
                            uint32_t currentTime);
     bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames);
+    std::unordered_map<uint32_t, SampleBundleInfo> GetSampleBundleInfosForActiveUser();
+    SampleBundleInfo GetSampleBundleInfoForUid(uint32_t uid);
+    void RefreshUidStatsFlag(uint64_t delay);
+    bool CommonEventPackageAdded(uint32_t uid);
+    bool CommonEventPackageRemoved(uint32_t uid);
 
 private:
     enum ServiceRunningState {

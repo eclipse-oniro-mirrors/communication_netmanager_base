@@ -33,6 +33,7 @@ config("net_stats_manager_config") {
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
   ]
 }
 

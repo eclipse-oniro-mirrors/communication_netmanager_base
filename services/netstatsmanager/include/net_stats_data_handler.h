@@ -41,6 +41,7 @@ public:
     int32_t DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t UpdateStatsFlag(uint32_t uid, uint32_t flag);
     int32_t UpdateSimStatsFlag(uint32_t uid, uint32_t flag);
+    int32_t UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag);
     int32_t ClearData();
 };
 } // namespace NetManagerStandard

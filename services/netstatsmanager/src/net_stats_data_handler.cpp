@@ -89,7 +89,17 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
     std::vector<NetStatsInfo> uidSimTableInfos;
     ret1 = helper->QueryData(UID_TABLE, ident, start, end, infos);
     ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
-    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) { info.uid_ = Sim_UID; });
+    uidSimTableInfos.erase(std::remove_if(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](const auto &item) {
+                               return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
+                           }),
+                           uidSimTableInfos.end());
+    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
+        if (info.flag_ == STATS_DATA_FLAG_ABROAD) {
+            info.uid_ = ABROAD_UID;
+        } else if (info.flag_ == STATS_DATA_FLAG_DROI) {
+            info.uid_ = Sim_UID;
+        }
+    });
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
         return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
@@ -110,10 +120,18 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
     ret1 = helper->QueryData(UID_TABLE, uid, ident, start, end, infos);
-    if (uid == Sim_UID) {
+    if (uid == Sim_UID || uid == ABROAD_UID) {
         ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+        uidSimTableInfos.erase(std::remove_if(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](const auto &item) {
+                                   return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
+                               }),
+                               uidSimTableInfos.end());
         std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-            info.uid_ = Sim_UID;
+            if (info.flag_ == STATS_DATA_FLAG_ABROAD) {
+                info.uid_ = ABROAD_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_DROI) {
+                info.uid_ = Sim_UID;
+            }
         });
     } else {
         ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
@@ -205,6 +223,16 @@ int32_t NetStatsDataHandler::UpdateSimStatsFlag(uint32_t uid, uint32_t flag)
         return NETMANAGER_ERR_INTERNAL;
     }
     return helper->UpdateStatsFlag(UID_SIM_TABLE, uid, flag);
+}
+
+int32_t NetStatsDataHandler::UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateDataFlag(UID_SIM_TABLE, oldFlag, newFlag);
 }
 
 int32_t NetStatsDataHandler::ClearData()
