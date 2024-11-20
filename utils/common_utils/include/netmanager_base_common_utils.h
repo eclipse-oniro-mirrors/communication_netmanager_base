@@ -21,6 +21,7 @@
 #include <vector>
 
 namespace OHOS::NetManagerStandard {
+constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 10;
 constexpr uint32_t INVALID_NET_ID = 0;
 constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
@@ -29,6 +30,11 @@ constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 inline bool IsInternalNetId(int32_t netId)
 {
     return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
+}
+
+inline uint32_t ConvertTableByNetId(int32_t netId, uint32_t table)
+{
+    return IsInternalNetId(netId) ? table % ROUTE_INTERNAL_DEFAULT_TABLE + 1 : table;
 }
 }
 namespace OHOS::NetManagerStandard::CommonUtils {

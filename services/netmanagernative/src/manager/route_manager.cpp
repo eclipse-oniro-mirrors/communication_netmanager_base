@@ -62,7 +62,6 @@ constexpr uint32_t ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE = 91;
 constexpr uint32_t ROUTE_VNIC_TABLE = 97;
 constexpr uint32_t ROUTE_VPN_NETWORK_TABLE = 98;
 constexpr uint32_t ROUTE_LOCAL_NETWORK_TABLE = 99;
-constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 1;
 constexpr uint32_t OUTPUT_MAX = 128;
 constexpr uint32_t BIT_32_LEN = 32;
 constexpr uint32_t BIT_MAX_LEN = 255;
@@ -817,7 +816,7 @@ int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netI
         return -1;
     }
     int32_t ret = ClearRouteInfo(RTM_GETROUTE, table);
-    if (ret == 0 && table != ROUTE_INTERNAL_DEFAULT_TABLE) {
+    if (ret == 0 && table > ROUTE_INTERNAL_DEFAULT_TABLE) {
         interfaceToTable_.erase(interfaceName);
     }
 
@@ -1232,12 +1231,9 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
 uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
     NETNATIVE_LOGI("FindTableByInterfacename netId %{public}d", netId);
-    if (NetManagerStandard::IsInternalNetId(netId)) {
-        return ROUTE_INTERNAL_DEFAULT_TABLE;
-    }
     auto iter = interfaceToTable_.find(interfaceName);
     if (iter != interfaceToTable_.end()) {
-        return iter->second;
+        return ConvertTableByNetId(netId, iter->second);
     }
 
     uint32_t table = if_nametoindex(interfaceName.c_str());
@@ -1247,7 +1243,7 @@ uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName
     }
     table += THOUSAND_LEN;
     interfaceToTable_[interfaceName] = table;
-    return table;
+    return ConvertTableByNetId(netId, table);
 }
 
 uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::string &interfaceName)
@@ -1260,7 +1256,7 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
         case RouteManager::VPN_NETWORK:
             return ROUTE_VPN_NETWORK_TABLE;
         case RouteManager::INTERNAL_DEFAULT:
-            return ROUTE_INTERNAL_DEFAULT_TABLE;
+            return FindTableByInterfacename(interfaceName) % ROUTE_INTERNAL_DEFAULT_TABLE + 1;
         default:
             NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
             return RT_TABLE_UNSPEC;
