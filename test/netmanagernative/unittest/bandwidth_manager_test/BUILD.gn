@@ -40,7 +40,7 @@ ohos_unittest("bandwidth_manager_test") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
