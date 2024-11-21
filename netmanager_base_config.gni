@@ -65,5 +65,6 @@ declare_args() {
   netmanager_base_enable_netsys_access_policy_diag_listen = false
   netmanager_base_feature_support_powermanager = false
   netmanager_base_enable_feature_hosts = false
+  netmanager_base_enable_public_dns_server = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
