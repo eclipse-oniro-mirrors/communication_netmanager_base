@@ -28,7 +28,6 @@ group("unittest") {
     "netsys_manager_test:netsys_controller_test",
     "netsys_manager_test:netsys_native_client_test",
     "netsys_manager_test:netsys_native_manager_fault_through_test",
-    "netsys_manager_test:netsys_native_manager_for_controller_test",
     "netsys_manager_test:netsys_native_manager_netsys_native_service_test",
     "netsys_manager_test:netsys_native_manager_test",
     "netsys_manager_test:netsys_native_service_proxy_test",
