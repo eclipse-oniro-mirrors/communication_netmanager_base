@@ -178,7 +178,8 @@ HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
     int32_t ret = instance_->SetInterfaceMtu(testName, mtu);
     EXPECT_NE(ret, 0);
     std::string eth0Name = "eth0";
-    auto ifaceList = NetsysController::GetInstance().InterfaceGetList();
+    std::vector<std::string> ifaceList;
+    instance_->InterfaceGetList(ifaceList);
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), eth0Name) == ifaceList.end();
     if (eth0NotExist) {
         return;
