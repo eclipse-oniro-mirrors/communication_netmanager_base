@@ -269,6 +269,7 @@ void BitmapManager::OrInsertPortBitmap(SegmentBitmapMap &portSegMap, BpfUnordere
         uint32_t start = item.start;
         while (start <= item.end) {
             if (start == 0) {
+                start++;
                 continue;
             }
             PortKey key = (PortKey)Hltons(start);

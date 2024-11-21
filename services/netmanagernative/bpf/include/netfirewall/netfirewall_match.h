@@ -366,7 +366,13 @@ static __always_inline bool MatchDomain(const struct match_tuple *tuple)
         };
         result = bpf_map_lookup_elem(&DOMAIN_IPV6_MAP, &key);
     }
-    return result != NULL;
+    bool matchAction = false;
+    if (result != NULL && tuple->uid == *result) {
+        matchAction =  true;
+    } else {
+        matchAction = false;
+    }
+    return matchAction;
 }
 
 /**

@@ -21,6 +21,7 @@
 #endif // SEC
 
 #define MAP_MAX_ENTRIES 5000
+#define MAP_MAP_PORT_ENTRIES 65535
 
 #define INGRESS_SADDR_MAP in_saddr_map
 #define INGRESS_SADDR6_MAP in_saddr6_map
