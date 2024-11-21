@@ -207,6 +207,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
 
   external_deps = [
