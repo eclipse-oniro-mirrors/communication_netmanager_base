@@ -41,6 +41,12 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace CommonUtils {
+std::string ToAnonymousIp(const std::string &input)
+{
+    return input;
+}
+}
 namespace {
 using namespace testing::ext;
 static constexpr const char *IFACE = "test0";
