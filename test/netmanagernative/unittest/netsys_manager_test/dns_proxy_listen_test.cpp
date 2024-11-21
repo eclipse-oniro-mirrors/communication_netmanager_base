@@ -46,13 +46,17 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<DnsProxyListen> instance_ = nullptr;
 };
 
 void DnsProxyListenTest::SetUpTestCase() {}
 
 void DnsProxyListenTest::TearDownTestCase() {}
 
-void DnsProxyListenTest::SetUp() {}
+void DnsProxyListenTest::SetUp()
+{
+    instance_ = std::make_shared<DnsProxyListen>();
+}
 
 void DnsProxyListenTest::TearDown() {}
 
