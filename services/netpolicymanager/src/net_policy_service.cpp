@@ -102,6 +102,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
 void NetPolicyService::Init()
 {
     NETMGR_LOG_D("Init");
+    AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     ffrtQueue_.submit(
         [this]() {
@@ -112,7 +113,6 @@ void NetPolicyService::Init()
             netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
             netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
             netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
-            RegisterFactoryResetCallback();
             NetAccessPolicyRDB netAccessPolicy;
             netAccessPolicy.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
@@ -358,6 +358,9 @@ int32_t NetPolicyService::CheckPermission()
 void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETMGR_LOG_I("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        RegisterFactoryResetCallback();
+    }
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
             OnNetSysRestart();
@@ -398,6 +401,7 @@ int32_t NetPolicyService::FactoryResetPolicies()
         netPolicyRule_->ResetPolicies();
         netPolicyFirewall_->ResetPolicies();
         netPolicyTraffic_->ResetPolicies();
+        ResetNetAccessPolicy();
         NETMGR_LOG_I("FactoryResetPolicies end.");
         return NETMANAGER_SUCCESS;
     }
@@ -430,6 +434,26 @@ void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
     NetAccessPolicyRDB netAccessPolicy;
     std::vector<NetAccessPolicyData> result = netAccessPolicy.QueryAll();
     for (size_t i = 0; i < result.size(); i++) {
+        NetworkAccessPolicy policy;
+        policy.wifiAllow = result[i].wifiPolicy;
+        policy.cellularAllow = result[i].cellularPolicy;
+        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag,
+                                                     result[i].isBroker);
+    }
+}
+
+void NetPolicyService::ResetNetAccessPolicy()
+{
+    NETMGR_LOG_I("ResetNetAccessPolicy enter.");
+    NetAccessPolicyRDB netAccessPolicyRdb;
+    std::vector<NetAccessPolicyData> result = netAccessPolicyRdb.QueryAll();
+    for (size_t i = 0; i < result.size(); i++) {
+        if (result[i].wifiPolicy && result[i].cellularPolicy) {
+            continue;
+        }
+        result[i].wifiPolicy = 1;
+        result[i].cellularPolicy = 1;
+        netAccessPolicyRdb.UpdateByUid(result[i].uid, result[i]);
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
         policy.cellularAllow = result[i].cellularPolicy;
