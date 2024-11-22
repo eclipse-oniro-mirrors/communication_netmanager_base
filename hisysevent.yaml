@@ -26,9 +26,9 @@ HTTP_PERF:
   TOTAL_TLS_TIME: {type: DOUBLE, desc: total tls time all the successful request}
   TOTAL_FIRST_RECEIVE_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
 
-NET_STACK_HTTP_FAULT:
+NET_STACK_HTTP_RESPONSE_ERROR:
   __BASE: {type: STATISTIC, level: CRITICAL, desc: TOP_APP_HTTP_NET_STACK, preserve: true}
-  NET_STACK_FAULT_QUEUE: {type: STRING, desc: netstack fault queue}
+  HTTP_REQUEST_ERROR_QUEUE: {type: STRING, desc: netstack fault queue}
 
 NET_CONN_SUPPLER_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: send supplier fault event}
