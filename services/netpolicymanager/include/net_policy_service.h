@@ -270,6 +270,7 @@ private:
     int32_t GetDumpMessage(std::string &message);
 
     void OnNetSysRestart();
+    void ResetNetAccessPolicy();
     void UpdateNetAccessPolicyToMapFromDB();
     bool CheckNetworkAccessIsBroker(uint32_t uid);
 
