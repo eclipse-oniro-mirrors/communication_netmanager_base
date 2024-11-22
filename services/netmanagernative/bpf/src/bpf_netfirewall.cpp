@@ -327,11 +327,7 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
     ClearDomainRules();
     int ret = 0;
     for (const auto &rule : ruleList) {
-        if (rule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
-            domainVaule = 1;
-        } else {
-            domainVaule = 0;
-        }
+        domainVaule = (DomainValue)rule->userId;
         for (const auto &param : rule->domains) {
             if (param.isWildcard) {
                 isWildcard = true;
@@ -776,7 +772,8 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
             NETNATIVE_LOG_D("egress match domain, action PASS");
             break;
         case DBG_MATCH_DOMAIN_ACTION:
-            NETNATIVE_LOG_D("%{public}s domain action: %{public}s", direction, (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
+            NETNATIVE_LOG_D("%{public}s match domain action: %{public}s", direction,
+                (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
             break;
         default:
             break;
