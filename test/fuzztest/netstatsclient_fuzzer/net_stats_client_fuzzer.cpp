@@ -140,6 +140,7 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
+    CheckParamVaild(dataParcel, data, size);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK), dataParcel);
@@ -161,6 +162,7 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    CheckParamVaild(dataParcel, data, size);
 
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
 }
