@@ -288,7 +288,7 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     }
     NetManagerBaseAccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 

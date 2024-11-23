@@ -149,7 +149,7 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
     NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY), dataParcel);
@@ -210,7 +210,7 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
     NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -489,7 +489,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), dataParcel);
     
     MessageParcel dataParcelNoRemoteObject;
-    if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -582,18 +582,30 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 void SetAppHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     HttpProxy httpProxy = {NetConnGetString(STR_LEN), 0, {}};
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->SetAppHttpProxy(httpProxy);
 }
 
 void RegisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     uint32_t callbackId = 0;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->RegisterAppHttpProxyCallback(SetAppHttpProxyCallback, callbackId);
 }
 
 void UnregisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     int32_t callbackId = NetConnGetData<int32_t>();
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterAppHttpProxyCallback(callbackId);
 }
 
@@ -675,6 +687,9 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcelNoRemoteObject;
     if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
+        return;
+    }
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
