@@ -775,12 +775,6 @@ HWTEST_F(TestNetStatsServiceStub, GetCookieRxBytesTest001, TestSize.Level1)
 HWTEST_F(TestNetStatsServiceStub, GetCookieTxBytesTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint64(TEST_UINT64_VALUE)) {
-        return;
-    }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), data,
