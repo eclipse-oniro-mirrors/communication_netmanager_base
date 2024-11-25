@@ -288,7 +288,8 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (!netSupplierInfo_.isAvailable_) {
+    bool isInternal = HasNetCap(NET_CAPABILITY_INTERNAL_DEFAULT);
+    if (!netSupplierInfo_.isAvailable_ && !isInternal) {
         NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
