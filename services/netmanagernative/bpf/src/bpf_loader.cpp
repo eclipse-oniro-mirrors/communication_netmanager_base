@@ -624,6 +624,10 @@ private:
                 if (prog.needExpectedAttach) {
                     attr.expected_attach_type = prog.attachType;
                 }
+                NETNATIVE_LOGW(
+                    "BpfLoadProgram progName[%{public}s] attrProgType[%{public}u], "
+                    "attrExpectedAttachType[%{public}u]",
+                    progName.c_str(), attr.prog_type, attr.expected_attach_type);
                 break;
             }
         }
