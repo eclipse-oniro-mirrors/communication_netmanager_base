@@ -216,6 +216,7 @@ ohos_shared_library("net_bundle_utils") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
 

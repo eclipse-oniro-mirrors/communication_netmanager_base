@@ -26,6 +26,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   include_dirs = [
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
