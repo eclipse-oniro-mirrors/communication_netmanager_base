@@ -210,10 +210,10 @@ bpf_map_def SEC("maps") EGRESS_UID_MAP = {
 };
 bpf_map_def SEC("maps") DEFAULT_ACTION_MAP = {
     .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(default_action_key),
-    .value_size = sizeof(enum sk_action),
-    .max_entries = 2,
-    .map_flags = 0,
+    .key_size = sizeof(uid_key),
+    .value_size = sizeof(struct defalut_action_value),
+    .max_entries = MAP_MAX_ENTRIES,
+    .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
 };

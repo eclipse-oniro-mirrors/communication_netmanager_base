@@ -1560,7 +1560,8 @@ int32_t NetsysNativeClient::SetFirewallRules(NetFirewallRuleType type,
     return proxy->SetFirewallRules(type, ruleList, isFinish);
 }
 
-int32_t NetsysNativeClient::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeClient::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     NETMGR_LOG_D("NetsysNativeClient::SetFirewallDefaultAction");
     auto proxy = GetProxy();
@@ -1568,7 +1569,7 @@ int32_t NetsysNativeClient::SetFirewallDefaultAction(FirewallRuleAction inDefaul
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetFirewallDefaultAction(inDefault, outDefault);
+    return proxy->SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysNativeClient::SetFirewallCurrentUserId(int32_t userId)

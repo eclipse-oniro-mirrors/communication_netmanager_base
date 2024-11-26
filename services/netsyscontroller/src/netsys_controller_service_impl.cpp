@@ -830,11 +830,11 @@ int32_t NetsysControllerServiceImpl::SetFirewallRules(NetFirewallRuleType type,
     return netsysClient_.SetFirewallRules(type, ruleList, isFinish);
 }
 
-int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(FirewallRuleAction inDefault,
+int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
                                                               FirewallRuleAction outDefault)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallDefaultAction");
-    return netsysClient_.SetFirewallDefaultAction(inDefault, outDefault);
+    return netsysClient_.SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysControllerServiceImpl::SetFirewallCurrentUserId(int32_t userId)

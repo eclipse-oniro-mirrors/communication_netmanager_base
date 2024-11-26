@@ -53,3 +53,28 @@ HWTEST_F(NetsysBpfNetFirewallTest, AddDomainCache001, TestSize.Level0)
     bpfNet->ClearDomainCache();
     EXPECT_EQ(netInfo.aiFamily, AF_INET6);
 }
+
+HWTEST_F(NetsysBpfNetFirewallTest, ClearFirewallDefaultAction001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
+    int ret = bpfNet->SetFirewallDefaultAction(100,
+        FirewallRuleAction::RULE_ALLOW, FirewallRuleAction::RULE_ALLOW);
+    bpfNet->ClearFirewallDefaultAction();
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, ClearFirewallRules001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
+    int ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_ALL);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+    ret = FIREWALL_ERR_INTERNAL;
+    ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_IP);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+    ret = FIREWALL_ERR_INTERNAL;
+    ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_DOMAIN);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+    ret = FIREWALL_ERR_INTERNAL;
+    ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_DEFAULT_ACTION);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
+}

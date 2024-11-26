@@ -1905,6 +1905,11 @@ int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, Messag
 int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallDefaultAction");
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        NETNATIVE_LOGE("Read userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     int32_t inDefault = 0;
     if (!data.ReadInt32(inDefault)) {
         NETNATIVE_LOGE("Read inDefault failed");
@@ -1915,7 +1920,7 @@ int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data
         NETNATIVE_LOGE("Read outDefault failed");
         return ERR_FLATTEN_OBJECT;
     }
-    return SetFirewallDefaultAction(static_cast<FirewallRuleAction>(inDefault),
+    return SetFirewallDefaultAction(userId, static_cast<FirewallRuleAction>(inDefault),
                                     static_cast<FirewallRuleAction>(outDefault));
 }
 

@@ -940,11 +940,12 @@ int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
     return ret;
 }
 
-int32_t NetsysNativeService::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeService::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallDefaultAction");
     int32_t ret = netsysService_->SetFirewallDefaultAction(inDefault, outDefault);
-    ret += bpfNetFirewall_->SetFirewallDefaultAction(inDefault, outDefault);
+    ret += bpfNetFirewall_->SetFirewallDefaultAction(userId, inDefault, outDefault);
     return ret;
 }
 

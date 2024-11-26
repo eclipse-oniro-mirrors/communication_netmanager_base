@@ -2752,12 +2752,16 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction in=%{public}d out=%{public}d", inDefault,
-                   outDefault);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction uid=%{public}d in=%{public}d out=%{public}d",
+        userId, inDefault, outDefault);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(static_cast<int32_t>(inDefault))) {

@@ -1356,7 +1356,8 @@ int32_t NetsysController::SetFirewallRules(NetFirewallRuleType type,
     return netsysService_->SetFirewallRules(type, ruleList, isFinish);
 }
 
-int32_t NetsysController::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysController::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     NETMGR_LOG_I("NetsysController::SetFirewallDefaultAction");
     // LCOV_EXCL_START This will never happen.
@@ -1365,7 +1366,7 @@ int32_t NetsysController::SetFirewallDefaultAction(FirewallRuleAction inDefault,
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->SetFirewallDefaultAction(inDefault, outDefault);
+    return netsysService_->SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysController::SetFirewallCurrentUserId(int32_t userId)

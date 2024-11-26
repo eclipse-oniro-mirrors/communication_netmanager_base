@@ -871,11 +871,13 @@ public:
     /**
      * Set firewall default action
      *
+     * @param userId user id
      * @param inDefault  Default action of NetFirewallRuleDirection:RULE_IN
      * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+        FirewallRuleAction outDefault) override;
 
     /**
      * Set firewall current user id
