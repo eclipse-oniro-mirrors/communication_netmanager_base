@@ -306,7 +306,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    HttpProxy httpProxy = {TEST_DOMAIN3, 8080, {}};
+    HttpProxy httpProxy = {TEST_DOMAIN3, 8081, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
