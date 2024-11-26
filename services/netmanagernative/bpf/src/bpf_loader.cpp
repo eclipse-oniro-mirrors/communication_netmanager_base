@@ -624,6 +624,13 @@ private:
                 if (prog.needExpectedAttach) {
                     attr.expected_attach_type = prog.attachType;
                 }
+                if (memcpy_s(attr.prog_name, sizeof(attr.prog_name), progName.c_str(),
+                             std::min(progName.size(), sizeof(attr.prog_name)))) {
+                    NETNATIVE_LOGE(
+                        "BpfLoadProgram progName[%{public}s] attrProgType[%{public}u], "
+                        "attrExpectedAttachType[%{public}u]",
+                        attr.prog_name, attr.prog_type, attr.expected_attach_type);
+                }
                 break;
             }
         }
