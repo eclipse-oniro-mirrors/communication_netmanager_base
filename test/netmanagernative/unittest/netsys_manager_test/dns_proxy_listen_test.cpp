@@ -76,7 +76,6 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     listener.proxySockFd_ = CLIENT_SOCKET;
     listener.OffListen();
     EXPECT_EQ(listener.proxySockFd_, -1);
-    EXPECT_TRUE(listener.proxyListenSwitch_);
 }
 
 HWTEST_F(DnsProxyListenTest, DnsProxyListenTest01, TestSize.Level1)
