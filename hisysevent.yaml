@@ -27,8 +27,15 @@ HTTP_PERF:
   TOTAL_FIRST_RECEIVE_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
 
 NET_STACK_HTTP_RESPONSE_ERROR:
-  __BASE: {type: STATISTIC, level: CRITICAL, desc: TOP_APP_HTTP_NET_STACK, preserve: true}
-  HTTP_REQUEST_ERROR_QUEUE: {type: STRING, desc: netstack fault queue}
+  __BASE: {type: FAULT, level: CRITICAL, desc: TOP_APP_HTTP_NET_STACK, preserve: true}
+  PACKAGE_NAME_EPARA: {type: STRING, desc: http response packageName}
+  TOTAL_DNS_TIME_EPARA: {type: STRING, desc: http response dns time}
+  TOTAL_TLS_TIME_EPARA: {type: STRING, desc: http response tls time}
+  RESPONSE_CODE_EPARA: {type: STRING, desc: http responseCode}
+  ERROR_CODE_EPARA: {type: STRING, desc: http errorCode}
+  OS_ERR_EPARA: {type: STRING, desc: http osErr}
+  IP_TYPE_EPARA: {type: STRING, desc: http IP type}
+  METHOD_EPARA: {type: STRING, desc: http response method}
 
 NET_CONN_SUPPLER_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: send supplier fault event}
