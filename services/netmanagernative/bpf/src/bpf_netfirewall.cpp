@@ -238,12 +238,17 @@ int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
             ClearDomainRules();
             break;
         }
+        case NetFirewallRuleType::RULE_DEFAULT_ACTION: {
+            ClearFirewallDefaultAction();
+            break;
+        }
         case NetFirewallRuleType::RULE_ALL: {
             firewallIpRules_.clear();
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
             firewallDomainRules_.clear();
             ClearDomainRules();
+            ClearFirewallDefaultAction();
             break;
         }
         default:
@@ -419,19 +424,24 @@ int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirew
     return ret;
 }
 
-int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+void NetsysBpfNetFirewall::ClearFirewallDefaultAction()
+{
+    defalut_action_value val = { SK_PASS };
+    int32_t userId = -1;
+    ClearBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
+}
+
+int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     if (!isBpfLoaded_) {
         NETNATIVE_LOGE("SetFirewallDefaultAction: bpf not loaded");
         return NETFIREWALL_ERR;
     }
-    DefaultActionKey key = DEFAULT_ACT_IN_KEY;
-    enum sk_action val = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
-    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
-
-    key = DEFAULT_ACT_OUT_KEY;
-    val = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
-    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
+    defalut_action_value val = { SK_PASS };
+    val.inaction = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
+    val.outaction = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
+    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
     CtKey ctKey;
     CtVaule ctVal;
     ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);

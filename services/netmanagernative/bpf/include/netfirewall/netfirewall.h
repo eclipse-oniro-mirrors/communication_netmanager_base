@@ -80,6 +80,7 @@ static __always_inline bool get_ct_tuple(struct match_tuple *match_tpl, struct c
         return false;
     }
 
+    ct_tpl->uid = match_tpl->uid;
     ct_tpl->family = match_tpl->family;
     ct_tpl->protocol = match_tpl->protocol;
     ct_tpl->sport = match_tpl->sport;
@@ -152,9 +153,8 @@ static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
 {
     __be16 port = bpf_htons(tuple->sport);
     if (port == FIREWALL_DNS_QUERY_PORT || port == FIREWALL_DNS_OVER_QUERY_PORT) {
-        default_action_key key = DEFAULT_ACT_OUT_KEY;
-        enum sk_action *action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &key);
-        return action && *action != SK_PASS;
+        struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &tuple->uid);
+        return default_value && default_value->outaction != SK_PASS;
     }
     return false;
 }

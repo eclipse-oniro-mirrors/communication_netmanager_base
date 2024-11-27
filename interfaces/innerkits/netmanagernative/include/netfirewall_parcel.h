@@ -98,11 +98,12 @@ enum class FirewallRuleAction {
 
 // Firewall Rule Type
 enum class NetFirewallRuleType {
-    RULE_INVALID = -1, // TYPE INVALID
-    RULE_IP = 1,       // TYPE IP
-    RULE_DOMAIN,       // TYPE Domain
-    RULE_DNS,          // TYPE DNS
-    RULE_ALL           // TYPE ALL
+    RULE_INVALID = -1,     // TYPE INVALID
+    RULE_IP = 1,           // TYPE IP
+    RULE_DOMAIN,           // TYPE Domain
+    RULE_DNS,              // TYPE DNS
+    RULE_DEFAULT_ACTION,   //TYPE DEFAULT ACTION
+    RULE_ALL               // TYPE ALL
 };
 
 // Network protocol, currently only supports the following enumeration. Please refer to the enumeration data for

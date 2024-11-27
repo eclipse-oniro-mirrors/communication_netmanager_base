@@ -174,7 +174,8 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     virtual int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                                      bool isFinish) = 0;
-    virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
+    virtual int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+                                             FirewallRuleAction outDefault) = 0;
     virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
     virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
     virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;

@@ -184,9 +184,12 @@ static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u
         }
 
         domain_value *allow_uid = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        default_action_key default_key = DEFAULT_ACT_OUT_KEY;
-        enum sk_action *default_action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &default_key);
-        enum sk_action sk_act = default_action ? *default_action : SK_PASS;
+        domain_value current_uid = get_current_uid(skb);
+        struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &current_uid);
+        enum sk_action sk_act = SK_PASS;
+        if (default_value) {
+            sk_act = default_value->outaction;
+        }
 
         if ((allow_uid != NULL && match_domain_uid(skb, allow_uid)) && (sk_act == SK_DROP)) {
             is_in_pass = 1;

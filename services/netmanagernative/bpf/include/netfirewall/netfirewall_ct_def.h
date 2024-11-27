@@ -45,6 +45,7 @@ enum ct_status {
 };
 
 struct ct_tuple {
+    __u32 uid;
     __u32 family;
     __u8 protocol;
     union {
