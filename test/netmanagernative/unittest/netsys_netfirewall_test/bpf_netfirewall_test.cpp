@@ -59,11 +59,13 @@ HWTEST_F(NetsysBpfNetFirewallTest, ClearFirewallDefaultAction001, TestSize.Level
 {
     std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
     bpfNet->SetBpfLoaded(true);
-    int ret = bpfNet->SetFirewallDefaultAction(USER_ID1, FirewallRuleAction::RULE_ALLOW, FirewallRuleAction::RULE_ALLOW);
+    int ret = bpfNet->SetFirewallDefaultAction(USER_ID1, FirewallRuleAction::RULE_ALLOW,
+        FirewallRuleAction::RULE_ALLOW);
     bpfNet->ClearFirewallDefaultAction();
     EXPECT_EQ(ret, FIREWALL_SUCCESS);
     bpfNet->SetBpfLoaded(false);
-    ret = bpfNet->SetFirewallDefaultAction(USER_ID1, FirewallRuleAction::RULE_ALLOW, FirewallRuleAction::RULE_ALLOW);
+    ret = bpfNet->SetFirewallDefaultAction(USER_ID1, FirewallRuleAction::RULE_ALLOW,
+        FirewallRuleAction::RULE_ALLOW);
     EXPECT_EQ(ret, NETFIREWALL_ERR);
 }
 
