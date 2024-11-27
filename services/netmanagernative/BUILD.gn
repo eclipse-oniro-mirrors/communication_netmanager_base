@@ -46,7 +46,7 @@ config("netsys_native_manager_config") {
     defines += [ "EMLULATOR_PLATFORM" ]
   }
 
-  if (netmanager_base_enable_public_dns_server) {
+  if (netmanager_base_enable_public_dns_server && !is_emulator) {
     defines += [ "ENABLE_PUBLIC_DNS_SERVER" ]
   }
 }
