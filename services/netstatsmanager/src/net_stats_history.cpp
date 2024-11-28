@@ -16,6 +16,7 @@
 #include "net_stats_history.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

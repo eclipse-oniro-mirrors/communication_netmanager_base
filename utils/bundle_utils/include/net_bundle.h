@@ -21,12 +21,40 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+struct SampleBundleInfo {
+public:
+    inline bool Valid() const
+    {
+        return uid_ > 0 && !bundleName_.empty();
+    }
+    std::string ToString() const
+    {
+        std::string s;
+        s.append(std::to_string(uid_));
+        s.append(",");
+        s.append(bundleName_);
+        s.append(",");
+        s.append(installSource_);
+        s.append(",");
+        s.append(std::to_string(installTime_));
+        return s;
+    }
+
+public:
+    uint32_t uid_ = 0;
+    std::string bundleName_;
+    std::string installSource_;
+    int64_t installTime_ = -1;
+};
+
 class INetBundle {
 public:
     virtual int32_t GetJsonFromBundle(std::string &jsonProfile) = 0;
     virtual bool IsAtomicService(std::string &bundleName) = 0;
     virtual std::optional<int32_t> ObtainTargetApiVersionForSelf() = 0;
     virtual std::optional<std::string> ObtainBundleNameForSelf() = 0;
+    virtual std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> ObtainBundleInfoForActive() = 0;
+    virtual std::optional<SampleBundleInfo> ObtainBundleInfoForUid(uint32_t uid) = 0;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);

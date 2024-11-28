@@ -30,6 +30,9 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_UID = 1;
+constexpr int32_t TEST_UID2 = 2;
+constexpr const char *TEST_BUNDLENAME = "TEST_BUNDLE_NAME";
+constexpr const char *TEST_BUNDLENAME2 = "TEST_BUNDLE_NAME2";
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
@@ -179,9 +182,9 @@ HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
     }
 }
 
-HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
+HWTEST_F(NetStatsCachedTest, DeleteUidStatsTest001, TestSize.Level1)
 {
-    instance_->ForceDeleteStats(TEST_UID);
+    instance_->DeleteUidStats(TEST_UID);
     std::vector<NetStatsInfo> statsInfoAfter;
     instance_->GetKernelStats(statsInfoAfter);
     bool found = false;
@@ -192,6 +195,71 @@ HWTEST_F(NetStatsCachedTest, ForceDeleteStatsTest001, TestSize.Level1)
         }
     }
     EXPECT_FALSE(found);
+}
+
+HWTEST_F(NetStatsCachedTest, DeleteUidSimStatsTest001, TestSize.Level1)
+{
+    instance_->DeleteUidSimStats(TEST_UID);
+    std::vector<NetStatsInfo> statsInfoAfter;
+    instance_->GetKernelStats(statsInfoAfter);
+    bool found = false;
+    for (const auto &item : statsInfoAfter) {
+        if (item.uid_ == TEST_UID) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_FALSE(found);
+}
+
+HWTEST_F(NetStatsCachedTest, SetAndGetAndDeleteUidSimSampleBundleTest001, TestSize.Level1)
+{
+    SampleBundleInfo info{TEST_UID, TEST_BUNDLENAME, "", 1};
+    instance_->SetUidSimSampleBundle(TEST_UID, info);
+    auto getResult = instance_->GetUidSimSampleBundle(TEST_UID);
+    EXPECT_TRUE(getResult.has_value());
+    EXPECT_EQ(getResult.value().uid_, TEST_UID);
+    EXPECT_EQ(getResult.value().bundleName_, TEST_BUNDLENAME);
+    EXPECT_EQ(instance_->GetUidSimSampleBundlesSize(), 1);
+    instance_->DeleteUidSimSampleBundle(TEST_UID);
+    getResult = instance_->GetUidSimSampleBundle(TEST_UID);
+    EXPECT_FALSE(getResult.has_value());
+}
+
+HWTEST_F(NetStatsCachedTest, SetUidStatsFlagTest001, TestSize.Level1)
+{
+    SampleBundleInfo info{TEST_UID, TEST_BUNDLENAME, "", 1};
+    std::unordered_map<uint32_t, SampleBundleInfo> maps;
+    maps.emplace(TEST_UID, info);
+    instance_->SetUidStatsFlag(maps);
+    EXPECT_EQ(instance_->uidStatsFlagMap_.Size(), 0);
+    instance_->DeleteUidStatsFlag(TEST_UID);
+    EXPECT_EQ(instance_->uidStatsFlagMap_.Size(), 0);
+    instance_->SetUidStatsFlag(maps);
+    EXPECT_EQ(instance_->uidStatsFlagMap_.Size(), 0);
+    instance_->ClearUidStatsFlag();
+    EXPECT_EQ(instance_->uidStatsFlagMap_.Size(), 0);
+}
+
+HWTEST_F(NetStatsCachedTest, IsExistInUidSimSampleBundleMapTest001, TestSize.Level1)
+{
+    bool isA = false;
+    bool isB = false;
+    instance_->IsExistInUidSimSampleBundleMap(isA, isB);
+    EXPECT_FALSE(isA);
+    EXPECT_FALSE(isB);
+}
+
+HWTEST_F(NetStatsCachedTest, GetEarlySampleBundleInfoTest001, TestSize.Level1)
+{
+    SampleBundleInfo info1{TEST_UID, TEST_BUNDLENAME, "", 1};
+    SampleBundleInfo info2{TEST_UID2, TEST_BUNDLENAME2, "", 2};
+    instance_->SetUidSimSampleBundle(TEST_UID, info1);
+    instance_->SetUidSimSampleBundle(TEST_UID2, info2);
+    auto earlyItem = instance_->GetEarlySampleBundleInfo();
+    EXPECT_TRUE(earlyItem.has_value());
+    EXPECT_EQ(earlyItem.value().uid_, TEST_UID);
+    EXPECT_EQ(earlyItem.value().bundleName_, TEST_BUNDLENAME);
 }
 
 HWTEST_F(NetStatsCachedTest, SetAppStatsTest002, TestSize.Level1)

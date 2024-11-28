@@ -78,6 +78,11 @@ struct domain_hash_key {
     __u8 data[DNS_DOMAIN_LEN];
 };
 
+struct defalut_action_value {
+    enum sk_action inaction;
+    enum sk_action outaction;
+};
+
 struct debug_event {
     enum debug_type type;
     enum stream_dir dir;
@@ -147,7 +152,7 @@ typedef __be16 port_key;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
-typedef __u8 domain_value;
+typedef __u32 domain_value;
 
 typedef enum {
     CURRENT_USER_ID_KEY = 1,

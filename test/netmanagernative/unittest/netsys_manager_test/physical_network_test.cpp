@@ -21,6 +21,7 @@
 #include "netsys_controller.h"
 #define private public
 #define protected public
+#include "interface_manager.h"
 #include "physical_network.h"
 #undef private
 #undef protected
@@ -58,7 +59,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     NETNATIVE_LOGI("AddInterfaceTest001 enter");
     PhysicalNetwork physicNetwork(2, NetworkPermission::PERMISSION_NETWORK);
     std::string interfaceName1 = "wlan0";
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool wlan0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName1) == ifaceList.end();
     if (wlan0NotExist) {
         return;
@@ -70,7 +71,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     ret = physicNetwork.AddInterface(interfaceName1);
     EXPECT_EQ(ret, 0);
     std::string interfaceName2 = "eth1";
-    ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName2) != ifaceList.end();
     if (eth1Exist) {
         ret = physicNetwork.AddInterface(interfaceName2);
@@ -96,7 +97,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
     ret = instance_->AddInterface(interfaceName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     interfaceName = "wlan1";
-    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool wlan1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) != ifaceList.end();
     if (wlan1Exist) {
         return;

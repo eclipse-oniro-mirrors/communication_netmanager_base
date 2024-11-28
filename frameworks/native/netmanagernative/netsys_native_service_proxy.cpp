@@ -30,6 +30,7 @@ namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
+static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -1249,6 +1250,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
         return ret;
     }
     vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_SIZE ? MAX_INTERFACE_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -2752,12 +2754,16 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction in=%{public}d out=%{public}d", inDefault,
-                   outDefault);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction uid=%{public}d in=%{public}d out=%{public}d",
+        userId, inDefault, outDefault);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(static_cast<int32_t>(inDefault))) {

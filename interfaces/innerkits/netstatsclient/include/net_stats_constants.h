@@ -24,6 +24,7 @@ namespace NetManagerStandard {
 constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
 constexpr uint32_t Sim_UID = std::numeric_limits<uint32_t>::max();
 constexpr uint32_t UNINSTALLED_UID = std::numeric_limits<uint32_t>::max() - 1;
+constexpr uint32_t ABROAD_UID = std::numeric_limits<uint32_t>::max() - 2;
 enum NetStatsResultCode {
     STATS_DUMP_MESSAGE_FAIL = 2103002,
     STATS_REMOVE_FILE_FAIL,
@@ -47,6 +48,8 @@ enum NetStatsResultCode {
 enum NetStatsDataFlag {
     STATS_DATA_FLAG_DEFAULT,     // The minimum value of DataFlag, Do not less than the limit. No actual meaning.
     STATS_DATA_FLAG_UNINSTALLED, // the stats of the uninstalled uid.
+    STATS_DATA_FLAG_ABROAD,      // the stats of the abroad uid.
+    STATS_DATA_FLAG_DROI,        // the stats of the droi uid.
     STATS_DATA_FLAG_LIMIT,       // The maximum value of DataFlag, Do not exceed the limit. No actual meaning.
 };
 } // namespace NetManagerStandard

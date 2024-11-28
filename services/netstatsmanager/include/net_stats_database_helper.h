@@ -57,6 +57,7 @@ public:
     int32_t ExecSql(const std::string &sql, void *recv, SqlCallback callback);
     int32_t Upgrade();
     int32_t UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag);
+    int32_t UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag);
 
 private:
     enum TableVersion : int32_t {
@@ -64,6 +65,7 @@ private:
         Version_1,
         Version_2,
         Version_3,
+        Version_4,
     };
 
 private:
@@ -73,6 +75,7 @@ private:
     int32_t GetTableVersion(TableVersion &version, const std::string &tableName);
     int32_t UpdateTableVersion(TableVersion version, const std::string &tableName);
     int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
+    void ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
 };

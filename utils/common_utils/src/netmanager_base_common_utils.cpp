@@ -84,6 +84,11 @@ std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "
                                           "jp",   "de",      "uk",     "fr",   "au",  "ca",   "br",   "ru",  "it",
                                           "es",   "in",      "online", "shop", "vip", "club", "xyz",  "top", "icu",
                                           "work", "website", "tech",   "asia", "xin", "co",   "mobi", "info"};
+constexpr const char *BUNDLENAME_DELIMITER = ",";
+constexpr const char *DROI_APP_BUNDLENAME = "com.droi.iapps,com.droi.tong";
+constexpr const char *INSTALL_SOURCE_FROM_DROI = "com.zhuoyi.appstore.lite";
+constexpr const char *CHUJING_APP_BUNDLENAME = "com.easy.abroadHarmony.temp,com.easy.hmos.abroad";
+constexpr const char *INSTALL_SOURCE_FROM_CHUJING = "com.easy.abroad";
 std::mutex g_commonUtilsMutex;
 
 std::string Strip(const std::string &str, char ch)
@@ -489,26 +494,26 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 
 int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
 {
-    NETMGR_LOG_I("Fork OK");
+    NETMGR_LOG_D("Fork OK");
     if (count != PIPE_FD_NUM) {
         NETMGR_LOG_E("fork exec parent process failed");
         _exit(-1);
     }
-    NETMGR_LOG_I("Fork done and ready to close");
+    NETMGR_LOG_D("Fork done and ready to close");
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
-    NETMGR_LOG_I("Close done and ready for dup2");
+    NETMGR_LOG_D("Close done and ready for dup2");
     if (dup2(pipeFd[PIPE_IN], STDOUT_FILENO) == -1) {
         NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
-    NETMGR_LOG_I("ready for execv");
+    NETMGR_LOG_D("ready for execv");
     if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
         NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
-    NETMGR_LOG_I("execv done");
+    NETMGR_LOG_D("execv done");
     if (close(pipeFd[PIPE_IN]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
@@ -518,7 +523,7 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
 
 struct ParentProcessHelper {
     std::atomic_bool waitDoneFlag = false;
-    pid_t ret = 0;
+    std::atomic<pid_t> ret = 0;
     std::mutex parentMutex;
     std::condition_variable parentCv;
 };
@@ -535,7 +540,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (out != nullptr) {
         char buf[CHAR_ARRAY_SIZE_MAX] = {0};
         out->clear();
-        NETMGR_LOG_I("ready for read");
+        NETMGR_LOG_D("ready for read");
         while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
             if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
@@ -543,16 +548,17 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
             }
         }
     }
-    NETMGR_LOG_I("read done");
+    NETMGR_LOG_D("read done");
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     auto helper = std::make_shared<ParentProcessHelper>();
+    std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
     auto parentThread = std::thread([helper, childPid]() {
-        helper->ret = waitpid(childPid, nullptr, 0);
+        helper->ret.store(waitpid(childPid, nullptr, 0));
         helper->waitDoneFlag = true;
         helper->parentCv.notify_all();
-        NETMGR_LOG_I("waitpid %{public}d done", childPid);
+        NETMGR_LOG_D("waitpid %{public}d done", childPid);
     });
 #ifndef CROSS_PLATFORM
     pthread_setname_np(parentThread.native_handle(), "ExecParentThread");
@@ -566,7 +572,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         return NETMANAGER_ERROR;
     }
-    pid_t pidRet = helper->ret;
+    pid_t pidRet = helper->ret.load();
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
@@ -583,9 +589,9 @@ int32_t ForkExec(const std::string &command, std::string *out)
         NETMGR_LOG_E("creat pipe failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
     }
-    NETMGR_LOG_I("ForkExec");
+    NETMGR_LOG_D("ForkExec");
     pid_t pid = fork();
-    NETMGR_LOG_I("ForkDone %{public}d", pid);
+    NETMGR_LOG_D("ForkDone %{public}d", pid);
     if (pid < 0) {
         NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
@@ -718,5 +724,31 @@ uint64_t GenRandomNumber()
     static std::uniform_int_distribution<uint64_t> dist(0ULL, UINT64_MAX);
     uint64_t num = dist(rd);
     return num;
+}
+
+bool IsDroi(const std::string &bundleName)
+{
+    std::vector<std::string> list = Split(DROI_APP_BUNDLENAME, BUNDLENAME_DELIMITER);
+    auto findRet =
+        std::find_if(list.begin(), list.end(), [&bundleName](const auto &item) { return item == bundleName; });
+    return findRet != list.end();
+}
+
+bool IsInstallSourceFromDroi(const std::string &installSource)
+{
+    return installSource == INSTALL_SOURCE_FROM_DROI;
+}
+
+bool IsAbroad(const std::string &bundleName)
+{
+    std::vector<std::string> list = Split(CHUJING_APP_BUNDLENAME, BUNDLENAME_DELIMITER);
+    auto findRet =
+        std::find_if(list.begin(), list.end(), [&bundleName](const auto &item) { return item == bundleName; });
+    return findRet != list.end();
+}
+
+bool IsInstallSourceFromAbroad(const std::string &installSource)
+{
+    return installSource == INSTALL_SOURCE_FROM_CHUJING;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

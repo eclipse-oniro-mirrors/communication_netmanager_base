@@ -15,6 +15,7 @@
 
 #include "net_stats_service.h"
 
+#include <dlfcn.h>
 #include <net/if.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -26,6 +27,8 @@
 #include "broadcast_manager.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "ffrt_inner.h"
+#include "net_bundle.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -48,6 +51,8 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
 };
 constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 constexpr const char* UID = "uid";
+const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
+constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -98,8 +103,13 @@ int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &arg
 
 void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
+    if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        RefreshUidStatsFlag(DELAY_US);
+        return;
+    }
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
@@ -111,21 +121,13 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         [this](const EventFwk::Want &want) {
             uint32_t uid = want.GetIntParam(UID, 0);
             NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
-            auto handler = std::make_unique<NetStatsDataHandler>();
-            if (handler == nullptr) {
-                NETMGR_LOG_E("Net Manager package removed, get db handler failed. uid:[%{public}d]", uid);
-                return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
-            }
-            auto ret1 = handler->UpdateStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
-            if (ret1 != NETMANAGER_SUCCESS) {
-                NETMGR_LOG_E("Net Manager update stats flag failed, uid:[%{public}d]", uid);
-            }
-            auto ret2 = handler->UpdateSimStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
-            if (ret2 != NETMANAGER_SUCCESS) {
-                NETMGR_LOG_E("Net Manager update sim stats flag failed, uid:[%{public}d]", uid);
-            }
-            netStatsCached_->ForceArchiveStats(uid);
-            return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
+            return CommonEventPackageRemoved(uid);
+        });
+    subscriber_->RegisterStatsCallback(
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED, [this](const EventFwk::Want &want) {
+            uint32_t uid = want.GetIntParam(UID, 0);
+            NETMGR_LOG_D("Net Manager add uid, uid:[%{public}d]", uid);
+            return CommonEventPackageAdded(uid);
         });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
@@ -185,6 +187,9 @@ bool NetStatsService::Init()
         NETMGR_LOG_E("Start cached failed");
         return false;
     }
+    AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    uint64_t delay = DELAY_US / 2;
+    RefreshUidStatsFlag(delay);
 
     return true;
 }
@@ -579,6 +584,121 @@ bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceName
         return false;
     }
     return true;
+}
+
+std::unordered_map<uint32_t, SampleBundleInfo> NetStatsService::GetSampleBundleInfosForActiveUser()
+{
+    void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    using GetNetBundleClass = INetBundle *(*)();
+    auto getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler);
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> result = netBundle->ObtainBundleInfoForActive();
+    dlclose(handler);
+    if (!result.has_value()) {
+        NETMGR_LOG_W("ObtainBundleInfoForActive is nullopt");
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    return result.value();
+}
+
+SampleBundleInfo NetStatsService::GetSampleBundleInfoForUid(uint32_t uid)
+{
+    void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
+        return SampleBundleInfo{};
+    }
+    using GetNetBundleClass = INetBundle *(*)();
+    auto getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return SampleBundleInfo{};
+    }
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler);
+        return SampleBundleInfo{};
+    }
+    std::optional<SampleBundleInfo> result = netBundle->ObtainBundleInfoForUid(uid);
+    dlclose(handler);
+    if (!result.has_value()) {
+        NETMGR_LOG_W("ObtainBundleInfoForUid is nullopt");
+        return SampleBundleInfo{};
+    }
+    return result.value();
+}
+
+void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
+{
+    std::function<void()> uidInstallSourceFunc = [this]() {
+        auto tmp = GetSampleBundleInfosForActiveUser();
+        for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
+            if (CommonUtils::IsDroi(iter->second.bundleName_) ||
+                CommonUtils::IsAbroad(iter->second.bundleName_)) {
+                netStatsCached_->SetUidSimSampleBundle(iter->first, iter->second);
+            }
+        }
+        netStatsCached_->ClearUidStatsFlag();
+        netStatsCached_->SetUidStatsFlag(tmp);
+    };
+    ffrt::submit(std::move(uidInstallSourceFunc), {}, {}, ffrt::task_attr().name("RefreshUidStatsFlag").delay(delay));
+}
+
+bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
+{
+    SampleBundleInfo sampleBundleInfo = GetSampleBundleInfoForUid(uid);
+    if (CommonUtils::IsDroi(sampleBundleInfo.bundleName_) ||
+        CommonUtils::IsAbroad(sampleBundleInfo.bundleName_)) {
+        uint64_t delay = 0;
+        if (netStatsCached_->GetUidSimSampleBundlesSize() == 0) {
+            delay = DELAY_US;
+            netStatsCached_->ForceCachedStats();
+        }
+        RefreshUidStatsFlag(delay);
+    } else {
+        std::unordered_map<uint32_t, SampleBundleInfo> tmp{{uid, sampleBundleInfo}};
+        netStatsCached_->SetUidStatsFlag(tmp);
+    }
+    return true;
+}
+
+bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr) {
+        NETMGR_LOG_E("Net Manager package removed, get db handler failed. uid:[%{public}d]", uid);
+        return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
+    }
+    auto ret1 = handler->UpdateStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
+    if (ret1 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Net Manager update stats flag failed, uid:[%{public}d]", uid);
+    }
+    auto ret2 = handler->UpdateSimStatsFlag(uid, STATS_DATA_FLAG_UNINSTALLED);
+    if (ret2 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Net Manager update sim stats flag failed, uid:[%{public}d]", uid);
+    }
+    auto ffrtHandle = netStatsCached_->ForceArchiveStats(uid);
+    if (netStatsCached_->GetUidSimSampleBundle(uid).has_value()) {
+        ffrt::wait({ffrtHandle});
+        RefreshUidStatsFlag(0);
+    }
+    return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

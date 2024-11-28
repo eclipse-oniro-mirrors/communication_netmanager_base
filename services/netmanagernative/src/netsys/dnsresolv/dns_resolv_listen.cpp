@@ -144,7 +144,7 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
             DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
         }
         // the last one is for baidu DNS Server
-#ifndef EMLULATOR_PLATFORM
+#ifdef ENABLE_PUBLIC_DNS_SERVER
         AddPublicDnsServers(sendData, i);
 #endif
     }

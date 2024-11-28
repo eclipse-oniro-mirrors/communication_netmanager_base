@@ -22,8 +22,10 @@
 #include <vector>
 
 #include "ffrt.h"
+#include "net_bundle.h"
 #include "net_push_stats_info.h"
 #include "net_stats_callback.h"
+#include "net_stats_constants.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
 #include "safe_map.h"
@@ -38,9 +40,9 @@ public:
     ~NetStatsCached() = default;
     void ForceUpdateStats();
 
-    void ForceDeleteStats(uint32_t uid);
+    ffrt::task_handle ForceArchiveStats(uint32_t uid);
 
-    void ForceArchiveStats(uint32_t uid);
+    void ForceCachedStats();
 
     int32_t StartCached();
 
@@ -76,6 +78,20 @@ public:
     }
 
     void Reset();
+
+    void SetUidSimSampleBundle(uint32_t uid, const SampleBundleInfo &info);
+
+    void DeleteUidSimSampleBundle(uint32_t uid);
+
+    std::optional<SampleBundleInfo> GetUidSimSampleBundle(uint32_t uid);
+
+    uint32_t GetUidSimSampleBundlesSize();
+
+    void SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleInfo> &sampleBundleMap);
+
+    void DeleteUidStatsFlag(uint32_t uid);
+
+    void ClearUidStatsFlag();
 
 private:
     class CachedInfo {
@@ -227,14 +243,23 @@ private:
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
     std::atomic<int64_t> uninstalledUid_ = -1;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
+    SafeMap<uint32_t, NetStatsDataFlag> uidStatsFlagMap_;
+    SafeMap<uint32_t, SampleBundleInfo> uidSimSampleBundleMap_;
 
     void LoadIfaceNameIdentMaps();
+    NetStatsDataFlag GetUidStatsFlag(uint32_t uid);
+    void IsExistInUidSimSampleBundleMap(bool &isExistDroi, bool &isExistAbroad);
+    std::optional<SampleBundleInfo> GetEarlySampleBundleInfo();
 
     void CacheStats();
     void CacheUidStats();
     void CacheUidSimStats();
     void CacheIfaceStats();
     void CacheAppStats();
+    void GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo);
+    void GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo);
+    void DeleteUidStats(uint32_t uid);
+    void DeleteUidSimStats(uint32_t uid);
 
     void WriteStats();
     void WriteUidStats();
