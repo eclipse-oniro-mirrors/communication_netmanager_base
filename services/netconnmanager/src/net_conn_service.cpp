@@ -2326,6 +2326,9 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         ret = GetActiveUserId(userId);
     } else if (userIdType == LOCAL) {
         ret = GetLocalUserId(userId);
+        if (userId == 0) {
+            userId = PRIMARY_USER_ID;
+        }
     } else if (userIdType == SPECIFY) {
         userId = httpProxy.GetUserId();
     } else {
