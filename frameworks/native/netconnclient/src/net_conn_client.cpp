@@ -876,6 +876,11 @@ bool NetConnClient::TrustUserCa()
     return NetworkSecurityConfig::GetInstance().TrustUserCa();
 }
 
+bool NetConnClient::IsUserDnsCache()
+{
+    return NetworkSecurityConfig::GetInstance().IsUserDnsCache();
+}
+
 bool NetConnClient::IsPinOpenMode(const std::string &hostname)
 {
     return NetworkSecurityConfig::GetInstance().IsPinOpenMode(hostname);

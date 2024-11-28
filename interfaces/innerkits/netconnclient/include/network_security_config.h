@@ -64,6 +64,7 @@ public:
     bool TrustUser0Ca();
     bool TrustUserCa();
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
+    bool IsUserDnsCache();
 
 private:
     int32_t GetConfig();
@@ -95,6 +96,7 @@ private:
     std::vector<DomainConfig> domainConfigs_;
     bool trustUser0Ca_ = true;
     bool trustUserCa_ = true;
+    bool isUserDnsCache_ = true;
 };
 
 }

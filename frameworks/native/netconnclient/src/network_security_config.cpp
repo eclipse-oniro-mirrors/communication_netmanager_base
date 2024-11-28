@@ -524,6 +524,11 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
         trustUserCa_ = cJSON_IsTrue(trustUserCa);
     }
 
+    auto isUserDnsCache = cJSON_GetObjectItem(root, "use-dns-cache");
+    if (isUserDnsCache) {
+        isUserDnsCache_ = cJSON_IsTrue(isUserDnsCache);
+    }
+
     cJSON *networkSecurityConfig = cJSON_GetObjectItem(root, TAG_NETWORK_SECURITY_CONFIG.c_str());
     if (networkSecurityConfig == nullptr) {
         NETMGR_LOG_E("networkSecurityConfig is null");
@@ -690,6 +695,11 @@ bool NetworkSecurityConfig::TrustUser0Ca()
 bool NetworkSecurityConfig::TrustUserCa()
 {
     return trustUserCa_;
+}
+
+bool NetworkSecurityConfig::IsUserDnsCache()
+{
+    return isUserDnsCache_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
