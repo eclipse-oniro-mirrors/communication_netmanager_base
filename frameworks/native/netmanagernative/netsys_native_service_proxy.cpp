@@ -30,6 +30,7 @@ namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
+static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -1249,6 +1250,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
         return ret;
     }
     vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_SIZE ? MAX_INTERFACE_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
