@@ -99,6 +99,8 @@ private:
     std::string udpOutput_;
     std::vector<std::string> iptablesDeleteCmds_;
     std::string configPath_ = IPTABLES_CONFIG_PATH;
+    bool iptablesHasBeenParse_ = false;
+    std::mutex iptablesParseMutex_;
 };
 } // namespace nmd
 } // namespace OHOS// namespace OHOS::nmd
