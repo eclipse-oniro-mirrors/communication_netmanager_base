@@ -2527,6 +2527,10 @@ void NetConnService::NetPolicyCallback::SendNetPolicyChange(uint32_t uid, uint32
     bool newBlocked = false;
     {
         std::lock_guard<std::recursive_mutex> locker(client_.netManagerMutex_);
+        if (client_.defaultNetSupplier_ == nullptr) {
+            NETMGR_LOG_E("SendNetPolicyChange defaultNetSupplier_ is nullptr");
+            return;
+        }
         defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
         metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     }
