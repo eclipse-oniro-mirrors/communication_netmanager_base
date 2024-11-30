@@ -94,9 +94,9 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
                            }),
                            uidSimTableInfos.end());
     std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-        if (info.flag_ == STATS_DATA_FLAG_ABROAD) {
-            info.uid_ = ABROAD_UID;
-        } else if (info.flag_ == STATS_DATA_FLAG_DROI) {
+        if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+            info.uid_ = SIM2_UID;
+        } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
             info.uid_ = Sim_UID;
         }
     });
@@ -120,16 +120,16 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
     ret1 = helper->QueryData(UID_TABLE, uid, ident, start, end, infos);
-    if (uid == Sim_UID || uid == ABROAD_UID) {
+    if (uid == Sim_UID || uid == SIM2_UID) {
         ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
         uidSimTableInfos.erase(std::remove_if(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](const auto &item) {
                                    return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                                }),
                                uidSimTableInfos.end());
         std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-            if (info.flag_ == STATS_DATA_FLAG_ABROAD) {
-                info.uid_ = ABROAD_UID;
-            } else if (info.flag_ == STATS_DATA_FLAG_DROI) {
+            if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+                info.uid_ = SIM2_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
                 info.uid_ = Sim_UID;
             }
         });
