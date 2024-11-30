@@ -248,7 +248,7 @@ private:
 
     void LoadIfaceNameIdentMaps();
     NetStatsDataFlag GetUidStatsFlag(uint32_t uid);
-    void IsExistInUidSimSampleBundleMap(bool &isExistDroi, bool &isExistAbroad);
+    void IsExistInUidSimSampleBundleMap(bool &isExistSim, bool &isExistSim2);
     std::optional<SampleBundleInfo> GetEarlySampleBundleInfo();
 
     void CacheStats();

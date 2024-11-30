@@ -477,7 +477,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
         oldVersion = Version_3;
     }
     if (oldVersion < Version_4 && newVersion >= Version_4) {
-        std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_DROI) +
+        std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM) +
                           " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_DEFAULT) + ";";
         ret = ExecSql(sql, nullptr, sqlCallback);
         if (ret != SQLITE_OK) {

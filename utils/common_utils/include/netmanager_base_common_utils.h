@@ -83,10 +83,10 @@ std::string InsertCharBefore(const std::string &input, const char from, const ch
 std::string ReplaceCharacters(const std::string &input);
 bool UrlRegexParse(const std::string &str, const std::string &patternStr);
 uint64_t GenRandomNumber();
-bool IsDroi(const std::string &bundleName);
-bool IsInstallSourceFromDroi(const std::string &installSource);
-bool IsAbroad(const std::string &bundleName);
-bool IsInstallSourceFromAbroad(const std::string &installSource);
+bool IsSim(const std::string &bundleName);
+bool IsInstallSourceFromSim(const std::string &installSource);
+bool IsSim2(const std::string &bundleName);
+bool IsInstallSourceFromSim2(const std::string &installSource);
 
 inline uint64_t GetCurrentSecond()
 {

@@ -85,10 +85,10 @@ std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "
                                           "es",   "in",      "online", "shop", "vip", "club", "xyz",  "top", "icu",
                                           "work", "website", "tech",   "asia", "xin", "co",   "mobi", "info"};
 constexpr const char *BUNDLENAME_DELIMITER = ",";
-constexpr const char *DROI_APP_BUNDLENAME = "com.droi.iapps,com.droi.tong";
-constexpr const char *INSTALL_SOURCE_FROM_DROI = "com.zhuoyi.appstore.lite";
-constexpr const char *CHUJING_APP_BUNDLENAME = "com.easy.abroadHarmony.temp,com.easy.hmos.abroad";
-constexpr const char *INSTALL_SOURCE_FROM_CHUJING = "com.easy.abroad";
+constexpr const char *SIM_APP_BUNDLENAMES = "com.example.sim.tmp,com.example.sim";
+constexpr const char *INSTALL_SOURCE_FROM_SIM = "com.sim.installSource";
+constexpr const char *SIM2_BUNDLENAMES = "com.phony.bundleName.temp,com.phony.bundleName";
+constexpr const char *INSTALL_SOURCE_FROM_SIM2 = "com.phony.installSource";
 std::mutex g_commonUtilsMutex;
 
 std::string Strip(const std::string &str, char ch)
@@ -726,29 +726,29 @@ uint64_t GenRandomNumber()
     return num;
 }
 
-bool IsDroi(const std::string &bundleName)
+bool IsSim(const std::string &bundleName)
 {
-    std::vector<std::string> list = Split(DROI_APP_BUNDLENAME, BUNDLENAME_DELIMITER);
+    std::vector<std::string> list = Split(SIM_APP_BUNDLENAMES, BUNDLENAME_DELIMITER);
     auto findRet =
         std::find_if(list.begin(), list.end(), [&bundleName](const auto &item) { return item == bundleName; });
     return findRet != list.end();
 }
 
-bool IsInstallSourceFromDroi(const std::string &installSource)
+bool IsInstallSourceFromSim(const std::string &installSource)
 {
-    return installSource == INSTALL_SOURCE_FROM_DROI;
+    return installSource == INSTALL_SOURCE_FROM_SIM;
 }
 
-bool IsAbroad(const std::string &bundleName)
+bool IsSim2(const std::string &bundleName)
 {
-    std::vector<std::string> list = Split(CHUJING_APP_BUNDLENAME, BUNDLENAME_DELIMITER);
+    std::vector<std::string> list = Split(SIM2_BUNDLENAMES, BUNDLENAME_DELIMITER);
     auto findRet =
         std::find_if(list.begin(), list.end(), [&bundleName](const auto &item) { return item == bundleName; });
     return findRet != list.end();
 }
 
-bool IsInstallSourceFromAbroad(const std::string &installSource)
+bool IsInstallSourceFromSim2(const std::string &installSource)
 {
-    return installSource == INSTALL_SOURCE_FROM_CHUJING;
+    return installSource == INSTALL_SOURCE_FROM_SIM2;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

@@ -649,8 +649,8 @@ void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
     std::function<void()> uidInstallSourceFunc = [this]() {
         auto tmp = GetSampleBundleInfosForActiveUser();
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
-            if (CommonUtils::IsDroi(iter->second.bundleName_) ||
-                CommonUtils::IsAbroad(iter->second.bundleName_)) {
+            if (CommonUtils::IsSim(iter->second.bundleName_) ||
+                CommonUtils::IsSim2(iter->second.bundleName_)) {
                 netStatsCached_->SetUidSimSampleBundle(iter->first, iter->second);
             }
         }
@@ -663,8 +663,8 @@ void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
 bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 {
     SampleBundleInfo sampleBundleInfo = GetSampleBundleInfoForUid(uid);
-    if (CommonUtils::IsDroi(sampleBundleInfo.bundleName_) ||
-        CommonUtils::IsAbroad(sampleBundleInfo.bundleName_)) {
+    if (CommonUtils::IsSim(sampleBundleInfo.bundleName_) ||
+        CommonUtils::IsSim2(sampleBundleInfo.bundleName_)) {
         uint64_t delay = 0;
         if (netStatsCached_->GetUidSimSampleBundlesSize() == 0) {
             delay = DELAY_US;
