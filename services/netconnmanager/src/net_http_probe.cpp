@@ -177,6 +177,7 @@ void NetHttpProbe::CleanHttpCurl()
             curl_multi_remove_handle(curlMulti_, httpCurl_);
         }
         curl_easy_cleanup(httpCurl_);
+        std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
         httpCurl_ = nullptr;
     }
 
@@ -185,21 +186,25 @@ void NetHttpProbe::CleanHttpCurl()
             curl_multi_remove_handle(curlMulti_, httpsCurl_);
         }
         curl_easy_cleanup(httpsCurl_);
+        std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
         httpsCurl_ = nullptr;
     }
 
     if (httpResolveList_) {
         curl_slist_free_all(httpResolveList_);
+        std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
         httpResolveList_ = nullptr;
     }
 
     if (httpsResolveList_) {
         curl_slist_free_all(httpsResolveList_);
+        std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
         httpsResolveList_ = nullptr;
     }
 
     if (curlMulti_) {
         curl_multi_cleanup(curlMulti_);
+        std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
         curlMulti_ = nullptr;
     }
 }

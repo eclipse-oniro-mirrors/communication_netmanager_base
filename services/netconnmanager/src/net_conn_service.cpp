@@ -148,13 +148,6 @@ bool NetConnService::Init()
 
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
-    SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
-                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-#ifdef FEATURE_SUPPORT_POWERMANAGER
-    SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
-                         [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-#endif
-
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
         NETMGR_LOG_E("Create event runner failed.");
@@ -179,6 +172,7 @@ bool NetConnService::Init()
     }
     AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     NETMGR_LOG_I("Init end");
     return true;
 }
@@ -2671,6 +2665,13 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         if (registerRet != NETMANAGER_SUCCESS) {
             NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }
+    } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+        SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#endif
     }
 }
 
@@ -2930,8 +2931,7 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_
         }
         uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
         if (tmpSupplierId == INVALID_SUPPLIER_ID) {
-            NETMGR_LOG_E("not found supplierId, default supplier id[%{public}d], netId:[%{public}d]",
-                         defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetId());
+            NETMGR_LOG_E("not found supplierId");
             return NETMANAGER_ERR_INVALID_PARAMETER;
         }
     }
