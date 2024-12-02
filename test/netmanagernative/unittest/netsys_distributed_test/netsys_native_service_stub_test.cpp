@@ -510,7 +510,7 @@ public:
         return 0;
     }
 
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker) override
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
     {
         return 0;
     }
@@ -541,6 +541,16 @@ public:
     }
 
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override
+    {
+        return 0;
+    }
+
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override
+    {
+        return 0;
+    }
+
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override
     {
         return 0;
     }

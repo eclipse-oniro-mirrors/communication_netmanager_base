@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr const char *COMMON_EVENT_STATUS_CHANGED = "usual.event.RGM_STATUS_CHANGED";
+}
 class NetPolicyListener : public EventFwk::CommonEventSubscriber {
 public:
     explicit NetPolicyListener(const EventFwk::CommonEventSubscribeInfo &sp,

@@ -1010,12 +1010,11 @@ int32_t NetsysNativeService::DisableWearableDistributedNetForward()
 }
 #endif
 
-int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                    bool isBroker)
+int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     NETNATIVE_LOGI("SetNetworkAccessPolicy");
 
-    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)
@@ -1100,6 +1099,47 @@ int32_t NetsysNativeService::CloseSocketsUid(const std::string &ipAddr, uint32_t
 {
     NETNATIVE_LOGI("CloseSocketsUid uid[%{public}d]", uid);
     return netsysService_->CloseSocketsUid(ipAddr, uid);
+}
+
+int32_t NetsysNativeService::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
+{
+    NETNATIVE_LOGI("SetBrokerUidAccessPolicyMap Enter");
+    if (uidMaps.size() == 0) {
+        return NetManagerStandard::NETSYS_SUCCESS;
+    }
+    BpfMapper<app_uid_key, app_uid_key> brokerUidAccessPolicyMap(BROKER_UID_ACCESS_POLICY_MAP_PATH, BPF_ANY);
+    if (!brokerUidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("invalid map");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    for (auto iter = uidMaps.begin(); iter != uidMaps.end(); ++iter) {
+        app_uid_key k = {0};
+        k = iter->first;
+        app_uid_key v = {0};
+        v = iter->second;
+        auto ret = brokerUidAccessPolicyMap.Write(k, v, BPF_ANY);
+        if (ret < 0) {
+            NETNATIVE_LOGE("Write map err. ret[%{public}d], item[%{public}u, %{public}u]", ret, k, v);
+        }
+    }
+    return NetManagerStandard::NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeService::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    NETNATIVE_LOGI("DelBrokerUidAccessPolicyMap Enter");
+    BpfMapper<app_uid_key, app_uid_key> brokerUidAccessPolicyMap(BROKER_UID_ACCESS_POLICY_MAP_PATH, BPF_F_WRONLY);
+    if (!brokerUidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("invalid map");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    app_uid_key k = uid;
+    auto ret = brokerUidAccessPolicyMap.Delete(uid);
+    if (ret != 0) {
+        NETNATIVE_LOGE("Delete map err. ret[%{public}d]", ret);
+        NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return NetManagerStandard::NETSYS_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS

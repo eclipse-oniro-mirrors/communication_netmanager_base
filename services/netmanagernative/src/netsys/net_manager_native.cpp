@@ -598,10 +598,9 @@ int32_t NetManagerNative::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCa
     return dnsManager_->UnregisterDnsHealthCallback(callback);
 }
 
-int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                 bool isBroker)
+int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
-    return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetManagerNative::DeleteNetworkAccessPolicy(uint32_t uid)
