@@ -54,6 +54,7 @@ ohos_shared_library("netsys_bpf_utils") {
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/include",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
   ]

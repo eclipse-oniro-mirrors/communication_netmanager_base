@@ -23,6 +23,7 @@
 #include <sys/socket.h>
 #include <vector>
 
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_net_dns_result_data.h"
 
@@ -208,7 +209,8 @@ int32_t BitmapManager::InsertIp6SegBitmap(const NetFirewallIpParam &item, Bitmap
     if (item.type == SINGLE_IP) {
         ip6Map->OrInsert(item.ipv6.startIp, static_cast<uint32_t>(item.mask), bitmap);
         std::string addrStr = IpParamParser::Addr6ToStr(item.ipv6.startIp);
-        NETNATIVE_LOG_D("InsertIp6SegBitmap ip, mask[%{public}u]", item.mask);
+        NETNATIVE_LOG_D("InsertIp6SegBitmap ip[%{public}s], mask[%{public}u]",
+            CommonUtils::ToAnonymousIp(addrStr).c_str(), item.mask);
     } else if (item.type == MULTIPLE_IP) {
         std::vector<Ip6Data> ips;
         int32_t ret = IpParamParser::GetIp6AndMask(item.ipv6.startIp, item.ipv6.endIp, ips);
@@ -602,7 +604,8 @@ void IpParamParser::AddIp6(const in6_addr &addr, uint32_t prefixlen, std::vector
     list.emplace_back(info);
 
     std::string startIpStr = IpParamParser::Addr6ToStr(info.data);
-    NETNATIVE_LOG_D("AddIp6 ip, mask[%{public}u]", info.prefixlen);
+    NETNATIVE_LOG_D("AddIp6 ip[%{public}s], mask[%{public}u]",
+        CommonUtils::ToAnonymousIp(startIpStr).c_str(), info.prefixlen);
 }
 
 void IpParamParser::ChangeIp6Start(uint32_t startBit, in6_addr &addr)

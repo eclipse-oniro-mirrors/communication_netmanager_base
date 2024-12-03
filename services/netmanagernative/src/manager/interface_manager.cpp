@@ -187,7 +187,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     }
     auto family = CommonUtils::GetAddrFamily(addr);
     if (family != AF_INET && family != AF_INET6) {
-        NETNATIVE_LOGE("Ivalid ip address");
+        NETNATIVE_LOGE("Ivalid ip address: %{public}s", CommonUtils::ToAnonymousIp(addr).c_str());
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 

@@ -27,6 +27,7 @@
 #include <thread>
 #include <pthread.h>
 #include <unistd.h>
+#include <string>
 
 #include "net_monitor.h"
 #include "dns_config_client.h"
@@ -53,10 +54,16 @@ constexpr int32_t ONE_URL_DETECT_NUM = 2;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 4;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char *SETTINGS_DATASHARE_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
 const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
 const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
 const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
 const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
+const std::string ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
+const std::string ADD_RANDOM_CFG_VALUE = "true";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -75,6 +82,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 {
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
+    GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
 }
 
@@ -244,6 +252,10 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& htt
 
 void NetMonitor::LoadGlobalHttpProxy()
 {
+    if (!CheckIfSettingsDataReady()) {
+        NETMGR_LOG_E("data_share is not ready");
+        return;
+    }
     NetHttpProxyTracker httpProxyTracker;
     httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
 }
@@ -274,6 +286,10 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     if (pos != std::string::npos) {
         pos += HTTP_URL_HEADER.length();
         httpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        if (isNeedSuffix_) {
+            uint64_t ranNum = CommonUtils::GenRandomNumber();
+            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);
+        }
     }
 
     pos = content.find(HTTPS_URL_HEADER);
@@ -296,6 +312,71 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
         " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
         fallbackHttpsUrl_.c_str());
+}
+
+bool NetMonitor::CheckIfSettingsDataReady()
+{
+    if (isDataShareReady_) {
+        return true;
+    }
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("GetSystemAbilityManager failed.");
+        return false;
+    }
+    sptr<IRemoteObject> dataShareSa = saManager->GetSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    if (dataShareSa == nullptr) {
+        NETMGR_LOG_E("Get dataShare SA Failed.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return false;
+    }
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+            DataShare::DataShareHelper::Create(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    NETMGR_LOG_I("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == DataShare::E_OK) {
+        NETMGR_LOG_I("create data_share helper success");
+        auto helper = ret.second;
+        if (helper != nullptr) {
+            bool releaseRet = helper->Release();
+            NETMGR_LOG_I("release data_share helper, releaseRet=%{public}d", releaseRet);
+        }
+        isDataShareReady_ = true;
+        return true;
+    } else if (ret.first == DataShare::E_DATA_SHARE_NOT_READY) {
+        NETMGR_LOG_E("create data_share helper failed");
+        isDataShareReady_ = false;
+        return false;
+    }
+    NETMGR_LOG_E("data_share unknown.");
+    return true;
+}
+void NetMonitor::GetDetectUrlConfig()
+{
+    if (!std::filesystem::exists(DETECT_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", DETECT_CFG_FILE);
+        return;
+    }
+
+    std::ifstream file(DETECT_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(ADD_RANDOM_CFG_PREFIX);
+    if (pos != std::string::npos) {
+        pos += ADD_RANDOM_CFG_PREFIX.length();
+        std::string value = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+        value = CommonUtils::Trim(value);
+        isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;
+    }
+    NETMGR_LOG_I("is need add suffix (%{public}d)", isNeedSuffix_);
 }
 
 } // namespace NetManagerStandard

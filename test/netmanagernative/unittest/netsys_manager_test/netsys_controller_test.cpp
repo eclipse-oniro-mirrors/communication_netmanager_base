@@ -31,6 +31,7 @@
 #include "bpf_path.h"
 #include "common_net_diag_callback_test.h"
 #include "common_netsys_controller_callback_test.h"
+#include "netmanager_base_common_utils.h"
 #include "net_conn_constants.h"
 #include "net_diag_callback_stub.h"
 #include "netnative_log_wrapper.h"
@@ -763,10 +764,10 @@ void ShowSocketInfo(NetsysNative::NetDiagSocketsInfo &info)
 {
     for (const auto &lt : info.netProtoSocketsInfo_) {
         NETNATIVE_LOGI(
-            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s"
-            "state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d"
+            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s localAddr_:%{public}s"
+            "foreignAddr_:%{public}s state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d"
             "sendQueue_:%{public}d inode_:%{public}d ",
-            lt.protocol_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
+            lt.protocol_.c_str(), lt.localAddr_.c_str(), lt.foreignAddr_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
             lt.programName_.c_str(), lt.recvQueue_, lt.sendQueue_, lt.inode_);
     }
 
@@ -827,9 +828,9 @@ HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
     for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
         NETNATIVE_LOGI(
             "ShowSocketInfo  DiagGetInterfaceConfig  ifaceName_:%{public}s linkEncap_:%{public}s"
-            "ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
             "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d",
-            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(),
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), CommonUtils::ToAnonymousIp(lt.ipv4Addr_).c_str(),
             lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
     }
 
@@ -841,9 +842,9 @@ HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
     for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
         NETNATIVE_LOGI(
             "ShowSocketInfo  DiagGetInterfaceConfig ifaceName_:%{public}s linkEncap_:%{public}s"
-            "ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
             "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d ",
-            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(),
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), CommonUtils::ToAnonymousIp(lt.ipv4Addr_).c_str(),
             lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
     }
 }
