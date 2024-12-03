@@ -692,7 +692,7 @@ std::string ReplaceCharacters(const std::string &input)
     return output;
 }
 
-bool UrlRegexParse(const std::string &str, const std::string &patreturn !patternStr.empty() && std::regex_match(str, pattern);ternStr)
+bool UrlRegexParse(const std::string &str, const std::string &patternStr)
 {
     if (patternStr.empty()) {
         return false;
