@@ -32,6 +32,7 @@
 #include <vector>
 #include <numeric>
 #include <fstream>
+#include <random>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -704,5 +705,13 @@ bool UrlRegexParse(const std::string &str, const std::string &patternStr)
     }
     std::regex pattern(ReplaceCharacters(patternStr));
     return !patternStr.empty() && std::regex_match(str, pattern);
+}
+
+uint64_t GenRandomNumber()
+{
+    static std::random_device rd;
+    static std::uniform_int_distribution<uint64_t> dist(0ULL, UINT64_MAX);
+    uint64_t num = dist(rd);
+    return num;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
