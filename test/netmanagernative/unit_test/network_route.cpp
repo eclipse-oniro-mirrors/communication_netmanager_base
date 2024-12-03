@@ -15,6 +15,7 @@
 
 #include "i_netsys_service.h"
 #include "iservice_registry.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 #include "system_ability_definition.h"
@@ -278,10 +279,12 @@ void TestInterfaceSetCfg()
     parcel.ifName = "eth0";
     NETNATIVE_LOGE("ZZZZ:TestInterfaceSetCfg");
     int ret = netsysServiceR_->GetInterfaceConfig(parcel);
+    NETNATIVE_LOGE("before: parcel get ipv4Addr = %{public}s", CommonUtils::ToAnonymousIp(parcel.ipv4Addr).c_str());
     parcel.ipv4Addr = std::string("192.168.55.121");
     ret = netsysServiceR_->SetInterfaceConfig(parcel);
     NETNATIVE_LOGE("SetInterfaceConfig  ret  %{public}d", ret);
     ret = netsysServiceR_->GetInterfaceConfig(parcel);
+    NETNATIVE_LOGE("after: parcel get ipv4Addr = %{public}s", CommonUtils::ToAnonymousIp(parcel.ipv4Addr).c_str());
 }
 
 void TestNetGetProcSysNet()

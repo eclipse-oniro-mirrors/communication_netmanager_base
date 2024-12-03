@@ -71,6 +71,13 @@ ohos_prebuilt_etc("initHosts") {
   subsystem_name = "communication"
 }
 
+## Install detectionconfig.conf to /system/etc
+ohos_prebuilt_etc("detectionconfig.conf") {
+  source = "detectionconfig.conf"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
 ohos_prebuilt_etc("hosts") {
   source = "hosts"
   symlink_path = "../../data/service/el1/network/hosts_user/hosts"

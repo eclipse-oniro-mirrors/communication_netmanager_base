@@ -110,6 +110,7 @@
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
+                    "//foundation/communication/netmanager_base/services/etc/init:detectionconfig.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:initHosts",
                     "//foundation/communication/netmanager_base/services/etc/init:hosts_lnk",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",
@@ -212,7 +213,7 @@
                         ],
                         "header_base": "//foundation/communication/netmanager_base/utils/bundle_utils/include"
                     }
-                }, 
+                },
                 {
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_parcel",
