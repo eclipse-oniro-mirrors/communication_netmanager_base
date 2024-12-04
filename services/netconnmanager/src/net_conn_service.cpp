@@ -730,6 +730,28 @@ void NetConnService::HandlePowerMgrEvent(int code)
 }
 #endif
 
+void NetConnService::HandleScreenEvent(bool isScreenOn)
+{
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        pNetwork->SetScreenState(isScreenOn);
+        if (isScreenOn && pNetSupplier.second->GetNetSupplierType() == BEARER_WIFI &&
+            pNetSupplier.second->HasNetCap(NET_CAPABILITY_PORTAL)) {
+            NETMGR_LOG_I("on receive screen on");
+            if (netConnEventHandler_) {
+                netConnEventHandler_->PostSyncTask([pNetwork]() { pNetwork->StartNetDetection(false); });
+            }
+        }
+    }
+}
+
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
@@ -2676,6 +2698,10 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
 #endif
+        SubscribeCommonEvent("usual.event.SCREEN_ON",
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+        SubscribeCommonEvent("usual.event.SCREEN_OFF",
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
     }
 }
 
@@ -2720,6 +2746,11 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HandlePowerMgrEvent(code);
     }
 #endif
+    if (action == "usual.event.SCREEN_ON") {
+        HandleScreenEvent(true);
+    } else if (action == "usual.event.SCREEN_OFF") {
+        HandleScreenEvent(false);
+    }
 }
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)

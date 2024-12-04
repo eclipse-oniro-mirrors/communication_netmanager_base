@@ -788,5 +788,14 @@ void Network::CloseSocketsUid(uint32_t uid)
         NetsysController::GetInstance().CloseSocketsUid(inetAddr.address_, uid);
     }
 }
+
+void Network::SetScreenState(bool isScreenOn)
+{
+    if (netMonitor_ == nullptr) {
+        NETMGR_LOG_E("netMonitor_ null");
+        return;
+    }
+    netMonitor_->SetScreenState(isScreenOn);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

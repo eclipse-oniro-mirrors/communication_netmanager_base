@@ -39,6 +39,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
+#include "power_mgr_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -48,6 +49,7 @@ constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
+constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 2;
@@ -81,6 +83,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback)
 {
     netBearType_ = bearType;
+    isScreenOn_ = PowerMgr::PowerMgrClient::GetInstance.IsScreenOn();
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -127,7 +130,11 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         result = CAPTIVE_PORTAL_STATE;
     } else if (probeResult.IsNeedPortal()) {
         NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
-        detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
+        if (!isScreenOn_ && netBearType_ == BEARER_WIFI) {
+            detectionDelay_ = SCREENOFF_PORTAL_DETECTION_DELAY_MS;
+        } else {
+            detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
+        }
         result = CAPTIVE_PORTAL_STATE;
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
@@ -378,6 +385,11 @@ bool NetMonitor::CheckIfSettingsDataReady()
     }
     NETMGR_LOG_E("data_share unknown.");
     return true;
+}
+
+void Network::SetScreenState(bool isScreenOn)
+{
+    isScreenOn_ = isScreenOn;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
