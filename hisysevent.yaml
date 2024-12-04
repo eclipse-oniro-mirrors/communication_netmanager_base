@@ -26,6 +26,18 @@ HTTP_PERF:
   TOTAL_TLS_TIME: {type: DOUBLE, desc: total tls time all the successful request}
   TOTAL_FIRST_RECEIVE_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
 
+NET_STACK_HTTP_RESPONSE_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: TOP_APP_HTTP_NET_STACK, preserve: true}
+  PACKAGE_NAME: {type: STRING, desc: package name}
+  TOTAL_DNS_TIME: {type: DOUBLE, arrsize: 10, desc: total dns time of all the successful request}
+  TOTAL_TCP_TIME: {type: DOUBLE, arrsize: 10, desc: total tcp time all the successful request}
+  TOTAL_TLS_TIME: {type: DOUBLE, arrsize: 10, desc: total tls time all the successful request}
+  IP_TYPE: {type: INT8, arrsize: 10, desc: IP type of all the error response}
+  OS_ERR: {type: INT64, arrsize: 10, desc: os error of all the error response}
+  ERROR_CODE: {type: INT32, arrsize: 10, desc: error code of all the error response}
+  TOTAL_FIRST_RECEIVE_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
+  TOTAL_FIRST_SEND_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
+
 NET_CONN_SUPPLER_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: send supplier fault event}
   UPDATE_SUPPLIERID: {type: INT32, desc: update supplier id}
