@@ -123,6 +123,7 @@ ohos_shared_library("net_conn_manager") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
+    "power_manager:powermgr_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

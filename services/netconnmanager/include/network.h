@@ -71,6 +71,7 @@ public:
     bool ResumeNetworkInfo();
     void CloseSocketsUid(uint32_t uid);
     void StopNetDetection();
+    void SetScreenState(bool isScreenOn);
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
 #endif

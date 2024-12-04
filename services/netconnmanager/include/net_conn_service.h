@@ -600,6 +600,7 @@ private:
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
     void HandlePowerMgrEvent(int code);
+    void HandleScreenEvent(bool isScreenOn);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;

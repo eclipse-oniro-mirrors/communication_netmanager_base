@@ -71,7 +71,8 @@
                 "os_account",
                 "libbpf",
                 "elfio",
-                "iptables"
+                "iptables",
+                "power_manager"
             ],
             "third_party": [
                 "curl",

@@ -84,6 +84,12 @@ public:
      */
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
+    /**
+     * Set screen state
+     *
+     */
+    void SetScreenState(bool isScreenOn);
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -117,6 +123,7 @@ private:
     std::mutex proxyMtx_;
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
+    bool isScreenOn_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
