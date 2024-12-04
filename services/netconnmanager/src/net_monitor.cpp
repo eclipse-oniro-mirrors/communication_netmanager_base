@@ -387,7 +387,7 @@ bool NetMonitor::CheckIfSettingsDataReady()
     return true;
 }
 
-void Network::SetScreenState(bool isScreenOn)
+void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
 }
