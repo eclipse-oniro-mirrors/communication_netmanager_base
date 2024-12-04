@@ -83,7 +83,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback)
 {
     netBearType_ = bearType;
-    isScreenOn_ = PowerMgr::PowerMgrClient::GetInstance.IsScreenOn();
+    isScreenOn_ = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
