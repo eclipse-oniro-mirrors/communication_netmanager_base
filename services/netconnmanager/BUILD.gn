@@ -123,7 +123,6 @@ ohos_shared_library("net_conn_manager") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
-    "power_manager:powermgr_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -148,6 +147,11 @@ ohos_shared_library("net_conn_manager") {
 
   if (netmanager_base_feature_support_powermanager) {
     defines += [ "FEATURE_SUPPORT_POWERMANAGER" ]
+  }
+
+  if (netmanager_base_enable_power_manager) {
+    external_deps += [ "power_manager:powermgr_client" ]
+    defines += [ "NETMANAGER_BASE_POWER_MANAGER_ENABLE" ]
   }
 
   external_deps += [ "hilog:libhilog" ]
@@ -221,7 +225,6 @@ ohos_static_library("net_conn_manager_static") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
-    "power_manager:powermgr_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -240,6 +243,11 @@ ohos_static_library("net_conn_manager_static") {
     defines += [ "SYS_FUNC" ]
   }
 
+  if (netmanager_base_enable_power_manager) {
+    external_deps += [ "power_manager:powermgr_client" ]
+    defines += [ "NETMANAGER_BASE_POWER_MANAGER_ENABLE" ]
+  }
+ 
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

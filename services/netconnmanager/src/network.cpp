@@ -789,6 +789,7 @@ void Network::CloseSocketsUid(uint32_t uid)
     }
 }
 
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 void Network::SetScreenState(bool isScreenOn)
 {
     if (netMonitor_ == nullptr) {
@@ -797,5 +798,6 @@ void Network::SetScreenState(bool isScreenOn)
     }
     netMonitor_->SetScreenState(isScreenOn);
 }
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

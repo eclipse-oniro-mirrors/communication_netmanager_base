@@ -730,6 +730,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
 }
 #endif
 
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 void NetConnService::HandleScreenEvent(bool isScreenOn)
 {
     for (const auto& pNetSupplier : netSuppliers_) {
@@ -752,6 +753,7 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
         }
     }
 }
+#endif
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
@@ -2699,10 +2701,12 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
 #endif
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
         SubscribeCommonEvent("usual.event.SCREEN_ON",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
         SubscribeCommonEvent("usual.event.SCREEN_OFF",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+#endif
     }
 }
 
@@ -2747,11 +2751,13 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HandlePowerMgrEvent(code);
     }
 #endif
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
     if (action == "usual.event.SCREEN_ON") {
         HandleScreenEvent(true);
     } else if (action == "usual.event.SCREEN_OFF") {
         HandleScreenEvent(false);
     }
+#endif
 }
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
