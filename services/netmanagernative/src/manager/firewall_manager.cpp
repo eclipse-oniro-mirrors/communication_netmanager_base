@@ -42,6 +42,13 @@ bool SetFireWallCommand(const std::string &chainName, std::string command)
     command = "-t filter -A " + chainName + " -p tcp --tcp-flags RST RST -j RETURN";
     ret = ret ||
           (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) == NETMANAGER_ERROR);
+    // provisional release ns/na pkg
+    command = "-t filter -A " + chainName + " -p icmpv6 --icmpv6-type 135 -j RETURN";
+    ret = ret ||
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV6, command) == NETMANAGER_ERROR);
+    command = "-t filter -A " + chainName + " -p icmpv6 --icmpv6-type 136 -j RETURN";
+    ret = ret ||
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV6, command) == NETMANAGER_ERROR);
     return ret;
 }
 } // namespace
