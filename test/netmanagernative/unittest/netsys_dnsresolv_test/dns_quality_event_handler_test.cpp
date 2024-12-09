@@ -60,4 +60,24 @@ HWTEST_F(DnsQualityEventHandlerTest, ProcessEvent_ShouldCallHandleEvent_WhenEven
         pMockHandler->ProcessEvent(event);
     }
 }
+
+HWTEST_F(DnsQualityEventHandlerTest, ProcessEvent_ShouldHandleEvent_WhenEventIsNotNull, TestSize.Level0)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(DNS_DIAG_WORK_THREAD);
+    DnsQualityEventHandler *dnsQualityEventHandler = new DnsQualityEventHandler(runner);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    dnsQualityEventHandler->ProcessEvent(event);
+    EXPECT_NE(event.get(), nullptr);
+}
+
+HWTEST_F(DnsQualityEventHandlerTest, ProcessEvent_ShouldNotHandleEvent_WhenEventIsNull, TestSize.Level0)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(DNS_DIAG_WORK_THREAD);
+    DnsQualityEventHandler *dnsQualityEventHandler = new DnsQualityEventHandler(runner);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    event.reset();
+    dnsQualityEventHandler->ProcessEvent(event);
+    EXPECT_EQ(event.get(), nullptr);
+}
+
 }  // namespace OHOS::nmd

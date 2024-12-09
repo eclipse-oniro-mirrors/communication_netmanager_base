@@ -56,3 +56,45 @@ bool ReadBool(bool value)
     return true;
 }
 }  // namespace OHOS::NetsysNative
+
+namespace OHOS::NetManagerStandard {
+bool Parcel::WriteBool(bool value)
+{
+    return true;
+}
+
+bool Parcel::WriteString(const std::string &value)
+{
+    return true;
+}
+
+bool Parcel::WriteUint16(uint16_t value)
+{
+    return true;
+}
+
+bool Parcel::WriteUint32(uint32_t value)
+{
+    return true;
+}
+
+bool ReadUint32(uint32_t value)
+{
+    return true;
+}
+
+bool ReadString(const std::string &value)
+{
+    return true;
+}
+
+bool ReadUint16(uint16_t value)
+{
+    return true;
+}
+
+bool ReadBool(bool value)
+{
+    return true;
+}
+}  // namespace OHOS::NetManagerStandard

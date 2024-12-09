@@ -99,7 +99,7 @@ HWTEST_F(DnsQualityDiagTest, ParseReportAddr_ShouldNotAddMoreThanMaxSize_WhenCal
     EXPECT_EQ(returnCode, 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
 {
     uint16_t netId = 1;
     uint16_t uid = 1;
@@ -112,6 +112,39 @@ HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldReturnZero_WhenCalled, TestSi
     AddrInfo addrinfo;
     EXPECT_EQ(dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo),
               0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
+{
+    uint16_t netId = 1;
+    uint16_t uid = 1;
+    uint32_t pid = 1;
+    int32_t usedtime = 1;
+    char name[] = "test";
+    uint32_t size = 1;
+    int32_t failreason = 1;
+    QueryParam queryParam;
+    AddrInfo addrinfo;
+    EXPECT_EQ(dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo),
+              0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldIgnore_WhenQueryTypeIsOne, TestSize.Level0)
+{
+    uint16_t netId = 1;
+    uint16_t uid = 1;
+    uint32_t pid = 1;
+    int32_t usedtime = 100;
+    char name[] = "test";
+    uint32_t size = 10;
+    int32_t failreason = 0;
+    QueryParam queryParam;
+    queryParam.type = 1;
+    AddrInfo addrinfo;
+
+    int32_t result =
+        dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo);
+    EXPECT_EQ(result, 0);
 }
 
 HWTEST_F(DnsQualityDiagTest, RegisterResultListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
@@ -150,26 +183,90 @@ HWTEST_F(DnsQualityDiagTest, query_default_host_ShouldReturnZero_WhenCalled, Tes
     EXPECT_EQ(dnsQualityDiag.query_default_host(), 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, handle_dns_loop_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, handle_dns_loop_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
 {
+    dnsQualityDiag.handler_started = false;
     EXPECT_EQ(dnsQualityDiag.handle_dns_loop(), 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, handle_dns_fail_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, handle_dns_loop_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
 {
+    dnsQualityDiag.handler_started = true;
+    EXPECT_EQ(dnsQualityDiag.handle_dns_loop(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, handle_dns_fail_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = false;
     EXPECT_EQ(dnsQualityDiag.handle_dns_fail(), 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, handle_dns_fail_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
 {
+    dnsQualityDiag.handler_started = true;
+    EXPECT_EQ(dnsQualityDiag.handle_dns_fail(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = false;
     EXPECT_EQ(dnsQualityDiag.send_dns_report(), 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = true;
+    EXPECT_EQ(dnsQualityDiag.send_dns_report(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_03, TestSize.Level0)
 {
     std::shared_ptr<NetsysNative::NetDnsResultReport> report;
     report = std::make_shared<NetsysNative::NetDnsResultReport>();
     EXPECT_EQ(dnsQualityDiag.add_dns_report(report), 0);
+    EXPECT_TRUE(dnsQualityDiag.report_.size() > 0);
+
+    dnsQualityDiag.handler_started = true;
+    EXPECT_EQ(dnsQualityDiag.send_dns_report(), 0);
+    EXPECT_EQ(dnsQualityDiag.report_.size(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    std::shared_ptr<NetsysNative::NetDnsResultReport> report;
+    report = std::make_shared<NetsysNative::NetDnsResultReport>();
+    EXPECT_EQ(dnsQualityDiag.add_dns_report(report), 0);
+    EXPECT_EQ(dnsQualityDiag.report_.size(), 1);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
+{
+    std::shared_ptr<NetsysNative::NetDnsResultReport> report = nullptr;
+    EXPECT_EQ(dnsQualityDiag.add_dns_report(report), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldNotAddReport_WhenReportListIsFull, TestSize.Level0)
+{
+    for (int i = 0; i < MAX_RESULT_SIZE; i++) {
+        std::shared_ptr<NetsysNative::NetDnsResultReport> report = std::make_shared<NetsysNative::NetDnsResultReport>();
+        dnsQualityDiag.add_dns_report(report);
+    }
+    std::shared_ptr<NetsysNative::NetDnsResultReport> report = std::make_shared<NetsysNative::NetDnsResultReport>();
+    int32_t result = dnsQualityDiag.add_dns_report(report);
+    ASSERT_EQ(result, 0);
+    ASSERT_EQ(dnsQualityDiag.report_.size(), MAX_RESULT_SIZE);
+
+    uint16_t netId = 1;
+    uint16_t uid = 1;
+    uint32_t pid = 1;
+    int32_t usedtime = 1;
+    char name[] = "test";
+    uint32_t size = 1;
+    int32_t failreason = 1;
+    QueryParam queryParam;
+    AddrInfo addrinfo;
+    EXPECT_EQ(dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo),
+              0);
 }
 
 HWTEST_F(DnsQualityDiagTest, load_query_addr_ShouldReturnZero_WhenCalled, TestSize.Level0)
@@ -178,9 +275,38 @@ HWTEST_F(DnsQualityDiagTest, load_query_addr_ShouldReturnZero_WhenCalled, TestSi
     EXPECT_EQ(dnsQualityDiag.load_query_addr(defaultAddr), 0);
 }
 
-HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled, TestSize.Level0)
+HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
 {
+    dnsQualityDiag.handler_started = false;
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    EXPECT_EQ(dnsQualityDiag.HandleEvent(event), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = true;
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP);
+    EXPECT_EQ(dnsQualityDiag.HandleEvent(event), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled_03, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = true;
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_QUERY_FAIL);
+    EXPECT_EQ(dnsQualityDiag.HandleEvent(event), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled_04, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = true;
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP);
+    EXPECT_EQ(dnsQualityDiag.HandleEvent(event), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, HandleEvent_ShouldReturnZero_WhenCalled_05, TestSize.Level0)
+{
+    dnsQualityDiag.handler_started = true;
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT);
     EXPECT_EQ(dnsQualityDiag.HandleEvent(event), 0);
 }
 
