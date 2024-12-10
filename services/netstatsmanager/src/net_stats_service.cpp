@@ -53,6 +53,9 @@ constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
+constexpr const char* COMMON_EVENT_STATUS = "usual.event.RGM_STATUS_CHANGED";
+constexpr const char* STATUS_FIELD = "rgmStatus";
+const std::string STATUS_UNLOCKED = "rgm_user_unlocked";
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -111,6 +114,7 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN);
+    matchingSkills.AddEvent(COMMON_EVENT_STATUS);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
@@ -129,6 +133,14 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             NETMGR_LOG_D("Net Manager add uid, uid:[%{public}d]", uid);
             return CommonEventPackageAdded(uid);
         });
+    subscriber_->RegisterStatsCallback(COMMON_EVENT_STATUS, [this](const EventFwk::Want &want) {
+        std::string status = want.GetStringParam(STATUS_FIELD);
+        NETMGR_LOG_I("Net Manager status changed, status:[%{public}s]", status.c_str());
+        if (status == STATUS_UNLOCKED) {
+            RefreshUidStatsFlag(0);
+        }
+        return true;
+    });
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
 
