@@ -35,8 +35,6 @@ NET_STACK_HTTP_RESPONSE_ERROR:
   IP_TYPE: {type: INT8, arrsize: 10, desc: IP type of all the error response}
   OS_ERR: {type: INT64, arrsize: 10, desc: os error of all the error response}
   ERROR_CODE: {type: INT32, arrsize: 10, desc: error code of all the error response}
-  TOTAL_FIRST_RECEIVE_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
-  TOTAL_FIRST_SEND_TIME: {type: DOUBLE, desc: total first receive time of all the successful request}
 
 NET_CONN_SUPPLER_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: send supplier fault event}
