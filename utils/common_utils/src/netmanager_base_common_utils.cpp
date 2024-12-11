@@ -403,6 +403,15 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
+std::string AnonymizeIptablesCommand(const std::string &command)
+{
+    std::string temp{command};
+    std::transform(temp.cbegin(), temp.cend(), temp.begin(), [](char c) {
+        return std::isdigit(c) ? 'x' : c;
+    });
+    return temp;
+}
+
 int32_t StrToInt(const std::string &value, int32_t defaultErr)
 {
     errno = 0;
@@ -521,12 +530,21 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     _exit(-1);
 }
 
-struct ParentProcessHelper {
-    std::atomic_bool waitDoneFlag = false;
-    std::atomic<pid_t> ret = 0;
-    std::mutex parentMutex;
-    std::condition_variable parentCv;
-};
+void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPid, std::string *out)
+{
+    int status = 0;
+    helper->ret.store(waitpid(childPid, &status, 0));
+    helper->waitDoneFlag = true;
+    helper->parentCv.notify_all();
+    NETMGR_LOG_D("waitpid %{public}d done", childPid);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        // child process abnormal exit
+        NETMGR_LOG_E("child process abnormal exit, status:%{public}d", status);
+        if (out != nullptr) {
+            NETMGR_LOG_E("out : %{public}s", AnonymizeIptablesCommand(*out).c_str());
+        }
+    }
+}
 
 int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childPid, std::string *out)
 {
@@ -554,11 +572,8 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     }
     auto helper = std::make_shared<ParentProcessHelper>();
     std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
-    auto parentThread = std::thread([helper, childPid]() {
-        helper->ret.store(waitpid(childPid, nullptr, 0));
-        helper->waitDoneFlag = true;
-        helper->parentCv.notify_all();
-        NETMGR_LOG_D("waitpid %{public}d done", childPid);
+    auto parentThread = std::thread([helper, childPid, out]() {
+        ParentWaitThread(helper, childPid, out);
     });
 #ifndef CROSS_PLATFORM
     pthread_setname_np(parentThread.native_handle(), "ExecParentThread");

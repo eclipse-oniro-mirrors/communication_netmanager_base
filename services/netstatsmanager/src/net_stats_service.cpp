@@ -133,7 +133,7 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
             NETMGR_LOG_D("Net Manager add uid, uid:[%{public}d]", uid);
             return CommonEventPackageAdded(uid);
         });
-    subscriber_->RegisterStatsCallback(COMMON_EVENT_STATUS, [this](const EventFwk::Want &want) {
+    subscriber_->RegisterStatsCallback(COMMON_EVENT_STATUS, [this](const EventFwk::Want &want) -> bool {
         std::string status = want.GetStringParam(STATUS_FIELD);
         NETMGR_LOG_I("Net Manager status changed, status:[%{public}s]", status.c_str());
         if (status == STATUS_UNLOCKED) {

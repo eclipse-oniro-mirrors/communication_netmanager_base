@@ -44,7 +44,7 @@ static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 fa
     return ret;
 }
 
-static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
+static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
     __u8 offset = dns_qry_off;
@@ -65,7 +65,7 @@ static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u
     return offset;
 }
 
-static __always_inline __u16 parse_queries(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
+static __always_inline __u16 parse_queries(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
     __u16 offset = parse_queries_name(skb, dns_qry_off, key_data, key_len);
@@ -78,7 +78,7 @@ static __always_inline __u16 parse_queries(const struct __sk_buff *skb, __u16 dn
     return offset;
 }
 
-static __always_inline domain_value get_current_uid(const struct __sk_buff *skb)
+static __always_inline domain_value get_current_uid(struct __sk_buff *skb)
 {
     if (skb == NULL) {
         return DEFAULT_USER_ID;
@@ -88,7 +88,7 @@ static __always_inline domain_value get_current_uid(const struct __sk_buff *skb)
     return get_user_id(sock_uid);
 }
 
-static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
+static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
 {
     __u16 type;
     __u16 str_len;
@@ -130,7 +130,7 @@ static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dn
     return offset;
 }
 
-static __always_inline bool match_domain_uid(const struct __sk_buff *skb, const domain_value *value)
+static __always_inline bool match_domain_uid(struct __sk_buff *skb, const domain_value *value)
 {
     if (skb == NULL || value == NULL) {
         return false;
@@ -142,7 +142,7 @@ static __always_inline bool match_domain_uid(const struct __sk_buff *skb, const 
     return false;
 }
 
-static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
+static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
 {
     if (qu_num == 1) {
         __u16 res;
@@ -163,7 +163,7 @@ static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 d
     return 0;
 }
 
-static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
+static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
     __u16 as_num)
 {
     __u16 offset;
@@ -212,7 +212,7 @@ static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u
     return 0;
 }
 
-static __always_inline enum sk_action match_dns_query(const struct __sk_buff *skb)
+static __always_inline enum sk_action match_dns_query(struct __sk_buff *skb)
 {
     if (!skb) {
         return SK_PASS;
