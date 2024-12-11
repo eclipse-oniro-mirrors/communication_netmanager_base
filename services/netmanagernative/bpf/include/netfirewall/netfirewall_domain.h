@@ -25,9 +25,21 @@
 #include "netfirewall_types.h"
 #include "netfirewall_utils.h"
 
-static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 family, const domain_value value)
+static __always_inline __u32 get_current_uid(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return DEFAULT_USER_ID;
+    }
+    __u32 sock_uid = bpf_get_socket_uid(skb);
+    return get_user_id(sock_uid);
+}
+
+static __always_inline bool add_domain_cache(struct __sk_buff *skb, const __u8 *payload, const __u32 family)
 {
     bool ret = false;
+    struct domain_value value = { 0 };
+    value.appuid = bpf_get_socket_uid(skb);
+    value.uid = get_current_uid(skb);
     if (family == AF_INET) {
         struct ipv4_lpm_key lpm_key = {
             .prefixlen = IPV4_MAX_PREFIXLEN,
@@ -78,16 +90,6 @@ static __always_inline __u16 parse_queries(struct __sk_buff *skb, __u16 dns_qry_
     return offset;
 }
 
-static __always_inline domain_value get_current_uid(struct __sk_buff *skb)
-{
-    if (skb == NULL) {
-        return DEFAULT_USER_ID;
-    }
-
-    __u32 sock_uid = bpf_get_socket_uid(skb);
-    return get_user_id(sock_uid);
-}
-
 static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
 {
     __u16 type;
@@ -116,13 +118,13 @@ static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_
         __u32 addr;
         bpf_skb_load_bytes(skb, offset, &addr, sizeof(__u32));
         if (save_ip) {
-            add_domain_cache((__u8*)&addr, AF_INET, get_current_uid(skb));
+            add_domain_cache(skb, (__u8*)&addr, AF_INET);
         }
     } else if (type == DNS_QRS_IPV6_TYPE && str_len == DNS_QRS_IPV6_LEN) {
         ip6_key ip6_addr;
         bpf_skb_load_bytes(skb, offset, &ip6_addr, sizeof(ip6_key));
         if (save_ip) {
-            add_domain_cache((__u8*)&ip6_addr, AF_INET6, get_current_uid(skb));
+            add_domain_cache(skb, (__u8*)&ip6_addr, AF_INET6);
         }
     }
     offset += str_len;
@@ -130,13 +132,14 @@ static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_
     return offset;
 }
 
-static __always_inline bool match_domain_uid(struct __sk_buff *skb, const domain_value *value)
+static __always_inline bool match_domain_value(struct __sk_buff *skb, const struct domain_value *value)
 {
     if (skb == NULL || value == NULL) {
         return false;
     }
 
-    if (*value == get_current_uid(skb)) {
+    if (value->uid == get_current_uid(skb) &&
+        (value->appuid == bpf_get_socket_uid(skb) || value->appuid == 0)) {
         return true;
     }
     return false;
@@ -154,9 +157,9 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
             return 0;
         }
 
-        domain_value *deny_uid = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
 
-        if (deny_uid != NULL && match_domain_uid(skb, deny_uid)) {
+        if (deny_value != NULL && match_domain_value(skb, deny_value)) {
             return 1;
         }
     }
@@ -178,20 +181,20 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
             return 0;
         }
 
-        domain_value *deny_uid = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (deny_uid != NULL && match_domain_uid(skb, deny_uid)) {
+        struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if (deny_value != NULL && match_domain_value(skb, deny_value)) {
             return 1;
         }
 
-        domain_value *allow_uid = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        domain_value current_uid = get_current_uid(skb);
+        struct domain_value *allow_value = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        __u32 current_uid = get_current_uid(skb);
         struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &current_uid);
         enum sk_action sk_act = SK_PASS;
         if (default_value) {
             sk_act = default_value->outaction;
         }
 
-        if ((allow_uid != NULL && match_domain_uid(skb, allow_uid)) && (sk_act == SK_DROP)) {
+        if ((allow_value != NULL && match_domain_value(skb, allow_value)) && (sk_act == SK_DROP)) {
             is_in_pass = 1;
             log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         } else {

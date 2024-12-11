@@ -327,12 +327,13 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
         NETNATIVE_LOGE("SetFirewallDomainRules: rules is empty");
         return NETFIREWALL_ERR;
     }
-    DomainValue domainVaule = 0;
+    DomainValue domainVaule = { 0 };
     bool isWildcard = false;
     ClearDomainRules();
     int ret = 0;
     for (const auto &rule : ruleList) {
-        domainVaule = (DomainValue)rule->userId;
+        domainVaule.uid = rule->userId;
+        domainVaule.appuid = rule->appUid;
         for (const auto &param : rule->domains) {
             if (param.isWildcard) {
                 isWildcard = true;
@@ -375,8 +376,8 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
 int32_t NetsysBpfNetFirewall::SetBpfFirewallDomainRules(FirewallRuleAction action, DomainHashKey &key,
     DomainValue value, bool isWildcard)
 {
-    NETNATIVE_LOG_D("SetBpfFirewallDomainRules: action=%{public}d, value=%{public}d, is=%{public}d",
-        (action == FirewallRuleAction::RULE_ALLOW), value, isWildcard);
+    NETNATIVE_LOG_D("SetBpfFirewallDomainRules: action=%{public}d, userid=%{public}d appuid=%{public}d",
+        (action == FirewallRuleAction::RULE_ALLOW), value.uid, value.appuid);
     int32_t ret = 0;
     if (action == FirewallRuleAction::RULE_ALLOW) {
         ret = WriteBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
@@ -391,7 +392,7 @@ void NetsysBpfNetFirewall::ClearDomainRules()
     NETNATIVE_LOG_D("ClearDomainRules");
     ClearDomainCache();
     DomainHashKey key = { 0 };
-    DomainValue value;
+    DomainValue value = { 0 };
     ClearBpfMap(MAP_PATH(DOMAIN_PASS_MAP), key, value);
     ClearBpfMap(MAP_PATH(DOMAIN_DENY_MAP), key, value);
 }
@@ -857,7 +858,7 @@ int32_t NetsysBpfNetFirewall::LoadSystemAbility(int32_t systemAbilityId)
 void NetsysBpfNetFirewall::AddDomainCache(const NetAddrInfo &addrInfo)
 {
     NETNATIVE_LOGI("AddDomainCache");
-    domain_value value = 1;
+    domain_value value = { 0 };
     if (addrInfo.aiFamily == AF_INET) {
         Ipv4LpmKey key = { 0 };
         key.prefixlen = IPV4_MAX_PREFIXLEN;
@@ -876,7 +877,7 @@ void NetsysBpfNetFirewall::ClearDomainCache()
     NETNATIVE_LOG_D("ClearDomainCache");
     Ipv4LpmKey ip4Key = {};
     Ipv6LpmKey ip6Key = {};
-    domain_value value;
+    domain_value value { 0 };
     ClearBpfMap(MAP_PATH(DOMAIN_IPV4_MAP), ip4Key, value);
     ClearBpfMap(MAP_PATH(DOMAIN_IPV6_MAP), ip6Key, value);
 }
