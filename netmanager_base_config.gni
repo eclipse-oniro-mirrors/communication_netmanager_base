@@ -67,8 +67,8 @@ declare_args() {
   netmanager_base_enable_feature_hosts = false
   netmanager_base_enable_public_dns_server = false
   netmanager_base_enable_power_manager = true
-  if (define(global_parts_info) &&
-      !define(global_parts_info.powermgr_power_manager)) {
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.powermgr_power_manager)) {
     netmanager_base_enable_power_manager = false;
   }
 }
