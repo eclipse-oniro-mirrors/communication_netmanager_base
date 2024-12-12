@@ -117,6 +117,7 @@ enum class NetworkProtocol {
     IPSEC_ESP = 50, // Encap Security Payload [RFC2406]
     IPSEC_AH = 51,  // Authentication Header [RFC2402]
     L2TP = 115,     // Layer Two Tunneling Protocol [RFC2661]
+    SAT_EXPAK = 64, // SATNET and Backroom EXPAK
 };
 
 // Firewall IP parameters
