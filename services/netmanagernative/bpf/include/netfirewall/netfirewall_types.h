@@ -39,6 +39,7 @@
 #define DNS_QRS_IPV6_LEN 16
 #define DNS_DOMAIN_LEN 253
 #define DNS_ANSWER_CNT 32
+#define PROTOCOL_SAT_EXPAK 64
 
 struct bitmap {
     __u32 val[BITMAP_LEN];
@@ -131,6 +132,7 @@ struct match_tuple {
     __u32 appuid;
     __u32 uid;
     __u16 rst;
+    __u32 ifindex;
 };
 
 
@@ -144,6 +146,7 @@ struct event {
     __u32 len;
 };
 
+typedef __u8 loop_back_val;
 typedef __be32 ip4_key;
 typedef struct in6_addr ip6_key;
 typedef __u8 action_key;
