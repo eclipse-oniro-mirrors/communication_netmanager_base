@@ -20,6 +20,7 @@
 #include "bundle_mgr_proxy.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -114,6 +115,83 @@ std::optional<int32_t> NetBundleImpl::ObtainTargetApiVersionForSelf()
     auto targetApiVersion = bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD;
     NETMGR_LOG_I("Got target API version %{public}d.", targetApiVersion);
     return targetApiVersion;
+}
+
+std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> NetBundleImpl::ObtainBundleInfoForActive()
+{
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("ObtainBundleInfoForActive Failed to get bundle manager proxy.");
+        return std::nullopt;
+    }
+    int32_t userId;
+    if (GetActivatedOsAccountId(userId) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ObtainBundleInfoForActive Failed to get userid.");
+        return std::nullopt;
+    }
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    auto ret = bundleMgrProxy->GetBundleInfosV9(static_cast<int32_t>(flags), bundleInfos, userId);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("ObtainBundleInfoForUid Failed GetBundleInfo. ret[%{public}d] userId[%{public}d]", ret,
+                     userId);
+        return std::nullopt;
+    }
+    std::unordered_map<uint32_t, SampleBundleInfo> result;
+    for (const auto &bundleInfo : bundleInfos) {
+        result.insert(
+            std::make_pair(static_cast<uint32_t>(bundleInfo.applicationInfo.uid),
+                           SampleBundleInfo{static_cast<uint32_t>(bundleInfo.applicationInfo.uid),
+                                            bundleInfo.applicationInfo.bundleName,
+                                            bundleInfo.applicationInfo.installSource, bundleInfo.installTime}));
+    }
+    return result;
+}
+
+std::optional<SampleBundleInfo> NetBundleImpl::ObtainBundleInfoForUid(uint32_t uid)
+{
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("ObtainBundleInfoForUid Failed to get bundle manager proxy.");
+        return std::nullopt;
+    }
+    std::string bundleName;
+    if (bundleMgrProxy->GetNameForUid(uid, bundleName) != ERR_OK) {
+        NETMGR_LOG_E("ObtainBundleInfoForUid Failed to GetBundleName. uid[%{public}u]", uid);
+        return std::nullopt;
+    }
+    int32_t userId;
+    if (GetActivatedOsAccountId(userId) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ObtainBundleInfoForUid Failed to GetUserId.");
+        return std::nullopt;
+    }
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    AppExecFwk::BundleInfo bundleInfo;
+    auto ret = bundleMgrProxy->GetBundleInfoV9(bundleName, static_cast<int32_t>(flags), bundleInfo, userId);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("ObtainBundleInfoForUid Failed. ret[%{public}d] userId[%{public}d], bundleName[%{public}s]", ret,
+                     userId, bundleName.c_str());
+        return std::nullopt;
+    }
+    return SampleBundleInfo{bundleInfo.applicationInfo.uid, bundleInfo.applicationInfo.bundleName,
+                            bundleInfo.applicationInfo.installSource, bundleInfo.installTime};
+}
+
+int32_t NetBundleImpl::GetActivatedOsAccountId(int32_t &userId)
+{
+    std::vector<int32_t> activatedOsAccountIds;
+    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activatedOsAccountIds);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds failed. ret is %{public}d", ret);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (activatedOsAccountIds.empty()) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds is empty");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    userId = activatedOsAccountIds[0];
+    NETMGR_LOG_I("QueryActiveOsAccountIds is %{public}d", userId);
+    return NETMANAGER_SUCCESS;
 }
 
 INetBundle *GetNetBundle()

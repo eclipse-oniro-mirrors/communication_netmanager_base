@@ -173,6 +173,8 @@ private:
     int32_t CmdProcessVpnStage(MessageParcel &data, MessageParcel &reply);
 #endif // SUPPORT_SYSVPN
     int32_t CmdCloseSocketsUid(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

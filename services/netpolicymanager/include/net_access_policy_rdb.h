@@ -38,7 +38,6 @@ namespace NetAccessPolicyRdbFiledConst {
     constexpr int32_t FILED_COLUMN_INDEX_ONE = 1;
     constexpr int32_t FILED_COLUMN_INDEX_TWO = 2;
     constexpr int32_t FILED_COLUMN_INDEX_THREE = 3;
-    constexpr int32_t FILED_COLUMN_INDEX_FOUR = 4;
 }
 
 typedef struct NetAccessPolicyData {
@@ -46,7 +45,6 @@ typedef struct NetAccessPolicyData {
     int32_t wifiPolicy;
     int32_t cellularPolicy;
     int32_t setFromConfigFlag;
-    int32_t isBroker;
 }NetAccessPolicyData;
 
 class NetAccessPolicyRDB {

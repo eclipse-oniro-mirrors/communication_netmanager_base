@@ -420,6 +420,7 @@ public:
     bool IsPinOpenMode(const std::string &hostname);
     bool TrustUser0Ca();
     bool TrustUserCa();
+    bool IsUserDnsCache();
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);

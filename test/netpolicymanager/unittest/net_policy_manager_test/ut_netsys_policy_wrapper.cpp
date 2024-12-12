@@ -148,8 +148,7 @@ HWTEST_F(NetsysPolicyWrapperTest, SetNetworkAccessPolicyTest001, TestSize.Level1
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 

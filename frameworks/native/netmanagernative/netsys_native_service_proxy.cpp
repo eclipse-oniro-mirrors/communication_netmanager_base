@@ -30,6 +30,7 @@ namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
+static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -1249,6 +1250,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
         return ret;
     }
     vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_SIZE ? MAX_INTERFACE_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -2752,12 +2754,16 @@ int32_t NetsysNativeServiceProxy::SetFirewallRules(NetFirewallRuleType type,
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeServiceProxy::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction in=%{public}d out=%{public}d", inDefault,
-                   outDefault);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::SetFirewallDefaultAction uid=%{public}d in=%{public}d out=%{public}d",
+        userId, inDefault, outDefault);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(static_cast<int32_t>(inDefault))) {
@@ -2983,8 +2989,7 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                         bool isBroker)
+int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     NETNATIVE_LOGI("SetNetworkAccessPolicy");
     MessageParcel data;
@@ -3008,9 +3013,6 @@ int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAc
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteBool(isBroker)) {
-        return ERR_FLATTEN_OBJECT;
-    }
     MessageParcel reply;
     MessageOption option;
     int result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY),
@@ -3267,5 +3269,75 @@ int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode 
     return result;
 }
 #endif // SUPPORT_SYSVPN
+
+int32_t NetsysNativeServiceProxy::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t count = static_cast<uint32_t>(uidMaps.size());
+    if (count == 0) {
+        NETNATIVE_LOGW("param is empty.");
+        return NetManagerStandard::NETSYS_SUCCESS;
+    }
+    if (!data.WriteUint32(count)) {
+        NETNATIVE_LOGE("Write count failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto iter = uidMaps.begin(); iter != uidMaps.end(); iter++) {
+        if (!data.WriteUint32(iter->first) || !data.WriteUint32(iter->second)) {
+            NETNATIVE_LOGE("Write param item failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_BROKER_UID_NETWORK_POLICY), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("SetBrokerUidAccessPolicyMap proxy sendRequest failed. code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("Read result failed.");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceProxy::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        NETNATIVE_LOGE("Write uid failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_BROKER_UID_NETWORK_POLICY), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("DelBrokerUidAccessPolicyMap proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("Read result failed.");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
 } // namespace NetsysNative
 } // namespace OHOS

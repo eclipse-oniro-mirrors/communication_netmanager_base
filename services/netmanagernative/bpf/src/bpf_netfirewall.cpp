@@ -238,12 +238,17 @@ int32_t NetsysBpfNetFirewall::ClearFirewallRules(NetFirewallRuleType type)
             ClearDomainRules();
             break;
         }
+        case NetFirewallRuleType::RULE_DEFAULT_ACTION: {
+            ClearFirewallDefaultAction();
+            break;
+        }
         case NetFirewallRuleType::RULE_ALL: {
             firewallIpRules_.clear();
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_IN);
             ClearBpfFirewallRules(NetFirewallRuleDirection::RULE_OUT);
             firewallDomainRules_.clear();
             ClearDomainRules();
+            ClearFirewallDefaultAction();
             break;
         }
         default:
@@ -327,11 +332,7 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
     ClearDomainRules();
     int ret = 0;
     for (const auto &rule : ruleList) {
-        if (rule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
-            domainVaule = 1;
-        } else {
-            domainVaule = 0;
-        }
+        domainVaule = (DomainValue)rule->userId;
         for (const auto &param : rule->domains) {
             if (param.isWildcard) {
                 isWildcard = true;
@@ -361,7 +362,7 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
 
     int i = 0;
     for (auto &s : v) {
-        int strLen = s.length();
+        int strLen = static_cast<int>(s.length());
         out.data[i++] = (uint8_t)strLen;
         if (memcpy_s(out.data + i, DNS_DOMAIN_LEN - i, (uint8_t *)s.c_str(), strLen) != EOK) {
             NETNATIVE_LOGE("GetDomainHashKey: memcpy_s failed");
@@ -423,19 +424,24 @@ int32_t NetsysBpfNetFirewall::SetFirewallIpRules(const std::vector<sptr<NetFirew
     return ret;
 }
 
-int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+void NetsysBpfNetFirewall::ClearFirewallDefaultAction()
+{
+    defalut_action_value val = { SK_PASS };
+    int32_t userId = -1;
+    ClearBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
+}
+
+int32_t NetsysBpfNetFirewall::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     if (!isBpfLoaded_) {
         NETNATIVE_LOGE("SetFirewallDefaultAction: bpf not loaded");
         return NETFIREWALL_ERR;
     }
-    DefaultActionKey key = DEFAULT_ACT_IN_KEY;
-    enum sk_action val = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
-    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
-
-    key = DEFAULT_ACT_OUT_KEY;
-    val = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
-    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), key, val);
+    defalut_action_value val = { SK_PASS };
+    val.inaction = (inDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
+    val.outaction = (outDefault == FirewallRuleAction::RULE_ALLOW) ? SK_PASS : SK_DROP;
+    WriteBpfMap(MAP_PATH(DEFAULT_ACTION_MAP), (uid_key)userId, val);
     CtKey ctKey;
     CtVaule ctVal;
     ClearBpfMap(MAP_PATH(CT_MAP), ctKey, ctVal);
@@ -776,7 +782,8 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
             NETNATIVE_LOG_D("egress match domain, action PASS");
             break;
         case DBG_MATCH_DOMAIN_ACTION:
-            NETNATIVE_LOG_D("%{public}s domain action: %{public}s", direction, (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
+            NETNATIVE_LOG_D("%{public}s match domain action: %{public}s", direction,
+                (ev->arg1 == SK_PASS ? "PASS" : "DROP"));
             break;
         default:
             break;

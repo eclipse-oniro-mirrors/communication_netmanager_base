@@ -20,13 +20,13 @@
 #include <linux/udp.h>
 
 #include "netfirewall_event.h"
+#include "netfirewall_match.h"
 #include "netfirewall_map.h"
 #include "netfirewall_types.h"
 #include "netfirewall_utils.h"
 
-static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 family)
+static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 family, const domain_value value)
 {
-    domain_value value = 1;
     bool ret = false;
     if (family == AF_INET) {
         struct ipv4_lpm_key lpm_key = {
@@ -44,7 +44,7 @@ static __always_inline bool add_domain_cache(const __u8 *payload, const __u32 fa
     return ret;
 }
 
-static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
+static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
     __u8 offset = dns_qry_off;
@@ -65,7 +65,7 @@ static __always_inline __u16 parse_queries_name(const struct __sk_buff *skb, __u
     return offset;
 }
 
-static __always_inline __u16 parse_queries(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
+static __always_inline __u16 parse_queries(struct __sk_buff *skb, __u16 dns_qry_off, __u8 *key_data,
     __u16 *key_len)
 {
     __u16 offset = parse_queries_name(skb, dns_qry_off, key_data, key_len);
@@ -78,7 +78,17 @@ static __always_inline __u16 parse_queries(const struct __sk_buff *skb, __u16 dn
     return offset;
 }
 
-static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
+static __always_inline domain_value get_current_uid(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return DEFAULT_USER_ID;
+    }
+
+    __u32 sock_uid = bpf_get_socket_uid(skb);
+    return get_user_id(sock_uid);
+}
+
+static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
 {
     __u16 type;
     __u16 str_len;
@@ -106,13 +116,13 @@ static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dn
         __u32 addr;
         bpf_skb_load_bytes(skb, offset, &addr, sizeof(__u32));
         if (save_ip) {
-            add_domain_cache((__u8*)&addr, AF_INET);
+            add_domain_cache((__u8*)&addr, AF_INET, get_current_uid(skb));
         }
     } else if (type == DNS_QRS_IPV6_TYPE && str_len == DNS_QRS_IPV6_LEN) {
         ip6_key ip6_addr;
         bpf_skb_load_bytes(skb, offset, &ip6_addr, sizeof(ip6_key));
         if (save_ip) {
-            add_domain_cache((__u8*)&ip6_addr, AF_INET6);
+            add_domain_cache((__u8*)&ip6_addr, AF_INET6, get_current_uid(skb));
         }
     }
     offset += str_len;
@@ -120,7 +130,19 @@ static __always_inline __u16 parse_answers(const struct __sk_buff *skb, __u16 dn
     return offset;
 }
 
-static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
+static __always_inline bool match_domain_uid(struct __sk_buff *skb, const domain_value *value)
+{
+    if (skb == NULL || value == NULL) {
+        return false;
+    }
+
+    if (*value == get_current_uid(skb)) {
+        return true;
+    }
+    return false;
+}
+
+static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
 {
     if (qu_num == 1) {
         __u16 res;
@@ -132,15 +154,16 @@ static __always_inline __u8 parse_dns_query(const struct __sk_buff *skb, __u16 d
             return 0;
         }
 
-        domain_value *deny_action = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (deny_action != NULL) {
+        domain_value *deny_uid = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+
+        if (deny_uid != NULL && match_domain_uid(skb, deny_uid)) {
             return 1;
         }
     }
     return 0;
 }
 
-static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
+static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
     __u16 as_num)
 {
     __u16 offset;
@@ -155,18 +178,22 @@ static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u
             return 0;
         }
 
-        domain_value *deny_action = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (deny_action) {
+        domain_value *deny_uid = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if (deny_uid != NULL && match_domain_uid(skb, deny_uid)) {
             return 1;
         }
 
-        domain_value *allow_action = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        default_action_key default_key = DEFAULT_ACT_OUT_KEY;
-        enum sk_action *default_action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &default_key);
-        enum sk_action sk_act = default_action ? *default_action : SK_PASS;
+        domain_value *allow_uid = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        domain_value current_uid = get_current_uid(skb);
+        struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &current_uid);
+        enum sk_action sk_act = SK_PASS;
+        if (default_value) {
+            sk_act = default_value->outaction;
+        }
 
-        if ((allow_action != NULL) && (sk_act == SK_DROP)) {
+        if ((allow_uid != NULL && match_domain_uid(skb, allow_uid)) && (sk_act == SK_DROP)) {
             is_in_pass = 1;
+            log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         } else {
             return 0;
         }
@@ -185,7 +212,7 @@ static __always_inline __u16 parse_dns_response(const struct __sk_buff *skb, __u
     return 0;
 }
 
-static __always_inline enum sk_action match_dns_query(const struct __sk_buff *skb)
+static __always_inline enum sk_action match_dns_query(struct __sk_buff *skb)
 {
     if (!skb) {
         return SK_PASS;
@@ -233,7 +260,6 @@ static __always_inline enum sk_action match_dns_query(const struct __sk_buff *sk
                 log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_DROP);
                 return SK_DROP;
             }
-            log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         }
         return SK_PASS;
     }

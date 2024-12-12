@@ -1388,13 +1388,11 @@ void CmdSetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
     netAccessPolicy.wifiAllow = NetSysGetData<bool>();
     netAccessPolicy.cellularAllow = NetSysGetData<bool>();
     bool reconfirmFlag = NetSysGetData<bool>();
-    bool isBroker = NetSysGetData<bool>();
 
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint8(netAccessPolicy.wifiAllow);
     dataParcel.WriteUint8(netAccessPolicy.cellularAllow);
     dataParcel.WriteBool(reconfirmFlag);
-    dataParcel.WriteBool(isBroker);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY),
                     dataParcel);
 }

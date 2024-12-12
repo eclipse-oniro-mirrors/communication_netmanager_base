@@ -31,6 +31,7 @@ namespace {
 const uint8_t *g_baseBranchFuzzData = nullptr;
 size_t g_baseBranchFuzzSize = 0;
 size_t g_baseBranchFuzzPos;
+constexpr int TWO = 2;
 constexpr size_t STR_LEN = 10;
 } // namespace
 
@@ -85,6 +86,8 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     std::string host = GetStringFromData(STR_LEN);
     HttpProxy httpProxy = {host, 0, {}};
     NetLinkInfo info;
+    std::string ifaceName = std::string(reinterpret_cast<const char*>(data), size);
+    info.ifaceName_ = ifaceName;
     instance_->UpdateNetLinkInfo(info);
     instance_->UpdateGlobalHttpProxy(httpProxy);
     std::string httpUrl = GetStringFromData(STR_LEN);
@@ -118,9 +121,9 @@ void NetPolicyRuleBranchFuzzTest(const uint8_t *data, size_t size)
     if (data == nullptr) {
         return;
     }
+    bool isForeground = (static_cast<int>(data[0]) % TWO) ? true : false;
     std::shared_ptr<NetPolicyRule> netPolicyRule = std::make_shared<NetPolicyRule>();
     uint32_t testId = GetNetBranchFuzzData<uint32_t>();
-    bool isForeground = GetNetBranchFuzzData<bool>();
     netPolicyRule->UpdateForegroundUidList(testId, isForeground);
     std::string message = GetStringFromData(STR_LEN);
     netPolicyRule->GetDumpMessage(message);

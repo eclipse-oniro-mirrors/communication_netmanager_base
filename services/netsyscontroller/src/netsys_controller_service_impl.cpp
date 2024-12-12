@@ -830,11 +830,11 @@ int32_t NetsysControllerServiceImpl::SetFirewallRules(NetFirewallRuleType type,
     return netsysClient_.SetFirewallRules(type, ruleList, isFinish);
 }
 
-int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(FirewallRuleAction inDefault,
+int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
                                                               FirewallRuleAction outDefault)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallDefaultAction");
-    return netsysClient_.SetFirewallDefaultAction(inDefault, outDefault);
+    return netsysClient_.SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysControllerServiceImpl::SetFirewallCurrentUserId(int32_t userId)
@@ -891,9 +891,9 @@ int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceN
 }
 
 int32_t NetsysControllerServiceImpl::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy,
-                                                            bool reconfirmFlag, bool isBroker)
+                                                            bool reconfirmFlag)
 {
-    return netsysClient_.SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    return netsysClient_.SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetsysControllerServiceImpl::DeleteNetworkAccessPolicy(uint32_t uid)
@@ -945,6 +945,18 @@ int32_t NetsysControllerServiceImpl::CloseSocketsUid(const std::string &ipAddr, 
         return mockNetsysClient_.CloseSocketsUid(ipAddr, uid);
     }
     return netsysClient_.CloseSocketsUid(ipAddr, uid);
+}
+
+int32_t NetsysControllerServiceImpl::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
+{
+    NETMGR_LOG_I("SetBrokerUidAccessPolicyMap Enter. size[%{public}zu]", uidMaps.size());
+    return netsysClient_.SetBrokerUidAccessPolicyMap(uidMaps);
+}
+
+int32_t NetsysControllerServiceImpl::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    NETMGR_LOG_I("DelBrokerUidAccessPolicyMap Enter. uid[%{public}u]", uid);
+    return netsysClient_.DelBrokerUidAccessPolicyMap(uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,6 +21,7 @@
 #include <vector>
 
 namespace OHOS::NetManagerStandard {
+constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 10;
 constexpr uint32_t INVALID_NET_ID = 0;
 constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
@@ -30,8 +31,19 @@ inline bool IsInternalNetId(int32_t netId)
 {
     return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
 }
+
+inline uint32_t ConvertTableByNetId(int32_t netId, uint32_t table)
+{
+    return IsInternalNetId(netId) ? table % ROUTE_INTERNAL_DEFAULT_TABLE + 1 : table;
+}
 }
 namespace OHOS::NetManagerStandard::CommonUtils {
+struct ParentProcessHelper {
+    std::atomic_bool waitDoneFlag = false;
+    std::atomic<pid_t> ret = 0;
+    std::mutex parentMutex;
+    std::condition_variable parentCv;
+};
 inline std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -62,6 +74,7 @@ int32_t Ipv6PrefixLen(const std::string &ip);
 bool ParseInt(const std::string &str, int32_t *value);
 int64_t ConvertToInt64(const std::string &str);
 std::string ToAnonymousIp(const std::string &input);
+std::string AnonymizeIptablesCommand(const std::string &command);
 int32_t StrToInt(const std::string &value, int32_t defaultErr = -1);
 uint32_t StrToUint(const std::string &value, uint32_t defaultErr = 0);
 bool StrToBool(const std::string &value, bool defaultErr = false);
@@ -69,6 +82,7 @@ int64_t StrToLong(const std::string &value, int64_t defaultErr = -1);
 uint64_t StrToUint64(const std::string &value, uint64_t defaultErr = 0);
 bool CheckIfaceName(const std::string &name);
 int32_t ForkExec(const std::string &command, std::string *out = nullptr);
+void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPid, std::string *out);
 bool IsValidDomain(const std::string &domain);
 bool HasInternetPermission();
 std::string Trim(const std::string &str);
@@ -77,6 +91,10 @@ std::string InsertCharBefore(const std::string &input, const char from, const ch
 std::string ReplaceCharacters(const std::string &input);
 bool UrlRegexParse(const std::string &str, const std::string &patternStr);
 uint64_t GenRandomNumber();
+bool IsSim(const std::string &bundleName);
+bool IsInstallSourceFromSim(const std::string &installSource);
+bool IsSim2(const std::string &bundleName);
+bool IsInstallSourceFromSim2(const std::string &installSource);
 
 inline uint64_t GetCurrentSecond()
 {

@@ -24,6 +24,7 @@
 #include "system_ability.h"
 #include "system_ability_definition.h"
 
+#include "net_bundle.h"
 #include "net_policy_callback.h"
 #include "net_policy_event_handler.h"
 #include "net_policy_firewall.h"
@@ -262,6 +263,9 @@ public:
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 
+    void SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid);
+    void DelBrokerUidAccessPolicyMap(uint32_t uid);
+
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -271,11 +275,12 @@ private:
     int32_t GetDumpMessage(std::string &message);
 
     void OnNetSysRestart();
+    void ResetNetAccessPolicy();
     void UpdateNetAccessPolicyToMapFromDB();
-    bool CheckNetworkAccessIsBroker(uint32_t uid);
     void OverwriteNetAccessPolicyToDBFromConfig();
     void UpdateNetworkAccessPolicyFromConfig(const std::string &bundleName, NetworkAccessPolicy &policy);
     int32_t GetActivatedOsAccountId(int32_t &userId);
+    std::unordered_map<uint32_t, SampleBundleInfo> GetSampleBundleInfosForActiveUser();
 
 private:
     enum ServiceRunningState {

@@ -41,6 +41,12 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace CommonUtils {
+std::string ToAnonymousIp(const std::string &input)
+{
+    return input;
+}
+}
 namespace {
 using namespace testing::ext;
 static constexpr const char *IFACE = "test0";
@@ -1087,8 +1093,7 @@ HWTEST_F(NetsysControllerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    int32_t ret = NetsysController::GetInstance().SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = NetsysController::GetInstance().SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -1129,6 +1134,27 @@ HWTEST_F(NetsysControllerTest, CloseSocketsUid001, TestSize.Level1)
     uint32_t uid = 1000;
     int32_t result = NetsysController::GetInstance().CloseSocketsUid(ipAddr, uid);
     EXPECT_EQ(result, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = NetsysController::GetInstance().SetBrokerUidAccessPolicyMap(params);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID_32, TEST_UID_32);
+    int32_t ret = NetsysController::GetInstance().SetBrokerUidAccessPolicyMap(params);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(TEST_UID_32);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

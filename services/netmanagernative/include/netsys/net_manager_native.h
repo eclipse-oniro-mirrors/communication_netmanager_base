@@ -155,7 +155,7 @@ public:
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
     int32_t DisableWearableDistributedNetForward();
 #endif
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t ClearFirewallAllRules();

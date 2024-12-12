@@ -770,8 +770,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Le
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -796,6 +795,27 @@ HWTEST_F(NetsysControllerServiceImplTest, CloseSocketsUid001, TestSize.Level1)
     uint32_t uid = 1000;
     int32_t result = instance_->CloseSocketsUid(ipAddr, uid);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID, TEST_UID);
+    int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

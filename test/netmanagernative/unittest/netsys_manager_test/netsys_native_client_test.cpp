@@ -42,6 +42,7 @@ static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,5
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
+static constexpr uint32_t TEST_UID = 1;
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
 const int32_t IFACEFD = 5;
@@ -422,8 +423,7 @@ HWTEST_F(NetsysNativeClientTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    int32_t ret = nativeClient_.SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = nativeClient_.SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -447,6 +447,27 @@ HWTEST_F(NetsysNativeClientTest, CloseSocketsUid001, TestSize.Level1)
     std::string ipAddr = "";
     uint32_t uid = 1000;
     int32_t ret = nativeClient_.CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = nativeClient_.SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID, TEST_UID);
+    int32_t ret = nativeClient_.SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    int32_t ret = nativeClient_.DelBrokerUidAccessPolicyMap(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

@@ -319,6 +319,10 @@ void NetsysNativeServiceStub::InitNetVirnicInterfaceMap()
         &NetsysNativeServiceStub::CmdDisableDistributedNet;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLOSE_SOCKETS_UID)] =
         &NetsysNativeServiceStub::CmdCloseSocketsUid;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_BROKER_UID_NETWORK_POLICY)] =
+        &NetsysNativeServiceStub::CmdDelBrokerUidAccessPolicyMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_BROKER_UID_NETWORK_POLICY)] =
+        &NetsysNativeServiceStub::CmdSetBrokerUidAccessPolicyMap;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -1905,6 +1909,11 @@ int32_t NetsysNativeServiceStub::CmdSetFirewallRules(MessageParcel &data, Messag
 int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("NetsysNativeServiceStub::CmdSetFirewallDefaultAction");
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        NETNATIVE_LOGE("Read userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     int32_t inDefault = 0;
     if (!data.ReadInt32(inDefault)) {
         NETNATIVE_LOGE("Read inDefault failed");
@@ -1915,7 +1924,7 @@ int32_t NetsysNativeServiceStub::CmdSetFirewallDefaultAction(MessageParcel &data
         NETNATIVE_LOGE("Read outDefault failed");
         return ERR_FLATTEN_OBJECT;
     }
-    return SetFirewallDefaultAction(static_cast<FirewallRuleAction>(inDefault),
+    return SetFirewallDefaultAction(userId, static_cast<FirewallRuleAction>(inDefault),
                                     static_cast<FirewallRuleAction>(outDefault));
 }
 
@@ -2028,16 +2037,11 @@ int32_t NetsysNativeServiceStub::CmdSetNetworkAccessPolicy(MessageParcel &data, 
         NETNATIVE_LOGE("Read bool failed");
         return ERR_FLATTEN_OBJECT;
     }
-    bool isBroker = true;
-    if (!data.ReadBool(isBroker)) {
-        NETNATIVE_LOGE("Read bool failed");
-        return ERR_FLATTEN_OBJECT;
-    }
 
     NetworkAccessPolicy policy;
     policy.wifiAllow = wifi_allow;
     policy.cellularAllow = cellular_allow;
-    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
     reply.WriteInt32(result);
     return result;
 }
@@ -2209,6 +2213,51 @@ int32_t NetsysNativeServiceStub::CmdCloseSocketsUid(MessageParcel &data, Message
     int32_t result = CloseSocketsUid(ipAddr, uid);
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    uint32_t count = 0;
+    if (!data.ReadUint32(count)) {
+        NETNATIVE_LOGE("Read count failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (count > UINT16_MAX) {
+        NETNATIVE_LOGE("count too big");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t key = 0;
+    uint32_t value = 0;
+    for (uint32_t i = 0; i < count; i++) {
+        if (!data.ReadUint32(key) || !data.ReadUint32(value)) {
+            NETNATIVE_LOGE("Read param failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+        params.emplace(key, value);
+    }
+    int32_t result = SetBrokerUidAccessPolicyMap(params);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uid failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DelBrokerUidAccessPolicyMap(uid);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NETSYS_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS

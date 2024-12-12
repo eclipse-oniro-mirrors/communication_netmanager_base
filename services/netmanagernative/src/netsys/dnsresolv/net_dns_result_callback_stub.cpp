@@ -19,6 +19,7 @@
 
 namespace OHOS {
 namespace NetsysNative {
+static constexpr int32_t MAX_SIZE = 65535;
 NetDnsResultCallbackStub::NetDnsResultCallbackStub()
 {
     memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT)] =
@@ -53,7 +54,7 @@ int32_t NetDnsResultCallbackStub::CmdDnsResultReport(MessageParcel &data, Messag
     std::list<NetDnsResultReport> dnsResultReport;
 
     uint32_t size = data.ReadUint32();
-    
+    size = size > MAX_SIZE ? MAX_SIZE : size;
     for (uint32_t i = 0; i < size; ++i) {
         NetDnsResultReport report;
         if (!NetDnsResultReport::Unmarshalling(data, report)) {

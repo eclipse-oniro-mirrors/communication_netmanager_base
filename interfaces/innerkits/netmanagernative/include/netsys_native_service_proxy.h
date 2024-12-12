@@ -140,7 +140,8 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                              bool isFinish) override;
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+                                     FirewallRuleAction outDefault) override;
     int32_t SetFirewallCurrentUserId(int32_t userId) override;
     int32_t ClearFirewallRules(NetFirewallRuleType type) override;
     int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
@@ -150,8 +151,7 @@ public:
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) override;
     int32_t DisableWearableDistributedNetForward() override;
 #endif
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                   bool isBroker) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
@@ -165,6 +165,8 @@ public:
 #ifdef SUPPORT_SYSVPN
     int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override;
 #endif // SUPPORT_SYSVPN
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

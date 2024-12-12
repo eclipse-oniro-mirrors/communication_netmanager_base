@@ -125,11 +125,10 @@ int32_t NetsysPolicyWrapper::FirewallEnableChain(uint32_t chain, bool enable)
     return netsysReturnValue;
 }
 
-int32_t NetsysPolicyWrapper::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                    bool isBroker)
+int32_t NetsysPolicyWrapper::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     auto netsysReturnValue =
-        NetsysController::GetInstance().SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+        NetsysController::GetInstance().SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
     NETMGR_LOG_D(
         "SetNetworkAccessPolicy uid[%{public}u] policy wifi_enable[%{public}d] and cellular_enable[%{public}d] "
         "netsys return[%{public}d]",

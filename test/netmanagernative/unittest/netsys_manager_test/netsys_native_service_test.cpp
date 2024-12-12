@@ -178,7 +178,8 @@ HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
     int32_t ret = instance_->SetInterfaceMtu(testName, mtu);
     EXPECT_NE(ret, 0);
     std::string eth0Name = "eth0";
-    auto ifaceList = NetsysController::GetInstance().InterfaceGetList();
+    std::vector<std::string> ifaceList;
+    instance_->InterfaceGetList(ifaceList);
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), eth0Name) == ifaceList.end();
     if (eth0NotExist) {
         return;
@@ -802,8 +803,7 @@ HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -844,6 +844,27 @@ HWTEST_F(NetsysNativeServiceTest, CloseSocketsUid001, TestSize.Level1)
     uint32_t uid = 1000;
     int32_t ret = instance_->CloseSocketsUid(ipAddr, uid);
     EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID, TEST_UID);
+    int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

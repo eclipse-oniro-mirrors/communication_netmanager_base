@@ -22,6 +22,7 @@
 
 #include "bundle_constants.h"
 #include "bundle_mgr_proxy.h"
+#include "ffrt_inner.h"
 #include "iservice_registry.h"
 #include "net_access_policy_config.h"
 #include "net_manager_center.h"
@@ -34,6 +35,7 @@
 #include "net_policy_inner_define.h"
 #include "net_quota_policy.h"
 #include "net_settings.h"
+#include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
 #include "system_ability_definition.h"
 #include "net_policy_listener.h"
@@ -50,6 +52,9 @@ using GetNetBundleClass = OHOS::NetManagerStandard::INetAccessPolicyDialog *(*)(
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
+constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
+constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -129,6 +134,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
 void NetPolicyService::Init()
 {
     NETMGR_LOG_D("Init");
+    AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     ffrtQueue_.submit(
@@ -140,7 +146,6 @@ void NetPolicyService::Init()
             netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
             netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
             netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
-            RegisterFactoryResetCallback();
             NetAccessPolicyRDB netAccessPolicy;
             netAccessPolicy.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
@@ -148,6 +153,8 @@ void NetPolicyService::Init()
                 NETMGR_LOG_E("Register to sa manager failed");
             }
         }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
+    ffrtQueue_.submit([this]() { SetBrokerUidAccessPolicyMap(std::nullopt); },
+                      ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
@@ -386,27 +393,35 @@ int32_t NetPolicyService::CheckPermission()
 void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETMGR_LOG_I("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        RegisterFactoryResetCallback();
+    }
+    if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        ffrtQueue_.submit([this]() { SetBrokerUidAccessPolicyMap(std::nullopt); },
+                          ffrt::task_attr().name("SetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
+
+        EventFwk::MatchingSkills matchingSkills;
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+        matchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
+        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+        subscribeInfo.SetPriority(1);
+        std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
+            subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+
+        ffrtQueue_.submit(
+            [this]() {
+                OverwriteNetAccessPolicyToDBFromConfig();
+                UpdateNetAccessPolicyToMapFromDB();
+            },
+            ffrt::task_attr().name("NetworkAccessPolicyConfigFlush"));
+    }
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
             OnNetSysRestart();
             hasSARemoved_ = false;
         }
     }
-    if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-        ffrtQueue_.submit([this]() {
-            OverwriteNetAccessPolicyToDBFromConfig();
-            UpdateNetAccessPolicyToMapFromDB();
-        });
-    }
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    subscribeInfo.SetPriority(1);
-    std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
-        subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
-
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
 }
 
 void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
@@ -433,6 +448,7 @@ int32_t NetPolicyService::FactoryResetPolicies()
         netPolicyRule_->ResetPolicies();
         netPolicyFirewall_->ResetPolicies();
         netPolicyTraffic_->ResetPolicies();
+        ResetNetAccessPolicy();
         NETMGR_LOG_I("FactoryResetPolicies end.");
         return NETMANAGER_SUCCESS;
     }
@@ -462,7 +478,7 @@ void NetPolicyService::RegisterFactoryResetCallback()
 
 int32_t NetPolicyService::RefreshNetworkAccessPolicyFromConfig()
 {
-    NETMGR_LOG_I("smh:RefreshNetworkAccessPolicyFromConfigs enter.");
+    NETMGR_LOG_I("RefreshNetworkAccessPolicyFromConfigs Enter.");
     OverwriteNetAccessPolicyToDBFromConfig();
     UpdateNetAccessPolicyToMapFromDB();
     return NETMANAGER_SUCCESS;
@@ -509,7 +525,6 @@ void NetPolicyService::OverwriteNetAccessPolicyToDBFromConfig()
         policyData.setFromConfigFlag = 0;
         if (ret != NETMANAGER_SUCCESS) {
             policyData.uid = uid;
-            policyData.isBroker = CheckNetworkAccessIsBroker(uid);
             netAccessPolicyRdb.InsertData(policyData);
             continue;
         }
@@ -543,8 +558,26 @@ void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
         policy.cellularAllow = result[i].cellularPolicy;
-        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag,
-                                                     result[i].isBroker);
+        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
+    }
+}
+
+void NetPolicyService::ResetNetAccessPolicy()
+{
+    NETMGR_LOG_I("ResetNetAccessPolicy enter.");
+    NetAccessPolicyRDB netAccessPolicyRdb;
+    std::vector<NetAccessPolicyData> result = netAccessPolicyRdb.QueryAll();
+    for (size_t i = 0; i < result.size(); i++) {
+        if (result[i].wifiPolicy && result[i].cellularPolicy) {
+            continue;
+        }
+        result[i].wifiPolicy = 1;
+        result[i].cellularPolicy = 1;
+        netAccessPolicyRdb.UpdateByUid(result[i].uid, result[i]);
+        NetworkAccessPolicy policy;
+        policy.wifiAllow = result[i].wifiPolicy;
+        policy.cellularAllow = result[i].cellularPolicy;
+        (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
     }
 }
 
@@ -557,17 +590,15 @@ int32_t NetPolicyService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPoli
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    bool isBroker = CheckNetworkAccessIsBroker(uid);
     NetAccessPolicyData data;
     data.uid = uid;
     data.wifiPolicy = policy.wifiAllow;
     data.cellularPolicy = policy.cellularAllow;
     data.setFromConfigFlag = !reconfirmFlag;
-    data.isBroker = isBroker;
     NetAccessPolicyRDB netAccessPolicy;
     netAccessPolicy.InsertData(data);
 
-    return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag, isBroker);
+    return netPolicyRule_->SetNetworkAccessPolicy(uid, policy, !reconfirmFlag);
 }
 
 int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave &policy)
@@ -670,35 +701,97 @@ int32_t NetPolicyService::NotifyNetAccessPolicyDiag(uint32_t uid)
     return NETMANAGER_SUCCESS;
 }
 
-bool NetPolicyService::CheckNetworkAccessIsBroker(uint32_t uid)
+int32_t NetPolicyService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
-    NETMGR_LOG_I("CheckNetworkAccessIsBroker");
-
-    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        NETMGR_LOG_E("fail to get system ability mgr.");
-        return false;
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        NETMGR_LOG_E("fail to get bundle manager proxy.");
-        return false;
-    }
+    return netPolicyRule_->PolicySetNicTrafficAllowed(ifaceNames, status);
+}
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-    if (bundleMgrProxy == nullptr) {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
-        return false;
+void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
+{
+    NETMGR_LOG_I("SetBrokerUidAccessPolicyMap Enter. uid[%{public}u]", uid.has_value() ? uid.value() : 0);
+    std::unordered_map<uint32_t, SampleBundleInfo> sampleBundleInfos = GetSampleBundleInfosForActiveUser();
+    if (sampleBundleInfos.empty()) {
+        NETMGR_LOG_W("bundleInfos is empty");
+        return;
     }
+    auto uidFindRet = std::find_if(sampleBundleInfos.begin(), sampleBundleInfos.end(),
+                                   [uid](const auto &item) { return uid.has_value() && uid == item.second.uid_; });
+    auto simFindRet = std::find_if(sampleBundleInfos.begin(), sampleBundleInfos.end(),
+                                   [](const auto &item) { return CommonUtils::IsSim(item.second.bundleName_); });
+    auto sim2FindRet = std::find_if(sampleBundleInfos.begin(), sampleBundleInfos.end(),
+                                    [](const auto &item) { return CommonUtils::IsSim2(item.second.bundleName_); });
+    NETMGR_LOG_I("SetBrokerUidAccessPolicyMap findRet[%{public}d, %{public}d], uidBundleName[%{public}s]",
+                 simFindRet != sampleBundleInfos.end(), sim2FindRet != sampleBundleInfos.end(),
+                 uidFindRet != sampleBundleInfos.end() ? uidFindRet->second.bundleName_.c_str() : "");
+    std::unordered_map<uint32_t, uint32_t> params;
+    if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid()) {
+        params.emplace(UINT16_MAX, simFindRet->second.uid_);
+    }
+    for (auto iter = sampleBundleInfos.begin(); iter != sampleBundleInfos.end(); iter++) {
+        if (uid.has_value() && uidFindRet != sampleBundleInfos.end() &&
+            !CommonUtils::IsSim(uidFindRet->second.bundleName_) &&
+            !CommonUtils::IsSim2(uidFindRet->second.bundleName_) && uid.value() != iter->first) {
+            continue;
+        }
+        if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid() &&
+            (CommonUtils::IsInstallSourceFromSim(iter->second.installSource_) ||
+             iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
+            params.emplace(iter->second.uid_, simFindRet->second.uid_);
+            continue;
+        }
+        if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
+            CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
+            params.emplace(iter->second.uid_, sim2FindRet->second.uid_);
+            continue;
+        }
+    }
+    auto ret = NetsysController::GetInstance().SetBrokerUidAccessPolicyMap(params);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("SetBrokerUidAccessPolicyMap failed.");
+    }
+}
 
-    std::string bundleName = "";
-    bundleMgrProxy->GetBundleNameForUid(uid, bundleName);
-    if (bundleName == "myappliction.apps" || bundleName == "myappliction1.apps") {
-        NETMGR_LOG_D("BundleName is myappliction.");
-        return true;
+void NetPolicyService::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    NETMGR_LOG_I("DelBrokerUidAccessPolicyMap Enter");
+    auto ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(uid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DelBrokerUidAccessPolicyMap failed.");
     }
-    return false;
+}
+
+std::unordered_map<uint32_t, SampleBundleInfo> NetPolicyService::GetSampleBundleInfosForActiveUser()
+{
+    void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
+        NETMGR_LOG_E("load lib failed, reason : %{public}s", dlerror());
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    using GetNetBundleClass = INetBundle *(*)();
+    auto getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle failed, reason : %{public}s", dlerror());
+        dlclose(handler);
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler);
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> result = netBundle->ObtainBundleInfoForActive();
+    dlclose(handler);
+    if (!result.has_value()) {
+        NETMGR_LOG_W("ObtainBundleInfoForActive is nullopt");
+        return std::unordered_map<uint32_t, SampleBundleInfo>{};
+    }
+    return result.value();
 }
 
 void NetPolicyService::UpdateNetworkAccessPolicyFromConfig(const std::string &bundleName, NetworkAccessPolicy &policy)
@@ -715,16 +808,6 @@ void NetPolicyService::UpdateNetworkAccessPolicyFromConfig(const std::string &bu
     }
     policy.wifiSwitchDisable = policyConfig->disableWlanSwitch;
     policy.cellularSwitchDisable = policyConfig->disableCellularSwitch;
-}
-
-int32_t NetPolicyService::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
-{
-    if (netPolicyRule_ == nullptr) {
-        NETMGR_LOG_E("netPolicyRule_ is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    return netPolicyRule_->PolicySetNicTrafficAllowed(ifaceNames, status);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
