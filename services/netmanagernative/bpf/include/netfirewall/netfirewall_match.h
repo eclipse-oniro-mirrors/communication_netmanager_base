@@ -352,7 +352,7 @@ static __always_inline bool MatchDomain(const struct match_tuple *tuple)
     if (!tuple || tuple->dir == INGRESS) {
         return false;
     }
-    domain_value *result = NULL;
+    struct domain_value *result = NULL;
     if (tuple->family == AF_INET) {
         struct ipv4_lpm_key key = {
             .prefixlen = IPV4_MAX_PREFIXLEN,
@@ -367,7 +367,8 @@ static __always_inline bool MatchDomain(const struct match_tuple *tuple)
         result = bpf_map_lookup_elem(&DOMAIN_IPV6_MAP, &key);
     }
     bool matchAction = false;
-    if (result != NULL && tuple->uid == *result) {
+    if (result != NULL && tuple->uid == result->uid &&
+        (tuple->appuid == result->appuid || result->appuid == 0)) {
         matchAction =  true;
     } else {
         matchAction = false;
