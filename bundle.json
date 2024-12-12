@@ -29,8 +29,7 @@
             "netmanager_base_enable_feature_sysvpn",
             "netmanager_base_enable_feature_hosts",
             "netmanager_base_feature_support_powermanager",
-            "netmanager_base_enable_public_dns_server",
-            "netmanager_base_enable_power_manager"
+            "netmanager_base_enable_public_dns_server"
         ],
         "adapted_system_type": [
             "standard"
