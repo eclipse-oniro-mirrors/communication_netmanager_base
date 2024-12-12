@@ -452,8 +452,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -692,8 +691,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicyTest002, TestSize.Level1)
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = true;
-    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 } // namespace NetsysNative

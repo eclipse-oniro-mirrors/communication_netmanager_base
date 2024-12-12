@@ -927,11 +927,9 @@ public:
      * @param uid - The specified UID of application.
      * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
      * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
-     * @param isBroker true means the broker application.
      * @return return 0 if OK, return error number if not OK
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                   bool isBroker) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
@@ -963,6 +961,8 @@ public:
 #endif // SUPPORT_SYSVPN
 
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

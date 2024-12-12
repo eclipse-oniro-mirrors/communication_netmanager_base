@@ -965,10 +965,9 @@ public:
      * @param uid - The specified UID of application.
      * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
      * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
-     * @param isBroker true means the broker application.
      * @return return 0 if OK, return error number if not OK
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
 
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
@@ -996,6 +995,8 @@ public:
      */
     int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage);
 #endif // SUPPORT_SYSVPN
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps);
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid);
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

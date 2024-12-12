@@ -25,6 +25,7 @@ group("common_target") {
 
 config("netmgr_common_config") {
   include_dirs = [
+    "bundle_utils/include",
     "common_utils/include",
     "log/include",
     "errorcode_utils/include",

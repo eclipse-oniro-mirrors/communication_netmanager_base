@@ -1458,8 +1458,7 @@ int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const 
     return netsysService_->SetEnableIpv6(interfaceName, on);
 }
 
-int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                 bool isBroker)
+int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
@@ -1467,7 +1466,7 @@ int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPoli
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetsysController::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
@@ -1557,6 +1556,26 @@ int32_t NetsysController::CloseSocketsUid(const std::string &ipAddr, uint32_t ui
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->CloseSocketsUid(ipAddr, uid);
+}
+
+int32_t NetsysController::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
+{
+    NETMGR_LOG_D("SetBrokerUidAccessPolicyMap Enter");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetBrokerUidAccessPolicyMap(uidMaps);
+}
+
+int32_t NetsysController::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    NETMGR_LOG_D("DelBrokerUidAccessPolicyMap Enter");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DelBrokerUidAccessPolicyMap(uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

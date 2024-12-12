@@ -39,6 +39,7 @@ using namespace testing::ext;
 using namespace NetManagerStandard;
 constexpr int32_t NETID = 101;
 constexpr int32_t UID = 1000;
+constexpr uint32_t TEST_UID_U32 = 1;
 constexpr int32_t MTU = 1500;
 constexpr int32_t WHICH = 14;
 const std::string INTERFACENAME = "wlan0";
@@ -370,8 +371,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetNetworkAccessPolicy001, TestSize.Level
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
-    int32_t ret = netsysNativeService->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag, isBroker);
+    int32_t ret = netsysNativeService->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -425,6 +425,33 @@ HWTEST_F(NetsysNativeServiceProxyTest, CloseSocketsUid001, TestSize.Level1)
     std::string ipAddr = "";
     uint32_t uid = 1000;
     int32_t ret = netsysNativeService->CloseSocketsUid(ipAddr, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = netsysNativeService->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID_U32, TEST_UID_U32);
+    int32_t ret = netsysNativeService->SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->DelBrokerUidAccessPolicyMap(TEST_UID_U32);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

@@ -24,6 +24,8 @@ namespace NetManagerStandard {
 namespace {
 using namespace OHOS::EventFwk;
 constexpr const char* UID = "uid";
+constexpr const char* STATUS_FIELD = "rgmStatus";
+const std::string STATUS_UNLOCKED = "rgm_user_unlocked";
 };
 
 NetPolicyListener::NetPolicyListener(const EventFwk::CommonEventSubscribeInfo &sp,
@@ -39,9 +41,22 @@ void NetPolicyListener::OnReceiveEvent(const CommonEventData &data)
     std::string wantAction = want.GetAction();
     if (wantAction == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         uint32_t uid = want.GetIntParam(UID, 0);
+        NETMGR_LOG_I("packet remove uid:[%{public}d]", uid);
         netPolicyService_->GetNetAccessPolicyDBHandler().DeleteByUid(uid);
         netPolicyService_->DeleteNetworkAccessPolicy(uid);
-        NETMGR_LOG_I("packet remove uid:[%{public}d]", uid);
+        netPolicyService_->DelBrokerUidAccessPolicyMap(uid);
+    }
+    if (wantAction == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        uint32_t uid = want.GetIntParam(UID, 0);
+        NETMGR_LOG_I("packet add uid:[%{public}d]", uid);
+        netPolicyService_->SetBrokerUidAccessPolicyMap(uid);
+    }
+    if (wantAction == COMMON_EVENT_STATUS_CHANGED) {
+        std::string status = want.GetStringParam(STATUS_FIELD);
+        NETMGR_LOG_I("status changed, status:[%{public}s]", status.c_str());
+        if (status == STATUS_UNLOCKED) {
+            netPolicyService_->SetBrokerUidAccessPolicyMap(std::nullopt);
+        }
     }
 }
 } // namespace NetManagerStandard

@@ -136,6 +136,8 @@ enum class NetsysInterfaceCode {
 #ifdef SUPPORT_SYSVPN
     NETSYS_PROCESS_VPN_STAGE,
 #endif // SUPPORT_SYSVPN
+    NETSYS_DEL_BROKER_UID_NETWORK_POLICY,
+    NETSYS_SET_BROKER_UID_NETWORK_POLICY,
 };
 
 enum class NotifyInterfaceCode {

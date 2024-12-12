@@ -152,12 +152,11 @@ public:
      * @param uid The specified UID of application.
      * @param policy The network access policy of application, {@link NetworkAccessPolicy}.
      * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
-     * @param isBroker true means the broker application.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy Policy, bool reconfirmFlag, bool isBroker);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy Policy, bool reconfirmFlag);
 
     /**
      * Delete the policy to access the network of the specified application from map.

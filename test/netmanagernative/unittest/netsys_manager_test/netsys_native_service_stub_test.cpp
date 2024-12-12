@@ -35,6 +35,7 @@ using namespace testing::ext;
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint64_t TEST_UID = 1;
+static constexpr uint32_t TEST_UID_U32 = 1;
 
 class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
 public:
@@ -532,7 +533,7 @@ public:
         return 0;
     }
 
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker) override
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
     {
         return 0;
     }
@@ -575,6 +576,16 @@ public:
 #endif // SUPPORT_SYSVPN
 
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override
+    {
+        return 0;
+    }
+
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override
     {
         return 0;
     }
@@ -1898,7 +1909,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Lev
     netAccessPolicy.wifiAllow = false;
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
-    bool isBroker = false;
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
         return;
@@ -1916,10 +1926,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Lev
     }
 
     if (!data.WriteBool(reconfirmFlag)) {
-        return;
-    }
-
-    if (!data.WriteBool(isBroker)) {
         return;
     }
 
@@ -2026,6 +2032,39 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCloseSocketsUid001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdCloseSocketsUid(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, SetBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    std::unordered_map<uint32_t, uint32_t> params;
+    params.emplace(TEST_UID_U32, TEST_UID_U32);
+
+    uint32_t count = static_cast<uint32_t>(params.size());
+    if (!data.WriteUint32(count)) {
+        return;
+    }
+    for (auto iter = params.begin(); iter != params.end(); iter++) {
+        if (!data.WriteUint32(iter->first) || !data.WriteUint32(iter->second)) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetBrokerUidAccessPolicyMap(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteUint32(TEST_UID_U32)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDelBrokerUidAccessPolicyMap(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative

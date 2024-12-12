@@ -116,7 +116,7 @@ int32_t NetAccessPolicyRDB::InsertData(NetAccessPolicyData policy)
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_WIFI_POLICY, policy.wifiPolicy);
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_CELLULAR_POLICY, policy.cellularPolicy);
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_SET_FROM_CONFIG_FLAG, policy.setFromConfigFlag);
-    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_IS_BROKER, policy.isBroker);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_IS_BROKER, 0);
 
     int64_t id = 0;
     ret = rdbStore_->Insert(id, NETMANAGER_DB_UID_ACCESS_POLICY_TABLE, policyValues);
@@ -170,7 +170,6 @@ int32_t NetAccessPolicyRDB::UpdateByUid(int32_t uid, NetAccessPolicyData policy)
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_WIFI_POLICY, policy.wifiPolicy);
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_CELLULAR_POLICY, policy.cellularPolicy);
     policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_SET_FROM_CONFIG_FLAG, policy.setFromConfigFlag);
-    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_IS_BROKER, policy.isBroker);
 
     int32_t rowId = -1;
     int32_t result = rdbStore_->Update(rowId, policyValues, rdbPredicate);
@@ -207,7 +206,6 @@ std::vector<NetAccessPolicyData> NetAccessPolicyRDB::QueryAll()
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_ONE, policy.wifiPolicy);
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_TWO, policy.cellularPolicy);
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_THREE, policy.setFromConfigFlag);
-        queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_FOUR, policy.isBroker);
         result.emplace_back(policy);
     }
     return result;
@@ -248,7 +246,6 @@ int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_ONE, uidPolicy.wifiPolicy);
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_TWO, uidPolicy.cellularPolicy);
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_THREE, uidPolicy.setFromConfigFlag);
-        queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_FOUR, uidPolicy.isBroker);
         if (uidPolicy.uid == uid) {
             return NETMANAGER_SUCCESS;
         }
