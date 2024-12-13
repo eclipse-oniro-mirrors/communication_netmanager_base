@@ -44,6 +44,26 @@ public:
     ~FfrtTimer()
     {
         Stop();
+        StopPro();
+    }
+
+    void StartPro(uint64_t interval, void *data, void (*taskFun)(void *))
+    {
+        StopPro();
+        timer_ = ffrt_timer_start(ffrt_qos_default, interval, data, taskFun, true);
+        if (timer_ == ffrt_error) {
+            NETMGR_LOG_E("ffrt_timer_start err[%{public}d]", timer_);
+        }
+    }
+
+    void StopPro()
+    {
+        if (timer_ != ffrt_error) {
+            auto ret = ffrt_timer_stop(ffrt_qos_default, timer_);
+            if (ret == ffrt_error) {
+                NETMGR_LOG_E("ffrt_timer_stop err[%{public}d]", ret);
+            }
+        }
     }
 
     void Start(int interval, std::function<void()> taskFun)
@@ -106,6 +126,7 @@ private:
     std::atomic<bool> tryStopFlag_;
     ffrt::mutex mutex_;
     ffrt::condition_variable timerCond_;
+    ffrt_timer_t timer_ = ffrt_error;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
