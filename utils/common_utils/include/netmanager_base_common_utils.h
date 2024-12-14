@@ -75,6 +75,7 @@ bool ParseInt(const std::string &str, int32_t *value);
 int64_t ConvertToInt64(const std::string &str);
 std::string ToAnonymousIp(const std::string &input);
 std::string AnonymizeIptablesCommand(const std::string &command);
+std::string AnonymousIpInStr(const std::string &input);
 int32_t StrToInt(const std::string &value, int32_t defaultErr = -1);
 uint32_t StrToUint(const std::string &value, uint32_t defaultErr = 0);
 bool StrToBool(const std::string &value, bool defaultErr = false);
