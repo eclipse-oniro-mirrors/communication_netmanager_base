@@ -37,6 +37,15 @@ public:
     virtual int32_t OnInterfaceRemoved(const std::string &ifName) = 0;
     virtual int32_t OnInterfaceChanged(const std::string &ifName, bool up) = 0;
     virtual int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) = 0;
+    virtual int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                                   const std::string &ifName)
+    {
+        (void)updated;
+        (void)route;
+        (void)gateway;
+        (void)ifName;
+        return 0;
+    };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

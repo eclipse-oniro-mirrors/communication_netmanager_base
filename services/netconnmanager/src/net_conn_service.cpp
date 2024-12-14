@@ -2281,6 +2281,20 @@ int32_t NetConnService::RegisterNetInterfaceCallback(const sptr<INetInterfaceSta
     return interfaceStateCallback_->RegisterInterfaceCallback(callback);
 }
 
+int32_t NetConnService::UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    NETMGR_LOG_I("Enter UnregisterNetInterfaceCallback.");
+    if (interfaceStateCallback_ == nullptr) {
+        NETMGR_LOG_E("interfaceStateCallback_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return interfaceStateCallback_->UnregisterInterfaceCallback(callback);
+}
+
 int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
 {
     using namespace OHOS::nmd;
@@ -2295,6 +2309,21 @@ int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, N
     config.prefixLength_ = configParcel.prefixLength;
     config.flags_.assign(configParcel.flags.begin(), configParcel.flags.end());
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress)
+{
+    return NetsysController::GetInstance().InterfaceSetIpAddress(iface, ipAddress);
+}
+
+int32_t NetConnService::SetInterfaceUp(const std::string &iface)
+{
+    return NetsysController::GetInstance().SetInterfaceUp(iface);
+}
+
+int32_t NetConnService::SetInterfaceDown(const std::string &iface)
+{
+    return NetsysController::GetInstance().SetInterfaceDown(iface);
 }
 
 int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSuccess)
@@ -2464,6 +2493,14 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceLinkStateChanged(c
 int32_t NetConnService::NetInterfaceStateCallback::OnRouteChanged(bool updated, const std::string &route,
                                                                   const std::string &gateway, const std::string &ifName)
 {
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnRouteChanged(updated, route, gateway, ifName);
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -2497,7 +2534,61 @@ int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
         }
     }
     ifaceStateCallbacks_.push_back(callback);
+    NETMGR_LOG_I("Register interface callback successful");
+
+    AddIfaceDeathRecipient(callback);
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::UnregisterInterfaceCallback(
+    const sptr<INetInterfaceStateCallback> &callback)
+{
+    NETMGR_LOG_I("UnregisterInterfaceCallback, callingPid=%{public}d, callingUid=%{public}d",
+                 IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid());
+    
+    std::lock_guard<std::mutex> locker(mutex_);
+    auto isSameCallback = [&callback](const sptr<INetInterfaceStateCallback> &item) {
+        return item->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr();
+    };
+    auto iter = std::find_if(ifaceStateCallbacks_.cbegin(), ifaceStateCallbacks_.cend(), isSameCallback);
+    if (iter == ifaceStateCallbacks_.cend()) {
+        NETMGR_LOG_E("UnregisterInterfaceCallback callback not found.");
+        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
+    }
+
+    callback->AsObject()->RemoveDeathRecipient(netIfaceStateDeathRecipient_);
+    ifaceStateCallbacks_.erase(iter);
+    return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::NetInterfaceStateCallback::OnNetIfaceStateRemoteDied(const wptr<IRemoteObject> &remoteObject)
+{
+    sptr<IRemoteObject> diedRemoted = remoteObject.promote();
+    if (diedRemoted == nullptr) {
+        NETMGR_LOG_E("diedRemoted is null");
+        return;
+    }
+    sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(diedRemoted);
+    
+    int32_t ret = UnregisterInterfaceCallback(callback);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UnregisterInterfaceCallback failed with code %{public}d", ret);
+    }
+}
+
+void NetConnService::NetInterfaceStateCallback::AddIfaceDeathRecipient(const sptr<INetInterfaceStateCallback> &callback)
+{
+    if (netIfaceStateDeathRecipient_ == nullptr) {
+        netIfaceStateDeathRecipient_ = new (std::nothrow) NetIfaceStateCallbackDeathRecipient(*this);
+    }
+    if (netIfaceStateDeathRecipient_ == nullptr) {
+        NETMGR_LOG_E("netIfaceStateDeathRecipient_ is null");
+        return;
+    }
+    if (!callback->AsObject()->AddDeathRecipient(netIfaceStateDeathRecipient_)) {
+        NETMGR_LOG_E("AddNetIfaceStateCallbackDeathRecipient failed");
+        return;
+    }
 }
 
 int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint32_t policy)

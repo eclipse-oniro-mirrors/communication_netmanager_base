@@ -83,7 +83,11 @@ public:
     virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
     virtual int32_t SetAppNet(int32_t netId) = 0;
     virtual int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) = 0;
+    virtual int32_t UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) = 0;
     virtual int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) = 0;
+    virtual int32_t SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress) = 0;
+    virtual int32_t SetInterfaceUp(const std::string &iface) = 0;
+    virtual int32_t SetInterfaceDown(const std::string &iface) = 0;
     virtual int32_t AddNetworkRoute(int32_t netId, const std::string &ifName,
                                     const std::string &destination, const std::string &nextHop) = 0;
     virtual int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName,

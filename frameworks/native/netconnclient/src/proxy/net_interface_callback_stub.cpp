@@ -35,6 +35,8 @@ NetInterfaceStateCallbackStub::NetInterfaceStateCallbackStub()
         &NetInterfaceStateCallbackStub::CmdInterfaceChanged;
     memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED)] =
         &NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_ROUTE_CHANGED)] =
+        &NetInterfaceStateCallbackStub::CmdRouteChanged;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -169,6 +171,35 @@ int32_t NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged(MessageParce
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetInterfaceStateCallbackStub::CmdRouteChanged(MessageParcel &data, MessageParcel &reply)
+{
+    bool updated = false;
+    if (!data.ReadBool(updated)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string route;
+    if (!data.ReadString(route)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string gateway;
+    if (!data.ReadString(gateway)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName;
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = OnRouteChanged(updated, route, gateway, ifName);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName,
                                                                  int32_t flags, int32_t scope)
 {
@@ -204,6 +235,14 @@ int32_t NetInterfaceStateCallbackStub::OnInterfaceChanged(const std::string &ifN
 int32_t NetInterfaceStateCallbackStub::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
     NETMGR_LOG_D("OnInterfaceLinkStateChanged, iface:[%{public}s] -> Up:[%{public}d]", ifName.c_str(), up);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetInterfaceStateCallbackStub::OnRouteChanged(bool updated, const std::string &route,
+                                                      const std::string &gateway, const std::string &ifName)
+{
+    NETMGR_LOG_D("OnRouteChanged, updated:[%{public}d], route:[%{public}s], gateway:[%{public}s], iface:[%{public}s]",
+                 updated, route.c_str(), gateway.c_str(), ifName.c_str());
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

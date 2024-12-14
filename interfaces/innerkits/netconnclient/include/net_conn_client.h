@@ -396,6 +396,16 @@ public:
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
 
     /**
+     * UnRegister network interface state change callback
+     *
+     * @param callback The callback of INetInterfaceStateCallback interface
+     * @return Returns 0, successfully unregister net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
+
+    /**
      * Get network interface configuration
      *
      * @param ifaceName Network port device name
@@ -405,6 +415,10 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config);
+    
+    int32_t SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress);
+    int32_t SetInterfaceUp(const std::string &iface);
+    int32_t SetInterfaceDown(const std::string &iface);
 
     int32_t AddNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
                             const std::string &nextHop);

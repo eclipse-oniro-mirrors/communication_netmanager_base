@@ -830,9 +830,13 @@ HWTEST_F(NetConnServiceTest, RegisterNetInterfaceCallbackTest001, TestSize.Level
     sptr<INetInterfaceStateCallback> callback = nullptr;
     auto ret = NetConnService::GetInstance()->RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = NetConnService::GetInstance()->UnregisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     callback = new (std::nothrow) NetInterfaceStateCallbackStub();
     ret = NetConnService::GetInstance()->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = NetConnService::GetInstance()->UnregisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     NetConnService::GetInstance()->interfaceStateCallback_ =
@@ -841,6 +845,8 @@ HWTEST_F(NetConnServiceTest, RegisterNetInterfaceCallbackTest001, TestSize.Level
     NetsysController::GetInstance().RegisterCallback(NetConnService::GetInstance()->interfaceStateCallback_);
 
     ret = NetConnService::GetInstance()->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->UnregisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1100,6 +1106,8 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
 
     sptr<INetInterfaceStateCallback> interfaceStateCallback = nullptr;
     ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = stateCallback.UnregisterInterfaceCallback(interfaceStateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
@@ -1653,6 +1661,28 @@ HWTEST_F(NetConnServiceTest, CloseSocketsUidTest001, TestSize.Level1)
     ASSERT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->CloseSocketsUidAsync(netId, uid);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetInterfaceUpTest001, TestSize.Level1)
+{
+    std::string ifName = "wlan0";
+    auto ret = NetConnService::GetInstance()->SetInterfaceUp(ifName);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetInterfaceDownTest001, TestSize.Level1)
+{
+    std::string ifName = "wlan0";
+    auto ret = NetConnService::GetInstance()->SetInterfaceDown(ifName);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
+{
+    std::string ifName = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+    auto ret = NetConnService::GetInstance()->SetNetInterfaceIpAddress(ifName, ipAddr);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

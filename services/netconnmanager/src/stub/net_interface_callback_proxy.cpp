@@ -238,5 +238,46 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceLinkStateChanged(const std::s
     }
     return replyParcel.ReadInt32();
 }
+
+int32_t NetInterfaceStateCallbackProxy::OnRouteChanged(bool updated, const std::string &route,
+                                                       const std::string &gateway, const std::string &ifName)
+{
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!dataParcel.WriteBool(updated)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!dataParcel.WriteString(route)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!dataParcel.WriteString(gateway)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!dataParcel.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    MessageParcel replyParcel;
+    MessageOption option;
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_ROUTE_CHANGED),
+                                          dataParcel, replyParcel, option);
+    if (retCode != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
+        return retCode;
+    }
+    return replyParcel.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

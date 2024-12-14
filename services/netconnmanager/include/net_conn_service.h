@@ -347,7 +347,11 @@ public:
 
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
+    int32_t UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
+    int32_t SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress) override;
+    int32_t SetInterfaceUp(const std::string &iface) override;
+    int32_t SetInterfaceDown(const std::string &iface) override;
     int32_t AddNetworkRoute(int32_t netId, const std::string &ifName,
                             const std::string &destination, const std::string &nextHop) override;
     int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName,
@@ -397,10 +401,28 @@ private:
         int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
 
         int32_t RegisterInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
+        int32_t UnregisterInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
 
     private:
+    class NetIfaceStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+        public:
+            explicit NetIfaceStateCallbackDeathRecipient(NetInterfaceStateCallback &client) : client_(client) {}
+            ~NetIfaceStateCallbackDeathRecipient() override = default;
+            void OnRemoteDied(const wptr<IRemoteObject> &remote) override
+            {
+                client_.OnNetIfaceStateRemoteDied(remote);
+            }
+
+        private:
+            NetInterfaceStateCallback &client_;
+        };
+
         std::mutex mutex_;
         std::vector<sptr<INetInterfaceStateCallback>> ifaceStateCallbacks_;
+        sptr<IRemoteObject::DeathRecipient> netIfaceStateDeathRecipient_ = nullptr;
+
+        void OnNetIfaceStateRemoteDied(const wptr<IRemoteObject> &remoteObject);
+        void AddIfaceDeathRecipient(const sptr<INetInterfaceStateCallback> &callback);
     };
 
     class NetPolicyCallback : public NetPolicyCallbackStub {
