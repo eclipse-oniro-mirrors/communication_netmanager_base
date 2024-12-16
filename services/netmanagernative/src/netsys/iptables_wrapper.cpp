@@ -53,7 +53,7 @@ IptablesWrapper::~IptablesWrapper()
 void IptablesWrapper::ExecuteCommand(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
-    NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymizeIptablesCommand(cmdWithWait).c_str());
+    NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     if (CommonUtils::ForkExec(cmdWithWait) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
@@ -62,7 +62,7 @@ void IptablesWrapper::ExecuteCommand(const std::string &command)
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
-    NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymizeIptablesCommand(cmdWithWait).c_str());
+    NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }

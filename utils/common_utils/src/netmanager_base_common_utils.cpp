@@ -403,6 +403,16 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
+std::string AnonymousIpInStr(const std::string &input)
+{
+    std::string result;
+    // Mask ipv4 address.
+    result = std::regex_replace(input, IP_PATTERN, "X.X.X.X");
+    // Mask ipv6 address.
+    result = std::regex_replace(result, IPV6_PATTERN, "X:X:X:X");
+    return result;
+}
+
 std::string AnonymizeIptablesCommand(const std::string &command)
 {
     std::string temp{command};
