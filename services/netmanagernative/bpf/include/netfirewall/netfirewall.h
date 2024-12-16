@@ -121,7 +121,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         return SK_PASS;
     }
 
-    enum ct_status status = ct_lookup_entry(skb, &ct_tpl, CT_INGRESS);
+    enum ct_status status = ct_map_lookup_entry(skb, &ct_tpl, CT_INGRESS, match_loopback(tuple));
     log_dbg(DBG_CT_LOOKUP, INGRESS, status);
     if (status != CT_NEW) {
         return SK_PASS;
@@ -187,7 +187,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         return SK_PASS;
     }
 
-    enum ct_status status = ct_lookup_entry(skb, &ct_tpl, CT_EGRESS);
+    enum ct_status status = ct_map_lookup_entry(skb, &ct_tpl, CT_EGRESS, match_loopback(tuple));
     log_dbg(DBG_CT_LOOKUP, EGRESS, status);
     if (status != CT_NEW) {
         return SK_PASS;

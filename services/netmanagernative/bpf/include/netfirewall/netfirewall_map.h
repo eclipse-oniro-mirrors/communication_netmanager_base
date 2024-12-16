@@ -265,4 +265,24 @@ bpf_map_def SEC("maps") DOMAIN_DENY_MAP = {
     .inner_map_idx = 0,
     .numa_node = 0,
 };
+
+bpf_map_def SEC("maps") LOOP_BACK_IPV4_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct ipv4_lpm_key),
+    .value_size = sizeof(loop_back_val),
+    .max_entries = 1,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") LOOP_BACK_IPV6_MAP = {
+    .type = BPF_MAP_TYPE_LPM_TRIE,
+    .key_size = sizeof(struct ipv6_lpm_key),
+    .value_size = sizeof(loop_back_val),
+    .max_entries = 1,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
 #endif // NET_FIREWALL_MAP_H

@@ -117,6 +117,7 @@ static __always_inline bool get_match_tuple(struct __sk_buff *skb, struct match_
         swap_tuple_addrs(tuple);
         swap_tuple_ports(tuple);
     }
+    tuple->ifindex = skb->ifindex;
     return true;
 }
 
@@ -135,6 +136,49 @@ static __always_inline struct bitmap *lookup_map(void *map, void *key, void *oth
         result = bpf_map_lookup_elem(map, other_key);
     }
     return result;
+}
+
+/**
+ * @brief match packet is loopback or not
+ *
+ * @param match_tpl struct match_tuple
+ * @return true is loopback packet or false if not
+ */
+static __always_inline bool match_loopback(struct match_tuple match_tpl)
+{
+    bool is_loopback = false;
+    if (match_tpl.protocol == PROTOCOL_SAT_EXPAK && match_tpl.ifindex == 1) {
+        is_loopback = true;
+    } else {
+        loop_back_val *result = NULL;
+        if (match_tpl.family == AF_INET) {
+            // ipv4 127.0.0.1
+            struct ipv4_lpm_key lpm_key = {
+                .prefixlen = IPV4_MAX_PREFIXLEN,
+                .data = match_tpl.ipv4.saddr,
+            };
+            result = bpf_map_lookup_elem(&LOOP_BACK_IPV4_MAP, &lpm_key);
+            if (result != NULL) {
+                lpm_key.data = match_tpl.ipv4.daddr;
+                result = bpf_map_lookup_elem(&LOOP_BACK_IPV4_MAP, &lpm_key);
+            }
+        } else {
+            // ipv6 ::1/128
+            struct ipv6_lpm_key lpm_key = {
+                .prefixlen = IPV6_MAX_PREFIXLEN,
+            };
+            memcpy(&(lpm_key.data), &(match_tpl.ipv6.saddr), sizeof(lpm_key.data));
+            result = bpf_map_lookup_elem(&LOOP_BACK_IPV6_MAP, &lpm_key);
+            if (result != NULL) {
+                memcpy(&(lpm_key.data), &(match_tpl.ipv6.daddr), sizeof(lpm_key.data));
+                result = bpf_map_lookup_elem(&LOOP_BACK_IPV4_MAP, &lpm_key);
+            }
+        }
+        if (result != NULL) {
+            is_loopback = true;
+        }
+    }
+    return true;
 }
 
 /**

@@ -193,6 +193,23 @@ void NetsysBpfNetFirewall::StopConntrackGc()
 void NetsysBpfNetFirewall::SetBpfLoaded(bool load)
 {
     isBpfLoaded_ = load;
+    if (isBpfLoaded_) {
+        WriteLoopBackBpfMap();
+    }
+}
+
+int32_t NetsysBpfNetFirewall::WriteLoopBackBpfMap()
+{
+    Ipv4LpmKey ip4Key = {};
+    LoopbackValue loopbackVal = 1;
+    ip4Key.prefixlen = LOOP_BACK_IPV4_PREFIXLEN;
+    inet_pton(AF_INET, LOOP_BACK_IPV4, &ip4Key.data);
+    WriteBpfMap(MAP_PATH(LOOP_BACK_IPV4_MAP), ip4Key, loopbackVal);
+    Ipv6LpmKey ip6Key = {};
+    ip6Key.prefixlen = LOOP_BACK_IPV6_PREFIXLEN;
+    inet_pton(AF_INET6, LOOP_BACK_IPV6, &ip6Key.data);
+    WriteBpfMap(MAP_PATH(LOOP_BACK_IPV6_MAP), ip6Key, loopbackVal);
+    return NETFIREWALL_SUCCESS;
 }
 
 void NetsysBpfNetFirewall::ClearBpfFirewallRules(NetFirewallRuleDirection direction)
