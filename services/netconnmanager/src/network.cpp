@@ -241,6 +241,9 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 NetLinkInfo Network::GetNetLinkInfo() const
 {
     NetLinkInfo linkInfo = netLinkInfo_;
+    if (netSupplierType_ == BEARER_VPN) {
+        return linkInfo;
+    }
     for (auto iter = linkInfo.routeList_.begin(); iter != linkInfo.routeList_.end();) {
         if (iter->destination_.address_ == LOCAL_ROUTE_NEXT_HOP ||
             iter->destination_.address_ == LOCAL_ROUTE_IPV6_DESTINATION) {
