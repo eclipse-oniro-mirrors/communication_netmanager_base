@@ -35,6 +35,14 @@ int32_t NetworkAccessPolicy::Marshalling(Parcel &parcel, AccessPolicySave& polic
         if (!parcel.WriteBool(policies.policy.cellularAllow)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+
+        if (!parcel.WriteBool(policies.policy.wifiSwitchDisable)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+
+        if (!parcel.WriteBool(policies.policy.cellularSwitchDisable)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     } else {
         if (!parcel.WriteUint32(policies.uid_policies.size())) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -48,6 +56,12 @@ int32_t NetworkAccessPolicy::Marshalling(Parcel &parcel, AccessPolicySave& polic
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
             if (!parcel.WriteBool(policies.second.cellularAllow)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+            if (!parcel.WriteBool(policies.second.wifiSwitchDisable)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+            if (!parcel.WriteBool(policies.second.cellularSwitchDisable)) {
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
@@ -65,6 +79,14 @@ int32_t NetworkAccessPolicy::Unmarshalling(Parcel &parcel, AccessPolicySave& pol
         }
 
         if (!parcel.ReadBool(accessPolicyTmp.cellularAllow)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+
+        if (!parcel.ReadBool(accessPolicyTmp.wifiSwitchDisable)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+
+        if (!parcel.ReadBool(accessPolicyTmp.cellularSwitchDisable)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         policies.policy = accessPolicyTmp;
@@ -85,6 +107,13 @@ int32_t NetworkAccessPolicy::Unmarshalling(Parcel &parcel, AccessPolicySave& pol
             }
 
             if (!parcel.ReadBool(tmp_policy.cellularAllow)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+            if (!parcel.ReadBool(tmp_policy.wifiSwitchDisable)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+
+            if (!parcel.ReadBool(tmp_policy.cellularSwitchDisable)) {
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
             policies.uid_policies.insert(std::pair<int32_t, NetworkAccessPolicy>(uid, tmp_policy));

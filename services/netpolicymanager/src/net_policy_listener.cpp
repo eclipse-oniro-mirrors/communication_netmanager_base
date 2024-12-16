@@ -50,6 +50,7 @@ void NetPolicyListener::OnReceiveEvent(const CommonEventData &data)
         uint32_t uid = want.GetIntParam(UID, 0);
         NETMGR_LOG_I("packet add uid:[%{public}d]", uid);
         netPolicyService_->SetBrokerUidAccessPolicyMap(uid);
+        netPolicyService_->RefreshNetworkAccessPolicyFromConfig();
     }
     if (wantAction == COMMON_EVENT_STATUS_CHANGED) {
         std::string status = want.GetStringParam(STATUS_FIELD);

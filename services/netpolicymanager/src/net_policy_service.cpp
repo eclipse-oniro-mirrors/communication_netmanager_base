@@ -24,6 +24,7 @@
 #include "bundle_mgr_proxy.h"
 #include "ffrt_inner.h"
 #include "iservice_registry.h"
+#include "net_access_policy_config.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -39,6 +40,7 @@
 #include "system_ability_definition.h"
 #include "net_policy_listener.h"
 #include "net_access_policy_dialog.h"
+#include "os_account_manager.h"
 
 #ifdef __LP64__
 const std::string LIB_LOAD_PATH = "/system/lib64/libnet_access_policy_dialog.z.so";
@@ -53,6 +55,29 @@ namespace {
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
 constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
+sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+{
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        NETMGR_LOG_E("fail to get system ability mgr.");
+        return nullptr;
+    }
+
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        NETMGR_LOG_E("fail to get bundle manager proxy.");
+        return nullptr;
+    }
+
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return nullptr;
+    }
+    return bundleMgrProxy;
+}
+const int32_t MAIN_USER_ID = 100;
+const int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
 } // namespace
 static std::atomic<bool> g_RegisterToService(
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetPolicyService>::GetInstance().get()));
@@ -383,6 +408,13 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         subscribeInfo.SetPriority(1);
         std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
             subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+
+        ffrtQueue_.submit(
+            [this]() {
+                OverwriteNetAccessPolicyToDBFromConfig();
+                UpdateNetAccessPolicyToMapFromDB();
+            },
+            ffrt::task_attr().name("NetworkAccessPolicyConfigFlush"));
     }
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
@@ -443,6 +475,80 @@ void NetPolicyService::RegisterFactoryResetCallback()
     }
 }
 
+
+int32_t NetPolicyService::RefreshNetworkAccessPolicyFromConfig()
+{
+    NETMGR_LOG_I("RefreshNetworkAccessPolicyFromConfigs Enter.");
+    OverwriteNetAccessPolicyToDBFromConfig();
+    UpdateNetAccessPolicyToMapFromDB();
+    return NETMANAGER_SUCCESS;
+}
+
+void NetPolicyService::OverwriteNetAccessPolicyToDBFromConfig()
+{
+    std::vector<NetAccessPolicyConfig> configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    if (configs.empty()) {
+        NETMGR_LOG_W("configs is empty");
+        return;
+    }
+
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return;
+    }
+    NetAccessPolicyRDB netAccessPolicyRdb;
+    auto ret = ERR_OK;
+    int32_t userId = MAIN_USER_ID;
+    if (GetActivatedOsAccountId(userId) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_W("use default userId.");
+    }
+    for (size_t i = 0; i < configs.size(); i++) {
+        if (!configs[i].disableWlanSwitch && !configs[i].disableCellularSwitch) {
+            continue;
+        }
+        auto uid = bundleMgrProxy->GetUidByBundleName(configs[i].bundleName, userId);
+        if (uid == -1) {
+            NETMGR_LOG_E("Failed to get uid from bundleName. [%{public}s]", configs[i].bundleName.c_str());
+            continue;
+        }
+        NetAccessPolicyData policyData;
+        policyData.wifiPolicy = NET_ACCESS_POLICY_ALLOW_VALUE;
+        policyData.cellularPolicy = NET_ACCESS_POLICY_ALLOW_VALUE;
+        auto ret = netAccessPolicyRdb.QueryByUid(uid, policyData);
+        if (configs[i].disableWlanSwitch) {
+            policyData.wifiPolicy = NET_ACCESS_POLICY_ALLOW_VALUE;
+        }
+        if (configs[i].disableCellularSwitch) {
+            policyData.cellularPolicy = NET_ACCESS_POLICY_ALLOW_VALUE;
+        }
+        policyData.setFromConfigFlag = 0;
+        if (ret != NETMANAGER_SUCCESS) {
+            policyData.uid = uid;
+            netAccessPolicyRdb.InsertData(policyData);
+            continue;
+        }
+        netAccessPolicyRdb.UpdateByUid(uid, policyData);
+    }
+}
+
+int32_t NetPolicyService::GetActivatedOsAccountId(int32_t &userId)
+{
+    std::vector<int32_t> activatedOsAccountIds;
+    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activatedOsAccountIds);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds failed. ret is %{public}d", ret);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (activatedOsAccountIds.empty()) {
+        NETMGR_LOG_E("QueryActiveOsAccountIds is empty");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    userId = activatedOsAccountIds[0];
+    NETMGR_LOG_I("QueryActiveOsAccountIds is %{public}d", userId);
+    return NETMANAGER_SUCCESS;
+}
+
 void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
 {
     NETMGR_LOG_I("UpdateNetAccessPolicyToMapFromDB enter.");
@@ -500,7 +606,19 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
     NETMGR_LOG_I("GetNetworkAccessPolicy enter.");
     NetAccessPolicyRDB netAccessPolicy;
 
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
     if (parameter.flag) {
+        std::string uidBundleName;
+        if (!bundleMgrProxy->GetBundleNameForUid(parameter.uid, uidBundleName)) {
+            NETMGR_LOG_E("GetBundleNameForUid Failed");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        UpdateNetworkAccessPolicyFromConfig(uidBundleName, policy.policy);
         NetAccessPolicyData policyData;
         if (netAccessPolicy.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
             policy.policy.wifiAllow = true;
@@ -510,24 +628,6 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
         policy.policy.wifiAllow = policyData.wifiPolicy;
         policy.policy.cellularAllow = policyData.cellularPolicy;
         return NETMANAGER_SUCCESS;
-    }
-
-    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        NETMGR_LOG_E("fail to get system ability mgr.");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        NETMGR_LOG_E("fail to get bundle manager proxy.");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-    if (bundleMgrProxy == nullptr) {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
-        return NETMANAGER_ERR_INTERNAL;
     }
 
     std::vector<AppExecFwk::ApplicationInfo> appInfos;
@@ -547,6 +647,7 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
             policyTmp.wifiAllow = true;
             policyTmp.cellularAllow = true;
         }
+        UpdateNetworkAccessPolicyFromConfig(appInfo.bundleName, policyTmp);
         policy.uid_policies.insert(std::pair<uint32_t, NetworkAccessPolicy>(appInfo.uid, policyTmp));
     }
 
@@ -691,6 +792,22 @@ std::unordered_map<uint32_t, SampleBundleInfo> NetPolicyService::GetSampleBundle
         return std::unordered_map<uint32_t, SampleBundleInfo>{};
     }
     return result.value();
+}
+
+void NetPolicyService::UpdateNetworkAccessPolicyFromConfig(const std::string &bundleName, NetworkAccessPolicy &policy)
+{
+    std::vector<NetAccessPolicyConfig> configs = NetAccessPolicyConfigUtils::GetInstance().GetNetAccessPolicyConfig();
+    if (configs.empty()) {
+        NETMGR_LOG_W("net access policy configs is empty");
+        return;
+    }
+    auto policyConfig = std::find_if(configs.begin(), configs.end(),
+                                     [&bundleName](const auto &item) { return item.bundleName == bundleName; });
+    if (policyConfig == configs.end()) {
+        return;
+    }
+    policy.wifiSwitchDisable = policyConfig->disableWlanSwitch;
+    policy.cellularSwitchDisable = policyConfig->disableCellularSwitch;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
