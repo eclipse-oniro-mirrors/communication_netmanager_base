@@ -25,6 +25,8 @@
 #include <set>
 #include <thread>
 
+#include "ffrt_inner.h"
+
 #ifndef CROSS_PLATFORM
 #include "netnative_log_wrapper.h"
 #endif
@@ -34,13 +36,13 @@ template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueu
 public:
     DelayedQueue() : index_(0), needRun_(true)
     {
-        pthread_ = std::thread([this]() {
+        pthread_ = ffrt::thread([this]() {
 #ifndef CROSS_PLATFORM
             size_t allCounter = 0;
 #endif
             while (needRun_) {
                 {
-                    std::lock_guard<std::mutex> guard(mutex_);
+                    std::lock_guard<ffrt::mutex> guard(mutex_);
 #ifndef CROSS_PLATFORM
                     size_t counter = 0;
                     for (auto &temp : elems_) {
@@ -62,9 +64,9 @@ public:
                 if (!needRun_) {
                     break;
                 }
-                std::unique_lock<std::mutex> needRunLock(needRunMutex_);
+                std::unique_lock<ffrt::mutex> needRunLock(needRunMutex_);
                 needRunCondition_.wait_for(needRunLock, std::chrono::seconds(1), [this] { return !needRun_; });
-                std::lock_guard<std::mutex> guard(mutex_);
+                std::lock_guard<ffrt::mutex> guard(mutex_);
                 index_ = (index_ + 1) % (ARRAY_SIZE + DELAYED_COUNT);
             }
         });
@@ -82,7 +84,7 @@ public:
 
     void Put(const std::shared_ptr<T> &elem)
     {
-        std::lock_guard<std::mutex> guard(mutex_);
+        std::lock_guard<ffrt::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
             int oldIndex = indexMap_[elem];
             if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
@@ -96,12 +98,12 @@ public:
     }
 
 private:
-    std::thread pthread_;
+    ffrt::thread pthread_;
     int index_;
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     std::atomic_bool needRun_;
-    std::condition_variable needRunCondition_;
-    std::mutex needRunMutex_;
+    ffrt::condition_variable needRunCondition_;
+    ffrt::mutex needRunMutex_;
     std::array<std::set<std::shared_ptr<T>, std::owner_less<std::shared_ptr<T>>>, ARRAY_SIZE + DELAYED_COUNT> elems_;
     std::map<std::shared_ptr<T>, int, std::owner_less<std::shared_ptr<T>>> indexMap_;
 };
