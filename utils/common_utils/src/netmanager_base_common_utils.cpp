@@ -36,7 +36,9 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "parameters.h"
+#endif
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
@@ -772,7 +774,11 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
 
 bool ForbideSetIpforward()
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     return system::GetParameter(SUPPORT_HMOS_CFG, "false") == "true" ||
            system::GetParameter(IP_FORWARD_ENABLE_CFG, "false") == "true";
+#else
+    return false;
+#endif
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
