@@ -206,6 +206,9 @@ void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::stri
             case NET_CAPABILITY_CHECKING_CONNECTIVITY:
                 str.append("NET_CAPABILITY_CHECKING_CONNECTIVITY");
                 break;
+            case NET_CAPABILITY_BIP:
+                str.append("NET_CAPABILITY_BIP");
+                break;
             default:
                 str.append("unknown NetCap");
                 break;
