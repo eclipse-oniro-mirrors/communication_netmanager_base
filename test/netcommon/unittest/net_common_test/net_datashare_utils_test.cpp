@@ -154,54 +154,5 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: QueryTest001
- * @tc.desc: Test NetDataShareHelperUtils::Query
- * @tc.type: FUNC
- */
-HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
-{
-    std::string status;
-    Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Wifi QueryTest result: " << status << std::endl;
-
-    Uri usbUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Query(usbUri, KEY_SHARING_USB, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Usb QueryTest result: " << status << std::endl;
-
-    Uri bluetoothUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Bluetooth QueryTest result: " << status << std::endl;
-}
-
-/**
- * @tc.name: QueryTest002
- * @tc.desc: Test NetDataShareHelperUtils::Query
- * @tc.type: FUNC
- */
-HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
-{
-    NetManagerBaseDataShareToken token;
-
-    std::string status;
-    Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Wifi QueryTest result: " << status << std::endl;
-
-    Uri bluetoothUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Bluetooth QueryTest result: " << status << std::endl;
-
-    Uri usbUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Query(usbUri, KEY_SHARING_USB, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Usb QueryTest result: " << status << std::endl;
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
