@@ -682,6 +682,8 @@ HWTEST_F(NetConnServiceStubTest, OnRegisterNetInterfaceCallbackTest001, TestSize
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -1068,6 +1070,45 @@ HWTEST_F(NetConnServiceStubTest, CloseSocketsUid001, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, SetInterfaceUpDownTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_UP);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

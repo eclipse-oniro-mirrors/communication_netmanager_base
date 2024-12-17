@@ -30,6 +30,7 @@ namespace {
 constexpr uint64_t OUT_OF_RANGE_CODE = 100;
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
 constexpr const char *TEST_IFACE = "eth0";
+constexpr const char *TEST_ROUTE = "fe80::/64";
 
 class NetInterfaceCallbackStubTest : public testing::Test {
 public:
@@ -278,6 +279,47 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceLinkStateChangedTest001, TestS
     MessageOption option;
     ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnRouteChangedTest001
+ * @tc.desc: Test NetInterfaceStateCallbackStub OnRouteChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetInterfaceCallbackStubTest, OnRouteChangedTest001, TestSize.Level1)
+{
+    int32_t ret = NETMANAGER_SUCCESS;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetInterfaceStateCallbackStub::GetDescriptor())) {
+        ret = NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    if (!data.WriteBool(true)) {
+        ret = NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    if (!data.WriteString(TEST_ROUTE)) {
+        ret = NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    if (!data.WriteString("")) {
+        ret = NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    if (!data.WriteString(TEST_IFACE)) {
+        ret = NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    MessageParcel reply;
+    MessageOption option;
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_ROUTE_CHANGED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace
