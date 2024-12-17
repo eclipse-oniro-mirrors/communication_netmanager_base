@@ -22,6 +22,11 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
+#ifdef UNITTEST_FORBID_FFRT
+#undef UNITTEST_FORBID_FFRT
+#endif
+#define UNITTEST_FORBID_FFRT 1
+
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
@@ -47,23 +52,25 @@ IptablesWrapper::~IptablesWrapper()
 
 void IptablesWrapper::ExecuteCommand(const std::string &command)
 {
-    NETNATIVE_LOGI("ExecuteCommand %{public}s", AnonymizeIptablesCommand(command).c_str());
-    if (CommonUtils::ForkExec(command) == NETMANAGER_ERROR) {
+    std::string cmdWithWait = command + " -w 5 ";
+    NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    if (CommonUtils::ForkExec(cmdWithWait) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
 }
 
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
-    NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", AnonymizeIptablesCommand(command).c_str());
-    if (CommonUtils::ForkExec(command, &result_) == NETMANAGER_ERROR) {
+    std::string cmdWithWait = command + " -w 5 ";
+    NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
 }
 
 int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &command)
 {
-    NETNATIVE_LOGI("IptablesWrapper::RunCommand, ipType:%{public}d", ipType);
+    NETNATIVE_LOG_D("IptablesWrapper::RunCommand, ipType:%{public}d", ipType);
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
         return NETMANAGER_ERROR;
@@ -106,8 +113,12 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
             std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
 
         int64_t start = GetTickCount();
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        executeCommandForRes();
+#else
         ffrt::task_handle RunCommandForResTaskIpv4 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
         iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv4);
+#endif // UNITTEST_FORBID_FFRT
         NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
     }
 
@@ -117,8 +128,12 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
             std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
 
         int64_t start = GetTickCount();
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        executeCommandForRes();
+#else
         ffrt::task_handle RunCommandForResTaskIpv6 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
         iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv6);
+#endif // UNITTEST_FORBID_FFRT
         NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
     }
 
@@ -137,13 +152,21 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
         if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
             std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+            executeCommand();
+#else
             iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif
         }
 
         if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
             std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+            executeCommand();
+#else
             iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif
         }
     }
 

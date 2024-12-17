@@ -40,7 +40,6 @@ ohos_unittest("netsys_native_manager_test") {
     "net_conn_manager_test_util.cpp",
     "net_diag_wrapper_test.cpp",
     "netlink_msg_test.cpp",
-    "netsys_controller_service_impl_test.cpp",
     "netsys_native_service_stub_test.cpp",
     "netsys_network_test.cpp",
     "netsys_udp_transfer_test.cpp",
@@ -271,7 +270,7 @@ ohos_unittest("netsys_controller_test") {
   deps = [
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
@@ -333,7 +332,7 @@ ohos_unittest("netsys_native_client_test") {
   deps = [
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
@@ -462,7 +461,6 @@ ohos_unittest("resolver_config_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
 
   external_deps = [

@@ -882,11 +882,12 @@ public:
     /**
      * Set firewall default action
      *
+     * @param userId user id
      * @param inDefault  Default action of NetFirewallRuleDirection:RULE_IN
      * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
      * @return 0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
      * Set firewall current user id
@@ -936,10 +937,9 @@ public:
      * @param uid - The specified UID of application.
      * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
      * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
-     * @param isBroker true means the broker application.
      * @return return 0 if OK, return error number if not OK
      */
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag, bool isBroker);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
 
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
@@ -972,11 +972,13 @@ public:
 #endif // SUPPORT_SYSVPN
 
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
-private:
-    NetsysController() = default;
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps);
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid);
 
 private:
-    bool initFlag_ = false;
+    NetsysController();
+
+private:
     sptr<INetsysControllerService> netsysService_;
 };
 } // namespace NetManagerStandard

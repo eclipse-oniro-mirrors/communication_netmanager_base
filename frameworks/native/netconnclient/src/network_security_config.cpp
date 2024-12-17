@@ -514,6 +514,21 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
         return NETMANAGER_ERR_INTERNAL;
     }
 
+    auto trustUser0Ca = cJSON_GetObjectItem(root, "trust-global-user-ca");
+    if (trustUser0Ca) {
+        trustUser0Ca_ = cJSON_IsTrue(trustUser0Ca);
+    }
+
+    auto trustUserCa = cJSON_GetObjectItem(root, "trust-current-user-ca");
+    if (trustUserCa) {
+        trustUserCa_ = cJSON_IsTrue(trustUserCa);
+    }
+
+    auto isUserDnsCache = cJSON_GetObjectItem(root, "use-dns-cache");
+    if (isUserDnsCache) {
+        isUserDnsCache_ = cJSON_IsTrue(isUserDnsCache);
+    }
+
     cJSON *networkSecurityConfig = cJSON_GetObjectItem(root, TAG_NETWORK_SECURITY_CONFIG.c_str());
     if (networkSecurityConfig == nullptr) {
         NETMGR_LOG_E("networkSecurityConfig is null");
@@ -525,16 +540,6 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 
     ParseJsonBaseConfig(baseConfig, baseConfig_);
     ParseJsonDomainConfigs(domainConfig, domainConfigs_);
-
-    auto trustUser0Ca = cJSON_GetObjectItem(root, "trust-global-user-ca");
-    if (trustUser0Ca) {
-        trustUser0Ca_ = cJSON_IsTrue(trustUser0Ca);
-    }
-
-    auto trustUserCa = cJSON_GetObjectItem(root, "trust-current-user-ca");
-    if (trustUserCa) {
-        trustUserCa_ = cJSON_IsTrue(trustUserCa);
-    }
 
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
@@ -690,6 +695,11 @@ bool NetworkSecurityConfig::TrustUser0Ca()
 bool NetworkSecurityConfig::TrustUserCa()
 {
     return trustUserCa_;
+}
+
+bool NetworkSecurityConfig::IsUserDnsCache()
+{
+    return isUserDnsCache_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

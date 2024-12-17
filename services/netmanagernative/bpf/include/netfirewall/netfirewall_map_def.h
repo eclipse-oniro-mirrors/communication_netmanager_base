@@ -21,6 +21,7 @@
 #endif // SEC
 
 #define MAP_MAX_ENTRIES 5000
+#define MAP_MAX_PORT_ENTRIES 65535
 
 #define INGRESS_SADDR_MAP in_saddr_map
 #define INGRESS_SADDR6_MAP in_saddr6_map
@@ -52,6 +53,8 @@
 #define DOMAIN_IPV6_MAP domain_ipv6_map
 #define DOMAIN_PASS_MAP domain_pass_map
 #define DOMAIN_DENY_MAP domain_deny_map
+#define LOOP_BACK_IPV4_MAP loop_ipv4_map
+#define LOOP_BACK_IPV6_MAP loop_ipv6_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x

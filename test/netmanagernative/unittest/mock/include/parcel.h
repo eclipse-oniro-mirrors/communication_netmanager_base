@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef MOCK_NETMANAGERNATIVE_PARCEL
 #define MOCK_NETMANAGERNATIVE_PARCEL
 
 #include <string>
+#include "refbase.h"
 
 namespace OHOS::NetsysNative {
 class Parcelable;
@@ -48,4 +50,36 @@ public:
     virtual bool Marshalling(Parcel &parcel) const = 0;
 };
 }  // namespace OHOS::NetsysNative
+
+namespace OHOS::NetManagerStandard {
+class Parcelable;
+class Parcel {
+public:
+    Parcel() {}
+    virtual ~Parcel() = default;
+
+    virtual bool WriteUint32(uint32_t) = 0;
+
+    virtual bool WriteUint16(uint16_t) = 0;
+
+    virtual bool WriteBool(bool) = 0;
+
+    virtual bool WriteString(const std::string &) = 0;
+
+    virtual bool ReadUint32(uint32_t) = 0;
+
+    virtual bool ReadString(const std::string &) = 0;
+
+    virtual bool ReadUint16(uint16_t) = 0;
+
+    virtual bool ReadBool(bool) = 0;
+};
+
+class Parcelable {
+public:
+    Parcelable() = default;
+    virtual ~Parcelable() = default;
+    virtual bool Marshalling(Parcel &parcel) const = 0;
+};
+}  // namespace OHOS::NetManagerStandard
 #endif

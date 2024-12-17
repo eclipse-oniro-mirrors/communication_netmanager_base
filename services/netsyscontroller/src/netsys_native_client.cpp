@@ -1560,7 +1560,8 @@ int32_t NetsysNativeClient::SetFirewallRules(NetFirewallRuleType type,
     return proxy->SetFirewallRules(type, ruleList, isFinish);
 }
 
-int32_t NetsysNativeClient::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
+int32_t NetsysNativeClient::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+    FirewallRuleAction outDefault)
 {
     NETMGR_LOG_D("NetsysNativeClient::SetFirewallDefaultAction");
     auto proxy = GetProxy();
@@ -1568,7 +1569,7 @@ int32_t NetsysNativeClient::SetFirewallDefaultAction(FirewallRuleAction inDefaul
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetFirewallDefaultAction(inDefault, outDefault);
+    return proxy->SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysNativeClient::SetFirewallCurrentUserId(int32_t userId)
@@ -1660,8 +1661,7 @@ int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, cons
     return proxy->SetEnableIpv6(interfaceName, on);
 }
 
-int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                                   bool isBroker)
+int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
@@ -1669,7 +1669,7 @@ int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPo
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag, isBroker);
+    return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetsysNativeClient::DeleteNetworkAccessPolicy(uint32_t uid)
@@ -1756,6 +1756,26 @@ int32_t NetsysNativeClient::CloseSocketsUid(const std::string &ipAddr, uint32_t 
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->CloseSocketsUid(ipAddr, uid);
+}
+
+int32_t NetsysNativeClient::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetBrokerUidAccessPolicyMap(uidMaps);
+}
+
+int32_t NetsysNativeClient::DelBrokerUidAccessPolicyMap(uint32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DelBrokerUidAccessPolicyMap(uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

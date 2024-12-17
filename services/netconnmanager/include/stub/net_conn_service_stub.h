@@ -88,7 +88,11 @@ private:
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUnregisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetNetInterfaceIpAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetInterfaceUp(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetInterfaceDown(MessageParcel &data, MessageParcel &reply);
     int32_t OnAddNetworkRoute(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoveNetworkRoute(MessageParcel &data, MessageParcel &reply);
     int32_t OnAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);

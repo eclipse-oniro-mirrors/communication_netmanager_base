@@ -38,6 +38,10 @@ static constexpr const char *FIREWALL_BPF_PATH = "/system/etc/bpf/netsys.o";
 static constexpr const int CONNTRACK_GC_INTTERVAL_MS = 60000;
 static constexpr const int RING_BUFFER_POLL_TIME_OUT_MS = -1;
 
+static constexpr const char *LOOP_BACK_IPV4 = "127.0.0.0";
+static constexpr const int LOOP_BACK_IPV4_PREFIXLEN = 8;
+static constexpr const char *LOOP_BACK_IPV6 = "::1";
+static constexpr const int LOOP_BACK_IPV6_PREFIXLEN = 128;
 // convert ebpf types from unix style style to CPP's
 using Ip4Key = ip4_key;
 using Ip6Key = ip6_key;
@@ -64,6 +68,7 @@ using CtVaule = struct ct_entry;
 
 using DomainHashKey = struct domain_hash_key;
 using DomainValue = domain_value;
+using LoopbackValue = loop_back_val;
 
 struct NetAddrInfo {
     uint32_t aiFamily;
@@ -129,11 +134,12 @@ public:
     /**
      * Set firewall default action
      *
+     * @param userId user id
      * @param inDefault  Default action of NetFirewallRuleDirection:RULE_IN
      * @param outDefault Default action of NetFirewallRuleDirection:RULE_OUT
      * @return  0 if success or -1 if an error occurred
      */
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
     /**
      * Set firewall current user id
@@ -192,6 +198,12 @@ public:
 
     void AddDomainCache(const NetAddrInfo &addrInfo);
     void ClearDomainCache();
+
+    /**
+     * clear firewall default action
+     *
+     */
+    void ClearFirewallDefaultAction();
 
 private:
     template <typename Key, typename Value> int ClearBpfMap(const char *path, const Key &key, Value &val)
@@ -292,6 +304,8 @@ private:
         bool isWildcard);
 
     void ClearDomainRules();
+
+    int32_t WriteLoopBackBpfMap();
 
     static std::shared_ptr<NetsysBpfNetFirewall> instance_;
     static bool isBpfLoaded_;

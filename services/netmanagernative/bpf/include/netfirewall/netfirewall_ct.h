@@ -206,4 +206,54 @@ static __always_inline enum ct_status ct_lookup_entry(struct __sk_buff *skb, con
     return CT_NEW;
 }
 
+/**
+ * @brief swap tuple ports at egress direction
+ *
+ * @param tuple struct match_tuple
+ */
+static __always_inline void swap_ct_tuple_ports(struct ct_tuple *tuple)
+{
+    __be16 tmp = tuple->sport;
+    tuple->sport = tuple->dport;
+    tuple->dport = tmp;
+}
+
+/**
+ * @brief swap tuple addrs at egress direction
+ *
+ * @param tuple struct match_tuple
+ */
+static __always_inline void swap_ct_tuple_addrs(struct ct_tuple *tuple)
+{
+    if (tuple->family == AF_INET) {
+        __be32 tmp = tuple->ipv4.saddr;
+        tuple->ipv4.saddr = tuple->ipv4.daddr;
+        tuple->ipv4.daddr = tmp;
+    } else {
+        struct in6_addr tmp = tuple->ipv6.saddr;
+        tuple->ipv6.saddr = tuple->ipv6.daddr;
+        tuple->ipv6.daddr = tmp;
+    }
+}
+
+/**
+ * @brief lookup from ct map by ct_tuple if found then update lifetime of connection
+ *
+ * @param skb struct __sk_buff
+ * @param tuple struct ct_tuple
+ * @param dir enum ct_dir
+ * @return CT_NEW if not found, otherwise CT_RELATED, CT_REOPENED or CT_ESTABLISHED
+ */
+static __always_inline enum ct_status ct_map_lookup_entry(struct __sk_buff *skb, struct ct_tuple *tuple,
+    enum ct_dir dir, bool is_loopback)
+{
+    enum ct_status status = ct_lookup_entry(skb, tuple, dir);
+    if (status == CT_NEW && is_loopback) {
+        swap_ct_tuple_addrs(tuple);
+        swap_ct_tuple_ports(tuple);
+        status = ct_lookup_entry(skb, tuple, dir);
+    }
+    return status;
+}
+
 #endif // NET_FIREWALL_CT_H

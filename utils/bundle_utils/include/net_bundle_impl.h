@@ -26,6 +26,11 @@ public:
     bool IsAtomicService(std::string &bundleName) override;
     std::optional<int32_t> ObtainTargetApiVersionForSelf() override;
     std::optional<std::string> ObtainBundleNameForSelf() override;
+    std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> ObtainBundleInfoForActive() override;
+    std::optional<SampleBundleInfo> ObtainBundleInfoForUid(uint32_t uid) override;
+
+private:
+    int32_t GetActivatedOsAccountId(int32_t &userId);
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);

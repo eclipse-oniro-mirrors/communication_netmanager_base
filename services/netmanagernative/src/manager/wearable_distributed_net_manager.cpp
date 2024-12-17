@@ -63,6 +63,11 @@ std::vector<std::string> WearableDistributedNet::GetIptablesDeleteCmds()
 
 bool WearableDistributedNet::ReadSystemIptablesConfiguration()
 {
+    std::unique_lock<std::mutex> lock(iptablesParseMutex_);
+    if (iptablesHasBeenParse_) {
+        NETNATIVE_LOGI("iptables has been parsed");
+        return true;
+    }
     const auto &jsonStr = ReadJsonFile();
     if (jsonStr.length() == 0) {
         NETNATIVE_LOGE("ReadConfigData config file is return empty");
@@ -80,6 +85,7 @@ bool WearableDistributedNet::ReadSystemIptablesConfiguration()
         return false;
     }
     cJSON_Delete(json);
+    iptablesHasBeenParse_ = true;
     return true;
 }
 

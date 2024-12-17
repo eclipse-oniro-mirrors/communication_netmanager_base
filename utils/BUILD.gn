@@ -25,6 +25,7 @@ group("common_target") {
 
 config("netmgr_common_config") {
   include_dirs = [
+    "bundle_utils/include",
     "common_utils/include",
     "log/include",
     "errorcode_utils/include",
@@ -216,6 +217,7 @@ ohos_shared_library("net_bundle_utils") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
   ]
 

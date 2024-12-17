@@ -39,6 +39,8 @@ public:
     int32_t OnInterfaceRemoved(const std::string &ifName) override;
     int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
     int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName) override;
 
 private:
     using NetInterfaceStateCallbackFunc = int32_t (NetInterfaceStateCallbackStub::*)(MessageParcel &, MessageParcel &);
@@ -50,6 +52,7 @@ private:
     int32_t CmdInterfaceRemoved(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceChanged(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceLinkStateChanged(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRouteChanged(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetInterfaceStateCallbackFunc> memberFuncMap_;

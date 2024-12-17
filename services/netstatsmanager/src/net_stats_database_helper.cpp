@@ -415,6 +415,10 @@ int32_t NetStatsDatabaseHelper::Upgrade()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_3);
     }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_4);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_4);
+    }
     return ret;
 }
 
@@ -431,6 +435,24 @@ int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, T
     }
     NETMGR_LOG_I("ExecTableUpgrade tableName = %{public}s, oldVersion = %{public}d, newVersion = %{public}d",
                  tableName.c_str(), oldVersion, newVersion);
+    ExecUpgradeSql(tableName, oldVersion, newVersion);
+    if (oldVersion != newVersion) {
+        NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
+                     oldVersion, newVersion);
+        return NETMANAGER_ERROR;
+    }
+    ret = UpdateTableVersion(oldVersion, tableName);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("ExecTableUpgrade updateVersion failed. ret = %{public}d", ret);
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion,
+                                            TableVersion newVersion)
+{
+    int32_t ret = NETMANAGER_SUCCESS;
     if (oldVersion < Version_1 && newVersion >= Version_1) {
         std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
         ret = ExecSql(sql, nullptr, sqlCallback);
@@ -454,17 +476,15 @@ int32_t NetStatsDatabaseHelper::ExecTableUpgrade(const std::string &tableName, T
         }
         oldVersion = Version_3;
     }
-    if (oldVersion != newVersion) {
-        NETMGR_LOG_E("ExecTableUpgrade error. oldVersion = %{public}d, newVersion = %{public}d",
-                     oldVersion, newVersion);
-        return NETMANAGER_ERROR;
+    if (oldVersion < Version_4 && newVersion >= Version_4) {
+        std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM) +
+                          " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_DEFAULT) + ";";
+        ret = ExecSql(sql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade Version_4 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_4;
     }
-    ret = UpdateTableVersion(oldVersion, tableName);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ExecTableUpgrade updateVersion failed. ret = %{public}d", ret);
-        return NETMANAGER_ERROR;
-    }
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std::string &tableName)
@@ -504,6 +524,13 @@ int32_t NetStatsDatabaseHelper::UpdateStatsFlag(const std::string &tableName, ui
 {
     std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(flag) +
                       " WHERE UID = " + std::to_string(uid);
+    return ExecSql(sql, nullptr, sqlCallback);
+}
+
+int32_t NetStatsDatabaseHelper::UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag)
+{
+    std::string sql =
+        "UPDATE " + tableName + " SET Flag = " + std::to_string(newFlag) + " WHERE Flag = " + std::to_string(oldFlag);
     return ExecSql(sql, nullptr, sqlCallback);
 }
 } // namespace NetManagerStandard

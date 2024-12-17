@@ -130,7 +130,7 @@ HWTEST_F(EthernetConfigurationTest, EthernetConfiguration003, TestSize.Level1)
 {
     EthernetConfiguration ethernetConfiguration;
     EthernetDhcpCallback::DhcpResult dhcpResult;
-    dhcpResult.ipAddr = "test";
+    dhcpResult.ipAddr = "test1";
     sptr<StaticConfiguration> config = (std::make_unique<StaticConfiguration>()).release();
     ethernetConfiguration.IsValidDhcpResult(dhcpResult, config);
 

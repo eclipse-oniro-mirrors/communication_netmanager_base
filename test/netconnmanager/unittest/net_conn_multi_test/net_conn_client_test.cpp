@@ -1016,6 +1016,8 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest001, TestSize.Level1
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
     int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    ret = NetConnClient::GetInstance().UnregisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -1028,6 +1030,8 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1
     NetManagerBaseAccessToken token;
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
     int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnClient::GetInstance().UnregisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1185,6 +1189,16 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string ifName = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetNetInterfaceIpAddress(ifName, ipAddr);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1470,6 +1484,18 @@ HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
     int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
     NetConnClient::GetInstance().DlCloseRemoveDeathRecipient();
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, SetInterfaceTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+
+    std::string ifName = "wlan0";
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetInterfaceDown(ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetInterfaceUp(ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

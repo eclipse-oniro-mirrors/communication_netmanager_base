@@ -184,7 +184,7 @@ bool WrapperDecoder::DecodeAscii(const char *buffer, int32_t buffSize)
     }
     const auto msg = Split(buf, SYMBOL_AT);
     if (msg.size() <= 1) {
-        NETNATIVE_LOGE("msg.size() = %{public}d, buf = %{public}s.", static_cast<int32_t>(msg.size()), buf.c_str());
+        NETNATIVE_LOG_D("msg.size() = %{public}d, buf = %{public}s.", static_cast<int32_t>(msg.size()), buf.c_str());
         return false;
     }
     const std::string path = msg[1];

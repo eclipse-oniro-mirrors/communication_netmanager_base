@@ -82,7 +82,11 @@
       "OHOS::NetManagerStandard::NetConnClient::GetDefaultHttpProxy(OHOS::NetManagerStandard::HttpProxy&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetIdByIdentifier(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::list<int, std::__h::allocator<int>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetInterfaceConfiguration(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::NetManagerStandard::NetInterfaceConfiguration&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetNetInterfaceIpAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetInterfaceUp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetInterfaceDown(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetInterfaceCallback(OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::UnregisterNetInterfaceCallback(OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> const&)";
       "OHOS::NetManagerStandard::NetConnClient::AddNetworkRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::RemoveNetworkRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::DelStaticArp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -94,6 +98,7 @@
       "OHOS::NetManagerStandard::NetConnClient::TrustUser0Ca()";
       "OHOS::NetManagerStandard::NetConnClient::TrustUserCa()";
       "OHOS::NetManagerStandard::NetConnClient::GetTrustAnchorsForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsUserDnsCache()";
       VTT?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
       vtable?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
       "OHOS::NetManagerStandard::NetworkSecurityConfig::NetworkSecurityConfig()";
@@ -114,6 +119,7 @@
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenMode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUser0Ca()";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUserCa()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsUserDnsCache()";
       "OHOS::NetManagerStandard::NetConnClient::FactoryResetNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetFactoryResetCallback(OHOS::sptr<OHOS::NetManagerStandard::INetFactoryResetCallback> const&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;
@@ -199,12 +205,14 @@
       "OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceRemoved(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceLinkStateChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      "OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnRouteChanged(bool, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceAddressUpdated(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceAddressRemoved(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceAdded(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceRemoved(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceLinkStateChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnRouteChanged(bool, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       VTT?for?OHOS::NetManagerStandard::NetFactoryResetCallbackStub;
       vtable?for?OHOS::NetManagerStandard::NetFactoryResetCallbackStub;
       "OHOS::NetManagerStandard::NetFactoryResetCallbackStub::NetFactoryResetCallbackStub()";

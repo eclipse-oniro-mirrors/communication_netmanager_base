@@ -73,7 +73,11 @@ public:
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
+    int32_t UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
+    int32_t SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress) override;
+    int32_t SetInterfaceUp(const std::string &iface) override;
+    int32_t SetInterfaceDown(const std::string &iface) override;
     int32_t AddNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
                             const std::string &nextHop) override;
     int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,

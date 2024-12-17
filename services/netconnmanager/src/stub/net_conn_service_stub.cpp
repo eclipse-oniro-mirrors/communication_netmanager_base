@@ -81,6 +81,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnSetInternetPermission, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetInterfaceCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK)] = {
+        &NetConnServiceStub::OnUnregisterNetInterfaceCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE)] = {
         &NetConnServiceStub::OnAddNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
@@ -168,6 +170,12 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
         &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS)] = {
+        &NetConnServiceStub::OnSetNetInterfaceIpAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_UP)] = {
+        &NetConnServiceStub::OnSetInterfaceUp, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN)] = {
+        &NetConnServiceStub::OnSetInterfaceDown, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE)] = {
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
@@ -1326,6 +1334,25 @@ int32_t NetConnServiceStub::OnRegisterNetInterfaceCallback(MessageParcel &data, 
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceStub::OnUnregisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
+    int32_t ret = UnregisterNetInterfaceCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply)
 {
     std::string iface;
@@ -1344,6 +1371,56 @@ int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, 
             return ERR_FLATTEN_OBJECT;
         }
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetNetInterfaceIpAddress(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ipAddress;
+    if (!data.ReadString(ipAddress)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetNetInterfaceIpAddress(iface, ipAddress);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetInterfaceUp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetInterfaceUp(iface);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetInterfaceDown(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetInterfaceDown(iface);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
     return NETMANAGER_SUCCESS;
 }
 

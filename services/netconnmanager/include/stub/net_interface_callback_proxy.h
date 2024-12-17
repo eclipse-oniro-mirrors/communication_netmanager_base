@@ -36,6 +36,8 @@ public:
     int32_t OnInterfaceRemoved(const std::string &ifName) override;
     int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
     int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

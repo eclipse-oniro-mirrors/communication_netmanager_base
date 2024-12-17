@@ -33,6 +33,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace testing::ext;
+namespace {
+constexpr uint32_t TEST_UID = 1;
+}
 
 class UtNetPolicyService : public testing::Test {
 public:

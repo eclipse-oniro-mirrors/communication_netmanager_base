@@ -394,25 +394,9 @@ void ConnManager::GetDumpInfos(std::string &infos)
 }
 
 int32_t ConnManager::SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy,
-                                            bool reconfirmFlag, bool isBroker)
+                                            bool reconfirmFlag)
 {
-    NETNATIVE_LOGI("SetNetworkAccessPolicy isBroker: %{public}d", isBroker);
-
-    if (isBroker) {
-        BpfMapper<app_uid_key, app_uid_key> brokerUidAccessPolicyMap(BROKER_UID_ACCESS_POLICY_MAP_PATH, BPF_F_WRONLY);
-        if (!brokerUidAccessPolicyMap.IsValid()) {
-            return NETMANAGER_ERROR;
-        }
-        // 0 means no permission
-        app_uid_key v = {0};
-        v = uid;
-        if (brokerUidAccessPolicyMap.Write(DEFAULT_BROKER_UID_KEY, v, 0) != 0) {
-            NETNATIVE_LOGE("SetNetworkAccessPolicy Write brokerUidAccessPolicyMap err");
-            return NETMANAGER_ERROR;
-        }
-
-        NETNATIVE_LOG_D("SetNetworkAccessPolicy brokerUidAccessPolicyMap: %{public}d", isBroker);
-    }
+    NETNATIVE_LOGI("SetNetworkAccessPolicy Enter");
 
     BpfMapper<app_uid_key, uid_access_policy_value> uidAccessPolicyMap(APP_UID_PERMISSION_MAP_PATH, BPF_ANY);
     if (!uidAccessPolicyMap.IsValid()) {

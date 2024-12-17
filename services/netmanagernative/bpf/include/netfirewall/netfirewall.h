@@ -80,6 +80,7 @@ static __always_inline bool get_ct_tuple(struct match_tuple *match_tpl, struct c
         return false;
     }
 
+    ct_tpl->uid = match_tpl->uid;
     ct_tpl->family = match_tpl->family;
     ct_tpl->protocol = match_tpl->protocol;
     ct_tpl->sport = match_tpl->sport;
@@ -120,7 +121,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         return SK_PASS;
     }
 
-    enum ct_status status = ct_lookup_entry(skb, &ct_tpl, CT_INGRESS);
+    enum ct_status status = ct_map_lookup_entry(skb, &ct_tpl, CT_INGRESS, match_loopback(tuple));
     log_dbg(DBG_CT_LOOKUP, INGRESS, status);
     if (status != CT_NEW) {
         return SK_PASS;
@@ -152,9 +153,8 @@ static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
 {
     __be16 port = bpf_htons(tuple->sport);
     if (port == FIREWALL_DNS_QUERY_PORT || port == FIREWALL_DNS_OVER_QUERY_PORT) {
-        default_action_key key = DEFAULT_ACT_OUT_KEY;
-        enum sk_action *action = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &key);
-        return action && *action != SK_PASS;
+        struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &tuple->uid);
+        return default_value && default_value->outaction != SK_PASS;
     }
     return false;
 }
@@ -187,7 +187,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         return SK_PASS;
     }
 
-    enum ct_status status = ct_lookup_entry(skb, &ct_tpl, CT_EGRESS);
+    enum ct_status status = ct_map_lookup_entry(skb, &ct_tpl, CT_EGRESS, match_loopback(tuple));
     log_dbg(DBG_CT_LOOKUP, EGRESS, status);
     if (status != CT_NEW) {
         return SK_PASS;

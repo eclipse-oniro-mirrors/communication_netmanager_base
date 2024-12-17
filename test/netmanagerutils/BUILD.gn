@@ -16,6 +16,7 @@ import("//build/test.gni")
 group("unittest") {
   testonly = true
   deps = [
+    "unittest/netmanager_base_common_test:netmanager_datashare_iface_test",
     "unittest/netmanager_base_common_test:netmanager_datashare_test",
     "unittest/netmanager_base_common_test:netmanager_utils_test",
   ]

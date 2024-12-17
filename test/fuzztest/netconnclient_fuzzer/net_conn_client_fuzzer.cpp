@@ -149,7 +149,7 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
     NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY), dataParcel);
@@ -210,7 +210,7 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
     NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -489,7 +489,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), dataParcel);
     
     MessageParcel dataParcelNoRemoteObject;
-    if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -582,18 +582,30 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 void SetAppHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     HttpProxy httpProxy = {NetConnGetString(STR_LEN), 0, {}};
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->SetAppHttpProxy(httpProxy);
 }
 
 void RegisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     uint32_t callbackId = 0;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->RegisterAppHttpProxyCallback(SetAppHttpProxyCallback, callbackId);
 }
 
 void UnregisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     int32_t callbackId = NetConnGetData<int32_t>();
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterAppHttpProxyCallback(callbackId);
 }
 
@@ -677,8 +689,43 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
         return;
     }
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
     dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK),
+                    dataParcelNoRemoteObject);
+}
+
+void UnregisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr) {
+        return;
+    }
+
+    NetManagerBaseAccessToken token;
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK),
+                    dataParcel);
+
+    MessageParcel dataParcelNoRemoteObject;
+    if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
+        return;
+    }
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK),
                     dataParcelNoRemoteObject);
 }
 
@@ -1456,6 +1503,56 @@ void CloseSocketsUidTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID), dataParcelNoIfName);
 }
+
+void SetInterfaceUpFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    std::string iface = NetConnGetString(STR_LEN);
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(iface);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_UP), dataParcel);
+}
+
+void SetInterfaceDownFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    std::string iface = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(iface);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN), dataParcel);
+}
+
+void SetNetInterfaceIpAddressFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    std::string iface = NetConnGetString(STR_LEN);
+    std::string ipAddr = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(iface);
+    dataParcel.WriteString(ipAddr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS), dataParcel);
+}
+
+void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
+{
+    OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetInterfaceDownFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNetInterfaceIpAddressFuzzTest(data, size);
+    OHOS::NetManagerStandard::UnregisterNetInterfaceCallbackFuzzTest(data, size);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1511,5 +1608,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::EnableDistributedServerNetFuzzTest(data, size);
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
+    OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     return 0;
 }

@@ -34,6 +34,7 @@ namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
+constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
 } // namespace
 
 int32_t NetStatsCached::StartCached()
@@ -78,12 +79,23 @@ void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
 void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
-                   std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+    std::vector<NetStatsInfo> tmpList;
+    std::transform(stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(), std::back_inserter(tmpList),
+                   [](NetStatsInfo &info) {
                        NetStatsInfo tmpInfo = info;
-                       tmpInfo.uid_ = Sim_UID;
                        return tmpInfo;
                    });
+    tmpList.erase(std::remove_if(tmpList.begin(), tmpList.end(), [](const auto &item) {
+                      return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
+                  }), tmpList.end());
+    std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+        if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+            info.uid_ = SIM2_UID;
+        } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+            info.uid_ = Sim_UID;
+        }
+        return info;
+    });
 }
 
 void NetStatsCached::GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo)
@@ -125,47 +137,8 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
-    std::vector<NetStatsInfo> allInfos;
-    NetsysController::GetInstance().GetAllStatsInfo(allInfos);
-    ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
-        std::for_each(allInfos.begin(), allInfos.end(), [&k, &v](NetStatsInfo &item) {
-            if (item.iface_ == k) {
-                item.ident_ = v;
-            }
-        });
-    });
-    std::for_each(allInfos.begin(), allInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
-        if (info.iface_ == IFACE_LO) {
-            return;
-        }
-        NetStatsInfo tmp = GetIncreasedStats(info);
-        if (tmp.HasNoData()) {
-            return;
-        }
-        tmp.date_ = CommonUtils::GetCurrentSecond();
-        statsInfo.push_back(std::move(tmp));
-    });
-    std::vector<NetStatsInfo> SimInfos;
-    NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
-    ifaceNameIdentMap_.Iterate([&SimInfos](const std::string &k, const std::string &v) {
-        std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
-            if (item.iface_ == k) {
-                item.ident_ = v;
-            }
-        });
-    });
-    std::for_each(SimInfos.begin(), SimInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
-        if (info.iface_ == IFACE_LO) {
-            return;
-        }
-        NetStatsInfo tmp = GetIncreasedSimStats(info);
-        if (tmp.HasNoData()) {
-            return;
-        }
-        tmp.date_ = CommonUtils::GetCurrentSecond();
-        tmp.uid_ = Sim_UID;
-        statsInfo.push_back(std::move(tmp));
-    });
+    GetKernelUidStats(statsInfo);
+    GetKernelUidSimStats(statsInfo);
 }
 
 NetStatsInfo NetStatsCached::GetIncreasedStats(const NetStatsInfo &info)
@@ -264,10 +237,20 @@ void NetStatsCached::CacheUidSimStats()
             }
         });
     });
+    uidStatsFlagMap_.Iterate([&statsInfos](const uint32_t &k, const NetStatsDataFlag &v) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.uid_ == k) {
+                item.flag_ = v;
+            }
+        });
+    });
 
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
+        }
+        if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
+            info.flag_ = GetUidStatsFlag(info.uid_);
         }
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
@@ -399,33 +382,7 @@ void NetStatsCached::ForceUpdateStats()
     ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
 }
 
-void NetStatsCached::ForceDeleteStats(uint32_t uid)
-{
-    NETMGR_LOG_I("ForceDeleteStats Enter uid[%{public}u]", uid);
-    auto ret = NetsysController::GetInstance().DeleteStatsInfo(uid);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ForceDeleteStats DeleteStatsInfo failed. ret is %{public}d", ret);
-    }
-    ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("ForceDeleteStats DeleteSimStatsInfo failed. ret is %{public}d", ret);
-    }
-
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    stats_.ResetUidStats(uid);
-    stats_.ResetUidSimStats(uid);
-    lastUidStatsInfo_.erase(std::remove_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
-                                           [uid](const auto &item) { return item.uid_ == uid; }),
-                            lastUidStatsInfo_.end());
-    lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
-                                              [uid](const auto &item) { return item.uid_ == uid; }),
-                               lastUidSimStatsInfo_.end());
-    uidPushStatsInfo_.erase(std::remove_if(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(),
-                                           [uid](const auto &item) { return item.uid_ == uid; }),
-                            uidPushStatsInfo_.end());
-}
-
-void NetStatsCached::ForceArchiveStats(uint32_t uid)
+ffrt::task_handle NetStatsCached::ForceArchiveStats(uint32_t uid)
 {
     std::function<void()> netCachedStats = [this, uid]() {
         CacheStats();
@@ -438,12 +395,281 @@ void NetStatsCached::ForceArchiveStats(uint32_t uid)
             uninstalledUid_ = -1;
             isForce_ = false;
         }
-        ForceDeleteStats(uid);
+        DeleteUidStats(uid);
+        DeleteUidSimStats(uid);
+        DeleteUidStatsFlag(uid);
+        DeleteUidSimSampleBundle(uid);
+        if (GetUidSimSampleBundlesSize() == 0) {
+            uidStatsFlagMap_.Clear();
+        }
     };
-    ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetForceArchiveStats"));
+    return ffrt::submit_h(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetForceArchiveStats"));
 }
 
 void NetStatsCached::Reset() {}
 
+void NetStatsCached::ForceCachedStats()
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    CacheUidSimStats();
+    WriteUidSimStats();
+}
+
+void NetStatsCached::SetUidSimSampleBundle(uint32_t uid, const SampleBundleInfo &info)
+{
+    if (!info.Valid()) {
+        NETMGR_LOG_W("SetUidSimSampleBundle invalid. info[%{public}u, %{public}s]", uid, info.ToString().c_str());
+        return;
+    }
+    uidSimSampleBundleMap_.EnsureInsert(uid, info);
+}
+
+void NetStatsCached::DeleteUidSimSampleBundle(uint32_t uid)
+{
+    uidSimSampleBundleMap_.Erase(uid);
+}
+
+std::optional<SampleBundleInfo> NetStatsCached::GetUidSimSampleBundle(uint32_t uid)
+{
+    SampleBundleInfo info;
+    if (uidSimSampleBundleMap_.Find(uid, info)) {
+        return info;
+    }
+    return std::nullopt;
+}
+
+uint32_t NetStatsCached::GetUidSimSampleBundlesSize()
+{
+    return static_cast<uint32_t>(uidSimSampleBundleMap_.Size());
+}
+
+void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleInfo> &sampleBundleMap)
+{
+    if (sampleBundleMap.empty()) {
+        NETMGR_LOG_W("SetUidStatsFlag sampleBundleMap is empty");
+        return;
+    }
+    bool isExistSim = false;
+    bool isExistSim2 = false;
+    IsExistInUidSimSampleBundleMap(isExistSim, isExistSim2);
+    std::optional<SampleBundleInfo> earlySampleBundleOpt = GetEarlySampleBundleInfo();
+    for (auto iter = sampleBundleMap.begin(); iter != sampleBundleMap.end(); ++iter) {
+        if (!iter->second.Valid()) {
+            NETMGR_LOG_W("SetUidStatsFlag sampleBundleInfo is invalid. [%{public}s]", iter->second.ToString().c_str());
+            continue;
+        }
+        if (CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
+            uidStatsFlagMap_.EnsureInsert(iter->first,
+                                          isExistSim2 ? STATS_DATA_FLAG_SIM2 : STATS_DATA_FLAG_DEFAULT);
+        } else if (CommonUtils::IsInstallSourceFromSim(iter->second.installSource_)) {
+            uidStatsFlagMap_.EnsureInsert(iter->first, isExistSim ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_DEFAULT);
+        } else if (iter->second.installSource_ == INSTALL_SOURCE_DEFAULT) {
+            if (!isExistSim && !isExistSim2) {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_DEFAULT);
+                continue;
+            }
+            if (earlySampleBundleOpt.has_value() &&
+                CommonUtils::IsSim2(earlySampleBundleOpt.value().bundleName_) && isExistSim2) {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2);
+            } else if (isExistSim) {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM);
+            } else {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_DEFAULT);
+            }
+        }
+    }
+}
+
+void NetStatsCached::DeleteUidStatsFlag(uint32_t uid)
+{
+    uidStatsFlagMap_.Erase(uid);
+}
+
+void NetStatsCached::ClearUidStatsFlag()
+{
+    ForceCachedStats();
+    uidStatsFlagMap_.Clear();
+}
+
+NetStatsDataFlag NetStatsCached::GetUidStatsFlag(uint32_t uid)
+{
+    NetStatsDataFlag flag = STATS_DATA_FLAG_DEFAULT;
+    if (uidStatsFlagMap_.Find(uid, flag)) {
+        return flag;
+    }
+    if (uidSimSampleBundleMap_.Size() < 1) {
+        uidStatsFlagMap_.EnsureInsert(uid, flag);
+        return flag;
+    }
+    bool isExistSim = false;
+    uidSimSampleBundleMap_.Iterate([&isExistSim](const uint32_t &k, const SampleBundleInfo &v) {
+        if (CommonUtils::IsSim(v.bundleName_)) {
+            isExistSim = true;
+        }
+    });
+    flag = isExistSim ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_DEFAULT;
+    uidStatsFlagMap_.EnsureInsert(uid, flag);
+    return flag;
+}
+
+std::optional<SampleBundleInfo> NetStatsCached::GetEarlySampleBundleInfo()
+{
+    std::map<uint32_t, SampleBundleInfo> tmp;
+    uidSimSampleBundleMap_.Iterate([&tmp](uint32_t uid, const SampleBundleInfo &info) { tmp.emplace(uid, info); });
+    auto earlySampleBundle = std::max_element(
+        tmp.begin(), tmp.end(), [](std::pair<uint32_t, SampleBundleInfo> l, std::pair<uint32_t, SampleBundleInfo> r) {
+            return l.second.installTime_ > r.second.installTime_;
+        });
+    if (earlySampleBundle != tmp.end()) {
+        return earlySampleBundle->second;
+    } else {
+        NETMGR_LOG_W("SetUidStatsFlag earlySampleBundle is not exist.");
+        return std::nullopt;
+    }
+}
+
+void NetStatsCached::IsExistInUidSimSampleBundleMap(bool &isExistSim, bool &isExistSim2)
+{
+    isExistSim = false;
+    isExistSim2 = false;
+    uidSimSampleBundleMap_.Iterate([&isExistSim2, &isExistSim](uint32_t uid, const SampleBundleInfo &info) {
+        if (CommonUtils::IsSim(info.bundleName_)) {
+            isExistSim = true;
+        }
+        if (CommonUtils::IsSim2(info.bundleName_)) {
+            isExistSim2 = true;
+        }
+    });
+}
+
+void NetStatsCached::DeleteUidStats(uint32_t uid)
+{
+    auto ret = NetsysController::GetInstance().DeleteStatsInfo(uid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DeleteUidStats statsInfo failed. ret is %{public}d", ret);
+    }
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    stats_.ResetUidStats(uid);
+    lastUidStatsInfo_.erase(std::remove_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
+                                           [uid](const auto &item) { return item.uid_ == uid; }),
+                            lastUidStatsInfo_.end());
+    uidPushStatsInfo_.erase(std::remove_if(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(),
+                                           [uid](const auto &item) { return item.uid_ == uid; }),
+                            uidPushStatsInfo_.end());
+}
+
+void NetStatsCached::DeleteUidSimStats(uint32_t uid)
+{
+    std::optional<SampleBundleInfo> sampleBundleInfoOpt = GetUidSimSampleBundle(uid);
+    DeleteUidSimSampleBundle(uid);
+    if (!sampleBundleInfoOpt.has_value()) {
+        auto ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("DeleteUidSimStats SimStatsInfo Failed. ret is %{public}d", ret);
+        }
+        std::lock_guard<ffrt::mutex> lock(lock_);
+        stats_.ResetUidSimStats(uid);
+        lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
+                                                  [uid](const auto &item) { return item.uid_ == uid; }),
+                                   lastUidSimStatsInfo_.end());
+        return;
+    }
+    auto sampleBundleInfo = sampleBundleInfoOpt.value();
+    if (!sampleBundleInfo.Valid()) {
+        NETMGR_LOG_W("DeleteUidSimStats invalid info[%{public}s]", sampleBundleInfo.ToString().c_str());
+        return;
+    }
+    if (CommonUtils::IsSim(sampleBundleInfo.bundleName_) ||
+        CommonUtils::IsSim2(sampleBundleInfo.bundleName_)) {
+        auto flag =
+            CommonUtils::IsSim(sampleBundleInfo.bundleName_) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
+        auto handler = std::make_unique<NetStatsDataHandler>();
+        if (handler == nullptr || handler->UpdateSimDataFlag(flag, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("DeleteUidSimStats updateFlag failed. uid:[%{public}d], flag[%{public}u]", uid, flag);
+        }
+        std::lock_guard<ffrt::mutex> lock(lock_);
+        lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
+                                                  [flag](const auto &item) { return item.flag_ == flag; }),
+                                   lastUidSimStatsInfo_.end());
+        std::vector<uint32_t> uidList{uid};
+        uidStatsFlagMap_.Iterate([flag, &uidList](const uint32_t &k, const NetStatsDataFlag &v) {
+            if (flag == v) {
+                uidList.push_back(k);
+            }
+        });
+        std::for_each(uidList.begin(), uidList.end(), [this](const uint32_t uid) {
+            uidStatsFlagMap_.EnsureInsert(uid, STATS_DATA_FLAG_DEFAULT);
+            auto ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("DeleteUidSimStats SimStatsInfo Failed. ret[%{public}d], uid[%{public}u]", ret, uid);
+            }
+        });
+    }
+}
+
+void NetStatsCached::GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo)
+{
+    std::vector<NetStatsInfo> allInfos;
+    NetsysController::GetInstance().GetAllStatsInfo(allInfos);
+    ifaceNameIdentMap_.Iterate([&allInfos](const std::string &k, const std::string &v) {
+        std::for_each(allInfos.begin(), allInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
+    std::for_each(allInfos.begin(), allInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
+        if (info.iface_ == IFACE_LO) {
+            return;
+        }
+        NetStatsInfo tmp = GetIncreasedStats(info);
+        if (tmp.HasNoData()) {
+            return;
+        }
+        tmp.date_ = CommonUtils::GetCurrentSecond();
+        statsInfo.push_back(std::move(tmp));
+    });
+}
+
+void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
+{
+    std::vector<NetStatsInfo> SimInfos;
+    NetsysController::GetInstance().GetAllSimStatsInfo(SimInfos);
+    ifaceNameIdentMap_.Iterate([&SimInfos](const std::string &k, const std::string &v) {
+        std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
+    uidStatsFlagMap_.Iterate([&SimInfos](const uint32_t &k, const NetStatsDataFlag &v) {
+        std::for_each(SimInfos.begin(), SimInfos.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.uid_ == k) {
+                item.flag_ = v;
+            }
+        });
+    });
+    std::for_each(SimInfos.begin(), SimInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
+        if (info.iface_ == IFACE_LO) {
+            return;
+        }
+        NetStatsInfo tmp = GetIncreasedSimStats(info);
+        if (tmp.HasNoData()) {
+            return;
+        }
+        tmp.date_ = CommonUtils::GetCurrentSecond();
+        if (tmp.flag_ <= STATS_DATA_FLAG_DEFAULT || tmp.flag_ >= STATS_DATA_FLAG_LIMIT) {
+            tmp.flag_ = GetUidStatsFlag(tmp.uid_);
+        }
+        if (tmp.flag_ == STATS_DATA_FLAG_SIM2) {
+            tmp.uid_ = SIM2_UID;
+        } else if (tmp.flag_ == STATS_DATA_FLAG_SIM) {
+            tmp.uid_ = Sim_UID;
+        } else {
+            return;
+        }
+        statsInfo.push_back(std::move(tmp));
+    });
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

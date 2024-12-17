@@ -164,7 +164,8 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                              bool isFinish) override;
-    int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) override;
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+                                     FirewallRuleAction outDefault) override;
     int32_t SetFirewallCurrentUserId(int32_t userId) override;
     int32_t ClearFirewallRules(NetFirewallRuleType type) override;
     int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override;
@@ -177,8 +178,7 @@ public:
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                   bool isBroker) override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
     int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
@@ -189,6 +189,8 @@ public:
     int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override;
 #endif // SUPPORT_SYSVPN
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
+    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
+    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

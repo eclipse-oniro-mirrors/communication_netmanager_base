@@ -208,7 +208,7 @@ void NetSupplier::GetHttpProxy(HttpProxy &httpProxy)
         NETMGR_LOG_E("network_ is nullptr.");
         return;
     }
-    httpProxy = network_->GetNetLinkInfo().httpProxy_;
+    httpProxy = network_->GetHttpProxy();
 }
 
 uint32_t NetSupplier::GetSupplierId() const
@@ -288,7 +288,10 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
-    if (!netSupplierInfo_.isAvailable_) {
+    bool isInternal = HasNetCap(NET_CAPABILITY_INTERNAL_DEFAULT);
+    bool isXcap = HasNetCap(NET_CAPABILITY_XCAP);
+    bool isMms = HasNetCap(NET_CAPABILITY_MMS);
+    if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
         NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }

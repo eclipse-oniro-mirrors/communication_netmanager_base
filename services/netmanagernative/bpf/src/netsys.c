@@ -146,7 +146,7 @@ bpf_map_def SEC("maps") broker_uid_access_policy_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(app_uid_key),
     .value_size = sizeof(app_uid_key),
-    .max_entries = 1,
+    .max_entries = APP_STATS_MAP_SIZE,
     .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -223,11 +223,19 @@ static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_ty
 static inline __u64 check_broker_policy(uint64_t uid)
 {
     uint64_t network_access_uid = uid;
-    void* broker_map_ptr = &broker_uid_access_policy_map;
-    __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
-    app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+    void *broker_map_ptr = &broker_uid_access_policy_map;
+    app_uid_key *broker_uid_key = &uid;
+    app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, broker_uid_key);
     if (broker_uid_value != NULL) {
         network_access_uid = *broker_uid_value;
+        return network_access_uid;
+    } else {
+        __u32 broker_default_uid = DEFAULT_BROKER_UID_KEY;
+        app_uid_key *broker_default_value = bpf_map_lookup_elem(broker_map_ptr, &broker_default_uid);
+        if (broker_default_value != NULL && uid > SIM_UID_MIN && uid < SIM_UID_MAX) {
+            network_access_uid = *broker_default_value;
+            bpf_map_update_elem(broker_map_ptr, broker_uid_key, broker_default_value, BPF_NOEXIST);
+        }
     }
     return network_access_uid;
 }

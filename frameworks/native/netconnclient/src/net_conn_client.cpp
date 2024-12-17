@@ -752,6 +752,16 @@ int32_t NetConnClient::RegisterNetInterfaceCallback(const sptr<INetInterfaceStat
     return proxy->RegisterNetInterfaceCallback(callback);
 }
 
+int32_t NetConnClient::UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UnregisterNetInterfaceCallback(callback);
+}
+
 int32_t NetConnClient::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
 {
     sptr<INetConnService> proxy = GetProxy();
@@ -760,6 +770,36 @@ int32_t NetConnClient::GetNetInterfaceConfiguration(const std::string &iface, Ne
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetNetInterfaceConfiguration(iface, config);
+}
+
+int32_t NetConnClient::SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNetInterfaceIpAddress(iface, ipAddress);
+}
+
+int32_t NetConnClient::SetInterfaceUp(const std::string &iface)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInterfaceUp(iface);
+}
+
+int32_t NetConnClient::SetInterfaceDown(const std::string &iface)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInterfaceDown(iface);
 }
 
 int32_t NetConnClient::AddNetworkRoute(int32_t netId, const std::string &ifName,
@@ -874,6 +914,11 @@ bool NetConnClient::TrustUser0Ca()
 bool NetConnClient::TrustUserCa()
 {
     return NetworkSecurityConfig::GetInstance().TrustUserCa();
+}
+
+bool NetConnClient::IsUserDnsCache()
+{
+    return NetworkSecurityConfig::GetInstance().IsUserDnsCache();
 }
 
 bool NetConnClient::IsPinOpenMode(const std::string &hostname)

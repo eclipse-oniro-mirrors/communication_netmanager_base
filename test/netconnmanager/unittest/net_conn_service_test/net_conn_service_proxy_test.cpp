@@ -654,6 +654,9 @@ HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Lev
     ret = instance_->RegisterNetInterfaceCallback(stateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
+    ret = instance_->UnregisterNetInterfaceCallback(stateCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
     sptr<INetFactoryResetCallback> netFactoryResetCallback = nullptr;
     ret = instance_->RegisterNetFactoryResetCallback(netFactoryResetCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -703,6 +706,21 @@ HWTEST_F(NetConnServiceProxyTest, CloseSocketsUid001, TestSize.Level1)
     int32_t netId = 100;
     uint32_t uid = 20020157;
     int32_t ret = instance_->CloseSocketsUid(netId, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, SetInterfaceTest001, TestSize.Level1)
+{
+    std::string iface = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+    
+    int32_t ret = instance_->SetInterfaceUp(iface);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetNetInterfaceIpAddress(iface, ipAddr);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetInterfaceDown(iface);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 }

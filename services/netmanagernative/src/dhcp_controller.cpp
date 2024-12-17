@@ -19,6 +19,7 @@
 #include "netnative_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include <securec.h>
+#include <cstring>
 
 namespace OHOS {
 namespace nmd {
@@ -89,7 +90,13 @@ void DhcpController::StartClient(const std::string &iface, bool bIpv6)
     }
 
     NETNATIVE_LOGI("DhcpController StartDhcpClient iface[%{public}s] ipv6[%{public}d]", iface.c_str(), bIpv6);
-    if (StartDhcpClient(iface.c_str(), bIpv6) != DHCP_SUCCESS) {
+    RouterConfig config;
+    config.bIpv6 = bIpv6;
+    if (strncpy_s(config.ifname, sizeof(config.ifname), iface.c_str(), iface.length()) != DHCP_SUCCESS) {
+        NETNATIVE_LOGE("strncpy_s config.ifname failed.");
+        return;
+    }
+    if (StartDhcpClient(config) != DHCP_SUCCESS) {
         NETNATIVE_LOGE("Start dhcp client failed");
     }
 }

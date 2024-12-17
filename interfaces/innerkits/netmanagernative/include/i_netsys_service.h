@@ -174,7 +174,8 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     virtual int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                                      bool isFinish) = 0;
-    virtual int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault) = 0;
+    virtual int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+                                             FirewallRuleAction outDefault) = 0;
     virtual int32_t SetFirewallCurrentUserId(int32_t userId) = 0;
     virtual int32_t ClearFirewallRules(NetFirewallRuleType type) = 0;
     virtual int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) = 0;
@@ -186,8 +187,7 @@ public:
 #endif
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
-    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag,
-                                           bool isBroker) = 0;
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
     virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
     virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
     virtual int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) = 0;
@@ -198,6 +198,8 @@ public:
 #ifdef SUPPORT_SYSVPN
     virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
 #endif // SUPPORT_SYSVPN
+    virtual int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) = 0;
+    virtual int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

@@ -329,6 +329,26 @@ public:
     {
         return 0;
     }
+    
+    int32_t UnregisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t SetInterfaceUp(const std::string &iface) override
+    {
+        return 0;
+    }
+
+    int32_t SetInterfaceDown(const std::string &iface) override
+    {
+        return 0;
+    }
+
+    int32_t SetNetInterfaceIpAddress(const std::string &iface, const std::string &ipAddress) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

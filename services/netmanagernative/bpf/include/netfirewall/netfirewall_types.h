@@ -39,6 +39,7 @@
 #define DNS_QRS_IPV6_LEN 16
 #define DNS_DOMAIN_LEN 253
 #define DNS_ANSWER_CNT 32
+#define PROTOCOL_SAT_EXPAK 64
 
 struct bitmap {
     __u32 val[BITMAP_LEN];
@@ -76,6 +77,16 @@ enum debug_type {
 
 struct domain_hash_key {
     __u8 data[DNS_DOMAIN_LEN];
+};
+
+struct defalut_action_value {
+    enum sk_action inaction;
+    enum sk_action outaction;
+};
+
+struct domain_value {
+    __u32 appuid;
+    __u32 uid;
 };
 
 struct debug_event {
@@ -126,6 +137,7 @@ struct match_tuple {
     __u32 appuid;
     __u32 uid;
     __u16 rst;
+    __u32 ifindex;
 };
 
 
@@ -139,6 +151,7 @@ struct event {
     __u32 len;
 };
 
+typedef __u8 loop_back_val;
 typedef __be32 ip4_key;
 typedef struct in6_addr ip6_key;
 typedef __u8 action_key;
@@ -147,7 +160,6 @@ typedef __be16 port_key;
 typedef __u8 proto_key;
 typedef __u32 appuid_key;
 typedef __u32 uid_key;
-typedef __u8 domain_value;
 
 typedef enum {
     CURRENT_USER_ID_KEY = 1,
