@@ -90,7 +90,6 @@ bool IsUrlRegexValid(const std::string &regex);
 std::string InsertCharBefore(const std::string &input, const char from, const char preChar, const char nextChar);
 std::string ReplaceCharacters(const std::string &input);
 bool UrlRegexParse(const std::string &str, const std::string &patternStr);
-bool ForbideSetIpforward();
 uint64_t GenRandomNumber();
 bool IsSim(const std::string &bundleName);
 bool IsInstallSourceFromSim(const std::string &installSource);

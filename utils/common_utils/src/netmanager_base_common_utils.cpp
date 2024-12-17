@@ -36,9 +36,6 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-#include "parameters.h"
-#endif
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
@@ -72,8 +69,6 @@ constexpr const char *TLDS_SPLIT_SYMBOL = "|";
 constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^(https?://)?[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
 constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
 constexpr const char *DEFAULT_IPV6_ANY_INIT_ADDR = "::";
-const std::string SUPPORT_HMOS_CFG = "persist.hmos_fusion_mgr.ctl.support_hmos";
-const std::string IP_FORWARD_ENABLE_CFG = "persist.vm.ip_forward.enable";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
@@ -770,15 +765,5 @@ bool IsSim2(const std::string &bundleName)
 bool IsInstallSourceFromSim2(const std::string &installSource)
 {
     return installSource == INSTALL_SOURCE_FROM_SIM2;
-}
-
-bool ForbideSetIpforward()
-{
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    return system::GetParameter(SUPPORT_HMOS_CFG, "false") == "true" ||
-           system::GetParameter(IP_FORWARD_ENABLE_CFG, "false") == "true";
-#else
-    return false;
-#endif
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
