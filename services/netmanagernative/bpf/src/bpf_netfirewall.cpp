@@ -349,8 +349,8 @@ int32_t NetsysBpfNetFirewall::SetFirewallDomainRules(const std::vector<sptr<NetF
     ClearDomainRules();
     int ret = 0;
     for (const auto &rule : ruleList) {
-        domainVaule.uid = rule->userId;
-        domainVaule.appuid = rule->appUid;
+        domainVaule.uid = static_cast<uint32_t>(rule->userId);
+        domainVaule.appuid = static_cast<uint32_t>(rule->appUid);
         for (const auto &param : rule->domains) {
             if (param.isWildcard) {
                 isWildcard = true;
