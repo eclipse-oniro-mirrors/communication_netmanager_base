@@ -252,16 +252,9 @@ int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const ui
 int32_t SharingManager::SetIpFwdEnable()
 {
     bool disable = forwardingRequests_.empty();
-    std::string value;
-    if (CommonUtils::ForbideSetIpforward()) {
-        NETNATIVE_LOGI("Ipforward in use, cannot disable.");
-        value = "1";
-    } else {
-        value = disable ? "0" : "1";
-    }
-
-    bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value.c_str());
-    bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value.c_str());
+    const char *value = disable ? "0" : "1";
+    bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
+    bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
     return (ipv4Success && ipv6Success) ? 0 : -1;
 }
 
