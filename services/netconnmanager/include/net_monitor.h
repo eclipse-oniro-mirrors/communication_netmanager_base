@@ -84,6 +84,14 @@ public:
      */
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
+    /**
+     * Set screen state
+     *
+     */
+    void SetScreenState(bool isScreenOn);
+#endif
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -117,6 +125,9 @@ private:
     std::mutex proxyMtx_;
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
+#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
+    bool isScreenOn_ = false;
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
