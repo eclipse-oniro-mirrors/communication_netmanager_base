@@ -64,8 +64,22 @@ int32_t NetStatsCached::StartCached()
 #ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
     writeTimer_ = std::make_unique<FfrtTimer>();
-    cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
-    writeTimer_->Start(STATS_PACKET_CYCLE_MS, [this]() { WriteStats(); });
+    cacheTimer_->StartPro(cycleThreshold_, this, [](void *netStatsCachedPtr) -> void {
+        if (netStatsCachedPtr != nullptr) {
+            NetStatsCached *netStatsCached = reinterpret_cast<NetStatsCached *>(netStatsCachedPtr);
+            netStatsCached->CacheStats();
+        } else {
+            NETMGR_LOG_E("not NetStatsCached obj");
+        }
+    });
+    writeTimer_->StartPro(STATS_PACKET_CYCLE_MS, this, [](void *netStatsCachedPtr) -> void {
+        if (netStatsCachedPtr != nullptr) {
+            NetStatsCached *netStatsCached = reinterpret_cast<NetStatsCached *>(netStatsCachedPtr);
+            netStatsCached->WriteStats();
+        } else {
+            NETMGR_LOG_E("not NetStatsCached obj");
+        }
+    });
 #endif
     return ret;
 }
