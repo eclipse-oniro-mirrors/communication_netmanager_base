@@ -595,6 +595,8 @@ bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceName
         NETMGR_LOG_D("Iface list is empty, ret = %{public}d", ret);
         return false;
     }
+    ifaceNames.sort();
+    ifaceNames.erase(std::unique(ifaceNames.begin(), ifaceNames.end()), ifaceNames.end());
     return true;
 }
 
