@@ -251,6 +251,7 @@ int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const ui
 
 int32_t SharingManager::SetIpFwdEnable()
 {
+    bool disable = forwardingRequests_.empty();
     const char *value = disable ? "0" : "1";
     bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
     bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
