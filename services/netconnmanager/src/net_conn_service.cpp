@@ -3059,13 +3059,20 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_
         // In poor network, supplierId should be an output parameter.
         std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
         if (suppliers.empty()) {
-            NETMGR_LOG_E(" not found supplierId by bearertype[%{public}d].", bearerType);
+            NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
             return NETMANAGER_ERR_INVALID_PARAMETER;
         }
         uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
         if (tmpSupplierId == INVALID_SUPPLIER_ID) {
-            NETMGR_LOG_E("not found supplierId");
-            return NETMANAGER_ERR_INVALID_PARAMETER;
+            if (bearerType == BEARER_WIFI) {
+                tmpSupplierId = FindSupplierForConnected(suppliers);
+                supplierId = tmpSupplierId;
+                NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
+            }
+            if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+                NETMGR_LOG_E("not found supplierId");
+                return NETMANAGER_ERR_INVALID_PARAMETER;
+            }
         }
     }
     // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
@@ -3096,6 +3103,22 @@ uint32_t NetConnService::FindSupplierToReduceScore(std::vector<sptr<NetSupplier>
         if (defaultNetSupplier_->GetNetId() == (*iter)->GetNetId()) {
             ret = (*iter)->GetSupplierId();
             supplierId = ret;
+            break;
+        }
+    }
+    return ret;
+}
+
+uint32_t NetConnService::FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers)
+{
+    uint32_t ret = INVALID_SUPPLIER_ID;
+    std::vector<sptr<NetSupplier>>::iterator iter;
+    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
+        if (*iter == nullptr) {
+            continue;
+        }
+        if ((*iter)->IsConnected()) {
+            ret = (*iter)->GetSupplierId();
             break;
         }
     }

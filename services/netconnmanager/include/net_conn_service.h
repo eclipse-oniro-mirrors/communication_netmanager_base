@@ -519,6 +519,7 @@ private:
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
+    uint32_t FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers);
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);
     bool IsValidUserId(int32_t userId);
