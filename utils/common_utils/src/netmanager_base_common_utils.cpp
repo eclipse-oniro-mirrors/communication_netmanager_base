@@ -540,7 +540,7 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     _exit(-1);
 }
 
-void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPid, std::string *out)
+void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPid)
 {
     int status = 0;
     helper->ret.store(waitpid(childPid, &status, 0));
@@ -550,9 +550,6 @@ void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPi
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         // child process abnormal exit
         NETMGR_LOG_E("child process abnormal exit, status:%{public}d", status);
-        if (out != nullptr) {
-            NETMGR_LOG_E("out : %{public}s", AnonymizeIptablesCommand(*out).c_str());
-        }
     }
 }
 
@@ -582,8 +579,8 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     }
     auto helper = std::make_shared<ParentProcessHelper>();
     std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
-    auto parentThread = std::thread([helper, childPid, out]() {
-        ParentWaitThread(helper, childPid, out);
+    auto parentThread = std::thread([helper, childPid]() {
+        ParentWaitThread(helper, childPid);
     });
 #ifndef CROSS_PLATFORM
     pthread_setname_np(parentThread.native_handle(), "ExecParentThread");
