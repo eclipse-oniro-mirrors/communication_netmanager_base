@@ -408,6 +408,7 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         subscribeInfo.SetPriority(1);
         std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
             subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+        EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
 
         ffrtQueue_.submit(
             [this]() {
