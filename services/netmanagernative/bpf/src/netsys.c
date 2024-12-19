@@ -192,14 +192,15 @@ bpf_map_def SEC("maps") net_bear_type_map = {
 static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_type,
                                         uid_access_policy_value *netAccessPolicyValue)
 {
-    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) ||
-         (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR)) &&
-        (!netAccessPolicyValue->cellularPolicy)) {
+    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) && (!netAccessPolicyValue->wifiPolicy)) ||
+        ((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) && (!netAccessPolicyValue->cellularPolicy))) {
         return 0;
+    } else if (net_bear_mark_type != NETWORK_BEARER_TYPE_INITIAL) {
+        return 1;
     }
-    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) ||
-         (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI)) &&
-        (!netAccessPolicyValue->wifiPolicy)) {
+    if (((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_WIFI) && (!netAccessPolicyValue->wifiPolicy)) ||
+        ((netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_CELLULAR) &&
+        (!netAccessPolicyValue->cellularPolicy))) {
         return 0;
     }
     if (netAccessPolicyValue->netIfIndex == NETWORK_BEARER_TYPE_INITIAL) {
@@ -503,12 +504,16 @@ bpf_map_def SEC("maps") ringbuf_map = {
 };
 
 static inline __u8 socket_check_network_policy(net_bear_type_map_value net_bear_mark_type,
-                                               net_bear_type_map_value *net_bear_type, uid_access_policy_value *value)
+    net_bear_type_map_value *net_bear_type, uid_access_policy_value *value)
 {
-    if ((((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) || (*net_bear_type == NETWORK_BEARER_TYPE_WIFI)) &&
-         (!value->wifiPolicy)) ||
-        (((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) || (*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR)) &&
-         (!value->cellularPolicy))) {
+    if (((net_bear_mark_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
+        ((net_bear_mark_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
+        return 0;
+    } else if (net_bear_mark_type != NETWORK_BEARER_TYPE_INITIAL) {
+        return 1;
+    }
+    if (((*net_bear_type == NETWORK_BEARER_TYPE_WIFI) && (!value->wifiPolicy)) ||
+        ((*net_bear_type == NETWORK_BEARER_TYPE_CELLULAR) && (!value->cellularPolicy))) {
         return 0;
     }
     return 1;
