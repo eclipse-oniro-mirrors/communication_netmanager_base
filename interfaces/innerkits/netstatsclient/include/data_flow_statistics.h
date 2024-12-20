@@ -101,6 +101,14 @@ public:
      */
     int64_t GetIfaceTxPackets(const std::string &interfaceName);
 };
+
+enum class StatsType {
+    STATS_TYPE_RX_BYTES = 0,
+    STATS_TYPE_RX_PACKETS = 1,
+    STATS_TYPE_TX_BYTES = 2,
+    STATS_TYPE_TX_PACKETS = 3,
+};
+
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // DATA_FLOW_STATISTICS_H
