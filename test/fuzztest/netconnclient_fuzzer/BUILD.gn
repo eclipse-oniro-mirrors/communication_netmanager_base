@@ -29,14 +29,12 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
-    "$THIRD_PARTY_ROOT/curl/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
   ]
@@ -59,7 +57,6 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   defines = [
@@ -89,6 +86,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "curl:curl_shared",
   ]
 }
 

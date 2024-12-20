@@ -66,7 +66,6 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
-    "$THIRD_PARTY_ROOT/cJSON/include",
   ]
 
   deps = [
@@ -88,6 +87,7 @@ ohos_unittest("netsys_native_manager_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "cJSON:cjson",
   ]
 
   defines = [
@@ -576,7 +576,6 @@ ohos_unittest("nat464_clat_test") {
 
   deps = [
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
-    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
@@ -588,6 +587,7 @@ ohos_unittest("nat464_clat_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "googletest:gmock_main",
   ]
 
   defines = [

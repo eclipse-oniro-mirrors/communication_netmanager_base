@@ -42,7 +42,6 @@ ohos_unittest("net_stats_mock_data") {
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   external_deps = [
@@ -53,6 +52,7 @@ ohos_unittest("net_stats_mock_data") {
     "ffrt:libffrt",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "sqlite:sqlite",
   ]
 
   defines = [
@@ -125,7 +125,6 @@ ohos_unittest("net_stats_manager_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   external_deps = [
@@ -138,6 +137,7 @@ ohos_unittest("net_stats_manager_test") {
     "ffrt:libffrt",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "sqlite:sqlite",
   ]
 
   defines = [
@@ -190,7 +190,6 @@ ohos_unittest("net_stats_service_common_test") {
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   external_deps = [
@@ -203,6 +202,7 @@ ohos_unittest("net_stats_service_common_test") {
     "ffrt:libffrt",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "sqlite:sqlite",
   ]
 
   defines = [
