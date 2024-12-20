@@ -73,11 +73,6 @@
                 "elfio",
                 "iptables",
                 "power_manager"
-            ],
-            "third_party": [
-                "curl",
-                "libuv",
-                "libbpf"
             ]
         },
         "build": {

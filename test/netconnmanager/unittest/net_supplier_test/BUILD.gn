@@ -39,7 +39,6 @@ ohos_unittest("net_supplier_test") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
@@ -48,8 +47,6 @@ ohos_unittest("net_supplier_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$THIRD_PARTY_ROOT/curl/include",
-    "$THIRD_PARTY_ROOT/openssl/include",
     "$NETMANAGER_BASE_ROOT/test/netconnmanager",
   ]
 
@@ -59,8 +56,6 @@ ohos_unittest("net_supplier_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -85,6 +80,9 @@ ohos_unittest("net_supplier_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "curl:curl_shared",
   ]
 
   defines = [
