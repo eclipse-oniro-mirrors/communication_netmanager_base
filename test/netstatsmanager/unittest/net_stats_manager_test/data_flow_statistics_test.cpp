@@ -179,5 +179,19 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager011, TestSize.Level1)
     result = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: NetStatsManager012
+ * @tc.desc: Test DataFlowStatisticsTest RegisterNetStatsCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager012, TestSize.Level1)
+{
+    std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
+    std::string iface = "nonexistent_iface";
+    int64_t ret = flow->GetIfaceRxBytes(iface);
+    ASSERT_LT(ret, 0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

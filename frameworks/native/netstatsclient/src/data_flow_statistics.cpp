@@ -16,6 +16,7 @@
 #include "data_flow_statistics.h"
 
 #include "netsys_controller.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -51,22 +52,50 @@ int64_t DataFlowStatistics::GetUidTxBytes(uint32_t uid)
 
 int64_t DataFlowStatistics::GetIfaceRxBytes(const std::string &interfaceName)
 {
-    return NetsysController::GetInstance().GetIfaceRxBytes(interfaceName);
+    uint64_t rxBytes = 0;
+    int32_t result = NetsysController::GetInstance().GetIfaceStats(
+        rxBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), interfaceName);
+    if (result != 0) {
+        NETMGR_LOG_E("Failed to get %{public}s RX bytes, result: %{public}d", interfaceName.c_str(), result);
+        return -1;
+    }
+    return static_cast<int64_t>(rxBytes);
 }
 
 int64_t DataFlowStatistics::GetIfaceTxBytes(const std::string &interfaceName)
 {
-    return NetsysController::GetInstance().GetIfaceTxBytes(interfaceName);
+    uint64_t txBytes = 0;
+    int32_t result = NetsysController::GetInstance().GetIfaceStats(
+        txBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), interfaceName);
+    if (result != 0) {
+        NETMGR_LOG_E("Failed to get %{public}s TX bytes, result: %{public}d", interfaceName.c_str(), result);
+        return -1;
+    }
+    return static_cast<int64_t>(txBytes);
 }
 
 int64_t DataFlowStatistics::GetIfaceRxPackets(const std::string &interfaceName)
 {
-    return NetsysController::GetInstance().GetIfaceRxPackets(interfaceName);
+    uint64_t rxPackets = 0;
+    int32_t result = NetsysController::GetInstance().GetIfaceStats(
+        rxPackets, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_PACKETS), interfaceName);
+    if (result != 0) {
+        NETMGR_LOG_E("Failed to get %{public}s RX packets, result: %{public}d", interfaceName.c_str(), result);
+        return -1;
+    }
+    return static_cast<int64_t>(rxPackets);
 }
 
 int64_t DataFlowStatistics::GetIfaceTxPackets(const std::string &interfaceName)
 {
-    return NetsysController::GetInstance().GetIfaceTxPackets(interfaceName);
+    uint64_t txPackets = 0;
+    int32_t result = NetsysController::GetInstance().GetIfaceStats(
+        txPackets, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_PACKETS), interfaceName);
+    if (result != 0) {
+        NETMGR_LOG_E("Failed to get %{public}s TX packets, result: %{public}d", interfaceName.c_str(), result);
+        return -1;
+    }
+    return static_cast<int64_t>(txPackets);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
