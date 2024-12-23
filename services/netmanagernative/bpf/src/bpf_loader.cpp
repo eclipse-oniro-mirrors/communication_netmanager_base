@@ -666,7 +666,7 @@ private:
                 }
 
                 if (SysBpfObjAttach(prog.attachType, progFd, cgroupFd) < NETSYS_SUCCESS) {
-                    NETNATIVE_LOGE("attach %{pubic}s failed: errno = %{public}d", progName.c_str(), errno);
+                    NETNATIVE_LOGE("attach %{public}s failed: errno = %{public}d", progName.c_str(), errno);
                     close(cgroupFd);
                     return false;
                 }
@@ -702,7 +702,7 @@ private:
                 }
 
                 if (SysBpfObjDetach(prog.attachType, progFd, cgroupFd) < NETSYS_SUCCESS) {
-                    NETNATIVE_LOGE("detach %{pubic}s failed: errno = %{public}d", progName.c_str(), errno);
+                    NETNATIVE_LOGE("detach %{public}s failed: errno = %{public}d", progName.c_str(), errno);
                     close(cgroupFd);
                     return;
                 }
