@@ -73,8 +73,7 @@
                 "elfio",
                 "iptables",
                 "power_manager"
-            ],
-            "third_party": []
+            ]
         },
         "build": {
             "group_type": {
