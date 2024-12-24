@@ -71,9 +71,7 @@ public:
     bool ResumeNetworkInfo();
     void CloseSocketsUid(uint32_t uid);
     void StopNetDetection();
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
     void SetScreenState(bool isScreenOn);
-#endif
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
 #endif
@@ -116,6 +114,7 @@ private:
     bool forbidDetectionFlag_ = false;
 #endif
     bool isNeedResume_ = false;
+    bool isScreenOn_ = true;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
