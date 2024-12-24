@@ -587,7 +587,6 @@ ohos_unittest("nat464_clat_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "googletest:gmock_main",
   ]
 
   defines = [
