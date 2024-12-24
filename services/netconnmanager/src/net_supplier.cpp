@@ -259,7 +259,9 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps, const NetR
         NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
-    UpdateNetConnState(NET_CONN_STATE_IDLE);
+    if (!(netSupplierType_ == NetBearType::BEARER_WIFI && !netRequest.ident.empty())) {
+        UpdateNetConnState(NET_CONN_STATE_IDLE);
+    }
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
