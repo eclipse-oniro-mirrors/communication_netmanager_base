@@ -45,7 +45,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-               const std::weak_ptr<INetMonitorCallback> &callback);
+               const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
 
     /**
      * Destroy the NetMonitor
