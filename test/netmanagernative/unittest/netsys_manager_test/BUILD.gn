@@ -574,9 +574,7 @@ ohos_unittest("nat464_clat_test") {
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
   ]
 
-  deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
-  ]
+  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static" ]
 
   external_deps = [
     "ability_base:want",
