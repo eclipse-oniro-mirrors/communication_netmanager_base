@@ -63,10 +63,10 @@ ohos_unittest("netsys_dnsresolv_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "googletest:gmock_main",
   ]
 
   defines = [
