@@ -1133,7 +1133,6 @@ int32_t NetsysNativeService::DelBrokerUidAccessPolicyMap(uint32_t uid)
         NETNATIVE_LOGE("invalid map");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    app_uid_key k = uid;
     auto ret = brokerUidAccessPolicyMap.Delete(uid);
     if (ret != 0) {
         NETNATIVE_LOGE("Delete map err. ret[%{public}d]", ret);
