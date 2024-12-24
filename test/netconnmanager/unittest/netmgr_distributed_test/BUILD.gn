@@ -84,7 +84,6 @@ ohos_unittest("netmgr_distributed_test") {
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "curl:curl_shared",
-    "googletest:gmock_main",
   ]
 
   defines = [
