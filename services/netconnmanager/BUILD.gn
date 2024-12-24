@@ -149,12 +149,6 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "FEATURE_SUPPORT_POWERMANAGER" ]
   }
 
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.powermgr_power_manager)) {
-    external_deps += [ "power_manager:powermgr_client" ]
-    defines += [ "NETMANAGER_BASE_POWER_MANAGER_ENABLE" ]
-  }
-
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -242,12 +236,6 @@ ohos_static_library("net_conn_manager_static") {
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]
-  }
-
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.powermgr_power_manager)) {
-    external_deps += [ "power_manager:powermgr_client" ]
-    defines += [ "NETMANAGER_BASE_POWER_MANAGER_ENABLE" ]
   }
 
   external_deps += [ "hilog:libhilog" ]

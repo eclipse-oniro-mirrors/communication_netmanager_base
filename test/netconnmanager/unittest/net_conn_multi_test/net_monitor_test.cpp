@@ -47,7 +47,7 @@ public:
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
     static inline std::shared_ptr<NetMonitor> instance_ =
-        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_);
+        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, true);
 };
 
 void NetMonitorTest::SetUpTestCase()
