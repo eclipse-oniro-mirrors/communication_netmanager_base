@@ -2908,9 +2908,17 @@ void NetConnService::OnNetSysRestart()
 
 int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
 {
-    static std::vector<std::string> preferredUrlList = GetPreferredUrl();
-    preferCellular = std::any_of(preferredUrlList.begin(), preferredUrlList.end(),
-                                 [&url](const std::string &str) { return url.find(str) != std::string::npos; });
+    std::string hostName = CommonUtils::GetHostnameFromURL(url);
+    static std::vector<std::string> preferredRegexList = GetPreferredRegex();
+    preferCellular = std::any_of(preferredRegexList.begin(), preferredRegexList.end(),
+        [&hostName](const std::string &str) -> bool {
+            try {
+                return std::regex_match(hostName, std::regex(str));
+            } catch (const std::regex_error& e) {
+                NETMGR_LOG_E("regex_match exception!");
+                return false;
+            }
+        });
     return 0;
 }
 
@@ -2941,21 +2949,23 @@ std::string NetConnService::GetNetCapabilitiesAsString(const uint32_t supplierId
     return {};
 }
 
-std::vector<std::string> NetConnService::GetPreferredUrl()
+std::vector<std::string> NetConnService::GetPreferredRegex()
 {
-    std::vector<std::string> preferCellularUrlList;
-    const std::string preferCellularUrlPath = "/system/etc/prefer_cellular_url_list.txt";
-    std::ifstream preferCellularFile(preferCellularUrlPath);
+    std::vector<std::string> preferCellularRegexList;
+    const std::string preferCellularRegexPath = "/system/etc/prefer_cellular_regex_list.txt";
+    std::ifstream preferCellularFile(preferCellularRegexPath);
     if (preferCellularFile.is_open()) {
         std::string line;
         while (getline(preferCellularFile, line)) {
-            preferCellularUrlList.push_back(line);
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
+            preferCellularRegexList.push_back(line);
         }
         preferCellularFile.close();
     } else {
         NETMGR_LOG_E("open prefer cellular url file failure.");
     }
-    return preferCellularUrlList;
+    return preferCellularRegexList;
 }
 
 void NetConnService::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)

@@ -660,5 +660,365 @@ HWTEST_F(UtNetmanagerBaseCommon, CheckIfaceName001, TestSize.Level2)
     result = CommonUtils::CheckIfaceName(name);
     EXPECT_FALSE(result);
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL01, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https:////www.example.com?data_string");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL02, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL(R"(https:/\\\\\\///\\/www.example.com?data_string)");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL03, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("");
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL04, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://");
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL05, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://www.example.com:8080");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL06, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://www.example.com/for/test");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL07, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL(R"(https:/\\\\\)");
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL08, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL(R"(https://www.example.com/watch/80033982:sadsda?dd\\\df)");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL09, TestSize.Level2)
+{
+    std::string hostname =
+        CommonUtils::GetHostnameFromURL(R"(https://www.example.com:8080/watch/80033982:sadsda?dd\\\df)");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL10, TestSize.Level2)
+{
+    std::string url = "example.com:98421/dsdsd?dsdsds";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL11, TestSize.Level2)
+{
+    std::string url = R"(\/\/\/\/\/\/\/\////\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL12, TestSize.Level2)
+{
+    std::string url = "http://www.example.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL13, TestSize.Level2)
+{
+    std::string url = "https://www.example-test.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "www.example-test.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL14, TestSize.Level2)
+{
+    std::string url = "ftp://www.baidu-test.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "www.baidu-test.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL15, TestSize.Level2)
+{
+    std::string url = R"(\\\/\/\/\/\/\///\/\\\:80808)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL16, TestSize.Level2)
+{
+    std::string url = R"(?????DSdsafhu34r3urihiu45t794\\56y&^&*%$^&$&*&^%*&((*)))";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL17, TestSize.Level2)
+{
+    std::string url = R"(16456465221-*/*/\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "16456465221-*");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL18, TestSize.Level2)
+{
+    std::string url = "czvxkhcvjhkgfidkh";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "czvxkhcvjhkgfidkh");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL19, TestSize.Level2)
+{
+    std::string url = "hcd   dfdf4efd446576";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "hcd   dfdf4efd446576");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL20, TestSize.Level2)
+{
+    std::string url = " ";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), " ");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL21, TestSize.Level2)
+{
+    std::string url = "                             ";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "                             ");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL22, TestSize.Level2)
+{
+    std::string url = R"(dsd!!!@@#$$%%%^df\\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "dsd!!!@@#$$%%%^df");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL23, TestSize.Level2)
+{
+    std::string url = "http://example.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL24, TestSize.Level2)
+{
+    std::string url = "example.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "example.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL25, TestSize.Level2)
+{
+    std::string url = "https:////??::||///stackoverflow.com";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL26, TestSize.Level2)
+{
+    std::string url = R"(https://\\\154545\\\stackoverflow.com)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "154545");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL27, TestSize.Level2)
+{
+    std::string url = R"(https://\\\\\\////\\\\stackoverflow.com)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "stackoverflow.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL28, TestSize.Level2)
+{
+    std::string url = R"(https:/\151\\\\23243435)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "151");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL29, TestSize.Level2)
+{
+    std::string url = R"(https:\\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL30, TestSize.Level2)
+{
+    std::string url = R"(""""\\"""""""""""""")";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), R"("""")");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL31, TestSize.Level2)
+{
+    std::string url = ":::::::dfsfd::::::::::::";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL32, TestSize.Level2)
+{
+    std::string url = "1--**--4545";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "1--**--4545");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL33, TestSize.Level2)
+{
+    std::string url = R"( https:\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), " https");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL34, TestSize.Level2)
+{
+    std::string url = " https:////";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL35, TestSize.Level2)
+{
+    std::string url = " saasa";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), " saasa");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL36, TestSize.Level2)
+{
+    std::string url = R"(|||///\\\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "|||");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL37, TestSize.Level2)
+{
+    std::string url = "-- fdsf";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "-- fdsf");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL38, TestSize.Level2)
+{
+    std::string url = "xnmku:9090?(sdfgjhg)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "xnmku");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL39, TestSize.Level2)
+{
+    std::string url = "oooxxx111-===";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "oooxxx111-===");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL40, TestSize.Level2)
+{
+    std::string url = R"($^%(_*_()*+_)(YU(\_)))";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "$^%(_*_()*+_)(YU(");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL41, TestSize.Level2)
+{
+    std::string url = R"(万维网.com:9090\)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "万维网.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL42, TestSize.Level2)
+{
+    std::string url = R"(https://\\\中文测试)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "中文测试");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL43, TestSize.Level2)
+{
+    std::string url = R"(http://\\\中文测试?中文数据)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "中文测试");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL44, TestSize.Level2)
+{
+    std::string url = R"(http://\\\中文测试：8080?中文数据)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "中文测试：8080");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL45, TestSize.Level2)
+{
+    std::string url = R"(http：：：/\\\中文测试：8080?中文数据)";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "http：：：");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL46, TestSize.Level2)
+{
+    std::string url = R"(（）“”{}P{{}:\、、、})";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "（）“”{}P{{}");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL47, TestSize.Level2)
+{
+    std::string url = R"(（）“”{}P{http://{}:\、、、})";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "{}");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL48, TestSize.Level2)
+{
+    std::string url = R"(（）“===\\///?=”{}P{{的‘；‘’；’}:\、、、})";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "（）“===");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL49, TestSize.Level2)
+{
+    std::string url = R"(（）“”{}P{{；‘k:’}:\、、、})";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "（）“”{}P{{；‘k");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL50, TestSize.Level2)
+{
+    std::string url = R"(（）“”{}P{0%%%VVV{}:\、、、})";
+    std::string hostname = CommonUtils::GetHostnameFromURL(url);
+    EXPECT_STREQ(hostname.c_str(), "（）“”{}P{0%%%VVV{}");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL51, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://www.alibaba.com/idesk?idesk:idesk");
+    EXPECT_STREQ(hostname.c_str(), "www.alibaba.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL52, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://www.alibaba.com:8081/idesk?idesk:idesk");
+    EXPECT_STREQ(hostname.c_str(), "www.alibaba.com");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL53, TestSize.Level2)
+{
+    std::string hostname = CommonUtils::GetHostnameFromURL("https://www.alibaba.com?data_string");
+    EXPECT_STREQ(hostname.c_str(), "www.alibaba.com");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

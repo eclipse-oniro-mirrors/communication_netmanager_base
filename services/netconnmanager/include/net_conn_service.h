@@ -514,7 +514,7 @@ private:
     void OnNetSysRestart();
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
-    std::vector<std::string> GetPreferredUrl();
+    std::vector<std::string> GetPreferredRegex();
     bool IsValidDecValue(const std::string &inputValue);
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
