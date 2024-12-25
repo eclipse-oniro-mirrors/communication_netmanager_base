@@ -118,6 +118,7 @@ inline bool IsSameNaturalDay(uint32_t current, uint32_t another)
 }
 
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
+std::string GetHostnameFromURL(const std::string &url);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

@@ -761,6 +761,32 @@ bool IsInstallSourceFromSim(const std::string &installSource)
     return installSource == INSTALL_SOURCE_FROM_SIM;
 }
 
+std::string GetHostnameFromURL(const std::string &url)
+{
+    if (url.empty()) {
+        return "";
+    }
+    std::string delimiter = "://";
+    std::string tempUrl = url;
+    std::replace(tempUrl.begin(), tempUrl.end(), '\\', '/');
+    size_t posStart = tempUrl.find(delimiter);
+    if (posStart != std::string::npos) {
+        posStart += delimiter.length();
+    } else {
+        posStart = 0;
+    }
+    size_t notSlash = tempUrl.find_first_not_of('/', posStart);
+    if (notSlash != std::string::npos) {
+        posStart = notSlash;
+    }
+    size_t posEnd = std::min({ tempUrl.find(':', posStart),
+                              tempUrl.find('/', posStart), tempUrl.find('?', posStart) });
+    if (posEnd != std::string::npos) {
+        return tempUrl.substr(posStart, posEnd - posStart);
+    }
+    return tempUrl.substr(posStart);
+}
+
 bool IsSim2(const std::string &bundleName)
 {
     std::vector<std::string> list = Split(SIM2_BUNDLENAMES, BUNDLENAME_DELIMITER);

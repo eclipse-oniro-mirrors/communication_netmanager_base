@@ -1115,7 +1115,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
 {
     NetHttpProxyTracker httpProxyTracker;
     std::string exclusions = "";
-    NetConnService::GetInstance()->GetPreferredUrl();
+    NetConnService::GetInstance()->GetPreferredRegex();
     std::list<std::string> list = httpProxyTracker.ParseExclusionList(exclusions);
     EXPECT_TRUE(list.empty());
 
