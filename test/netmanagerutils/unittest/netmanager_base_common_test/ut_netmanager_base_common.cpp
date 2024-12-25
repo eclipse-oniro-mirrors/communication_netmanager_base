@@ -705,13 +705,14 @@ HWTEST_F(UtNetmanagerBaseCommon, CommonUtils::GetHostnameFromURL07, TestSize.Lev
 
 HWTEST_F(UtNetmanagerBaseCommon, CommonUtils::GetHostnameFromURL08, TestSize.Level2)
 {
-    std::string hostname = CommonUtils::GetHostnameFromURL(R"(https://www.example.com/watch/80033982:sadsda?dd\\\df)");
+    std::string hostname =CommonUtils::GetHostnameFromURL(R"(https://www.example.com/watch/80033982:sadsda?dd\\\df)");
     EXPECT_STREQ(hostname.c_str(), "www.example.com");
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, CommonUtils::GetHostnameFromURL09, TestSize.Level2)
 {
-    std::string hostname = CommonUtils::GetHostnameFromURL(R"(https://www.example.com:8080/watch/80033982:sadsda?dd\\\df)");
+    std::string hostname =
+        CommonUtils::GetHostnameFromURL(R"(https://www.example.com:8080/watch/80033982:sadsda?dd\\\df)");
     EXPECT_STREQ(hostname.c_str(), "www.example.com");
 }
 
