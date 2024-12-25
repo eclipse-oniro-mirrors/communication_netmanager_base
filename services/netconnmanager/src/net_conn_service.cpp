@@ -742,7 +742,7 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
             continue;
         }
         if (netConnEventHandler_) {
-            netConnEventHandler_->PostSyncTask([pNetwork]() { pNetwork->SetScreenState(isScreenOn); });
+            netConnEventHandler_->PostSyncTask([pNetwork, isScreenOn]() { pNetwork->SetScreenState(isScreenOn); });
         }
         if (!isScreenOn || pNetSupplier.second->GetNetSupplierType() != BEARER_WIFI ||
             !pNetSupplier.second->HasNetCap(NET_CAPABILITY_PORTAL)) {
