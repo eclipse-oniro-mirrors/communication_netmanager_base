@@ -585,7 +585,7 @@ void Network::InitNetMonitor()
 {
     NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
-    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
+    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
@@ -792,15 +792,14 @@ void Network::CloseSocketsUid(uint32_t uid)
     }
 }
 
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 void Network::SetScreenState(bool isScreenOn)
 {
+    isScreenOn_ = isScreenOn;
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ null");
         return;
     }
     netMonitor_->SetScreenState(isScreenOn);
 }
-#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

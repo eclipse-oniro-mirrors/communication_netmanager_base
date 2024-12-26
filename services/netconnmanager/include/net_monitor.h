@@ -45,7 +45,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-               const std::weak_ptr<INetMonitorCallback> &callback);
+               const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
 
     /**
      * Destroy the NetMonitor
@@ -84,13 +84,11 @@ public:
      */
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
     /**
      * Set screen state
      *
      */
     void SetScreenState(bool isScreenOn);
-#endif
 
 private:
     void LoadGlobalHttpProxy();
@@ -125,9 +123,7 @@ private:
     std::mutex proxyMtx_;
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
-    bool isScreenOn_ = false;
-#endif
+    bool isScreenOn_ = true;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
