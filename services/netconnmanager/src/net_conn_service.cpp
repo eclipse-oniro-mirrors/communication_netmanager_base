@@ -2919,6 +2919,7 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
                 return false;
             }
         });
+    NETMGR_LOG_I("preferCellular:%{public}d", preferCellular);
     return 0;
 }
 
