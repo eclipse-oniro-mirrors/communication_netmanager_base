@@ -817,5 +817,16 @@ HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, Te
     int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+HWTEST_F(NetsysControllerServiceImplTest, DisableWearableDistributedNetForward, TestSize.Level1)
+{
+    auto ret = instance_->EnableWearableDistributedNetForward(8001, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DisableWearableDistributedNetForward();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

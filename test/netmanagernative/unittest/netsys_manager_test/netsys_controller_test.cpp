@@ -1156,5 +1156,27 @@ HWTEST_F(NetsysControllerTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Leve
     int32_t ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(TEST_UID_32);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+HWTEST_F(NetsysControllerTest, EnableWearableDistributedNetForward, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().EnableWearableDistributedNetForward(8001, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = NetsysController::GetInstance().DisableWearableDistributedNetForward();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DisableWearableDistributedNetForward, TestSize.Level1)
+{
+    NetsysController::GetInstance().initFlag_ = false;
+    NetsysController::GetInstance().Init();
+    int32_t ret = NetsysController::GetInstance().EnableWearableDistributedNetForward(8001, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().DisableWearableDistributedNetForward();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
