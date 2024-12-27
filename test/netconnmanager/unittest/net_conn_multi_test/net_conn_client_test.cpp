@@ -1497,5 +1497,22 @@ HWTEST_F(NetConnClientTest, SetInterfaceTest001, TestSize.Level1)
     ret = DelayedSingleton<NetConnClient>::GetInstance()->SetInterfaceUp(ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnClientTest, UpdateNetCaps001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    uint32_t supplierId = 0;
+    int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

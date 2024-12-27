@@ -1711,5 +1711,29 @@ HWTEST_F(NetConnServiceTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->SetNetInterfaceIpAddress(ifName, ipAddr);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, UpdateNetCaps001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+
+    auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateNetCaps002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    netCaps.insert(NetCap::NET_CAPABILITY_NOT_VPN);
+    std::string netConnManagerWorkThread = "NET_CONN_MANAGER_WORK_THREAD";
+    NetConnService::GetInstance()->netConnEventRunner_ = AppExecFwk::EventRunner::Create(netConnManagerWorkThread);
+    NetConnService::GetInstance()->netConnEventHandler_
+        = std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
+        
+    auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

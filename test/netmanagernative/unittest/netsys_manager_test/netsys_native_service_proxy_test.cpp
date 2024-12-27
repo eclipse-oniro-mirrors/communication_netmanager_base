@@ -454,5 +454,33 @@ HWTEST_F(NetsysNativeServiceProxyTest, DelBrokerUidAccessPolicyMapTest001, TestS
     int32_t ret = netsysNativeService->DelBrokerUidAccessPolicyMap(TEST_UID_U32);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+HWTEST_F(NetsysNativeServiceProxyTest, EnableWearableDistributedNetForward001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->EnableWearableDistributedNetForward(8001, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_UDP_PORT_ID);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, EnableWearableDistributedNetForward002, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->EnableWearableDistributedNetForward(-80, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_INVALID_TCP_PORT_ID);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DisableWearableDistributedNetForward, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->EnableWearableDistributedNetForward(8001, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->DisableWearableDistributedNetForward();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

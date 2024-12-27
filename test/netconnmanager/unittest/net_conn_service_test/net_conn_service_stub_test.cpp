@@ -1111,5 +1111,28 @@ HWTEST_F(NetConnServiceStubTest, SetNetInterfaceIpAddressTest001, TestSize.Level
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceStubTest, OnUpdateNetCaps, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(TEST_UINT32_VALUE)) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint32(TEST_UINT32_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint32(TEST_UINT32_VALUE)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
