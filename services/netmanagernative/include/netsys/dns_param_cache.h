@@ -113,6 +113,11 @@ public:
 
     int32_t UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
 #endif
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
+
+    int32_t GetUserDefinedServerFlag(uint16_t netId, bool &flag);
+
+    int32_t GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint32_t uid);
 
 private:
     DnsParamCache();

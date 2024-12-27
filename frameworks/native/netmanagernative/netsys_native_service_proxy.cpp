@@ -3339,5 +3339,41 @@ int32_t NetsysNativeServiceProxy::DelBrokerUidAccessPolicyMap(uint32_t uid)
     }
     return result;
 }
+
+int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("SetUserDefinedServerFlag WriteParam func in");
+    if (!data.WriteUint16(netId)) {
+        NETNATIVE_LOGE("SetUserDefinedServerFlag WriteBool func return error");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isUserDefinedServer)) {
+        NETNATIVE_LOGE("SetUserDefinedServerFlag WriteBool func return error");
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetUserDefinedServerFlag remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error =
+        Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetUserDefinedServerFlag proxy sendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetUserDefinedServerFlag proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("SetUserDefinedServerFlag WriteParam func out");
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

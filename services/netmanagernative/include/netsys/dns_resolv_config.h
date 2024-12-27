@@ -52,6 +52,10 @@ public:
 
     void EnableIpv6();
 
+    void SetUserDefinedServerFlag(bool flag);
+
+    bool IsUserDefinedServer();
+
 private:
     class DelayedTaskWrapper {
     public:
@@ -79,6 +83,7 @@ private:
     NetManagerStandard::DelayedQueue<DelayedTaskWrapper, NetManagerStandard::DEFAULT_CAPABILITY, DEFAULT_DELAYED_COUNT>
         delayedQueue_;
     bool isIpv6Enable_;
+    bool isUserDefinedDnsServer_;
 };
 } // namespace OHOS::nmd
 #endif // INCLUDE_DNSRESOLV_CONFIG_H

@@ -167,6 +167,7 @@ public:
 #endif // SUPPORT_SYSVPN
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

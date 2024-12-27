@@ -601,6 +601,11 @@ public:
     {
         return 0;
     }
+
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

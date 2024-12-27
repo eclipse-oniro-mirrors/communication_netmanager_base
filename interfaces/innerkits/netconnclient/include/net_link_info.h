@@ -43,6 +43,7 @@ struct NET_SYMBOL_VISIBLE NetLinkInfo final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
+    static bool UnmarshallingEx(Parcel &parcel, sptr<NetLinkInfo> &ptr);
     static bool Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object);
     void Initialize();
     bool HasNetAddr(const INetAddr &netAddr) const;
@@ -51,6 +52,7 @@ struct NET_SYMBOL_VISIBLE NetLinkInfo final : public Parcelable {
     std::string ToStringAddr(const std::string &tab) const;
     std::string ToStringDns(const std::string &tab) const;
     std::string ToStringRoute(const std::string &tab) const;
+    bool isUserDefinedDnsServer_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -62,6 +62,7 @@ private:
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
+    static bool IsUserDefinedServer(uint16_t netId, uint32_t uid);
 
     ReceiverRunner ProcCommand();
     ReceiverRunner ProcBindSocket(uint32_t netId);
@@ -115,6 +116,7 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
+    bool isUserDefinedDnsServer = false;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     DnsParamCache::GetInstance().SetCallingUid(uid);
@@ -145,7 +147,9 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
         }
         // the last one is for baidu DNS Server
 #ifdef ENABLE_PUBLIC_DNS_SERVER
-        AddPublicDnsServers(sendData, i);
+        if (!IsUserDefinedServer(static_cast<uint16_t>(netId), uid)) {
+            AddPublicDnsServers(sendData, i);
+        }
 #endif
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfig))) {
@@ -565,5 +569,22 @@ void DnsResolvListen::StartListen()
     (void)this;
     DnsResolvListenInternal dnsResolvListenInternal;
     dnsResolvListenInternal.StartListen();
+}
+
+bool DnsResolvListenInternal::IsUserDefinedServer(uint16_t netId, uint32_t uid)
+{
+    int status = 0;
+    bool isUserDefinedDnsServer = false;
+    if (DnsParamCache::GetInstance().IsVpnOpen() && netId == 0) {
+        status = DnsParamCache::GetInstance().GetUserDefinedServerFlag(static_cast<uint16_t>(netId),
+            isUserDefinedDnsServer, uid);
+    } else {
+        status = DnsParamCache::GetInstance().GetUserDefinedServerFlag(static_cast<uint16_t>(netId),
+            isUserDefinedDnsServer);
+    }
+    if (status < 0) {
+        isUserDefinedDnsServer = false;
+    }
+    return isUserDefinedDnsServer;
 }
 } // namespace OHOS::nmd

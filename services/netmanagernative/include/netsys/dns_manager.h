@@ -180,7 +180,7 @@ public:
 
     int32_t AddUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
     int32_t DelUidRange(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
-
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag);
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);

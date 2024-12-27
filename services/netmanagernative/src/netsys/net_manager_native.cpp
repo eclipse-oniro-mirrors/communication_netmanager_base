@@ -622,5 +622,10 @@ int32_t NetManagerNative::CloseSocketsUid(const std::string &ipAddr, uint32_t ui
 {
     return connManager_->CloseSocketsUid(ipAddr, uid);
 }
+
+int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
+{
+    return dnsManager_->SetUserDefinedServerFlag(netId, flag);
+}
 } // namespace nmd
 } // namespace OHOS

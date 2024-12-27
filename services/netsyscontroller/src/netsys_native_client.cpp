@@ -1777,5 +1777,17 @@ int32_t NetsysNativeClient::DelBrokerUidAccessPolicyMap(uint32_t uid)
     }
     return proxy->DelBrokerUidAccessPolicyMap(uid);
 }
+
+int32_t NetsysNativeClient::SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetUserDefinedServerFlag(netId, isUserDefinedServer);
+}
+
+
 } // namespace NetManagerStandard
 } // namespace OHOS

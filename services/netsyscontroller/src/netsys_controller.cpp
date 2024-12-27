@@ -1535,6 +1535,15 @@ int32_t NetsysController::SetNicTrafficAllowed(const std::vector<std::string> &i
     return netsysService_->SetNicTrafficAllowed(ifaceNames, status);
 }
 
+int32_t NetsysController::SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetUserDefinedServerFlag netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
+}
+
 #ifdef SUPPORT_SYSVPN
 int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
 {

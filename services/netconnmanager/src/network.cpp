@@ -426,6 +426,12 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_NET_RESOLVER_FAILED);
     }
+    NETMGR_LOG_I("SetUserDefinedServerFlag: netId:[%{public}d], flag:[%{public}d]", netId_,
+        netLinkInfo.isUserDefinedDnsServer_);
+    ret = NetsysController::GetInstance().SetUserDefinedServerFlag(netId_, netLinkInfo.isUserDefinedDnsServer_);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("SetUserDefinedServerFlag failed");
+    }
     NETMGR_LOG_D("Network UpdateDns out.");
     if (netLinkInfo.dnsList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_DNSES_FAILED);
