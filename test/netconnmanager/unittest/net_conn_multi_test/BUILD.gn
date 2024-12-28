@@ -48,7 +48,6 @@ ohos_unittest("net_conn_multi_test") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
@@ -59,8 +58,6 @@ ohos_unittest("net_conn_multi_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$THIRD_PARTY_ROOT/curl/include",
-    "$THIRD_PARTY_ROOT/openssl/include",
   ]
 
   deps = [
@@ -69,8 +66,6 @@ ohos_unittest("net_conn_multi_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -85,6 +80,7 @@ ohos_unittest("net_conn_multi_test") {
     "cJSON:cjson",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "curl:curl_shared",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
@@ -92,6 +88,8 @@ ohos_unittest("net_conn_multi_test") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
@@ -138,7 +136,6 @@ ohos_unittest("net_conn_multi_vnic_test") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
@@ -147,8 +144,6 @@ ohos_unittest("net_conn_multi_vnic_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$THIRD_PARTY_ROOT/curl/include",
-    "$THIRD_PARTY_ROOT/openssl/include",
   ]
 
   deps = [
@@ -157,8 +152,6 @@ ohos_unittest("net_conn_multi_vnic_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -173,12 +166,15 @@ ohos_unittest("net_conn_multi_vnic_test") {
     "cJSON:cjson",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "curl:curl_shared",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",

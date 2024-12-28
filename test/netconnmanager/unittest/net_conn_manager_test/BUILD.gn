@@ -62,8 +62,6 @@ ohos_unittest("net_conn_manager_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -85,6 +83,8 @@ ohos_unittest("net_conn_manager_test") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",

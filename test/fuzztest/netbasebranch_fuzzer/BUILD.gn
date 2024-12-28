@@ -31,7 +31,6 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/netpolicymanager/include",
@@ -39,7 +38,6 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
-    "$THIRD_PARTY_ROOT/curl/include",
   ]
 
   cflags = [
@@ -57,7 +55,6 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
     "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   defines = [
@@ -76,6 +73,7 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "common_event_service:cesfwk_innerkits",
+    "curl:curl_shared",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",

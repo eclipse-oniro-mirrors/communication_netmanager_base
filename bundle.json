@@ -71,12 +71,8 @@
                 "os_account",
                 "libbpf",
                 "elfio",
-                "iptables"
-            ],
-            "third_party": [
-                "curl",
-                "libuv",
-                "libbpf"
+                "iptables",
+                "power_manager"
             ]
         },
         "build": {

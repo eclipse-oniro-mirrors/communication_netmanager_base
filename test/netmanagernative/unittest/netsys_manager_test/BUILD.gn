@@ -67,7 +67,6 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
-    "$THIRD_PARTY_ROOT/cJSON/include",
   ]
 
   deps = [
@@ -82,6 +81,7 @@ ohos_unittest("netsys_native_manager_test") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "ffrt:libffrt",
@@ -604,16 +604,14 @@ ohos_unittest("nat464_clat_test") {
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
   ]
 
-  deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
-    "//third_party/googletest:gmock_main",
-  ]
+  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static" ]
 
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "googletest:gmock_main",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

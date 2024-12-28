@@ -54,7 +54,6 @@ ohos_unittest("netsys_dnsresolv_test") {
   deps = [
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
-    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
@@ -64,6 +63,7 @@ ohos_unittest("netsys_dnsresolv_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
