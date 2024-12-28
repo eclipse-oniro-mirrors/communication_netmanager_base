@@ -203,5 +203,16 @@ HWTEST_F(NetManagerNativeTest, DestroyVnic001, TestSize.Level1)
     auto ret = instance_->DestroyVnic();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+HWTEST_F(NetManagerNativeTest, DisableWearableDistributedNetForward, TestSize.Level1)
+{
+    auto ret = instance_->EnableWearableDistributedNetForward(8001, 8002);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DisableWearableDistributedNetForward();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

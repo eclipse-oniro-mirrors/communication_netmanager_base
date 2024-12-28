@@ -39,9 +39,6 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
-#include "power_mgr_client.h"
-#endif
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -51,9 +48,7 @@ constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
-#endif
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 2;
@@ -83,13 +78,10 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-                       const std::weak_ptr<INetMonitorCallback> &callback)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback)
+                       const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
 {
     netBearType_ = bearType;
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
-    isScreenOn_ = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
-#endif
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -136,15 +128,11 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         result = CAPTIVE_PORTAL_STATE;
     } else if (probeResult.IsNeedPortal()) {
         NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
         if (!isScreenOn_ && netBearType_ == BEARER_WIFI) {
             detectionDelay_ = SCREENOFF_PORTAL_DETECTION_DELAY_MS;
         } else {
             detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
         }
-#else
-        detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
-#endif
         result = CAPTIVE_PORTAL_STATE;
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
@@ -397,11 +385,9 @@ bool NetMonitor::CheckIfSettingsDataReady()
     return true;
 }
 
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
 }
-#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

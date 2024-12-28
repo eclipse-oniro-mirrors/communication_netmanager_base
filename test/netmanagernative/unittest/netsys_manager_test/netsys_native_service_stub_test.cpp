@@ -523,6 +523,18 @@ public:
         return 0;
     }
 
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+    int32_t EnableWearableDistributedNetForward(int32_t tcpPortId, int32_t udpPortId) override
+    {
+        return 0;
+    }
+
+    int32_t DisableWearableDistributedNetForward() override
+    {
+        return 0;
+    }
+#endif
+
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
     {
         return 0;
@@ -2067,5 +2079,47 @@ HWTEST_F(NetsysNativeServiceStubTest, DelBrokerUidAccessPolicyMapTest001, TestSi
     int32_t ret = notifyStub_->CmdDelBrokerUidAccessPolicyMap(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
+HWTEST_F(NetsysNativeServiceStubTest, CmdEnableWearableDistributedNetForward, TestSize.Level1)
+{
+    uint32_t type = 0;
+    uint32_t uId = 2020;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(type)) {
+        return;
+    }
+    if (!data.WriteInt32(uId)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdEnableWearableDistributedNetForward(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDisableWearableDistributedNetForward, TestSize.Level1)
+{
+    uint32_t type = 0;
+    uint32_t uId = 2020;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(type)) {
+        return;
+    }
+    if (!data.WriteInt32(uId)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDisableWearableDistributedNetForward(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

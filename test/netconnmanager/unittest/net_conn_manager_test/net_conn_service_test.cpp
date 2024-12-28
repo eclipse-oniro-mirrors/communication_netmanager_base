@@ -1115,7 +1115,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
 {
     NetHttpProxyTracker httpProxyTracker;
     std::string exclusions = "";
-    NetConnService::GetInstance()->GetPreferredUrl();
+    NetConnService::GetInstance()->GetPreferredRegex();
     std::list<std::string> list = httpProxyTracker.ParseExclusionList(exclusions);
     EXPECT_TRUE(list.empty());
 
@@ -1189,6 +1189,32 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
         QUALITY_GOOD_STATE, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateSupplierScore003, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
+        netCaps, supplierId, callingUid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    if (netLinkInfo == nullptr) {
+        return;
+    }
+    netLinkInfo->ifaceName_ = "wlan0";
+    INetAddr netAddr;
+    netAddr.type_ = INetAddr::IPV4;
+    netAddr.hostName_ = "testHost";
+    netLinkInfo->netAddrList_.push_back(netAddr);
+    ret = NetConnService::GetInstance()->UpdateNetLinkInfoAsync(supplierId, netLinkInfo, callingUid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
+        QUALITY_POOR_STATE, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1684,6 +1710,30 @@ HWTEST_F(NetConnServiceTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
     std::string ipAddr = "0.0.0.1";
     auto ret = NetConnService::GetInstance()->SetNetInterfaceIpAddress(ifName, ipAddr);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateNetCaps001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+
+    auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateNetCaps002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    netCaps.insert(NetCap::NET_CAPABILITY_NOT_VPN);
+    std::string netConnManagerWorkThread = "NET_CONN_MANAGER_WORK_THREAD";
+    NetConnService::GetInstance()->netConnEventRunner_ = AppExecFwk::EventRunner::Create(netConnManagerWorkThread);
+    NetConnService::GetInstance()->netConnEventHandler_
+        = std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
+        
+    auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

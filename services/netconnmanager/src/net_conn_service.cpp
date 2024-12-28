@@ -730,7 +730,6 @@ void NetConnService::HandlePowerMgrEvent(int code)
 }
 #endif
 
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
 void NetConnService::HandleScreenEvent(bool isScreenOn)
 {
     for (const auto& pNetSupplier : netSuppliers_) {
@@ -742,18 +741,18 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
             NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
             continue;
         }
-        pNetwork->SetScreenState(isScreenOn);
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostSyncTask([pNetwork, isScreenOn]() { pNetwork->SetScreenState(isScreenOn); });
+        }
         if (!isScreenOn || pNetSupplier.second->GetNetSupplierType() != BEARER_WIFI ||
             !pNetSupplier.second->HasNetCap(NET_CAPABILITY_PORTAL)) {
             continue;
         }
-        NETMGR_LOG_I("on receive screen on");
         if (netConnEventHandler_) {
             netConnEventHandler_->PostSyncTask([pNetwork]() { pNetwork->StartNetDetection(false); });
         }
     }
 }
-#endif
 
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
@@ -2792,12 +2791,10 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
 #endif
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
         SubscribeCommonEvent("usual.event.SCREEN_ON",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
         SubscribeCommonEvent("usual.event.SCREEN_OFF",
             [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-#endif
     }
 }
 
@@ -2842,13 +2839,11 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HandlePowerMgrEvent(code);
     }
 #endif
-#ifdef NETMANAGER_BASE_POWER_MANAGER_ENABLE
     if (action == "usual.event.SCREEN_ON") {
         HandleScreenEvent(true);
     } else if (action == "usual.event.SCREEN_OFF") {
         HandleScreenEvent(false);
     }
-#endif
 }
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
@@ -2908,9 +2903,18 @@ void NetConnService::OnNetSysRestart()
 
 int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
 {
-    static std::vector<std::string> preferredUrlList = GetPreferredUrl();
-    preferCellular = std::any_of(preferredUrlList.begin(), preferredUrlList.end(),
-                                 [&url](const std::string &str) { return url.find(str) != std::string::npos; });
+    std::string hostName = CommonUtils::GetHostnameFromURL(url);
+    static std::vector<std::string> preferredRegexList = GetPreferredRegex();
+    preferCellular = std::any_of(preferredRegexList.begin(), preferredRegexList.end(),
+        [&hostName](const std::string &str) -> bool {
+            try {
+                return std::regex_match(hostName, std::regex(str));
+            } catch (const std::regex_error& e) {
+                NETMGR_LOG_E("regex_match exception!");
+                return false;
+            }
+        });
+    NETMGR_LOG_I("preferCellular:%{public}d", preferCellular);
     return 0;
 }
 
@@ -2941,21 +2945,23 @@ std::string NetConnService::GetNetCapabilitiesAsString(const uint32_t supplierId
     return {};
 }
 
-std::vector<std::string> NetConnService::GetPreferredUrl()
+std::vector<std::string> NetConnService::GetPreferredRegex()
 {
-    std::vector<std::string> preferCellularUrlList;
-    const std::string preferCellularUrlPath = "/system/etc/prefer_cellular_url_list.txt";
-    std::ifstream preferCellularFile(preferCellularUrlPath);
+    std::vector<std::string> preferCellularRegexList;
+    const std::string preferCellularRegexPath = "/system/etc/prefer_cellular_regex_list.txt";
+    std::ifstream preferCellularFile(preferCellularRegexPath);
     if (preferCellularFile.is_open()) {
         std::string line;
         while (getline(preferCellularFile, line)) {
-            preferCellularUrlList.push_back(line);
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
+            preferCellularRegexList.push_back(line);
         }
         preferCellularFile.close();
     } else {
         NETMGR_LOG_E("open prefer cellular url file failure.");
     }
-    return preferCellularUrlList;
+    return preferCellularRegexList;
 }
 
 void NetConnService::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)
@@ -3059,13 +3065,20 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_
         // In poor network, supplierId should be an output parameter.
         std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
         if (suppliers.empty()) {
-            NETMGR_LOG_E(" not found supplierId by bearertype[%{public}d].", bearerType);
+            NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
             return NETMANAGER_ERR_INVALID_PARAMETER;
         }
         uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
         if (tmpSupplierId == INVALID_SUPPLIER_ID) {
-            NETMGR_LOG_E("not found supplierId");
-            return NETMANAGER_ERR_INVALID_PARAMETER;
+            if (bearerType == BEARER_WIFI) {
+                tmpSupplierId = FindSupplierForConnected(suppliers);
+                supplierId = tmpSupplierId;
+                NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
+            }
+            if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+                NETMGR_LOG_E("not found supplierId");
+                return NETMANAGER_ERR_INVALID_PARAMETER;
+            }
         }
     }
     // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
@@ -3096,6 +3109,22 @@ uint32_t NetConnService::FindSupplierToReduceScore(std::vector<sptr<NetSupplier>
         if (defaultNetSupplier_->GetNetId() == (*iter)->GetNetId()) {
             ret = (*iter)->GetSupplierId();
             supplierId = ret;
+            break;
+        }
+    }
+    return ret;
+}
+
+uint32_t NetConnService::FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers)
+{
+    uint32_t ret = INVALID_SUPPLIER_ID;
+    std::vector<sptr<NetSupplier>>::iterator iter;
+    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
+        if (*iter == nullptr) {
+            continue;
+        }
+        if ((*iter)->IsConnected()) {
+            ret = (*iter)->GetSupplierId();
             break;
         }
     }

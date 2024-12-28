@@ -72,7 +72,11 @@ void ProbeThread::Start()
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     isDetecting_ = true;
     std::shared_ptr<ProbeThread> probeThead = shared_from_this();
-    thread_ = std::thread([probeThead] { return NetProbeThread(probeThead);});
+    std::shared_ptr<ProbeThread> temp;
+    std::atomic_store_explicit(&temp, std::move(probeThead), std::memory_order_release);
+    thread_ = std::thread([thread = std::atomic_load_explicit(&temp, std::memory_order_acquire)] {
+        return NetProbeThread(thread);
+    });
     std::string threadName = "netDetectThread";
     pthread_setname_np(thread_.native_handle(), threadName.c_str());
     thread_.detach();

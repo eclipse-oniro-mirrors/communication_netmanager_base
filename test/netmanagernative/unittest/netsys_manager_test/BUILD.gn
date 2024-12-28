@@ -40,6 +40,7 @@ ohos_unittest("netsys_native_manager_test") {
     "net_conn_manager_test_util.cpp",
     "net_diag_wrapper_test.cpp",
     "netlink_msg_test.cpp",
+    "netsys_controller_service_impl_test.cpp",
     "netsys_native_service_stub_test.cpp",
     "netsys_network_test.cpp",
     "netsys_udp_transfer_test.cpp",
@@ -100,6 +101,10 @@ ohos_unittest("netsys_native_manager_test") {
     defines += [ "SUPPORT_SYSVPN" ]
   }
 
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -152,6 +157,7 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "ffrt:libffrt",
@@ -165,7 +171,12 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
     "SHARING_MANAGER_DEPS",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
 
   external_deps += [ "hilog:libhilog" ]
 
@@ -214,6 +225,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "ffrt:libffrt",
@@ -227,7 +239,12 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
     "SHARING_MANAGER_DEPS",
+    "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
 
   external_deps += [ "hilog:libhilog" ]
 
@@ -296,6 +313,10 @@ ohos_unittest("netsys_controller_test") {
     "SHARING_MANAGER_DEPS",
   ]
 
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -354,6 +375,10 @@ ohos_unittest("netsys_native_client_test") {
     "LOG_DOMAIN = 0xD0015B0",
     "SHARING_MANAGER_DEPS",
   ]
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
 
   external_deps += [ "hilog:libhilog" ]
 
@@ -423,6 +448,10 @@ ohos_unittest("netsys_native_service_proxy_test") {
     "SHARING_MANAGER_DEPS",
   ]
 
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -461,6 +490,7 @@ ohos_unittest("resolver_config_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
 
   external_deps = [
