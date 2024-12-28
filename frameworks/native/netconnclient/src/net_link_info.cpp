@@ -152,13 +152,13 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
         }
         ptr->routeList_.push_back(*route);
     }
-    if (!UnmarshallingEx(parcel, ptr)) {
+    if (!ReadInfoFromParcel(parcel, ptr)) {
         return nullptr;
     }
     return ptr;
 }
 
-bool NetLinkInfo::UnmarshallingEx(Parcel &parcel, sptr<NetLinkInfo> &ptr)
+bool NetLinkInfo::ReadInfoFromParcel(Parcel &parcel, sptr<NetLinkInfo> &ptr)
 {
     if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) || !parcel.ReadString(ptr->ident_)) {
         return false;
