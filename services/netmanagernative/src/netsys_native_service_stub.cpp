@@ -57,7 +57,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
 #ifdef SUPPORT_SYSVPN
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
-    InitOpToInterfaceMapExt2();
+    InitDnsServerOpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -266,7 +266,7 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdSetNicTrafficAllowed;
 }
 
-void NetsysNativeServiceStub::InitOpToInterfaceMapExt2()
+void NetsysNativeServiceStub::InitDnsServerOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG)] =
         &NetsysNativeServiceStub::CmdSetUserDefinedServerFlag;
