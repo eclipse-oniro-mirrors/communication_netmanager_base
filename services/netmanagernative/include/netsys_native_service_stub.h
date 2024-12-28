@@ -53,7 +53,7 @@ private:
     void InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
     void InitOpToInterfaceMapExt();
-    void InitOpToInterfaceMapExt2();
+    void InitDnsServerOpToInterfaceMap();
     void InitNetDiagOpToInterfaceMap();
     void InitNetDnsDiagOpToInterfaceMap();
     void InitNetVnicInterfaceMap();
