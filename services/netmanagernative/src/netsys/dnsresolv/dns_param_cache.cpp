@@ -716,8 +716,8 @@ int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag)
         DNS_CONFIG_PRINT("GetUserDefinedServerFlag failed: netid is not have netid:%{public}d,", netId);
         return -ENOENT;
     }
-     flag = it->second.IsUserDefinedServer();
-     return 0;
+    flag = it->second.IsUserDefinedServer();
+    return 0;
 }
 
 int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint32_t uid)
