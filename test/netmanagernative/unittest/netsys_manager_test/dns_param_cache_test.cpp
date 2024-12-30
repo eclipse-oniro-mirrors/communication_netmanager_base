@@ -196,5 +196,97 @@ HWTEST_F(DNSParamCacheTest, GetDnsCacheTest01, TestSize.Level1)
     auto ret = dnsParCache.GetDnsCache(netId, hostName);
     EXPECT_TRUE(netId == dnsParCache.defaultNetId_);
 }
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest001 enter");
+    DnsParamCache dnsParCache;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000);
+    uidRanges.push_back(uidrange1);
+    uint16_t netId = 0;
+    bool flag = false;
+    dnsParCache.SetDefaultNetwork(netId);
+    dnsParCache.CreateCacheForNet(netId);
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag, 10001);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest002 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 0;
+    bool flag = false;
+    dnsParCache.SetDefaultNetwork(netId);
+    dnsParCache.CreateCacheForNet(netId);
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest003 enter");
+    DnsParamCache dnsParCache;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000);
+    uidRanges.push_back(uidrange1);
+    uint16_t netId = 1;
+    bool flag = false;
+    dnsParCache.SetDefaultNetwork(netId);
+    dnsParCache.CreateCacheForNet(netId);
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag, 9999);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest004 enter");
+    DnsParamCache dnsParCache;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000);
+    uidRanges.push_back(uidrange1);
+    uint16_t netId = 0;
+    dnsParCache.SetDefaultNetwork(1);
+    dnsParCache.CreateCacheForNet(1);
+    bool flag = false;
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag, 9999);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest005 enter");
+    DnsParamCache dnsParCache;
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    NetManagerStandard::UidRange uidrange1(10000, 20000);
+    uidRanges.push_back(uidrange1);
+    uint16_t netId = 1;
+    bool flag = false;
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag, 9999);
+    EXPECT_EQ(ret, -ENOENT);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest006, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest006 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 0;
+    bool flag = false;
+    dnsParCache.SetDefaultNetwork(1);
+    dnsParCache.CreateCacheForNet(1);
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest007, TestSize.Level1)
+{
+    NETNATIVE_LOGI("GetUserDefinedServerFlagTest007 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    bool flag = false;
+    int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag);
+    EXPECT_EQ(ret, -ENOENT);
+}
 } // namespace NetsysNative
 } // namespace OHOS

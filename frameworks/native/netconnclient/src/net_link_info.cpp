@@ -38,6 +38,7 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
     ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
+    isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
 }
 
 NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
@@ -51,6 +52,7 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
     ident_ = linkInfo.ident_;
     httpProxy_ = linkInfo.httpProxy_;
+    isUserDefinedDnsServer_ = linkInfo.isUserDefinedDnsServer_;
     return *this;
 }
 
@@ -93,6 +95,9 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString(tcpBufferSizes_) || !parcel.WriteString(ident_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isUserDefinedDnsServer_)) {
         return false;
     }
     if (!httpProxy_.Marshalling(parcel)) {
@@ -147,11 +152,24 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
         }
         ptr->routeList_.push_back(*route);
     }
-    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) || !parcel.ReadString(ptr->ident_) ||
-        !HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
+    if (!ReadInfoFromParcel(parcel, ptr)) {
         return nullptr;
     }
     return ptr;
+}
+
+bool NetLinkInfo::ReadInfoFromParcel(Parcel &parcel, sptr<NetLinkInfo> &ptr)
+{
+    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) || !parcel.ReadString(ptr->ident_)) {
+        return false;
+    }
+    if (!parcel.ReadBool(ptr->isUserDefinedDnsServer_)) {
+        return false;
+    }
+    if (!HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
+        return false;
+    }
+    return true;
 }
 
 bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
@@ -194,7 +212,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
         }
     }
     if (!parcel.WriteUint16(object->mtu_) || !parcel.WriteString(object->tcpBufferSizes_) ||
-        !parcel.WriteString(object->ident_)) {
+        !parcel.WriteString(object->ident_)|| !parcel.WriteBool(object->isUserDefinedDnsServer_)) {
         return false;
     }
     if (!object->httpProxy_.Marshalling(parcel)) {
@@ -261,6 +279,14 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("ident_ = ");
     str.append(ident_);
+
+    str.append(tab);
+    str.append("isUserDefinedDnsServer_ = ");
+    if (isUserDefinedDnsServer_) {
+        str.append("true");
+    } else {
+        str.append("false");
+    }
 
     str.append(tab);
     str.append("httpProxy = ");

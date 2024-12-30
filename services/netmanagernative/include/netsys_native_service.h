@@ -184,13 +184,14 @@ public:
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
     int32_t StopClat(const std::string &interfaceName) override;
     int32_t ClearFirewallAllRules() override;
-    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
 #ifdef SUPPORT_SYSVPN
     int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override;
 #endif // SUPPORT_SYSVPN
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
+    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

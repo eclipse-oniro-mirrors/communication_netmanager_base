@@ -246,5 +246,11 @@ int32_t DnsManager::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetF
     return DnsParamCache::GetInstance().UnRegisterNetFirewallCallback(callback);
 }
 #endif
+
+int32_t DnsManager::SetUserDefinedServerFlag(uint16_t netId, bool flag)
+{
+    NETNATIVE_LOGI("manager_SetUserDefinedServerFlag netId[%{public}d] flag[%{public}d]", netId, flag);
+    return DnsParamCache::GetInstance().SetUserDefinedServerFlag(netId, flag);
+}
 } // namespace nmd
 } // namespace OHOS

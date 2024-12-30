@@ -958,5 +958,11 @@ int32_t NetsysControllerServiceImpl::DelBrokerUidAccessPolicyMap(uint32_t uid)
     NETMGR_LOG_I("DelBrokerUidAccessPolicyMap Enter. uid[%{public}u]", uid);
     return netsysClient_.DelBrokerUidAccessPolicyMap(uid);
 }
+
+int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer)
+{
+    NETMGR_LOG_I("SetUserDefinedServerFlag isUserDefinedServer = %{public}d", isUserDefinedServer);
+    return netsysClient_.SetUserDefinedServerFlag(netId, isUserDefinedServer);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

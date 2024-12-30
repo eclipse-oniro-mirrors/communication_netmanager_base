@@ -53,6 +53,7 @@ private:
     void InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
     void InitOpToInterfaceMapExt();
+    void InitDnsServerOpToInterfaceMap();
     void InitNetDiagOpToInterfaceMap();
     void InitNetDnsDiagOpToInterfaceMap();
     void InitNetVnicInterfaceMap();
@@ -168,13 +169,14 @@ private:
     int32_t CmdStartClat(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopClat(MessageParcel &data, MessageParcel &reply);
     int32_t CmdClearFirewallAllRules(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_SYSVPN
     int32_t CmdProcessVpnStage(MessageParcel &data, MessageParcel &reply);
 #endif // SUPPORT_SYSVPN
     int32_t CmdCloseSocketsUid(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

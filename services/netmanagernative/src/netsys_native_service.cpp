@@ -1140,5 +1140,11 @@ int32_t NetsysNativeService::DelBrokerUidAccessPolicyMap(uint32_t uid)
     }
     return NetManagerStandard::NETSYS_SUCCESS;
 }
+
+int32_t NetsysNativeService::SetUserDefinedServerFlag(uint16_t netId, bool flag)
+{
+    netsysService_->DnsSetUserDefinedServerFlag(netId, flag);
+    return NetManagerStandard::NETSYS_SUCCESS;
+}
 } // namespace NetsysNative
 } // namespace OHOS

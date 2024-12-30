@@ -112,4 +112,14 @@ void DnsResolvConfig::SetCacheDelayed(const std::string &hostName)
     auto wrapper = std::make_shared<DelayedTaskWrapper>(hostName, cache_);
     delayedQueue_.Put(wrapper);
 }
+
+void DnsResolvConfig::SetUserDefinedServerFlag(bool flag)
+{
+    isUserDefinedDnsServer_ = flag;
+}
+
+bool DnsResolvConfig::IsUserDefinedServer()
+{
+    return isUserDefinedDnsServer_;
+}
 } // namespace OHOS::nmd

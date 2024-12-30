@@ -688,4 +688,64 @@ void DnsParamCache::GetDumpInfo(std::string &info)
     });
     info.append(dnsData);
 }
+
+int32_t DnsParamCache::SetUserDefinedServerFlag(uint16_t netId, bool flag)
+{
+    NETNATIVE_LOGI("DnsParamCache::SetUserDefinedServerFlag, netid:%{public}d, flag:%{public}d,", netId, flag);
+
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    // select_domains
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        NETNATIVE_LOGE("DnsParamCache::SetUserDefinedServerFlag failed, netid is non-existent");
+        return -ENOENT;
+    }
+    it->second.SetUserDefinedServerFlag(flag);
+    return 0;
+}
+
+int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+        NETNATIVE_LOG_D("defaultNetId_ = [%{public}u]", netId);
+    }
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("GetUserDefinedServerFlag failed: netid is not have netid:%{public}d,", netId);
+        return -ENOENT;
+    }
+    flag = it->second.IsUserDefinedServer();
+    return 0;
+}
+
+int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint32_t uid)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+        NETNATIVE_LOG_D("defaultNetId_ = [%{public}u]", netId);
+    }
+    {
+        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+        for (auto mem : vpnUidRanges_) {
+            if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
+                NETNATIVE_LOG_D("is vpn hap");
+                auto it = serverConfigMap_.find(vpnNetId_);
+                if (it == serverConfigMap_.end()) {
+                    NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", vpnNetId_);
+                    break;
+                }
+                flag = it->second.IsUserDefinedServer();
+                return 0;
+            }
+        }
+        auto it = serverConfigMap_.find(netId);
+        if (it == serverConfigMap_.end()) {
+            DNS_CONFIG_PRINT("GetUserDefinedServerFlag failed: netid is not have netid:%{public}d,", netId);
+            return -ENOENT;
+        }
+    }
+    return GetUserDefinedServerFlag(netId, flag);
+}
 } // namespace OHOS::nmd

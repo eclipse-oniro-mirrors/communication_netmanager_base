@@ -856,6 +856,8 @@ public:
     
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) override;
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**
      * Set firewall rules to native

@@ -57,6 +57,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
 #ifdef SUPPORT_SYSVPN
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
+    InitDnsServerOpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
@@ -263,6 +264,12 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED)] =
         &NetsysNativeServiceStub::CmdSetNicTrafficAllowed;
+}
+
+void NetsysNativeServiceStub::InitDnsServerOpToInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG)] =
+        &NetsysNativeServiceStub::CmdSetUserDefinedServerFlag;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -2258,6 +2265,32 @@ int32_t NetsysNativeServiceStub::CmdDelBrokerUidAccessPolicyMap(MessageParcel &d
         return ERR_FLATTEN_OBJECT;
     }
     return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetUserDefinedServerFlag CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    bool flag = false;
+    uint16_t netId = 0;
+    if (!data.ReadUint16(netId)) {
+        NETNATIVE_LOGE("CmdSetUserDefinedServerFlag read netId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadBool(flag)) {
+        NETNATIVE_LOGE("CmdSetUserDefinedServerFlag read flag failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = SetUserDefinedServerFlag(netId, flag);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetUserDefinedServerFlag result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative
 } // namespace OHOS

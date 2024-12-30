@@ -961,6 +961,8 @@ public:
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
+    int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer);
+
 #ifdef SUPPORT_SYSVPN
     /**
      * process the next vpn stage by SysVpnStageCode

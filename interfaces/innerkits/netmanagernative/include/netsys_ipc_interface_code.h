@@ -138,6 +138,7 @@ enum class NetsysInterfaceCode {
 #endif // SUPPORT_SYSVPN
     NETSYS_DEL_BROKER_UID_NETWORK_POLICY,
     NETSYS_SET_BROKER_UID_NETWORK_POLICY,
+    NETSYS_SET_USER_DEFINED_SERVER_FLAG,
 };
 
 enum class NotifyInterfaceCode {
