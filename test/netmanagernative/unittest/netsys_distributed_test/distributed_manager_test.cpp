@@ -65,6 +65,21 @@ HWTEST_F(DistributedManagerTest, SetDistributedNicMtu001, TestSize.Level1)
     ifName = DISTRIBUTED_TUN_CARD_NAME;
     testNumber = 1;
     result = DistributedManager::GetInstance().SetDistributedNicMtu(ifName, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, SetDistributedNicMtu002, TestSize.Level1)
+{
+    DistributedManager::GetInstance().CreateDistributedInterface(DISTRIBUTED_TUN_CARD_NAME);
+    std::string ifName = DISTRIBUTED_TUN_CARD_NAME;
+    int32_t testNumber = 1; // func ioctl will be failed, if mtu is too small
+    auto result = DistributedManager::GetInstance().SetDistributedNicMtu(ifName, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    ifName = DISTRIBUTED_TUN_CARD_NAME;
+    testNumber = 1400;
+    result = DistributedManager::GetInstance().SetDistributedNicMtu(ifName, testNumber);
+    DistributedManager::GetInstance().DestroyDistributedNic(DISTRIBUTED_TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 

@@ -120,7 +120,9 @@ int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const 
     }
 
     DataShare::DataShareValuesBucket valuesBucket;
+    DataShare::DataShareValueObject keyObj(key);
     DataShare::DataShareValueObject valueObj(value);
+    valuesBucket.Put(SETTINGS_DATA_COLUMN_KEYWORD, keyObj);
     valuesBucket.Put(SETTINGS_DATA_COLUMN_VALUE, valueObj);
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);

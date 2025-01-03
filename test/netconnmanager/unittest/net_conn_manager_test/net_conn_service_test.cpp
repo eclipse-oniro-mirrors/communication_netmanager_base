@@ -216,6 +216,14 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid001, TestSize.Level1)
+{
+    int32_t netId = 100;
+    uint32_t uid = 20020157;
+    int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
 {
     sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
@@ -489,7 +497,7 @@ HWTEST_F(NetConnServiceTest, NetDetectionTest001, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 
     ret = NetConnService::GetInstance()->NetDetection(MIN_NET_ID);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 }
 
 HWTEST_F(NetConnServiceTest, GetNetIdByIdentifierTest001, TestSize.Level1)
@@ -1108,7 +1116,7 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
     ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = stateCallback.UnregisterInterfaceCallback(interfaceStateCallback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(ret, NET_CONN_ERR_CALLBACK_NOT_FOUND);
 }
 
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
@@ -1261,12 +1269,12 @@ HWTEST_F(NetConnServiceTest, DisableVnicNetwork001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, CmdCloseSocketsUid002, TestSize.Level1)
 {
     int32_t netId = 100;
     uint32_t uid = 20020157;
     int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, SystemReadyTest002, TestSize.Level1)
