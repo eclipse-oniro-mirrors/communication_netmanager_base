@@ -91,7 +91,7 @@ private:
 
 extern std::map<OHOS::NetManagerStandard::ConnectionCallbackObserver *, OHOS::NetManagerStandard::NetConnectionImpl *>
     NET_CONNECTIONS;
-extern std::mutex g_netConnectionsMutex;
+extern std::shared_mutex g_netConnectionsMutex;
 } // namespace OHOS::NetManagerStandard
 
 #endif

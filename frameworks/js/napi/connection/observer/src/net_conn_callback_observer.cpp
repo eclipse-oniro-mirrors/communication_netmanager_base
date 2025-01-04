@@ -26,17 +26,17 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -51,7 +51,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_AVAILABLE, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_AVAILABLE, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_AVAILABLE, handler, netConnection->second->moduleId_);
     return 0;
 }
 
@@ -61,17 +61,17 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     if (netHandle == nullptr || netAllCap == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -87,7 +87,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_CAPABILITIES_CHANGE, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_CAPABILITIES_CHANGE, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_CAPABILITIES_CHANGE, handler, netConnection->second->moduleId_);
     return 0;
 }
 
@@ -97,17 +97,17 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     if (netHandle == nullptr || info == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -123,7 +123,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, handler, netConnection->second->moduleId_);
     return 0;
 }
 
@@ -132,17 +132,17 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -156,23 +156,23 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_LOST, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_LOST, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_LOST, handler, netConnection->second->moduleId_);
     return 0;
 }
 
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -185,7 +185,7 @@ int32_t NetConnCallbackObserver::NetUnavailable()
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_UNAVAILABLE, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_UNAVAILABLE, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_UNAVAILABLE, handler, netConnection->second->moduleId_);
     return 0;
 }
 
@@ -194,17 +194,17 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
     if (netHandle == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    if (NET_CONNECTIONS.find(this) == NET_CONNECTIONS.end()) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
     }
-    NetConnection *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    if (netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
-    auto manager = netConnection->GetEventManager();
+    auto manager = netConnection->second->GetEventManager();
     if (manager == nullptr) {
         return 0;
     }
@@ -218,7 +218,7 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
         manager->Emit(EVENT_NET_BLOCK_STATUS_CHANGE, arg);
     };
-    manager->EmitByUvWithModuleId(EVENT_NET_BLOCK_STATUS_CHANGE, handler, netConnection->moduleId_);
+    manager->EmitByUvWithModuleId(EVENT_NET_BLOCK_STATUS_CHANGE, handler, netConnection->second->moduleId_);
     return 0;
 }
 

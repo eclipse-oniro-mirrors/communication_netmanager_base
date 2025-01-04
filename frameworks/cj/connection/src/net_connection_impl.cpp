@@ -14,14 +14,14 @@
  */
 #include "net_connection_impl.h"
 #include "cj_lambda.h"
-#include "mutex"
+#include <shared_mutex>
 #include "net_conn_client.h"
 #include "netmanager_base_log.h"
 #include "net_specifier.h"
 
 namespace OHOS::NetManagerStandard {
 std::map<ConnectionCallbackObserver *, NetConnectionImpl *> NET_CONNECTIONS;
-std::mutex g_netConnectionsMutex;
+std::shared_mutex g_netConnectionsMutex;
 
 NetConnectionProxy::NetConnectionProxy(CNetSpecifier specifier, uint32_t timeout)
 {
@@ -118,7 +118,7 @@ NetConnectionImpl::NetConnectionImpl()
 
 NetConnectionImpl *NetConnectionImpl::MakeNetConnection()
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    std::unique_lock lock(g_netConnectionsMutex);
     auto netConnection = new NetConnectionImpl();
     if (netConnection) {
         NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
@@ -128,7 +128,7 @@ NetConnectionImpl *NetConnectionImpl::MakeNetConnection()
 
 void NetConnectionImpl::DeleteNetConnection(NetConnectionImpl *netConnection)
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    std::unique_lock lock(g_netConnectionsMutex);
     NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
     delete netConnection;
 }

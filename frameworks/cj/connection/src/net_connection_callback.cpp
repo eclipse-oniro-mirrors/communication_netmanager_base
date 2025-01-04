@@ -24,20 +24,20 @@ int32_t ConnectionCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netAvailible.size() == 0) {
+    if (netConnection->second->netAvailible.size() == 0) {
         NETMANAGER_BASE_LOGE("no NetAvailable func registered");
         return 0;
     }
     int32_t id = netHandle->GetNetId();
-    int len = static_cast<int>(netConnection->netAvailible.size());
+    int len = static_cast<int>(netConnection->second->netAvailible.size());
     for (int i = 0; i < len; i++) {
-        netConnection->netAvailible[i](id);
+        netConnection->second->netAvailible[i](id);
     }
     return 0;
 }
@@ -79,20 +79,20 @@ int32_t ConnectionCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHa
         NETMANAGER_BASE_LOGE("NetCapabilitiesChange param is nullptr");
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netCapabilitiesChange.size() == 0) {
+    if (netConnection->second->netCapabilitiesChange.size() == 0) {
         NETMANAGER_BASE_LOGE("no NetCapabilitiesChange func registered");
         return 0;
     }
 
     int32_t id = netHandle->GetNetId();
 
-    int len = static_cast<int>(netConnection->netCapabilitiesChange.size());
+    int len = static_cast<int>(netConnection->second->netCapabilitiesChange.size());
     for (int i = 0; i < len; i++) {
         auto bearTypes = netAllCap->bearerTypes_;
         auto netCaps = netAllCap->netCaps_;
@@ -108,7 +108,7 @@ int32_t ConnectionCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHa
         }
 
         CNetCapabilityInfo info = {.netHandle = id, .netCap = capabilities};
-        netConnection->netCapabilitiesChange[i](info);
+        netConnection->second->netCapabilitiesChange[i](info);
     }
     return 0;
 }
@@ -170,18 +170,18 @@ int32_t ConnectionCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle
         NETMANAGER_BASE_LOGE("NetConnectionPropertiesChange param is nullptr");
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netConnectionPropertiesChange.size() == 0) {
+    if (netConnection->second->netConnectionPropertiesChange.size() == 0) {
         return 0;
     }
 
     int32_t id = netHandle->GetNetId();
-    int len = static_cast<int>(netConnection->netConnectionPropertiesChange.size());
+    int len = static_cast<int>(netConnection->second->netConnectionPropertiesChange.size());
     for (int i = 0; i < len; i++) {
         CConnectionProperties props = {.interfaceName = MallocCString(info->ifaceName_),
                                        .domains = MallocCString(info->domain_),
@@ -193,7 +193,7 @@ int32_t ConnectionCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle
                                        .dnses = nullptr,
                                        .routes = nullptr};
         SetConnectionProp(props, info);
-        netConnection->netConnectionPropertiesChange[i](id, props);
+        netConnection->second->netConnectionPropertiesChange[i](id, props);
     }
     return 0;
 }
@@ -203,59 +203,59 @@ int32_t ConnectionCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netLost.size() == 0) {
+    if (netConnection->second->netLost.size() == 0) {
         NETMANAGER_BASE_LOGE("no NetLost func registered");
         return 0;
     }
     int32_t id = netHandle->GetNetId();
-    int32_t len = static_cast<int32_t>(netConnection->netLost.size());
+    int32_t len = static_cast<int32_t>(netConnection->second->netLost.size());
     for (int32_t i = 0; i < len; i++) {
-        netConnection->netLost[i](id);
+        netConnection->second->netLost[i](id);
     }
     return 0;
 }
 
 int32_t ConnectionCallbackObserver::NetUnavailable()
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netUnavailable.size() == 0) {
+    if (netConnection->second->netUnavailable.size() == 0) {
         NETMANAGER_BASE_LOGE("no NetUnavailable func registered");
         return 0;
     }
-    int len = static_cast<int>(netConnection->netUnavailable.size());
+    int len = static_cast<int>(netConnection->second->netUnavailable.size());
     for (int i = 0; i < len; i++) {
-        netConnection->netUnavailable[i]();
+        netConnection->second->netUnavailable[i]();
     }
     return 0;
 }
 
 int32_t ConnectionCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
-    NetConnectionImpl *netConnection = NET_CONNECTIONS[this];
-    if (netConnection == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
+    auto netConnection = NET_CONNECTIONS.find(this);
+    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
-    if (netConnection->netBlockStatusChange.size() == 0) {
+    if (netConnection->second->netBlockStatusChange.size() == 0) {
         NETMANAGER_BASE_LOGE("no NetBlockStatusChange func registered");
         return 0;
     }
     int32_t id = netHandle->GetNetId();
-    int len = static_cast<int64_t>(netConnection->netBlockStatusChange.size());
+    int len = static_cast<int64_t>(netConnection->second->netBlockStatusChange.size());
     for (int i = 0; i < len; i++) {
-        netConnection->netBlockStatusChange[i](id, blocked);
+        netConnection->second->netBlockStatusChange[i](id, blocked);
     }
     return 0;
 }
