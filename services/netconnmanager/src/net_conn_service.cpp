@@ -732,6 +732,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
 
 void NetConnService::HandleScreenEvent(bool isScreenOn)
 {
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto& pNetSupplier : netSuppliers_) {
         if (pNetSupplier.second == nullptr) {
             continue;
