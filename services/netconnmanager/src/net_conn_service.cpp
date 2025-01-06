@@ -719,6 +719,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
                 this->StopAllNetDetection();
             });
         }
+        isInSleep_.store(true);
     } else if (code == STATE_EXIT_FORCESLEEP || code == STATE_EXIT_SLEEP_NOT_FORCE) {
         NETMGR_LOG_I("on receive exit sleep, code %{public}d.", code);
         if (netConnEventHandler_) {
@@ -726,6 +727,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
                 this->StartAllNetDetection();
             });
         }
+        isInSleep_.store(false);
     }
 }
 #endif
@@ -2120,7 +2122,7 @@ void NetConnService::ActiveHttpProxy()
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
             NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy ret: %{public}d, code: %{public}d", static_cast<int>(ret),
                          static_cast<int32_t>(response_code));
-            if (response_code != SUCCESS_CODE && retryTimes == 0) {
+            if (response_code != SUCCESS_CODE && retryTimes == 0 && !isInSleep_.load()) {
                 retryTimes = RETRY_TIMES;
             }
             curl_easy_cleanup(curl);
@@ -2128,7 +2130,8 @@ void NetConnService::ActiveHttpProxy()
         if (httpProxyThreadNeedRun_.load()) {
             if (retryTimes == 0) {
                 std::unique_lock lock(httpProxyThreadMutex_);
-                auto notifyRet = httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+                auto notifyRet = httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(isInSleep_.load() ?
+                    HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S : HTTP_PROXY_ACTIVE_PERIOD_S));
                 retryTimes = (notifyRet == std::cv_status::timeout) ? 0 : RETRY_TIMES;
             } else {
                 retryTimes--;
