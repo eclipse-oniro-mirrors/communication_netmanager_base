@@ -580,12 +580,14 @@ private:
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
-    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
+    static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
+    static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
     std::shared_ptr<NetConnListener> subscriber_ = nullptr;
 
     bool hasSARemoved_ = false;
+    std::atomic<bool> isInSleep_ = false;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

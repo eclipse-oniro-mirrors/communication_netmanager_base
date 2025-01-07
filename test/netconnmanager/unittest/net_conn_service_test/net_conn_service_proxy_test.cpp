@@ -56,6 +56,7 @@ public:
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS):
                 reply.WriteUint32(NETMANAGER_SUCCESS);
                 break;
 

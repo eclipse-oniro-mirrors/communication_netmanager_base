@@ -683,6 +683,21 @@ HWTEST_F(NetConnServiceStubTest, OnRegisterNetInterfaceCallbackTest001, TestSize
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnUnregisterNetInterfaceCallback001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1069,8 +1084,42 @@ HWTEST_F(NetConnServiceStubTest, CloseSocketsUid001, TestSize.Level1)
     if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
         return;
     }
+    int32_t netId = 1;
+    if (!data.WriteInt32(netId)) {
+        return;
+    }
+    uint32_t uid = 1;
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, CloseSocketsUid002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+HWTEST_F(NetConnServiceStubTest, CloseSocketsUid003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t netId = 1;
+    if (!data.WriteInt32(netId)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
 
 HWTEST_F(NetConnServiceStubTest, SetInterfaceUpDownTest001, TestSize.Level1)
@@ -1089,6 +1138,22 @@ HWTEST_F(NetConnServiceStubTest, SetInterfaceUpDownTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, SetInterfaceUpDownTest002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
