@@ -103,6 +103,7 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag002, TestSize.Level1)
 
 HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag003, TestSize.Level1)
 {
+    instance_->netPolicyRule_ = std::make_shared<NetPolicyRule>();
     std::string ifaceName = "faces";
     bool isAllowed = true;
     std::vector<std::string> newMeteredIfaces;
@@ -114,10 +115,13 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag003, TestSize.Level1)
 
 HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag004, TestSize.Level1)
 {
+    auto ret = instance_->RegisterNetPolicyCallback(NULL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
     sptr<IRemoteObject> impl = new (std::nothrow) IPCObjectStub();
     sptr<NetPolicyCallbackProxy> callback = new (std::nothrow) NetPolicyCallbackProxy(impl);
-    auto ret = instance_->RegisterNetPolicyCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = instance_->RegisterNetPolicyCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     instance_->netPolicyCallback_ = std::make_shared<NetPolicyCallback>();
     ret = instance_->RegisterNetPolicyCallback(callback);

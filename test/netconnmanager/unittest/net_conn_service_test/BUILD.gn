@@ -29,6 +29,7 @@ ohos_unittest("net_conn_service_test") {
     "net_conn_service_iface_test.cpp",
     "net_conn_service_proxy_test.cpp",
     "net_conn_service_stub_test.cpp",
+    "net_supplier_callback_proxy_test.cpp",
   ]
 
   include_dirs = [
@@ -49,10 +50,13 @@ ohos_unittest("net_conn_service_test") {
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
+    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -81,6 +85,10 @@ ohos_unittest("net_conn_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (enable_netmgr_debug) {
+    external_deps += [ "googletest:gmock_main" ]
+  }
 
   defines = [
     "NETMGR_LOG_TAG = \"NetConnManager\"",
