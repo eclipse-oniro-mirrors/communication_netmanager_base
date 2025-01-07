@@ -22,6 +22,7 @@
 #endif
 
 #include "net_supplier.h"
+#include "common_net_conn_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -92,6 +93,20 @@ HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
     uint32_t invalidValue = 100;
     result = supplier->TechToType(static_cast<NetSlotTech>(invalidValue));
     EXPECT_TRUE(result == "3G");
+}
+
+HWTEST_F(NetSupplierTest, GetSupplierCallbackTest001, TestSize.Level1)
+{
+    sptr<INetSupplierCallback> callBack = supplier->GetSupplierCallback();
+    EXPECT_TRUE(callBack == nullptr);
+}
+
+HWTEST_F(NetSupplierTest, GetSupplierCallbackTest002, TestSize.Level1)
+{
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
+    ASSERT_NE(callback, nullptr);
+    supplier->RegisterSupplierCallback(callback);
+    ASSERT_NE(supplier->GetSupplierCallback(), nullptr);
 }
 
 HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest001, TestSize.Level1)

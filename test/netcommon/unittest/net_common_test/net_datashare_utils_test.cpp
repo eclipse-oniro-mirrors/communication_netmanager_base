@@ -29,10 +29,13 @@ constexpr const char *SHARING_USB_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=sharing_usb";
 constexpr const char *SHARING_BLUETOOTH_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=sharing_bluetooth";
+constexpr const char *SHARING_NOTEXIST_TEST_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=not_exist_test";
 
 constexpr const char *KEY_SHARING_WIFI = "settings.netmanager.sharing_wifi";
 constexpr const char *KEY_SHARING_USB = "settings.netmanager.sharing_usb";
 constexpr const char *KEY_SHARING_BLUETOOTH = "settings.netmanager.sharing_bluetooth";
+constexpr const char *KEY_NOTEXIST_TEST = "settings.netmanager.not_exist_test";
 
 std::unique_ptr<NetDataShareHelperUtils> netDataShareHelperUtils_ = nullptr;
 
@@ -65,61 +68,41 @@ void NetDataShareHelperUtilsTest::TearDown() {}
  */
 HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
 {
-    std::string on = "1";
+    NetManagerBaseAccessToken token;
+
     Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_SHARING_WIFI, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    std::string off = "0";
-    ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_SHARING_WIFI, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
     Uri usbUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
     Uri bluetoothUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: InsertTest002
- * @tc.desc: Test NetDataShareHelperUtils::Insert
- * @tc.type: FUNC
- */
-HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
-{
-    NetManagerBaseDataShareToken token;
-
     std::string on = "1";
-    Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_SHARING_WIFI, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
     std::string off = "0";
+    std::string status;
+
+    // insert will be failed after insert success because data is exist
+    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
+    if (ret != NETMANAGER_SUCCESS) {
+        ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_SHARING_WIFI, on);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+
+    ret = netDataShareHelperUtils_->Query(usbUri, KEY_SHARING_USB, status);
+    if (ret != NETMANAGER_SUCCESS) {
+        ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, on);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+
+    ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
+    if (ret != NETMANAGER_SUCCESS) {
+        ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+
+    // test for multi insert fail sence
     ret = netDataShareHelperUtils_->Insert(wifiUri, KEY_SHARING_WIFI, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    Uri usbUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    Uri bluetoothUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -129,6 +112,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
+
     std::string on = "1";
     Uri wifiUri(SHARING_WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
@@ -160,19 +145,35 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 {
-    NetManagerBaseDataShareToken token;
+    NetManagerBaseAccessToken token;
+    std::string status;
     std::string on = "1";
+    std::string off = "0";
+
     Uri wifiUri(SHARING_WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(status, on);
 
-    std::string off = "0";
     ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(status, off);
 
     Uri usbUri(SHARING_USB_URI);
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_USB, status);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(status, on);
+    ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on); // test for multi update
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_USB, status);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(status, on);
 
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, off);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -192,6 +193,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
+
     std::string status;
     Uri wifiUri(SHARING_WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
@@ -216,23 +219,23 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 {
-    NetManagerBaseDataShareToken token;
-
+    NetManagerBaseAccessToken token;
     std::string status;
-    Uri wifiUri(SHARING_WIFI_URI);
-    int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Wifi QueryTest result: " << status << std::endl;
+    std::string off = "0";
 
-    Uri bluetoothUri(SHARING_USB_URI);
-    ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Bluetooth QueryTest result: " << status << std::endl;
+    Uri notExistTestUri(SHARING_NOTEXIST_TEST_URI);
+    int32_t ret = netDataShareHelperUtils_->Query(notExistTestUri, KEY_NOTEXIST_TEST, status);
+    std::cout << "Not Exist Test result: " << status << std::endl;
 
-    Uri usbUri(SHARING_BLUETOOTH_URI);
-    ret = netDataShareHelperUtils_->Query(usbUri, KEY_SHARING_USB, status);
+    // update include insert action
+    ret = netDataShareHelperUtils_->Update(notExistTestUri, KEY_NOTEXIST_TEST, off);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    std::cout << "Usb QueryTest result: " << status << std::endl;
+
+    ret = netDataShareHelperUtils_->Query(notExistTestUri, KEY_NOTEXIST_TEST, status);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(status, off);
+    std::cout << "Not Exist Test result: " << status << std::endl;
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS
