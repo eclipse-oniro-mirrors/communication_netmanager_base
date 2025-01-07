@@ -23,6 +23,28 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
+#ifdef SUPPORT_EBPF_MEM_MIN
+static const int32_t APP_STATS_MAP_SIZE = 200;
+static const int32_t APP_STATS_MAP_SIZE_MIN = 1;
+static const int32_t IFACE_STATS_MAP_SIZE = 64;
+static const int32_t IFACE_NAME_MAP_SIZE = 200;
+static const int32_t IFACE_NAME_MAP_SIZE_MIN = 1;
+static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 200;
+static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1;
+static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 1;
+static const int32_t NET_NS_MAP_SIZE = 1;
+#else
+static const int32_t APP_STATS_MAP_SIZE = 5000;
+static const int32_t APP_STATS_MAP_SIZE_MIN = 5000;
+static const int32_t IFACE_STATS_MAP_SIZE = 1000;
+static const int32_t IFACE_NAME_MAP_SIZE = 1000;
+static const int32_t IFACE_NAME_MAP_SIZE_MIN = 1000;
+static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 1000;
+static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1000;
+static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
+static const int32_t NET_NS_MAP_SIZE = 5000;
+#endif
+
 // network stats begin
 bpf_map_def SEC("maps") iface_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
@@ -78,7 +100,7 @@ bpf_map_def SEC("maps") app_cookie_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(socket_cookie_stats_key),
     .value_size = sizeof(app_cookie_stats_value),
-    .max_entries = IFACE_NAME_MAP_SIZE,
+    .max_entries = IFACE_NAME_MAP_SIZE_MIN,
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -146,7 +168,7 @@ bpf_map_def SEC("maps") broker_uid_access_policy_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(app_uid_key),
     .value_size = sizeof(app_uid_key),
-    .max_entries = APP_STATS_MAP_SIZE,
+    .max_entries = APP_STATS_MAP_SIZE_MIN,
     .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,

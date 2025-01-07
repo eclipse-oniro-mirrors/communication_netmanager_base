@@ -27,6 +27,10 @@ ohos_bpf("netsys") {
     ]
   }
 
+  if (netmanager_base_support_ebpf_memory_miniaturization) {
+    defines = [ "SUPPORT_EBPF_MEM_MIN" ]
+  }
+
   subsystem_name = "communication"
   part_name = "netmanager_base"
 }
