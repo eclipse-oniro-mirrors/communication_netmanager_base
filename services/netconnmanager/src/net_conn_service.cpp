@@ -742,15 +742,17 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
             NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
             continue;
         }
+        int delayTime = 0;
         if (netConnEventHandler_) {
-            netConnEventHandler_->PostSyncTask([pNetwork, isScreenOn]() { pNetwork->SetScreenState(isScreenOn); });
+            netConnEventHandler_->PostAsyncTask([pNetwork, isScreenOn]() { pNetwork->SetScreenState(isScreenOn); }
+                                                delayTime);
         }
         if (!isScreenOn || pNetSupplier.second->GetNetSupplierType() != BEARER_WIFI ||
             !pNetSupplier.second->HasNetCap(NET_CAPABILITY_PORTAL)) {
             continue;
         }
         if (netConnEventHandler_) {
-            netConnEventHandler_->PostSyncTask([pNetwork]() { pNetwork->StartNetDetection(false); });
+            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(false); }, delayTime);
         }
     }
 }
