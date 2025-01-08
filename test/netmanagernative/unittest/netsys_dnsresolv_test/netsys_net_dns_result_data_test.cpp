@@ -23,6 +23,9 @@ namespace {
 using namespace testing::ext;
 using ::testing::_;
 using ::testing::Return;
+using ::testing::DoAll;
+using ::testing::SetArgReferee;
+using ::testing::InSequence;
 }  // namespace
 
 class ParcelMock : public Parcel {
@@ -33,7 +36,7 @@ public:
     MOCK_METHOD1(WriteString, bool(const std::string &));
     MOCK_METHOD1(WriteUint16, bool(uint16_t));
     MOCK_METHOD1(WriteBool, bool(bool));
-    MOCK_METHOD1(ReadUint32, bool(uint32_t));
+    MOCK_METHOD1(ReadUint32, bool(uint32_t &));
     MOCK_METHOD1(ReadString, bool(const std::string &));
     MOCK_METHOD1(ReadUint16, bool(uint16_t));
     MOCK_METHOD1(ReadBool, bool(bool));
@@ -75,63 +78,195 @@ void NetDnsResultReportTest::SetUp()
 
 void NetDnsResultReportTest::TearDown() {}
 
-/**
- * @tc.name  : Marshalling_ShouldReturnFalse_WhenWriteUint32Fails
- * @tc.number: NetDnsResultReportTest_001
- * @tc.desc  : Test Marshalling method when WriteUint32 fails
- */
-HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_WhenWriteUint32Fails, TestSize.Level0)
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_001, TestSize.Level0)
 {
-    ON_CALL(parcel, WriteUint32(_)).WillByDefault(Return(false));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
     EXPECT_FALSE(report.Marshalling(parcel));
 }
 
-/**
- * @tc.name  : Marshalling_ShouldReturnFalse_WhenWriteStringFails
- * @tc.number: NetDnsResultReportTest_002
- * @tc.desc  : Test Marshalling method when WriteString fails
- */
-HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_WhenWriteStringFails, TestSize.Level0)
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_002, TestSize.Level0)
 {
-    ON_CALL(parcel, WriteString(_)).WillByDefault(Return(false));
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_FALSE(report.Marshalling(parcel));
 }
 
-/**
- * @tc.name  : Marshalling_ShouldReturnTrue_WhenAllWritesSucceed
- * @tc.number: NetDnsResultReportTest_003
- * @tc.desc  : Test Marshalling method when all writes succeed
- */
-HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnTrue_WhenAllWritesSucceed, TestSize.Level0)
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_003, TestSize.Level0)
 {
-    ON_CALL(parcel, WriteUint32(_)).WillByDefault(Return(true));
-    ON_CALL(parcel, WriteString(_)).WillByDefault(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(3).WillOnce(Return(true)).WillOnce(Return(true)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_004, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(3).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_005, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(4).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(1).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_006, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_007, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_008, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_009, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnFalse_010, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, WriteUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(report.Marshalling(parcel));
+}
+
+HWTEST_F(NetDnsResultReportTest, Marshalling_ShouldReturnTrue_001, TestSize.Level0)
+{
+    EXPECT_CALL(parcel, WriteUint32(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, WriteString(_)).WillRepeatedly(Return(true));
     EXPECT_TRUE(report.Marshalling(parcel));
 }
 
-/**
- * @tc.name  : Unmarshalling_ShouldReturnFalse_WhenReadUint32Fails
- * @tc.number: NetDnsResultReportTest_001
- * @tc.desc  : Test when ReadUint32 fails then Unmarshalling returns false
- */
-HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_WhenReadUint32Fails, TestSize.Level0)
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_001, TestSize.Level0)
 {
-    ON_CALL(parcel, ReadUint32(_)).WillByDefault(Return(false));
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
     EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
 }
 
-/**
- * @tc.name  : Unmarshalling_ShouldReturnFalse_WhenReadStringFails
- * @tc.number: NetDnsResultReportTest_002
- * @tc.desc  : Test when ReadString fails then Unmarshalling returns false
- */
-HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_WhenReadStringFails, TestSize.Level0)
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_002, TestSize.Level0)
 {
-    ON_CALL(parcel, ReadUint32(_)).WillByDefault(Return(true));
-    ON_CALL(parcel, ReadString(_)).WillByDefault(Return(false));
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
     EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
 }
 
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_003, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_004, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(3).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_005, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(4).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_006, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_007, TestSize.Level0)
+{
+    InSequence s;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_008, TestSize.Level0)
+{
+    InSequence s;
+    uint32_t size = 2;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(DoAll(SetArgReferee<0>(size), Return(true)));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_009, TestSize.Level0)
+{
+    InSequence s;
+    uint32_t size = 2;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(DoAll(SetArgReferee<0>(size), Return(true)));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnFalse_010, TestSize.Level0)
+{
+    InSequence s;
+    uint32_t size = 2;
+    EXPECT_CALL(parcel, ReadUint32(_)).Times(5).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(DoAll(SetArgReferee<0>(size), Return(true)));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
+    EXPECT_CALL(parcel, ReadUint32(_)).WillOnce(Return(false));
+    EXPECT_FALSE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
+
+HWTEST_F(NetDnsResultReportTest, Unmarshalling_ShouldReturnTrue_001, TestSize.Level0)
+{
+    EXPECT_CALL(parcel, ReadUint32(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(parcel, ReadString(_)).WillRepeatedly(Return(true));
+    EXPECT_TRUE(NetDnsResultReport::Unmarshalling(parcel, report));
+}
 
 }  // namespace NetsysNative
 }  // namespace OHOS

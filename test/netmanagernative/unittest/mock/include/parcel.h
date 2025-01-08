@@ -34,7 +34,7 @@ public:
 
     virtual bool WriteString(const std::string &) = 0;
 
-    virtual bool ReadUint32(uint32_t) = 0;
+    virtual bool ReadUint32(uint32_t &) = 0;
 
     virtual bool ReadString(const std::string &) = 0;
 
