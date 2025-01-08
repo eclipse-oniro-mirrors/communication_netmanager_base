@@ -41,7 +41,7 @@ void DnsProxyRequestSocketTest::TearDown() {}
 
 HWTEST_F(DnsProxyRequestSocketTest, Create_01, TestSize.Level0)
 {
-    int32_t sock = 1;
+    int32_t sock = 10000;
     std::unique_ptr<AlignedSockAddr> clientSock = std::make_unique<AlignedSockAddr>();
     std::unique_ptr<RecvBuff> recvBuff = std::make_unique<RecvBuff>();
     DnsProxyRequestSocket dnsProxyRequestSocket(sock, std::move(clientSock), std::move(recvBuff));
@@ -64,7 +64,7 @@ HWTEST_F(DnsProxyRequestSocketTest, Release_01, TestSize.Level0)
 
 HWTEST_F(DnsProxyRequestSocketTest, Release_02, TestSize.Level0)
 {
-    int32_t sock = 1;
+    int32_t sock = 10000;
     std::unique_ptr<AlignedSockAddr> clientSock = std::make_unique<AlignedSockAddr>();
     std::unique_ptr<RecvBuff> recvBuff = std::make_unique<RecvBuff>();
     DnsProxyRequestSocket dnsProxyRequestSocket(sock, std::move(clientSock), std::move(recvBuff));

@@ -36,7 +36,7 @@ bool Parcel::WriteUint32(uint32_t value)
     return true;
 }
 
-bool ReadUint32(uint32_t value)
+bool ReadUint32(uint32_t &value)
 {
     return true;
 }

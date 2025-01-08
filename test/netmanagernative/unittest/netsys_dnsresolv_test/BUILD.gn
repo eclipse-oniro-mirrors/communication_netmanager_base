@@ -32,6 +32,73 @@ ohos_unittest("netsys_dnsresolv_test") {
     "dns_resolv_listen_test.cpp",
     "net_dns_health_callback_proxy_test.cpp",
     "net_dns_result_callback_proxy_test.cpp",
+  ]
+
+  include_dirs = [
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$FWMARK_CLIENT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/include",
+    "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+    "$INNERKITS_ROOT/netconnclient/include",
+    "$INNERKITS_ROOT/netconnclient/include/proxy",
+  ]
+
+  deps = [
+    "$FWMARK_CLIENT_DIR:fwmark_client",
+    "$NETMANAGERNATIVE_ROOT:netsys_client",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dhcp:dhcp_sdk",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_unittest("netsys_dnsresolv_mock_test") {
+  module_out_path = "netmanager_base/dnsresolv_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "../mock/src/parcel.cpp",
     "netsys_net_dns_health_data_test.cpp",
     "netsys_net_dns_result_data_test.cpp",
   ]
@@ -39,7 +106,6 @@ ohos_unittest("netsys_dnsresolv_test") {
   sources += [
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_result_data.cpp",
-    "$NETMANAGER_BASE_ROOT/test/netmanagernative/unittest/mock/src/parcel.cpp",
   ]
 
   include_dirs = [
@@ -53,7 +119,7 @@ ohos_unittest("netsys_dnsresolv_test") {
 
   deps = [
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
   ]
 
   external_deps = [
@@ -61,9 +127,9 @@ ohos_unittest("netsys_dnsresolv_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -73,8 +139,6 @@ ohos_unittest("netsys_dnsresolv_test") {
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
-
-  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

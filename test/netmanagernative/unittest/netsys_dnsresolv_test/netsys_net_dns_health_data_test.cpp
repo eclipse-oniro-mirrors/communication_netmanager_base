@@ -35,7 +35,7 @@ public:
     MOCK_METHOD1(WriteString, bool(const std::string &));
     MOCK_METHOD1(WriteUint16, bool(uint16_t));
     MOCK_METHOD1(WriteBool, bool(bool));
-    MOCK_METHOD1(ReadUint32, bool(uint32_t));
+    MOCK_METHOD1(ReadUint32, bool(uint32_t &));
     MOCK_METHOD1(ReadString, bool(const std::string &));
     MOCK_METHOD1(ReadUint16, bool(uint16_t));
     MOCK_METHOD1(ReadBool, bool(bool));
@@ -124,20 +124,20 @@ HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnTrue_WhenAllReadOpera
     EXPECT_CALL(parcel, ReadUint16(_)).WillOnce(Return(true));
     EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
     EXPECT_CALL(parcel, ReadBool(_)).WillOnce(Return(true));
-    EXPECT_EQ(report.Unmarshalling(parcel, report), true);
+    EXPECT_EQ(NetDnsHealthReport::Unmarshalling(parcel, report), true);
 }
 
 HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadUint32Fails, TestSize.Level0)
 {
     EXPECT_CALL(parcel, ReadUint32(_)).WillRepeatedly(Return(false));
-    EXPECT_EQ(report.Unmarshalling(parcel, report), false);
+    EXPECT_EQ(NetDnsHealthReport::Unmarshalling(parcel, report), false);
 }
 
 HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadStringFails, TestSize.Level0)
 {
     EXPECT_CALL(parcel, ReadUint32(_)).WillRepeatedly(Return(true));
     EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(false));
-    EXPECT_EQ(report.Unmarshalling(parcel, report), false);
+    EXPECT_EQ(NetDnsHealthReport::Unmarshalling(parcel, report), false);
 }
 
 HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadUint16Fails, TestSize.Level0)
@@ -145,7 +145,7 @@ HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadUint
     EXPECT_CALL(parcel, ReadUint32(_)).WillRepeatedly(Return(true));
     EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
     EXPECT_CALL(parcel, ReadUint16(_)).WillOnce(Return(false));
-    EXPECT_EQ(report.Unmarshalling(parcel, report), false);
+    EXPECT_EQ(NetDnsHealthReport::Unmarshalling(parcel, report), false);
 }
 
 HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadBoolFails, TestSize.Level0)
@@ -154,7 +154,7 @@ HWTEST_F(NetDnsHealthReportTest, Unmarshalling_ShouldReturnFalse_WhenAllReadBool
     EXPECT_CALL(parcel, ReadString(_)).WillOnce(Return(true));
     EXPECT_CALL(parcel, ReadUint16(_)).WillOnce(Return(true));
     EXPECT_CALL(parcel, ReadBool(_)).WillOnce(Return(false));
-    EXPECT_EQ(report.Unmarshalling(parcel, report), false);
+    EXPECT_EQ(NetDnsHealthReport::Unmarshalling(parcel, report), false);
 }
 }  // namespace NetsysNative
 }  // namespace OHOS

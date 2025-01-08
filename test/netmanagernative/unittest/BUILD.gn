@@ -22,6 +22,7 @@ group("unittest") {
     "firewall_manager_test:firewall_manager_class_test",
     "firewall_manager_test:firewall_manager_test",
     "netsys_distributed_test:netsys_distributed_test",
+    "netsys_dnsresolv_test:netsys_dnsresolv_mock_test",
     "netsys_dnsresolv_test:netsys_dnsresolv_test",
     "netsys_manager_test:conn_manager_test",
     "netsys_manager_test:nat464_clat_test",

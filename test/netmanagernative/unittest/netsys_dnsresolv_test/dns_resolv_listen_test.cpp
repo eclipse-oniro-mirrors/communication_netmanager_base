@@ -27,7 +27,6 @@
 #endif
 #include "dns_quality_diag.h"
 #include "dns_resolv_listen.h"
-#include "epoller.h"
 
 namespace OHOS::nmd {
 const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_backup";
@@ -57,28 +56,13 @@ public:
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
-
-    ReceiverRunner ProcCommand();
-    ReceiverRunner ProcBindSocket(uint32_t netId);
-    ReceiverRunner ProcGetKeyLengthForCache(CommandType command, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetKeyForCache(CommandType command, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetCacheSize(const std::string &name, uint16_t netId, uint32_t uid);
-    ReceiverRunner ProcGetCacheContent(const std::string &name, uint16_t netId, uint32_t uid, uint32_t resNum);
-    ReceiverRunner ProcPostDnsThreadResult(uint16_t netId);
-    ReceiverRunner ProcGetKeyLengthForCache(uint16_t netId, uint32_t uid, uint32_t pid);
-    ReceiverRunner ProcGetKeyForCache(uint16_t netId, uint32_t uid, uint32_t pid);
-    ReceiverRunner ProcGetPostParam(const std::string &name, uint16_t netId, uint32_t uid, uint32_t pid);
     struct PostParam {
         uint32_t usedTime = 0;
         int32_t queryRet = 0;
         uint32_t aiSize = 0;
         QueryParam param{};
     };
-    ReceiverRunner ProcPostDnsResult(const std::string &name, uint16_t netId, uint32_t uid, uint32_t pid,
-                                     const PostParam &param);
-
     int32_t serverSockFd_ = -1;
-    std::shared_ptr<EpollServer> server_;
 };
 
 class DnsResolvListenTest : public testing::Test {
