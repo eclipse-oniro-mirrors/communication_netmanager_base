@@ -33,7 +33,8 @@ bool DnsResolvConfig::DelayedTaskWrapper::operator<(const DelayedTaskWrapper &ot
 }
 
 DnsResolvConfig::DnsResolvConfig()
-    : netId_(0), netIdIsSet_(false), revisionId_(0), timeoutMsec_(0), retryCount_(0), isIpv6Enable_(false)
+    : netId_(0), netIdIsSet_(false), revisionId_(0), timeoutMsec_(0), retryCount_(0), isIpv6Enable_(false),
+    isUserDefinedDnsServer_(false)
 {
 }
 
