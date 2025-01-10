@@ -26,7 +26,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetAccessPolicyConfigUtils NetAccessPolicyConfigUtils::instance_;
 namespace {
-const char *PATH = "/data/service/el1/public/netmanager/net_access_policy_config.json";
+const char *PATH = "/system/variant/phone/base/etc/netmanager/net_access_policy_config.json";
 const char *ARRAY_NAME = "configs";
 const char *ITEM_BUNDLE_NAME = "bundleName";
 const char *ITEM_DISABLE_WLAN_SWITCH = "disableWlanSwitch";
