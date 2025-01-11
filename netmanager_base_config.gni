@@ -67,5 +67,6 @@ declare_args() {
   netmanager_base_enable_feature_hosts = false
   netmanager_base_enable_public_dns_server = false
   netmanager_base_support_ebpf_memory_miniaturization = false
+  netmanager_base_enable_traffic_statistic = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
