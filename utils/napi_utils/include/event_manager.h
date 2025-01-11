@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include <list>
-#include <mutex>
+#include <shared_mutex>
 
 #include <uv.h>
 
@@ -58,9 +58,8 @@ public:
     void SetRef(napi_ref ref);
 
 private:
-    std::mutex mutexForListenersAndEmitByUv_;
+    std::shared_mutex mutexForListenersAndEmitByUv_;
     std::mutex mutexForEmitAndEmitByUv_;
-    std::mutex mutex_;
     std::list<EventListener> listeners_;
     void *data_ = nullptr;
     std::atomic_bool isValid_;

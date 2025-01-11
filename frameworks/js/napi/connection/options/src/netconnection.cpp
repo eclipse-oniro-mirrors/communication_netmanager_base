@@ -16,11 +16,11 @@
 #include "netconnection.h"
 #include "netmanager_base_log.h"
 
-#include <mutex>
+#include <shared_mutex>
 
 namespace OHOS::NetManagerStandard {
 std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
-std::mutex g_netConnectionsMutex;
+std::shared_mutex g_netConnectionsMutex;
 
 NetConnection::NetConnection(EventManager *eventManager)
     : hasNetSpecifier_(false),
@@ -33,7 +33,7 @@ NetConnection::NetConnection(EventManager *eventManager)
 
 NetConnection *NetConnection::MakeNetConnection(EventManager *eventManager)
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     auto netConnection = new NetConnection(eventManager);
     NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
     return netConnection;
@@ -41,7 +41,7 @@ NetConnection *NetConnection::MakeNetConnection(EventManager *eventManager)
 
 void NetConnection::DeleteNetConnection(NetConnection *netConnection)
 {
-    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
+    std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
     delete netConnection;
 }
