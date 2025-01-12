@@ -325,7 +325,6 @@ int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
         NETNATIVE_LOGE("ClearIncreaseTrafficMap Write increamentTrafficMap err");
         return NETMANAGER_ERROR;
     }
-    // TODO
     keys = {};
     if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
@@ -352,7 +351,6 @@ int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
         NETNATIVE_LOGE("UpdateIfIndexMap Write netStatsTrafficMap err");
         return NETMANAGER_ERROR;
     }
-    // TODO
     GetIfIndexMap();
     return 0;
 }

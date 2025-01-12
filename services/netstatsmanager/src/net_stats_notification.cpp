@@ -116,7 +116,6 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
 {
     OHOS::Global::I18n::LocaleInfo locale(Global::I18n::LocaleConfig::GetSystemLocale());
     std::string curBaseName = locale.GetBaseName();
-
     if (localeBaseName == curBaseName) {
         return;
     }

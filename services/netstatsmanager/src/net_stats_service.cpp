@@ -168,8 +168,7 @@ void NetStatsService::RegisterCommonEvent()
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
         [this](const EventFwk::Want &want) { return UpdateStatsData(); });
     subscriber_->RegisterStatsCallback(
-        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
-        [this](const EventFwk::Want &want) {
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, [this](const EventFwk::Want &want) {
             uint32_t uid = want.GetIntParam(UID, 0);
             NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
             return CommonEventPackageRemoved(uid);
@@ -196,8 +195,7 @@ void NetStatsService::RegisterCommonEvent()
             return CommonEventSimStateChanged(slotId, simStatus);
         });
     subscriber_->RegisterStatsCallback(
-        EventFwk::CommonEventSupport::COMMON_EVENT_CELLULAR_DATA_STATE_CHANGED,
-        [this](const EventFwk::Want &want) {
+        EventFwk::CommonEventSupport::COMMON_EVENT_CELLULAR_DATA_STATE_CHANGED, [this](const EventFwk::Want &want) {
             int32_t slotId = want.GetIntParam("slotId", -1);
             int32_t dataState = want.GetIntParam("dataState", -1);
             return CommonEventCellularDataStateChanged(slotId, dataState);
