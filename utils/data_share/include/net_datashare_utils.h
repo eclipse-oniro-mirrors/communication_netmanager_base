@@ -57,6 +57,8 @@ public:
     int32_t Delete(Uri &uri, const std::string &key);
     int32_t RegisterObserver(const Uri &uri, const std::function<void()> &onChange);
     int32_t UnregisterObserver(const Uri &uri, int32_t callbackId);
+    int32_t UnRegisterSettingsObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver);
+    int32_t RegisterSettingsObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();

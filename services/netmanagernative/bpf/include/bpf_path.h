@@ -27,8 +27,12 @@ static constexpr const char *BROKER_SOCKET_PERMISSION_MAP_PATH =
 static constexpr const char *APP_COOKIE_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_cookie_stats_map";
 static constexpr const char *APP_UID_PERMISSION_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_access_policy_map";
 static constexpr const char *RING_BUFFER_MAP_PATH = "/sys/fs/bpf/netsys/maps/ringbuf_map";
+static constexpr const char *NET_STATS_RING_BUFFER_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_stats_ringbuf_map";
 static constexpr const char *NET_BEAR_TYPE_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_bear_type_map";
 static constexpr const char *BROKER_UID_ACCESS_POLICY_MAP_PATH = "/sys/fs/bpf/netsys/maps/broker_uid_access_policy_map";
 static constexpr const char *NET_INDEX_AND_IFACE_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_index_and_iface_map";
+static constexpr const char *LIMITS_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/limits_stats_map";
+static constexpr const char *INCREMENT_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/increment_stats_map";
+static constexpr const char *IFINDEX_MAP_PATH = "/sys/fs/bpf/netsys/maps/ifindex_map";
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_BASE_BPF_PATH_H */

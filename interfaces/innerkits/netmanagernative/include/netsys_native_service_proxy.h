@@ -117,6 +117,10 @@ public:
     int32_t DeleteStatsInfo(uint32_t uid) override;
     int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t DeleteSimStatsInfo(uint32_t uid) override;
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override;
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override;
+    int32_t ClearIncreaseTrafficMap() override;
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
@@ -168,6 +172,9 @@ public:
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer) override;
+    int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
+    int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
+
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

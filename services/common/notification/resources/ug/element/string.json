@@ -1,0 +1,67 @@
+{
+    "string":[
+        {
+            "name":"netstats_excess_daymark_notofication_title",
+            "value":"كۈندىلىك ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_limit_message",
+            "value":"بۇ ئايلىق ئېقىم بېكىتىلگەن %sچەككە يەتتى",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title",
+            "value":"ئايلىق ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_daily_notify_message",
+            "value":"بۈگۈنكى ئېقىم بېكىتىلگەن %sچەككە يەتتى",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title_sub",
+            "value":"كارتا %dئايلىق ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title_sub",
+            "value":"كارتا %dئايلىق ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_daymark_notofication_title_sub",
+            "value":"كارتا %dكۈندىلىك ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_notify_message",
+            "value":"بۇ ئايلىق ئېقىم بېكىتىلگەن چەكنىڭ %sگە يەتتى",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title",
+            "value":"ئايلىق ئېشىپ كەتكەننى ئەسكەرتىش",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

@@ -1374,6 +1374,46 @@ int32_t NetsysNativeClient::DeleteStatsInfo(uint32_t uid)
     return proxy->DeleteStatsInfo(uid);
 }
 
+int32_t NetsysNativeClient::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysNativeClient::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysNativeClient::ClearIncreaseTrafficMap()
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->ClearIncreaseTrafficMap();
+}
+
+int32_t NetsysNativeClient::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateIfIndexMap(key, index);
+}
+
 int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
     NetsysNative::IptablesType ipType)
 {
@@ -1640,6 +1680,28 @@ int32_t NetsysNativeClient::DisableWearableDistributedNetForward()
     return proxy->DisableWearableDistributedNetForward();
 }
 #endif
+
+int32_t NetsysNativeClient::RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    NETMGR_LOG_I("NetsysNativeClient::RegisterNetsysTrafficCallback");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterNetsysTrafficCallback(callback);
+}
+
+int32_t NetsysNativeClient::UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysNativeClient::UnRegisterNetsysTrafficCallback");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UnRegisterNetsysTrafficCallback(callback);
+}
 
 int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {

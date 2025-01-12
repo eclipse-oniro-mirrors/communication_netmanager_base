@@ -15,6 +15,7 @@
 
 #include <net/if.h>
 #include <vector>
+#include <cinttypes>
 
 #include "bpf_path.h"
 #include "bpf_def.h"
@@ -241,5 +242,138 @@ int32_t NetsysBpfStats::GetCookieStats(uint64_t &stats, StatsType statsType, uin
         return NETMANAGER_ERR_INTERNAL;
     }
     return NETSYS_SUCCESS;
+}
+
+// write taffic available value map.  update by timer/settings modify/network changed
+int32_t NetsysBpfStats::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    NETNATIVE_LOGI("NetsysBpfStats::SetNetStateTrafficMap start. flag:%{public}u, availableTraffic:%{public}" PRIu64,
+        flag, availableTraffic);
+
+    BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_WRONLY);
+    if (!netStatsTrafficMap.IsValid()) {
+        NETNATIVE_LOGE("SetNetStateTrafficMap netStatsTrafficMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    if (netStatsTrafficMap.Write(flag, availableTraffic, 0) != 0) {
+        NETNATIVE_LOGE("SetNetStateTrafficMap Write netStatsTrafficMap err");
+        return NETMANAGER_ERROR;
+    }
+
+    NETNATIVE_LOGI("NetsysBpfStats::SetNetStateTrafficMap flag:%{public}u, availableTraffic:%{public}" PRIu64,
+        flag, availableTraffic);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysBpfStats::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_RDONLY);
+    if (!netStatsTrafficMap.IsValid()) {
+        NETNATIVE_LOGE("GetNetStateTrafficMap netStatsTrafficMap not exist. errno: %{public}d", errno);
+        return NETMANAGER_ERROR;
+    }
+    traffic_value value = 0;
+    if (netStatsTrafficMap.Read(flag, value) != 0) {
+        NETNATIVE_LOGE("GetNetStateTrafficMap read netStatsTrafficMap err");
+        return NETMANAGER_ERROR;
+    }
+    availableTraffic = value;
+    NETNATIVE_LOGI("NetsysBpfStats::GetNetStateTrafficMap flag:%{public}u, availableTraffic:%{public}" PRIu64,
+        flag, availableTraffic);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysBpfStats::GetNetStateIncreTrafficMap(std::vector<uint64_t> &keys)
+{
+    BpfMapper<uint64_t, traffic_value> netStatsIncreTrafficMap(INCREMENT_STATS_MAP_PATH, BPF_F_RDONLY);
+    if (!netStatsIncreTrafficMap.IsValid()) {
+        NETNATIVE_LOGE("GetNetStateIncreTrafficMap netStatsTrafficMap not exist. errno: %{public}d", errno);
+        return NETMANAGER_ERROR;
+    }
+    keys = netStatsIncreTrafficMap.GetAllKeys();
+    NETNATIVE_LOGI("NetsysBpfStats::GetNetStateIncreTrafficMap keys.size: %{public}zu", keys.size());
+    for (auto key : keys) {
+        traffic_value value = { 0 };
+        if (netStatsIncreTrafficMap.Read(key, value) != 0) {
+            NETNATIVE_LOGE("GetNetStateIncreTrafficMap read netStatsTrafficMap err");
+            return NETMANAGER_ERROR;
+        }
+        char ifName[IFNAME_SIZE] = { 0 };
+        auto pName = if_indextoname(key, ifName);
+        NETNATIVE_LOGI("NetsysBpfStats::GetNetStateIncreTrafficMap keys: %{public}" PRIu64 ", \
+value: %{public}" PRIu64 ", name: %{public}s",
+            key, static_cast<uint64_t>(value), ifName);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
+{
+    NETNATIVE_LOGI("NetsysBpfStats::ClearIncreaseTrafficMap start");
+    std::vector<uint64_t> keys;
+    if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+    BpfMapper<uint64_t, traffic_value> increaseTrafficMap(INCREMENT_STATS_MAP_PATH, BPF_F_WRONLY);
+    if (!increaseTrafficMap.IsValid()) {
+        NETNATIVE_LOGE("ClearIncreaseTrafficMap increamentTrafficMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    if (increaseTrafficMap.Clear(keys) != 0) {
+        NETNATIVE_LOGE("ClearIncreaseTrafficMap Write increamentTrafficMap err");
+        return NETMANAGER_ERROR;
+    }
+    keys = {};
+    if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+
+    NETNATIVE_LOGI("NetsysBpfStats::ClearIncreaseTrafficMap end");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    NETNATIVE_LOGE("NetsysBpfStats::UpdateIfIndexMap start.");
+    if (index == UINT64_MAX) {
+        return -1;
+    }
+    NETNATIVE_LOGE("UpdateIfIndexMap ifindex: %{public}" PRIu64, index);
+    BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
+    if (!netStatsIfIndexMap.IsValid()) {
+        NETNATIVE_LOGE("UpdateIfIndexMap netStatsTrafficMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    if (netStatsIfIndexMap.Write(key, index, 0) != 0) {
+        NETNATIVE_LOGE("UpdateIfIndexMap Write netStatsTrafficMap err");
+        return NETMANAGER_ERROR;
+    }
+    GetIfIndexMap();
+    return 0;
+}
+
+int32_t NetsysBpfStats::GetIfIndexMap()
+{
+    NETNATIVE_LOGE("NetsysBpfStats::GetIfIndexMap start");
+    BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_RDONLY);
+    if (!netStatsIfIndexMap.IsValid()) {
+        NETNATIVE_LOGE("GetIfIndexMap netStatsTrafficMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    std::vector<uint8_t> keys = netStatsIfIndexMap.GetAllKeys();
+    NETNATIVE_LOGI("GetIfIndexMap keys.size: %{public}zu", keys.size());
+    for (auto key : keys) {
+        uint64_t value = 0;
+        if (netStatsIfIndexMap.Read(key, value) != 0) {
+            NETNATIVE_LOGE("GetIfIndexMap read err");
+            return NETMANAGER_ERROR;
+        }
+        NETNATIVE_LOGI("NetsysBpfStats::GetIfIndexMap keys: %{public}u, value: %{public}" PRIu64, key, value);
+    }
+    return NETMANAGER_SUCCESS;
 }
 } // namespace OHOS::NetManagerStandard

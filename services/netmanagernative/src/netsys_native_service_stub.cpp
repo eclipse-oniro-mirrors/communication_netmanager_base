@@ -27,6 +27,7 @@
 #include "securec.h"
 #include "i_net_dns_result_callback.h"
 #include "i_net_dns_health_callback.h"
+#include "netsys_traffic_callback_proxy.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -54,6 +55,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitStaticArpToInterfaceMap();
     InitNetVnicInterfaceMap();
     InitNetVirnicInterfaceMap();
+    InitNetStatsInterfaceMap();
 #ifdef SUPPORT_SYSVPN
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
@@ -330,6 +332,71 @@ void NetsysNativeServiceStub::InitNetVirnicInterfaceMap()
         &NetsysNativeServiceStub::CmdDelBrokerUidAccessPolicyMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_BROKER_UID_NETWORK_POLICY)] =
         &NetsysNativeServiceStub::CmdSetBrokerUidAccessPolicyMap;
+}
+
+void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_REGISTER)] =
+        &NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_UNREGISTER)] =
+        &NetsysNativeServiceStub::CmdUnRegisterNetsysTrafficCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP)] =
+        &NetsysNativeServiceStub::CmdSetNetStateTrafficMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP)] =
+        &NetsysNativeServiceStub::CmdGetNetStateTrafficMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP)] =
+        &NetsysNativeServiceStub::CmdClearIncreaseTrafficMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP)] =
+        &NetsysNativeServiceStub::CmdUpdateIfIndexMap;
+}
+
+int32_t NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("CmdRegisterNetsysTrafficCallback start.");
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    sptr<INetsysTrafficCallback> callback = iface_cast<INetsysTrafficCallback>(remote);
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("CmdRegisterNetsysTrafficCallback err.");
+        result = ERR_FLATTEN_OBJECT;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    result = RegisterNetsysTrafficCallback(callback);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("CmdRegisterNetsysTrafficCallback end. result:%{public}d", result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdUnRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        result = IPC_STUB_ERR;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    sptr<INetsysTrafficCallback> callback = iface_cast<INetsysTrafficCallback>(remote);
+    if (callback == nullptr) {
+        result = ERR_FLATTEN_OBJECT;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    result = UnRegisterNetsysTrafficCallback(callback);
+    reply.WriteInt32(result);
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -1455,6 +1522,72 @@ int32_t NetsysNativeServiceStub::CmdDeleteStatsInfo(MessageParcel &data, Message
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply)
+{
+    uint8_t flag = 0;
+    uint64_t availableTraffic = 0;
+    if (!data.ReadUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadUint64(availableTraffic)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = SetNetStateTrafficMap(flag, availableTraffic);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply)
+{
+    uint8_t flag = 0;
+    if (!data.ReadUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint64_t availableTraffic = 0;
+    int32_t result = GetNetStateTrafficMap(flag, availableTraffic);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint64(availableTraffic)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdClearIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = ClearIncreaseTrafficMap();
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdUpdateIfIndexMap(MessageParcel &data, MessageParcel &reply)
+{
+    int8_t key = 0;
+    uint64_t index = 0;
+    if (!data.ReadInt8(key)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadUint64(index)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = UpdateIfIndexMap(key, index);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)

@@ -24,6 +24,7 @@
 #include "i_notify_callback.h"
 #include "i_net_dns_result_callback.h"
 #include "i_net_dns_health_callback.h"
+#include "i_netsys_traffic_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
 #include "net_stats_info.h"
@@ -151,6 +152,10 @@ public:
     virtual int32_t DeleteStatsInfo(uint32_t uid) = 0;
     virtual int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
     virtual int32_t DeleteSimStatsInfo(uint32_t uid) = 0;
+    virtual int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) = 0;
+    virtual int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) = 0;
+    virtual int32_t ClearIncreaseTrafficMap() = 0;
+    virtual int32_t UpdateIfIndexMap(int8_t key, uint64_t index) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                              IptablesType ipType = IPTYPE_IPV4) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
@@ -185,6 +190,8 @@ public:
     virtual int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) = 0;
     virtual int32_t DisableWearableDistributedNetForward() = 0;
 #endif
+    virtual int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) = 0;
+    virtual int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) = 0;
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;

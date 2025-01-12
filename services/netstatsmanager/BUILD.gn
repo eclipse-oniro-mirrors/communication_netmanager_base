@@ -68,6 +68,8 @@ ohos_shared_library("net_stats_manager") {
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
@@ -113,6 +115,29 @@ ohos_shared_library("net_stats_manager") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
+    external_deps += [
+      "ability_runtime:ability_manager",
+      "ability_runtime:dataobs_manager",
+      "cJSON:cjson",
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "data_share:datashare_consumer",
+      "distributed_notification_service:ans_innerkits",
+      "i18n:intl_util",
+      "relational_store:native_rdb",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+    sources += [
+      "src/net_info_observer.cpp",
+      "src/net_stats_base.cpp",
+      "src/net_stats_notification.cpp",
+      "src/net_stats_settings_observer.cpp",
+      "src/net_stats_trafficLimit_dialog.cpp",
+      "src/net_stats_utils.cpp",
+    ]
+  }
+
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
@@ -153,6 +178,8 @@ ohos_static_library("net_stats_manager_static") {
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
@@ -173,6 +200,29 @@ ohos_static_library("net_stats_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "UNITTEST_FORBID_FFRT",
   ]
+
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
+    external_deps += [
+      "ability_runtime:ability_manager",
+      "ability_runtime:dataobs_manager",
+      "cJSON:cjson",
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "data_share:datashare_consumer",
+      "distributed_notification_service:ans_innerkits",
+      "i18n:intl_util",
+      "relational_store:native_rdb",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+    sources += [
+      "src/net_info_observer.cpp",
+      "src/net_stats_base.cpp",
+      "src/net_stats_notification.cpp",
+      "src/net_stats_settings_observer.cpp",
+      "src/net_stats_trafficLimit_dialog.cpp",
+      "src/net_stats_utils.cpp",
+    ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

@@ -1,0 +1,67 @@
+{
+    "string":[
+        {
+            "name":"netstats_excess_daymark_notofication_title",
+            "value":"ཉིན་རེའི་ཚད་བརྒལ་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_limit_message",
+            "value":"ཁྱེད་ཀྱི་ཟླ་འདིའི་རྒྱུག་ཚད་ཚད་བཀག(%s)ལ་བསླེབས་འདུག",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title",
+            "value":"ཟླ་རེའི་ཚད་བརྒལ་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_daily_notify_message",
+            "value":"ཁྱེད་ཀྱི་དེ་རིང་གི་རྒྱུག་ཚད་བཀོལ་ཚད(%s)ལ་བསླེབས་འདུག",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title_sub",
+            "value":"བྱང་བུ་ %d ཡི་ལོ་རེའི་ཟད་གྲོན་གྲངས་འབོར་ལས་བརྒལ་བའི་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title_sub",
+            "value":"བྱང་བུ་ %d ཡི་ཟླ་རེའི་ཟད་གྲོན་གྲངས་འབོར་ལས་བརྒལ་བའི་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_daymark_notofication_title_sub",
+            "value":"བྱང་བུ་ %d ཡི་ཉིན་རེའི་ཟད་གྲོན་གྲངས་འབོར་ལས་བརྒལ་བའི་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_notify_message",
+            "value":"ཁྱེད་ཀྱི་ཟླ་འདིའི་རྒྱུག་ཚད་ཚད་བཀག་གི%sལ་བསླེབས་ཟིན།",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title",
+            "value":"ཟླ་རེའི་ཚད་བརྒལ་དྲན་སྐུལ།",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

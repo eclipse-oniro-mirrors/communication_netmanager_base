@@ -419,6 +419,26 @@ public:
         return 0;
     }
 
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override
+    {
+        return 0;
+    }
+
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override
+    {
+        return 0;
+    }
+
+    int32_t ClearIncreaseTrafficMap() override
+    {
+        return 0;
+    }
+
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override
+    {
+        return 0;
+    }
+
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;
@@ -481,6 +501,16 @@ public:
     }
 
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override
     {
         return 0;
     }

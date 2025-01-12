@@ -774,6 +774,11 @@ public:
      */
     int32_t DeleteStatsInfo(uint32_t uid);
 
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic);
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic);
+    int32_t ClearIncreaseTrafficMap();
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index);
+
     /**
      * Set iptables for result
      *
@@ -954,6 +959,9 @@ public:
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId);
     int32_t DisableWearableDistributedNetForward();
 #endif
+
+    int32_t RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
+    int32_t UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
 

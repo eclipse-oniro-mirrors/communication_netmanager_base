@@ -74,7 +74,12 @@
                 "libbpf",
                 "elfio",
                 "iptables",
-                "power_manager"
+                "power_manager",
+                "cellular_data",
+                "core_service",
+                "distributed_notification_service",
+                "i18n"
+                
             ]
         },
         "build": {

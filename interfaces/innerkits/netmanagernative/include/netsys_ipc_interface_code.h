@@ -139,6 +139,12 @@ enum class NetsysInterfaceCode {
     NETSYS_DEL_BROKER_UID_NETWORK_POLICY,
     NETSYS_SET_BROKER_UID_NETWORK_POLICY,
     NETSYS_SET_USER_DEFINED_SERVER_FLAG,
+    NETSYS_TRAFFIC_REGISTER,
+    NETSYS_TRAFFIC_UNREGISTER,
+    NETSYS_SET_TRAFFIC_AVAILABLE_MAP,
+	NETSYS_GET_TRAFFIC_AVAILABLE_MAP,
+	NETSYS_CLEAR_INCRE_TRAFFIC_MAP,
+	NETSYS_UPDATE_IFINDEX_MAP,
 };
 
 enum class NotifyInterfaceCode {
@@ -170,6 +176,10 @@ enum class NetFirewallfaceCode {
     ON_INTERCEPT = 0,
 };
 #endif
+
+enum class NetsysTrafficfaceCode {
+    NETSYS_TRAFFIC_STATUS_CHANGED = 0,
+};
 
 } // namespace NetsysNative
 } // namespace OHOS

@@ -732,6 +732,14 @@ public:
      */
     int32_t DeleteStatsInfo(uint32_t uid) override;
 
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override;
+
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override;
+
+    int32_t ClearIncreaseTrafficMap() override;
+
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;
+
     /**
      * Set iptables for result
      *
@@ -918,6 +926,22 @@ public:
     int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) override;
     int32_t DisableWearableDistributedNetForward() override;
 #endif
+
+    /**
+     * Register callback for recevie traffic event
+     *
+     * @param callback implement of INetsysTrafficCallback
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback) override;
+
+    /**
+     * Unregister callback for recevie traffic event
+     *
+     * @param callback register callback for recevie intercept event
+     * @return 0 if success or -1 if an error occurred
+     */
+    int32_t UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback) override;
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
 

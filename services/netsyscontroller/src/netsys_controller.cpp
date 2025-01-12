@@ -1152,6 +1152,49 @@ int32_t NetsysController::DeleteStatsInfo(uint32_t uid)
     return netsysService_->DeleteStatsInfo(uid);
 }
 
+int32_t NetsysController::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetNetStateTrafficMap(flag, availableTraffic);
+}
+int32_t NetsysController::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->GetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysController::ClearIncreaseTrafficMap()
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->ClearIncreaseTrafficMap();
+}
+
+int32_t NetsysController::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->UpdateIfIndexMap(key, index);
+}
+
 int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
     NetsysNative::IptablesType ipType)
 {
@@ -1435,6 +1478,29 @@ int32_t NetsysController::DisableWearableDistributedNetForward()
     return netsysService_->DisableWearableDistributedNetForward();
 }
 #endif
+
+int32_t NetsysController::RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    NETMGR_LOG_E("RegisterNetsysTrafficCallback start");
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->RegisterNetsysTrafficCallback(callback);
+}
+
+int32_t NetsysController::UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->UnRegisterNetsysTrafficCallback(callback);
+}
 
 int32_t NetsysController::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
