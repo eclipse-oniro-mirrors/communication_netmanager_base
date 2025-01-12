@@ -141,6 +141,10 @@ public:
     int32_t DeleteSimStatsInfo(uint32_t uid) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t DeleteStatsInfo(uint32_t uid) override;
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override;
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override;
+    int32_t ClearIncreaseTrafficMap() override;
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
@@ -160,6 +164,8 @@ public:
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
     int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override;
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
+    int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
+    int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,

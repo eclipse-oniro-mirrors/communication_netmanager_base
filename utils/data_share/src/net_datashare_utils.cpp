@@ -215,5 +215,33 @@ int32_t NetDataShareHelperUtils::UnregisterObserver(const Uri &uri, int32_t call
     dataShareHelper->UnregisterObserver(uri, it->second);
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetDataShareHelperUtils::UnRegisterSettingsObserver(const Uri &uri,
+    const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
+{
+    NETMGR_LOG_I("NetDataShareHelperUtils::UnRegisterSettingsObserver");
+    auto settingHelper = CreateDataShareHelper();
+    if (settingHelper == nullptr) {
+        NETMGR_LOG_E("settingHelper is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    settingHelper->UnregisterObserver(uri, dataObserver);
+    settingHelper->Release();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetDataShareHelperUtils::RegisterSettingsObserver(const Uri &uri,
+    const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
+{
+    NETMGR_LOG_E("NetDataShareHelperUtils::RegisterSettingsObserver");
+    auto settingHelper = CreateDataShareHelper();
+    if (settingHelper == nullptr) {
+        NETMGR_LOG_E("settingHelper is nullptr");
+        return NETMANAGER_ERROR;
+    }
+    settingHelper->RegisterObserver(uri, dataObserver);
+    settingHelper->Release();
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -91,6 +91,15 @@ public:
      */
     int32_t DeleteStatsInfo(const std::string &path, uint32_t uid);
 
+    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic);
+    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic);
+
+    int32_t GetNetStateIncreTrafficMap(std::vector<uint64_t> &keys);
+    int32_t ClearIncreaseTrafficMap();
+
+    int32_t UpdateIfIndexMap(int8_t key, uint64_t index);
+    int32_t GetIfIndexMap();
+
     int32_t GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie);
 
 private:

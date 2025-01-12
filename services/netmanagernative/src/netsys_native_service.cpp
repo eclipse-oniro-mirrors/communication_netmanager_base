@@ -30,9 +30,7 @@
 #ifdef SUPPORT_SYSVPN
 #include "system_vpn_wrapper.h"
 #endif // SUPPORT_SYSVPN
-#ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
 #include "bpf_ring_buffer.h"
-#endif
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -95,6 +93,7 @@ void NetsysNativeService::OnStop()
 #ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
     NetsysBpfRingBuffer::ExistRingBufferPoll();
 #endif
+    NetsysBpfRingBuffer::ExistNetstatsRingBufferPoll();
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -157,6 +156,7 @@ bool NetsysNativeService::Init()
 #ifdef ENABLE_NETSYS_ACCESS_POLICY_DIAG_LISTEN
     NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
 #endif
+    NetsysBpfRingBuffer::ListenNetworkStatsEvent();
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
@@ -238,8 +238,22 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
 
 int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
-    NETNATIVE_LOGI("UnRegisterNotifyCallback");
+    NETNATIVE_LOG_D("UnRegisterNotifyCallback");
     manager_->UnregisterNetlinkCallback(notifyCallback_);
+    return 0;
+}
+
+int32_t NetsysNativeService::RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback)
+{
+    NETNATIVE_LOGI("RegisterNetsysTrafficCallback");
+    NetsysBpfRingBuffer::RegisterNetsysTrafficCallback(callback);
+    return 0;
+}
+
+int32_t NetsysNativeService::UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback)
+{
+    NETNATIVE_LOGI("UnRegisterNetsysTrafficCallback");
+    NetsysBpfRingBuffer::UnRegisterNetsysTrafficCallback(callback);
     return 0;
 }
 
@@ -709,6 +723,46 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     }
 
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
+}
+
+int32_t NetsysNativeService::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->SetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysNativeService::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysNativeService::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->UpdateIfIndexMap(key, index);
+}
+
+int32_t NetsysNativeService::ClearIncreaseTrafficMap()
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->ClearIncreaseTrafficMap();
 }
 
 int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)

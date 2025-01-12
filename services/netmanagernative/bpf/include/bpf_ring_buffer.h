@@ -28,12 +28,17 @@
 #include <linux/unistd.h>
 #include <string>
 #include <functional>
+#include <memory>
+#include <mutex>
+#include <vector>
 
 #include "bpf_path.h"
 #include "bpf_def.h"
 #include "bpf_stats.h"
 #include "bpf_mapper.h"
 #include "securec.h"
+
+#include "i_netsys_traffic_callback.h"
 
 namespace OHOS::NetManagerStandard {
 
@@ -52,12 +57,21 @@ public:
     static int GetRingbufFd(const std::string &path, uint32_t fileFlags);
 
     static int HandleNetworkPolicyEventCallback(void *ctx, void *data, size_t data_sz);
+    static int HandleNetStatsEventCallback(void *ctx, void *data, size_t data_sz);
     static void ListenRingBufferThread(void);
     static void ListenNetworkAccessPolicyEvent();
+    static void ListenNetStatsRingBufferThread(void);
     static void ExistRingBufferPoll(void);
+    static void ListenNetworkStatsEvent(void);
+    static void ExistNetstatsRingBufferPoll(void);
+    static int RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
+    static int UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
 
 private:
     static bool existThread_;
+    static bool existNetStatsThread_;
+    static std::vector<sptr<NetsysNative::INetsysTrafficCallback>> callbacks_;
+    static std::mutex callbackMutex_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_RING_BUFFER_H

@@ -52,6 +52,15 @@ enum NetStatsDataFlag {
     STATS_DATA_FLAG_SIM,        // the stats of the sim uid.
     STATS_DATA_FLAG_LIMIT,       // The maximum value of DataFlag, Do not exceed the limit. No actual meaning.
 };
+
+enum NetStatsNotificationFlag {
+    NET_STATS_MONTHLY_LIMIT = 0,
+    NET_STATS_MONTHLY_MARK,
+    NET_STATS_DAILY_MARK,
+    NET_STATS_NO_LIMIT_ENABLE,
+    NET_STATS_NOTIFY_TYPE,
+    NET_STATS_BEGIN_DATE,
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_STATS_CONSTANTS_H

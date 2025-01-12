@@ -104,4 +104,7 @@ typedef __u16 net_index;
 typedef __u8 net_interface_name_id;
 
 typedef __u32 app_uid_key;
+
+typedef __u8 traffic_notify_flag;
+typedef __u64 traffic_value;
 #endif /* NETMANAGER_BASE_BPF_DEF_H */

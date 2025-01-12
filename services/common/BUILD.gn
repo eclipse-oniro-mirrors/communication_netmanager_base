@@ -14,6 +14,63 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
+ohos_prebuilt_etc("netstats_notification_base") {
+  source = "notification/resources/base/element/string.json"
+  relative_install_dir = "netmanager_base/resources/base/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_bo_CN") {
+  source = "notification/resources/bo_CN/element/string.json"
+  relative_install_dir = "netmanager_base/resources/bo_CN/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_ug") {
+  source = "notification/resources/ug/element/string.json"
+  relative_install_dir = "netmanager_base/resources/ug/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_zh_CN") {
+  source = "notification/resources/zh_CN/element/string.json"
+  relative_install_dir = "netmanager_base/resources/zh_CN/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_zh_HK") {
+  source = "notification/resources/zh_HK/element/string.json"
+  relative_install_dir = "netmanager_base/resources/zh_HK/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_zh_TW") {
+  source = "notification/resources/zh_TW/element/string.json"
+  relative_install_dir = "netmanager_base/resources/zh_TW/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_zz_ZX") {
+  source = "notification/resources/zz_ZX/element/string.json"
+  relative_install_dir = "netmanager_base/resources/zz_ZX/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_prebuilt_etc("netstats_notification_icon") {
+  source = "notification/resources/network_ic.png"
+  relative_install_dir = "netmanager_base/resources"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_prebuilt_etc("netstats_notification_locale") {
+  source = "common/notification/resources/locale_to_resourcePath.json"
+  relative_install_dir = "netmanager_base/resources"
+  part_name = "netmanager_enhanced"
+  subsystem_name = "communication"
+}
+
 config("net_service_common_config") {
   # header file path
   include_dirs = [ "$INNERKITS_ROOT/netconnclient/include/proxy" ]
@@ -65,6 +122,13 @@ ohos_shared_library("net_service_common") {
   public_configs = [ ":net_service_common_config" ]
 
   deps = [
+    ":netstats_notification_base",
+    ":netstats_notification_bo_CN",
+    ":netstats_notification_ug",
+    ":netstats_notification_zh_CN",
+    ":netstats_notification_zh_HK",
+    ":netstats_notification_zh_TW",
+    ":netstats_notification_zz_ZX",
     "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]

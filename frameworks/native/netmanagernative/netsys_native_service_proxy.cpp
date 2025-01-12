@@ -2078,6 +2078,135 @@ int32_t NetsysNativeServiceProxy::DeleteStatsInfo(uint32_t uid)
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint64(availableTraffic)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP),
+                                        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to SetNetStateTrafficMap ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint64(availableTraffic)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
+                                          data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to GetNetStateTrafficMap ret= %{public}d", ret);
+        }
+        return ret;
+    }
+    if (!reply.ReadUint64(availableTraffic)) {
+        NETNATIVE_LOGE("get traffic falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP),
+                                        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to ClearIncreaseTrafficMap ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt8(key)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint64(index)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP), data,
+                                        reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to UpdateIfIndexMap ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                                            IptablesType ipType)
 {
@@ -2937,6 +3066,58 @@ int32_t NetsysNativeServiceProxy::DisableWearableDistributedNetForward()
     return reply.ReadInt32();
 }
 #endif
+
+int32_t NetsysNativeServiceProxy::RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to RegisterNetsysTrafficCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("FirewallCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_REGISTER), data,
+        reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("RegisterNetsysTrafficCallback SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceProxy::UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to UnRegisterNetsysTrafficCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("FirewallCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_UNREGISTER),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("UnRegisterNetsysTrafficCallback SendRequest failed");
+        return ret;
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 
 int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {

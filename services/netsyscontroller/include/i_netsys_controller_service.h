@@ -761,6 +761,11 @@ public:
      */
     virtual int32_t DeleteStatsInfo(uint32_t uid) = 0;
 
+    virtual int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) = 0;
+    virtual int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) = 0;
+    virtual int32_t ClearIncreaseTrafficMap() = 0;
+    virtual int32_t UpdateIfIndexMap(int8_t key, uint64_t index) = 0;
+
     /**
      * Set iptables for result
      *
@@ -943,6 +948,9 @@ public:
     virtual int32_t EnableWearableDistributedNetForward(const int32_t tcpPortId, const int32_t udpPortId) = 0;
     virtual int32_t DisableWearableDistributedNetForward() = 0;
 #endif
+
+    virtual int32_t RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback) = 0;
+    virtual int32_t UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback) = 0;
 
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
 

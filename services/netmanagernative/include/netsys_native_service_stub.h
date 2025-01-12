@@ -59,6 +59,7 @@ private:
     void InitNetVnicInterfaceMap();
     void InitNetVirnicInterfaceMap();
     void InitStaticArpToInterfaceMap();
+    void InitNetStatsInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
@@ -133,6 +134,10 @@ private:
     int32_t CmdDeleteSimStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDeleteStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdClearIncreaseTrafficMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateIfIndexMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply);
@@ -177,6 +182,9 @@ private:
     int32_t CmdDelBrokerUidAccessPolicyMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUnRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
+
 private:
     std::vector<int32_t> uids_;
 };

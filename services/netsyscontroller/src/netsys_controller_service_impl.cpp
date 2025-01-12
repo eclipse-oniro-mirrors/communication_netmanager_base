@@ -716,6 +716,30 @@ int32_t NetsysControllerServiceImpl::DeleteStatsInfo(uint32_t uid)
     return netsysClient_.DeleteStatsInfo(uid);
 }
 
+int32_t NetsysControllerServiceImpl::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
+{
+    NETMGR_LOG_D("SetNetStateTrafficMap");
+    return netsysClient_.SetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysControllerServiceImpl::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
+{
+    NETMGR_LOG_D("GetNetStateTrafficMap");
+    return netsysClient_.GetNetStateTrafficMap(flag, availableTraffic);
+}
+
+int32_t NetsysControllerServiceImpl::ClearIncreaseTrafficMap()
+{
+    NETMGR_LOG_D("ClearIncreaseTrafficMap");
+    return netsysClient_.ClearIncreaseTrafficMap();
+}
+
+int32_t NetsysControllerServiceImpl::UpdateIfIndexMap(int8_t key, uint64_t index)
+{
+    NETMGR_LOG_D("UpdateIfIndexMap");
+    return netsysClient_.UpdateIfIndexMap(key, index);
+}
+
 int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                                               NetsysNative::IptablesType ipType)
 {
@@ -877,6 +901,20 @@ int32_t NetsysControllerServiceImpl::DisableWearableDistributedNetForward()
     return netsysClient_.DisableWearableDistributedNetForward();
 }
 #endif
+
+int32_t NetsysControllerServiceImpl::RegisterNetsysTrafficCallback(
+    const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    NETMGR_LOG_I("NetsysControllerServiceImpl::RegisterNetsysTrafficCallback");
+    return netsysClient_.RegisterNetsysTrafficCallback(callback);
+}
+
+int32_t NetsysControllerServiceImpl::UnRegisterNetsysTrafficCallback(
+    const sptr<NetsysNative::INetsysTrafficCallback> &callback)
+{
+    NETMGR_LOG_I("NetsysControllerServiceImpl::UnRegisterNetsysTrafficCallback");
+    return netsysClient_.UnRegisterNetsysTrafficCallback(callback);
+}
 
 int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
