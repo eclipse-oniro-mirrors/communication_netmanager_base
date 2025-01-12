@@ -80,7 +80,7 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
 
     data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
     data.WriteString16(u"bundleName");
-    data.WriteString16(u"com.huawei.hmos.communicationsetting");
+    data.WriteString16(u"com.xxxxxx.hmos.communicationsetting");
     data.WriteString16(u"abilityName");
     data.WriteString16(u"DisableMobileDataDialogAbility");
 
