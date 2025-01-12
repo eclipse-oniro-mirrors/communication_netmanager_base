@@ -26,13 +26,6 @@
 
 static const int32_t COMM_NETSYS_NATIVE_SYS_ABILITY_ID = 1158;
 
-const std::string NETMGR_ENHANCED_SYS_ABILITY_NAME = "netmanager";
-const std::string NET_ACC_HEADER_NOTIFICATION = "ohos.event.notification.netmgr.NETWORK_ACCELERATION";
-const std::string NEVER_REMIND_NOTIFICATION = "ohos.event.notification.netmgr.NEVER_REMIND";
-const std::string START_ABILITY_NOTIFICATION = "ohos.event.notification.netmgr.START_ABILITY";
-const std::string SWITCH_BACK_NOTIFICATION = "ohos.event.notification.netmgr.SWITCH_BACK";
-const std::string SWITCH_BACK_FEATURE_TYPE = "swtich_back_feature_type";
-
 typedef void (*NetMgrStatsLimitNtfCallback)(int notificationId);
 
 enum NetMgrStatsLimitNotificationId : int {
@@ -73,13 +66,11 @@ private:
     std::string GetTrafficNum(uint64_t traffic);
 
     std::shared_ptr<Media::PixelMap> netmgrStatsLimitIconPixelMap_  {};
-    std::map<std::string, std::string> g_resourceMap;
-    std::map<std::string, std::string> g_languageMap;
-    std::string g_localeBaseName;
-    std::mutex mutex_ {};
+    std::map<std::string, std::string> resourceMap;
+    std::map<std::string, std::string> languageMap;
+    std::string localeBaseName;
+    std::mutex mutex_;
     const int NETMGR_TRAFFIC_NTF_CONTROL_FLAG = 0;
-
-    // std::unique_ptr<NetMgrEnhancedEventSubscriberManager> netMgrEnhancedEventSubscriberManager = nullptr;
 };
 }  // namespace NetManagerStandard
 }  // namespace OHOS

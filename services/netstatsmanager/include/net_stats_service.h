@@ -151,7 +151,7 @@ private:
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t curActiviteSimId_ = -1;
     uint64_t curIfIndex_ = UINT64_MAX;
-    bool isWifiConnected = false;
+    std::atomic_bool isWifiConnected_ = false;
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> settingsTrafficMap_;
     std::unique_ptr<FfrtTimer> trafficTimer_ = nullptr;
     sptr<NetInfoObserver> netconnCallback_ = nullptr;

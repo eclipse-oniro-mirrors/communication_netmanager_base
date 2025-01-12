@@ -807,8 +807,7 @@ bool NetStatsService::CommonEventSimStateChanged(int32_t slotId, int32_t simStat
             NETMGR_LOG_I("settingsTrafficMap_.insert(simId). simId:%{public}d", simId);
             trafficDataObserver->RegisterTrafficDataSettingObserver();
         }
-    } else if (simState != static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED) &&
-        simState != static_cast<int32_t>(Telephony::SimState::SIM_STATE_READY)) {
+    } else if (simState != static_cast<int32_t>(Telephony::SimState::SIM_STATE_READY)) {
         // 卡异常，取消监听
         if (settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
             // 去注册
@@ -823,7 +822,7 @@ bool NetStatsService::CommonEventSimStateChanged(int32_t slotId, int32_t simStat
 bool NetStatsService::CommonEventCellularDataStateChanged(int32_t slotId, int32_t dataState)
 {
     NETMGR_LOG_I("CommonEventCellularDataStateChanged slotId:%{public}d, dateState:%{public}d", slotId, dataState);
-    if (!isWifiConnected) {
+    if (!isWifiConnected_) {
         NETMGR_LOG_I("CommonEventCellularDataStateChanged. but wifi is not connected");
         return false;
     }
@@ -873,7 +872,8 @@ void NetStatsService::StartNetObserver()
     netAllCapabilities.netCaps_.insert(NetManagerStandard::NetCap::NET_CAPABILITY_INTERNET);
     netSpecifier.ident_ = "";
     netSpecifier.netCapabilities_ = netAllCapabilities;
-    sptr<NetManagerStandard::NetSpecifier> specifier = new NetManagerStandard::NetSpecifier(netSpecifier);
+    sptr<NetManagerStandard::NetSpecifier> specifier =
+        new (std::nothrow) NetManagerStandard::NetSpecifier(netSpecifier);
     int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, netconnCallback_, 0);
     if (ret != 0) {
         NETMGR_LOG_E("StartNetObserver fail, ret = %{public}d", ret);
@@ -921,11 +921,11 @@ bool NetStatsService::ProcessNetConnectionPropertiesChange(int32_t simId, uint64
 {
     if (simId == INT32_MAX) {
         NETMGR_LOG_I("ProcessNetConnectionPropertiesChange. current default net is wifi");
-        isWifiConnected = true;
+        isWifiConnected_ = true;
         return true;
     }
 
-    isWifiConnected = false;
+    isWifiConnected_ = false;
     if (simId < 0 || simId == curActiviteSimId_) {
         NETMGR_LOG_I("ProcessNetConnectionPropertiesChange. simId == curActiviteSimId_, no process");
         return false;
@@ -1053,7 +1053,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
     network->startTime_ =
         NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate);
     network->endTime_ = NetStatsUtils::GetNowTimestamp();
-    NETMGR_LOG_E("endTime: %{public}lu. simId: %{public}d", network->endTime_, simId);
+    NETMGR_LOG_I("endTime: %{public}lu. simId: %{public}d", network->endTime_, simId);
     network->type_ = 0;
     network->simId_ = simId;
     uint64_t allUsedTraffic = 0;
@@ -1063,7 +1063,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
         return false;
     }
 
-    NETMGR_LOG_E("GetAllUsedTrafficStatsByNetwork allUsedTraffic: %{public}" PRIu64, allUsedTraffic);
+    NETMGR_LOG_I("GetAllUsedTrafficStatsByNetwork allUsedTraffic: %{public}" PRIu64, allUsedTraffic);
     // 限额不是u64且没有打开无限开关
     if (settingsTrafficMap_[simId].second->monthlyLimit != UINT64_MAX &&
         settingsTrafficMap_[simId].second->unLimitedDataEnable != 1) {
@@ -1098,7 +1098,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
 
 void NetStatsService::SetTrafficMapMaxValue()
 {
-    NETMGR_LOG_E("SetTrafficMapMaxValue");
+    NETMGR_LOG_I("SetTrafficMapMaxValue");
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, UINT64_MAX);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, UINT64_MAX);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_DAILY_MARK, UINT64_MAX);
@@ -1224,22 +1224,20 @@ void NetStatsService::UpdateNetStatsToMapFromDB(int32_t simId)
     for (size_t i = 0; i < result.size(); i++) {
         int32_t curSumId = result[i].simId;
         if (simId == curSumId && settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
-            settingsTrafficMap_[curSumId].second-> lastMonAlertTime = result[i].monWarningDate;
-            settingsTrafficMap_[curSumId].second-> lastMonNotifyTime = result[i].dayNoticeDate;
-            settingsTrafficMap_[curSumId].second-> lastDayNotifyTime = result[i].monNoticeDate;
-            settingsTrafficMap_[curSumId].second-> isCanNotifyMonthlyLimit = (bool)result[i].monWarningState;
-            settingsTrafficMap_[curSumId].second-> isCanNotifyMonthlyMark = (bool)result[i].monNoticeState;
-            settingsTrafficMap_[curSumId].second-> isCanNotifyDailyMark = (bool)result[i].dayNoticeState;
+            settingsTrafficMap_[curSumId].second->lastMonAlertTime = result[i].monWarningDate;
+            settingsTrafficMap_[curSumId].second->lastMonNotifyTime = result[i].dayNoticeDate;
+            settingsTrafficMap_[curSumId].second->lastDayNotifyTime = result[i].monNoticeDate;
+            settingsTrafficMap_[curSumId].second->isCanNotifyMonthlyLimit =
+                static_cast<bool>(result[i].monWarningState);
+            settingsTrafficMap_[curSumId].second->isCanNotifyMonthlyMark = static_cast<bool>(result[i].monNoticeState);
+            settingsTrafficMap_[curSumId].second->isCanNotifyDailyMark = static_cast<bool>(result[i].dayNoticeState);
         }
     }
 }
 
 int32_t NetStatsService::NotifyTrafficAlert(uint8_t flag)
 {
-    bool notifyStatus = GetNotifyStats(flag);
-    bool mobileStatus = NetStatsUtils::IsMobileDataEnabled();
-    NETMGR_LOG_I("NotifyTrafficAlert notifyStatus:%{public}d, mobileStatus:%{public}d", notifyStatus, mobileStatus);
-    if (notifyStatus && mobileStatus) {
+    if (NetStatsUtils::IsMobileDataEnabled() && GetNotifyStats(flag)) {
         DealNotificaiton(flag);
     } else {
         NETMGR_LOG_I("There is no need to pop up trafficLimit notification.");
@@ -1365,8 +1363,6 @@ void NetStatsService::DealNotificaiton(uint8_t flag)
 void NetStatsService::DealDayNotification(bool isDaulCard)
 {
     NETMGR_LOG_I("Enter DealDayNotification.");
-    NetMgrNetStatsLimitNotification& notify = NetMgrNetStatsLimitNotification::GetInstance();
- 
     NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_DAY, isDaulCard);
     settingsTrafficMap_[curActiviteSimId_].second->lastDayNotifyTime = NetStatsUtils::GetNowTimestamp();
     UpdateTrafficLimitDate(curActiviteSimId_);
@@ -1377,8 +1373,6 @@ void NetStatsService::DealDayNotification(bool isDaulCard)
 void NetStatsService::DealMonNotification(bool isDaulCard)
 {
     NETMGR_LOG_I("Enter DealMonNotification.");
-    NetMgrNetStatsLimitNotification& notify = NetMgrNetStatsLimitNotification::GetInstance();
- 
     NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(
         NETMGR_STATS_LIMIT_MONTH, isDaulCard);
     settingsTrafficMap_[curActiviteSimId_].second->lastMonNotifyTime = NetStatsUtils::GetNowTimestamp();
@@ -1395,8 +1389,12 @@ void NetStatsService::DealMonAlert(bool isDaulCard)
     }
     
     if (dialog_ == nullptr) {
-        NETMGR_LOG_I("Get TrafficLimitDialog faied.");
+        NETMGR_LOG_E("Get TrafficLimitDialog faied.");
         return;
+    }
+
+    if (settingsTrafficMap_.find(curActiviteSimId_) == settingsTrafficMap_.end()) {
+        NETMGR_LOG_E("map find error");
     }
     NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(
         NETMGR_STATS_ALERT_MONTH, isDaulCard);
@@ -1428,13 +1426,14 @@ void NetStatsService::UpdateTrafficLimitDate(int32_t simId)
         NETMGR_LOG_E("UpdateTrafficLimitDate err. Not find simId:%{public}d", simId);
         return;
     }
+    auto info = settingsTrafficMap_[simId];
     statsData.simId = simId;
-    statsData.monWarningDate = settingsTrafficMap_[simId].second->lastMonAlertTime;
-    statsData.dayNoticeDate = settingsTrafficMap_[simId].second->lastMonNotifyTime;
-    statsData.monNoticeDate = settingsTrafficMap_[simId].second->lastDayNotifyTime;
-    statsData.monWarningState = settingsTrafficMap_[simId].second->isCanNotifyMonthlyLimit;
-    statsData.dayNoticeState = settingsTrafficMap_[simId].second->isCanNotifyDailyMark;
-    statsData.monNoticeState = settingsTrafficMap_[simId].second->isCanNotifyMonthlyMark;
+    statsData.monWarningDate = info.second->lastMonAlertTime;
+    statsData.dayNoticeDate = info.second->lastMonNotifyTime;
+    statsData.monNoticeDate = info.second->lastDayNotifyTime;
+    statsData.monWarningState = info.second->isCanNotifyMonthlyLimit;
+    statsData.dayNoticeState = info.second->isCanNotifyDailyMark;
+    statsData.monNoticeState = info.second->isCanNotifyMonthlyMark;
 
     netStats.InsertData(statsData);
 }

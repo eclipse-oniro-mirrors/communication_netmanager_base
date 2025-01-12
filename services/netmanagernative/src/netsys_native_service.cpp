@@ -238,7 +238,7 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
 
 int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
-    NETNATIVE_LOG_D("UnRegisterNotifyCallback");
+    NETNATIVE_LOGI("UnRegisterNotifyCallback");
     manager_->UnregisterNetlinkCallback(notifyCallback_);
     return 0;
 }

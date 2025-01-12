@@ -65,9 +65,9 @@ ohos_prebuilt_etc("netstats_notification_icon") {
 }
 
 ohos_prebuilt_etc("netstats_notification_locale") {
-  source = "common/notification/resources/locale_to_resourcePath.json"
+  source = "notification/resources/locale_to_resourcePath.json"
   relative_install_dir = "netmanager_base/resources"
-  part_name = "netmanager_enhanced"
+  part_name = "netmanager_base"
   subsystem_name = "communication"
 }
 

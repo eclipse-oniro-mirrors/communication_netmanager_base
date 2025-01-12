@@ -372,7 +372,6 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
     }
-    NETMGR_LOG_I("NetStatsCached ifaceNameIdentMap size: %{public}d", ifaceNameIdentMap_.Size());
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)

@@ -352,7 +352,7 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
 
 int32_t NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGE("CmdRegisterNetsysTrafficCallback start.");
+    NETNATIVE_LOGI("CmdRegisterNetsysTrafficCallback start.");
     int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -372,7 +372,7 @@ int32_t NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback(MessageParcel 
 
     result = RegisterNetsysTrafficCallback(callback);
     reply.WriteInt32(result);
-    NETNATIVE_LOGE("CmdRegisterNetsysTrafficCallback end. result:%{public}d", result);
+    NETNATIVE_LOGI("CmdRegisterNetsysTrafficCallback end. result:%{public}d", result);
     return result;
 }
 
@@ -1526,8 +1526,14 @@ int32_t NetsysNativeServiceStub::CmdDeleteStatsInfo(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdSetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t flag = data.ReadUint8();
-    uint32_t availableTraffic = data.ReadUint64();
+    uint8_t flag = 0;
+    uint64_t availableTraffic = 0;
+    if (!data.ReadUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadUint64(availableTraffic)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     int32_t result = SetNetStateTrafficMap(flag, availableTraffic);
     if (!reply.WriteInt32(result)) {
@@ -1539,8 +1545,11 @@ int32_t NetsysNativeServiceStub::CmdSetNetStateTrafficMap(MessageParcel &data, M
 
 int32_t NetsysNativeServiceStub::CmdGetNetStateTrafficMap(MessageParcel &data, MessageParcel &reply)
 {
-    int8_t flag = data.ReadInt8();
-    uint64_t availableTraffic;
+    uint8_t flag = 0;
+    if (!data.ReadUint8(flag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint64_t availableTraffic = 0;
     int32_t result = GetNetStateTrafficMap(flag, availableTraffic);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
@@ -1565,8 +1574,14 @@ int32_t NetsysNativeServiceStub::CmdClearIncreaseTrafficMap(MessageParcel &data,
 
 int32_t NetsysNativeServiceStub::CmdUpdateIfIndexMap(MessageParcel &data, MessageParcel &reply)
 {
-    int8_t key = data.ReadInt8();
-    uint64_t index = data.ReadUint64();
+    int8_t key = 0;
+    uint64_t index = 0;
+    if (!data.ReadInt8(key)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadUint64(index)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     int32_t result = UpdateIfIndexMap(key, index);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");

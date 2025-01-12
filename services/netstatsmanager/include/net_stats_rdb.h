@@ -53,7 +53,7 @@ typedef struct NetStatsData {
     int monWarningState;
     int dayNoticeState;
     int monNoticeState;
-}NetStatsData;
+} NetStatsData;
 
 class NetStatsRDB {
 public:
@@ -62,13 +62,9 @@ public:
     int32_t InitRdbStore();
     int32_t GetRdbStore();
     int32_t InsertData(NetStatsData state);
-    /* 插拔卡的时候删除 */
     int32_t DeleteBySimId(int32_t simId);
     int32_t UpdateBySimId(int32_t simId, NetStatsData state);
-    bool IsRdbNull()
-    {
-        return rdbStore_ == nullptr;
-    }
+
     std::vector<NetStatsData> QueryAll();
     int32_t QueryBySimId(int simId, NetStatsData& simStats);
 

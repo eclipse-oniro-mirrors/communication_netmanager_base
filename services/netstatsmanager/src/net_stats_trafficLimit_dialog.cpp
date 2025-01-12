@@ -60,7 +60,6 @@ bool TrafficLimitDialog::DismissTrafficLimitDialog()
         return false;
     }
     NETMGR_LOG_I("Dismiss TrafficLimit Dialog");
-    std::lock_guard<std::mutex> guard(opMutex_);
     return UnShowTrafficLimitDialog();
 }
 
@@ -68,7 +67,6 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
     NETMGR_LOG_I("TrafficLimitDialog::OnAbilityConnectDone");
-
     int32_t curSimId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
     int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(curSimId);
 
@@ -120,7 +118,7 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::CloseDialog()
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    const uint32_t cmdCode = 3;
+    const uint32_t cmdCode = 3;  // 3：表示关闭弹窗
     int32_t ret = remoteObject_->SendRequest(cmdCode, data, reply, option);
     int32_t replyCode = -1;
     bool success = false;
@@ -133,6 +131,7 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::CloseDialog()
 bool TrafficLimitDialog::ShowTrafficLimitDialog()
 {
     NETMGR_LOG_I("Show TrafficLimit Dialog");
+    std::lock_guard<std::mutex> guard(opMutex_);
     if (trafficlimitAbilityConn_ == nullptr) {
         trafficlimitAbilityConn_ = new (std::nothrow) TrafficLimitAbilityConn();
     }
@@ -171,6 +170,7 @@ bool TrafficLimitDialog::ShowTrafficLimitDialog()
 
 bool TrafficLimitDialog::UnShowTrafficLimitDialog()
 {
+    std::lock_guard<std::mutex> guard(opMutex_);
     if (trafficlimitAbilityConn_ == nullptr) {
         return true;
     }
@@ -180,7 +180,7 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
         NETMGR_LOG_I("GetInstance failed");
         return false;
     }
-    NETMGR_LOG_I("Unshow SmartDualCard Dialog");
+    NETMGR_LOG_I("Unshow TrafficLimit Dialog");
     trafficlimitAbilityConn_->CloseDialog();
 
     auto ret = abmc->DisconnectAbility(trafficlimitAbilityConn_);

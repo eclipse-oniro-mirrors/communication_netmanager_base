@@ -19,6 +19,7 @@
 #include "net_manager_constants.h"
 #include "net_stats_service.h"
 #include "net_stats_client.h"
+#include "net_stats_utils.h"
 namespace OHOS {
 namespace NetManagerStandard {
 
@@ -134,8 +135,8 @@ void TrafficDataObserver::ReadTrafficDataSettings(std::shared_ptr<TrafficSetting
     std::string value = "";
     dataShareHelperUtils->Query(unLimitUri, TAG_NAME + std::to_string(simId_) + "_" + UNLIMITED_TRAFFIC_ENABLE, value);
     info->unLimitedDataEnable = 0;
-    if (value != "") {
-        int32_t enable = std::stoull(value);
+    int32_t enable = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToInt32(value, enable)) {
         info->unLimitedDataEnable = enable;
     }
 
@@ -143,8 +144,8 @@ void TrafficDataObserver::ReadTrafficDataSettings(std::shared_ptr<TrafficSetting
     value = "";
     dataShareHelperUtils->Query(mLimitUri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_LIMITED_TRAFFIC, value);
     info->monthlyLimit = UINT64_MAX;
-    if (value != "") {
-        uint64_t trafficInt = stoull(value);
+    uint64_t trafficInt = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToUint64(value, trafficInt)) {
         info->monthlyLimit = trafficInt;
     }
 
@@ -152,8 +153,8 @@ void TrafficDataObserver::ReadTrafficDataSettings(std::shared_ptr<TrafficSetting
     value = "";
     dataShareHelperUtils->Query(beginTimeUri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE, value);
     info->beginDate = 1;
-    if (value != "") {
-        uint64_t dateInt = stoull(value);
+    uint64_t dateInt = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToUint64(value, dateInt)) {
         info->beginDate = dateInt;
     }
 
@@ -172,8 +173,8 @@ void TrafficDataObserver::ReadTrafficDataSettingsPart2(std::shared_ptr<TrafficSe
     std::string value = "";
     dataShareHelperUtils->Query(typeUri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_NOTIFY_TYPE, value);
     info->monthlyLimitdNotifyType = 1; // 1:默认断网
-    if (value != "") {
-        uint64_t type = stoull(value);
+    int32_t type = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToInt32(value, type)) {
         info->monthlyLimitdNotifyType = type;
     }
 
@@ -181,18 +182,18 @@ void TrafficDataObserver::ReadTrafficDataSettingsPart2(std::shared_ptr<TrafficSe
     value = "";
     dataShareHelperUtils->Query(mMarkuri, TAG_NAME + std::to_string(simId_) + "_" + OVER_MONTHLY_MARK, value);
     info->monthlyMark = 80;  // 月限额比例默认80%
-    if (value != "") {
-        uint64_t mark = stoull(value);
-        info->monthlyMark = mark;
+    uint64_t mMark = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToUint64(value, mMark)) {
+        info->monthlyMark = mMark;
     }
 
     Uri dMarkuri(SETTING_URI + TAG_NAME + std::to_string(simId_) + "_" + OVER_DAILY_MARK);
     value = "";
     dataShareHelperUtils->Query(dMarkuri, TAG_NAME + std::to_string(simId_) + "_" + OVER_DAILY_MARK, value);
     info->dailyMark = 10;  // 日限额比例默认10%
-    if (value != "") {
-        uint64_t mark = stoull(value);
-        info->dailyMark = mark;
+    uint64_t dMark = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToUint64(value, dMark)) {
+        info->dailyMark = dMark;
     }
 }
 
@@ -206,7 +207,10 @@ void UnlimitTrafficEnableObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri, TAG_NAME + std::to_string(simId_) + "_" + UNLIMITED_TRAFFIC_ENABLE, value);
-    int32_t enable = std::stoll(value);
+    int32_t enable = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToInt32(value, enable);
+    }
     NETMGR_LOG_E("UnlimitTrafficEnableObserver OnChanged. dataString: %{public}s, TrafficInt: %{public}d",
         value.c_str(), enable);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_NO_LIMIT_ENABLE, enable);
@@ -221,7 +225,10 @@ void TrafficMonthlyValueObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_LIMITED_TRAFFIC, value);
-    uint64_t trafficInt = stoull(value);
+    uint64_t trafficInt = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToUint64(value, trafficInt);
+    }
     NETMGR_LOG_E("TrafficMonthlyValueObserver OnChanged. dataString: %{public}s, TrafficInt: %{public}lu",
         value.c_str(), trafficInt);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_MONTHLY_LIMIT, trafficInt);
@@ -236,7 +243,10 @@ void TrafficMonthlyBeginDateObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE, value);
-    int32_t dateInt = stoi(value);
+    int32_t dateInt = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToInt32(value, dateInt);
+    }
     NETMGR_LOG_E("TrafficMonthlyBeginDateObserver OnChanged. dataString: %{public}s, dateInt: %{public}d",
         value.c_str(), dateInt);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_BEGIN_DATE, dateInt);
@@ -251,7 +261,10 @@ void TrafficMonthlyNotifyTypeObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri,  TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_NOTIFY_TYPE, value);
-    int32_t typeInt = stoi(value);
+    int32_t typeInt = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToInt32(value, typeInt);
+    }
     NETMGR_LOG_E("TrafficMonthlyNotifyTypeObserver OnChanged. typeString: %{public}s, typeInt: %{public}d",
         value.c_str(), typeInt);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_NOTIFY_TYPE, typeInt);
@@ -266,7 +279,10 @@ void TrafficMonthlyMarkObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri,  TAG_NAME + std::to_string(simId_) + "_" + OVER_MONTHLY_MARK, value);
-    int32_t percentInt = stoi(value);
+    int32_t percentInt = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToInt32(value, percentInt);
+    }
     NETMGR_LOG_E("TrafficMonthlyMarkObserver OnChanged. percentString: %{public}s, percentInt: %{public}d",
         value.c_str(), percentInt);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_MONTHLY_MARK, percentInt);
@@ -281,7 +297,10 @@ void TrafficDailyMarkObserver::OnChange()
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string value = "";
     dataShareHelperUtils->Query(uri,  TAG_NAME + std::to_string(simId_) + "_" + OVER_DAILY_MARK, value);
-    int32_t percentInt = stoi(value);
+    int32_t percentInt  = 0;
+    if (!value.empty()) {
+        NetStatsUtils::ConvertToInt32(value, percentInt);
+    }
     NETMGR_LOG_E("TrafficDailyMarkObserver OnChanged. percentString: %{public}s, percentInt: %{public}d",
         value.c_str(), percentInt);
     DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_DAILY_MARK, percentInt);
@@ -289,12 +308,11 @@ void TrafficDailyMarkObserver::OnChange()
 
 void CellularDataObserver::OnChange()
 {
-    NETMGR_LOG_E("CellularDataObserver OnChanged.");
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string value = "";
     Uri uri(CELLULAR_DATA_SETTING_DATA_ENABLE_URI);
     dataShareHelperUtils->Query(uri,  "cellular_data_enable", value);
-    NETMGR_LOG_E("CellularDataObserver OnChanged. enable: %{public}s", value.c_str());
+    NETMGR_LOG_I("CellularDataObserver OnChanged. enable: %{public}s", value.c_str());
 }
 
 } // namespace NetManagerStandard

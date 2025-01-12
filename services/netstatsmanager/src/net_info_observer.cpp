@@ -19,6 +19,7 @@
 #include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_service.h"
+#include "net_stats_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,55 +27,42 @@ namespace NetManagerStandard {
 int32_t NetInfoObserver::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
     const sptr<NetManagerStandard::NetAllCapabilities> &netAllCap)
 {
-    if (netAllCap == nullptr) {
-        return 0;
-    }
-
-    NETMGR_LOG_E("NetInfoObserver NetCapabilitiesChange");
-
-    if (netAllCap->netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNET) <= 0 ||
-        netAllCap->netCaps_.count(NetManagerStandard::NET_CAPABILITY_VALIDATED) <= 0) {
-        NETMGR_LOG_E("NetCapabilitiesChange not NetAvailable");
-        return 0;
-    }
+    NETMGR_LOG_D("NetInfoObserver NetCapabilitiesChange");
     return 0;
 }
 
 int32_t NetInfoObserver::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHandle)
 {
-    NETMGR_LOG_E("NetInfoObserver NetAvailable");
+    NETMGR_LOG_D("NetInfoObserver NetAvailable");
     return 0;
 }
 
 int32_t NetInfoObserver::NetLost(sptr<NetManagerStandard::NetHandle> &netHandle)
 {
-    NETMGR_LOG_E("NetInfoObserver NetLost");
-    if (netHandle == nullptr) {
-        NETMGR_LOG_E("netHandle is nullptr");
-        return -1;
-    }
-
+    NETMGR_LOG_D("NetInfoObserver NetLost");
     return 0;
 }
 
 int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
-    NETMGR_LOG_E("NetInfoObserver NetConnectionPropertiesChange");
+    NETMGR_LOG_D("NetInfoObserver NetConnectionPropertiesChange");
     if (info == nullptr) {
         return -1;
     }
-    NETMGR_LOG_E("NetInfoObserver ifName: %{public}s, idnet: %{public}s",
+    NETMGR_LOG_D("NetInfoObserver ifName: %{public}s, idnet: %{public}s",
         info->ifaceName_.c_str(), info->ident_.c_str());
-    if (info->ident_ == "") {  // wifi场景
+    if (info->ident_.empty()) {  // wifi场景
         uint64_t ifindex = if_nametoindex(info->ifaceName_.c_str());
         DelayedSingleton<NetStatsService>::GetInstance()->ProcessNetConnectionPropertiesChange(INT32_MAX, ifindex_);
         return 0;
     }
-    if (stoul(info->ident_) == ident_) {  // 默认网络对应的sim卡没变
+
+    uint64_t ident = 0;
+    NetStatsUtils::ConvertToUint64(info->ident_, ident);
+    if (ident == ident_) { // 默认蜂窝网络对应的sim卡没变
         return 0;
     }
-
-    ident_ = stoul(info->ident_);
+    ident_ = ident;
     ifaceName_ = info->ifaceName_;
     ifindex_ = if_nametoindex(ifaceName_.c_str());
     DelayedSingleton<NetStatsService>::GetInstance()->ProcessNetConnectionPropertiesChange(ident_, ifindex_);

@@ -244,13 +244,13 @@ int32_t NetsysBpfStats::GetCookieStats(uint64_t &stats, StatsType statsType, uin
     return NETSYS_SUCCESS;
 }
 
-// 写可用余额map  定时器更新/数据库更新
+// write taffic available value map.  update by timer/settings modify/network changed
 int32_t NetsysBpfStats::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
 {
     NETNATIVE_LOGI("NetsysBpfStats::SetNetStateTrafficMap start. flag:%{public}u, availableTraffic:%{public}" PRIu64,
         flag, availableTraffic);
 
-    BpfMapper<uint8_t, uint64_t> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_WRONLY);
+    BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_WRONLY);
     if (!netStatsTrafficMap.IsValid()) {
         NETNATIVE_LOGE("SetNetStateTrafficMap netStatsTrafficMap not exist.");
         return NETMANAGER_ERROR;
@@ -266,7 +266,6 @@ int32_t NetsysBpfStats::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTr
     return NETMANAGER_SUCCESS;
 }
 
-// 读可用余额map
 int32_t NetsysBpfStats::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
 {
     BpfMapper<traffic_notify_flag, traffic_value> netStatsTrafficMap(LIMITS_STATS_MAP_PATH, BPF_F_RDONLY);
@@ -274,12 +273,12 @@ int32_t NetsysBpfStats::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableT
         NETNATIVE_LOGE("GetNetStateTrafficMap netStatsTrafficMap not exist. errno: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
-    traffic_value v = { 0 };
-    if (netStatsTrafficMap.Read(flag, v) != 0) {
+    traffic_value value = 0;
+    if (netStatsTrafficMap.Read(flag, value) != 0) {
         NETNATIVE_LOGE("GetNetStateTrafficMap read netStatsTrafficMap err");
         return NETMANAGER_ERROR;
     }
-    availableTraffic = v;
+    availableTraffic = value;
     NETNATIVE_LOGI("NetsysBpfStats::GetNetStateTrafficMap flag:%{public}u, availableTraffic:%{public}" PRIu64,
         flag, availableTraffic);
     return NETMANAGER_SUCCESS;
@@ -295,19 +294,16 @@ int32_t NetsysBpfStats::GetNetStateIncreTrafficMap(std::vector<uint64_t> &keys)
     keys = netStatsIncreTrafficMap.GetAllKeys();
     NETNATIVE_LOGI("NetsysBpfStats::GetNetStateIncreTrafficMap keys.size: %{public}zu", keys.size());
     for (auto key : keys) {
-        traffic_value v = { 0 };
-        if (netStatsIncreTrafficMap.Read(key, v) != 0) {
+        traffic_value value = { 0 };
+        if (netStatsIncreTrafficMap.Read(key, value) != 0) {
             NETNATIVE_LOGE("GetNetStateIncreTrafficMap read netStatsTrafficMap err");
             return NETMANAGER_ERROR;
         }
-        char if_name[32] = { 0 };
-        if (memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) != EOK) {
-            return STATS_ERR_READ_BPF_FAIL;
-        }
-        char *pName = if_indextoname(key, if_name);
-        NETNATIVE_LOGE("NetsysBpfStats::GetNetStateIncreTrafficMap keys: %{public}" PRIu64 ", \
+        char ifName[IFNAME_SIZE] = { 0 };
+        auto pName = if_indextoname(key, ifName);
+        NETNATIVE_LOGI("NetsysBpfStats::GetNetStateIncreTrafficMap keys: %{public}" PRIu64 ", \
 value: %{public}" PRIu64 ", name: %{public}s",
-            key, static_cast<uint64_t>(v), if_name);
+            key, static_cast<uint64_t>(value), ifName);
     }
     return NETMANAGER_SUCCESS;
 }
@@ -315,7 +311,7 @@ value: %{public}" PRIu64 ", name: %{public}s",
 int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
 {
     NETNATIVE_LOGI("NetsysBpfStats::ClearIncreaseTrafficMap start");
-    std::vector<uint64_t> keys = {};
+    std::vector<uint64_t> keys;
     if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
@@ -329,6 +325,7 @@ int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
         NETNATIVE_LOGE("ClearIncreaseTrafficMap Write increamentTrafficMap err");
         return NETMANAGER_ERROR;
     }
+    // TODO
     keys = {};
     if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
@@ -338,7 +335,6 @@ int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
     return NETMANAGER_SUCCESS;
 }
 
-// 更新当前网卡id
 int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     NETNATIVE_LOGE("NetsysBpfStats::UpdateIfIndexMap start.");
@@ -346,7 +342,7 @@ int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
         return -1;
     }
     NETNATIVE_LOGE("UpdateIfIndexMap ifindex: %{public}" PRIu64, index);
-    BpfMapper<uint8_t, int32_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
+    BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
     if (!netStatsIfIndexMap.IsValid()) {
         NETNATIVE_LOGE("UpdateIfIndexMap netStatsTrafficMap not exist.");
         return NETMANAGER_ERROR;
@@ -356,11 +352,11 @@ int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
         NETNATIVE_LOGE("UpdateIfIndexMap Write netStatsTrafficMap err");
         return NETMANAGER_ERROR;
     }
+    // TODO
     GetIfIndexMap();
     return 0;
 }
 
-// 查询当前网卡id
 int32_t NetsysBpfStats::GetIfIndexMap()
 {
     NETNATIVE_LOGE("NetsysBpfStats::GetIfIndexMap start");
@@ -371,14 +367,14 @@ int32_t NetsysBpfStats::GetIfIndexMap()
     }
 
     std::vector<uint8_t> keys = netStatsIfIndexMap.GetAllKeys();
-    NETNATIVE_LOGI("GetIfIndexMap keys.size: %{public}lu", keys.size());
+    NETNATIVE_LOGI("GetIfIndexMap keys.size: %{public}zu", keys.size());
     for (auto key : keys) {
-        uint64_t v = { 0 };
-        if (netStatsIfIndexMap.Read(key, v) != 0) {
+        uint64_t value = 0;
+        if (netStatsIfIndexMap.Read(key, value) != 0) {
             NETNATIVE_LOGE("GetIfIndexMap read err");
             return NETMANAGER_ERROR;
         }
-        NETNATIVE_LOGE("NetsysBpfStats::GetIfIndexMap keys: %{public}u, value: %{public}" PRIu64, key, v);
+        NETNATIVE_LOGI("NetsysBpfStats::GetIfIndexMap keys: %{public}u, value: %{public}" PRIu64, key, value);
     }
     return NETMANAGER_SUCCESS;
 }

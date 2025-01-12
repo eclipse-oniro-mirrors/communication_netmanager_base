@@ -112,7 +112,7 @@ bpf_map_def SEC("maps") limits_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(traffic_notify_flag),
     .value_size = sizeof(traffic_value),
-    .max_entries = 3,
+    .max_entries = 3, // 3:   0-monthly limit 1-monthly mark 2-daily mark
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -123,7 +123,7 @@ bpf_map_def SEC("maps") increment_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uint64_t),
     .value_size = sizeof(traffic_value),
-    .max_entries = 1,
+    .max_entries = 1, // current only support single card detect
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -148,7 +148,7 @@ bpf_map_def SEC("maps") net_stats_ringbuf_map = {
 static inline __u8 socket_ringbuf_net_stats_event_submit(__u8 flag)
 {
     uint8_t *e;
-    e = bpf_ringbuf_reserve(&net_stats_ringbuf_map, sizeof(*e), 0);
+    e = bpf_ringbuf_reserve(&net_stats_ringbuf_map, sizeof(uint8_t), 0);
     if (e) {
         *e = flag;
         bpf_ringbuf_submit(e, 0);
@@ -174,67 +174,67 @@ static inline __u32 get_data_len(struct __sk_buff *skb)
 
 static traffic_value update_new_incre_value(uint64_t ifindex, __u32 len)
 {
-    traffic_value *oldValue = bpf_map_lookup_elem(&increment_stats_map, &ifindex);
-    if (oldValue == NULL) {
+    traffic_value *old_value = bpf_map_lookup_elem(&increment_stats_map, &ifindex);
+    if (old_value == NULL) {
         traffic_value newValue = 0;
         bpf_map_update_elem(&increment_stats_map, &ifindex, &newValue, BPF_NOEXIST);
-        oldValue = bpf_map_lookup_elem(&increment_stats_map, &ifindex);
+        old_value = bpf_map_lookup_elem(&increment_stats_map, &ifindex);
     }
 
-    if (oldValue != NULL) {
-        *oldValue = (*oldValue) + len;
-        bpf_map_update_elem(&increment_stats_map, &ifindex, oldValue, BPF_ANY);
-        return *oldValue;
+    if (old_value != NULL) {
+        *old_value = (*old_value) + len;
+        bpf_map_update_elem(&increment_stats_map, &ifindex, old_value, BPF_ANY);
+        return *old_value;
     }
     return 0;
 }
 
-static traffic_notify_flag is_exceed_daily_mark(traffic_value usedValue)
+static traffic_notify_flag is_exceed_daily_mark(traffic_value used_value)
 {
-    traffic_notify_flag daily_mark = 2;
-    traffic_value *dayMarkAvai = bpf_map_lookup_elem(&limits_stats_map, &daily_mark);
+    traffic_notify_flag daily_mark = 2; // 2: DAILY_MARK
+    traffic_value *day_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &daily_mark);
 
-    traffic_value maxValue = UINT64_MAX;
-    if (dayMarkAvai == NULL) {
-        bpf_map_update_elem(&limits_stats_map, &daily_mark, &maxValue, BPF_NOEXIST);
-        dayMarkAvai = bpf_map_lookup_elem(&limits_stats_map, &daily_mark);
+    traffic_value max_value = UINT64_MAX;
+    if (day_mark_avai == NULL) {
+        bpf_map_update_elem(&limits_stats_map, &daily_mark, &max_value, BPF_NOEXIST);
+        day_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &daily_mark);
     }
-    if (dayMarkAvai != NULL && usedValue > *dayMarkAvai) {
-        bpf_map_update_elem(&limits_stats_map, &daily_mark, &maxValue, BPF_ANY);
+    if (day_mark_avai != NULL && used_value > *day_mark_avai) {
+        bpf_map_update_elem(&limits_stats_map, &daily_mark, &max_value, BPF_ANY);
         return daily_mark;
     }
     return UINT8_MAX;
 }
 
-static traffic_notify_flag is_exceed_mothly_mark(traffic_value usedValue)
+static traffic_notify_flag is_exceed_mothly_mark(traffic_value used_value)
 {
-    traffic_notify_flag monthly_mark = 1;
-    traffic_value *monthlyMarkVal = bpf_map_lookup_elem(&limits_stats_map, &monthly_mark);
+    traffic_notify_flag monthly_mark = 1; // 1: MONTHLY_MARK
+    traffic_value *monthly_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_mark);
 
-    traffic_value maxValue = UINT64_MAX;
-    if (monthlyMarkVal == NULL) {
-        bpf_map_update_elem(&limits_stats_map, &monthly_mark, &maxValue, BPF_NOEXIST);
-        monthlyMarkVal = bpf_map_lookup_elem(&limits_stats_map, &monthly_mark);
+    traffic_value max_value = UINT64_MAX;
+    if (monthly_mark_avai == NULL) {
+        bpf_map_update_elem(&limits_stats_map, &monthly_mark, &max_value, BPF_NOEXIST);
+        monthly_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_mark);
     }
-    if (monthlyMarkVal != NULL && usedValue > *monthlyMarkVal) {
-        bpf_map_update_elem(&limits_stats_map, &monthly_mark, &maxValue, BPF_ANY);
+    if (monthly_mark_avai != NULL && used_value > *monthly_mark_avai) {
+        bpf_map_update_elem(&limits_stats_map, &monthly_mark, &max_value, BPF_ANY);
         return monthly_mark;
     }
     return UINT8_MAX;
 }
 
-static traffic_notify_flag is_exceed_mothly_limit(traffic_value usedValue)
+static traffic_notify_flag is_exceed_mothly_limit(traffic_value used_value)
 {
-    traffic_notify_flag monthly_limit = 0;
-    traffic_value *monthlyLimitVal = bpf_map_lookup_elem(&limits_stats_map, &monthly_limit);
+    traffic_notify_flag monthly_limit = 0; // 0: MONTHLY_LIMIT
+    traffic_value *monthly_limit_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_limit);
 
-    traffic_value maxValue = UINT64_MAX;
-    if (monthlyLimitVal == NULL) {
-        bpf_map_update_elem(&limits_stats_map, &monthly_limit, &maxValue, BPF_NOEXIST);
-        monthlyLimitVal = bpf_map_lookup_elem(&limits_stats_map, &monthly_limit);
+    traffic_value max_value = UINT64_MAX;
+    if (monthly_limit_avai == NULL) {
+        bpf_map_update_elem(&limits_stats_map, &monthly_limit, &max_value, BPF_NOEXIST);
+        monthly_limit_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_limit);
     }
-    if (monthlyLimitVal != NULL && usedValue > *monthlyLimitVal) {
-        bpf_map_update_elem(&limits_stats_map, &monthly_limit, &maxValue, BPF_ANY);
+    if (monthly_limit_avai != NULL && used_value > *monthly_limit_avai) {
+        bpf_map_update_elem(&limits_stats_map, &monthly_limit, &max_value, BPF_ANY);
         return monthly_limit;
     }
     return UINT8_MAX;
@@ -271,28 +271,27 @@ int socket_iface_stats(struct __sk_buff *skb)
         }
     }
 
-    uint8_t id = 0;
+    uint8_t id = 0; // current only support single card detect.
     uint64_t *cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &id);
     if (cur_rmnet_ifindex == NULL || *cur_rmnet_ifindex != ifindex) {
         return 1;
     }
 
-    traffic_value usedValue = update_new_incre_value(ifindex, skb->len);
-    if (usedValue == 0) {
+    traffic_value used_value = update_new_incre_value(ifindex, skb->len);
+    if (used_value == 0) {
         return 1;
     }
-    traffic_notify_flag flag = is_exceed_mothly_limit(usedValue);
+    traffic_notify_flag flag = is_exceed_mothly_limit(used_value);
     if (flag == UINT8_MAX) {
-        flag = is_exceed_mothly_mark(usedValue);
+        flag = is_exceed_mothly_mark(used_value);
         if (flag == UINT8_MAX) {
-            is_exceed_daily_mark(usedValue);
+            is_exceed_daily_mark(used_value);
         }
     }
-    if (flag == UINT8_MAX) {
-        return -1;
+    if (flag != UINT8_MAX) {
+        socket_ringbuf_net_stats_event_submit(flag);
     }
 
-    socket_ringbuf_net_stats_event_submit(flag);
     return 1;
 }
 

@@ -57,19 +57,19 @@ public:
     static int GetRingbufFd(const std::string &path, uint32_t fileFlags);
 
     static int HandleNetworkPolicyEventCallback(void *ctx, void *data, size_t data_sz);
-    static int HandleNetStatsEventCallback(void *ctx, void *data, size_t data_sz);
+    static int HandleNetStatsEventCallback(void *ctx, void *data, size_t dataSz);
     static void ListenRingBufferThread(void);
     static void ListenNetworkAccessPolicyEvent();
-    static void ListenNetStatsRingBufferThread(void);
+    static void ListenNetStatsRingBufferThread();
     static void ExistRingBufferPoll(void);
     static void ListenNetworkStatsEvent(void);
-    static void ExistNetstatsRingBufferPoll(void);
+    static void ExistNetstatsRingBufferPoll();
     static int RegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
     static int UnRegisterNetsysTrafficCallback(const sptr<NetsysNative::INetsysTrafficCallback> &callback);
 
 private:
     static bool existThread_;
-    static bool existNetStatsThread_;
+    static std::atomic_bool existNetStatsThread_;
     static std::vector<sptr<NetsysNative::INetsysTrafficCallback>> callbacks_;
     static std::mutex callbackMutex_;
 };

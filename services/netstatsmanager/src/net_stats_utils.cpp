@@ -145,5 +145,68 @@ int32_t NetStatsUtils::IsDaulCardEnabled()
     NETMGR_LOG_I("actualSimNum == %{public}d.", actualSimNum);
     return actualSimNum;
 }
+
+bool NetStatsUtils::ConvertToUint64(const std::string &str, uint64_t &value)
+{
+    char* end;
+    errno = 0; // 清除 errno
+    if (str.empty()) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+
+    value = std::strtoull(str.c_str(), &end, 10);  // 10:十进制
+
+    // 检查错误:
+    // 1. 若没有数字被转换
+    if (end == str.c_str()) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+    // 2. 若存在范围错误（过大或过小）
+    if (errno == ERANGE && (value == HUGE_VAL || value == HUGE_VALF || value == HUGE_VALL)) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+    // 3. 若字符串包含非数字字符
+    if (*end != '\0') {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+bool NetStatsUtils::ConvertToInt32(const std::string &str, int32_t &value)
+{
+    char* end;
+    errno = 0; // 清除 errno
+
+    if (str.empty()) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+
+    value = std::strtod(str.c_str(), &end);
+
+    // 检查错误:
+    // 1. 若没有数字被转换
+    if (end == str.c_str()) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+    // 2. 若存在范围错误（过大或过小）
+    if (errno == ERANGE && (value == HUGE_VAL || value == HUGE_VALF || value == HUGE_VALL)) {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+    // 3. 若字符串包含非数字字符
+    if (*end != '\0') {
+        NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
+        return false;
+    }
+
+    return true;
+}
 }
 }

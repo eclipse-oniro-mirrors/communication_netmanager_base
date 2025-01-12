@@ -2092,6 +2092,10 @@ int32_t NetsysNativeServiceProxy::SetNetStateTrafficMap(uint8_t flag, uint64_t a
     }
     MessageParcel reply;
     MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
     auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TRAFFIC_AVAILABLE_MAP),
                                         data, reply, option);
     if (result != ERR_NONE) {
@@ -2124,6 +2128,10 @@ int32_t NetsysNativeServiceProxy::GetNetStateTrafficMap(uint8_t flag, uint64_t &
     }
     MessageParcel reply;
     MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
     if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TRAFFIC_AVAILABLE_MAP),
                                           data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
@@ -2157,6 +2165,10 @@ int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
 
     MessageParcel reply;
     MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
     auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CLEAR_INCRE_TRAFFIC_MAP),
                                         data, reply, option);
     if (result != ERR_NONE) {
@@ -2189,6 +2201,10 @@ int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
     }
     MessageParcel reply;
     MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
     auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP), data,
                                         reply, option);
     if (result != ERR_NONE) {
@@ -3083,7 +3099,12 @@ int32_t NetsysNativeServiceProxy::RegisterNetsysTrafficCallback(const sptr<INets
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_REGISTER), data,
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null in EnableWearableDistributedNetForward");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_REGISTER), data,
         reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("RegisterNetsysTrafficCallback SendRequest failed");
@@ -3109,7 +3130,12 @@ int32_t NetsysNativeServiceProxy::UnRegisterNetsysTrafficCallback(const sptr<INe
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_UNREGISTER),
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null in EnableWearableDistributedNetForward");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TRAFFIC_UNREGISTER),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("UnRegisterNetsysTrafficCallback SendRequest failed");

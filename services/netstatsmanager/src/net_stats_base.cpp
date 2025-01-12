@@ -145,7 +145,7 @@ int32_t NetStatsRDB::DeleteBySimId(int32_t simId)
 
     int32_t deletedRows = -1;
     std::vector<std::string> whereArgs;
-    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
+    NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
     rdbPredicate.EqualTo(NetStatsRdbFiledConst::FILED_SIMID, std::to_string(simId));
     int32_t result = rdbStore_->Delete(deletedRows, rdbPredicate);
     if (result != NativeRdb::E_OK) {
@@ -164,8 +164,8 @@ int32_t NetStatsRDB::UpdateBySimId(int32_t simId, NetStatsData state)
         NETMGR_LOG_E("error: rdbStore_ is nullptr");
         return NETMANAGER_ERROR;
     }
-    /* 改 */
-    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
+
+    NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
     NETMGR_LOG_I("begin EqualTo");
     rdbPredicate.EqualTo(NetStatsRdbFiledConst::FILED_SIMID, std::to_string(simId));
     NETMGR_LOG_I("end EqualTo");
@@ -199,7 +199,7 @@ std::vector<NetStatsData> NetStatsRDB::QueryAll()
         return result;
     }
 
-    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
+    NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
     std::vector<std::string> whereArgs;
     auto queryResultSet = rdbStore_->Query(rdbPredicate, whereArgs);
     if (queryResultSet == nullptr) {
@@ -231,7 +231,7 @@ int32_t NetStatsRDB::QueryBySimId(int simId, NetStatsData& simStats)
         return NETMANAGER_ERROR;
     }
 
-    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
+    NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_SIMID_STATS_TABLE};
     rdbPredicate.EqualTo(NetStatsRdbFiledConst::FILED_SIMID, simId);
 
     std::vector<std::string> whereArgs;

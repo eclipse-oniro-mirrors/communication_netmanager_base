@@ -55,30 +55,30 @@ static const int32_t TWO_PRECISION = 2;
 static const int32_t TWO_CHAR = 2;
 
 // keys in json file
-static const std::string KEY_STRING = "string";
-static const std::string KEY_NAME = "name";
-static const std::string KEY_VALUE = "value";
-static const std::string KEY_NETWORK_MONTH_LIMIT_SIMGLE_TITLE = "netstats_excess_monthlimit_notofication_title";
-static const std::string KEY_NETWORK_MONTH_MARK_SIMGLE_TITLE = "netstats_excess_monthmark_notofication_title";
-static const std::string KEY_NETWORK_DAY_MARK_SIMGLE_TITLE = "netstats_excess_daymark_notofication_title";
+static constexpr const char *KEY_STRING = "string";
+static constexpr const char *KEY_NAME = "name";
+static constexpr const char *KEY_VALUE = "value";
+static constexpr const char *KEY_NETWORK_MONTH_LIMIT_SIMGLE_TITLE = "netstats_excess_monthlimit_notofication_title";
+static constexpr const char *KEY_NETWORK_MONTH_MARK_SIMGLE_TITLE = "netstats_excess_monthmark_notofication_title";
+static constexpr const char *KEY_NETWORK_DAY_MARK_SIMGLE_TITLE = "netstats_excess_daymark_notofication_title";
 
-static const std::string KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE = "netstats_excess_monthlimit_notofication_title_sub";
-static const std::string KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_excess_monthmark_notofication_title_sub";
-static const std::string KEY_NETWORK_DAY_MARK_DUAL_TITLE = "netstats_excess_daymark_notofication_title_sub";
+static constexpr const char *KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE = "netstats_excess_monthlimit_notofication_title_sub";
+static constexpr const char *KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_excess_monthmark_notofication_title_sub";
+static constexpr const char *KEY_NETWORK_DAY_MARK_DUAL_TITLE = "netstats_excess_daymark_notofication_title_sub";
 
-static const std::string KEY_MONTH_LIMIT_TEXT = "netstats_month_limit_message";
-static const std::string KEY_MONTH_NOTIFY_TEXT = "netstats_month_notify_message";
-static const std::string KEY_DAILY_NOTIFY_TEXT = "netstats_daily_notify_message";
+static constexpr const char *KEY_MONTH_LIMIT_TEXT = "netstats_month_limit_message";
+static constexpr const char *KEY_MONTH_NOTIFY_TEXT = "netstats_month_notify_message";
+static constexpr const char *KEY_DAILY_NOTIFY_TEXT = "netstats_daily_notify_message";
 
 // NOTE: icon and json path must be absolute path
 // all locales are listed at: global_i18n-master\global_i18n-master\frameworks\intl\etc\supported_locales.xml
-static const std::string NETWORK_ICON_PATH = "//system/etc/netmanager_base/resources/network_ic.png";
-static const std::string DEFAULT_LANGUAGE_NAME_EN = "base";
-static const std::string LOCALE_TO_RESOURCE_PATH =
+static constexpr const char *NETWORK_ICON_PATH = "//system/etc/netmanager_base/resources/network_ic.png";
+static constexpr const char *DEFAULT_LANGUAGE_NAME_EN = "base";
+static constexpr const char *LOCALE_TO_RESOURCE_PATH =
     "//system/etc/netmanager_base/resources/locale_to_resourcePath.json";
-static const std::string LANGUAGE_RESOURCE_PARENT_PATH =
+static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH =
     "//system/etc/netmanager_base/resources/";
-static const std::string LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
+static constexpr const char *LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
 
 static std::mutex g_callbackMutex {};
 static NetMgrStatsLimitNtfCallback g_NetMgrStatsLimitNtfCallback = nullptr;
@@ -87,13 +87,15 @@ void NetMgrNetStatsLimitNotification::ParseJSONFile(
     const std::string& filePath, std::map<std::string, std::string>& container)
 {
     std::string content;
-    NETMGR_LOG_I("ParseJSONFile: filepath = %{public}s", filePath.c_str());
-
     LoadStringFromFile(filePath, content);
 
     cJSON *json = cJSON_Parse(content.c_str());
+    if (json == nullptr) {
+        NETMGR_LOG_I("ParseJSONFile: json null. filepath = %{public}s", filePath.c_str());
+        return;
+    }
 
-    cJSON *resJson = cJSON_GetObjectItemCaseSensitive(json, KEY_STRING.c_str());
+    cJSON *resJson = cJSON_GetObjectItemCaseSensitive(json, KEY_STRING);
 
     if (resJson == nullptr) {
         NETMGR_LOG_I("ParseJSONFile: resJson null. filepath = %{public}s", filePath.c_str());
@@ -101,8 +103,8 @@ void NetMgrNetStatsLimitNotification::ParseJSONFile(
         container.clear();
         cJSON *resJsonEach = nullptr;
         cJSON_ArrayForEach(resJsonEach, resJson) {
-            cJSON *key = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_NAME.c_str());
-            cJSON *value = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_VALUE.c_str());
+            cJSON *key = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_NAME);
+            cJSON *value = cJSON_GetObjectItemCaseSensitive(resJsonEach, KEY_VALUE);
             container.insert(std::pair<std::string, std::string>(key->valuestring, value->valuestring));
         }
     }
@@ -114,22 +116,20 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
 {
     OHOS::Global::I18n::LocaleInfo locale(Global::I18n::LocaleConfig::GetSystemLocale());
     std::string curBaseName = locale.GetBaseName();
-    NETMGR_LOG_I("UpdateResourceMap: curBaseName %{public}s", curBaseName.c_str());
-    NETMGR_LOG_I("UpdateResourceMap: g_localeBaseName %{public}s", g_localeBaseName.c_str());
-    /* 获取当前语言系统 */
-    if (g_localeBaseName == curBaseName) {
+
+    if (localeBaseName == curBaseName) {
         return;
     }
 
     NETMGR_LOG_I("UpdateResourceMap: change from %{public}s to %{public}s",
-        g_localeBaseName.c_str(), curBaseName.c_str());
-    g_localeBaseName = curBaseName;
+        localeBaseName.c_str(), curBaseName.c_str());
+    localeBaseName = curBaseName;
 
     std::string languagePath = DEFAULT_LANGUAGE_NAME_EN;
-    if (g_languageMap.find(g_localeBaseName) != g_languageMap.end()) {
-        languagePath = g_languageMap[g_localeBaseName];
+    if (languageMap.find(localeBaseName) != languageMap.end()) {
+        languagePath = languageMap[localeBaseName];
     } else {
-        for (auto& eachPair : g_languageMap) {
+        for (auto& eachPair : languageMap) {
             OHOS::Global::I18n::LocaleInfo eachLocale(eachPair.first);
             if (OHOS::Global::I18n::LocaleMatcher::Match(&locale, &eachLocale)) {
                 languagePath = eachPair.second;
@@ -138,32 +138,27 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
         }
     }
 
-    NETMGR_LOG_I("UpdateResourceMap: language = %{public}s", languagePath.c_str());
     std::string resourcePath = LANGUAGE_RESOURCE_PARENT_PATH + languagePath + LANGUAGE_RESOURCE_CHILD_PATH;
     NETMGR_LOG_I("UpdateResourceMap: resourcePath = %{public}s", resourcePath.c_str());
     if (!std::filesystem::exists(resourcePath)) {
-        NETMGR_LOG_I("resource path not exist: %{public}s", resourcePath.c_str());
+        NETMGR_LOG_E("resource path not exist: %{public}s", resourcePath.c_str());
         return;
-    } else {
-        NETMGR_LOG_I("exists success");
     }
     /* 从resourcePath中拿到resourceMap */
-    NETMGR_LOG_I("resourcePath get resourceMap");
-    ParseJSONFile(resourcePath, g_resourceMap);
+    ParseJSONFile(resourcePath, resourceMap);
 }
 
 std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
 {
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetDayNotificationText");
     int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-    NETMGR_LOG_I("NetMgrNetStatsLimitNotification:: simId [%{public}d]", simId);
     auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
     if (settingsObserverMap_.find(simId) == settingsObserverMap_.end()) {
         NETMGR_LOG_I("settingsObserverMap_ has no simId key:: simId %{public}d", simId);
         return "";
     }
 
-    std::string outText = g_resourceMap[KEY_DAILY_NOTIFY_TEXT];
+    std::string outText = resourceMap[KEY_DAILY_NOTIFY_TEXT];
     NETMGR_LOG_I("NetMgrNetStatsLimitNotification:: simId [%{public}d]", simId);
     if (outText.find("%s") == std::string::npos) {
         NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
@@ -174,7 +169,6 @@ std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
     std::string num = GetTrafficNum(dailyTraffic);
     outText = outText.replace(outText.find("%s"), TWO_CHAR, num);
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::outText [%{public}s]", outText.c_str());
-    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetDayNotificationText");
     return outText;
 }
 
@@ -192,14 +186,13 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
 
     int32_t monUsedPercent = settingsObserverMap_[simId].second->monthlyMark;
     
-    outText = g_resourceMap[KEY_MONTH_NOTIFY_TEXT];
+    outText = resourceMap[KEY_MONTH_NOTIFY_TEXT];
     if (outText.find("%s") == std::string::npos) {
         NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
         return "";
     }
-    outText = outText.replace(outText.find("%s"), TWO_CHAR, std::to_string(monUsedPercent));
-    outText += "%";
-    NETMGR_LOG_I("GetMonthNotificationText outText [%s]", outText.c_str());
+    outText = outText.replace(outText.find("%s"), TWO_CHAR, std::to_string(monUsedPercent) + "%");
+    NETMGR_LOG_I("GetMonthNotificationText outText [%{public}s]", outText.c_str());
     return outText;
 }
 
@@ -216,7 +209,7 @@ std::string NetMgrNetStatsLimitNotification::GetMonthAlertText()
     }
 
     // 检验simId是否合法
-    outText = g_resourceMap[KEY_MONTH_LIMIT_TEXT];
+    outText = resourceMap[KEY_MONTH_LIMIT_TEXT];
     if (outText.find("%s") == std::string::npos) {
         NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
         return "";
@@ -232,7 +225,7 @@ std::string NetMgrNetStatsLimitNotification::GetNotificationTile(std::string &no
     std::string outText;
     int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
 
-    outText = g_resourceMap[notificationType];
+    outText = resourceMap[notificationType];
     
     if (outText.find("%d") == std::string::npos) {
         NETMGR_LOG_I("incorrect format %{public}s", outText.c_str());
@@ -267,7 +260,7 @@ bool NetMgrNetStatsLimitNotification::SetTitleAndText(
         title = (notificationId == NETMGR_STATS_ALERT_MONTH) ? KEY_NETWORK_MONTH_LIMIT_SIMGLE_TITLE : title;
     }
 
-    if (g_resourceMap.find(title) == g_resourceMap.end()) {
+    if (resourceMap.find(title) == resourceMap.end()) {
         NETMGR_LOG_I("cannot get title from resources");
         return false;
     }
@@ -275,7 +268,7 @@ bool NetMgrNetStatsLimitNotification::SetTitleAndText(
     if (isDaulCard) {
         strTitle = GetNotificationTile(title);
     } else {
-        strTitle = g_resourceMap[title];
+        strTitle = resourceMap[title];
     }
 
     NETMGR_LOG_I("NetMgrNetStatsLimitNotification: strTitle = %{public}s", strTitle.c_str());
@@ -333,20 +326,10 @@ NetMgrNetStatsLimitNotification::NetMgrNetStatsLimitNotification()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification");
-    NETMGR_LOG_I("start ParseJSONFile");
-    ParseJSONFile(LOCALE_TO_RESOURCE_PATH, g_languageMap);
-    NETMGR_LOG_I("end ParseJSONFile");
-
-    NETMGR_LOG_I("start UpdateResourceMap");
+    ParseJSONFile(LOCALE_TO_RESOURCE_PATH, languageMap);
     UpdateResourceMap();
-    NETMGR_LOG_I("end UpdateResourceMap");
-
-    NETMGR_LOG_I("start GetPixelMap");
     GetPixelMap();
-    NETMGR_LOG_I("end GetPixelMap");
-
     NETMGR_LOG_I("end NetMgrNetStatsLimitNotification");
-     //netMgrEnhancedEventSubscriberManager = std::make_unique<NetMgrEnhancedEventSubscriberManager>();
 }
 
 NetMgrNetStatsLimitNotification::~NetMgrNetStatsLimitNotification()

@@ -16,6 +16,7 @@
 #ifndef NET_STATS_UTIL_H
 #define NET_STATS_UTIL_H
 #include <stdint.h>
+#include <string>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,6 +35,8 @@ public:
     static int32_t GetDaysInMonth(int32_t year, int32_t month);
     static bool IsMobileDataEnabled();
     static int32_t IsDaulCardEnabled();
+    static bool ConvertToUint64(const std::string &str, uint64_t &value);
+    static bool ConvertToInt32(const std::string &str, int32_t &value);
 };
 }
 }

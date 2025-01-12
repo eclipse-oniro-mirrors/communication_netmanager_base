@@ -45,7 +45,7 @@ int32_t NetsysTrafficCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel 
         }
     }
 
-    NETNATIVE_LOGE("Stub default case, need check");
+    NETNATIVE_LOGI("Stub default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
