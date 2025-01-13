@@ -33,7 +33,7 @@ void GetVectorData(const std::vector<std::string> &data, std::string &result)
     std::for_each(data.begin(), data.end(), [&result](const auto &str) { result.append(ToAnonymousIp(str) + ", "); });
     result.append("}\n");
 }
-constexpr int RES_TIMEOUT = 5000;    // min. milliseconds between retries
+constexpr int RES_TIMEOUT = 4000;    // min. milliseconds between retries
 constexpr int RES_DEFAULT_RETRY = 2; // Default
 } // namespace
 
