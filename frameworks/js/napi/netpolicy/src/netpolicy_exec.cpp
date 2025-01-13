@@ -395,11 +395,11 @@ napi_value NetPolicyExec::GetNetworkAccessPolicyCallback(GetNetworkAccessPolicyC
         NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowCellular",
                                       context->policy_save_.policy.cellularAllow);
         if (context->policy_save_.policy.wifiSwitchDisable) {
-            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "disableWifiSwitch",
+            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "alwaysAllowWiFi",
                                           context->policy_save_.policy.wifiSwitchDisable);
         }
         if (context->policy_save_.policy.cellularSwitchDisable) {
-            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "disableCellularSwitch",
+            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "alwaysAllowCellular",
                                           context->policy_save_.policy.cellularSwitchDisable);
         }
         return obj;
@@ -411,10 +411,10 @@ napi_value NetPolicyExec::GetNetworkAccessPolicyCallback(GetNetworkAccessPolicyC
         NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowWiFi", item.second.wifiAllow);
         NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "allowCellular", item.second.cellularAllow);
         if (item.second.wifiSwitchDisable) {
-            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "disableWifiSwitch", item.second.wifiSwitchDisable);
+            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "alwaysAllowWiFi", item.second.wifiSwitchDisable);
         }
         if (item.second.cellularSwitchDisable) {
-            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "disableCellularSwitch",
+            NapiUtils::SetBooleanProperty(context->GetEnv(), obj, "alwaysAllowCellular",
                                           item.second.cellularSwitchDisable);
         }
         NapiUtils::SetNamedProperty(context->GetEnv(), result, std::to_string(item.first).c_str(), obj);
