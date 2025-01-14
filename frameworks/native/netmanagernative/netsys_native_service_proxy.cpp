@@ -1186,7 +1186,7 @@ int32_t NetsysNativeServiceProxy::SetInterfaceConfig(const InterfaceConfiguratio
 
 int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOGI("Begin to GetInterfaceConfig");
+    NETNATIVE_LOG_D("Begin to GetInterfaceConfig");
     MessageParcel data;
     int32_t ret;
     int32_t vSize;
@@ -1223,7 +1223,7 @@ int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParce
     if (vSize > 0) {
         cfg.flags.assign(vecString.begin(), vecString.end());
     }
-    NETNATIVE_LOGI("End to GetInterfaceConfig, ret =%{public}d", ret);
+    NETNATIVE_LOG_D("End to GetInterfaceConfig, ret =%{public}d", ret);
     return ret;
 }
 

@@ -1867,7 +1867,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         LoadGlobalHttpProxy(LOCAL, httpProxy);
     }
     if (!httpProxy.GetHost().empty()) {
-        NETMGR_LOG_I("Return global http proxy as default.");
+        NETMGR_LOG_D("Return global http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
 
@@ -2122,7 +2122,7 @@ void NetConnService::ActiveHttpProxy()
             long response_code;
             auto ret = curl_easy_perform(curl);
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-            NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy ret: %{public}d, code: %{public}d", static_cast<int>(ret),
+            NETMGR_LOG_D("SetGlobalHttpProxy ActiveHttpProxy ret: %{public}d, code: %{public}d", static_cast<int>(ret),
                          static_cast<int32_t>(response_code));
             if (response_code != SUCCESS_CODE && retryTimes == 0 && !isInSleep_.load()) {
                 retryTimes = RETRY_TIMES;

@@ -147,7 +147,7 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std
 
 int32_t NetsysControllerServiceImpl::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETMGR_LOG_I("Interface get config");
+    NETMGR_LOG_D("Interface get config");
     return netsysClient_.GetInterfaceConfig(cfg);
 }
 

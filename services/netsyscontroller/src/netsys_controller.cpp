@@ -237,7 +237,7 @@ int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &i
 
 int32_t NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETMGR_LOG_I("get interface config");
+    NETMGR_LOG_D("get interface config");
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");

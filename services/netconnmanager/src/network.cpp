@@ -554,7 +554,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
     NETMGR_LOG_D("Enter NetDetectionForDnsHealthSync");
     if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("netMonitor_ is nullptr");
+        NETMGR_LOG_D("netMonitor_ is nullptr");
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
@@ -726,7 +726,7 @@ void Network::ResetNetlinkInfo()
 void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("netMonitor_ is nullptr");
+        NETMGR_LOG_D("netMonitor_ is nullptr");
         return;
     }
     netMonitor_->UpdateGlobalHttpProxy(httpProxy);
