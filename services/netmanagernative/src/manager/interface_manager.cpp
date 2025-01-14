@@ -291,7 +291,7 @@ void UpdateIfaceConfigFlags(unsigned flags, nmd::InterfaceConfigurationParcel &i
 
 InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string &ifName)
 {
-    NETNATIVE_LOGI("GetIfaceConfig in. ifName %{public}s", ifName.c_str());
+    NETNATIVE_LOG_D("GetIfaceConfig in. ifName %{public}s", ifName.c_str());
     struct in_addr addr = {};
     nmd::InterfaceConfigurationParcel ifaceConfig;
 
