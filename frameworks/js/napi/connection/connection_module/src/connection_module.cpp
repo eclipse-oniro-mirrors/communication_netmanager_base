@@ -211,7 +211,13 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
 
     InitProperties(env, exports);
     NapiUtils::SetEnvValid(env);
-    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, env);
+    auto envWrapper = new (std::nothrow) napi_env;
+    if (envWrapper == nullptr) {
+        NETMANAGER_BASE_LOGE("EnvWrapper create fail!");
+        return exports;
+    }
+    *envWrapper = env;
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
     return exports;
 }
 

@@ -666,7 +666,15 @@ napi_value CreateErrorMessage(napi_env env, int32_t errorCode, const std::string
 void HookForEnvCleanup(void *data)
 {
     std::lock_guard<std::recursive_mutex> lock(mutexForEnv);
-    auto env = static_cast<napi_env>(data);
+    auto envWrapper = reinterpret_cast<napi_env *>(data);
+    if (envWrapper == nullptr) {
+        return;
+    }
+    auto env = *envWrapper;
+    delete envWrapper;
+    if (env == nullptr) {
+        return;
+    }
     auto pos = unorderedSetEnv.find(env);
     if (pos == unorderedSetEnv.end()) {
         NETMANAGER_BASE_LOGE("The env is not in the unordered set");

@@ -43,7 +43,13 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     };
     napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
     NapiUtils::SetEnvValid(env);
-    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, env);
+    auto envWrapper = new (std::nothrow) napi_env;
+    if (envWrapper == nullptr) {
+        NETMANAGER_BASE_LOGE("EnvWrapper create fail!");
+        return exports;
+    }
+    *envWrapper = env;
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
     return exports;
 }
 
