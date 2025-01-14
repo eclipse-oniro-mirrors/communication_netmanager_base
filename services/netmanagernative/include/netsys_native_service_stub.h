@@ -33,6 +33,7 @@ enum {
     UID_PARAM_WATCHER = 1101,
     UID_EDM = 3057,
     UID_SECURITY_COLLECTOR = 3521,
+    UID_IOT_NET_MANAGER = 7211,
 };
 
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
