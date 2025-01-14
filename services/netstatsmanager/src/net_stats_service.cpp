@@ -1070,7 +1070,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
             monthlyAvailable = settingsTrafficMap_[simId].second->monthlyLimit - allUsedTraffic;
         }
         // (设置值*月限制比例)大于已用值
-        uint64_t monthTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100) *
+        uint64_t monthTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->monthlyMark;
         if (monthTmp > allUsedTraffic) {
             monthlyMarkAvailable = monthTmp - allUsedTraffic;
@@ -1083,7 +1083,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
             NETMGR_LOG_E("GetAllUsedTrafficStatsByNetwork err. ret: %{public}d", ret);
             return false;
         }
-        uint64_t dayTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100) *
+        uint64_t dayTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->dailyMark;
         NETMGR_LOG_E("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);
         if (dayTmp > allTodayUsedTraffix) {
