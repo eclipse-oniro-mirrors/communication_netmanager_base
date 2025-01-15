@@ -61,7 +61,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
 #endif // SUPPORT_SYSVPN
     InitDnsServerOpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
-        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
+        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR, UID_IOT_NET_MANAGER};
 }
 
 void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
@@ -418,7 +418,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
     }
 
     if (code == static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES) && uid != UID_EDM &&
-        uid != UID_NET_MANAGER) {
+        uid != UID_NET_MANAGER && uid != UID_IOT_NET_MANAGER) {
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
