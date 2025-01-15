@@ -210,15 +210,20 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     ModuleTemplate::DefineClass(env, exports, netConnectionFunctions, INTERFACE_NET_CONNECTION);
 
     InitProperties(env, exports);
+    AddCleanupHook(env);
+    return exports;
+}
+
+static void AddCleanupHook(napi_env env)
+{
     NapiUtils::SetEnvValid(env);
     auto envWrapper = new (std::nothrow) napi_env;
     if (envWrapper == nullptr) {
         NETMANAGER_BASE_LOGE("EnvWrapper create fail!");
-        return exports;
+        return;
     }
     *envWrapper = env;
     napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
-    return exports;
 }
 
 void ConnectionModule::InitProperties(napi_env env, napi_value exports)
