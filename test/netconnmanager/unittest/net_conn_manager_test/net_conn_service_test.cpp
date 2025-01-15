@@ -682,6 +682,46 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest016, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest017, TestSize.Level1)
+{
+    NetConnService::GetInstance()->currentUserId_ = -1;
+    HttpProxy httpProxy = {"", 0, {}};
+    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest018, TestSize.Level1)
+{
+    NetConnService::GetInstance()->currentUserId_ = -1;
+    HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
+    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest019, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    if (ret == NETMANAGER_SUCCESS) {
+        NetConnService::GetInstance()->currentUserId_ = userId;
+        HttpProxy httpProxy = {"", 0, {}};
+        auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+        ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest020, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    if (ret == NETMANAGER_SUCCESS) {
+        NetConnService::GetInstance()->currentUserId_ = userId;
+        HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
+        auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+        ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+}
+
 HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
     HttpProxy getGlobalHttpProxy;
@@ -1743,5 +1783,24 @@ HWTEST_F(NetConnServiceTest, UpdateNetCaps002, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+
+HWTEST_F(NetConnServiceTest, SendHttpProxyChangeBroadcast001, TestSize.Level1)
+{
+    NetHttpProxyTracker httpProxyTracker;
+    HttpProxy httpProxy;
+    httpProxy.SetPort(0);
+    httpProxyTracker.ReadFromSettingsData(httpProxy);
+    NetConnService::GetInstance()->currentUserId_ = -1;
+    NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    if (ret == NETMANAGER_SUCCESS) {
+        NetConnService::GetInstance()->currentUserId_ = userId;
+        NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
