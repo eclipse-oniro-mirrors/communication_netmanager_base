@@ -165,6 +165,18 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
     }
 }
 
+static void AddCleanupHook(napi_env env)
+{
+    NapiUtils::SetEnvValid(env);
+    auto envWrapper = new (std::nothrow) napi_env;
+    if (envWrapper == nullptr) {
+        NETMANAGER_BASE_LOGE("EnvWrapper create fail!");
+        return;
+    }
+    *envWrapper = env;
+    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
+}
+
 napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
 {
     g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
@@ -212,18 +224,6 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     InitProperties(env, exports);
     AddCleanupHook(env);
     return exports;
-}
-
-static void AddCleanupHook(napi_env env)
-{
-    NapiUtils::SetEnvValid(env);
-    auto envWrapper = new (std::nothrow) napi_env;
-    if (envWrapper == nullptr) {
-        NETMANAGER_BASE_LOGE("EnvWrapper create fail!");
-        return;
-    }
-    *envWrapper = env;
-    napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
 }
 
 void ConnectionModule::InitProperties(napi_env env, napi_value exports)
