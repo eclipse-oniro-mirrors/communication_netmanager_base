@@ -30,6 +30,7 @@
 
 #include "init_socket.h"
 #include "net_manager_constants.h"
+#include "netlink_socket_diag.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "route_manager.h"
@@ -325,15 +326,26 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
         return NETMANAGER_ERROR;
     }
 
+    nmd::NetLinkSocketDiag socketDiag;
+    for (auto const &uid : uidRanges) {
+        NETNATIVE_LOG_D("CreateVnic uid %{public}d", (uint32_t)uid.begin_);
+        socketDiag.DestroyLiveSocketsWithUid((uint32_t)uid.begin_);
+    }
+
     return NETMANAGER_SUCCESS;
 }
 
 int32_t VnicManager::DestroyVnic()
 {
+    nmd::NetLinkSocketDiag socketDiag;
     nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
-    uidRanges.clear();
     DelDefaultRoute();
     DestroyVnicInterface();
+    for (auto const &uid : uidRanges) {
+        NETNATIVE_LOG_D("DestroyVnic uid %{public}d", (uint32_t)uid.begin_);
+        socketDiag.DestroyLiveSocketsWithUid((uint32_t)uid.begin_);
+    }
+    uidRanges.clear();
     return NETMANAGER_SUCCESS;
 }
 

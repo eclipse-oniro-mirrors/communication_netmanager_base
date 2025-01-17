@@ -55,6 +55,7 @@ public:
      */
     int32_t SetSocketDestroyType(const std::string &netCapabilities);
     void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
+    void DestroyLiveSocketsWithUid(uint32_t uid);
 private:
     static bool InLookBack(uint32_t a);
 
