@@ -79,7 +79,7 @@ int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId)
     if (defaultNetId_ == netId) {
         defaultNetId_ = 0;
     }
-    for(auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
+    for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
         it->second.GetCache().Clear();
     }
     return 0;
@@ -108,7 +108,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     auto newDnsServers = servers;
     std::sort(newDnsServers.begin(), newDnsServers.end());
 
-    for(auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
+    for (auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
         iterator->second.GetCache().Clear();
     }
 
