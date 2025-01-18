@@ -17,6 +17,7 @@
 
 #include <fcntl.h>
 #include <string>
+#include <shared_mutex>
 
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
@@ -25,6 +26,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+std::recursive_mutex g_netFirewallRulesMutex;
+
 namespace {
 bool CheckFilePath(const std::string &fileName, std::string &realPath)
 {
@@ -184,6 +187,8 @@ void NetPolicyFile::ParseFirewallRule(const cJSON* const root, NetPolicy &netPol
     if (netFirewallRules == nullptr) {
         return;
     }
+
+    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     uint32_t size = cJSON_GetArraySize(netFirewallRules);
     for (uint32_t i = 0; i < size; i++) {
         cJSON *firewallRulesItem = cJSON_GetArrayItem(netFirewallRules, i);
@@ -334,6 +339,7 @@ void NetPolicyFile::AddBackgroundPolicy(cJSON *root)
 
 void NetPolicyFile::AddFirewallRule(cJSON *root)
 {
+    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     cJSON *firewallRuleObj = cJSON_CreateObject();
     for (auto &&[k, v] : netPolicy_.netFirewallRules) {
         NETMGR_LOG_D("read k[%{public}d].", k);
@@ -483,6 +489,7 @@ void NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies
 int32_t NetPolicyFile::ReadFirewallRules(uint32_t chainType, std::set<uint32_t> &allowedList,
                                          std::set<uint32_t> &deniedList)
 {
+    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     auto &&w = netPolicy_.netFirewallRules[chainType].allowedList;
     auto &&b = netPolicy_.netFirewallRules[chainType].deniedList;
     allowedList.insert(w.begin(), w.end());
@@ -493,6 +500,7 @@ int32_t NetPolicyFile::ReadFirewallRules(uint32_t chainType, std::set<uint32_t> 
 void NetPolicyFile::WriteFirewallRules(uint32_t chainType, const std::set<uint32_t> &allowedList,
                                        const std::set<uint32_t> &deniedList)
 {
+    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     netPolicy_.netFirewallRules[chainType].allowedList.clear();
     netPolicy_.netFirewallRules[chainType].deniedList.clear();
     netPolicy_.netFirewallRules[chainType].allowedList.insert(allowedList.begin(), allowedList.end());
@@ -502,6 +510,7 @@ void NetPolicyFile::WriteFirewallRules(uint32_t chainType, const std::set<uint32
 
 int32_t NetPolicyFile::ResetPolicies()
 {
+    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     netPolicy_.uidPolicies.clear();
     netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     netPolicy_.netQuotaPolicies.clear();
