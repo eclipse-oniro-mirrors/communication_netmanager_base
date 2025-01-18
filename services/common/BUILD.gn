@@ -124,6 +124,8 @@ ohos_shared_library("net_service_common") {
   deps = [
     ":netstats_notification_base",
     ":netstats_notification_bo_CN",
+    ":netstats_notification_icon",
+    ":netstats_notification_locale",
     ":netstats_notification_ug",
     ":netstats_notification_zh_CN",
     ":netstats_notification_zh_HK",

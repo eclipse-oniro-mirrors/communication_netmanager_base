@@ -63,7 +63,7 @@ private:
     void SetNotificationWant(int notificationId, Notification::NotificationRequest &request);
     bool SetTitleAndText(int notificationId,
         std::shared_ptr<Notification::NotificationNormalContent> content, bool isDaulCard);
-    std::string GetTrafficNum(uint64_t traffic);
+    std::string GetTrafficNum(double traffic);
 
     std::shared_ptr<Media::PixelMap> netmgrStatsLimitIconPixelMap_  {};
     std::map<std::string, std::string> resourceMap;

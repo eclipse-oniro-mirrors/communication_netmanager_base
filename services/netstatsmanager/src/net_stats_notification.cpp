@@ -164,7 +164,7 @@ std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
         return "";
     }
     uint64_t traffic = settingsObserverMap_[simId].second->monthlyLimit;
-    double dailyTraffic = traffic / 100 * settingsObserverMap_[simId].second->dailyMark;
+    double dailyTraffic = traffic / 100.0 * settingsObserverMap_[simId].second->dailyMark;
     std::string num = GetTrafficNum(dailyTraffic);
     outText = outText.replace(outText.find("%s"), TWO_CHAR, num);
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::outText [%{public}s]", outText.c_str());
@@ -383,20 +383,19 @@ void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNt
     g_NetMgrStatsLimitNtfCallback = callback;
 }
 
-std::string NetMgrNetStatsLimitNotification::GetTrafficNum(uint64_t traffic)
+std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 {
     const char* units[] = {"B", "KB", "MB", "GB", "TB"}; // 流量单位数组
     int record = 0; // 记录单位索引
-    double tmp = traffic; // 使用 double 类型进行浮点运算
  
     // 确定应该使用的单位
-    while (tmp >= UNIT_CONVERT_1024 && record < 4) { // 4: 防止units数组越界
-        tmp /= UNIT_CONVERT_1024;
+    while (traffic >= UNIT_CONVERT_1024 && record < 4) { // 4: 防止units数组越界
+        traffic /= UNIT_CONVERT_1024;
         record++;
     }
  
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << tmp << " " << units[record];  // 2: 保留两位小数
+    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record];  // 2: 保留两位小数
     // 返回格式化后的字符串
     return oss.str();
 }
