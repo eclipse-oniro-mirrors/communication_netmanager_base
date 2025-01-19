@@ -746,6 +746,11 @@ int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string 
     return netsysClient_.SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
+int32_t NetsysControllerServiceImpl::SetIpCommandForRes(const std::string &cmd, std::string &respond)
+{
+    return netsysClient_.SetIpCommandForRes(cmd, respond);
+}
+
 int32_t NetsysControllerServiceImpl::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
                                                      const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
 {

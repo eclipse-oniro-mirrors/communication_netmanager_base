@@ -790,6 +790,15 @@ public:
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, NetsysNative::IptablesType ipType);
 
     /**
+     * Set ip command for result
+     *
+     * @param cmd ip command
+     * @param respond The respond of execute ip command
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t SetIpCommandForRes(const std::string &cmd, std::string &respond);
+
+    /**
      * Check network connectivity by sending packets to a host and reporting its response.
      *
      * @param pingOption Ping option

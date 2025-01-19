@@ -1212,6 +1212,22 @@ int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::
     return netsysService_->SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
+int32_t NetsysController::SetIpCommandForRes(const std::string &cmd, std::string &respond)
+{
+    if (cmd.empty()) {
+        NETMGR_LOG_E("SetIpCommandForRes cmd is empty");
+        return ERR_INVALID_DATA;
+    }
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpCommandForRes netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    NETMGR_LOG_I("SetIpCommandForRes");
+    return netsysService_->SetIpCommandForRes(cmd, respond);
+}
+
 int32_t NetsysController::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
                                           const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
 {

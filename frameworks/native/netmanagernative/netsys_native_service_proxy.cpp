@@ -2262,6 +2262,41 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::SetIpCommandForRes(const std::string &cmd, std::string &respond)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cmd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIpCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES),
+                                          data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("SetIpCommandForRes proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetIpCommandForRes proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == ERR_NONE) {
+        if (!reply.ReadString(respond)) {
+            NETNATIVE_LOGE("SetIpCommandForRes proxy read respond failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::DealBandwidth(uint32_t uid, uint32_t code)
 {
     MessageParcel data;

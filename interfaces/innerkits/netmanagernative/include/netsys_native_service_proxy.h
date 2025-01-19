@@ -122,6 +122,7 @@ public:
     int32_t ClearIncreaseTrafficMap() override;
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override;
+    int32_t SetIpCommandForRes(const std::string &cmd, std::string &respond) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
     int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;

@@ -46,9 +46,9 @@ public:
     int32_t GetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName);
     int32_t UpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName, bool add);
     int32_t SetInterfaceActiveState(const std::string &ifaceName, bool up);
+    int32_t ExecuteCommandForResult(const std::string &command, std::string &result);
 
 private:
-    int32_t ExecuteCommandForResult(const std::string &command, std::string &result);
     int32_t GeneratePingCommand(const NetDiagPingOption &pingOption, std::string &command);
     bool IsBlankLine(const std::string &line);
     void ExtractPingResult(const std::string &result, const sptr<INetDiagCallback> &callback);

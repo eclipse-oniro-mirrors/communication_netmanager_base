@@ -288,6 +288,8 @@ void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdNetDiagUpdateInterfaceConfig;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE)] =
         &NetsysNativeServiceStub::CmdNetDiagSetInterfaceActiveState;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES)] =
+        &NetsysNativeServiceStub::CmdSetIpCommandForRes;
 }
 
 void NetsysNativeServiceStub::InitStaticArpToInterfaceMap()
@@ -417,7 +419,8 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
-    if (code == static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES) && uid != UID_EDM &&
+    if ((code == static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES) ||
+         code == static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES)) && uid != UID_EDM &&
         uid != UID_NET_MANAGER && uid != UID_IOT_NET_MANAGER) {
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
@@ -1607,6 +1610,27 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
     }
     if (!reply.WriteString(respond)) {
         NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes respond failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpCommandForRes(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetIpCommandForRes CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    std::string cmd = data.ReadString();
+    std::string respond;
+    int32_t result = SetIpCommandForRes(cmd, respond);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetIpCommandForRes result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteString(respond)) {
+        NETNATIVE_LOGE("Write CmdSetIpCommandForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

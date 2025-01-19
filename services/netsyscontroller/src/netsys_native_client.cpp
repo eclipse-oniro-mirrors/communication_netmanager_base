@@ -1425,6 +1425,16 @@ int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std
     return proxy->SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
+int32_t NetsysNativeClient::SetIpCommandForRes(const std::string &cmd, std::string &respond)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpCommandForRes(cmd, respond);
+}
+
 int32_t NetsysNativeClient::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
                                             const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
 {
