@@ -504,7 +504,6 @@ void NetPolicyFile::WriteFirewallRules(uint32_t chainType, const std::set<uint32
 
 int32_t NetPolicyFile::ResetPolicies()
 {
-    std::unique_lock<std::recursive_mutex> lock(g_netFirewallRulesMutex);
     netPolicy_.uidPolicies.clear();
     netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     netPolicy_.netQuotaPolicies.clear();
