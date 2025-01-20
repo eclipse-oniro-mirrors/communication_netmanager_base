@@ -48,10 +48,12 @@ struct PinSet {
 };
 
 struct BaseConfig {
+    bool cleartextTrafficPermitted_;
     TrustAnchors trustAnchors_;
 };
 
 struct DomainConfig {
+    bool cleartextTrafficPermitted_;
     std::vector<Domain> domains_;
     TrustAnchors trustAnchors_;
     PinSet pinSet_;
@@ -67,6 +69,8 @@ public:
     bool TrustUserCa();
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
     bool IsUserDnsCache();
+    int32_t IsCleartextPermitted(bool &baseCleartextPermitted);
+    int32_t IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted);
 
 private:
     int32_t GetConfig();
@@ -90,6 +94,7 @@ private:
     bool ValidateDate(const std::string &dateStr);
     void DumpConfigs();
     std::string GetJsonProfile();
+    void ParseJsonCleartextPermitted(const cJSON* const root, bool &cleartextPermitted);
 
 private:
     NetworkSecurityConfig();
@@ -99,6 +104,7 @@ private:
     bool trustUser0Ca_ = true;
     bool trustUserCa_ = true;
     bool isUserDnsCache_ = true;
+    bool hasBaseConfig_ = false;
 };
 
 }

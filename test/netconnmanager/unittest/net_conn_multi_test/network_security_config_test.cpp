@@ -41,6 +41,8 @@ namespace {
                     {"digest-algorithm": "sha256", "digest": "Q9TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY="},
                     {"digest-algorithm": "sha256", "digest": "Q6TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY="}
                     ]})");
+    
+    const std::string TEST_CLEARTEXT_TRAFFIC_PERMITTED(R"([{"cleartextTrafficPermitted": false}])");
 } // namespace
 
 std::shared_ptr<NetworkSecurityConfig> g_networkSecurityConfig;
@@ -254,6 +256,65 @@ HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostName001, TestSize.Level1)
     std::cout << "GetPinSetForHostName001 In" << std::endl;
     auto ret = NetworkSecurityConfig::GetInstance().GetPinSetForHostName(hostname, pins);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: HWTEST_F(NetworkSecurityConfigTest, ParseJsonCleartextPermitted001, TestSize.Level1)
+ * @tc.desc: Test NetworkSecurityConfig::ParseJsonCleartextPermitted, not applying for
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonCleartextPermitted001, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    bool cleartextPermitted;
+
+    std::string jsonTxt(TEST_CLEARTEXT_TRAFFIC_PERMITTED);
+    BuildTestJsonObject(jsonTxt, root);
+
+    std::cout << "ParseJsonCleartextPermitted001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonCleartextPermitted(root, cleartextPermitted);
+    EXPECT_TRUE(cleartextPermitted);
+}
+
+/**
+ * @tc.name: HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted001, TestSize.Level1)
+ * @tc.desc: Test NetworkSecurityConfig::IsCleartextPermitted, not applying for
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted001, TestSize.Level1)
+{
+    NetworkSecurityConfig::GetInstance().baseConfig_.cleartextTrafficPermitted_ = true;
+    std::cout << "IsCleartextPermitted001 In" << std::endl;
+    bool isclearpermitted;
+    auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted(isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted002, TestSize.Level1)
+ * @tc.desc: Test NetworkSecurityConfig::IsCleartextPermitted, not applying for
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted002, TestSize.Level1)
+{
+    NetworkSecurityConfig::GetInstance().baseConfig_.cleartextTrafficPermitted_ = false;
+    std::vector<DomainConfig> domainConfigs;
+    DomainConfig domainConfig;
+    domainConfig.cleartextTrafficPermitted_ = true;
+    std::vector<Domain> domains;
+    Domain domain;
+    domain.domainName_ = "www.text.com";
+    domains.push_back(domain);
+    domainConfig.domains_ = domains;
+    domainConfigs.push_back(domainConfig);
+    std::cout << "IsCleartextPermitted001 In" << std::endl;
+    bool isclearpermitted;
+    auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text2.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 }

@@ -936,6 +936,16 @@ int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, s
     return NetworkSecurityConfig::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
 }
 
+int32_t NetConnClient::IsCleartextPermitted(bool &cleartextPermitted)
+{
+    return NetworkSecurityConfig::GetInstance().IsCleartextPermitted(cleartextPermitted);
+}
+
+int32_t NetConnClient::IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted)
+{
+    return NetworkSecurityConfig::GetInstance().IsCleartextPermitted(hostname, cleartextPermitted);
+}
+
 int32_t NetConnClient::FactoryResetNetwork()
 {
     sptr<INetConnService> proxy = GetProxy();
