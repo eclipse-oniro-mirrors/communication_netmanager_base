@@ -592,6 +592,7 @@ private:
     std::atomic<bool> isInSleep_ = false;
     static constexpr uint32_t INVALID_USER_ID = -1;
     uint32_t currentUserId_ = INVALID_USER_ID;
+    bool isFallbackProbeWithProxy_ = false;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

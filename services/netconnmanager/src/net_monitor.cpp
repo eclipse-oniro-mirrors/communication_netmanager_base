@@ -53,6 +53,7 @@ constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 2;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 4;
+constexpr int32_t ALL_DETECT_THREAD_NUM_WITH_PROXY = 6;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
@@ -78,8 +79,9 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-                       const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
+                       const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, bool needProxy)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn),
+    isFallbackProbeWithProxy_(needProxy)
 {
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
@@ -169,21 +171,15 @@ void NetMonitor::Detection()
 NetHttpProbeResult NetMonitor::SendProbe()
 {
     NETMGR_LOG_I("start net detection");
+    int32_t count = isFallbackProbeWithProxy_ ? ALL_DETECT_THREAD_NUM_WITH_PROXY : ALL_DETECT_THREAD_NUM;
     std::lock_guard<std::mutex> monitorLocker(probeMtx_);
     std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
-    std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
+    std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(count);
     std::shared_ptr<ProbeThread> primaryHttpThread = std::make_shared<ProbeThread>(
         netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
     std::shared_ptr<ProbeThread> primaryHttpsThread = std::make_shared<ProbeThread>(
         netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
-    {
-        std::lock_guard<std::mutex> proxyLocker(proxyMtx_);
-        primaryHttpThread->UpdateGlobalHttpProxy(globalHttpProxy_);
-        primaryHttpsThread->UpdateGlobalHttpProxy(globalHttpProxy_);
-    }
-    primaryHttpThread->Start();
-    primaryHttpsThread->Start();
-
+    SendProbeWithProxy(primaryHttpThread, primaryHttpsThread);
     latch->Await(std::chrono::milliseconds(PRIMARY_DETECTION_RESULT_WAIT_MS));
     NetHttpProbeResult httpProbeResult = GetThreadDetectResult(primaryHttpThread, ProbeType::PROBE_HTTP);
     NetHttpProbeResult httpsProbeResult = GetThreadDetectResult(primaryHttpsThread, ProbeType::PROBE_HTTPS);
@@ -200,10 +196,15 @@ NetHttpProbeResult NetMonitor::SendProbe()
         netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
     std::shared_ptr<ProbeThread> fallbackHttpsThread = std::make_shared<ProbeThread>(netId_, netBearType_,
         netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
-    fallbackHttpThread->ProbeWithoutGlobalHttpProxy();
-    fallbackHttpsThread->ProbeWithoutGlobalHttpProxy();
-    fallbackHttpThread->Start();
-    fallbackHttpsThread->Start();
+    SendProbeWithoutProxy(fallbackHttpThread, fallbackHttpsThread);
+    std::shared_ptr<ProbeThread> fallbackProxyHttpThread = std::make_shared<ProbeThread>(netId_, netBearType_,
+        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> fallbackProxyHttpsThread = std::make_shared<ProbeThread>(netId_, netBearType_,
+        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
+    if (isFallbackProbeWithProxy_) {
+        SendProbeWithProxy(fallbackProxyHttpThread, fallbackProxyHttpsThread);
+        isFallbackProbeWithProxy_ = false;
+    }
     latchAll->Await(std::chrono::milliseconds(ALL_DETECTION_RESULT_WAIT_MS));
     httpProbeResult = GetThreadDetectResult(primaryHttpThread, ProbeType::PROBE_HTTP);
     httpsProbeResult = GetThreadDetectResult(primaryHttpsThread, ProbeType::PROBE_HTTPS);
@@ -211,8 +212,33 @@ NetHttpProbeResult NetMonitor::SendProbe()
         GetThreadDetectResult(fallbackHttpThread, ProbeType::PROBE_HTTP_FALLBACK);
     NetHttpProbeResult fallbackHttpsProbeResult =
         GetThreadDetectResult(fallbackHttpsThread, ProbeType::PROBE_HTTPS_FALLBACK);
+    NetHttpProbeResult fallbackProxyHttpProbeResult =
+        GetThreadDetectResult(fallbackProxyHttpThread, ProbeType::PROBE_HTTP_FALLBACK);
+    NetHttpProbeResult fallbackProxyHttpsProbeResult =
+        GetThreadDetectResult(fallbackProxyHttpsThread, ProbeType::PROBE_HTTPS_FALLBACK);
     return ProcessThreadDetectResult(httpProbeResult, httpsProbeResult, fallbackHttpProbeResult,
-        fallbackHttpsProbeResult);
+        fallbackHttpsProbeResult, fallbackProxyHttpProbeResult, fallbackProxyHttpsProbeResult);
+}
+
+void NetMonitor::SendProbeWithProxy(std::shared_ptr<ProbeThread>& httpProbeThread,
+    std::shared_ptr<ProbeThread>& httpsProbeThread)
+{
+    {
+        std::lock_guard<std::mutex> proxyLocker(proxyMtx_);
+        httpProbeThread->UpdateGlobalHttpProxy(globalHttpProxy_);
+        httpsProbeThread->UpdateGlobalHttpProxy(globalHttpProxy_);
+    }
+    httpProbeThread->Start();
+    httpsProbeThread->Start();
+}
+
+void NetMonitor::SendProbeWithoutProxy(std::shared_ptr<ProbeThread>& httpProbeThread,
+    std::shared_ptr<ProbeThread>& httpsProbeThread)
+{
+    httpProbeThread->ProbeWithoutGlobalHttpProxy();
+    httpsProbeThread->ProbeWithoutGlobalHttpProxy();
+    httpProbeThread->Start();
+    httpsProbeThread->Start();
 }
 
 NetHttpProbeResult NetMonitor::GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType)
@@ -230,8 +256,13 @@ NetHttpProbeResult NetMonitor::GetThreadDetectResult(std::shared_ptr<ProbeThread
 
 NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& httpProbeResult,
     NetHttpProbeResult& httpsProbeResult, NetHttpProbeResult& fallbackHttpProbeResult,
-    NetHttpProbeResult& fallbackHttpsProbeResult)
+    NetHttpProbeResult& fallbackHttpsProbeResult, NetHttpProbeResult& fallbackProxyHttpProbeResult,
+    NetHttpProbeResult& fallbackProxyHttpsProbeResult)
 {
+    NETMGR_LOG_I("probe result: %{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,",
+        httpProbeResult.GetCode(), httpsProbeResult.GetCode(), fallbackHttpProbeResult.GetCode(),
+        fallbackHttpsProbeResult.GetCode(), fallbackProxyHttpProbeResult.GetCode(),
+        fallbackProxyHttpsProbeResult.GetCode());
     if (httpProbeResult.IsNeedPortal()) {
         NETMGR_LOG_I("primary http detect result: portal");
         return httpProbeResult;
@@ -239,6 +270,9 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& htt
     if (fallbackHttpProbeResult.IsNeedPortal()) {
         NETMGR_LOG_I("fallback http detect result: portal");
         return fallbackHttpProbeResult;
+    }
+    if (fallbackProxyHttpProbeResult.IsNeedPortal()) {
+        return fallbackProxyHttpProbeResult;
     }
     if (httpsProbeResult.IsSuccessful()) {
         NETMGR_LOG_I("primary https detect result: success");
@@ -248,9 +282,15 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(NetHttpProbeResult& htt
         NETMGR_LOG_I("fallback https detect result: success");
         return fallbackHttpsProbeResult;
     }
+    if (fallbackProxyHttpsProbeResult.IsSuccessful()) {
+        return fallbackProxyHttpsProbeResult;
+    }
     if (httpProbeResult.IsSuccessful() && fallbackHttpProbeResult.IsSuccessful()) {
         NETMGR_LOG_I("both primary http and fallback http detect result success");
         return httpProbeResult;
+    }
+    if (fallbackProxyHttpProbeResult.IsSuccessful() && fallbackHttpProbeResult.IsSuccessful()) {
+        return fallbackProxyHttpProbeResult;
     }
     return httpsProbeResult;
 }

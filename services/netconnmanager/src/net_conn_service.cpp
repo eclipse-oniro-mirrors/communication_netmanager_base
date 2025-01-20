@@ -728,6 +728,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
             });
         }
         isInSleep_.store(false);
+        isFallbackProbeWithProxy_ = true;
     }
 }
 #endif
@@ -2483,8 +2484,10 @@ void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
             if (supplier.second == nullptr) {
                 continue;
             }
+            supplier.second->SetIfFallbackProbeWithProxy(isFallbackProbeWithProxy_);
             supplier.second->UpdateGlobalHttpProxy(httpProxy);
         }
+        isFallbackProbeWithProxy_ = false;
         NETMGR_LOG_I("UpdateGlobalHttpProxy end");
     });
 }

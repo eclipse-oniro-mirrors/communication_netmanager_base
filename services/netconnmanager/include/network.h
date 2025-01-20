@@ -75,6 +75,7 @@ public:
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
 #endif
+    void SetIfFallbackProbeWithProxy(bool needProxy);
 
 private:
     bool CreateBasicNetwork();
@@ -115,6 +116,7 @@ private:
 #endif
     bool isNeedResume_ = false;
     bool isScreenOn_ = true;
+    bool isFallbackProbeWithProxy_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

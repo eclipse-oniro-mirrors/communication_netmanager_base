@@ -591,12 +591,14 @@ void Network::InitNetMonitor()
 {
     NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
-    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_);
+    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_,
+        isFallbackProbeWithProxy_);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
     }
     netMonitor_->Start();
+    isFallbackProbeWithProxy_ = false;
 }
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
@@ -806,6 +808,11 @@ void Network::SetScreenState(bool isScreenOn)
         return;
     }
     netMonitor_->SetScreenState(isScreenOn);
+}
+
+void Network::SetIfFallbackProbeWithProxy(bool needProxy)
+{
+    isFallbackProbeWithProxy_ = needProxy;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
