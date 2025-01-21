@@ -781,9 +781,9 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname,
         return NETMANAGER_SUCCESS;
     }
 
-    bool *pCtTrafficPermitted = nullptr;
-    for (auto &domainConfig: domainConfigs_) {
-        for (auto &domain: domainConfig.domains_) {
+    const bool *pCtTrafficPermitted = nullptr;
+    for (const auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
             if (hostname == domain.domainName_) {
                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
                 break;
