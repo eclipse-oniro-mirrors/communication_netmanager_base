@@ -36,7 +36,7 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     auto observer = new NetworkObserver;
     observer->SetManager(manager);
     {
-        std::lock_guard<std::mutex> lock(g_observerMap_mtx);
+        std::lock_guard<std::shared_mutex> lock(g_observerMap_mtx);
         g_observerMap[manager] = observer;
     }
 
