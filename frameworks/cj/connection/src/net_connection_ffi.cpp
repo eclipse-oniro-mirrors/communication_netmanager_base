@@ -14,6 +14,9 @@
  */
 
 #include "net_connection_ffi.h"
+#include "connection_exec.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "net_all_capabilities.h"
 #include "net_conn_client.h"
 #include "net_connection_impl.h"
@@ -29,8 +32,8 @@ namespace OHOS::NetManagerStandard {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
-static constexpr size_t MAX_IPV4_STR_LEN = 16;
-static constexpr size_t MAX_IPV6_STR_LEN = 64;
+static constexpr size_t MAX_IPV4_STR_LEN_FFI = 16;
+static constexpr size_t MAX_IPV6_STR_LEN_FFI = 64;
 
 EXTERN_C_START
 int32_t TransErrorCode(int32_t error)
@@ -82,12 +85,12 @@ void ParseAddrInfo(addrinfo *res, std::vector<CNetAddress> &addresses_)
         std::string host_;
         if (tmp->ai_family == AF_INET) {
             auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
-            char ip[MAX_IPV4_STR_LEN] = {0};
+            char ip[MAX_IPV4_STR_LEN_FFI] = {0};
             inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
             host_ = ip;
         } else if (tmp->ai_family == AF_INET6) {
             auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
-            char ip[MAX_IPV6_STR_LEN] = {0};
+            char ip[MAX_IPV6_STR_LEN_FFI] = {0};
             inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
             host_ = ip;
         }
@@ -491,6 +494,12 @@ char **MallocCStringList(std::list<std::string> &list)
         i++;
     }
     return arr;
+}
+
+napi_value FfiConvertNetHandle2Napi(napi_env env, uint32_t netId)
+{
+    NetHandle netHandle{netId};
+    return ConnectionExec::CreateNetHandle(env, &netHandle);
 }
 EXTERN_C_END
 } // namespace OHOS::NetManagerStandard

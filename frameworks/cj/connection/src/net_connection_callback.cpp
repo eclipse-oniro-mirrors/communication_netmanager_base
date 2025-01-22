@@ -25,8 +25,8 @@ int32_t ConnectionCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         return 0;
     }
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
@@ -80,8 +80,8 @@ int32_t ConnectionCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHa
         return 0;
     }
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
@@ -171,8 +171,8 @@ int32_t ConnectionCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle
         return 0;
     }
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
@@ -204,8 +204,8 @@ int32_t ConnectionCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         return 0;
     }
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
@@ -224,8 +224,8 @@ int32_t ConnectionCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 int32_t ConnectionCallbackObserver::NetUnavailable()
 {
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }
@@ -243,8 +243,8 @@ int32_t ConnectionCallbackObserver::NetUnavailable()
 int32_t ConnectionCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
-    auto netConnection = NET_CONNECTIONS.find(this);
-    if (netConnection == NET_CONNECTIONS.end() || netConnection->second == nullptr) {
+    auto netConnection = NET_CONNECTIONS_FFI.find(this);
+    if (netConnection == NET_CONNECTIONS_FFI.end() || netConnection->second == nullptr) {
         NETMANAGER_BASE_LOGE("can not find netConnection handle");
         return 0;
     }

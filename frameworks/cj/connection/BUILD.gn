@@ -27,6 +27,13 @@ ohos_shared_library("cj_net_connection_ffi") {
 
   include_dirs = [
     "include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/async_context/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/async_work/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/connection_exec/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/connection_module/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/net_handle_interface/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/observer/include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection/options/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
@@ -53,13 +60,18 @@ ohos_shared_library("cj_net_connection_ffi") {
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]

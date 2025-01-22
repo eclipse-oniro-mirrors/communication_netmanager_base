@@ -19,6 +19,7 @@
 #include "cj_ffi/cj_common_ffi.h"
 #include "common.h"
 #include "ffi_remote_data.h"
+#include "napi/native_api.h"
 #include "netmanager_base_log.h"
 #include <cstdint>
 #include <list>
@@ -53,6 +54,7 @@ FFI_EXPORT void CJ_OnNetLost(int64_t connId, void (*callback)(int32_t));
 FFI_EXPORT void CJ_OnNetUnavailable(int64_t connId, void (*callback)());
 FFI_EXPORT int32_t CJ_GetAppNet(int32_t &netId);
 FFI_EXPORT int32_t CJ_SetAppNet(int32_t netId);
+FFI_EXPORT napi_value FfiConvertNetHandle2Napi(napi_env env, uint32_t netId);
 
 char *MallocCString(const std::string &origin);
 char **MallocCStringList(std::list<std::string> &list);
