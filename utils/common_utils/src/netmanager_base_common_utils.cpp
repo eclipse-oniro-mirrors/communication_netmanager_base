@@ -62,6 +62,8 @@ constexpr int32_t DOMAIN_VALID_MAX_PART_SIZE = 5;
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t NET_MASK_GROUP_COUNT = 4;
 constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
+constexpr int32_t WAIT_FOR_PID_TIME_MS = 20;
+constexpr int32_t MAX_WAIT_PID_COUNT = 500;
 const std::string IPADDR_DELIMITER = ".";
 constexpr const char *CMD_SEP = " ";
 constexpr const char *DOMAIN_DELIMITER = ".";
@@ -540,19 +542,6 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     _exit(-1);
 }
 
-void ParentWaitThread(std::shared_ptr<ParentProcessHelper> helper, pid_t childPid)
-{
-    int status = 0;
-    helper->ret.store(waitpid(childPid, &status, 0));
-    helper->waitDoneFlag = true;
-    helper->parentCv.notify_all();
-    NETMGR_LOG_D("waitpid %{public}d done", childPid);
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        // child process abnormal exit
-        NETMGR_LOG_E("child process abnormal exit, status:%{public}d", status);
-    }
-}
-
 int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childPid, std::string *out)
 {
     if (count != PIPE_FD_NUM) {
@@ -577,28 +566,30 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     if (close(pipeFd[PIPE_OUT]) != 0) {
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
-    auto helper = std::make_shared<ParentProcessHelper>();
-    std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);
-    auto parentThread = std::thread([helper, childPid]() {
-        ParentWaitThread(helper, childPid);
-    });
-#ifndef CROSS_PLATFORM
-    pthread_setname_np(parentThread.native_handle(), "ExecParentThread");
-#endif
-    parentThread.detach();
-    const int32_t waitTime = 10;
-    std::unique_lock uLock(helper->parentMutex);
-    auto waitRet = helper->parentCv.wait_for(uLock, std::chrono::seconds(waitTime),
-                                             [&helper] { return helper->waitDoneFlag.load(); });
-    if (!waitRet) {
+    int status = 0;
+    pid_t pidRet;
+    int waitCount;
+    for (waitCount = 0; waitCount < MAX_WAIT_PID_COUNT; waitCount++) {
+        pidRet = waitpid(childPid, &status, WNOHANG);
+        if (pidRet == 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_PID_TIME_MS));
+        } else {
+            break;
+        }
+    }
+    if (waitCount == MAX_WAIT_PID_COUNT) {
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         return NETMANAGER_ERROR;
     }
-    pid_t pidRet = helper->ret.load();
     if (pidRet != childPid) {
         NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
         return NETMANAGER_ERROR;
     }
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        // child process abnormal exit
+        NETMGR_LOG_E("child process abnormal exit, status:%{public}d", status);
+    }
+    NETMGR_LOG_I("waitpid %{public}d done", childPid);
     return NETMANAGER_SUCCESS;
 }
 
