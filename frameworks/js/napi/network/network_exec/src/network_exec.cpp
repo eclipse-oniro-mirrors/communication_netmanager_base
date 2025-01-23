@@ -116,7 +116,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     NETMANAGER_BASE_LOGI("ExecSubscribe");
     EventManager *manager = context->GetManager();
 
-    std::shared_lock<std::shared_mutex> lock(g_observerMap_mtx);
+    std::shared_lock<std::shared_mutex> lock(g_observerMapMtx);
     auto iter = g_observerMap.find(manager);
     if (iter == g_observerMap.end() || iter->second == nullptr) {
         NETMANAGER_BASE_LOGE("callback is null");
