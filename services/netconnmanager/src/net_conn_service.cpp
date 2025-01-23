@@ -2278,6 +2278,30 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::GetPacUrl(std::string &pacUrl)
+{
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    Uri uri(PAC_URL_URI);
+    int32_t ret = dataShareHelperUtils->Query(uri, KEY_PAC_URL, pacUrl);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Query pac url failed.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::SetPacUrl(const std::string &pacUrl)
+{
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    Uri uri(PAC_URL_URI);
+    int32_t ret = dataShareHelperUtils->Update(uri, KEY_PAC_URL, pacUrl);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update pacUrl to datashare failed.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 void NetConnService::CreateActiveHttpProxyThread()
 {
     httpProxyThreadNeedRun_ = true;

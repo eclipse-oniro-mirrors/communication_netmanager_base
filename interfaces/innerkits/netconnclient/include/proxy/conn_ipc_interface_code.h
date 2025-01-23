@@ -84,6 +84,8 @@ enum class ConnInterfaceCode {
     CMD_NM_SET_INTERFACE_IP_ADDRESS,
     CMD_NM_SET_INTERFACE_UP,
     CMD_NM_SET_INTERFACE_DOWN,
+    CMD_NM_SET_PAC_URL,
+    CMD_NM_GET_PAC_URL,
     CMD_NM_END,
 };
 

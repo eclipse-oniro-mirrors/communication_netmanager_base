@@ -1802,5 +1802,18 @@ HWTEST_F(NetConnServiceTest, SendHttpProxyChangeBroadcast001, TestSize.Level1)
     }
 }
 
+HWTEST_F(NetConnServiceTest, SetPacUrlTest001, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->SetPacUrl("text");
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetPacUrlTest001, TestSize.Level1)
+{
+    std::string pacUrl;
+    auto ret = NetConnService::GetInstance()->GetPacUrl(pacUrl);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

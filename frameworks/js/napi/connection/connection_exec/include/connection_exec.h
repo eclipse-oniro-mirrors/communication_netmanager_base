@@ -34,6 +34,7 @@
 #include "deletecustomdnsrules_context.h"
 #include "factoryresetnetwork_context.h"
 #include "setapphttpproxy_context.h"
+#include "pacurl_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -134,6 +135,14 @@ public:
     static bool ExecFactoryResetNetwork(FactoryResetNetworkContext *context);
 
     static napi_value FactoryResetNetworkCallback(FactoryResetNetworkContext *context);
+
+    static bool ExecSetPacUrl(SetPacUrlContext *context);
+
+    static napi_value SetPacUrlCallback(SetPacUrlContext *context);
+
+    static bool ExecGetPacUrl(GetPacUrlContext *context);
+
+    static napi_value GetPacUrlCallback(GetPacUrlContext *context);
 
     class NetHandleExec final {
     public:

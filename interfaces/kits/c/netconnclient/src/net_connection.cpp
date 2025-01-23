@@ -370,3 +370,21 @@ void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId)
 {
     NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackId);
 }
+
+int32_t OH_NetConn_SetPacUrl(const char *pacUrl)
+{
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_SetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t ret = NetConnClient::GetInstance().SetPacUrl(std::string(pacUrl));
+    return ret;
+}
+
+int32_t OH_NetConn_GetPacUrl(char *pacUrl)
+{
+    std::string pacUrlstr = "";
+    int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
+    pacUrl = const_cast<char*>(pacUrlstr.c_str());
+    return ret;
+}

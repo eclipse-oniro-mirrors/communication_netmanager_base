@@ -1514,5 +1514,93 @@ HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
     int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnClientTest, SetPacUrl001, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl = "";
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl002, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl = TEST_DOMAIN1;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl003, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl = TEST_DOMAIN6;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl004, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl = TEST_DOMAIN10;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl005, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl = TEST_LONG_HOST;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl006, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    std::string pacUrl;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, SetPacUrl007, TestSize.Level1)
+{
+    std::string pacUrl;
+    auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, GetPacUrl001, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN6);
+    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    std::string pacUrl;
+    auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_EQ(pacUrl, TEST_DOMAIN6);
+}
+
+HWTEST_F(NetConnClientTest, GetPacUrl002, TestSize.Level1)
+{
+    // NetManagerBaseAccessToken token;
+    auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN10);
+    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    std::string pacUrl;
+    auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_EQ(pacUrl, TEST_DOMAIN10);
+}
+
+HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
+{
+    auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN1);
+    EXPECT_NE(ret0, NETMANAGER_SUCCESS);
+    std::string pacUrl;
+    auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_NE(pacUrl, TEST_DOMAIN10);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

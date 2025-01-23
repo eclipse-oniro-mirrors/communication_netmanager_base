@@ -78,5 +78,13 @@
     {
         "first_introduced": "13",
         "name": "OH_NetConn_UnregisterDnsResolver"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_NetConn_SetPacUrl"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_NetConn_GetPacUrl"
     }
 ]

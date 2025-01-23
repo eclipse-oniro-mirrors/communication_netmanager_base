@@ -109,6 +109,7 @@ ohos_shared_library("connection_if") {
     "async_context/src/setappnet_context.cpp",
     "async_context/src/setcustomdnsrule_context.cpp",
     "async_context/src/setglobalhttpproxy_context.cpp",
+    "async_context/src/pacurl_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
     "net_handle_interface/src/net_handle_interface.cpp",

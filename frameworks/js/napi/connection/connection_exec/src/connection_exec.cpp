@@ -396,6 +396,60 @@ napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecGetPacUrl(GetPacUrlContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().GetPacUrl(context->pacUrl_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetPacUrl failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetPacUrlCallback(GetPacUrlContext *context)
+{
+    return NapiUtils::CreateStringUtf8(context->GetEnv(), context->pacUrl_);
+}
+
+bool ConnectionExec::ExecSetPacUrl(SetPacUrlContext *context)
+{
+    if (context->pacUrl_.empty()) {
+        NETMANAGER_BASE_LOGE("pac Url is empty!");
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        return false;
+    }
+    int32_t errorCode = NetConnClient::GetInstance().SetPacUrl(context->pacUrl_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetPacUrl failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetPacUrlCallback(SetPacUrlContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecFactoryResetNetwork(FactoryResetNetworkContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecFactoryResetNetwork into");
+    int32_t errorCode = NetConnClient::GetInstance().FactoryResetNetwork();
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec ResetNetwork failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::FactoryResetNetworkCallback(FactoryResetNetworkContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
 {
     if (context == nullptr) {

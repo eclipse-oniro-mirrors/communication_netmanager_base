@@ -198,13 +198,32 @@ PermissionStateFull testNetManageSettingsState = {
     .grantFlags = { 2 },
 };
 
+PermissionDef testPacUrlPermDef = {
+    .permissionName = "ohos.permission.SET_PAC_URL",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test set pac url",
+    .descriptionId = 1,
+};
+ 
+PermissionStateFull testPacUrlState = {
+    .permissionName = "ohos.permission.SET_PAC_URL",
+    .isGeneral = true,
+    .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 },
+};
+
 HapPolicyParams netManagerBasePolicy = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
     .permList = { testNetConnInfoPermDef, testNetConnInternetPermDef, testNetConnInternalPermDef,
-        testNetPolicyStrategyPermDef, testNetSysInternalDef, testNetStatsPermDef, testNetManageSettingsDef },
+        testNetPolicyStrategyPermDef, testNetSysInternalDef, testNetStatsPermDef, testNetManageSettingsDef, testPacUrlPermDef },
     .permStateList = { testNetConnInfoState, testNetConnInternetState, testNetConnInternalState,
-        testManageNetStrategyState, testNetSysInternalState, testNetStatsState, testNetManageSettingsState },
+        testManageNetStrategyState, testNetSysInternalState, testNetStatsState, testNetManageSettingsState, testPacUrlState },
 };
 
 PermissionDef testNoPermissionDef = {

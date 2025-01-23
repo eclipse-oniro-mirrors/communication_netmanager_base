@@ -381,6 +381,8 @@ public:
                                        const std::string &dstAddr) override;
     int32_t DisableDistributedNet(bool isServer) override;
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
+    int32_t SetPacUrl(const std::string &pacUrl) override;
+    int32_t GetPacUrl(std::string &pacUrl) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

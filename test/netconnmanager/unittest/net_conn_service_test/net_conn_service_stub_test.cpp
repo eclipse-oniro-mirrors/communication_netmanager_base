@@ -1199,5 +1199,57 @@ HWTEST_F(NetConnServiceStubTest, OnUpdateNetCaps, TestSize.Level1)
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: OnSetPacUrl
+ * @tc.desc: Test NetConnServiceStub.OnSetPacUrl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetPacUrlTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_PAC_URL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+ 
+/**
+ * @tc.name: OnSetPacUrl
+ * @tc.desc: Test NetConnServiceStub.OnSetPacUrl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetPacUrlTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_PAC_URL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+ 
+/**
+ * @tc.name: OnGetPacUrlTest001
+ * @tc.desc: Test NetConnServiceStub.OnGetPacUrl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetPacUrlTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_PAC_URL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
