@@ -28,7 +28,7 @@ static std::mutex OBSERVER_MUTEX;
 
 namespace OHOS::NetManagerStandard {
 std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
-std::shared_mutex g_observerMap_mtx;
+std::shared_mutex g_observerMapMtx;
 
 static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
 {
