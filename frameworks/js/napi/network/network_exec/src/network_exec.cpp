@@ -116,10 +116,14 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     NETMANAGER_BASE_LOGI("ExecSubscribe");
     EventManager *manager = context->GetManager();
 
-    sptr<INetConnCallback> callback = g_observerMap[manager];
-    if (callback == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_observerMapMtx);
+    auto iter = g_observerMap.find(manager);
+    if (iter == g_observerMap.end() || iter->second == nullptr) {
+        NETMANAGER_BASE_LOGE("callback is null");
         return false;
     }
+    auto callback = iter->second;
+    lock.unlock();
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
     NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
@@ -150,12 +154,14 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("ExecUnsubscribe");
     EventManager *manager = context->GetManager();
-    sptr<INetConnCallback> callback = g_observerMap[manager];
-    if (callback == nullptr) {
+    std::shared_lock<std::shared_mutex> lock(g_observerMapMtx);
+    auto iter = g_observerMap.find(manager);
+    if (iter == g_observerMap.end() || iter->second == nullptr) {
         NETMANAGER_BASE_LOGE("callback is null");
         return false;
     }
-
+    auto callback = iter->second;
+    lock.unlock();
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;

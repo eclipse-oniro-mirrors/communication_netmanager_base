@@ -35,7 +35,10 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     auto manager = new EventManager;
     auto observer = new NetworkObserver;
     observer->SetManager(manager);
-    g_observerMap[manager] = observer;
+    {
+        std::lock_guard<std::shared_mutex> lock(g_observerMapMtx);
+        g_observerMap[manager] = observer;
+    }
 
     auto finalizer = [](napi_env, void *data, void *) {
         auto manager = reinterpret_cast<EventManager *>(data);
