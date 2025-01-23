@@ -66,6 +66,6 @@ private:
 };
 
 extern std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
-extern std::shared_mutex g_observerMap_mtx;
+extern std::shared_mutex g_observerMapMtx;
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_BASE_NETWORK_OBSERVER_H */
