@@ -32,7 +32,6 @@ static const int32_t IFACE_NAME_MAP_SIZE_MIN = 1;
 static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 200;
 static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1;
 static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 1;
-static const int32_t NET_NS_MAP_SIZE = 1;
 #else
 static const int32_t APP_STATS_MAP_SIZE = 5000;
 static const int32_t APP_STATS_MAP_SIZE_MIN = 5000;
@@ -42,8 +41,8 @@ static const int32_t IFACE_NAME_MAP_SIZE_MIN = 1000;
 static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
-static const int32_t NET_NS_MAP_SIZE = 5000;
 #endif
+static const int32_t NET_NS_MAP_SIZE = 5000;
 
 // network stats begin
 bpf_map_def SEC("maps") iface_stats_map = {
