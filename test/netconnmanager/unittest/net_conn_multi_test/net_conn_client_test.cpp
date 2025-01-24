@@ -1514,5 +1514,20 @@ HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
     int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnClientTest, IsCleartextPermitted001, TestSize.Level1)
+{
+    bool isclearpermitted;
+    auto ret = NetConnClient::GetInstance().IsCleartextPermitted(isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
+{
+    bool isclearpermitted;
+    auto ret = NetConnClient::GetInstance().IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

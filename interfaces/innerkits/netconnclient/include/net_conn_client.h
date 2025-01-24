@@ -437,6 +437,8 @@ public:
     bool TrustUserCa();
     bool IsUserDnsCache();
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
+    int32_t IsCleartextPermitted(bool &baseCleartextPermitted);
+    int32_t IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted);
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
     int32_t GetSlotType(std::string &type);

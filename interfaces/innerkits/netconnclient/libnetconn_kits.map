@@ -98,6 +98,8 @@
       "OHOS::NetManagerStandard::NetConnClient::IsPinOpenModeVerifyRootCa(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::TrustUser0Ca()";
       "OHOS::NetManagerStandard::NetConnClient::TrustUserCa()";
+      "OHOS::NetManagerStandard::NetConnClient::IsCleartextPermitted(bool&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsCleartextPermitted(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
       "OHOS::NetManagerStandard::NetConnClient::GetTrustAnchorsForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
       "OHOS::NetManagerStandard::NetConnClient::IsUserDnsCache()";
       VTT?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
@@ -116,12 +118,15 @@
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonPinSet(cJSON const*, OHOS::NetManagerStandard::PinSet&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(cJSON const*, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(cJSON const*, OHOS::NetManagerStandard::TrustAnchors&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonCleartextPermitted(cJSON const*, bool&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenMode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenModeVerifyRootCa(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUser0Ca()";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::TrustUserCa()";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsUserDnsCache()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCleartextPermitted(bool&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCleartextPermitted(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
       "OHOS::NetManagerStandard::NetConnClient::FactoryResetNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetFactoryResetCallback(OHOS::sptr<OHOS::NetManagerStandard::INetFactoryResetCallback> const&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;
