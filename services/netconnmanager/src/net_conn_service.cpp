@@ -1092,7 +1092,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
     if (currentUserId_ == INVALID_USER_ID) {
         int32_t userId;
-        int32_t ret = GetCallingUserId(userId);
+        int32_t ret = GetActiveUserId(userId);
         if (ret == NETMANAGER_SUCCESS) {
             param.emplace("UserId", std::to_string(userId));
         } else {
@@ -1848,8 +1848,8 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
-    if (httpProxy.GetUserId() == 0) {
-        httpProxy.SetUserId(PRIMARY_USER_ID);
+    if (httpProxy.GetUserId() == 0 || httpProxy.GetUserId() == -1) {
+        LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
     if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.
@@ -1869,8 +1869,8 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
-    if (httpProxy.GetUserId() == 0) {
-        httpProxy.SetUserId(PRIMARY_USER_ID);
+    if (httpProxy.GetUserId() == 0 || httpProxy.GetUserId() == -1) {
+        LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
     auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() > 0) {
@@ -2233,7 +2233,10 @@ int32_t NetConnService::SetGlobalHttpProxyInner(const HttpProxy &httpProxy)
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     int32_t userId;
-    int32_t ret = GetActiveUserId(userId);
+    userId = httpProxy.GetUserId();
+    if (userId == 0 || userId == -1) {
+        int32_t ret = GetActiveUserId(userId);
+    }
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
         return ret;
@@ -2434,7 +2437,7 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
     } else if (userIdType == LOCAL) {
         ret = GetLocalUserId(userId);
         if (userId == 0) {
-            userId = PRIMARY_USER_ID;
+            ret = GetActiveUserId(userId);
         }
     } else if (userIdType == SPECIFY) {
         userId = httpProxy.GetUserId();
