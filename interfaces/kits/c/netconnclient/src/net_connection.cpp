@@ -383,6 +383,10 @@ int32_t OH_NetConn_SetPacUrl(const char *pacUrl)
 
 int32_t OH_NetConn_GetPacUrl(char *pacUrl)
 {
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
     pacUrl = const_cast<char*>(pacUrlstr.c_str());
