@@ -221,9 +221,11 @@ HapPolicyParams netManagerBasePolicy = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
     .permList = { testNetConnInfoPermDef, testNetConnInternetPermDef, testNetConnInternalPermDef,
-        testNetPolicyStrategyPermDef, testNetSysInternalDef, testNetStatsPermDef, testNetManageSettingsDef, testPacUrlPermDef },
+        testNetPolicyStrategyPermDef, testNetSysInternalDef, testNetStatsPermDef, testNetManageSettingsDef,
+        testPacUrlPermDef },
     .permStateList = { testNetConnInfoState, testNetConnInternetState, testNetConnInternalState,
-        testManageNetStrategyState, testNetSysInternalState, testNetStatsState, testNetManageSettingsState, testPacUrlState },
+        testManageNetStrategyState, testNetSysInternalState, testNetStatsState, testNetManageSettingsState,
+        testPacUrlState },
 };
 
 PermissionDef testNoPermissionDef = {
