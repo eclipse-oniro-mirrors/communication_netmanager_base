@@ -46,6 +46,7 @@ const std::string TAG_EXPIRATION("expiration");
 const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
+const std::string TAG_CLEARTEXT_TRAFFIC_PERMITTED("cleartextTrafficPermitted");
 
 const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
 #ifdef WINDOWS_PLATFORM
@@ -477,6 +478,9 @@ void NetworkSecurityConfig::ParseJsonBaseConfig(const cJSON* const root, BaseCon
     if (root == nullptr) {
         return;
     }
+    hasBaseConfig_ = true;
+    cJSON *cleartextPermitted = cJSON_GetObjectItem(root, TAG_CLEARTEXT_TRAFFIC_PERMITTED.c_str());
+    ParseJsonCleartextPermitted(cleartextPermitted, baseConfig.cleartextTrafficPermitted_);
 
     cJSON *trustAnchors = cJSON_GetObjectItem(root, TAG_TRUST_ANCHORS.c_str());
     if (trustAnchors == nullptr) {
@@ -496,6 +500,8 @@ void NetworkSecurityConfig::ParseJsonDomainConfigs(const cJSON* const root, std:
     for (uint32_t i = 0; i < size; i++) {
         cJSON *domainConfigItem = cJSON_GetArrayItem(root, i);
         DomainConfig domainConfig;
+        cJSON *cleartextPermitted = cJSON_GetObjectItem(domainConfigItem, TAG_CLEARTEXT_TRAFFIC_PERMITTED.c_str());
+        ParseJsonCleartextPermitted(cleartextPermitted, domainConfig.cleartextTrafficPermitted_);
         cJSON *domains = cJSON_GetObjectItem(domainConfigItem, TAG_DOMAINS.c_str());
         ParseJsonDomains(domains, domainConfig.domains_);
         cJSON *trustAnchors = cJSON_GetObjectItem(domainConfigItem, TAG_TRUST_ANCHORS.c_str());
@@ -742,5 +748,57 @@ bool NetworkSecurityConfig::IsUserDnsCache()
 {
     return isUserDnsCache_;
 }
+
+void NetworkSecurityConfig::ParseJsonCleartextPermitted(const cJSON* const root, bool &cleartextPermitted)
+{
+    if (root == nullptr || !cJSON_IsBool(root)) {
+        cleartextPermitted = true;
+        return;
+    }
+    cleartextPermitted = cJSON_IsTrue(root);
+    NETMGR_LOG_D("CleartextPermitted: %{public}d", cleartextPermitted);
+}
+
+int32_t NetworkSecurityConfig::IsCleartextPermitted(bool &baseCleartextPermitted)
+{
+    if (!CommonUtils::HasInternetPermission()) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    baseCleartextPermitted = hasBaseConfig_ ? baseConfig_.cleartextTrafficPermitted_ : true;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted)
+{
+    if (!CommonUtils::HasInternetPermission()) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    bool baseCleartextPermitted = hasBaseConfig_ ? baseConfig_.cleartextTrafficPermitted_ : true;
+    if (hostname.empty()) {
+        NETMGR_LOG_E("Failed to get cleartextPermitted, hostname is empty.");
+        cleartextPermitted = baseCleartextPermitted;
+        return NETMANAGER_SUCCESS;
+    }
+
+    const bool *pCtTrafficPermitted = nullptr;
+    for (const auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
+            if (hostname == domain.domainName_) {
+                pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
+                break;
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+                pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
+                break;
+            }
+        }
+        if (pCtTrafficPermitted != nullptr) {
+            break;
+        }
+    }
+    cleartextPermitted = pCtTrafficPermitted == nullptr ? baseCleartextPermitted : *pCtTrafficPermitted;
+    return NETMANAGER_SUCCESS;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

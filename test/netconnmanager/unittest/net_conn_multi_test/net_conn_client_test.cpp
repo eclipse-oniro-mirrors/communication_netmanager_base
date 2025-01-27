@@ -1602,5 +1602,19 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
+HWTEST_F(NetConnClientTest, IsCleartextPermitted001, TestSize.Level1)
+{
+    bool isclearpermitted;
+    auto ret = NetConnClient::GetInstance().IsCleartextPermitted(isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
+{
+    bool isclearpermitted;
+    auto ret = NetConnClient::GetInstance().IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

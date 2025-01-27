@@ -399,6 +399,7 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
 {
     int32_t result = NETMANAGER_ERROR;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    httpProxyThreadCv_.notify_all();
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, supplierId, &netLinkInfo, callingUid, &result]() {
             result = this->UpdateNetLinkInfoAsync(supplierId, netLinkInfo, callingUid);
@@ -411,6 +412,7 @@ int32_t NetConnService::NetDetection(int32_t netId)
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     NETMGR_LOG_I("NetDetection, call uid [%{public}d]", callingUid);
+    httpProxyThreadCv_.notify_all();
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, netId, &result]() { result = this->NetDetectionAsync(netId); });
