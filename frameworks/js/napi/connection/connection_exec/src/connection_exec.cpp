@@ -433,23 +433,6 @@ napi_value ConnectionExec::SetPacUrlCallback(SetPacUrlContext *context)
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-bool ConnectionExec::ExecFactoryResetNetwork(FactoryResetNetworkContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecFactoryResetNetwork into");
-    int32_t errorCode = NetConnClient::GetInstance().FactoryResetNetwork();
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec ResetNetwork failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::FactoryResetNetworkCallback(FactoryResetNetworkContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
 bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
 {
     if (context == nullptr) {
