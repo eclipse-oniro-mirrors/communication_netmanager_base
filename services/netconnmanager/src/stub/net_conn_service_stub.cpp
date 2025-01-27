@@ -181,7 +181,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL)] = {
-        &NetConnServiceStub::OnSetPacUrl, {}};
+        &NetConnServiceStub::OnSetPacUrl, {Permission::SET_PAC_URL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {
         &NetConnServiceStub::OnGetPacUrl, {}};
 }
