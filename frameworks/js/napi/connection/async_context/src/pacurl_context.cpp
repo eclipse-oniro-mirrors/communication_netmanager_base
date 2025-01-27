@@ -36,7 +36,6 @@ void SetPacUrlContext::ParseParams(napi_value *params, size_t paramsCount)
     if (!CheckParamsType(GetEnv(), params, paramsCount)) {
         NETMANAGER_BASE_LOGE("check params type failed");
         SetParseOK(false);
-        SetNeedThrowException(true);
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return;
     }
