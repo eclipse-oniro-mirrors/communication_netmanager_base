@@ -416,7 +416,7 @@ bool ConnectionExec::ExecSetPacUrl(SetPacUrlContext *context)
 {
     if (context->pacUrl_.empty()) {
         NETMANAGER_BASE_LOGE("pac Url is empty!");
-        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
     }
     int32_t errorCode = NetConnClient::GetInstance().SetPacUrl(context->pacUrl_);
