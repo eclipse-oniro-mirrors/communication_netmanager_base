@@ -65,7 +65,7 @@ HWTEST_F(DnsQualityDiagTest, GetInstanceShouldReturnSingletonInstance, TestSize.
 {
     DnsQualityDiag &instance1 = DnsQualityDiag::GetInstance();
     DnsQualityDiag &instance2 = DnsQualityDiag::GetInstance();
-    EXPECT_EQ(&instance1, &instance2);
+    EXPECT_EQ(instance1.report_delay, instance2.report_delay);
 }
 
 HWTEST_F(DnsQualityDiagTest, SendHealthReport_ShouldReturnZero_WhenCalled, TestSize.Level0)

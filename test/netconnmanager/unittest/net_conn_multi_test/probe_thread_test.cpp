@@ -57,6 +57,7 @@ HWTEST_F(ProbeThreadTest, SendHttpProbe001, TestSize.Level1)
     instance_->httpProbe_ = nullptr;
     instance_->SendHttpProbe(PROBE_HTTP_HTTPS);
     instance_->httpProbe_ = std::move(httpProbeInstance);
+    EXPECT_TRUE(instance_->httpProbe_ != nullptr);
 }
 
 } // NetManagerStandard
