@@ -444,6 +444,11 @@ public:
         return 0;
     }
 
+    int32_t SetIpCommandForRes(const std::string &cmd, std::string &respond) override
+    {
+        return 0;
+    }
+
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override
     {
         return 0;
