@@ -532,6 +532,9 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->SetIptablesCommandForRes(cmd, respond, ipType);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = instance_->SetIpCommandForRes(cmd, respond);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     OHOS::NetsysNative::NetDiagPingOption pingOption;
     ret = instance_->NetDiagPingHost(pingOption, nullptr);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
