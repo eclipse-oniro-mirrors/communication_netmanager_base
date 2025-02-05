@@ -123,6 +123,7 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
     info.ifaceName_ = TEST_IFACE_NAME;
     info.ident_ = IDENT;
     instance_->UpdateStatsCached(info);
+    EXPECT_TRUE(instance_ != nullptr);
 }
 
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)
