@@ -173,7 +173,7 @@ private:
     }
 
     std::shared_ptr<NetPolicyFileEventHandler> GetHandler();
-
+    ffrt::mutex netFirewallRulesMutex_;
 public:
     NetPolicy netPolicy_;
 };
