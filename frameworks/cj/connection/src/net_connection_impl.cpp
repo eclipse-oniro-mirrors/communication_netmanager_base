@@ -20,7 +20,7 @@
 #include "net_specifier.h"
 
 namespace OHOS::NetManagerStandard {
-std::map<ConnectionCallbackObserver *, NetConnectionImpl *> NET_CONNECTIONS;
+std::map<ConnectionCallbackObserver *, NetConnectionImpl *> NET_CONNECTIONS_FFI;
 std::shared_mutex g_netConnectionsMutex;
 
 NetConnectionProxy::NetConnectionProxy(CNetSpecifier specifier, uint32_t timeout)
@@ -121,7 +121,7 @@ NetConnectionImpl *NetConnectionImpl::MakeNetConnection()
     std::unique_lock lock(g_netConnectionsMutex);
     auto netConnection = new NetConnectionImpl();
     if (netConnection) {
-        NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
+        NET_CONNECTIONS_FFI[netConnection->observer_.GetRefPtr()] = netConnection;
     }
     return netConnection;
 }
@@ -129,7 +129,7 @@ NetConnectionImpl *NetConnectionImpl::MakeNetConnection()
 void NetConnectionImpl::DeleteNetConnection(NetConnectionImpl *netConnection)
 {
     std::unique_lock lock(g_netConnectionsMutex);
-    NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
+    NET_CONNECTIONS_FFI.erase(netConnection->observer_.GetRefPtr());
     delete netConnection;
 }
 
