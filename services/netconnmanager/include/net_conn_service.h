@@ -523,6 +523,7 @@ private:
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);
     bool IsValidUserId(int32_t userId);
+    int32_t GetValidUserIdFromProxy(const HttpProxy &httpProxy);
     inline bool IsPrimaryUserId(const int32_t userId)
     {
         return userId == PRIMARY_USER_ID;
