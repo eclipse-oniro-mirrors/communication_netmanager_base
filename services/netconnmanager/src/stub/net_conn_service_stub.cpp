@@ -180,6 +180,10 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL)] = {
+        &NetConnServiceStub::OnSetPacUrl, {Permission::SET_PAC_URL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {
+        &NetConnServiceStub::OnGetPacUrl, {}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -1271,6 +1275,40 @@ int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessagePa
     if (!httpProxy.Marshalling(reply)) {
         return ERR_FLATTEN_OBJECT;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetPacUrl(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnGetPacUrl");
+    std::string pacUrl = "";
+    int32_t ret = GetPacUrl(pacUrl);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    if (!reply.WriteString(pacUrl)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetPacUrl(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnSetPacUrl");
+    std::string pacUrl;
+    if (!data.ReadString(pacUrl)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetPacUrl(pacUrl);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
     return NETMANAGER_SUCCESS;
 }
 

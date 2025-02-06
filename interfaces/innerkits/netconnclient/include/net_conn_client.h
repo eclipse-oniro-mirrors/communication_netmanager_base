@@ -494,6 +494,10 @@ public:
     int32_t DisableDistributedNet(bool isServer);
 
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid);
+
+    int32_t SetPacUrl(const std::string &pacUrl);
+
+    int32_t GetPacUrl(std::string &pacUrl);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -537,6 +541,7 @@ private:
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
     std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
+    std::string pacUrl_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

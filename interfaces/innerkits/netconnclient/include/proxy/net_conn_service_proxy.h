@@ -97,6 +97,8 @@ public:
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override;
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
+    int32_t SetPacUrl(const std::string &pacUrl) override;
+    int32_t GetPacUrl(std::string &pacUrl) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

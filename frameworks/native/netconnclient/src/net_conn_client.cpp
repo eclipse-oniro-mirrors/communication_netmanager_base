@@ -707,6 +707,30 @@ int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
     return proxy->GetDefaultHttpProxy(bindNetId, httpProxy);
 }
 
+int32_t NetConnClient::SetPacUrl(const std::string &pacUrl)
+{
+    NETMGR_LOG_I("Enter SetPacUrl");
+
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetPacUrl(pacUrl);
+}
+
+int32_t NetConnClient::GetPacUrl(std::string &pacUrl)
+{
+    NETMGR_LOG_I("Enter GetPacUrl");
+
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetPacUrl(pacUrl);
+}
+
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     sptr<INetConnService> proxy = GetProxy();

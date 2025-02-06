@@ -116,6 +116,8 @@ public:
                                                const std::string &dstAddr) = 0;
     virtual int32_t DisableDistributedNet(bool isServer) = 0;
     virtual int32_t CloseSocketsUid(int32_t netId, uint32_t uid) = 0;
+    virtual int32_t SetPacUrl(const std::string &pacUrl) = 0;
+    virtual int32_t GetPacUrl(std::string &pacUrl) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -38,6 +38,8 @@ constexpr const char *GLOBAL_PROXY_PORT_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=global_proxy_port";
 constexpr const char *GLOBAL_PROXY_EXCLUSIONS_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=global_proxy_exclusions";
+constexpr const char *PAC_URL_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=pac_url";
 
 constexpr const char *USER_URI_PATTERN = "##USERID##";
 constexpr const char *USER_PROXY_HOST_URI =
@@ -54,6 +56,7 @@ constexpr const char *KEY_AIRPLANE_MODE = "settings.telephony.airplanemode";
 constexpr const char *KEY_GLOBAL_PROXY_HOST = "settings.netmanager.proxy_host";
 constexpr const char *KEY_GLOBAL_PROXY_PORT = "settings.netmanager.proxy_port";
 constexpr const char *KEY_GLOBAL_PROXY_EXCLUSIONS = "settings.netmanager.proxy_exclusions";
+constexpr const char *KEY_PAC_URL = "settings.netmanager.pac_url";
 } // namespace
 
 class NetDataShareHelperUtils final {
