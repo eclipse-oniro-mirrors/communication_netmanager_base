@@ -1308,7 +1308,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
 void NetConnService::RequestAllNetworkExceptDefault()
 {
     if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())
-        || defaultNetSupplier_->IsNetAcceptUnavalidate()) {
+        || (defaultNetSupplier_->IsNetAcceptUnavalidate())) {
         NETMGR_LOG_E("defaultNetSupplier_ is  null or IsNetValidated or AcceptUnavalidate");
         return;
     }
