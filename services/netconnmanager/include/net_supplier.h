@@ -147,7 +147,7 @@ public:
 
     bool ResumeNetworkInfo();
     bool IsNetQualityPoor();
-    bool IsNetAcceptUnavalidate()
+    bool IsNetAcceptUnavalidate();
     bool IsInFirstTimeDetecting() const;
     void SetIfFallbackProbeWithProxy(bool needProxy);
 
