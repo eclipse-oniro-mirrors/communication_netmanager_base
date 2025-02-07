@@ -2391,7 +2391,7 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         ret = GetActiveUserId(userId);
     } else if (userIdType == LOCAL) {
         ret = GetLocalUserId(userId);
-        if (userId == ROOT_USER_ID {
+        if (userId == ROOT_USER_ID) {
             ret = GetActiveUserId(userId);
         }
     } else if (userIdType == SPECIFY) {

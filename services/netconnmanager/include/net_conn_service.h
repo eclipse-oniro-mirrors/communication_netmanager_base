@@ -589,9 +589,9 @@ private:
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;
-    static constexpr uint32_t INVALID_USER_ID = -1;
-    static constexpr uint32_t ROOT_USER_ID = 0;
-    uint32_t currentUserId_ = INVALID_USER_ID;
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t ROOT_USER_ID = 0;
+    int32_t currentUserId_ = INVALID_USER_ID;
     bool isFallbackProbeWithProxy_ = false;
 
 private:
