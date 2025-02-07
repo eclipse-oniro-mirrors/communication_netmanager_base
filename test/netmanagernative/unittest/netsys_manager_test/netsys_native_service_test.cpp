@@ -628,6 +628,14 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetIpCommandForResTest001, TestSize.Level1)
+{
+    std::string ipCmd = "/system/bin/ip rule list";
+    std::string ipOutput = "";
+    auto ret = instance_->SetIpCommandForRes(ipCmd, ipOutput);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, StaticArpTest001, TestSize.Level1)
 {
     std::string ipAddr = "192.168.1.100";

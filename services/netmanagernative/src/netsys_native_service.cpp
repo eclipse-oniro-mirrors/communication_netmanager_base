@@ -831,6 +831,16 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+int32_t NetsysNativeService::SetIpCommandForRes(const std::string &cmd, std::string &respond)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("SetIpCommandForRes netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    netDiagWrapper->ExecuteCommandForResult(cmd, respond);
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysNativeService::NetDiagPingHost(const NetDiagPingOption &pingOption,
                                              const sptr<INetDiagCallback> &callback)
 {

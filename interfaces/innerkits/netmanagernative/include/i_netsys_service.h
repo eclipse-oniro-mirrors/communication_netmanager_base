@@ -158,6 +158,7 @@ public:
     virtual int32_t UpdateIfIndexMap(int8_t key, uint64_t index) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                              IptablesType ipType = IPTYPE_IPV4) = 0;
+    virtual int32_t SetIpCommandForRes(const std::string &cmd, std::string &respond) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
     virtual int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) = 0;

@@ -224,6 +224,14 @@ HWTEST_F(NetsysControllerTest, SetIptablesCommandForResTest001, TestSize.Level1)
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
+HWTEST_F(NetsysControllerTest, SetIpCommandForResTest001, TestSize.Level1)
+{
+    std::string cmd = "";
+    std::string respond = "";
+    int32_t result = instance_->SetIpCommandForRes(cmd, respond);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
 HWTEST_F(NetsysControllerTest, SetNicTrafficAllowedTest001, TestSize.Level1)
 {
     NetsysController netsysController;

@@ -1131,6 +1131,20 @@ void SetIptablesCommandForResFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void SetIpCommandForResFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    if (!dataParcel.WriteString("/system/bin/ip rule list")) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES),
+                    dataParcel);
+}
+
 void NetworkCreateVirtualFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1262,6 +1276,18 @@ void CmdSetIptablesCommandForResFuzzTest(const uint8_t *data, size_t size)
     std::string cmd = NetSysGetString(STR_LEN);
     dataParcel.WriteString(cmd);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES),
+                    dataParcel);
+}
+
+void CmdSetIpCommandForResFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string cmd = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(cmd);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_IPCMD_FOR_RES),
                     dataParcel);
 }
 
@@ -1534,6 +1560,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdSetTcpBufferSizesFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdGetAllStatsInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdSetIptablesCommandForResFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetIpCommandForResFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdAddStaticArpFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDelStaticArpFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdRegisterDnsResultListenerFuzzTest(data, size);
@@ -1584,6 +1611,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::StartDhcpServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDhcpServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::SetIptablesCommandForResFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetIpCommandForResFuzzTest(data, size);
     OHOS::NetManagerStandard::SetDefaultNetWorkFuzzTest(data, size);
     OHOS::NetManagerStandard::SetInterfaceConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::IpfwdAddInterfaceForwardFuzzTest(data, size);
