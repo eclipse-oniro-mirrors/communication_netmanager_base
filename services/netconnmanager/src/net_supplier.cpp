@@ -619,6 +619,11 @@ bool NetSupplier::IsNetQualityPoor()
     return netQuality_ == QUALITY_POOR_STATE;
 }
 
+bool NetSupplier::IsNetAcceptUnavalidate()
+{
+    return netQuality_ == ACCEPT_UNVALIDATED;
+}
+
 void NetSupplier::SetDetectionDone()
 {
     if (!isFirstTimeDetectionDone) {
