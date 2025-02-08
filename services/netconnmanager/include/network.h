@@ -28,6 +28,7 @@
 #include "route.h"
 #include "nat464_service.h"
 #include "netmanager_base_common_utils.h"
+#include <shared_mutex>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -111,6 +112,8 @@ private:
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
     std::unique_ptr<Nat464Service> nat464Service_;
+    std::shared_mutex netCapsMutex;
+    
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;
 #endif
