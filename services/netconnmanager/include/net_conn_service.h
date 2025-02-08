@@ -514,7 +514,6 @@ private:
 
     void RecoverNetSys();
     void OnNetSysRestart();
-    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
     std::vector<std::string> GetPreferredRegex();
@@ -526,7 +525,7 @@ private:
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);
     bool IsValidUserId(int32_t userId);
-    int32_t GetCallingUserId(int32_t &userId);
+    int32_t GetValidUserIdFromProxy(const HttpProxy &httpProxy);
     inline bool IsPrimaryUserId(const int32_t userId)
     {
         return userId == PRIMARY_USER_ID;
@@ -592,8 +591,9 @@ private:
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;
-    static constexpr uint32_t INVALID_USER_ID = -1;
-    uint32_t currentUserId_ = INVALID_USER_ID;
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t ROOT_USER_ID = 0;
+    int32_t currentUserId_ = INVALID_USER_ID;
     bool isFallbackProbeWithProxy_ = false;
 
 private:
