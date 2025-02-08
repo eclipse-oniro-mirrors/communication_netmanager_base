@@ -48,12 +48,12 @@ struct PinSet {
 };
 
 struct BaseConfig {
-    bool cleartextTrafficPermitted_;
+    bool cleartextTrafficPermitted_ = true;
     TrustAnchors trustAnchors_;
 };
 
 struct DomainConfig {
-    bool cleartextTrafficPermitted_;
+    bool cleartextTrafficPermitted_ = true;
     std::vector<Domain> domains_;
     TrustAnchors trustAnchors_;
     PinSet pinSet_;
