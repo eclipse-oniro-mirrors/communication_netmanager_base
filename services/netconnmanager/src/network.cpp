@@ -232,9 +232,11 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
         nat464Service_->UpdateService(NAT464_SERVICE_STOP);
     }
     bool find = false;
-    std::shared_lock<std::shared_mutex> lock(netCapsMutex);
-    if (netSupplierType_ != BEARER_VPN && netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
-        find = true;
+    {
+        std::shared_lock<std::shared_mutex> lock(netCapsMutex);
+        if (netSupplierType_ != BEARER_VPN && netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+            find = true;
+        }
     }
     if (find) {
         StartNetDetection(false);
