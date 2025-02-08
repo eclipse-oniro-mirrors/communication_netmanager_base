@@ -237,7 +237,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
         find = true;
     }
     if (find) {
-        StartNetDetection();
+        StartNetDetection(false);
     }
     return true;
 }
