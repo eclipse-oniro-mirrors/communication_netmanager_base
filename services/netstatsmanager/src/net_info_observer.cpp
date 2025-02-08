@@ -57,9 +57,9 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
         return 0;
     }
 
-    uint64_t ident = 0;
-    NetStatsUtils::ConvertToUint64(info->ident_, ident);
-    if (ident == ident_) { // 默认蜂窝网络对应的sim卡没变
+    int32_t ident = 0;
+    NetStatsUtils::ConvertToInt32(info->ident_, ident);
+    if (ident == ident_ && info->ifaceName_ == ifaceName_) {
         return 0;
     }
     ident_ = ident;
@@ -70,4 +70,4 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
 }
 
 } // namespace NetManagerStandard
-} // namespace OHOS
+} // namespace OHOS
