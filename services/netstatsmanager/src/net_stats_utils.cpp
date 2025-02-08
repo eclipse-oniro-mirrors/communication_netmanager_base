@@ -48,11 +48,11 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
     last_month_xth_tm.tm_mday = startdate;
 
     int daysInCurrentMonth = NetStatsUtils::GetDaysInMonth(previous_year, previous_month);
-    // 如果上个月没有起始日期这一天，就从本月第一天凌晨开始算
+    // 如果上个月没有起始日期这一天，就从上个月的月末一天开始算
     if (daysInCurrentMonth < startdate) {
-        last_month_xth_tm.tm_year = current_year - TM_YEAR_START;
-        last_month_xth_tm.tm_mon = current_month -1 ;
-        last_month_xth_tm.tm_mday = 1;
+        last_month_xth_tm.tm_year = previous_year - TM_YEAR_START;
+        last_month_xth_tm.tm_mon = previous_month -1 ;
+        last_month_xth_tm.tm_mday = daysInCurrentMonth;
     }
     // 如果当前天大于起始日期，则获取本月的时间
     if (startdate <= current_day) {
@@ -209,4 +209,4 @@ bool NetStatsUtils::ConvertToInt32(const std::string &str, int32_t &value)
     return true;
 }
 }
-}
+}
