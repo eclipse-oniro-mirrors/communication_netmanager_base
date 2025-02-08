@@ -63,7 +63,7 @@ public:
      * @param netId network ID
      * @return int32_t 0:success -1:failed
      */
-    int32_t CreateNetworkCache(uint16_t netId);
+    int32_t CreateNetworkCache(uint16_t netId, bool isVpnNet = false);
 
     /**
      * Set the Default Network object
@@ -116,7 +116,7 @@ public:
      * @param netId network's id
      * @return destroy is success? 0 : -1
      */
-    int32_t DestroyNetworkCache(uint16_t netId);
+    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     /**

@@ -71,15 +71,15 @@ int32_t DnsManager::GetResolverConfig(uint16_t netId, std::vector<std::string> &
     return DnsParamCache::GetInstance().GetResolverConfig(netId, servers, domains, baseTimeoutMillis, retryCount);
 }
 
-int32_t DnsManager::CreateNetworkCache(uint16_t netId)
+int32_t DnsManager::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOG_D("manager_CreateNetworkCache netId[%{public}d]", netId);
-    return DnsParamCache::GetInstance().CreateCacheForNet(netId);
+    return DnsParamCache::GetInstance().CreateCacheForNet(netId, isVpnNet);
 }
 
-int32_t DnsManager::DestroyNetworkCache(uint16_t netId)
+int32_t DnsManager::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
-    return DnsParamCache::GetInstance().DestroyNetworkCache(netId);
+    return DnsParamCache::GetInstance().DestroyNetworkCache(netId, isVpnNet);
 }
 
 void DnsManager::SetDefaultNetwork(uint16_t netId)

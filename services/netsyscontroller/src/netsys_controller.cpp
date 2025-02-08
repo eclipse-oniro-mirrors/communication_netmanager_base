@@ -75,7 +75,7 @@ int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return netsysService_->NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysController::NetworkDestroy(int32_t netId)
+int32_t NetsysController::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     // LCOV_EXCL_START This will never happen.
@@ -84,7 +84,7 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->NetworkDestroy(netId);
+    return netsysService_->NetworkDestroy(netId, isVpnNet);
 }
 
 int32_t NetsysController::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
@@ -425,7 +425,7 @@ int32_t NetsysController::GetResolverConfig(uint16_t netId, std::vector<std::str
     return netsysService_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
-int32_t NetsysController::CreateNetworkCache(uint16_t netId)
+int32_t NetsysController::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("create dns cache: netId[%{public}d]", netId);
     // LCOV_EXCL_START This will never happen.
@@ -434,10 +434,10 @@ int32_t NetsysController::CreateNetworkCache(uint16_t netId)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->CreateNetworkCache(netId);
+    return netsysService_->CreateNetworkCache(netId, isVpnNet);
 }
 
-int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysController::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("Destroy dns cache: netId[%{public}d]", netId);
     // LCOV_EXCL_START This will never happen.
@@ -446,7 +446,7 @@ int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->DestroyNetworkCache(netId);
+    return netsysService_->DestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysController::GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,

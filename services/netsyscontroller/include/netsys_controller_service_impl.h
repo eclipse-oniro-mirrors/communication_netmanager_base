@@ -54,7 +54,7 @@ public:
      * @param netId
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkDestroy(int32_t netId) override;
+    int32_t NetworkDestroy(int32_t netId, bool isVpnNet = false) override;
 
     int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                        const std::set<int32_t> &uids) override;
@@ -254,7 +254,7 @@ public:
      * @param netId
      * @return Return the return value for status of call
      */
-    int32_t CreateNetworkCache(uint16_t netId) override;
+    int32_t CreateNetworkCache(uint16_t netId, bool isVpnNet = false) override;
 
     /**
      * Destroy dns cache
@@ -262,7 +262,7 @@ public:
      * @param netId
      * @return Return the return value of the netsys interface call
      */
-    int32_t DestroyNetworkCache(uint16_t netId) override;
+    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet = false) override;
 
     /**
      * Domain name resolution Obtains the domain name address
