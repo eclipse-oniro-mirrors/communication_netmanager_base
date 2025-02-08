@@ -1494,10 +1494,9 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
             }
             case CALL_TYPE_UPDATE_CAP: {
                 sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
-                std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+                std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
                 *pNetAllCap = supplier->GetNetCapabilities();
                 callback->NetCapabilitiesChange(netHandle, pNetAllCap);
-                locker.unlock();
                 break;
             }
             case CALL_TYPE_UPDATE_LINK: {
@@ -1510,9 +1509,8 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
                 break;
             }
             case CALL_TYPE_BLOCK_STATUS: {
-                bool Metered = supplier->HasNetCap(NET_CAPABILITY_NOT_METERED);
-                bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(supplier->GetSupplierUid(), Metered);
-                callback->NetBlockStatusChange(netHandle, newBlocked);
+                callback->NetBlockStatusChange(netHandle, NetManagerCenter::GetInstance().IsUidNetAccess(
+                    supplier->GetSupplierUid(), supplier->HasNetCap(NET_CAPABILITY_NOT_METERED)));
                 break;
             }
             default:
