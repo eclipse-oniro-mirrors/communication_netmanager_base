@@ -498,6 +498,7 @@ public:
     int32_t SetPacUrl(const std::string &pacUrl);
 
     int32_t GetPacUrl(std::string &pacUrl);
+    int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
