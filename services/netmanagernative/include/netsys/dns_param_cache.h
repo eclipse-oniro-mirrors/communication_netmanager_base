@@ -52,7 +52,7 @@ public:
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                               const std::vector<std::string> &servers, const std::vector<std::string> &domains);
 
-    int32_t CreateCacheForNet(uint16_t netId);
+    int32_t CreateCacheForNet(uint16_t netId, bool isVpnNet = false);
 
     void SetDefaultNetwork(uint16_t netId);
 
@@ -73,7 +73,7 @@ public:
 
     void GetDumpInfo(std::string &info);
 
-    int32_t DestroyNetworkCache(uint16_t netId);
+    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
 
     bool IsIpv6Enable(uint16_t netId);
 

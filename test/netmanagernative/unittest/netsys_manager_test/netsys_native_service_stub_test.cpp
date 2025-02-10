@@ -81,12 +81,12 @@ public:
         return 0;
     }
 
-    int32_t CreateNetworkCache(uint16_t netId) override
+    int32_t CreateNetworkCache(uint16_t netId, bool isVpnNet) override
     {
         return 0;
     }
 
-    int32_t DestroyNetworkCache(uint16_t netId) override
+    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet) override
     {
         return 0;
     }
@@ -229,7 +229,7 @@ public:
         return 0;
     }
 
-    int32_t NetworkDestroy(int32_t netId) override
+    int32_t NetworkDestroy(int32_t netId, bool isVpnNet) override
     {
         return 0;
     }

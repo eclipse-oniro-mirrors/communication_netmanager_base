@@ -162,7 +162,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
     return result;
 }
 
-int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
+int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
@@ -170,6 +170,9 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -184,7 +187,7 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to DestroyNetworkCache");
     MessageParcel data;
@@ -192,6 +195,9 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -938,7 +944,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveInterface(int32_t netId, const st
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to NetworkDestroy");
     MessageParcel data;
@@ -946,6 +952,9 @@ int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 

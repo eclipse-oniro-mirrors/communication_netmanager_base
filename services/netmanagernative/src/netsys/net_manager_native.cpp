@@ -99,10 +99,10 @@ int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return connManager_->CreateVirtualNetwork(netId, hasDns);
 }
 
-int32_t NetManagerNative::NetworkDestroy(int32_t netId)
+int32_t NetManagerNative::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     auto ret = connManager_->DestroyNetwork(netId);
-    dnsManager_->DestroyNetworkCache(netId);
+    dnsManager_->DestroyNetworkCache(netId, isVpnNet);
     return ret;
 }
 
@@ -401,14 +401,14 @@ int32_t NetManagerNative::DnsGetResolverConfig(uint16_t netId, std::vector<std::
     return dnsManager_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
-int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netId)
+int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
-    return dnsManager_->CreateNetworkCache(netId);
+    return dnsManager_->CreateNetworkCache(netId, isVpnNet);
 }
 
-int32_t NetManagerNative::DnsDestroyNetworkCache(uint16_t netId)
+int32_t NetManagerNative::DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
-    return dnsManager_->DestroyNetworkCache(netId);
+    return dnsManager_->DestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)

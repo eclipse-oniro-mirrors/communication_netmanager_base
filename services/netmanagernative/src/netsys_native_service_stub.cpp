@@ -539,8 +539,9 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
 int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
     uint16_t netid = data.ReadUint16();
-    NETNATIVE_LOGI("CreateNetworkCache  netid %{public}d", netid);
-    int32_t result = CreateNetworkCache(netid);
+    bool isVpnNet = data.ReadBool();
+    NETNATIVE_LOGI("CreateNetworkCache  netid %{public}d, isVpnNet %{public}d", netid, isVpnNet);
+    int32_t result = CreateNetworkCache(netid, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("CreateNetworkCache has recved result %{public}d", result);
 
@@ -550,10 +551,11 @@ int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, Mess
 int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
     uint16_t netId = data.ReadUint16();
-    int32_t result = DestroyNetworkCache(netId);
+    bool isVpnNet = data.ReadBool();
+    NETNATIVE_LOGI("DestroyNetworkCache  netId %{public}d, isVpnNet %{public}d", netId, isVpnNet);
+    int32_t result = DestroyNetworkCache(netId, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("DestroyNetworkCache has recved result %{public}d", result);
-
     return ERR_NONE;
 }
 
@@ -1009,7 +1011,8 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveInterface(MessageParcel &data, 
 int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = data.ReadInt32();
-    int32_t result = NetworkDestroy(netId);
+    bool isVpnNet = data.ReadBool();
+    int32_t result = NetworkDestroy(netId, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
 

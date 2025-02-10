@@ -32,8 +32,8 @@ public:
                               const std::vector<std::string> &domains) override;
     int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
-    int32_t CreateNetworkCache(uint16_t netId) override;
-    int32_t DestroyNetworkCache(uint16_t netId) override;
+    int32_t CreateNetworkCache(uint16_t netId, bool isVpnNet = false) override;
+    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet = false) override;
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
                         uint16_t netId, std::vector<AddrInfo> &res) override;
     int32_t SetInterfaceMtu(const std::string &interfaceName, int32_t mtu) override;
@@ -72,7 +72,7 @@ public:
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
     int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
-    int32_t NetworkDestroy(int32_t netId) override;
+    int32_t NetworkDestroy(int32_t netId, bool isVpnNet = false) override;
     int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                        const std::set<int32_t> &uids) override;
     int32_t DestroyVnic() override;
