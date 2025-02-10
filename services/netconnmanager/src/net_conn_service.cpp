@@ -497,6 +497,7 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
 
     netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, callingUid, &callback]() {
+        std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         for (const auto &supplier : netSuppliers_) {
             if (supplier.second == nullptr || supplier.second->GetSupplierCallback() == nullptr) {
                 continue;
@@ -673,6 +674,7 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
 void NetConnService::StopAllNetDetection()
 {
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto& pNetSupplier : netSuppliers_) {
         if (pNetSupplier.second == nullptr) {
             continue;
@@ -689,6 +691,7 @@ void NetConnService::StopAllNetDetection()
 
 void NetConnService::StartAllNetDetection()
 {
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     for (const auto& pNetSupplier : netSuppliers_) {
         if (pNetSupplier.second == nullptr) {
             continue;
