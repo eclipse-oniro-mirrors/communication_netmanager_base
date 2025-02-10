@@ -284,7 +284,7 @@ int socket_iface_stats(struct __sk_buff *skb)
     if (flag == UINT8_MAX) {
         flag = is_exceed_mothly_mark(used_value);
         if (flag == UINT8_MAX) {
-            is_exceed_daily_mark(used_value);
+            flag = is_exceed_daily_mark(used_value);
         }
     }
     if (flag != UINT8_MAX) {
