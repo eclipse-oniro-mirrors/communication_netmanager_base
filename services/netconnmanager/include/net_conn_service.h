@@ -362,6 +362,8 @@ public:
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
+    int32_t SetPacUrl(const std::string &pacUrl) override;
+    int32_t GetPacUrl(std::string &pacUrl) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

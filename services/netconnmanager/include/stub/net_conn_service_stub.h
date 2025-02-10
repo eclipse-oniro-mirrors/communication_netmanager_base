@@ -98,6 +98,8 @@ private:
     int32_t OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetPacUrl(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetPacUrl(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

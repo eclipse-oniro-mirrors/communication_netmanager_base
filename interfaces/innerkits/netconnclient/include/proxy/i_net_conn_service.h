@@ -106,6 +106,8 @@ public:
     virtual int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) = 0;
     virtual int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) = 0;
     virtual int32_t DisableVnicNetwork() = 0;
+    virtual int32_t SetPacUrl(const std::string &pacUrl) = 0;
+    virtual int32_t GetPacUrl(std::string &pacUrl) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

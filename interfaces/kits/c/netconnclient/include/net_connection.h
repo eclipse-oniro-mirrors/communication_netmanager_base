@@ -268,6 +268,10 @@ int32_t OH_NetConn_RegisterAppHttpProxyCallback(OH_NetConn_AppHttpProxyChange ap
 
 void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId);
 
+int32_t OH_NetConn_SetPacUrl(const char *pacUrl);
+
+int32_t OH_NetConn_GetPacUrl(char *pacUrl);
+
 #ifdef __cplusplus
 }
 #endif

@@ -303,6 +303,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetPacUrl(const std::string &pacUrl) override
+    {
+        return 0;
+    }
+
+    int32_t GetPacUrl(std::string &pacUrl) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
