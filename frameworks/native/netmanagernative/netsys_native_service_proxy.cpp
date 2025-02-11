@@ -1855,7 +1855,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
 }
 
 int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic,
-                                                                    std::string &ifaceName)
+    std::string &ifaceName)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
