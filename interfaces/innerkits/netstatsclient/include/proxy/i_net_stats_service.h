@@ -26,6 +26,7 @@
 #include "net_stats_info_sequence.h"
 #include "net_stats_network.h"
 #include "stats_ipc_interface_code.h"
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -61,6 +62,7 @@ public:
     virtual int32_t ResetFactory() = 0;
     virtual int32_t GetCookieRxBytes(uint64_t &stats, uint64_t cookie) = 0;
     virtual int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) = 0;
+    virtual int32_t SaveSharingTraffic(const NetStatsInfo &infos) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

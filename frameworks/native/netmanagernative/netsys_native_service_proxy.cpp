@@ -1854,6 +1854,34 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic,
+                                                                    std::string &ifaceName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
+        data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetNetworkCellularSharingTraffic ret= %{public}d", ret);
+        return ret;
+    }
+
+    traffic.receive = reply.ReadInt64();
+    traffic.send = reply.ReadInt64();
+    traffic.all = reply.ReadInt64();
+    ifaceName = reply.ReadString();
+
+    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkCellularSharingTraffic ret=%{public}d", ret);
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
 {
     MessageParcel data;

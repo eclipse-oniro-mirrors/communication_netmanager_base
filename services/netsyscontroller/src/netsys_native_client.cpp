@@ -603,6 +603,18 @@ int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIfac
     return proxy->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 
+int32_t NetsysNativeClient::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
+                                                                std::string &ifaceName)
+{
+    NETMGR_LOG_D("NetsysNativeClient GetNetworkCellularSharingTraffic");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+}
+
 int64_t NetsysNativeClient::GetCellularRxBytes()
 {
     NETMGR_LOG_D("NetsysNativeClient GetCellularRxBytes");

@@ -29,6 +29,7 @@
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
 #include "safe_map.h"
+#include "network_sharing.h"
 
 #include "ffrt_timer.h"
 
@@ -64,6 +65,12 @@ public:
 
     void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
+    void GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo);
+
+    void GetIptablesStatsIncrease(std::vector<NetStatsInfo> &InfosVec);
+
+    void SaveSharingTraffic(const NetStatsInfo &infos);
+
     inline void SetTrafficThreshold(uint64_t threshold)
     {
         trafficThreshold_ = threshold;
@@ -94,6 +101,8 @@ public:
     void DeleteUidStatsFlag(uint32_t uid);
 
     void ClearUidStatsFlag();
+
+    void DeleteIptablesStats();
 
 private:
     class CachedInfo {
@@ -137,6 +146,19 @@ private:
             }
         }
 
+        void PushIptablesStats(NetStatsInfo &info)
+        {
+            if (info.HasNoData()) {
+                return;
+            }
+            info.date_ = CommonUtils::GetCurrentSecond();
+            iptablesStatsInfo_.push_back(info);
+            currentIptablesStats_ += info.GetStats();
+            if (netStatsCallbackManager_ != nullptr) {
+                netStatsCallbackManager_->NotifyNetUidStatsChanged(info.iface_, info.uid_);
+            }
+        }
+
         inline std::vector<NetStatsInfo> &GetUidStatsInfo()
         {
             return uidStatsInfo_;
@@ -152,6 +174,11 @@ private:
             return ifaceStatsInfo_;
         }
 
+        inline std::vector<NetStatsInfo> &GetIptablesStatsInfo()
+        {
+            return iptablesStatsInfo_;
+        }
+
         inline uint64_t GetCurrentUidStats() const
         {
             return currentUidStats_;
@@ -165,6 +192,11 @@ private:
         inline uint64_t GetCurrentIfaceStats() const
         {
             return currentIfaceStats_;
+        }
+
+        inline uint64_t GetCurrentIptablesStats() const
+        {
+            return currentIptablesStats_;
         }
 
         void ResetUidStats()
@@ -209,6 +241,12 @@ private:
             currentIfaceStats_ = 0;
         }
 
+        void ResetIptablesStats()
+        {
+            iptablesStatsInfo_.clear();
+            currentIptablesStats_ = 0;
+        }
+
         inline void SetNotifier(const std::shared_ptr<NetStatsCallback> &callbackManager)
         {
             netStatsCallbackManager_ = callbackManager;
@@ -218,9 +256,11 @@ private:
         uint64_t currentUidStats_ = 0;
         uint64_t currentUidSimStats_ = 0;
         uint64_t currentIfaceStats_ = 0;
+        uint64_t currentIptablesStats_ = 0;
         std::vector<NetStatsInfo> uidStatsInfo_;
         std::vector<NetStatsInfo> uidSimStatsInfo_;
         std::vector<NetStatsInfo> ifaceStatsInfo_;
+        std::vector<NetStatsInfo> iptablesStatsInfo_;
         std::shared_ptr<NetStatsCallback> netStatsCallbackManager_ = nullptr;
     };
 
@@ -242,6 +282,7 @@ private:
     std::vector<NetStatsInfo> allPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
+    std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
     std::atomic<int64_t> uninstalledUid_ = -1;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
@@ -258,6 +299,8 @@ private:
     void CacheUidSimStats();
     void CacheIfaceStats();
     void CacheAppStats();
+    void CacheIptablesStats();
+    void CacheIptablesStatsService(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
     void GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo);
     void GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo);
     void DeleteUidStats(uint32_t uid);
@@ -267,6 +310,9 @@ private:
     void WriteUidStats();
     void WriteUidSimStats();
     void WriteIfaceStats();
+    void WriteIptablesStats();
+
+    void GetUpIfaceName(std::string &downIface, std::string &upIface);
 
     NetStatsInfo GetIncreasedStats(const NetStatsInfo &info);
 
@@ -285,6 +331,11 @@ private:
     inline bool CheckIfaceStor()
     {
         return stats_.GetCurrentIfaceStats() >= trafficThreshold_;
+    }
+
+    inline bool CheckIptablesStor()
+    {
+        return stats_.GetCurrentIptablesStats() >= trafficThreshold_;
     }
 };
 } // namespace NetManagerStandard

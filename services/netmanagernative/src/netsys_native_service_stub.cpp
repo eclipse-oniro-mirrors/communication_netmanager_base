@@ -130,6 +130,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC)] =
         &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC)] =
+        &NetsysNativeServiceStub::CmdGetNetworkCellularSharingTraffic;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS)] =
         &NetsysNativeServiceStub::CmdGetTotalStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS)] =
@@ -1422,6 +1424,21 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data
     reply.WriteInt64(traffic.receive);
     reply.WriteInt64(traffic.send);
     reply.WriteInt64(traffic.all);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkCellularSharingTraffic(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd GetNetworkSharingTraffic");
+    std::string ifaceName;
+    NetworkSharingTraffic traffic;
+    int32_t result = GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    reply.WriteInt32(result);
+    reply.WriteInt64(traffic.receive);
+    reply.WriteInt64(traffic.send);
+    reply.WriteInt64(traffic.all);
+    reply.WriteString(ifaceName);
 
     return result;
 }

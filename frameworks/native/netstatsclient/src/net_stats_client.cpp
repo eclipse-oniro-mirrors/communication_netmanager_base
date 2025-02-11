@@ -366,6 +366,16 @@ int32_t NetStatsClient::SetAppStats(const PushStatsInfo &info)
     return proxy->SetAppStats(info);
 }
 
+int32_t NetStatsClient::SaveSharingTraffic(const NetStatsInfo &infos)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SaveSharingTraffic(infos);
+}
+
 int32_t NetStatsClient::GetSockfdRxBytes(uint64_t &stats, int32_t sockfd)
 {
     if (sockfd <= 0) {

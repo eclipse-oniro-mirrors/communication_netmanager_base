@@ -474,6 +474,18 @@ int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface,
     return netsysService_->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 
+int32_t NetsysController::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    NETMGR_LOG_I("NetsysController GetNetworkCellularSharingTraffic");
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+}
+
 int64_t NetsysController::GetCellularRxBytes()
 {
     NETMGR_LOG_D("NetsysController GetCellularRxBytes");

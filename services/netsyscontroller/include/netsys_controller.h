@@ -301,6 +301,13 @@ public:
                                      nmd::NetworkSharingTraffic &traffic);
 
     /**
+     * Obtains the bytes of the sharing network.
+     *
+     * @return Success return 0.
+     */
+    int32_t GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
+
+    /**
      * Obtains the bytes received over the cellular network.
      *
      * @return The number of received bytes.

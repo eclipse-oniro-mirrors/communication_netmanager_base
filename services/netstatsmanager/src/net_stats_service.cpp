@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <chrono>
 #include <format>
+#include <regex>
+
 #include <cinttypes>
 
 #include <initializer_list>
@@ -54,6 +56,7 @@
 #include "net_stats_notification.h"
 #include "net_stats_rdb.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
+#include "iptables_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -541,6 +544,9 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
+    netStatsCached_->GetIptablesStatsCached(allInfo);
+    netStatsCached_->GetIptablesStatsIncrease(allInfo);
+    NETMGR_LOG_E("get history by ident failed, err code=%{public}d", ret);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
         if (ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
@@ -595,6 +601,8 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
+    netStatsCached_->GetIptablesStatsCached(allInfo);
+    netStatsCached_->GetIptablesStatsIncrease(allInfo);
     std::for_each(allInfo.begin(), allInfo.end(), [this, &infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
         if (uid != info.uid_ || ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
@@ -618,6 +626,19 @@ int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
     }
     netStatsCached_->SetAppStats(info);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetAppStats end");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsService::SaveSharingTraffic(const NetStatsInfo &infos)
+{
+    NETMGR_LOG_D("Enter SaveSharingTraffic");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SaveSharingTraffic start");
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netStatsCached_->SaveSharingTraffic(infos);
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SaveSharingTraffic end");
     return NETMANAGER_SUCCESS;
 }
 

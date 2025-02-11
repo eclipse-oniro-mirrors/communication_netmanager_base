@@ -55,6 +55,13 @@ public:
     int32_t RunCommand(const IpType &ipType, const std::string &command);
 
     /**
+     * @param ipType ipv4 or ipv6
+     * @param command iptables command
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
+     */
+    std::string RunCommandForTraffic(const IpType &ipType, const std::string &command);
+
+    /**
      * @brief run iptables exec for result.
      *
      * @param ipType ipv4 or ipv6.
@@ -75,6 +82,7 @@ public:
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
+    void ExecuteCommandForTraffic(const std::string &command);
 private:
     std::mutex iptablesMutex_;
     std::condition_variable conditionVarLock_;
@@ -82,6 +90,7 @@ private:
     bool isIptablesSystemAccess_ = false;
     bool isIp6tablesSystemAccess_ = false;
     std::string result_;
+    std::string resultTraffic_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
     std::shared_ptr<ffrt::queue> iptablesWrapperFfrtQueue_ = nullptr;

@@ -304,6 +304,13 @@ int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string 
     return netsysClient_.GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 
+int32_t NetsysControllerServiceImpl::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
+                                                                        std::string &ifaceName)
+{
+    NETMGR_LOG_I("GetNetworkCellularSharingTraffic");
+    return netsysClient_.GetNetworkCellularSharingTraffic(traffic, ifaceName);
+}
+
 int64_t NetsysControllerServiceImpl::GetCellularRxBytes()
 {
     NETMGR_LOG_I("GetCellularRxBytes");
