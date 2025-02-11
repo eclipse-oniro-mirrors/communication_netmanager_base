@@ -497,7 +497,6 @@ void NetConnService::OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteOb
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(diedRemoted);
 
     netConnEventHandler_->PostSyncTask([this, &tmpSupplierId, callingUid, &callback]() {
-        std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         for (const auto &supplier : netSuppliers_) {
             if (supplier.second == nullptr || supplier.second->GetSupplierCallback() == nullptr) {
                 continue;
@@ -674,45 +673,47 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
 void NetConnService::StopAllNetDetection()
 {
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr) {
-            continue;
-        }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
-        }
-        pNetwork->StopNetDetection();
-        pNetwork->UpdateForbidDetectionFlag(true);
+    netConnEventHandler_->PostSyncTask([this]() {
+      for (const auto& pNetSupplier : netSuppliers_) {
+          if (pNetSupplier.second == nullptr) {
+              continue;
+          }
+          std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+          if (pNetwork == nullptr) {
+              NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+              continue;
+          }
+          pNetwork->StopNetDetection();
+          pNetwork->UpdateForbidDetectionFlag(true);
     }
+    });
 }
 
 void NetConnService::StartAllNetDetection()
 {
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr) {
-            continue;
-        }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
-        }
-        pNetwork->UpdateForbidDetectionFlag(false);
-    }
-    if ((defaultNetSupplier_ == nullptr)) {
-        NETMGR_LOG_W("defaultNetSupplier_ is  null");
-        return;
-    }
-    std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
-    if (pDefaultNetwork == nullptr) {
-        NETMGR_LOG_E("pDefaultNetwork is null");
-        return;
-    }
-    pDefaultNetwork->StartNetDetection(false);
+    netConnEventHandler_->PostSyncTask([this]() {
+      for (const auto& pNetSupplier : netSuppliers_) {
+          if (pNetSupplier.second == nullptr) {
+              continue;
+          }
+          std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+          if (pNetwork == nullptr) {
+              NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+              continue;
+          }
+          pNetwork->UpdateForbidDetectionFlag(false);
+      }
+      if ((defaultNetSupplier_ == nullptr)) {
+          NETMGR_LOG_W("defaultNetSupplier_ is  null");
+          return;
+      }
+      std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
+      if (pDefaultNetwork == nullptr) {
+          NETMGR_LOG_E("pDefaultNetwork is null");
+          return;
+      }
+      pDefaultNetwork->StartNetDetection(false);
+    });
 }
 
 void NetConnService::HandlePowerMgrEvent(int code)
