@@ -592,7 +592,7 @@ int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::
 }
 
 int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-                                                     nmd::NetworkSharingTraffic &traffic)
+    nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_D("NetsysNativeClient GetNetworkSharingTraffic");
     auto proxy = GetProxy();
