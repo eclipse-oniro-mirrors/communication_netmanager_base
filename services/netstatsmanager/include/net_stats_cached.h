@@ -46,6 +46,8 @@ public:
 
     int32_t StartCached();
 
+    int32_t CreatNetStatsTables();
+
     void SetCycleThreshold(uint32_t threshold);
 
     void GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo);
