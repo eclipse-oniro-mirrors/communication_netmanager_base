@@ -811,7 +811,6 @@ void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
 
 void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVec)
 {
-    std::lock_guard<ffrt::mutex> lock(lock_);
     std::string ifaceName;
     nmd::NetworkSharingTraffic traffic;
     int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
