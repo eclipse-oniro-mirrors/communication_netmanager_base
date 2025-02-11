@@ -70,43 +70,43 @@ int32_t NetStatsCached::StartCached()
 
 int32_t NetStatsCached::CreatNetStatsTables()
 {
-    auto helper = std::make_unique(NET_STATS_DATABASE_PATH);
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     int8_t curRetryTimes = 0;
     int32_t ret = -1;
     while (curRetryTimes < RETRY_TIME) {
-       NETMGR_LOG_I("Create table times: %{public}d", curRetryTimes + 1);
-       ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
-       if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_I("Create table times: %{public}d", curRetryTimes + 1);
+        ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
            NETMGR_LOG_E("Create version table failed");
            curRetryTimes++;
            continue;
-       }
-       ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
-       if (ret != NETMANAGER_SUCCESS) {
-           NETMGR_LOG_E("Create uid table failed");
-           curRetryTimes++;
-           continue;
-       }
-       ret = helper->CreateTable(IFACE_TABLE, IFACE_TABLE_CREATE_PARAM);
-       if (ret != NETMANAGER_SUCCESS) {
+        }
+        ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create uid table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(IFACE_TABLE, IFACE_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
            NETMGR_LOG_E("Create iface table failed");
-           curRetryTimes++;
+            curRetryTimes++;
            continue;
-       }
-       ret = helper->CreateTable(UID_SIM_TABLE, UID_SIM_TABLE_CREATE_PARAM);
-       if (ret != NETMANAGER_SUCCESS) {
-           NETMGR_LOG_E("Create uid_sim table failed");
-           curRetryTimes++;
-           continue;
-       }
-       break;
+        }
+        ret = helper->CreateTable(UID_SIM_TABLE, UID_SIM_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create uid_sim table failed");
+            curRetryTimes++;
+            continue;
+        }
+        break;
     }
     if (ret != NETMANAGER_SUCCESS) {
-       NETMGR_LOG_E("Create table failed");
-       return STATS_ERR_CREATE_TABLE_FAIL;
+        NETMGR_LOG_E("Create table failed");
+        return STATS_ERR_CREATE_TABLE_FAIL;
     }
-    ret = helper->Upgrade();
-    return ret;
+    helper->Upgrade();
+    return NETMANAGER_SUCCESS;
 }
 
 void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
