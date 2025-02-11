@@ -674,45 +674,12 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
 void NetConnService::StopAllNetDetection()
 {
     netConnEventHandler_->PostSyncTask([this]() {
-        for (const auto& pNetSupplier : netSuppliers_) {
-            if (pNetSupplier.second == nullptr) {
-                continue;
-            }
-            std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-            if (pNetwork == nullptr) {
-                NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-                continue;
-            }
-            pNetwork->StopNetDetection();
-            pNetwork->UpdateForbidDetectionFlag(true);
-        }
     });
 }
 
 void NetConnService::StartAllNetDetection()
 {
     netConnEventHandler_->PostSyncTask([this]() {
-        for (const auto& pNetSupplier : netSuppliers_) {
-            if (pNetSupplier.second == nullptr) {
-                continue;
-            }
-            std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-            if (pNetwork == nullptr) {
-                NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-                continue;
-            }
-            pNetwork->UpdateForbidDetectionFlag(false);
-        }
-        if ((defaultNetSupplier_ == nullptr)) {
-            NETMGR_LOG_W("defaultNetSupplier_ is  null");
-            return;
-        }
-        std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
-        if (pDefaultNetwork == nullptr) {
-            NETMGR_LOG_E("pDefaultNetwork is null");
-            return;
-        }
-        pDefaultNetwork->StartNetDetection(false);
     });
 }
 
