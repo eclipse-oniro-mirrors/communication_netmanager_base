@@ -738,6 +738,7 @@ void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesS
     std::lock_guard<ffrt::mutex> lock(lock_);
     iptablesStatsInfo.insert(iptablesStatsInfo.end(),
         stats_.GetIptablesStatsInfo().begin(), stats_.GetIptablesStatsInfo().end());
+    GetIptablesStatsIncrease(iptablesStatsInfo);
 }
 
 void NetStatsCached::CacheIptablesStats()
