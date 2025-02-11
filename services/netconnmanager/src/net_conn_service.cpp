@@ -685,7 +685,7 @@ void NetConnService::StopAllNetDetection()
           }
           pNetwork->StopNetDetection();
           pNetwork->UpdateForbidDetectionFlag(true);
-    }
+      }
     });
 }
 
