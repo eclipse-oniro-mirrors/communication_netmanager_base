@@ -545,8 +545,6 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
     netStatsCached_->GetIptablesStatsCached(allInfo);
-    netStatsCached_->GetIptablesStatsIncrease(allInfo);
-    NETMGR_LOG_E("get history by ident failed, err code=%{public}d", ret);
     std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
         if (ident != info.ident_ || start > info.date_ || end < info.date_) {
             return;
