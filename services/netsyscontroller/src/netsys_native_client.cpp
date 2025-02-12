@@ -604,7 +604,7 @@ int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIfac
 }
 
 int32_t NetsysNativeClient::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
-                                                                std::string &ifaceName)
+    std::string &ifaceName)
 {
     NETMGR_LOG_D("NetsysNativeClient GetNetworkCellularSharingTraffic");
     auto proxy = GetProxy();
