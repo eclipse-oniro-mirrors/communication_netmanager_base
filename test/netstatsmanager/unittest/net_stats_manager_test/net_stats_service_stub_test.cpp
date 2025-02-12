@@ -127,6 +127,11 @@ public:
         return 0;
     }
 
+    int32_t SaveSharingTraffic(const NetStatsInfo &infos) override
+    {
+        return 0;
+    }
+
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override
     {
         return 0;
