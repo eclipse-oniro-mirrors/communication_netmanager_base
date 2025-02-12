@@ -244,34 +244,34 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
         return std::string();
     }
 
-    std::vector<AddrInfo> result;
-    AddrInfo hints = {};
-    std::string serverName;
-    if (NetsysController::GetInstance().GetAddrInfo(domain, serverName, hints, netId_, result) < 0) {
-        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
+    struct addrinfo *result;
+    struct queryparam qparam = {};
+    qparam.qp_netid = netId;
+    qparam.qp_type = QEURY_TYPE_NETSYS;
+
+    int32_t ret = getaddrinfo_ext(domain.c_str(), nullptr, nullptr, &result, &qparam);
+    if (ret < 0) {
+        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId, errno,
                      strerror(errno));
-        return std::string();
-    }
-    if (result.empty()) {
-        NETMGR_LOG_E("Get net[%{public}d] address info return nullptr result", netId_);
         return std::string();
     }
 
     std::string ipAddress;
     char ip[DOMAIN_IP_ADDR_LEN_MAX] = {0};
-    for (auto &node : result) {
+    for (addrinfo *tmp = result; tmp != nullptr; tmp = tmp->ai_next) {
         errno_t err = memset_s(&ip, sizeof(ip), 0, sizeof(ip));
         if (err != EOK) {
             NETMGR_LOG_E("memset_s failed,err:%{public}d", err);
             return std::string();
         }
-
-        if (node.aiFamily == AF_INET) {
-            if (!inet_ntop(AF_INET, &node.aiAddr.sin.sin_addr, ip, sizeof(ip))) {
+        if (tmp->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
+            if (!inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip))) {
                 continue;
             }
-        } else if (node.aiFamily == AF_INET6) {
-            if (!inet_ntop(AF_INET6, &node.aiAddr.sin6.sin6_addr, ip, sizeof(ip))) {
+        } else if (tmp->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
+            if (!inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip))) {
                 continue;
             }
         }
@@ -279,6 +279,13 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
             continue;
         }
         ipAddress = ipAddress.empty() ? (ipAddress + ip) : (ipAddress + ADDR_SEPARATOR + ip);
+    }
+
+    freeaddrinfo(result);
+
+    if (ipAddress.empty()) {
+        NETMGR_LOG_E("Get net[%{public}d] address info return nullptr result",  netId);
+        return std::string();
     }
     return ipAddress;
 }
