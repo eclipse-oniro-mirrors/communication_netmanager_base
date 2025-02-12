@@ -244,14 +244,14 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
         return std::string();
     }
 
-    struct addrinfo *result;
+    struct addrinfo *result = nullptr;
     struct queryparam qparam = {};
-    qparam.qp_netid = netId;
+    qparam.qp_netid = netId_;
     qparam.qp_type = QEURY_TYPE_NETSYS;
 
     int32_t ret = getaddrinfo_ext(domain.c_str(), nullptr, nullptr, &result, &qparam);
     if (ret < 0) {
-        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId, errno,
+        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
                      strerror(errno));
         return std::string();
     }
@@ -262,6 +262,7 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
         errno_t err = memset_s(&ip, sizeof(ip), 0, sizeof(ip));
         if (err != EOK) {
             NETMGR_LOG_E("memset_s failed,err:%{public}d", err);
+            freeaddrinfo(result);
             return std::string();
         }
         if (tmp->ai_family == AF_INET) {
@@ -284,7 +285,7 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
     freeaddrinfo(result);
 
     if (ipAddress.empty()) {
-        NETMGR_LOG_E("Get net[%{public}d] address info return nullptr result",  netId);
+        NETMGR_LOG_E("Get net[%{public}d] address info return nullptr result",  netId_);
         return std::string();
     }
     return ipAddress;
