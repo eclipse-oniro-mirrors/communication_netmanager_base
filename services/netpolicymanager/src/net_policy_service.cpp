@@ -615,11 +615,11 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
 
     if (parameter.flag) {
         std::string uidBundleName;
-        if (!bundleMgrProxy->GetBundleNameForUid(parameter.uid, uidBundleName)) {
+        if (bundleMgrProxy->GetBundleNameForUid(parameter.uid, uidBundleName)) {
+            UpdateNetworkAccessPolicyFromConfig(uidBundleName, policy.policy);
+        } else {
             NETMGR_LOG_E("GetBundleNameForUid Failed");
-            return NETMANAGER_ERR_INTERNAL;
         }
-        UpdateNetworkAccessPolicyFromConfig(uidBundleName, policy.policy);
         NetAccessPolicyData policyData;
         if (netAccessPolicy.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
             policy.policy.wifiAllow = true;
