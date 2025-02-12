@@ -87,6 +87,7 @@
       "OHOS::NetManagerStandard::NetConnClient::AddInterfaceAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::NetManagerStandard::NetConnClient::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::IsPinOpenMode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsPinOpenModeVerifyRootCa(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetTrustAnchorsForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
       VTT?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
       vtable?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
@@ -106,6 +107,7 @@
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(cJSON const*, OHOS::NetManagerStandard::TrustAnchors&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenMode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::IsPinOpenModeVerifyRootCa(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::FactoryResetNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetFactoryResetCallback(OHOS::sptr<OHOS::NetManagerStandard::INetFactoryResetCallback> const&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;

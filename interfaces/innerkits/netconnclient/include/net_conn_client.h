@@ -408,6 +408,7 @@ public:
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
     bool IsPinOpenMode(const std::string &hostname);
+    bool IsPinOpenModeVerifyRootCa(const std::string &hostname);
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
