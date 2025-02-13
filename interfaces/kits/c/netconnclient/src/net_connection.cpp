@@ -25,6 +25,7 @@
 using namespace OHOS::NetManagerStandard;
 
 constexpr int32_t VALID_NETID_START = 100;
+constexpr int32_t PAC_URL_MAX_LEN = 1024;
 
 static int32_t ErrorCodeTrans(int status)
 {
@@ -389,6 +390,6 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
     }
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
-    pacUrl = const_cast<char*>(pacUrlstr.c_str());
+    strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str());
     return ret;
 }
