@@ -792,6 +792,7 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
 {
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
+    ffrtMutex_.lock();
     auto requestNetwork = netUidRequest.find(callingUid);
     if (requestNetwork == netUidRequest.end()) {
         netUidRequest.insert(std::make_pair(callingUid, 1));
@@ -804,6 +805,7 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
             requestNetwork->second++;
         }
     }
+    ffrtMutex_.unlock();
     return NETMANAGER_SUCCESS;
 }
 
@@ -811,6 +813,7 @@ void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
 {
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
+    ffrtMutex_.lock();
     auto requestNetwork = netUidRequest.find(callingUid);
     if (requestNetwork == netUidRequest.end()) {
         NETMGR_LOG_E("Could not find the request calling uid");
@@ -822,6 +825,7 @@ void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
             netUidRequest.erase(requestNetwork);
         }
     }
+    ffrtMutex_.unlock();
 }
 
 void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback)
