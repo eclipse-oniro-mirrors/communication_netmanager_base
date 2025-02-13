@@ -25,6 +25,7 @@ constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
 constexpr uint32_t Sim_UID = std::numeric_limits<uint32_t>::max();
 constexpr uint32_t UNINSTALLED_UID = std::numeric_limits<uint32_t>::max() - 1;
 constexpr uint32_t SIM2_UID = std::numeric_limits<uint32_t>::max() - 2;
+constexpr uint32_t IPTABLES_UID = std::numeric_limits<uint32_t>::max() - 3;
 enum NetStatsResultCode {
     STATS_DUMP_MESSAGE_FAIL = 2103002,
     STATS_REMOVE_FILE_FAIL,

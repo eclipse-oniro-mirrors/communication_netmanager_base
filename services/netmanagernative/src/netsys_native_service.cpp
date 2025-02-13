@@ -682,6 +682,15 @@ void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std:
     }
 }
 
+int32_t NetsysNativeService::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    if (sharingManager_ == nullptr) {
+        NETNATIVE_LOGE("manager is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return sharingManager_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+}
+
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETNATIVE_LOGI("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);

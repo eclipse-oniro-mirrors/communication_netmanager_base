@@ -95,6 +95,15 @@ public:
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic);
 
+    /*
+     * @brief Get trafic of network cellular sharing
+     *
+     * @param downIface
+     * @param traffic
+     * @return NETMANAGER_ERROR code
+     */
+    int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName);
+
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:

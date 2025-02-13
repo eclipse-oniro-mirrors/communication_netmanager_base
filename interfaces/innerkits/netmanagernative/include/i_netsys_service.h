@@ -145,6 +145,7 @@ public:
     virtual int32_t StopDnsProxyListen() = 0;
     virtual int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                              NetworkSharingTraffic &traffic) = 0;
+    virtual int32_t GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName) = 0;
     virtual int32_t GetTotalStats(uint64_t &stats, uint32_t type) = 0;
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;

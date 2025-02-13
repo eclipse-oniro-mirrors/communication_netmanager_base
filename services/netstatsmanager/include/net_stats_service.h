@@ -37,6 +37,7 @@
 #include "netsys_controller_callback.h"
 #include "net_stats_trafficLimit_dialog.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -85,6 +86,7 @@ public:
     int32_t ResetFactory() override;
     int32_t GetCookieRxBytes(uint64_t &stats, uint64_t cookie) override;
     int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) override;
+    int32_t SaveSharingTraffic(const NetStatsInfo &infos) override;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     void UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t value);

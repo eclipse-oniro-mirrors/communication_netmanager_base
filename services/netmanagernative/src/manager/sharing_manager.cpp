@@ -38,6 +38,8 @@ constexpr const int MAX_MATCH_SIZE = 4;
 constexpr const int TWO_LIST_CORRECT_DATA = 2;
 constexpr const int NEXT_LIST_CORRECT_DATA = 1;
 constexpr uint32_t NET_TRAFFIC_RESULT_INDEX_OFFSET = 2;
+const std::string CELLULAR_IFACE_NAME = "rmnet";
+const std::string WLAN_IFACE_NAME = "wlan";
 
 // commands of create tables
 constexpr const char *CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
@@ -380,7 +382,6 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
 {
     const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
     std::string result = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmds);
-
     const std::string num = "(\\d+)";
     const std::string iface = "([^\\s]+)";
     const std::string dst = "(0.0.0.0/0|::/0)";
@@ -391,6 +392,7 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
     bool isFindTx = false;
     bool isFindRx = false;
     const std::vector<std::string> lines = CommonUtils::Split(result, "\n");
+    std::size_t size1 = lines.size();
     for (auto line : lines) {
         std::smatch matches;
         std::regex_search(line, matches, IP_RE);
@@ -409,6 +411,58 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
                 traffic.all += send;
             } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface &&
                        ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
+                int64_t receive =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
+                isFindRx = true;
+                traffic.receive = receive;
+                traffic.all += receive;
+            }
+            if (isFindTx && isFindRx) {
+                NETNATIVE_LOG_D("GetNetworkSharingTraffic success total");
+                return NETMANAGER_SUCCESS;
+            }
+        }
+    }
+    NETNATIVE_LOGE("GetNetworkSharingTraffic failed");
+    return NETMANAGER_ERROR;
+}
+
+int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
+    std::string result = iptablesWrapper_->RunCommandForTraffic(IPTYPE_IPV4V6, cmds);
+
+    const std::string num = "(\\d+)";
+    const std::string iface = "([^\\s]+)";
+    const std::string dst = "(0.0.0.0/0|::/0)";
+    const std::string counters = "\\s*" + num + "\\s+" + num + " RETURN     all(  --  |      )" + iface + "\\s+" +
+                                 iface + "\\s+" + dst + "\\s+" + dst;
+    static const std::regex IP_RE(counters);
+
+    bool isFindTx = false;
+    bool isFindRx = false;
+    const std::vector<std::string> lines = CommonUtils::Split(result, "\n");
+    for (auto line : lines) {
+        std::smatch matches;
+        std::regex_search(line, matches, IP_RE);
+        if (matches.size() < MAX_MATCH_SIZE) {
+            continue;
+        }
+        for (uint32_t i = 0; i < matches.size() - 1; i++) {
+            std::string matchTemp = matches[i];
+            NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic matche[%{public}s]", matchTemp.c_str());
+            std::string matchNext = matches[i + NEXT_LIST_CORRECT_DATA];
+            if (matchTemp.find(CELLULAR_IFACE_NAME) != std::string::npos
+                && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
+                int64_t send =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
+                isFindTx = true;
+                traffic.send = send;
+                traffic.all += send;
+                ifaceName = matchTemp;
+            } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+                && matchNext.find(CELLULAR_IFACE_NAME) != std::string::npos
+                && ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
                 int64_t receive =
                     static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
                 isFindRx = true;

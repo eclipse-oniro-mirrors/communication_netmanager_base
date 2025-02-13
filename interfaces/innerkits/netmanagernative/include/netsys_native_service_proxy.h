@@ -110,6 +110,7 @@ public:
     int32_t StopDnsProxyListen() override;
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic) override;
+    int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName) override;
     int32_t GetTotalStats(uint64_t &stats, uint32_t type) override;
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;

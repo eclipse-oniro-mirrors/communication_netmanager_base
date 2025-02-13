@@ -324,6 +324,13 @@ public:
      */
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      nmd::NetworkSharingTraffic &traffic);
+    
+    /**
+     * Obtains the bytes of the cellular sharing network.
+     *
+     * @return Success return 0.
+     */
+    int32_t GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
 
     /**
      * Obtains the bytes received over the cellular network.
