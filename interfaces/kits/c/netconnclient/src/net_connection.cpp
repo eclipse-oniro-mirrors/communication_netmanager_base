@@ -390,6 +390,9 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
     }
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
-    strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str());
+    if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return ret;
 }
