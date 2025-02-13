@@ -505,6 +505,8 @@ private:
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    int32_t SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId);
+    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void CreateActiveHttpProxyThread();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
