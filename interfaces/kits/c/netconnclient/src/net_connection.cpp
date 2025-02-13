@@ -25,6 +25,7 @@
 using namespace OHOS::NetManagerStandard;
 
 constexpr int32_t VALID_NETID_START = 100;
+constexpr int32_t PAC_URL_MAX_LEN = 1024;
 
 static int32_t ErrorCodeTrans(int status)
 {
@@ -369,4 +370,29 @@ int32_t OH_NetConn_RegisterAppHttpProxyCallback(OH_NetConn_AppHttpProxyChange ap
 void OH_NetConn_UnregisterAppHttpProxyCallback(uint32_t callbackId)
 {
     NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackId);
+}
+
+int32_t OH_NetConn_SetPacUrl(const char *pacUrl)
+{
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_SetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t ret = NetConnClient::GetInstance().SetPacUrl(std::string(pacUrl));
+    return ret;
+}
+
+int32_t OH_NetConn_GetPacUrl(char *pacUrl)
+{
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    std::string pacUrlstr = "";
+    int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
+    if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return ret;
 }

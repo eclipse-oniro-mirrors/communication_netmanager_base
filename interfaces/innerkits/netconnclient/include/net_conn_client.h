@@ -457,6 +457,10 @@ public:
      */
     static std::optional<std::string> ObtainBundleNameForSelf();
 
+    int32_t SetPacUrl(const std::string &pacUrl);
+
+    int32_t GetPacUrl(std::string &pacUrl);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -499,6 +503,7 @@ private:
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
     std::mutex registerConnTupleListMutex_;
+    std::string pacUrl_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
