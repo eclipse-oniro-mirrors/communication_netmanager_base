@@ -640,6 +640,7 @@ private:
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
+    ffrt::mutex ffrtMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
