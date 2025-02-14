@@ -790,6 +790,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
 
 int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
+    std::lock_guard guard(netUidRequestMutex_);
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
@@ -809,6 +810,7 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
 
 void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
+    std::lock_guard guard(netUidRequestMutex_);
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
