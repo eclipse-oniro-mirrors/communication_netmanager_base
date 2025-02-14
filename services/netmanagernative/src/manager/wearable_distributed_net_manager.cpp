@@ -115,7 +115,7 @@ bool WearableDistributedNet::ParseTcpIptables(const cJSON &json)
     cJSON *tcpIptablesObj = cJSON_GetObjectItemCaseSensitive(&json, TCP_IPTABLES.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(tcpIptablesObj); i++) {
         cJSON *tcpIptablesItem = cJSON_GetArrayItem(tcpIptablesObj, i);
-        if (tcpIptablesItem == nullptr) {
+        if (tcpIptablesItem == nullptr || tcpIptablesItem->valuestring == nullptr) {
             NETNATIVE_LOGE("Invalid item in TCP iptables array");
             return false;
         }
