@@ -574,6 +574,7 @@ private:
     std::mutex globalHttpProxyMutex_;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
     std::recursive_mutex netManagerMutex_;
+    std::recursive_mutex netUidRequestMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
@@ -640,7 +641,6 @@ private:
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
-    ffrt::mutex ffrtMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
