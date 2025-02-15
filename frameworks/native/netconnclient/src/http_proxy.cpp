@@ -147,12 +147,6 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
         return false;
     }
 
-    if (size == 0) {
-        httpProxy = {host, port, {}};
-        httpProxy.SetUserId(userId);
-        return true;
-    }
-
     if (size > static_cast<uint32_t>(MAX_EXCLUSION_SIZE)) {
         size = MAX_EXCLUSION_SIZE;
     }
