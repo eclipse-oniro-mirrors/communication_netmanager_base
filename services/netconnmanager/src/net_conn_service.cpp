@@ -574,8 +574,13 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
                      reqId);
         return NET_CONN_ERR_SAME_CALLBACK;
     }
-    NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
-    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
+    auto registerType = (netSpecifier != nullptr && ((netSpecifier->netCapabilities_.netCaps_.count(
+        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ||
+        (netSpecifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0))) ?
+        REQUEST : REGISTER;
+    NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u], regType[%{public}u]",
+                 callingUid, reqId, registerType);
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, registerType);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -775,15 +780,16 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     }
     RegisterType registerType = INVALIDTYPE;
     uint32_t reqId = 0;
-    if (!FindSameCallback(callback, reqId, registerType) || registerType == INVALIDTYPE) {
-        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u",
-                     callingUid, reqId);
+    uint32_t uid = 0;
+    if (!FindSameCallback(callback, reqId, registerType, uid) || registerType == INVALIDTYPE) {
+        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u, uid:%{public}d",
+                     callingUid, reqId, uid);
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
-    NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
-    DecreaseNetConnCallbackCntForUid(callingUid, registerType);
-    DecreaseNetActivatesForUid(callingUid, callback);
-    DecreaseNetActivates(callingUid, callback, reqId);
+    NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u, uid:%{public}d", callingUid, reqId, uid);
+    DecreaseNetConnCallbackCntForUid(uid, registerType);
+    DecreaseNetActivatesForUid(uid, callback);
+    DecreaseNetActivates(uid, callback, reqId);
 
     return NETMANAGER_SUCCESS;
 }
@@ -1196,7 +1202,7 @@ sptr<NetSupplier> NetConnService::FindNetSupplier(uint32_t supplierId)
 }
 
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
-                                      uint32_t &reqId, RegisterType &registerType)
+                                      uint32_t &reqId, RegisterType &registerType, uint32_t &uid)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
@@ -1215,10 +1221,11 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
             reqId = iterActive->first;
             if (iterActive->second) {
                 auto specifier = iterActive->second->GetNetSpecifier();
-                registerType = (specifier != nullptr &&
-                    specifier->netCapabilities_.netCaps_.count(
-                        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
-                        REQUEST : REGISTER;
+                registerType = (specifier != nullptr && ((specifier->netCapabilities_.netCaps_.count(
+                    NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ||
+                    (specifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0))) ?
+                    REQUEST : REGISTER;
+                uid = iterActive->second->GetUid();
             }
             return true;
         }
@@ -1229,7 +1236,8 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
 {
     RegisterType registerType = INVALIDTYPE;
-    return FindSameCallback(callback, reqId, registerType);
+    uint32_t uid = 0;
+    return FindSameCallback(callback, reqId, registerType, uid);
 }
 
 void NetConnService::FindBestNetworkForAllRequest()
