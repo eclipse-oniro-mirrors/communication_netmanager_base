@@ -32,6 +32,7 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace nmd {
@@ -39,6 +40,15 @@ class FwmarkClient;
 }
 namespace NetManagerStandard {
 constexpr uint32_t RESERVED_BUFFER_SIZE = 512;
+
+class NetConnAbilityListener : public SystemAbilityStatusChangeStub {
+public:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+private:
+    std::mutex mutex_;
+};
+
 class NetConnClient {
 public:
     static NetConnClient &GetInstance();
@@ -495,6 +505,8 @@ public:
 
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid);
 
+    void RecoverCallbackAndGlobalProxy();
+
     int32_t SetPacUrl(const std::string &pacUrl);
 
     int32_t GetPacUrl(std::string &pacUrl);
@@ -520,11 +532,12 @@ private:
     NetConnClient(const NetConnClient&) = delete;
 
     sptr<INetConnService> GetProxy();
-    void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
     void DlCloseRemoveDeathRecipient();
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
     static std::optional<std::string> ObtainBundleNameFromBundleMgr();
+    void SubscribeSystemAbility();
+    void UnsubscribeSystemAbility();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
@@ -543,6 +556,7 @@ private:
     std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
+    sptr<ISystemAbilityStatusChange> saStatusListener_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
