@@ -64,7 +64,8 @@ void NetConnClient::SubscribeSystemAbility()
         return;
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    int32_t result = sam->SubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
+    int32_t result = 
+        sam->SubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
     if (result != ERR_OK) {
         NETMGR_LOG_E("NetConnAbilityListener subscribe failed, code %{public}d.", result);
     }
@@ -77,7 +78,8 @@ void NetConnClient::UnsubscribeSystemAbility()
         return;
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    int32_t result = sam->UnSubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
+    int32_t result =
+        sam->UnSubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
     if (result != ERR_OK) {
         NETMGR_LOG_E("NetConnAbilityListener Unsubscribe failed, code %{public}d.", result);
     }
@@ -575,9 +577,9 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
     if (registerConnTupleList_.empty() && globalHttpProxy_.GetHost().empty() &&
-         preAirplaneCallback_ == nullptr) {
-         NETMGR_LOG_W("no need recovery");
-         return;
+        preAirplaneCallback_ == nullptr) {
+        NETMGR_LOG_W("no need recovery");
+        return;
     }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s", proxy == nullptr ? "failed" : "success");
