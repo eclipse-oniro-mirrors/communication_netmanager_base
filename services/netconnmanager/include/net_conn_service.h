@@ -480,7 +480,8 @@ private:
     int32_t GenerateNetId();
     int32_t GenerateInternalNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
-    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId, RegisterType &registerType);
+    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId,
+                          RegisterType &registerType, uint32_t &uid);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,

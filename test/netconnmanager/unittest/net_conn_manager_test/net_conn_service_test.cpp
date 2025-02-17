@@ -310,7 +310,8 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
 
     NetConnService::RegisterType registerType = NetConnService::RegisterType::INVALIDTYPE;
     uint32_t reqId = 0;
-    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType);
+    uint32_t uid = 0;
+    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType, uid);
     EXPECT_EQ(registerType, NetConnService::RegisterType::REQUEST);
 
     ret = NetConnService::GetInstance()->UnregisterNetConnCallback(g_callback);
