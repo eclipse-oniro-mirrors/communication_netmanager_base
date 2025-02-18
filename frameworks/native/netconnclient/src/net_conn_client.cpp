@@ -64,7 +64,7 @@ void NetConnClient::SubscribeSystemAbility()
         return;
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    int32_t result = 
+    int32_t result =
         sam->SubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
     if (result != ERR_OK) {
         NETMGR_LOG_E("NetConnAbilityListener subscribe failed, code %{public}d.", result);
