@@ -463,6 +463,13 @@ void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pin
     if (isOpenMode) {
         pinSet.isOpenMode = cJSON_IsTrue(isOpenMode);
     }
+    if (pinSet.isOpenMode) {
+        // only when in open mode, verify root CA could be enabled.
+        auto verifyRootCaItem = cJSON_GetObjectItem(root, "open-mode-verify-root-ca");
+        if (verifyRootCaItem) {
+            pinSet.shouldVerifyRootCa_ = cJSON_IsTrue(verifyRootCaItem);
+        }
+    }
 }
 
 void NetworkSecurityConfig::ParseJsonBaseConfig(const cJSON* const root, BaseConfig &baseConfig)
@@ -556,6 +563,40 @@ bool NetworkSecurityConfig::IsPinOpenMode(const std::string &hostname)
         return false;
     }
     return pPinSet->isOpenMode;
+}
+
+bool NetworkSecurityConfig::IsPinOpenModeVerifyRootCa(const std::string &hostname)
+{
+    if (hostname.empty()) {
+        NETMGR_LOG_E("hostname is empty.");
+        return false;
+    }
+
+    PinSet *pPinSet = nullptr;
+    for (auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
+            if (hostname == domain.domainName_) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+                pPinSet = &domainConfig.pinSet_;
+                break;
+            }
+        }
+        if (pPinSet != nullptr) {
+            break;
+        }
+    }
+
+    if (pPinSet == nullptr) {
+        NETMGR_LOG_E("pinset not configured for this hostname.");
+        return false;
+    }
+    if (!pPinSet->isOpenMode) {
+        NETMGR_LOG_D("Verify root CA only available when open mode is true.");
+        return false;
+    }
+    return pPinSet->shouldVerifyRootCa_;
 }
 
 int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname, std::string &pins)

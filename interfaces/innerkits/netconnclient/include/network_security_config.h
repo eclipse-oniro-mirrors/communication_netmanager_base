@@ -42,6 +42,7 @@ struct Pin {
 
 struct PinSet {
     bool isOpenMode = false;
+    bool shouldVerifyRootCa_ = false;
     std::vector<Pin> pins_;
     std::string expiration_;
 };
@@ -61,6 +62,7 @@ public:
     static NetworkSecurityConfig& GetInstance();
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
     bool IsPinOpenMode(const std::string &hostname);
+    bool IsPinOpenModeVerifyRootCa(const std::string &hostname);
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
 private:

@@ -841,6 +841,11 @@ bool NetConnClient::IsPinOpenMode(const std::string &hostname)
     return NetworkSecurityConfig::GetInstance().IsPinOpenMode(hostname);
 }
 
+bool NetConnClient::IsPinOpenModeVerifyRootCa(const std::string &hostname)
+{
+    return NetworkSecurityConfig::GetInstance().IsPinOpenModeVerifyRootCa(hostname);
+}
+
 int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
 {
     return NetworkSecurityConfig::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
