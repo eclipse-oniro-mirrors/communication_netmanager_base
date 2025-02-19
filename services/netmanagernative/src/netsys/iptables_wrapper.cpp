@@ -196,5 +196,6 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
 } // namespace nmd
 } // namespace OHOS
