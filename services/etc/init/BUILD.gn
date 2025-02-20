@@ -96,3 +96,19 @@ ohos_prebuilt_etc("wearable_distributed_net_forward") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+## Install netmanager_base.para to /system/etc/param
+ohos_prebuilt_etc("netmanager_base.para") {
+  source = "netmanager_base.para"
+  relative_install_dir = "param"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+## Install netmanager_base.para.dac to /system/etc/param
+ohos_prebuilt_etc("netmanager_base.para.dac") {
+  source = "netmanager_base.para.dac"
+  relative_install_dir = "param"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
