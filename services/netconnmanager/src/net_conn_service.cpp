@@ -2247,12 +2247,10 @@ int32_t NetConnService::SetGlobalHttpProxyInner(const HttpProxy &httpProxy)
 int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId)
 {
     if (currentUserId_ == INVALID_USER_ID) {
-        if (httpProxy.GetHost().empty()) {
-            return NETMANAGER_SUCCESS;
-        } else {
+        if (!httpProxy.GetHost().empty()) {
             currentUserId_ = activeUserId;
-            httpProxy.SetUserId(currentUserId_);
         }
+        httpProxy.SetUserId(currentUserId_);
     } else if (currentUserId_ == activeUserId) {
         httpProxy.SetUserId(currentUserId_);
     } else {
