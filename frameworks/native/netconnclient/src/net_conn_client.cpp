@@ -32,8 +32,6 @@
 static constexpr const int32_t MIN_VALID_NETID = 100;
 static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
 static constexpr const int32_t MAX_VALID_INTERNAL_NETID = 50;
-static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
-static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
 static const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 
 namespace OHOS {
@@ -52,6 +50,56 @@ NetConnClient &NetConnClient::GetInstance()
 {
     static NetConnClient gInstance;
     return gInstance;
+}
+
+void NetConnClient::SubscribeSystemAbility()
+{
+    if (saStatusListener_ != nullptr) {
+        NETMGR_LOG_D("No duplicate subscribe.");
+        return;
+    }
+    saStatusListener_ = sptr<NetConnAbilityListener>(new NetConnAbilityListener());
+    if (saStatusListener_ == nullptr) {
+        NETMGR_LOG_E("NetConnAbilityListener create failed.");
+        return;
+    }
+    auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t result =
+        sam->SubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
+    if (result != ERR_OK) {
+        NETMGR_LOG_E("NetConnAbilityListener subscribe failed, code %{public}d.", result);
+    }
+}
+
+void NetConnClient::UnsubscribeSystemAbility()
+{
+    if (saStatusListener_ == nullptr) {
+        NETMGR_LOG_I("NetConnAbilityListener is nullptr.");
+        return;
+    }
+    auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t result =
+        sam->UnSubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
+    if (result != ERR_OK) {
+        NETMGR_LOG_E("NetConnAbilityListener Unsubscribe failed, code %{public}d.", result);
+    }
+}
+
+void NetConnAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    std::lock_guard<std::mutex>(this->mutex_);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        NETMGR_LOG_I("net conn manager sa is added.");
+        NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
+    }
+}
+
+void NetConnAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    std::lock_guard<std::mutex>(this->mutex_);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        NETMGR_LOG_I("net conn manager sa is removed.");
+    }
 }
 
 int32_t NetConnClient::SystemReady()
@@ -476,6 +524,7 @@ sptr<INetConnService> NetConnClient::GetProxy()
 {
     std::lock_guard lock(mutex_);
 
+    SubscribeSystemAbility();
     if (NetConnService_) {
         NETMGR_LOG_D("get proxy is ok");
         return NetConnService_;
@@ -527,13 +576,13 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
-    uint32_t count = 0;
-    while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_SERVICE_TIME_MS));
-        count++;
+    if (registerConnTupleList_.empty() && globalHttpProxy_.GetHost().empty() &&
+        preAirplaneCallback_ == nullptr) {
+        NETMGR_LOG_W("no need recovery");
+        return;
     }
     auto proxy = GetProxy();
-    NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+    NETMGR_LOG_W("Get proxy %{public}s", proxy == nullptr ? "failed" : "success");
     if (proxy != nullptr) {
         for (auto mem : registerConnTupleList_) {
             sptr<NetSpecifier> specifier = std::get<0>(mem);
@@ -589,20 +638,11 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
-
-    if (!registerConnTupleList_.empty() || preAirplaneCallback_ != nullptr || !globalHttpProxy_.GetHost().empty()) {
-        NETMGR_LOG_I("on remote died recover callback");
-        std::thread t([this]() {
-            RecoverCallbackAndGlobalProxy();
-        });
-        std::string threadName = "netconnRecoverCallback";
-        pthread_setname_np(t.native_handle(), threadName.c_str());
-        t.detach();
-    }
 }
 
 void NetConnClient::DlCloseRemoveDeathRecipient()
 {
+    UnsubscribeSystemAbility();
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
