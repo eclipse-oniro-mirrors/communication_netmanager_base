@@ -123,6 +123,7 @@
                     "//foundation/communication/netmanager_base/services/etc/init:wearable_distributed_net_forward",
                     "//foundation/communication/netmanager_base/services/etc/init:detectionconfig.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:hosts_lnk",
+                    "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.para.dac",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",
                     "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
                     "//foundation/communication/netmanager_base/services/netpolicymanager:net_access_policy_dialog"
