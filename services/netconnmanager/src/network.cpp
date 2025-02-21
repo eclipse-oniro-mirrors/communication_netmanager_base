@@ -392,7 +392,6 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 
 void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
-    // Update: remove old routes first, then add the new routes
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
@@ -721,7 +720,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
             break;
         case NET_CONN_STATE_DISCONNECTED:
             state_ = netConnState;
-            ResetNetLinkInfo();
+            ResetNetlinkInfo();
             break;
         default:
             state_ = NET_CONN_STATE_UNKNOWN;
