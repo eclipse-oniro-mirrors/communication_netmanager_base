@@ -154,7 +154,7 @@ bool Network::ReleaseBasicNetwork()
     NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
         supplierId_, netId_, netCapabilities.c_str());
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (!IsIfaceNameInUse() || isNeedResume_) {
         for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
@@ -198,7 +198,7 @@ bool Network::ReleaseVirtualNetwork()
     NETMGR_LOG_D("Enter release virtual network");
     if (isVirtualCreated_) {
         std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-        NetlinkInfo netLinkInfoBck = netlinkInfo_;
+        NetLinkInfo netLinkInfoBck = netLinkInfo_;
         lock.unlock();
         for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
@@ -234,7 +234,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     netLinkInfo_ = netLinkInfo;
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (IsNat464Prefered()) {
         if (nat464Service_ == nullptr) {
@@ -298,7 +298,7 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
 {
     NETMGR_LOG_D("Network UpdateInterfaces in.");
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (newNetLinkInfo.ifaceName_ == netLinkInfoBck.ifaceName_) {
         NETMGR_LOG_D("Network UpdateInterfaces out. same with before.");
@@ -329,7 +329,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfoBck.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
@@ -396,7 +396,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
     std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    for (const auto &route : netlinkInfo_.routeList_) {
+    for (const auto &route : netLinkInfo_.routeList_) {
         if (newNetLinkInfo.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
@@ -419,7 +419,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : newNetLinkInfo.routeList_) {
-        if (netlinkInfo_.HasRoute(route)) {
+        if (netLinkInfo_.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is no need to add it again",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
@@ -720,7 +720,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
             break;
         case NET_CONN_STATE_DISCONNECTED:
             state_ = netConnState;
-            ResetNetlinkInfo();
+            ResetNetLinkInfo();
             break;
         default:
             state_ = NET_CONN_STATE_UNKNOWN;
@@ -730,7 +730,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     SendConnectionChangedBroadcast(netConnState);
     if (IsNat464Prefered()) {
         std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-        NetlinkInfo netLinkInfoBck = netlinkInfo_;
+        NetLinkInfo netLinkInfoBck = netLinkInfo_;
         lock.unlock();
         if (nat464Service_ == nullptr) {
             nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
@@ -764,7 +764,7 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
     EventReport::SendSupplierFaultEvent(eventInfo);
 }
 
-void Network::ResetNetlinkInfo()
+void Network::ResetNetLinkInfo()
 {
     std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     netLinkInfo_.Initialize();
@@ -830,7 +830,7 @@ bool Network::IsNat464Prefered()
         return false;
     }
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (std::any_of(netLinkInfoBck.netAddrList_.begin(), netLinkInfoBck.netAddrList_.end(),
                     [](const INetAddr &i) { return i.type_ != INetAddr::IPV6; })) {
