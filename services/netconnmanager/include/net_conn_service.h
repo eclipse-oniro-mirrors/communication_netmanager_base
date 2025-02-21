@@ -564,6 +564,7 @@ private:
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
+    std::shared_mutex netActivatesMutex_;
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
