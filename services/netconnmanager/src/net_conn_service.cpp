@@ -574,8 +574,13 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
                      reqId);
         return NET_CONN_ERR_SAME_CALLBACK;
     }
-    NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
-    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
+    auto registerType = (netSpecifier != nullptr && ((netSpecifier->netCapabilities_.netCaps_.count(
+        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ||
+        (netSpecifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0))) ?
+        REQUEST : REGISTER;
+    NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u], regType[%{public}u]",
+                 callingUid, reqId, registerType);
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, registerType);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -673,43 +678,47 @@ int32_t NetConnService::CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t 
 #ifdef FEATURE_SUPPORT_POWERMANAGER
 void NetConnService::StopAllNetDetection()
 {
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr) {
-            continue;
+    netConnEventHandler_->PostSyncTask([this]() {
+        for (const auto& pNetSupplier : netSuppliers_) {
+            if (pNetSupplier.second == nullptr) {
+                continue;
+            }
+            std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+            if (pNetwork == nullptr) {
+                NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+                continue;
+            }
+            pNetwork->StopNetDetection();
+            pNetwork->UpdateForbidDetectionFlag(true);
         }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
-        }
-        pNetwork->StopNetDetection();
-        pNetwork->UpdateForbidDetectionFlag(true);
-    }
+    });
 }
 
 void NetConnService::StartAllNetDetection()
 {
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr) {
-            continue;
+    netConnEventHandler_->PostSyncTask([this]() {
+        for (const auto& pNetSupplier : netSuppliers_) {
+            if (pNetSupplier.second == nullptr) {
+                continue;
+            }
+            std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+            if (pNetwork == nullptr) {
+                NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+                continue;
+            }
+            pNetwork->UpdateForbidDetectionFlag(false);
         }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
+        if ((defaultNetSupplier_ == nullptr)) {
+            NETMGR_LOG_W("defaultNetSupplier_ is  null");
+            return;
         }
-        pNetwork->UpdateForbidDetectionFlag(false);
-    }
-    if ((defaultNetSupplier_ == nullptr)) {
-        NETMGR_LOG_W("defaultNetSupplier_ is  null");
-        return;
-    }
-    std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
-    if (pDefaultNetwork == nullptr) {
-        NETMGR_LOG_E("pDefaultNetwork is null");
-        return;
-    }
-    pDefaultNetwork->StartNetDetection(false);
+        std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
+        if (pDefaultNetwork == nullptr) {
+            NETMGR_LOG_E("pDefaultNetwork is null");
+            return;
+        }
+        pDefaultNetwork->StartNetDetection(false);
+    });
 }
 
 void NetConnService::HandlePowerMgrEvent(int code)
@@ -771,21 +780,23 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     }
     RegisterType registerType = INVALIDTYPE;
     uint32_t reqId = 0;
-    if (!FindSameCallback(callback, reqId, registerType) || registerType == INVALIDTYPE) {
-        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u",
-                     callingUid, reqId);
+    uint32_t uid = 0;
+    if (!FindSameCallback(callback, reqId, registerType, uid) || registerType == INVALIDTYPE) {
+        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u, uid:%{public}d",
+                     callingUid, reqId, uid);
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
-    NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u", callingUid, reqId);
-    DecreaseNetConnCallbackCntForUid(callingUid, registerType);
-    DecreaseNetActivatesForUid(callingUid, callback);
-    DecreaseNetActivates(callingUid, callback, reqId);
+    NETMGR_LOG_I("start, callUid:%{public}u, reqId:%{public}u, uid:%{public}d", callingUid, reqId, uid);
+    DecreaseNetConnCallbackCntForUid(uid, registerType);
+    DecreaseNetActivatesForUid(uid, callback);
+    DecreaseNetActivates(uid, callback, reqId);
 
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
+    std::lock_guard guard(netUidRequestMutex_);
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
@@ -805,6 +816,7 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
 
 void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
+    std::lock_guard guard(netUidRequestMutex_);
     auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
@@ -965,7 +977,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     EventReport::SendSupplierBehaviorEvent(eventInfo);
     NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
                  supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
-
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
@@ -977,6 +989,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     if (netSupplierInfo->score_ == 0) {
         supplier->InitNetScore();
     }
+    locker.unlock();
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
@@ -1090,17 +1103,11 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     info.data = "Global HttpProxy Changed";
     info.ordered = false;
     std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
-    if (currentUserId_ == INVALID_USER_ID) {
-        int32_t userId;
-        int32_t ret = GetCallingUserId(userId);
-        if (ret == NETMANAGER_SUCCESS) {
-            param.emplace("UserId", std::to_string(userId));
-        } else {
-            NETMGR_LOG_E("SendHttpProxyChangeBroadcast get calling userId fail.");
-        }
-    } else {
-        param.emplace("UserId", std::to_string(currentUserId_));
+    int32_t userId = GetValidUserIdFromProxy(httpProxy);
+    if (userId == INVALID_USER_ID) {
+        return;
     }
+    param.emplace("UserId", std::to_string(userId));
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
@@ -1125,6 +1132,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         std::lock_guard guard(uidActivateMutex_);
         netUidActivates_[callingUid].push_back(request);
     }
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
@@ -1140,8 +1148,10 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
                                           .supplierIdent = bestNet->GetNetSupplierIdent()};
             EventReport::SendRequestBehaviorEvent(eventInfo);
         }
+        locker.unlock();
         return NETMANAGER_SUCCESS;
     }
+    locker.unlock();
     if (timeoutMS == 0) {
         callback->NetUnavailable();
     }
@@ -1192,7 +1202,7 @@ sptr<NetSupplier> NetConnService::FindNetSupplier(uint32_t supplierId)
 }
 
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
-                                      uint32_t &reqId, RegisterType &registerType)
+                                      uint32_t &reqId, RegisterType &registerType, uint32_t &uid)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
@@ -1211,10 +1221,11 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
             reqId = iterActive->first;
             if (iterActive->second) {
                 auto specifier = iterActive->second->GetNetSpecifier();
-                registerType = (specifier != nullptr &&
-                    specifier->netCapabilities_.netCaps_.count(
-                        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
-                        REQUEST : REGISTER;
+                registerType = (specifier != nullptr && ((specifier->netCapabilities_.netCaps_.count(
+                    NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ||
+                    (specifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0))) ?
+                    REQUEST : REGISTER;
+                uid = iterActive->second->GetUid();
             }
             return true;
         }
@@ -1225,7 +1236,8 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
 {
     RegisterType registerType = INVALIDTYPE;
-    return FindSameCallback(callback, reqId, registerType);
+    uint32_t uid = 0;
+    return FindSameCallback(callback, reqId, registerType, uid);
 }
 
 void NetConnService::FindBestNetworkForAllRequest()
@@ -1307,8 +1319,9 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
 
 void NetConnService::RequestAllNetworkExceptDefault()
 {
-    if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
-        NETMGR_LOG_E("defaultNetSupplier_ is  null or IsNetValidated");
+    if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())
+        || (defaultNetSupplier_->IsNetAcceptUnavalidate())) {
+        NETMGR_LOG_E("defaultNetSupplier_ is  null or IsNetValidated or AcceptUnavalidate");
         return;
     }
     NETMGR_LOG_I("Default supplier[%{public}d, %{public}s] is not valid,request to activate another network",
@@ -1489,6 +1502,7 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
             }
             case CALL_TYPE_UPDATE_CAP: {
                 sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
+                std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
                 *pNetAllCap = supplier->GetNetCapabilities();
                 callback->NetCapabilitiesChange(netHandle, pNetAllCap);
                 break;
@@ -1503,9 +1517,8 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
                 break;
             }
             case CALL_TYPE_BLOCK_STATUS: {
-                bool Metered = supplier->HasNetCap(NET_CAPABILITY_NOT_METERED);
-                bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(supplier->GetSupplierUid(), Metered);
-                callback->NetBlockStatusChange(netHandle, newBlocked);
+                callback->NetBlockStatusChange(netHandle, NetManagerCenter::GetInstance().IsUidNetAccess(
+                    supplier->GetSupplierUid(), supplier->HasNetCap(NET_CAPABILITY_NOT_METERED)));
                 break;
             }
             default:
@@ -1525,8 +1538,10 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     sptr<NetHandle> netHandle = supplier->GetNetHandle();
     callback->NetAvailable(netHandle);
     sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     *pNetAllCap = supplier->GetNetCapabilities();
     callback->NetCapabilitiesChange(netHandle, pNetAllCap);
+    locker.unlock();
     sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
     auto network = supplier->GetNetwork();
     if (network != nullptr && pInfo != nullptr) {
@@ -1566,9 +1581,11 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
         NETMGR_LOG_E("supplier doesn't exist.");
         return;
     }
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     supplier->SetNetValid(netState);
     supplier->SetDetectionDone();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
+    locker.unlock();
     FindBestNetworkForAllRequest();
     bool ifValid = netState == VERIFICATION_STATE;
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
@@ -1848,8 +1865,8 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
-    if (httpProxy.GetUserId() == 0) {
-        httpProxy.SetUserId(PRIMARY_USER_ID);
+    if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
+        LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
     if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.
@@ -1869,8 +1886,8 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
-    if (httpProxy.GetUserId() == 0) {
-        httpProxy.SetUserId(PRIMARY_USER_ID);
+    if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
+        LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
     auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() > 0) {
@@ -2207,64 +2224,100 @@ int32_t NetConnService::SetGlobalHttpProxyInner(const HttpProxy &httpProxy)
 {
     NetHttpProxyTracker httpProxyTracker;
     HttpProxy newHttpProxy = httpProxy;
-    if (IsPrimaryUserId(currentUserId_)) {
+    int32_t userId = GetValidUserIdFromProxy(httpProxy);
+    if (userId == INVALID_USER_ID) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (IsPrimaryUserId(userId)) {
         if (!httpProxyTracker.WriteToSettingsData(newHttpProxy)) {
-            NETMGR_LOG_E("GlobalHttpProxy write settingDate fail.");
+            NETMGR_LOG_E("SetGlobalHttpProxyInner write settingDate fail.");
             return NETMANAGER_ERR_INTERNAL;
         }
     }
-    if (!httpProxyTracker.WriteToSettingsDataUser(newHttpProxy, currentUserId_)) {
-        NETMGR_LOG_E("GlobalHttpProxy write settingDateUser fail. userId=%{public}d", currentUserId_);
+    if (!httpProxyTracker.WriteToSettingsDataUser(newHttpProxy, userId)) {
+        NETMGR_LOG_E("SetGlobalHttpProxyInner write settingDateUser fail. userId=%{public}d", userId);
         return NETMANAGER_ERR_INTERNAL;
     }
-    globalHttpProxyCache_.EnsureInsert(currentUserId_, httpProxy);
+    globalHttpProxyCache_.EnsureInsert(userId, httpProxy);
     SendHttpProxyChangeBroadcast(httpProxy);
     UpdateGlobalHttpProxy(httpProxy);
     return NETMANAGER_SUCCESS;
 }
 
-/*
-    cases to set global http proxy:
-    1: no proxy has been set, and set nothing
-    2: no proxy has been set, and set new one
-    3: remove previous proxy, and set nothing
-    4: remove previous proxy, and set new one
-*/
-int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
+int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId)
 {
-    int32_t userId;
-    int32_t ret = GetActiveUserId(userId);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
-        return ret;
-    }
-    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}zu, currentUserId_=%{public}d, userId=%{public}d",
-        httpProxy.GetHost().length(), currentUserId_, userId);
     if (currentUserId_ == INVALID_USER_ID) {
-        if (httpProxy.GetHost().empty()) {
-            return NETMANAGER_SUCCESS;
-        } else {
-            currentUserId_ = userId;
-            if (SetGlobalHttpProxyInner(httpProxy) != NETMANAGER_SUCCESS) {
-                return NETMANAGER_ERR_INTERNAL;
-            }
+        if (!httpProxy.GetHost().empty()) {
+            currentUserId_ = activeUserId;
         }
+        httpProxy.SetUserId(currentUserId_);
+    } else if (currentUserId_ == activeUserId) {
+        httpProxy.SetUserId(currentUserId_);
     } else {
         if (httpProxy.GetHost().empty()) {
-            if (SetGlobalHttpProxyInner(httpProxy) != NETMANAGER_SUCCESS) {
-                return NETMANAGER_ERR_INTERNAL;
-            }
+            httpProxy.SetUserId(currentUserId_);
             currentUserId_ = INVALID_USER_ID;
         } else {
             HttpProxy emptyHttpProxy;
+            emptyHttpProxy.SetUserId(currentUserId_);
             if (SetGlobalHttpProxyInner(emptyHttpProxy) != NETMANAGER_SUCCESS) {
                 return NETMANAGER_ERR_INTERNAL;
             }
-            currentUserId_ = userId;
-            if (SetGlobalHttpProxyInner(httpProxy) != NETMANAGER_SUCCESS) {
+            currentUserId_ = activeUserId;
+            httpProxy.SetUserId(currentUserId_);
+        }
+    }
+    SetGlobalHttpProxyInner(httpProxy);
+    if (!httpProxy.GetHost().empty()) {
+        httpProxyThreadCv_.notify_all();
+    }
+    if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
+        CreateActiveHttpProxyThread();
+    } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
+        httpProxyThreadNeedRun_ = false;
+    }
+    NETMGR_LOG_I("End SetGlobalHttpProxyOld.");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    int32_t activeUserId;
+    int32_t ret = GetActiveUserId(activeUserId);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("SetGlobalHttpProxy failed to get active userId.");
+        return INVALID_USER_ID;
+    }
+    NETMGR_LOG_I(
+        "Enter SetGlobalHttpProxy. httpproxy = %{public}zu, currentUserId_=%{public}d, activeUserId=%{public}d",
+        httpProxy.GetHost().length(), currentUserId_, activeUserId);
+    if (httpProxy.GetUserId() == INVALID_USER_ID) {
+        return SetGlobalHttpProxyOld(httpProxy, activeUserId);
+    }
+    HttpProxy oldHttpProxy;
+    oldHttpProxy.SetUserId(httpProxy.GetUserId());
+    GetGlobalHttpProxy(oldHttpProxy);
+    if (oldHttpProxy != httpProxy) {
+        HttpProxy newHttpProxy = httpProxy;
+        int32_t userId = GetValidUserIdFromProxy(httpProxy);
+        if (userId == INVALID_USER_ID) {
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        NETMGR_LOG_I("GlobalHttpProxy userId is %{public}d", userId);
+        NetHttpProxyTracker httpProxyTracker;
+        if (IsPrimaryUserId(userId)) {
+            if (!httpProxyTracker.WriteToSettingsData(newHttpProxy)) {
+                NETMGR_LOG_E("GlobalHttpProxy write settingDate fail.");
                 return NETMANAGER_ERR_INTERNAL;
             }
         }
+        if (!httpProxyTracker.WriteToSettingsDataUser(newHttpProxy, userId)) {
+            NETMGR_LOG_E("GlobalHttpProxy write settingDateUser fail. userId=%{public}d", userId);
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        globalHttpProxyCache_.EnsureInsert(userId, newHttpProxy);
+        SendHttpProxyChangeBroadcast(newHttpProxy);
+        UpdateGlobalHttpProxy(newHttpProxy);
     }
     if (!httpProxy.GetHost().empty()) {
         httpProxyThreadCv_.notify_all();
@@ -2340,22 +2393,6 @@ int32_t NetConnService::GetActiveUserId(int32_t &userId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetCallingUserId(int32_t &userId)
-{
-    std::vector<int> activeIds;
-    int ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
-    if (ret != 0) {
-        NETMGR_LOG_E("QueryActiveOsAccountIds failed. ret is %{public}d", ret);
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    if (activeIds.empty()) {
-        NETMGR_LOG_E("QueryActiveOsAccountIds is empty");
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    userId = activeIds[0];
-    return NETMANAGER_SUCCESS;
-}
-
 bool NetConnService::IsValidUserId(int32_t userId)
 {
     if (userId < 0) {
@@ -2368,6 +2405,21 @@ bool NetConnService::IsValidUserId(int32_t userId)
         return false;
     }
     return isValid;
+}
+
+int32_t NetConnService::GetValidUserIdFromProxy(const HttpProxy &httpProxy)
+{
+    int32_t userId;
+    if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
+        int32_t ret = GetActiveUserId(userId);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("GetValidUserIdFromProxy failed to get active userId.");
+            return INVALID_USER_ID;
+        }
+    } else {
+        userId = httpProxy.GetUserId();
+    }
+    return userId;
 }
 
 int32_t NetConnService::SetAppNet(int32_t netId)
@@ -2457,8 +2509,8 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         ret = GetActiveUserId(userId);
     } else if (userIdType == LOCAL) {
         ret = GetLocalUserId(userId);
-        if (userId == 0) {
-            userId = PRIMARY_USER_ID;
+        if (userId == ROOT_USER_ID) {
+            ret = GetActiveUserId(userId);
         }
     } else if (userIdType == SPECIFY) {
         userId = httpProxy.GetUserId();
@@ -3168,12 +3220,15 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_
         }
     }
     // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr || supplier->GetNetSupplierType() != bearerType) {
+        locker.unlock();
         NETMGR_LOG_E("supplier doesn't exist.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     supplier->SetNetValid(state);
+    locker.unlock();
     // Find best network because supplier score changed.
     FindBestNetworkForAllRequest();
     // Tell other suppliers to enable if current default supplier is not better than others.

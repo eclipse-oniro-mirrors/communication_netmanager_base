@@ -162,7 +162,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
     return result;
 }
 
-int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
+int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
@@ -170,6 +170,9 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -184,7 +187,7 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to DestroyNetworkCache");
     MessageParcel data;
@@ -192,6 +195,9 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -938,7 +944,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveInterface(int32_t netId, const st
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("Begin to NetworkDestroy");
     MessageParcel data;
@@ -946,6 +952,9 @@ int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isVpnNet)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1842,6 +1851,34 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
     traffic.send = reply.ReadInt64();
     traffic.all = reply.ReadInt64();
     NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ret=%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic,
+    std::string &ifaceName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC),
+        data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetNetworkCellularSharingTraffic ret= %{public}d", ret);
+        return ret;
+    }
+
+    traffic.receive = reply.ReadInt64();
+    traffic.send = reply.ReadInt64();
+    traffic.all = reply.ReadInt64();
+    ifaceName = reply.ReadString();
+
+    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkCellularSharingTraffic ret=%{public}d", ret);
     return ret;
 }
 

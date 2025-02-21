@@ -27,6 +27,7 @@
 #include "net_stats_info.h"
 #include "net_stats_info_sequence.h"
 #include "net_stats_network.h"
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -193,6 +194,16 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t SetAppStats(const PushStatsInfo &info);
+
+    /**
+     * set sharing traffic before hotspot stop
+     *
+     * @param info traffic of the cellular
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SaveSharingTraffic(const NetStatsInfo &infos);
 
     /**
      * Get the historical traffic details of the specified network card

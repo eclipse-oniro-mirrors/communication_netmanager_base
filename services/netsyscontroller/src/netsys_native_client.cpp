@@ -231,7 +231,7 @@ int32_t NetsysNativeClient::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return proxy->NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeClient::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     auto proxy = GetProxy();
@@ -239,7 +239,7 @@ int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->NetworkDestroy(netId);
+    return proxy->NetworkDestroy(netId, isVpnNet);
 }
 
 int32_t NetsysNativeClient::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
@@ -558,7 +558,7 @@ int32_t NetsysNativeClient::GetResolverConfig(uint16_t netId, std::vector<std::s
     return proxy->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
-int32_t NetsysNativeClient::CreateNetworkCache(uint16_t netId)
+int32_t NetsysNativeClient::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_D("create dns cache: netId[%{public}d]", netId);
     auto proxy = GetProxy();
@@ -566,10 +566,10 @@ int32_t NetsysNativeClient::CreateNetworkCache(uint16_t netId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->CreateNetworkCache(netId);
+    return proxy->CreateNetworkCache(netId, isVpnNet);
 }
 
-int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_D("Destroy dns cache: netId[%{public}d]", netId);
     auto proxy = GetProxy();
@@ -577,7 +577,7 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->DestroyNetworkCache(netId);
+    return proxy->DestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
@@ -592,7 +592,7 @@ int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::
 }
 
 int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-                                                     nmd::NetworkSharingTraffic &traffic)
+    nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_D("NetsysNativeClient GetNetworkSharingTraffic");
     auto proxy = GetProxy();
@@ -601,6 +601,18 @@ int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIfac
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
+int32_t NetsysNativeClient::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
+    std::string &ifaceName)
+{
+    NETMGR_LOG_D("NetsysNativeClient GetNetworkCellularSharingTraffic");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
 int64_t NetsysNativeClient::GetCellularRxBytes()

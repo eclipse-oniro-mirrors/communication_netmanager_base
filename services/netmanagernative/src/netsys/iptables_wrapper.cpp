@@ -59,6 +59,15 @@ void IptablesWrapper::ExecuteCommand(const std::string &command)
     }
 }
 
+void IptablesWrapper::ExecuteCommandForTraffic(const std::string &command)
+{
+    std::string cmdWithWait = command + " -w 5 ";
+    NETNATIVE_LOGI("ExecuteCommandForTraffic %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    if (CommonUtils::ForkExec(cmdWithWait, &resultTraffic_) == NETMANAGER_ERROR) {
+        NETNATIVE_LOGE("run exec faild");
+    }
+}
+
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
@@ -97,6 +106,21 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     }
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+std::string IptablesWrapper::RunCommandForTraffic(const IpType &ipType, const std::string &command)
+{
+    NETNATIVE_LOG_D("IptablesWrapper::RunCommandForTraffic, ipType:%{public}d", ipType);
+    if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+        ExecuteCommandForTraffic(cmd);
+    }
+
+    if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+        ExecuteCommandForTraffic(cmd);
+    }
+    return resultTraffic_;
 }
 
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
@@ -172,5 +196,6 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
 } // namespace nmd
 } // namespace OHOS

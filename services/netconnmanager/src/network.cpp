@@ -125,7 +125,7 @@ bool Network::CreateVirtualNetwork()
             std::string errMsg = std::string(ERROR_MSG_CREATE_VIRTUAL_NETWORK_FAILED).append(std::to_string(netId_));
             SendSupplierFaultHiSysEvent(FAULT_CREATE_VIRTUAL_NETWORK_FAILED, errMsg);
         }
-        NetsysController::GetInstance().CreateNetworkCache(netId_);
+        NetsysController::GetInstance().CreateNetworkCache(netId_, true);
         isVirtualCreated_ = true;
     }
     return true;
@@ -205,9 +205,8 @@ bool Network::ReleaseVirtualNetwork()//记得修改
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetsysController::GetInstance().NetworkDestroy(netId_);
-        NetsysController::GetInstance().DestroyNetworkCache(netId_);
-        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        NetsysController::GetInstance().NetworkDestroy(netId_, true);
+        NetsysController::GetInstance().DestroyNetworkCache(netId_, true);
         netLinkInfo_.Initialize();
         isVirtualCreated_ = false;
     }

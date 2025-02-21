@@ -55,7 +55,7 @@ public:
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
-    int32_t NetworkDestroy(int32_t netId);
+    int32_t NetworkDestroy(int32_t netId, bool isVpnNet = false);
     int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix, const std::set<int32_t> &uids);
     int32_t DestroyVnic();
     int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif);
@@ -114,8 +114,8 @@ public:
                                  const std::vector<std::string> &servers, const std::vector<std::string> &domains);
     int32_t DnsGetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                                  uint16_t &baseTimeoutMsec, uint8_t &retryCount);
-    int32_t DnsCreateNetworkCache(uint16_t netid);
-    int32_t DnsDestroyNetworkCache(uint16_t netId);
+    int32_t DnsCreateNetworkCache(uint16_t netid, bool isVpnNet = false);
+    int32_t DnsDestroyNetworkCache(uint16_t netId, bool isVpnNet = false);
     int32_t BandwidthEnableDataSaver(bool enable);
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);

@@ -28,6 +28,7 @@
 #include "netsys_controller.h"
 #include "bpf_stats.h"
 #include "ffrt_inner.h"
+#include "net_manager_center.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -35,32 +36,17 @@ using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr const char *IFACE_LO = "lo";
 constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
+const std::string CELLULAR_IFACE_NAME = "rmnet";
 } // namespace
+const int8_t RETRY_TIME = 3;
 
 int32_t NetStatsCached::StartCached()
 {
-    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    auto ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
+    auto ret = CreatNetStatsTables();
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Create version table failed");
-        return STATS_ERR_CREATE_TABLE_FAIL;
+        NETMGR_LOG_E("CreatNetStatsTables error. ret: %{public}d", ret);
+        return ret;
     }
-    ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Create uid table failed");
-        return STATS_ERR_CREATE_TABLE_FAIL;
-    }
-    ret = helper->CreateTable(IFACE_TABLE, IFACE_TABLE_CREATE_PARAM);
-    if (ret != 0) {
-        NETMGR_LOG_E("Create iface table failed");
-        return STATS_ERR_CREATE_TABLE_FAIL;
-    }
-    ret = helper->CreateTable(UID_SIM_TABLE, UID_SIM_TABLE_CREATE_PARAM);
-    if (ret != 0) {
-        NETMGR_LOG_E("Create uid_sim table failed");
-        return STATS_ERR_CREATE_TABLE_FAIL;
-    }
-    helper->Upgrade();
 #ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
     writeTimer_ = std::make_unique<FfrtTimer>();
@@ -82,6 +68,47 @@ int32_t NetStatsCached::StartCached()
     });
 #endif
     return ret;
+}
+
+int32_t NetStatsCached::CreatNetStatsTables()
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    int8_t curRetryTimes = 0;
+    int32_t ret = -1;
+    while (curRetryTimes < RETRY_TIME) {
+        NETMGR_LOG_I("Create table times: %{public}d", curRetryTimes + 1);
+        ret = helper->CreateTable(VERSION_TABLE, VERSION_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create version table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create uid table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(IFACE_TABLE, IFACE_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create iface table failed");
+            curRetryTimes++;
+            continue;
+        }
+        ret = helper->CreateTable(UID_SIM_TABLE, UID_SIM_TABLE_CREATE_PARAM);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Create uid_sim table failed");
+            curRetryTimes++;
+            continue;
+        }
+        break;
+    }
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Create table failed");
+        return STATS_ERR_CREATE_TABLE_FAIL;
+    }
+    helper->Upgrade();
+    return NETMANAGER_SUCCESS;
 }
 
 void NetStatsCached::GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo)
@@ -314,6 +341,7 @@ void NetStatsCached::CacheStats()
     CacheAppStats();
     CacheUidSimStats();
     CacheIfaceStats();
+    CacheIptablesStats();
 }
 
 void NetStatsCached::WriteStats()
@@ -322,6 +350,7 @@ void NetStatsCached::WriteStats()
     WriteUidStats();
     WriteUidSimStats();
     WriteIfaceStats();
+    WriteIptablesStats();
 }
 void NetStatsCached::WriteIfaceStats()
 {
@@ -364,6 +393,17 @@ void NetStatsCached::WriteUidSimStats()
     handler->WriteStatsData(stats_.GetUidSimStatsInfo(), NetStatsDatabaseDefines::UID_SIM_TABLE);
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_SIM_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
     stats_.ResetUidSimStats();
+}
+
+void NetStatsCached::WriteIptablesStats()
+{
+    if (!(CheckIptablesStor() || isForce_)) {
+        return;
+    }
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    handler->WriteStatsData(stats_.GetIptablesStatsInfo(), NetStatsDatabaseDefines::UID_TABLE);
+    handler->DeleteByDate(NetStatsDatabaseDefines::UID_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
+    stats_.ResetIptablesStats();
 }
 
 void NetStatsCached::LoadIfaceNameIdentMaps()
@@ -621,6 +661,13 @@ void NetStatsCached::DeleteUidSimStats(uint32_t uid)
     }
 }
 
+void NetStatsCached::DeleteIptablesStats()
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    stats_.ResetIptablesStats();
+    lastIptablesStatsInfo_.clear();
+}
+
 void NetStatsCached::GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo)
 {
     std::vector<NetStatsInfo> allInfos;
@@ -684,6 +731,131 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
         }
         statsInfo.push_back(std::move(tmp));
     });
+}
+
+void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    iptablesStatsInfo.insert(iptablesStatsInfo.end(),
+        stats_.GetIptablesStatsInfo().begin(), stats_.GetIptablesStatsInfo().end());
+    GetIptablesStatsIncrease(iptablesStatsInfo);
+}
+
+void NetStatsCached::CacheIptablesStats()
+{
+    std::string ifaceName;
+    nmd::NetworkSharingTraffic traffic;
+
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetTrafficBytes err, ret[%{public}d]", ret);
+        return;
+    }
+    CacheIptablesStatsService(traffic, ifaceName);
+}
+
+void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    NetStatsInfo statsInfos;
+    statsInfos.uid_ = IPTABLES_UID;
+    statsInfos.iface_ = ifaceName;
+    statsInfos.rxBytes_ = traffic.receive;
+    statsInfos.txBytes_ = traffic.send;
+    statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
+    statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
+    statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
+    std::vector<NetStatsInfo> statsInfosVec;
+    statsInfosVec.push_back(std::move(statsInfos));
+
+    ifaceNameIdentMap_.Iterate([&statsInfosVec](const std::string &k, const std::string &v) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
+
+    std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this](NetStatsInfo &info) {
+        if (info.iface_ == IFACE_LO) {
+            return;
+        }
+        auto findRet = std::find_if(lastIptablesStatsInfo_.begin(), lastIptablesStatsInfo_.end(),
+            [this, &info](const NetStatsInfo &lastInfo) {return info.Equals(lastInfo); });
+        if (findRet == lastIptablesStatsInfo_.end()) {
+            stats_.PushIptablesStats(info);
+            return;
+        }
+        auto currentStats = info - *findRet;
+        stats_.PushIptablesStats(currentStats);
+    });
+    NETMGR_LOG_D("CacheIptablesStatsService info success");
+    lastIptablesStatsInfo_.swap(statsInfosVec);
+}
+
+void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
+{
+    NETMGR_LOG_I("SaveSharingTraffic enter");
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    if (infos.iface_ == "" || infos.iface_.find(CELLULAR_IFACE_NAME) == std::string::npos) {
+        NETMGR_LOG_D("ifaceName not cellular [%{public}s]", infos.iface_.c_str());
+        return;
+    }
+    nmd::NetworkSharingTraffic traffic;
+    traffic.receive = infos.rxBytes_;
+    traffic.send = infos.txBytes_;
+    std::string ifaceName = infos.iface_;
+    CacheIptablesStatsService(traffic, ifaceName);
+    WriteIptablesStats();
+    lastIptablesStatsInfo_.clear();
+}
+
+void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVec)
+{
+    std::string ifaceName;
+    nmd::NetworkSharingTraffic traffic;
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetTrafficBytes err, ret[%{public}d]", ret);
+        return;
+    }
+    NetStatsInfo statsInfos;
+    statsInfos.uid_ = IPTABLES_UID;
+    statsInfos.iface_ = ifaceName;
+    statsInfos.rxBytes_ = traffic.receive;
+    statsInfos.txBytes_ = traffic.send;
+    statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
+    statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
+    statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
+
+    std::vector<NetStatsInfo> statsInfosVec;
+    statsInfosVec.push_back(std::move(statsInfos));
+
+    ifaceNameIdentMap_.Iterate([&statsInfosVec](const std::string &k, const std::string &v) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [&k, &v](NetStatsInfo &item) {
+            if (item.iface_ == k) {
+                item.ident_ = v;
+            }
+        });
+    });
+    
+    std::vector<NetStatsInfo> tmpInfosVec;
+    if (!lastIptablesStatsInfo_.empty()) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
+            if (info.iface_ == IFACE_LO) {
+                return;
+            }
+            auto findRet = std::find_if(lastIptablesStatsInfo_.begin(), lastIptablesStatsInfo_.end(),
+                [this, &info](const NetStatsInfo &lastInfo) {return info.Equals(lastInfo); });
+            if (findRet == lastIptablesStatsInfo_.end()) {
+                tmpInfosVec.push_back(std::move(info));
+            } else {
+                tmpInfosVec.push_back(info - *findRet);
+            }
+        });
+    } else {
+        tmpInfosVec = statsInfosVec;
+    }
+    infosVec.insert(infosVec.end(), tmpInfosVec.begin(), tmpInfosVec.end());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

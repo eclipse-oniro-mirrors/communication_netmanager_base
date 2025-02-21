@@ -130,6 +130,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC)] =
         &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CELLULAR_SHARING_NETWORK_TRAFFIC)] =
+        &NetsysNativeServiceStub::CmdGetNetworkCellularSharingTraffic;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS)] =
         &NetsysNativeServiceStub::CmdGetTotalStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS)] =
@@ -539,8 +541,9 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
 int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
     uint16_t netid = data.ReadUint16();
-    NETNATIVE_LOGI("CreateNetworkCache  netid %{public}d", netid);
-    int32_t result = CreateNetworkCache(netid);
+    bool isVpnNet = data.ReadBool();
+    NETNATIVE_LOGI("CreateNetworkCache  netid %{public}d, isVpnNet %{public}d", netid, isVpnNet);
+    int32_t result = CreateNetworkCache(netid, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("CreateNetworkCache has recved result %{public}d", result);
 
@@ -550,10 +553,11 @@ int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, Mess
 int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
     uint16_t netId = data.ReadUint16();
-    int32_t result = DestroyNetworkCache(netId);
+    bool isVpnNet = data.ReadBool();
+    NETNATIVE_LOGI("DestroyNetworkCache  netId %{public}d, isVpnNet %{public}d", netId, isVpnNet);
+    int32_t result = DestroyNetworkCache(netId, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("DestroyNetworkCache has recved result %{public}d", result);
-
     return ERR_NONE;
 }
 
@@ -1009,7 +1013,8 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveInterface(MessageParcel &data, 
 int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = data.ReadInt32();
-    int32_t result = NetworkDestroy(netId);
+    bool isVpnNet = data.ReadBool();
+    int32_t result = NetworkDestroy(netId, isVpnNet);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
 
@@ -1419,6 +1424,21 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data
     reply.WriteInt64(traffic.receive);
     reply.WriteInt64(traffic.send);
     reply.WriteInt64(traffic.all);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkCellularSharingTraffic(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd GetNetworkSharingTraffic");
+    std::string ifaceName;
+    NetworkSharingTraffic traffic;
+    int32_t result = GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    reply.WriteInt32(result);
+    reply.WriteInt64(traffic.receive);
+    reply.WriteInt64(traffic.send);
+    reply.WriteInt64(traffic.all);
+    reply.WriteString(ifaceName);
 
     return result;
 }

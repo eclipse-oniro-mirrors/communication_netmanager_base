@@ -50,13 +50,13 @@ int32_t NetsysControllerServiceImpl::NetworkCreateVirtual(int32_t netId, bool ha
     return netsysClient_.NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId)
+int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKDESTROY_API)) {
         return mockNetsysClient_.NetworkDestroy(netId);
     }
-    return netsysClient_.NetworkDestroy(netId);
+    return netsysClient_.NetworkDestroy(netId, isVpnNet);
 }
 
 int32_t NetsysControllerServiceImpl::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
@@ -276,19 +276,19 @@ int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vect
     return netsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
-int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId)
+int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_I("create dns cache: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_CREATENETWORKCACHE_API)) {
         return mockNetsysClient_.CreateNetworkCache(netId);
     }
-    return netsysClient_.CreateNetworkCache(netId);
+    return netsysClient_.CreateNetworkCache(netId, isVpnNet);
 }
 
-int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_D("Destroy dns cache: netId[%{public}d]", netId);
-    return netsysClient_.DestroyNetworkCache(netId);
+    return netsysClient_.DestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
@@ -298,10 +298,17 @@ int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, co
 }
 
 int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-                                                              nmd::NetworkSharingTraffic &traffic)
+    nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_I("GetNetworkSharingTraffic");
     return netsysClient_.GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
+int32_t NetsysControllerServiceImpl::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
+    std::string &ifaceName)
+{
+    NETMGR_LOG_I("GetNetworkCellularSharingTraffic");
+    return netsysClient_.GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetCellularRxBytes()

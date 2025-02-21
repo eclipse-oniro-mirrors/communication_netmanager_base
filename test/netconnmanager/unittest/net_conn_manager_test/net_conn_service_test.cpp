@@ -310,7 +310,8 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
 
     NetConnService::RegisterType registerType = NetConnService::RegisterType::INVALIDTYPE;
     uint32_t reqId = 0;
-    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType);
+    uint32_t uid = 0;
+    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType, uid);
     EXPECT_EQ(registerType, NetConnService::RegisterType::REQUEST);
 
     ret = NetConnService::GetInstance()->UnregisterNetConnCallback(g_callback);
@@ -701,7 +702,7 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest018, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest019, TestSize.Level1)
 {
     int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
         NetConnService::GetInstance()->currentUserId_ = userId;
         HttpProxy httpProxy = {"", 0, {}};
@@ -713,7 +714,7 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest019, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest020, TestSize.Level1)
 {
     int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
         NetConnService::GetInstance()->currentUserId_ = userId;
         HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
@@ -1794,7 +1795,7 @@ HWTEST_F(NetConnServiceTest, SendHttpProxyChangeBroadcast001, TestSize.Level1)
     NetConnService::GetInstance()->currentUserId_ = -1;
     NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
     int32_t userId;
-    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
         NetConnService::GetInstance()->currentUserId_ = userId;
         NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);

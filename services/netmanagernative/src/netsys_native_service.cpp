@@ -189,18 +189,18 @@ int32_t NetsysNativeService::GetResolverConfig(uint16_t netid, std::vector<std::
     return 0;
 }
 
-int32_t NetsysNativeService::CreateNetworkCache(uint16_t netid)
+int32_t NetsysNativeService::CreateNetworkCache(uint16_t netid, bool isVpnNet)
 {
     NETNATIVE_LOG_D("CreateNetworkCache Begin");
-    netsysService_->DnsCreateNetworkCache(netid);
+    netsysService_->DnsCreateNetworkCache(netid, isVpnNet);
 
     return 0;
 }
 
-int32_t NetsysNativeService::DestroyNetworkCache(uint16_t netId)
+int32_t NetsysNativeService::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOG_D("DestroyNetworkCache");
-    return netsysService_->DnsDestroyNetworkCache(netId);
+    return netsysService_->DnsDestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysNativeService::GetAddrInfo(const std::string &hostName, const std::string &serverName,
@@ -413,9 +413,9 @@ int32_t NetsysNativeService::NetworkRemoveInterface(int32_t netId, const std::st
     return result;
 }
 
-int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeService::NetworkDestroy(int32_t netId, bool isVpnNet)
 {
-    int32_t result = netsysService_->NetworkDestroy(netId);
+    int32_t result = netsysService_->NetworkDestroy(netId, isVpnNet);
     NETNATIVE_LOG_D("NetworkDestroy");
     return result;
 }
@@ -680,6 +680,15 @@ void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std:
         }
         OnNetManagerRestart();
     }
+}
+
+int32_t NetsysNativeService::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName)
+{
+    if (sharingManager_ == nullptr) {
+        NETNATIVE_LOGE("manager is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return sharingManager_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

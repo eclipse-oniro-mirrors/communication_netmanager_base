@@ -480,7 +480,8 @@ private:
     int32_t GenerateNetId();
     int32_t GenerateInternalNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
-    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId, RegisterType &registerType);
+    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId,
+                          RegisterType &registerType, uint32_t &uid);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
@@ -505,6 +506,8 @@ private:
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    int32_t SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId);
+    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void CreateActiveHttpProxyThread();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -514,7 +517,6 @@ private:
 
     void RecoverNetSys();
     void OnNetSysRestart();
-    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
     std::vector<std::string> GetPreferredRegex();
@@ -526,7 +528,7 @@ private:
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);
     bool IsValidUserId(int32_t userId);
-    int32_t GetCallingUserId(int32_t &userId);
+    int32_t GetValidUserIdFromProxy(const HttpProxy &httpProxy);
     inline bool IsPrimaryUserId(const int32_t userId)
     {
         return userId == PRIMARY_USER_ID;
@@ -575,6 +577,7 @@ private:
     std::mutex globalHttpProxyMutex_;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
     std::recursive_mutex netManagerMutex_;
+    std::mutex netUidRequestMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
@@ -592,8 +595,9 @@ private:
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;
-    static constexpr uint32_t INVALID_USER_ID = -1;
-    uint32_t currentUserId_ = INVALID_USER_ID;
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t ROOT_USER_ID = 0;
+    int32_t currentUserId_ = INVALID_USER_ID;
     bool isFallbackProbeWithProxy_ = false;
 
 private:

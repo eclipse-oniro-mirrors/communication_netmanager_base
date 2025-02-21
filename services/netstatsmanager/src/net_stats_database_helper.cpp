@@ -116,7 +116,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     }
     int32_t idx = 1;
     if (paramCount == UID_PARAM_NUM) {
-        statement_.BindInt32(idx, info.uid_);
+        statement_.BindInt64(idx, info.uid_);
         ++idx;
     }
     statement_.BindText(idx, info.iface_);
@@ -174,7 +174,7 @@ int32_t NetStatsDatabaseHelper::SelectData(const uint32_t uid, uint64_t start, u
         return STATS_ERR_READ_DATA_FAIL;
     }
     int32_t idx = 1;
-    ret = statement_.BindInt32(idx, uid);
+    ret = statement_.BindInt64(idx, uid);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Bind int32 failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
@@ -222,7 +222,7 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
         return STATS_ERR_READ_DATA_FAIL;
     }
     int32_t idx = 1;
-    ret = statement_.BindInt32(idx, uid);
+    ret = statement_.BindInt64(idx, uid);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("bind int32 ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
@@ -275,7 +275,7 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const ui
         return STATS_ERR_READ_DATA_FAIL;
     }
     int32_t idx = 1;
-    ret = statement_.BindInt32(idx, uid);
+    ret = statement_.BindInt64(idx, uid);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("bind int32 ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
@@ -308,7 +308,7 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
         return STATS_ERR_WRITE_DATA_FAIL;
     }
     int32_t idx = 1;
-    statement_.BindInt32(idx, static_cast<int32_t>(uid));
+    statement_.BindInt64(idx, uid);
     ret = statement_.Step();
     statement_.ResetStatementAndClearBindings();
     if (ret != SQLITE_DONE) {

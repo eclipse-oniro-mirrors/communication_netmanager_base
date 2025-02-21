@@ -54,9 +54,9 @@ std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std:
     return res;
 }
 
-int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
+int32_t DnsParamCache::CreateCacheForNet(uint16_t netId, bool isVpnNet)
 {
-    NETNATIVE_LOG_D("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
+    NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it != serverConfigMap_.end()) {
@@ -64,12 +64,18 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
         return -EEXIST;
     }
     serverConfigMap_[netId].SetNetId(netId);
+    if (isVpnNet) {
+        NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet clear all dns cache when vpn net create");
+        for (auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
+            iterator->second.GetCache().Clear();
+        }
+    }
     return 0;
 }
 
-int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId)
+int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
-    NETNATIVE_LOG_D("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
+    NETNATIVE_LOGI("DnsParamCache::DestroyNetworkCache, netid:%{public}d, %{public}d", netId, isVpnNet);
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
@@ -79,8 +85,11 @@ int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId)
     if (defaultNetId_ == netId) {
         defaultNetId_ = 0;
     }
-    for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
-        it->second.GetCache().Clear();
+    if (isVpnNet) {
+        NETNATIVE_LOGI("DnsParamCache::DestroyNetworkCache clear all dns cache when vpn net destroy");
+        for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
+            it->second.GetCache().Clear();
+        }
     }
     return 0;
 }
@@ -107,10 +116,6 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
 
     auto newDnsServers = servers;
     std::sort(newDnsServers.begin(), newDnsServers.end());
-
-    for (auto iterator = serverConfigMap_.begin(); iterator != serverConfigMap_.end(); iterator++) {
-        iterator->second.GetCache().Clear();
-    }
 
     if (oldDnsServers != newDnsServers) {
         it->second.GetCache().Clear();

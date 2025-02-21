@@ -247,6 +247,7 @@
       "OHOS::NetManagerStandard::NetConnClient::UnregisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::CloseSocketsUid(int, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::DlCloseRemoveDeathRecipient()";
+      "OHOS::NetManagerStandard::NetConnClient::GetSpecificNet(OHOS::NetManagerStandard::NetBearType, std::__h::list<int, std::__h::allocator<int>>&)";
     };
   local:
    *;

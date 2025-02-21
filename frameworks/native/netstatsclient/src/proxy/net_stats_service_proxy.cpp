@@ -523,6 +523,27 @@ int32_t NetStatsServiceProxy::SetAppStats(const PushStatsInfo &info)
     return ret;
 }
 
+int32_t NetStatsServiceProxy::SaveSharingTraffic(const NetStatsInfo &infos)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!infos.Marshalling(data)) {
+        NETMGR_LOG_E("SaveSharingTraffic NetStatsInfo marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t ret = SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_SHARING_TRAFFIC_BEFORE_STOP),
+        data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    return ret;
+}
+
 int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
 {
     MessageParcel data;

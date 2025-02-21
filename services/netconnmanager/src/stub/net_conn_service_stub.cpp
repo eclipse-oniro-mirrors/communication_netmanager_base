@@ -206,11 +206,6 @@ void NetConnServiceStub::InitVirnicFuncToInterfaceMap()
 
 NetConnServiceStub::~NetConnServiceStub() {}
 
-std::string ToUtf8(std::u16string str16)
-{
-    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(str16);
-}
-
 int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                             MessageOption &option)
 {
@@ -219,8 +214,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     std::u16string myDescripter = NetConnServiceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
-        NETMGR_LOG_E("descriptor checked fail. my Descriptor: [%{public}s], remote Descriptor: [%{public}s]",
-                     ToUtf8(myDescripter).c_str(), ToUtf8(remoteDescripter).c_str());
+        NETMGR_LOG_E("descriptor checked fail.");
         if (!reply.WriteInt32(NETMANAGER_ERR_DESCRIPTOR_MISMATCH)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
