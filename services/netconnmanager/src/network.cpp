@@ -233,6 +233,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateTcpBufferSize(netLinkInfo);
     std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
     netLinkInfo_ = netLinkInfo;
+    wlock.unlock();
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
@@ -393,10 +394,11 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
-    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
-    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    for (const auto &route : netLinkInfo_.routeList_) {
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
+    lock.unlock();
+    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfoBck.ToStringRoute("").c_str());
+    for (const auto &route : netLinkInfoBck.routeList_) {
         if (newNetLinkInfo.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
@@ -419,7 +421,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : newNetLinkInfo.routeList_) {
-        if (netLinkInfo_.HasRoute(route)) {
+        if (netLinkInfoBck.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is no need to add it again",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
@@ -756,7 +758,7 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
 
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
 {
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     struct EventInfo eventInfo = {.netlinkInfo = netLinkInfo_.ToString(" "),
                                   .supplierId = static_cast<int32_t>(supplierId_),
                                   .errorType = static_cast<int32_t>(errorType),
