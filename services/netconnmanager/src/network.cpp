@@ -320,7 +320,7 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_INTERFACE_FAILED);
         }
     }
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
     netLinkInfo_.ifaceName_ = newNetLinkInfo.ifaceName_;
     NETMGR_LOG_D("Network UpdateInterfaces out.");
 }
@@ -765,7 +765,7 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
     EventReport::SendSupplierFaultEvent(eventInfo);
 }
 
-void Network::ResetNetLinkInfo()
+void Network::ResetNetlinkInfo()
 {
     std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     netLinkInfo_.Initialize();
