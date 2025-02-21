@@ -392,7 +392,6 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 
 void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
-    // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
