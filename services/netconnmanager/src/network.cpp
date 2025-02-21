@@ -205,7 +205,8 @@ bool Network::ReleaseVirtualNetwork()
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
             }
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().DelInterfaceAddress(
+                netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
         }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfoBck.ifaceName_);
         NetsysController::GetInstance().NetworkDestroy(netId_, true);
@@ -342,7 +343,8 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
                                                                      : Ipv4PrefixLen(inetAddr.netMask_));
         int32_t ret =
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().DelInterfaceAddress(
+                netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
         if (NETMANAGER_SUCCESS != ret) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
@@ -391,8 +393,10 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
+    {
+        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
+    }
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetlinkInfo netLinkInfoBck = netlinkInfo_;
     lock.unlock();
