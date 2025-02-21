@@ -32,7 +32,6 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
-#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace nmd {
