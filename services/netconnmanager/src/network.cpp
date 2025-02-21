@@ -187,7 +187,7 @@ bool Network::ReleaseBasicNetwork()
     NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfoBck.ifaceName_);
     NetsysController::GetInstance().NetworkDestroy(netId_);
     NetsysController::GetInstance().DestroyNetworkCache(netId_);
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
     netLinkInfo_.Initialize();
     isPhyNetCreated_ = false;
     return true;
@@ -211,7 +211,7 @@ bool Network::ReleaseVirtualNetwork()
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfoBck.ifaceName_);
         NetsysController::GetInstance().NetworkDestroy(netId_, true);
         NetsysController::GetInstance().DestroyNetworkCache(netId_, true);
-        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
         netLinkInfo_.Initialize();
         isVirtualCreated_ = false;
     }
@@ -231,7 +231,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
     netLinkInfo_ = netLinkInfo;
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
@@ -393,7 +393,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
-    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     for (const auto &route : netLinkInfo_.routeList_) {
