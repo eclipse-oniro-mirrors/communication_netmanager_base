@@ -69,6 +69,7 @@ ohos_shared_library("network") {
     "ipc:ipc_core",
     "libuv:uv",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   relative_install_dir = "module"
