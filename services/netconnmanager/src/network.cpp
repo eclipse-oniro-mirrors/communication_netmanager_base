@@ -393,14 +393,10 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
-    {
-        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-        NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
-    }
+    std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    NetlinkInfo netLinkInfoBck = netlinkInfo_;
-    lock.unlock();
-    for (const auto &route : netLinkInfoBck.routeList_) {
+    for (const auto &route : netlinkInfo_.routeList_) {
         if (newNetLinkInfo.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
@@ -423,7 +419,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : newNetLinkInfo.routeList_) {
-        if (netLinkInfoBck.HasRoute(route)) {
+        if (netlinkInfo_.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is no need to add it again",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
