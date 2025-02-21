@@ -53,6 +53,7 @@ ohos_shared_library("net_connection") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   part_name = "netmanager_base"
