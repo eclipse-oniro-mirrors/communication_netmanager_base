@@ -36,6 +36,7 @@ static constexpr uint32_t CONVERT_NUMBER_TO_BOOL = 2;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 template<class T>
@@ -558,6 +559,24 @@ void NotifyNetAccessPolicyDiagFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(uid);
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), dataParcel);
 }
+
+void SetNicTrafficAllowedFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    bool status = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    int32_t ifaceNamesSize = NetPolicyGetData<int32_t>() % MAX_IFACENAMES_SIZE;
+    dataParcel.WriteBool(status);
+    dataParcel.WriteInt32(ifaceNamesSize);
+    for (int32_t i = 0; i < ifaceNamesSize; i++) {
+        dataParcel.WriteString(NetPolicyGetString(STR_LEN));
+    }
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -587,5 +606,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::NotifyNetAccessPolicyDiagFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNicTrafficAllowedFuzzTest(data, size);
     return 0;
 }
