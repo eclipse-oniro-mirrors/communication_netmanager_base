@@ -193,20 +193,24 @@ bool Network::ReleaseBasicNetwork()
     return true;
 }
 
-bool Network::ReleaseVirtualNetwork()//记得修改
+bool Network::ReleaseVirtualNetwork()
 {
     NETMGR_LOG_D("Enter release virtual network");
     if (isVirtualCreated_) {
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+        NetlinkInfo netLinkInfoBck = netlinkInfo_;
+        lock.unlock();
+        for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
             }
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
         }
-        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfoBck.ifaceName_);
         NetsysController::GetInstance().NetworkDestroy(netId_, true);
         NetsysController::GetInstance().DestroyNetworkCache(netId_, true);
+        std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
         netLinkInfo_.Initialize();
         isVirtualCreated_ = false;
     }
