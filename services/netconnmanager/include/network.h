@@ -100,6 +100,7 @@ private:
     int32_t netId_ = 0;
     uint32_t supplierId_ = 0;
     NetLinkInfo netLinkInfo_;
+    mutable std::shared_mutex netLinkInfoMutex_;
     NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     std::atomic_bool isPhyNetCreated_ = false;
