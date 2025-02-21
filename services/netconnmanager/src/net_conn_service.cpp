@@ -118,7 +118,10 @@ void NetConnService::CreateDefaultRequest()
                                                             netConnEventHandler_, 0, REQUEST);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
-        netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
+        {
+            std::unique_lock<std::shared_mutex> lock(netActivatesMutex_);
+            netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
+        }
         NETMGR_LOG_D("defaultnetcap size = [%{public}zu]", defaultNetSpecifier_->netCapabilities_.netCaps_.size());
     }
 }
@@ -855,8 +858,8 @@ void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const
 void NetConnService::DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback,
                                           uint32_t reqId)
 {
-    NET_ACTIVATE_MAP::iterator iterActive;
-    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
+    std::lock_guard<std::shared_mutex> lock(netActivatesMutex_);
+    for (auto iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
         if (!iterActive->second) {
             ++iterActive;
             continue;
@@ -1127,7 +1130,10 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
     NetRequest netrequest(request->GetUid(), reqId);
-    netActivates_[reqId] = request;
+    {
+        std::lock_guard<std::shared_mutex> guard(netActivatesMutex_);
+        netActivates_[reqId] = request;
+    }
     {
         std::lock_guard guard(uidActivateMutex_);
         netUidActivates_[callingUid].push_back(request);
@@ -1166,6 +1172,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([reqId, this]() {
             NETMGR_LOG_I("DeactivateNetwork Enter, reqId is [%{public}d]", reqId);
+            std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
             auto iterActivate = netActivates_.find(reqId);
             if (iterActivate == netActivates_.end()) {
                 NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
@@ -1180,6 +1187,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                     pNetService->CancelRequest(netrequest);
                 }
             }
+            lock.unlock();
 
             NET_SUPPLIER_MAP::iterator iterSupplier;
             for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
@@ -1209,7 +1217,12 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
         return false;
     }
     NET_ACTIVATE_MAP::iterator iterActive;
-    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
+    NET_ACTIVATE_MAP netActivatesBck;
+    {
+        std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
+        netActivatesBck = netActivates_;
+    }
+    for (iterActive = netActivatesBck.begin(); iterActive != netActivatesBck.end(); ++iterActive) {
         if (!iterActive->second) {
             continue;
         }
@@ -1242,10 +1255,15 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
 
 void NetConnService::FindBestNetworkForAllRequest()
 {
-    NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netActivates_ size: [%{public}zu]", netActivates_.size());
+    NET_ACTIVATE_MAP netActivatesBck;
+    {
+        std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
+        netActivatesBck = netActivates_;
+    }
+    NETMGR_LOG_I("FindBestNetworkForAllRequest Enter. netActivates_ size: [%{public}zu]", netActivatesBck.size());
     NET_ACTIVATE_MAP::iterator iterActive;
     sptr<NetSupplier> bestSupplier = nullptr;
-    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
+    for (iterActive = netActivatesBck.begin(); iterActive != netActivatesBck.end(); ++iterActive) {
         if (!iterActive->second) {
             continue;
         }
@@ -1410,6 +1428,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     NETMGR_LOG_I("Send all request to supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
                  supplier->GetNetSupplierIdent().c_str());
     NET_ACTIVATE_MAP::iterator iter;
+    std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
     for (iter = netActivates_.begin(); iter != netActivates_.end(); ++iter) {
         if (iter->second == nullptr) {
             continue;
@@ -1485,9 +1504,14 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
     NETMGR_LOG_I("Callback type: %{public}d for supplier[%{public}d, %{public}s], best request size: %{public}zd",
                  static_cast<int32_t>(type), supplier->GetSupplierId(), supplier->GetNetSupplierIdent().c_str(),
                  bestReqList.size());
+    NET_ACTIVATE_MAP netActivatesBck;
+    {
+        std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
+        netActivatesBck = netActivates_;
+    }
     for (auto it : bestReqList) {
-        auto reqIt = netActivates_.find(it);
-        if ((reqIt == netActivates_.end()) || (reqIt->second == nullptr)) {
+        auto reqIt = netActivatesBck.find(it);
+        if ((reqIt == netActivatesBck.end()) || (reqIt->second == nullptr)) {
             continue;
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
@@ -2991,6 +3015,7 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
         return false;
     }
     NET_ACTIVATE_MAP::iterator iterActive;
+    std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
         if (!iterActive->second) {
             continue;
