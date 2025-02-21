@@ -553,6 +553,10 @@ int32_t NetPolicyService::GetActivatedOsAccountId(int32_t &userId)
 void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
 {
     NETMGR_LOG_I("UpdateNetAccessPolicyToMapFromDB enter.");
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return;
+    }
     NetAccessPolicyRDB netAccessPolicy;
     std::vector<NetAccessPolicyData> result = netAccessPolicy.QueryAll();
     for (size_t i = 0; i < result.size(); i++) {
@@ -566,6 +570,10 @@ void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
 void NetPolicyService::ResetNetAccessPolicy()
 {
     NETMGR_LOG_I("ResetNetAccessPolicy enter.");
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return;
+    }
     NetAccessPolicyRDB netAccessPolicyRdb;
     std::vector<NetAccessPolicyData> result = netAccessPolicyRdb.QueryAll();
     for (size_t i = 0; i < result.size(); i++) {
