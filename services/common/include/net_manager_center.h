@@ -61,11 +61,11 @@ public:
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
 
 private:
-    sptr<NetConnBaseService> connService_;
-    sptr<NetStatsBaseService> statsService_;
-    sptr<NetPolicyBaseService> policyService_;
-    sptr<NetEthernetBaseService> ethernetService_;
-    sptr<DnsBaseService> dnsService_;
+    sptr<NetConnBaseService> connService_ = nullptr;
+    sptr<NetStatsBaseService> statsService_ = nullptr;
+    sptr<NetPolicyBaseService> policyService_ = nullptr;
+    sptr<NetEthernetBaseService> ethernetService_ = nullptr;
+    sptr<DnsBaseService> dnsService_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

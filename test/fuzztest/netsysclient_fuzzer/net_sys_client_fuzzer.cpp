@@ -37,6 +37,7 @@ size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 constexpr size_t VECTOR_MAX_SIZE = 15;
+constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 } // namespace
 
 template <class T> T NetSysGetData()
@@ -1494,6 +1495,82 @@ void CloseSocketsUidTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CLOSE_SOCKETS_UID), dataParcel);
 }
 
+void CmdSetUserDefinedServerFlagFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    uint16_t netId = NetSysGetData<uint16_t>();
+    bool flag = NetSysGetData<bool>();
+    dataParcel.WriteUint16(netId);
+    dataParcel.WriteBool(flag);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG),
+                    dataParcel);
+}
+
+void CmdSetNicTrafficAllowedFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    bool status = NetSysGetData<bool>();
+    int32_t ifaceNamesSize = NetSysGetData<int32_t>() % MAX_IFACENAMES_SIZE;
+    dataParcel.WriteBool(status);
+    dataParcel.WriteInt32(ifaceNamesSize);
+    for (int32_t i = 0; i < ifaceNamesSize; i++) {
+        dataParcel.WriteString(NetSysGetString(STR_LEN));
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_NIC_TRAFFIC_ALLOWED),
+                    dataParcel);
+}
+
+void CmdSetBrokerUidAccessPolicyMapFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    uint32_t count = NetSysGetData<uint32_t>() % UINT16_MAX;
+    dataParcel.WriteUint32(count);
+    for (uint32_t i = 0; i < count; i++) {
+        dataParcel.WriteUint32(NetSysGetData<uint32_t>());
+        dataParcel.WriteUint32(NetSysGetData<uint32_t>());
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_BROKER_UID_NETWORK_POLICY),
+                    dataParcel);
+}
+
+void CmdProcessVpnStageFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t stage = NetSysGetData<int32_t>();
+    dataParcel.WriteInt32(stage);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE),
+                    dataParcel);
+}
+
+void CmdDelBrokerUidAccessPolicyMapFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    uint32_t uid = NetSysGetData<int32_t>();
+    dataParcel.WriteUint32(uid);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DEL_BROKER_UID_NETWORK_POLICY),
+                    dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1595,5 +1672,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputOthers(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
+    OHOS::NetManagerStandard::CmdSetUserDefinedServerFlagFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetNicTrafficAllowedFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetBrokerUidAccessPolicyMapFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdProcessVpnStageFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDelBrokerUidAccessPolicyMapFuzzTest(data, size);
     return 0;
 }
