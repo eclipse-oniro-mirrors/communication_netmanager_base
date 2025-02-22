@@ -105,7 +105,6 @@ int32_t NetStatsUtils::GetNowTimestamp()
 
 bool NetStatsUtils::IsLeapYear(int32_t year)
 {
-    // 判断是否是闰年
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0); // 4: 100/400计算闰年
 }
  
