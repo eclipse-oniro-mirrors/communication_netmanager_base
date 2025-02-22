@@ -180,6 +180,7 @@ ohos_shared_library("socket_permission") {
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
   part_name = "netmanager_base"
   subsystem_name = "communication"

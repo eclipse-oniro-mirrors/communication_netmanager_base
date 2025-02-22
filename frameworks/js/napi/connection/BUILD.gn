@@ -140,6 +140,7 @@ ohos_shared_library("connection_if") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   part_name = "netmanager_base"
