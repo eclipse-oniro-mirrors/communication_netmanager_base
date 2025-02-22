@@ -78,6 +78,7 @@ ResolvConfig DnsResolvListenTest::createResolvConfig(int num)
     resolvConfig.error = 0; // 假设默认错误码为0
     resolvConfig.timeoutMs = 1000; // 假设默认超时时间为1000ms
     resolvConfig.retryCount = 3; // 假设默认重试次数为3
+    resolvConfig.nonPublicNum = 1;
 
     // 将数字转换为字符串并赋值给nameservers
     for (int i = 0; i < num; ++i) {

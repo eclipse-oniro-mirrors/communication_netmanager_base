@@ -67,6 +67,7 @@ struct ResolvConfig {
     int32_t error;
     int32_t timeoutMs;
     uint32_t retryCount;
+    uint32_t nonPublicNum;
     char nameservers[MAX_SERVER_NUM][MAX_SERVER_LENGTH + 1];
 };
 
