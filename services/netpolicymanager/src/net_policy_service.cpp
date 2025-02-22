@@ -559,6 +559,10 @@ void NetPolicyService::UpdateNetAccessPolicyToMapFromDB()
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
         policy.cellularAllow = result[i].cellularPolicy;
+        if (netPolicyRule_ == nullptr) {
+            NETMGR_LOG_E("netPolicyRule_ is nullptr");
+            break;
+        }
         (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
     }
 }
@@ -578,6 +582,10 @@ void NetPolicyService::ResetNetAccessPolicy()
         NetworkAccessPolicy policy;
         policy.wifiAllow = result[i].wifiPolicy;
         policy.cellularAllow = result[i].cellularPolicy;
+        if (netPolicyRule_ == nullptr) {
+            NETMGR_LOG_E("netPolicyRule_ is nullptr");
+            break;
+        }
         (void)netPolicyRule_->SetNetworkAccessPolicy(result[i].uid, policy, result[i].setFromConfigFlag);
     }
 }
