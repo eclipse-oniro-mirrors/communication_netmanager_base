@@ -29,7 +29,9 @@
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
 #include "safe_map.h"
+#ifdef SUPPORT_NETWORK_SHARE
 #include "network_sharing.h"
+#endif // SUPPORT_NETWORK_SHARE
 
 #include "ffrt_timer.h"
 
@@ -65,10 +67,11 @@ public:
 
     void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
+#ifdef SUPPORT_NETWORK_SHARE
     void GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo);
 
     void GetIptablesStatsIncrease(std::vector<NetStatsInfo> &InfosVec);
-
+#endif
     void SaveSharingTraffic(const NetStatsInfo &infos);
 
     inline void SetTrafficThreshold(uint64_t threshold)
@@ -102,7 +105,11 @@ public:
 
     void ClearUidStatsFlag();
 
+#ifdef SUPPORT_NETWORK_SHARE
     void DeleteIptablesStats();
+
+    uint64_t GetWriteDateTime();
+#endif
 
 private:
     class CachedInfo {
@@ -146,6 +153,7 @@ private:
             }
         }
 
+#ifdef SUPPORT_NETWORK_SHARE
         void PushIptablesStats(NetStatsInfo &info)
         {
             if (info.HasNoData()) {
@@ -158,6 +166,7 @@ private:
                 netStatsCallbackManager_->NotifyNetUidStatsChanged(info.iface_, info.uid_);
             }
         }
+#endif
 
         inline std::vector<NetStatsInfo> &GetUidStatsInfo()
         {
@@ -174,10 +183,12 @@ private:
             return ifaceStatsInfo_;
         }
 
+#ifdef SUPPORT_NETWORK_SHARE
         inline std::vector<NetStatsInfo> &GetIptablesStatsInfo()
         {
             return iptablesStatsInfo_;
         }
+#endif
 
         inline uint64_t GetCurrentUidStats() const
         {
@@ -194,10 +205,12 @@ private:
             return currentIfaceStats_;
         }
 
+#ifdef SUPPORT_NETWORK_SHARE
         inline uint64_t GetCurrentIptablesStats() const
         {
             return currentIptablesStats_;
         }
+#endif
 
         void ResetUidStats()
         {
@@ -241,11 +254,13 @@ private:
             currentIfaceStats_ = 0;
         }
 
+#ifdef SUPPORT_NETWORK_SHARE
         void ResetIptablesStats()
         {
             iptablesStatsInfo_.clear();
             currentIptablesStats_ = 0;
         }
+#endif
 
         inline void SetNotifier(const std::shared_ptr<NetStatsCallback> &callbackManager)
         {
@@ -256,12 +271,14 @@ private:
         uint64_t currentUidStats_ = 0;
         uint64_t currentUidSimStats_ = 0;
         uint64_t currentIfaceStats_ = 0;
-        uint64_t currentIptablesStats_ = 0;
         std::vector<NetStatsInfo> uidStatsInfo_;
         std::vector<NetStatsInfo> uidSimStatsInfo_;
         std::vector<NetStatsInfo> ifaceStatsInfo_;
-        std::vector<NetStatsInfo> iptablesStatsInfo_;
         std::shared_ptr<NetStatsCallback> netStatsCallbackManager_ = nullptr;
+#ifdef SUPPORT_NETWORK_SHARE
+        uint64_t currentIptablesStats_ = 0;
+        std::vector<NetStatsInfo> iptablesStatsInfo_;
+#endif
     };
 
     static constexpr uint32_t DEFAULT_CACHE_CYCLE_MS = 30 * 60 * 1000;
@@ -282,12 +299,15 @@ private:
     std::vector<NetStatsInfo> allPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
-    std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
     std::atomic<int64_t> uninstalledUid_ = -1;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     SafeMap<uint32_t, NetStatsDataFlag> uidStatsFlagMap_;
     SafeMap<uint32_t, SampleBundleInfo> uidSimSampleBundleMap_;
+#ifdef SUPPORT_NETWORK_SHARE
+    std::vector<NetStatsInfo> lastIptablesStatsInfo_;
+    uint64_t writeDate_ = 0;
+#endif
 
     void LoadIfaceNameIdentMaps();
     NetStatsDataFlag GetUidStatsFlag(uint32_t uid);
@@ -299,8 +319,6 @@ private:
     void CacheUidSimStats();
     void CacheIfaceStats();
     void CacheAppStats();
-    void CacheIptablesStats();
-    void CacheIptablesStatsService(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
     void GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo);
     void GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo);
     void DeleteUidStats(uint32_t uid);
@@ -310,7 +328,11 @@ private:
     void WriteUidStats();
     void WriteUidSimStats();
     void WriteIfaceStats();
+#ifdef SUPPORT_NETWORK_SHARE
+    void CacheIptablesStats();
+    void CacheIptablesStatsService(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
     void WriteIptablesStats();
+#endif
 
     void GetUpIfaceName(std::string &downIface, std::string &upIface);
 
@@ -333,10 +355,12 @@ private:
         return stats_.GetCurrentIfaceStats() >= trafficThreshold_;
     }
 
+#ifdef SUPPORT_NETWORK_SHARE
     inline bool CheckIptablesStor()
     {
         return stats_.GetCurrentIptablesStats() >= trafficThreshold_;
     }
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
