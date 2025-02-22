@@ -46,6 +46,7 @@
 #include "netsys_controller.h"
 #include "ipc_skeleton.h"
 #include "parameter.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -75,6 +76,8 @@ constexpr uint16_t DEFAULT_MTU = 1500;
 constexpr int32_t SUCCESS_CODE = 204;
 constexpr int32_t RETRY_TIMES = 3;
 constexpr long AUTH_TIME_OUT = 5L;
+constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager.ready";
+constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -105,6 +108,10 @@ void NetConnService::OnStart()
     }
     state_ = STATE_RUNNING;
     gettimeofday(&tv, nullptr);
+    if (!system::GetBoolParameter(BOOTEVENT_NETMANAGER_SERVICE_READY, false)) {
+        system::SetParameter(BOOTEVENT_NETMANAGER_SERVICE_READY, "true");
+        NETMGR_LOG_I("set netmanager service start true");
+    }
     NETMGR_LOG_D("OnStart end");
 }
 
@@ -2907,6 +2914,10 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         if (hasSARemoved_) {
             OnNetSysRestart();
             hasSARemoved_ = false;
+        }
+        if (!system::GetBoolParameter(BOOTEVENT_NETSYSNATIVE_SERVICE_READY, false)) {
+            system::SetParameter(BOOTEVENT_NETSYSNATIVE_SERVICE_READY, "true");
+            NETMGR_LOG_I("set netsysnative service start true");
         }
     } else if (systemAbilityId == ACCESS_TOKEN_MANAGER_SERVICE_ID) {
         if (!registerToService_) {
