@@ -1194,6 +1194,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
 
 sptr<NetSupplier> NetConnService::FindNetSupplier(uint32_t supplierId)
 {
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto iterSupplier = netSuppliers_.find(supplierId);
     if (iterSupplier != netSuppliers_.end()) {
         return iterSupplier->second;
@@ -1289,7 +1290,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         NETMGR_LOG_E("netActivateNetwork is null");
         return bestScore;
     }
-
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -1441,6 +1442,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
             request->GetBearType());
     NETMGR_LOG_I("Send request[%{public}d] to all supplier", netrequest.requestId);
     NET_SUPPLIER_MAP::iterator iter;
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
             continue;
@@ -1461,6 +1463,7 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
 {
     NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
     NET_SUPPLIER_MAP::iterator iter;
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
             continue;
