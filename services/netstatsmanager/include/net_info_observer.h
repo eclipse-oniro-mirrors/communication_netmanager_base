@@ -41,7 +41,8 @@ private:
     std::string ifaceName_ = "";
     int32_t ident_ = -1;
     uint64_t ifindex_ = 0;
+    std::atomic_bool isNeedUpdate_ = false;
 };
 }
 }
-#endif
+#endif

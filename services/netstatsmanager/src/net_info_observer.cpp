@@ -39,7 +39,8 @@ int32_t NetInfoObserver::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHa
 
 int32_t NetInfoObserver::NetLost(sptr<NetManagerStandard::NetHandle> &netHandle)
 {
-    NETMGR_LOG_D("NetInfoObserver NetLost");
+    isNeedUpdate_ = true;
+    NETMGR_LOG_I("NetInfoObserver NetLost");
     return 0;
 }
 
@@ -47,6 +48,7 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
 {
     NETMGR_LOG_D("NetInfoObserver NetConnectionPropertiesChange");
     if (info == nullptr) {
+        isNeedUpdate_ = true;
         return -1;
     }
     NETMGR_LOG_D("NetInfoObserver ifName: %{public}s, idnet: %{public}s",
@@ -54,14 +56,16 @@ int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandl
     if (info->ident_.empty()) {  // wifi场景
         uint64_t ifindex = if_nametoindex(info->ifaceName_.c_str());
         DelayedSingleton<NetStatsService>::GetInstance()->ProcessNetConnectionPropertiesChange(INT32_MAX, ifindex_);
+        isNeedUpdate_ = true;
         return 0;
     }
 
     int32_t ident = 0;
     NetStatsUtils::ConvertToInt32(info->ident_, ident);
-    if (ident == ident_ && info->ifaceName_ == ifaceName_) {
+    if (!isNeedUpdate_ && ident == ident_ && info->ifaceName_ == ifaceName_) {
         return 0;
     }
+    isNeedUpdate_ = false;
     ident_ = ident;
     ifaceName_ = info->ifaceName_;
     ifindex_ = if_nametoindex(ifaceName_.c_str());
