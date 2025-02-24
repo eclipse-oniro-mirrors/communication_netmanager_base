@@ -516,6 +516,7 @@ private:
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
     sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
+    std::mutex httpProxyThreadNeedRunMutex_;
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
@@ -528,6 +529,7 @@ private:
     static constexpr int32_t INVALID_USER_ID = -1;
     static constexpr int32_t ROOT_USER_ID = 0;
     int32_t currentUserId_ = INVALID_USER_ID;
+    std::mutex currentUserIdMutex_;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

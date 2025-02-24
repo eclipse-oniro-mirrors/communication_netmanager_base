@@ -1976,6 +1976,7 @@ int32_t NetConnService::SetGlobalHttpProxyInner(const HttpProxy &httpProxy)
 
 int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId)
 {
+    std::lock_guard<std::mutex> autoLock(currentUserIdMutex_);
     if (currentUserId_ == INVALID_USER_ID) {
         if (httpProxy.GetHost().empty()) {
             return NETMANAGER_SUCCESS;
@@ -2003,6 +2004,8 @@ int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activ
     if (!httpProxy.GetHost().empty()) {
         httpProxyThreadCv_.notify_all();
     }
+
+    std::lock_guard<std::mutex> ThreadAutoLock(httpProxyThreadNeedRunMutex_);
     if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
         CreateActiveHttpProxyThread();
     } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
@@ -2054,6 +2057,8 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     if (!httpProxy.GetHost().empty()) {
         httpProxyThreadCv_.notify_all();
     }
+
+    std::lock_guard<std::mutex> ThreadAutoLock(httpProxyThreadNeedRunMutex_);
     if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
         NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
                      httpProxy.password_.length());
