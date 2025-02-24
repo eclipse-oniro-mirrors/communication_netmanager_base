@@ -1511,13 +1511,10 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
     }
     for (auto it : bestReqList) {
         auto reqIt = netActivatesBck.find(it);
-        if ((reqIt == netActivatesBck.end()) || (reqIt->second == nullptr)) {
+        if (reqIt == netActivatesBck.end() || reqIt->second == nullptr || reqIt->second->GetNetCallback() == nullptr) {
             continue;
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
-        if (!callback) {
-            continue;
-        }
         sptr<NetHandle> netHandle = supplier->GetNetHandle();
         switch (type) {
             case CALL_TYPE_LOST: {
