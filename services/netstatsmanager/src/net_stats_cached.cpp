@@ -28,7 +28,6 @@
 #include "netsys_controller.h"
 #include "bpf_stats.h"
 #include "ffrt_inner.h"
-#include "net_manager_center.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -341,7 +340,9 @@ void NetStatsCached::CacheStats()
     CacheAppStats();
     CacheUidSimStats();
     CacheIfaceStats();
+#ifdef SUPPORT_NETWORK_SHARE
     CacheIptablesStats();
+#endif
 }
 
 void NetStatsCached::WriteStats()
@@ -350,8 +351,19 @@ void NetStatsCached::WriteStats()
     WriteUidStats();
     WriteUidSimStats();
     WriteIfaceStats();
+#ifdef SUPPORT_NETWORK_SHARE
     WriteIptablesStats();
+    writeDate_ = CommonUtils::GetCurrentSecond();
+#endif
 }
+
+#ifdef SUPPORT_NETWORK_SHARE
+uint64_t NetStatsCached::GetWriteDateTime()
+{
+    return writeDate_;
+}
+#endif
+
 void NetStatsCached::WriteIfaceStats()
 {
     if (!(CheckIfaceStor() || isForce_)) {
@@ -395,6 +407,7 @@ void NetStatsCached::WriteUidSimStats()
     stats_.ResetUidSimStats();
 }
 
+#ifdef SUPPORT_NETWORK_SHARE
 void NetStatsCached::WriteIptablesStats()
 {
     if (!(CheckIptablesStor() || isForce_)) {
@@ -405,6 +418,7 @@ void NetStatsCached::WriteIptablesStats()
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
     stats_.ResetIptablesStats();
 }
+#endif
 
 void NetStatsCached::LoadIfaceNameIdentMaps()
 {
@@ -661,12 +675,14 @@ void NetStatsCached::DeleteUidSimStats(uint32_t uid)
     }
 }
 
+#ifdef SUPPORT_NETWORK_SHARE
 void NetStatsCached::DeleteIptablesStats()
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     stats_.ResetIptablesStats();
     lastIptablesStatsInfo_.clear();
 }
+#endif
 
 void NetStatsCached::GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo)
 {
@@ -733,6 +749,7 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
     });
 }
 
+#ifdef SUPPORT_NETWORK_SHARE
 void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
@@ -792,23 +809,6 @@ void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traff
     lastIptablesStatsInfo_.swap(statsInfosVec);
 }
 
-void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
-{
-    NETMGR_LOG_I("SaveSharingTraffic enter");
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    if (infos.iface_ == "" || infos.iface_.find(CELLULAR_IFACE_NAME) == std::string::npos) {
-        NETMGR_LOG_D("ifaceName not cellular [%{public}s]", infos.iface_.c_str());
-        return;
-    }
-    nmd::NetworkSharingTraffic traffic;
-    traffic.receive = infos.rxBytes_;
-    traffic.send = infos.txBytes_;
-    std::string ifaceName = infos.iface_;
-    CacheIptablesStatsService(traffic, ifaceName);
-    WriteIptablesStats();
-    lastIptablesStatsInfo_.clear();
-}
-
 void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVec)
 {
     std::string ifaceName;
@@ -856,6 +856,26 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
         tmpInfosVec = statsInfosVec;
     }
     infosVec.insert(infosVec.end(), tmpInfosVec.begin(), tmpInfosVec.end());
+}
+#endif
+
+void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
+{
+    NETMGR_LOG_I("SaveSharingTraffic enter");
+#ifdef SUPPORT_NETWORK_SHARE
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    if (infos.iface_ == "" || infos.iface_.find(CELLULAR_IFACE_NAME) == std::string::npos) {
+        NETMGR_LOG_D("ifaceName not cellular [%{public}s]", infos.iface_.c_str());
+        return;
+    }
+    nmd::NetworkSharingTraffic traffic;
+    traffic.receive = infos.rxBytes_;
+    traffic.send = infos.txBytes_;
+    std::string ifaceName = infos.iface_;
+    CacheIptablesStatsService(traffic, ifaceName);
+    WriteIptablesStats();
+    lastIptablesStatsInfo_.clear();
+#endif
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -57,6 +57,10 @@
 #include "net_stats_rdb.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
 #include "iptables_wrapper.h"
+#ifdef SUPPORT_NETWORK_SHARE
+#include "networkshare_client.h"
+#include "networkshare_constants.h"
+#endif // SUPPORT_NETWORK_SHARE
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -510,6 +514,32 @@ int32_t NetStatsService::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
     return NetsysController::GetInstance().GetAllSimStatsInfo(infos);
 }
 
+#ifdef SUPPORT_NETWORK_SHARE
+bool NetStatsService::IsSharingOn()
+{
+    int32_t share = 0;
+    int ret = DelayedSingleton<NetManagerStandard::networkshare_client>::GetInstance()->IsSharing(share);
+    if (ret != NETMANAGER_EXT_SUCCESS) {
+        NETMGR_LOG_E("get sharing state res: %{public}d, isSharing: %{public}d", ret, share);
+        return false;
+    }
+    return share == NetManagerStandard::NETWORKSHARE_IS_SHARING;
+}
+
+void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, uint32_t endtime)
+{
+    // 跑在非ipc线程防止鉴权失败
+    bool isSharingOn = false;
+    auto task = ffrt::submit_h([&isSharingOn, this]() {isSharingOn = NetStatsService::IsSharingOn();}, {}, {},
+        ffrt::task_attr().name("isSharingOn"));
+    ffrt::wait({task});
+    if (isSharingOn && (endtime > netStatsCached_->GetWriteDateTime())) {
+        NETMGR_LOG_D("GetIptablesStatsCached enter");
+        netStatsCached_->GetIptablesStatsCached(sharingStats);
+    }
+}
+#endif
+
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
                                                   const sptr<NetStatsNetwork> &network)
 {
@@ -544,9 +574,20 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    netStatsCached_->GetIptablesStatsCached(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](NetStatsInfo &info) {
-        if (ident != info.ident_ || start > info.date_ || end < info.date_) {
+#ifdef SUPPORT_NETWORK_SHARE
+    GetSharingStats(allInfo, end);
+#endif
+    FilterTrafficStatsByNetwork(allInfo, infos, ident, start, end);
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
+    return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &allInfo,
+    std::unordered_map<uint32_t, NetStatsInfo> &infos,
+    const std::string ident, uint32_t startTime, uint32_t endTime)
+{
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &startTime, &endTime](NetStatsInfo &info) {
+        if (ident != info.ident_ || startTime > info.date_ || endTime < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
@@ -559,8 +600,6 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
             item->second += info;
         }
     });
-    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
@@ -599,19 +638,28 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    netStatsCached_->GetIptablesStatsCached(allInfo);
-    netStatsCached_->GetIptablesStatsIncrease(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [this, &infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
-        if (uid != info.uid_ || ident != info.ident_ || start > info.date_ || end < info.date_) {
+#ifdef SUPPORT_NETWORK_SHARE
+    GetSharingStats(allInfo, end);
+#endif
+    FilterTrafficStatsByUidNetwork(allInfo, infos, uid, ident, start, end);
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
+    return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &allInfo,
+    std::vector<NetStatsInfoSequence> &infos, const uint32_t uid,
+    const std::string ident, uint32_t startTime, uint32_t endTime)
+{
+    std::for_each(allInfo.begin(), allInfo.end(),
+        [this, &infos, &uid, &ident, &startTime, &endTime](const NetStatsInfo &info) {
+        if (uid != info.uid_ || ident != info.ident_ || startTime > info.date_ || endTime < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
             return;
         }
-        MergeTrafficStats(infos, info, end);
+        MergeTrafficStats(infos, info, endTime);
     });
-    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)

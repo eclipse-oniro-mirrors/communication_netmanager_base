@@ -108,6 +108,15 @@ private:
     void RegisterCommonEvent();
     bool CommonEventPackageAdded(uint32_t uid);
     bool CommonEventPackageRemoved(uint32_t uid);
+    void FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &allInfo,
+        std::unordered_map<uint32_t, NetStatsInfo> &infos,
+        const std::string ident, uint32_t startTime, uint32_t endTime);
+    void FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &allInfo, std::vector<NetStatsInfoSequence> &infos,
+        const uint32_t uid, const std::string ident, uint32_t startTime, uint32_t endTime);
+#ifdef SUPPORT_NETWORK_SHARE
+    bool IsSharingOn();
+    void GetSharingStats(std::vector<NetStatsInfo> &sharingStats, uint32_t endtime);
+#endif
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     bool CommonEventSimStateChanged(int32_t slotId, int32_t simState);
     bool CommonEventCellularDataStateChanged(int32_t slotId, int32_t dataState);

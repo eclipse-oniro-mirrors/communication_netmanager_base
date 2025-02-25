@@ -32,7 +32,8 @@
             "netmanager_base_enable_public_dns_server",
             "netmanager_base_support_ebpf_memory_miniaturization",
             "netmanager_base_enable_traffic_statistic",
-            "netmanager_base_extended_features"
+            "netmanager_base_extended_features",
+            "netmanager_base_share_traffic_limit_enable"
         ],
         "adapted_system_type": [
             "standard"
@@ -79,8 +80,8 @@
                 "cellular_data",
                 "core_service",
                 "distributed_notification_service",
-                "i18n"
-                
+                "i18n",
+                "netmanager_ext"
             ]
         },
         "build": {
