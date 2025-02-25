@@ -518,7 +518,7 @@ int32_t NetStatsService::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
 bool NetStatsService::IsSharingOn()
 {
     int32_t share = 0;
-    int ret = DelayedSingleton<NetManagerStandard::networkshare_client>::GetInstance()->IsSharing(share);
+    int ret = DelayedSingleton<NetManagerStandard::NetworkShareClient>::GetInstance()->IsSharing(share);
     if (ret != NETMANAGER_EXT_SUCCESS) {
         NETMGR_LOG_E("get sharing state res: %{public}d, isSharing: %{public}d", ret, share);
         return false;
