@@ -388,7 +388,7 @@ static inline __u64 check_broker_policy(uint64_t uid)
 {
     uint64_t network_access_uid = uid;
     void *broker_map_ptr = &broker_uid_access_policy_map;
-    app_uid_key *broker_uid_key = &uid;
+    app_uid_key *broker_uid_key = (app_uid_key *)&uid;
     app_uid_key *broker_uid_value = bpf_map_lookup_elem(broker_map_ptr, broker_uid_key);
     if (broker_uid_value != NULL) {
         network_access_uid = *broker_uid_value;

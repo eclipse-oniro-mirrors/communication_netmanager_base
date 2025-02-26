@@ -141,7 +141,7 @@ bool WearableDistributedNet::ParseUdpIptables(const cJSON &json)
     cJSON *udpIptablesObj = cJSON_GetObjectItemCaseSensitive(&json, UDP_IPTABLES.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(udpIptablesObj); i++) {
         cJSON *udpIptablesItem = cJSON_GetArrayItem(udpIptablesObj, i);
-        if (udpIptablesItem == nullptr) {
+        if (udpIptablesItem == nullptr || udpIptablesItem->valuestring == nullptr) {
             NETNATIVE_LOGE("Invalid item in UDP iptables array");
             return false;
         }
@@ -167,7 +167,7 @@ bool WearableDistributedNet::ParseIptablesDeleteCmds(const cJSON &json)
     cJSON *iptablesDeleteCmdsObj = cJSON_GetObjectItemCaseSensitive(&json, IPTABLES_DELETE_CMDS.c_str());
     for (int32_t i = 0; i < cJSON_GetArraySize(iptablesDeleteCmdsObj); i++) {
         cJSON *iptablesDeleteCmdsItem = cJSON_GetArrayItem(iptablesDeleteCmdsObj, i);
-        if (iptablesDeleteCmdsItem == nullptr) {
+        if (iptablesDeleteCmdsItem == nullptr || iptablesDeleteCmdsItem->valuestring == nullptr) {
             NETNATIVE_LOGE("Invalid item in iptables delete commands array");
             return false;
         }
