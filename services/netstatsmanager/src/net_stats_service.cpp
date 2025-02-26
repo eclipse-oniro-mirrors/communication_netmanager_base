@@ -574,9 +574,6 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-#ifdef SUPPORT_NETWORK_SHARE
-    GetSharingStats(allInfo, end);
-#endif
     FilterTrafficStatsByNetwork(allInfo, infos, ident, start, end);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
     return NETMANAGER_SUCCESS;
@@ -638,9 +635,6 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-#ifdef SUPPORT_NETWORK_SHARE
-    GetSharingStats(allInfo, end);
-#endif
     FilterTrafficStatsByUidNetwork(allInfo, infos, uid, ident, start, end);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
     return NETMANAGER_SUCCESS;
