@@ -776,8 +776,8 @@ void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traff
     NetStatsInfo statsInfos;
     statsInfos.uid_ = IPTABLES_UID;
     statsInfos.iface_ = ifaceName;
-    statsInfos.rxBytes_ = traffic.receive;
-    statsInfos.txBytes_ = traffic.send;
+    statsInfos.rxBytes_ = static_cast<uint64_t>(traffic.receive);
+    statsInfos.txBytes_ = static_cast<uint64_t>(traffic.send);
     statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
     statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
     statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
@@ -821,8 +821,8 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
     NetStatsInfo statsInfos;
     statsInfos.uid_ = IPTABLES_UID;
     statsInfos.iface_ = ifaceName;
-    statsInfos.rxBytes_ = traffic.receive;
-    statsInfos.txBytes_ = traffic.send;
+    statsInfos.rxBytes_ = static_cast<uint64_t>(traffic.receive);
+    statsInfos.txBytes_ = static_cast<uint64_t>(traffic.send);
     statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
     statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
     statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
