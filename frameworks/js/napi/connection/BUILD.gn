@@ -110,12 +110,21 @@ ohos_shared_library("connection_if") {
     "async_context/src/setappnet_context.cpp",
     "async_context/src/setcustomdnsrule_context.cpp",
     "async_context/src/setglobalhttpproxy_context.cpp",
+    "async_context/src/setinterfaceup_context.cpp",
+    "async_context/src/setinterfaceipaddr_context.cpp",
+    "async_context/src/addnetworkroute_context.cpp",
+    "async_context/src/interfaceregister_context.cpp",
+    "async_context/src/getinterfaceconfig_context.cpp",
+    "async_context/src/registernetsupplier_context.cpp",
+    "async_context/src/unregisternetsupplier_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
     "net_handle_interface/src/net_handle_interface.cpp",
     "observer/src/net_conn_callback_observer.cpp",
+    "observer/src/net_interface_callback_observer.cpp",
     "options/src/net_address.cpp",
     "options/src/netconnection.cpp",
+    "options/src/netinterface.cpp",
   ]
 
   cflags = [

@@ -63,6 +63,14 @@ public:
     static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK_SYNC = "factoryResetNetworkSync";
     static constexpr const char *FUNCTION_SET_PAC_URL = "setPacUrl";
     static constexpr const char *FUNCTION_GET_PAC_URL = "getPacUrl";
+    static constexpr const char *FUNCTION_SET_INTERFACE_UP = "setInterfaceUp";
+    static constexpr const char *FUNCTION_SET_INTERFACE_IP_ADDRESS = "setNetInterfaceIpAddress";
+    static constexpr const char *FUNCTION_ADD_NETWORK_ROUTE = "addNetworkRoute";
+    static constexpr const char *FUNCTION_CREATE_NET_INTERFACE = "createNetInterface";
+    static constexpr const char *INTERFACE_NET_INTERFACE = "NetInterface";
+    static constexpr const char *FUNCTION_GET_INTERFACE_CONFIG = "getNetInterfaceConfiguration";
+    static constexpr const char *FUNCTION_REGISTER_NET_SUPPLIER = "registerNetSupplier";
+    static constexpr const char *FUNCTION_UNREGISTER_NET_SUPPLIER = "unregisterNetSupplier";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
 
@@ -77,7 +85,19 @@ public:
         static napi_value Unregister(napi_env env, napi_callback_info info);
     };
 
+    class NetInterfaceInterface final {
+    public:
+        static constexpr const char *FUNCTION_ON = "on";
+        static constexpr const char *FUNCTION_REGISTER = "register";
+        static constexpr const char *FUNCTION_UNREGISTER = "unregister";
+
+        static napi_value On(napi_env env, napi_callback_info info);
+        static napi_value Register(napi_env env, napi_callback_info info);
+        static napi_value Unregister(napi_env env, napi_callback_info info);
+    };
+
 private:
+    static void InitClasses(napi_env env, napi_value exports);
     static void InitProperties(napi_env env, napi_value exports);
 
     static napi_value GetDefaultNet(napi_env env, napi_callback_info info);
@@ -112,6 +132,13 @@ private:
     static napi_value FactoryResetNetworkSync(napi_env env, napi_callback_info info);
     static napi_value SetPacUrl(napi_env env, napi_callback_info info);
     static napi_value GetPacUrl(napi_env env, napi_callback_info info);
+    static napi_value SetInterfaceUp(napi_env env, napi_callback_info info);
+    static napi_value SetNetInterfaceIpAddress(napi_env env, napi_callback_info info);
+    static napi_value AddNetworkRoute(napi_env env, napi_callback_info info);
+    static napi_value CreateNetInterface(napi_env env, napi_callback_info info);
+    static napi_value GetNetInterfaceConfiguration(napi_env env, napi_callback_info info);
+    static napi_value RegisterNetSupplier(napi_env env, napi_callback_info info);
+    static napi_value UnregisterNetSupplier(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 
