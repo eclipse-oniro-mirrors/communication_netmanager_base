@@ -727,6 +727,7 @@ void NetConnService::StartAllNetDetection()
             NETMGR_LOG_E("pDefaultNetwork is null");
             return;
         }
+        httpProxyThreadCv_.notify_all();
         pDefaultNetwork->StartNetDetection(false);
     });
 }
