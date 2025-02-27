@@ -1251,5 +1251,26 @@ HWTEST_F(NetConnServiceStubTest, OnGetPacUrlTest001, TestSize.Level1)
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_PAC_URL);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceStubTest, OnSetAppIsFrozenedTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnEnableAppFrozenedCallbackLimitationTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

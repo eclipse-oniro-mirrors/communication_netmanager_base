@@ -116,6 +116,10 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
         &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED)] = {
+        &NetConnServiceStub::OnSetAppIsFrozened, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION)] = {
+        &NetConnServiceStub::OnEnableAppFrozenedCallbackLimitation, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
@@ -1808,6 +1812,43 @@ int32_t NetConnServiceStub::OnCloseSocketsUid(MessageParcel &data, MessageParcel
     }
 
     int32_t ret = CloseSocketsUid(netId, uid);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("reply.WriteInt32 error");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetAppIsFrozened(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETMGR_LOG_E("ReadUint32 error.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    bool isFrozened = false;
+    if (!data.ReadBool(isFrozened)) {
+        NETMGR_LOG_E("ReadBool error.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetAppIsFrozened(uid, isFrozened);
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("reply.WriteInt32 error");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnEnableAppFrozenedCallbackLimitation(MessageParcel &data, MessageParcel &reply)
+{
+    bool flag = false;
+    if (!data.ReadBool(flag)) {
+        NETMGR_LOG_E("ReadBool error.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = EnableAppFrozenedCallbackLimitation(flag);
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("reply.WriteInt32 error");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

@@ -70,5 +70,6 @@ declare_args() {
   netmanager_base_enable_traffic_statistic = false
   netmanager_base_extended_features = true
   netmanager_base_share_traffic_limit_enable = false
+  netmanager_base_enable_set_app_frozened = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"

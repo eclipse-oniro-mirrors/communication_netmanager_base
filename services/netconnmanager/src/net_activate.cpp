@@ -19,6 +19,7 @@
 #include "net_activate.h"
 #include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
+#include "app_state_aware.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -237,5 +238,65 @@ uint32_t NetActivate::GetUid() const
 {
     return uid_;
 }
+
+bool NetActivate::IsAppFrozened() const
+{
+    bool isAppFrozened = isAppFrozened_.load();
+    return isAppFrozened;
+}
+
+void NetActivate::SetIsAppFrozened(bool isFrozened)
+{
+    isAppFrozened_ = isFrozened;
+}
+
+CallbackType NetActivate::GetLastCallbackType() const
+{
+    int32_t lastCallbackType = lastCallbackType_;
+    return static_cast<CallbackType>(lastCallbackType);
+}
+
+void NetActivate::SetLastCallbackType(CallbackType callbackType)
+{
+    if (callbackType == CALL_TYPE_UPDATE_CAP || callbackType == CALL_TYPE_UPDATE_LINK) {
+        return;
+    }
+    lastCallbackType_ = callbackType;
+}
+
+
+sptr<NetSupplier> NetActivate::GetLastServiceSupply()
+{
+    std::lock_guard<std::mutex> lock(lastNetServiceSuppliedMutex_);
+    return lastNetServiceSupplied_;
+}
+
+void NetActivate::SetLastServiceSupply(sptr<NetSupplier> lastNetServiceSupplied)
+{
+    std::lock_guard<std::mutex> lock(lastNetServiceSuppliedMutex_);
+    lastNetServiceSupplied_ = lastNetServiceSupplied;
+}
+
+bool NetActivate::IsAllowCallback(CallbackType callbackType)
+{
+    bool isAppFrozened = isAppFrozened_.load();
+    bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
+    if (isAppFrozened && !isForegroundApp) {
+        if (lastCallbackType_ == CALL_TYPE_LOST && callbackType != CALL_TYPE_LOST) {
+            SetLastServiceSupply(nullptr);
+        }
+        if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST) {
+            SetLastServiceSupply(netServiceSupplied_);
+        }
+        SetLastCallbackType(callbackType);
+    
+        NETMGR_LOG_I("UID[%{public}d] is AppFrozened, not Allow send callbackType[%{public}d]",
+            uid_, callbackType);
+        return false;
+    }
+    NETMGR_LOG_I("UID[%{public}d] Allow send callbackType[%{public}d]", uid_, callbackType);
+    return true;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

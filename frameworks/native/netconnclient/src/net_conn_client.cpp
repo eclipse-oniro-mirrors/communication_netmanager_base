@@ -1169,5 +1169,26 @@ int32_t NetConnClient::GetSpecificNet(NetBearType bearerType, std::list<int32_t>
     }
     return proxy->GetSpecificNet(bearerType, netIdList);
 }
+
+int32_t NetConnClient::SetAppIsFrozened(uint32_t uid, bool isFrozened)
+{
+    sptr<INetConnService> proxy= GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetAppIsFrozened(uid, isFrozened);
+}
+
+int32_t NetConnClient::EnableAppFrozenedCallbackLimitation(bool flag)
+{
+    sptr<INetConnService> proxy= GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->EnableAppFrozenedCallbackLimitation(flag);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1616,5 +1616,23 @@ HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
+{
+    auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, true);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest002, TestSize.Level1)
+{
+    auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, false);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, EnableAppFrozenedCallbackLimitationTest001, TestSize.Level1)
+{
+    auto ret = NetConnClient::GetInstance().EnableAppFrozenedCallbackLimitation(false);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

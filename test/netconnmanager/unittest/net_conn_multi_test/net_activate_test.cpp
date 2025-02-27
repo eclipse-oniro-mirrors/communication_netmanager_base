@@ -280,5 +280,33 @@ HWTEST_F(NetActivateTest, NetActivateBranchTest001, TestSize.Level1)
     instance_->TimeOutNetAvailable();
     EXPECT_TRUE(instance_->GetNetCallback() == nullptr);
 }
+
+HWTEST_F(NetActivateTest, IsAppFrozenedTest001, TestSize.Level1)
+{
+    instance_->SetIsAppFrozened(true);
+    auto ret = instance_->IsAppFrozened();
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetActivateTest, LastCallbackTypeTest001, TestSize.Level1)
+{
+    instance_->SetLastCallbackType(CALL_TYPE_AVAILABLE);
+    auto ret = instance_->GetLastCallbackType();
+    EXPECT_TRUE(ret == CALL_TYPE_AVAILABLE);
+}
+
+HWTEST_F(NetActivateTest, GetLastServiceSupplyTest001, TestSize.Level1)
+{
+    instance_->SetLastServiceSupply(nullptr);
+    auto ret = instance_->GetLastServiceSupply();
+    EXPECT_TRUE(ret == nullptr);
+}
+
+HWTEST_F(NetActivateTest, IsAllowCallbackTest001, TestSize.Level1)
+{
+    auto ret = instance_->IsAllowCallback(CALL_TYPE_AVAILABLE);
+    EXPECT_FALSE(ret);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
