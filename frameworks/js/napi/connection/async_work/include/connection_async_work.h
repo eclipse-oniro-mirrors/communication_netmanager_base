@@ -90,6 +90,30 @@ public:
 
     static void SetAppNetCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecSetInterfaceUp(napi_env env, void *data);
+
+    static void SetInterfaceUpCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecSetInterfaceIpAddr(napi_env env, void *data);
+
+    static void SetInterfaceIpAddrCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecAddNetworkRoute(napi_env env, void *data);
+
+    static void AddNetworkRouteCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecGetNetInterfaceConfiguration(napi_env env, void *data);
+
+    static void GetNetInterfaceConfigurationCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecRegisterNetSupplier(napi_env env, void *data);
+
+    static void RegisterNetSupplierCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecUnregisterNetSupplier(napi_env env, void *data);
+
+    static void UnregisterNetSupplierCallback(napi_env env, napi_status status, void *data);
+
     static void ExecSetCustomDNSRule(napi_env env, void *data);
 
     static void SetCustomDNSRuleCallback(napi_env env, napi_status status, void *data);
@@ -138,6 +162,21 @@ public:
         static void ExecUnregister(napi_env env, void *data);
 
         static void UnregisterCallback(napi_env env, napi_status status, void *data);
+    };
+
+    class NetInterfaceAsyncWork final {
+    public:
+        NetInterfaceAsyncWork() = delete;
+
+        ~NetInterfaceAsyncWork() = delete;
+
+        static void ExecIfaceRegister(napi_env env, void *data);
+
+        static void IfaceRegisterCallback(napi_env env, napi_status status, void *data);
+
+        static void ExecIfaceUnregister(napi_env env, void *data);
+
+        static void IfaceUnregisterCallback(napi_env env, napi_status status, void *data);
     };
 };
 } // namespace OHOS::NetManagerStandard

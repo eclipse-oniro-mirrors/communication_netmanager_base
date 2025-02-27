@@ -57,6 +57,119 @@ declare namespace connection {
   function createNetConnection(netSpecifier?: NetSpecifier, timeout?: number): NetConnection;
 
   /**
+   * Create a network interface object.
+   * @returns { NetInterface } the NetInterface object.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function createNetInterface(): NetInterface;
+
+  /**
+   * Add route for a specefic net.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { number } netId - the nethandle to add route.
+   * @param { RouteInfo } routeInfo - the route info to add.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function addNetworkRoute(netId: number, routeInfo: RouteInfo): void;
+
+  /**
+   * Get the config of the interface.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { string } ifaceName - the name of the interface.
+   * @param { AsyncCallback<NetInterfaceConfiguration> } callback - the callback of getNetInterfaceConfiguration.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function getNetInterfaceConfiguration(ifaceName: string, callback: AsyncCallback<NetInterfaceConfiguration>): void;
+
+    /**
+   * Get the config of the interface.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { string } ifaceName - the name of the interface.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function getNetInterfaceConfiguration(ifaceName: string): Promise<NetInterfaceConfiguration>;
+
+  /**
+   * Register a net supplier.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { NetBearType } bearerType - the bearer type of the net.
+   * @param { string } ident - the id of the net.
+   * @param { Array<NetCap> } netCaps - the net capabilities of the net.
+   * @param { AsyncCallback<number> } callback - the callback of registerNetSupplier.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function registerNetSupplier(bearerType: NetBearType, ident: string, netCaps: Array<NetCap>, callback: AsyncCallback<number>): void;
+
+  /**
+   * Get the config of the interface.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { string } ifaceName - the name of the interface.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function registerNetSupplier(bearerType: NetBearType, ident: string, netCaps: Array<NetCap>): Promise<number>;
+
+  /**
+   * Unregister a net supplier.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { number } netId - the id of the net.
+   * @param { AsyncCallback<void> } callback - the callback of unregisterNetSupplier.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function unregisterNetSupplier(netId: number, callback: AsyncCallback<void>): void;
+
+  /**
+   * Unregister a net supplier.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { number } netId - the id of the net.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function unregisterNetSupplier(netId: number): Promise<void>;
+
+  /**
    * Obtains the data network that is activated by default.
    * To call this method, you must have the {@code ohos.permission.GET_NETWORK_INFO} permission.
    * @permission ohos.permission.GET_NETWORK_INFO
@@ -482,6 +595,66 @@ declare namespace connection {
   function setAppNet(netHandle: NetHandle): Promise<void>;
 
   /**
+   * Set a specific interface up.
+   * To invoke this method, you must have the {@code ohos.permission.CONNECTIVITY_INTERNAL} permission.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { string } ifaceName - the name of the interface to set up.
+   * @param { AsyncCallback<void> } callback - the callback of setInterfaceUp.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function setInterfaceUp(ifaceName: string, callback: AsyncCallback<void>): void;
+
+  /**
+   * Set a specific interface up.
+   * @param { string } ifaceName - the name of the interface to set up.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function setInterfaceUp(ifaceName: string): Promise<void>;
+
+  /**
+   * Set ip address for a specific interface.
+   * To invoke this method, you must have the {@code ohos.permission.CONNECTIVITY_INTERNAL} permission.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @param { string } ifaceName - the name of the interface.
+   * @param { string } ip - the ip address to set for the interface.
+   * @param { AsyncCallback<void> } callback - the callback of setNetInterfaceIpAddress.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function setNetInterfaceIpAddress(ifaceName: string, ip: string, callback: AsyncCallback<void>): void;
+
+  /**
+   * Set ip address for a specific interface.
+   * @param { string } ifaceName - the name of the interface.
+   * @param { string } ip - the ip address to set for the interface.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  function setNetInterfaceIpAddress(ifaceName: string, ip: string): Promise<void>;
+
+  /**
    * Obtains the network independent global {@link HttpProxy} proxy settings.
    *
    * If a application level proxy is set, the application level proxy parameters are returned.
@@ -850,6 +1023,108 @@ declare namespace connection {
      * @syscap SystemCapability.Communication.NetManager.Core
      * @crossplatform
      * @since 10
+     */
+    unregister(callback: AsyncCallback<void>): void;
+  }
+
+  /**
+   * Represents the network interface.
+   * @interface NetInterface
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use. Only used for system app.
+   * @since 16
+   */
+  export interface NetInterface {
+    /**
+     * Registers a listener for interfaceAddressUpdated events.
+     * @param { 'interfaceAddressUpdated' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceAddressUpdated', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for interfaceAddressRemoved events.
+     * @param { 'interfaceAddressRemoved' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceAddressRemoved', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for interfaceAdded events.
+     * @param { 'interfaceAdded' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceAdded', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for interfaceRemoved events.
+     * @param { 'interfaceRemoved' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceRemoved', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for interfaceChanged events.
+     * @param { 'interfaceChanged' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceChanged', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for interfaceLinkStateChanged events.
+     * @param { 'interfaceLinkStateChanged' } type Indicates Event name.
+     * @param { Callback<InterfaceInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'interfaceLinkStateChanged', callback: Callback<InterfaceInfo>): void;
+    /**
+     * Registers a listener for routeChanged events.
+     * @param { 'routeChanged' } type Indicates Event name.
+     * @param { Callback<RouteChangeInfo> } callback - the callback of on.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    on(type: 'routeChanged', callback: Callback<RouteChangeInfo>): void;
+
+    /**
+     * Receives status change notifications of a specified interface.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @param { AsyncCallback<void> } callback - the callback of register.
+     * @throws { BusinessError } 201 - Permission denied.
+     * @throws { BusinessError } 401 - Parameter error.
+     * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+     * @throws { BusinessError } 2100003 - System internal error.
+     * @throws { BusinessError } 2101008 - The same callback exists.
+     * @throws { BusinessError } 2101022 - The number of requests exceeded the maximum.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
+     */
+    register(callback: AsyncCallback<void>): void;
+    /**
+     * Cancels listening for interface status changes.
+     * @param { AsyncCallback<void> } callback - the callback of unregister.
+     * @throws { BusinessError } 201 - Permission denied.
+     * @throws { BusinessError } 401 - Parameter error.
+     * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+     * @throws { BusinessError } 2100003 - System internal error.
+     * @throws { BusinessError } 2101007 - The callback is not exists.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use. Only used for system app.
+     * @since 16
      */
     unregister(callback: AsyncCallback<void>): void;
   }
@@ -1330,6 +1605,159 @@ declare namespace connection {
      * @since 10
      */
     exclusionList: Array<string>;
+  }
+
+  /**
+   * Network Interface Information.
+   * @interface InterfaceInfo
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 16
+   */
+  export interface InterfaceInfo {
+    /**
+     * Interface name.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    interfaceName: string;
+
+    /**
+     * address of the interface.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    address?: string;
+
+    /**
+     * Interface flags.
+     * @type {number}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    flags?: number;
+
+    /**
+     * Interface scope.
+     * @type {number}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    scope?: number;
+
+    /**
+     * if interface is up.
+     * @type {boolean}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    up?: boolean;
+  }
+
+  /**
+   * Network Route Change Information.
+   * @interface RouteChangeInfo
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 16
+   */
+  export interface RouteChangeInfo {
+    /**
+     * Interface name.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    interfaceName: string;
+
+    /**
+     * route of the interface.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    route: string;
+
+    /**
+     * gateway of the interface.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    gateway: string;
+
+    /**
+     * if the route info is updated.
+     * @type {boolean}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    updated: boolean;
+  }
+
+  /**
+   * Network Interface Configuration Information.
+   * @interface NetInterfaceConfiguration
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 16
+   */
+  export interface NetInterfaceConfiguration {
+    /**
+     * Interface name.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    interfaceName: string;
+
+    /**
+     * Interface hardware address.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    hwAddress: string;
+
+    /**
+     * Interface ipv4 address.
+     * @type {string}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    ipv4Address: string;
+
+    /**
+     * Interface address prefixLength.
+     * @type {number}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    prefixLength: number;
+
+    /**
+     * Interface flags.
+     * @type {Array<string>}
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 16
+     */
+    flags: Array<string>;
   }
 }
 
