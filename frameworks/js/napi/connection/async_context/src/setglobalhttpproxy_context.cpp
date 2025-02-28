@@ -67,6 +67,7 @@ void SetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCou
         exclusionList.push_back(NapiUtils::GetStringFromValueUtf8(GetEnv(), element));
     }
     httpProxy_.SetExclusionList(exclusionList);
+    httpProxy_.SetUserId(-1);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);

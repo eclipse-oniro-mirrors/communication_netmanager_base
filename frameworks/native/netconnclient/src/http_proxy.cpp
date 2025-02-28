@@ -26,9 +26,10 @@ static const size_t MAX_EXCLUSION_SIZE = 500;
 static const size_t MAX_URL_SIZE = 2048;
 static const size_t BASE_DEC = 10;
 
-HttpProxy::HttpProxy() : port_(0) {}
+HttpProxy::HttpProxy() : port_(0), userId_(-1) {}
 
-HttpProxy::HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList) : port_(0)
+HttpProxy::HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList)
+    : port_(0), userId_(-1)
 {
     if (host.size() <= MAX_URL_SIZE) {
         host_ = std::move(host);
@@ -71,6 +72,11 @@ std::list<std::string> HttpProxy::GetExclusionList() const
     return exclusionList_;
 }
 
+int32_t HttpProxy::GetUserId() const
+{
+    return userId_;
+}
+
 bool HttpProxy::operator==(const HttpProxy &httpProxy) const
 {
     return (host_ == httpProxy.host_ && port_ == httpProxy.port_ && exclusionList_ == httpProxy.exclusionList_ &&
@@ -89,6 +95,10 @@ bool HttpProxy::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteUint16(port_)) {
+        return false;
+    }
+
+    if (!parcel.WriteInt32(userId_)) {
         return false;
     }
 
@@ -127,14 +137,14 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
         return false;
     }
 
-    uint32_t size = 0;
-    if (!parcel.ReadUint32(size)) {
+    int32_t userId = -1;
+    if (!parcel.ReadInt32(userId)) {
         return false;
     }
 
-    if (size == 0) {
-        httpProxy = {host, port, {}};
-        return true;
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
+        return false;
     }
 
     if (size > static_cast<uint32_t>(MAX_EXCLUSION_SIZE)) {
@@ -153,6 +163,7 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
     }
 
     httpProxy = {host, port, exclusionList};
+    httpProxy.SetUserId(userId);
     parcel.ReadString(httpProxy.username_);
     parcel.ReadString(httpProxy.password_);
     return true;

@@ -31,6 +31,7 @@
 
 #include "http_proxy.h"
 #include "net_activate.h"
+#include "net_conn_constants.h"
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
@@ -400,6 +401,12 @@ private:
         REGISTER,
         REQUEST,
     };
+
+    enum UserIdType {
+        ACTIVE,
+        LOCAL,
+        SPECIFY,
+    };
     bool Init();
     void GetHttpUrlFromConfig(std::string &httpUrl);
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -446,9 +453,12 @@ private:
     int32_t UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
-    void LoadGlobalHttpProxy(HttpProxy &httpProxy);
+    void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    int32_t SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId);
+    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
+    void CreateActiveHttpProxyThread();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
         const RegisterType registerType = REGISTER);
     int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -459,10 +469,14 @@ private:
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
     std::vector<std::string> GetPreferredUrl();
     bool IsValidDecValue(const std::string &inputValue);
+
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
-    int32_t GetCallingUserId(int32_t &userId);
+    int32_t GetLocalUserId(int32_t &userId);
+    int32_t GetActiveUserId(int32_t &userId);
+    bool IsValidUserId(int32_t userId);
+    int32_t GetValidUserIdFromProxy(const HttpProxy &httpProxy);
     inline bool IsPrimaryUserId(const int32_t userId)
     {
         return userId == PRIMARY_USER_ID;
@@ -502,6 +516,7 @@ private:
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
     sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
+    std::mutex httpProxyThreadNeedRunMutex_;
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
@@ -511,6 +526,10 @@ private:
     std::shared_ptr<NetConnListener> subscriber_ = nullptr;
 
     bool hasSARemoved_ = false;
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t ROOT_USER_ID = 0;
+    int32_t currentUserId_ = INVALID_USER_ID;
+    std::mutex currentUserIdMutex_;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
