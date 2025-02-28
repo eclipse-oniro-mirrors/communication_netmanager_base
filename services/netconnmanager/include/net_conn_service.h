@@ -635,7 +635,7 @@ private:
     void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
-    void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
+    void SubscribeCommonEvent(const std::string &eventName);
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     std::mutex remoteMutex_;
@@ -645,6 +645,7 @@ private:
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
+    std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
