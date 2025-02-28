@@ -2960,16 +2960,12 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
             NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+        SubscribeCommonEvent("usual.event.DATA_SHARE_READY");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
-        SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+        SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED");
 #endif
-        SubscribeCommonEvent("usual.event.SCREEN_ON",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-        SubscribeCommonEvent("usual.event.SCREEN_OFF",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+        SubscribeCommonEvent("usual.event.SCREEN_ON");
+        SubscribeCommonEvent("usual.event.SCREEN_OFF");
     }
 }
 
@@ -2981,17 +2977,19 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
-void NetConnService::SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver)
+void NetConnService::SubscribeCommonEvent(const std::string &eventName)
 {
     NETMGR_LOG_I("eventName=%{public}s", eventName.c_str());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(eventName);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
-    auto subscriberPtr = std::make_shared<NetConnListener>(subscribeInfo, receiver);
-    if (subscriberPtr == nullptr) {
-        NETMGR_LOG_E("subscriberPtr is nullptr");
-        return;
+    if (subscriberPtr_ == nullptr) {
+        subscriberPtr_ = std::make_shared<NetConnListener>(subscribeInfo,
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+    }
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
+        NETMGR_LOG_E("system event register fail.");
     }
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr);
 }
