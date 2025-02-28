@@ -17,7 +17,7 @@
 
 #include "app_mgr_constants.h"
 #include "iservice_registry.h"
-#include "ability_manager_client.h"
+#include <ability_manager_client.h>
 #include "system_ability_definition.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -136,4 +136,4 @@ void AppStateObserver::OnForegroundApplicationChanged(
 
 
 } // namespace NetManagerStandard
-} // namespace OHOS
+} // namespace OHOS
