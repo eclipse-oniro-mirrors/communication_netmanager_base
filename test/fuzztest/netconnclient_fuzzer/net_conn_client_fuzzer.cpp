@@ -1639,7 +1639,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
-    OHOS::NetManagerStandard::SetAppIsFrozened(data, size);
-    OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitation(data, size);
+    OHOS::NetManagerStandard::SetAppIsFrozenedTest(data, size);
+    OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitationTest(data, size);
     return 0;
 }
