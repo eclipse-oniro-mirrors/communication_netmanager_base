@@ -1531,7 +1531,8 @@ void EnableAppFrozenedCallbackLimitationTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteBool(flag);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION),
+        dataParcel);
 }
 
 void SetInterfaceUpFuzzTest(const uint8_t *data, size_t size)
@@ -1582,6 +1583,8 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetInterfaceDownFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetInterfaceIpAddressFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetInterfaceCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetAppIsFrozenedTest(data, size);
+    OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitationTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -1639,7 +1642,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
-    OHOS::NetManagerStandard::SetAppIsFrozenedTest(data, size);
-    OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitationTest(data, size);
     return 0;
 }
