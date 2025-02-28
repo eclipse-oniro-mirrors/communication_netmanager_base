@@ -3531,12 +3531,12 @@ int32_t NetConnService::CloseSocketsUidAsync(int32_t netId, uint32_t uid)
 int32_t NetConnService::SetAppIsFrozened(uint32_t uid, bool isFrozened)
 {
     int32_t result = NETMANAGER_SUCCESS;
-    // #ifdef ENABLE_SET_APP_FROZENED
+    #ifdef ENABLE_SET_APP_FROZENED
         if (netConnEventHandler_ && enableAppFrozenedCallbackLimitation_.load()) {
             netConnEventHandler_->PostSyncTask(
                 [this, uid, isFrozened, &result]() { result = this->SetAppIsFrozenedAsync(uid, isFrozened); });
         }
-    // #endif
+    #endif
     return result;
 }
 

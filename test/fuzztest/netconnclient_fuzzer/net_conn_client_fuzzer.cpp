@@ -1504,6 +1504,36 @@ void CloseSocketsUidTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID), dataParcelNoIfName);
 }
 
+void SetAppIsFrozenedTest(const uint8_t *data, size_t size)
+{
+    uint32_t uid = NetConnGetData<uint32_t>();
+    bool isFrozened = NetConnGetData<bool>();
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("SetAppIsFrozenedTest write token failed or invalid parameter.");
+        return;
+    }
+
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteBool(isFrozened);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED), dataParcel);
+}
+
+void EnableAppFrozenedCallbackLimitationTest(const uint8_t *data, size_t size)
+{
+    bool flag = NetConnGetData<bool>();
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("EnableAppFrozenedCallbackLimitationTest write token failed or invalid parameter.");
+        return;
+    }
+
+    dataParcel.WriteBool(flag);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION), dataParcel);
+}
+
 void SetInterfaceUpFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -1609,5 +1639,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
+    OHOS::NetManagerStandard::SetAppIsFrozened(data, size);
+    OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitation(data, size);
     return 0;
 }

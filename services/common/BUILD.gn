@@ -145,6 +145,7 @@ ohos_shared_library("net_service_common") {
     "ipc:ipc_core",
     "ability_runtime:app_manager",
     "samgr:samgr_proxy",
+    "cJSON:cjson",
   ]
 
   defines = [
