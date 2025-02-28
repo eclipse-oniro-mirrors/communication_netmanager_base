@@ -2991,7 +2991,6 @@ void NetConnService::SubscribeCommonEvent(const std::string &eventName)
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
         NETMGR_LOG_E("system event register fail.");
     }
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr);
 }
 
 void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
