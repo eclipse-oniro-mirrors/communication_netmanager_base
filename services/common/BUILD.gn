@@ -100,11 +100,11 @@ ohos_shared_library("net_service_common") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "src/app_state_aware.cpp",
     "src/broadcast_manager.cpp",
     "src/net_manager_center.cpp",
     "src/net_settings.cpp",
     "src/route_utils.cpp",
-    "src/app_state_aware.cpp",
   ]
 
   include_dirs = [
