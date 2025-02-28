@@ -138,14 +138,14 @@ ohos_shared_library("net_service_common") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "ipc:ipc_core",
-    "ability_runtime:app_manager",
-    "samgr:samgr_proxy",
     "jsoncpp:jsoncpp",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
