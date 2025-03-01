@@ -42,8 +42,10 @@ static __always_inline int send_sock_tcp_reset(struct match_tuple *tuple, struct
     if (tuple->protocol == IPPROTO_TCP) {
         if (dir == INGRESS) {
             bpf_sock_tcp_send_reset(skb);
+        } else if (dir == EGRESS) {
+            bpf_sock_destroy(skb);
         }
-        return bpf_sock_destroy(skb);
+        return 0;
     }
     return -1;
 }
