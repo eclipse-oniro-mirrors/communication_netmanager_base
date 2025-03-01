@@ -50,11 +50,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
   if (!(use_libfuzzer || use_clang_coverage)) {
     cflags += [
       "-flto",
-      "-fsanitize=cfi",
-      "-fsanitize-cfi-cross-dso",
       "-fvisibility=hidden",
-      "-fsanitize-blacklist=" +
-          rebase_path(_cfi_blocklist_path, root_build_dir),
     ]
   }
 
@@ -62,8 +58,6 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
   if (!(use_libfuzzer || use_clang_coverage)) {
     ldflags += [
       "-flto",
-      "-fsanitize=cfi",
-      "-fsanitize-cfi-cross-dso",
     ]
   }
 
