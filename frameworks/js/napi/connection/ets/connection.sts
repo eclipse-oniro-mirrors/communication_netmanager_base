@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// import { NetHandle } from "./@ohos.net.connection"
+
+export interface NetHandle {
+  netId: number;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
+
+  // getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
+
+  // getAddressesByName(host: string): Promise<Array<NetAddress>>;
+
+  // getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
+
+  // getAddressByName(host: string): Promise<NetAddress>;
+}
+
+class NetHandleInner implements NetHandle{
+   netId: double = 0;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
+
+  // getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
+
+  // getAddressesByName(host: string): Promise<Array<NetAddress>>;
+
+  // getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
+
+  // getAddressByName(host: string): Promise<NetAddress>;
+}
+
+export class ConnectionAni {
+    static { loadLibrary("connection_ani") }
+    native getDefaultNetSync(): NetHandle;
+    native sum():int;
+}
+
+function main() {
+    let c = new ConnectionAni;
+    let a = c.getDefaultNetSync();
+    console.println("hello ani")
+    console.println(a);
+}

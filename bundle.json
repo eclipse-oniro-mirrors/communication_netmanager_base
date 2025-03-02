@@ -70,7 +70,8 @@
                 "os_account",
                 "libbpf",
                 "elfio",
-                "iptables"
+                "iptables",
+                "runtime_core"
             ],
             "third_party": [
                 "curl",
@@ -82,6 +83,7 @@
             "group_type": {
                 "base_group": [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection" ],
                 "fwk_group": [
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection_ani",
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/utils:net_data_share",
                     "//foundation/communication/netmanager_base/utils:net_bundle_utils",
