@@ -548,6 +548,10 @@ private:
     int32_t EnableAppFrozenedCallbackLimitationAsync(bool flag);
     void HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
                         sptr<INetConnCallback> callback, CallbackType type);
+    std::shared_ptr<NetActivate> CreateNetActivateRequest(const sptr<NetSpecifier> &netSpecifier,
+                            const sptr<INetConnCallback> &callback,
+                            const uint32_t &timeoutMS, const int32_t registerType,
+                            const uint32_t callingUid);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);

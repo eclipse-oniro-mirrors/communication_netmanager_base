@@ -1150,22 +1150,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
 
-    std::shared_ptr<NetActivate> request = nullptr;
-#ifdef ENABLE_SET_APP_FROZENED
-    sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
-    if (callbakWrapper == nullptr) {
-            NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
-        request = std::make_shared<NetActivate>(
-            netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-    } else {
-        request = std::make_shared<NetActivate>(
-            netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-        callbakWrapper->SetNetActivate(request);
-    }
-#else
-    request = std::make_shared<NetActivate>(
-        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-#endif
+    std::shared_ptr<NetActivate> request = CreateNetActivateRequest(netSpecifier, callback,
+        timeoutMS, REQUEST, callingUid);
 
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
@@ -1206,6 +1192,32 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
     SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
+}
+
+std::shared_ptr<NetActivate> NetConnService::CreateNetActivateRequest(const sptr<NetSpecifier> &netSpecifier,
+                                                                      const sptr<INetConnCallback> &callback,
+                                                                      const uint32_t &timeoutMS,
+                                                                      const int32_t registerType,
+                                                                      const uint32_t callingUid)
+{
+    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
+    std::shared_ptr<NetActivate> request = nullptr;
+#ifndef ENABLE_SET_APP_FROZENED
+    sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
+    if (callbakWrapper == nullptr) {
+        NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
+        request = std::make_shared<NetActivate>(
+            netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+    } else {
+        request = std::make_shared<NetActivate>(
+        netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+        callbakWrapper->SetNetActivate(request);
+    }
+#else
+    request = std::make_shared<NetActivate>(
+        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+#endif
+    return request;
 }
 
 void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
