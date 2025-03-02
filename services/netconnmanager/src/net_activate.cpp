@@ -258,7 +258,8 @@ CallbackType NetActivate::GetLastCallbackType() const
 
 void NetActivate::SetLastCallbackType(CallbackType callbackType)
 {
-    if (callbackType == CALL_TYPE_UPDATE_CAP || callbackType == CALL_TYPE_UPDATE_LINK) {
+    if (callbackType == CALL_TYPE_UPDATE_CAP || callbackType == CALL_TYPE_UPDATE_LINK
+        && lastCallbackType_.load() == CALL_TYPE_AVAILABLE) {
         return;
     }
     lastCallbackType_ = callbackType;

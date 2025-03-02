@@ -185,21 +185,21 @@ bool NetConnService::Init()
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-    #ifdef ENABLE_SET_APP_FROZENED
-        if (netConnEventHandler_) {
-            int64_t delayTime = 3000;
-            appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
-                std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
-                if (netConnService) {
-                    netConnService ->SetAppIsFrozened(uid, false);
-                }
-            };
-            netConnEventHandler_->PostAsyncTask([this]() {
-                AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(appStateAwareCallback_);
-            },
-                delayTime);
-        }
-    #endif
+#ifdef ENABLE_SET_APP_FROZENED
+    if (netConnEventHandler_) {
+        int64_t delayTime = 3000;
+        appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
+            std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
+            if (netConnService) {
+                netConnService ->SetAppIsFrozened(uid, false);
+            }
+        };
+        netConnEventHandler_->PostAsyncTask([this]() {
+            AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(appStateAwareCallback_);
+        },
+            delayTime);
+    }
+#endif
     NETMGR_LOG_I("Init end");
     return true;
 }
@@ -1150,10 +1150,22 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
 
+    std::shared_ptr<NetActivate> request = nullptr;
+#ifdef ENABLE_SET_APP_FROZENED
     sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
-    std::shared_ptr<NetActivate> request = std::make_shared<NetActivate>(
-        netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-    callbakWrapper->SetNetActivate(request);
+    if (callbakWrapper == nullptr) {
+            NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
+        request = std::make_shared<NetActivate>(
+            netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+    } else {
+        request = std::make_shared<NetActivate>(
+            netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+        callbakWrapper->SetNetActivate(request);
+    }
+#else
+    request = std::make_shared<NetActivate>(
+        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+#endif
 
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
@@ -3531,12 +3543,12 @@ int32_t NetConnService::CloseSocketsUidAsync(int32_t netId, uint32_t uid)
 int32_t NetConnService::SetAppIsFrozened(uint32_t uid, bool isFrozened)
 {
     int32_t result = NETMANAGER_SUCCESS;
-    #ifdef ENABLE_SET_APP_FROZENED
-        if (netConnEventHandler_ && enableAppFrozenedCallbackLimitation_.load()) {
-            netConnEventHandler_->PostSyncTask(
-                [this, uid, isFrozened, &result]() { result = this->SetAppIsFrozenedAsync(uid, isFrozened); });
-        }
-    #endif
+#ifdef ENABLE_SET_APP_FROZENED
+    if (netConnEventHandler_ && enableAppFrozenedCallbackLimitation_.load()) {
+        netConnEventHandler_->PostSyncTask(
+            [this, uid, isFrozened, &result]() { result = this->SetAppIsFrozenedAsync(uid, isFrozened); });
+    }
+#endif
     return result;
 }
 
