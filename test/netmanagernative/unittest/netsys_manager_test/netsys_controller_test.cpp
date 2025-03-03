@@ -38,7 +38,6 @@
 #include "netsys_controller.h"
 #include "netsys_ipc_interface_code.h"
 #include "netsys_net_diag_data.h"
-#include "distributed_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1207,9 +1206,6 @@ HWTEST_F(NetsysControllerTest, EnableDistributedClientNet001, TestSize.Level1)
     bool isServer = false;
     ret = NetsysController::GetInstance().DisableDistributedNet(isServer);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    std::string ifName = "virnic";
-    ret = DistributedManager::GetInstance().DestroyDistributedNic(ifName);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, EnableDistributedServerNet001, TestSize.Level1)
