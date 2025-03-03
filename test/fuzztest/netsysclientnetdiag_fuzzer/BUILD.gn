@@ -56,9 +56,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
 
   ldflags = []
   if (!(use_libfuzzer || use_clang_coverage)) {
-    ldflags += [
-      "-flto",
-    ]
+    ldflags += [ "-flto" ]
   }
 
   sources = [ "net_sys_client_netdiag_fuzzer.cpp" ]
