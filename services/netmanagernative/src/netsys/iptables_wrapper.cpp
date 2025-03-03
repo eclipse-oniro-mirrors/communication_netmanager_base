@@ -108,21 +108,6 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-std::string IptablesWrapper::RunCommandForTraffic(const IpType &ipType, const std::string &command)
-{
-    NETNATIVE_LOG_D("IptablesWrapper::RunCommandForTraffic, ipType:%{public}d", ipType);
-    if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
-        std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-        ExecuteCommandForTraffic(cmd);
-    }
-
-    if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
-        std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
-        ExecuteCommandForTraffic(cmd);
-    }
-    return resultTraffic_;
-}
-
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
 {
     NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d", ipType);
