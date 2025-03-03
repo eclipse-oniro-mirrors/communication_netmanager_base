@@ -18,6 +18,7 @@
 
 #include "net_activate.h"
 #include "net_caps.h"
+#include "net_conn_service.h"
 #include "net_mgr_log_wrapper.h"
 #include "app_state_aware.h"
 
@@ -280,12 +281,12 @@ void NetActivate::SetLastServiceSupply(sptr<NetSupplier> lastNetServiceSupplied)
 
 bool NetActivate::IsAllowCallback(CallbackType callbackType)
 {
+    if (!NetConnService::GetInstance()->IsAppFrozenedCallbackLimitation()) {
+        return true;
+    }
     bool isAppFrozened = isAppFrozened_.load();
     bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
     if (isAppFrozened && !isForegroundApp) {
-        if (lastCallbackType_ == CALL_TYPE_LOST && callbackType != CALL_TYPE_LOST) {
-            SetLastServiceSupply(nullptr);
-        }
         if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST) {
             SetLastServiceSupply(netServiceSupplied_);
         }
@@ -295,7 +296,6 @@ bool NetActivate::IsAllowCallback(CallbackType callbackType)
             uid_, callbackType);
         return false;
     }
-    NETMGR_LOG_I("UID[%{public}d] Allow send callbackType[%{public}d]", uid_, callbackType);
     return true;
 }
 

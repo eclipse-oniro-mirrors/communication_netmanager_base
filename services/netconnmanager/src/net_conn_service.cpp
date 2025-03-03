@@ -3566,27 +3566,25 @@ int32_t NetConnService::SetAppIsFrozened(uint32_t uid, bool isFrozened)
 
 int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
 {
-    std::vector<std::shared_ptr<NetActivate>> activates;
-    {
-        std::lock_guard guard(uidActivateMutex_);
-        auto it = netUidActivates_.find(uid);
-        if ((it == netUidActivates_.end())) {
-            return NETMANAGER_SUCCESS;
-        }
-        activates = it->second;
+    std::lock_guard guard(uidActivateMutex_);
+    auto it = netUidActivates_.find(uid);
+    if ((it == netUidActivates_.end())) {
+        return NETMANAGER_SUCCESS;
     }
+    std::vector<std::shared_ptr<NetActivate>> activates = it->second;
     NETMGR_LOG_I("SetAppIsFrozenedAsync uid[%{public}d], isFrozened=[%{public}d].", uid, isFrozened);
     for (auto iter = activates.begin(); iter != activates.end();++iter) {
         auto curNetAct = (*iter);
-        if (curNetAct -> IsAppFrozened() == isFrozened) {
+        if (curNetAct->IsAppFrozened() == isFrozened) {
             continue;
         }
-        curNetAct -> SetIsAppFrozened(isFrozened);
+        curNetAct->SetIsAppFrozened(isFrozened);
         if (isFrozened) {
             continue;
         }
-        sptr<NetSupplier> netSupplier = curNetAct -> GetServiceSupply();
-        CallbackType callbackType = curNetAct -> GetLastCallbackType();
+        sptr<NetSupplier> netSupplier = curNetAct->GetServiceSupply();
+        sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
+        CallbackType callbackType = curNetAct->GetLastCallbackType();
         if (callbackType == CALL_TYPE_UNKNOWN) {
             continue;
         }
@@ -3594,19 +3592,19 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
             if (callbackType != CALL_TYPE_LOST) {
                 continue;
             }
-            netSupplier = curNetAct -> GetLastServiceSupply();
-            sptr<INetConnCallback> callback = curNetAct -> GetNetCallback();
+            netSupplier = curNetAct->GetLastServiceSupply();
             if (netSupplier && callback) {
-                sptr<NetHandle> netHandle = netSupplier ->GetNetHandle();
+                sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
                 callback->NetLost(netHandle);
             }
-            curNetAct -> SetLastServiceSupply(nullptr);
         } else if (callbackType == CALL_TYPE_AVAILABLE) {
             CallbackForAvailable(netSupplier, curNetAct->GetNetCallback());
         } else {
-            CallbackForSupplier(netSupplier, callbackType);
+            sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
+            HandleCallback(netSupplier, netHandle, callback, callbackType);
         }
-        curNetAct -> SetLastCallbackType(CALL_TYPE_UNKNOWN);
+        curNetAct->SetLastServiceSupply(nullptr);
+        curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
     }
     return NETMANAGER_SUCCESS;
 }
@@ -3627,6 +3625,12 @@ int32_t NetConnService::EnableAppFrozenedCallbackLimitationAsync(bool flag)
     enableAppFrozenedCallbackLimitation_ = flag;
     NETMGR_LOG_I("enableAppFrozenedCallbackLimitation_ = %{public}d", enableAppFrozenedCallbackLimitation_.load());
     return NETMANAGER_SUCCESS;
+}
+
+bool NetConnService::IsAppFrozenedCallbackLimitation()
+{
+    bool ret = enableAppFrozenedCallbackLimitation_.load();
+    return ret;
 }
 
 } // namespace NetManagerStandard

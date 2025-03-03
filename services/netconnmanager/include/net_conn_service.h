@@ -386,6 +386,7 @@ public:
     int32_t GetPacUrl(std::string &pacUrl) override;
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
+    bool IsAppFrozenedCallbackLimitation();
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
