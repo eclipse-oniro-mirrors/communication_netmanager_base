@@ -592,3 +592,29 @@ HWTEST_F(NetsysNativeClientTest, SetNicTrafficAllowed001, TestSize.Level1)
     int32_t ret = nativeClient_.SetNicTrafficAllowed(ifaceNames, status);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+---------------------------------------------------------------
+foundation/communication/netmanager_base/test/netstatsmanager/unittest/net_stats_manager_test/net_stats_client_test.cpp：
+
+HWTEST_F(NetStatsClientTest, SetAppStats001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    PushStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(info);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
+{
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    NetStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SaveSharingTraffic(info);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
