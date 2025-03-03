@@ -288,5 +288,3 @@ foundation/communication/netmanager_base/
 [communication_netmanager_ext](https://gitee.com/openharmony/communication_netmanager_ext)
 
 [communication_netstack](https://gitee.com/openharmony/communication_netstack)
-
-
