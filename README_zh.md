@@ -292,6 +292,9 @@ foundation/communication/netmanager_base/
 
 -------------------------------------
 foundation/communication/netmanager_base/test/netmanagernative/unittest/netsys_manager_test/netsys_controller_test.cpp:
+
+#include "distributed_manager.h"
+
 HWTEST_F(NetsysControllerTest, EnableDistributedClientNet001, TestSize.Level1)
 {
     std::string virnicAddr = "1.189.55.61";
