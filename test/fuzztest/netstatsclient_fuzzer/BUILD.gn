@@ -44,9 +44,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-fvisibility=hidden",
   ]
 
-  ldflags = [
-    "-flto",
-  ]
+  ldflags = [ "-flto" ]
 
   sources = [
     "mock_net_permission.cpp",
