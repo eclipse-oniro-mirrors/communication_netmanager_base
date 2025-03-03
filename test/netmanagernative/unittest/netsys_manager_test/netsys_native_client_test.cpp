@@ -480,5 +480,88 @@ HWTEST_F(NetsysNativeClientTest, DisableWearableDistributedNetForward, TestSize.
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetsysNativeClientTest, EnableDistributedClientNet001, TestSize.Level1)
+{
+    std::string virnicAddr = "1.189.55.61";
+    std::string iif = "lo";
+    int32_t ret = nativeClient_.EnableDistributedClientNet(virnicAddr, iif);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = false;
+    ret = nativeClient_.DisableDistributedNet(isServer);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, EnableDistributedServerNet001, TestSize.Level1)
+{
+    std::string iif = "lo";
+    std::string devIface = "lo";
+    std::string dstAddr = "1.189.55.61";
+    int32_t ret = nativeClient_.EnableDistributedServerNet(iif, devIface, dstAddr);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = true;
+    ret = nativeClient_.DisableDistributedNet(isServer);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)
+{
+    nmd::NetworkSharingTraffic traffic;
+    std::string ifaceName = "virnic";
+
+    int32_t ret = nativeClient_.GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetGetClearNetStateTrafficMap001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1000000;
+
+    int32_t ret = nativeClient_.SetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.GetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, UpdateIfIndexMap001, TestSize.Level1)
+{
+    uint8_t key = 1;
+    uint64_t index = 10;
+    int32_t ret = nativeClient_.UpdateIfIndexMap(key, index);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, RegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = nativeClient_.RegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeClientTest, StartStopClat001, TestSize.Level1)
+{
+    std::string interfaceName = "eth0";
+    int32_t netId = 1;
+    std::string nat64PrefixStr = "2001:db8::/64";
+
+    int32_t ret = nativeClient_.StartClat(interfaceName, netId, nat64PrefixStr);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.StopClat(interfaceName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    std::vector<std::string> ifaceNames = {"eth0", "wlan0"};
+    bool status = true;
+
+    int32_t ret = nativeClient_.SetNicTrafficAllowed(ifaceNames, status);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

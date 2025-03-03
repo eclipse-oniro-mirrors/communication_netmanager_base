@@ -482,5 +482,112 @@ HWTEST_F(NetsysNativeServiceProxyTest, DisableWearableDistributedNetForward, Tes
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedClientNet001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    std::string virnicAddr = "1.189.55.61";
+    std::string iif = "lo";
+    int32_t ret = netsysNativeService->EnableDistributedClientNet(virnicAddr, iif);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = false;
+    ret = netsysNativeService->DisableDistributedNet(isServer);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedServerNet001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    std::string iif = "lo";
+    std::string devIface = "lo";
+    std::string dstAddr = "1.189.55.61";
+    int32_t ret = netsysNativeService->EnableDistributedServerNet(iif, devIface, dstAddr);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = true;
+    ret = netsysNativeService->DisableDistributedNet(isServer);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    nmd::NetworkSharingTraffic traffic;
+    std::string ifaceName = "virnic";
+
+    int32_t ret = netsysNativeService->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetGetClearNetStateTrafficMap001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1000000;
+
+    int32_t ret = netsysNativeService->SetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->GetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateIfIndexMap001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    uint8_t key = 1;
+    uint64_t index = 10;
+    int32_t ret = netsysNativeService->UpdateIfIndexMap(key, index);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, RegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = netsysNativeService->RegisterNetsysTrafficCallback(callback);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, StartStopClat001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    std::string interfaceName = "eth0";
+    int32_t netId = 1;
+    std::string nat64PrefixStr = "2001:db8::/64";
+
+    int32_t ret = netsysNativeService->StartClat(interfaceName, netId, nat64PrefixStr);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->StopClat(interfaceName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    std::vector<std::string> ifaceNames = {"eth0", "wlan0"};
+    bool status = true;
+
+    int32_t ret = netsysNativeService->SetNicTrafficAllowed(ifaceNames, status);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

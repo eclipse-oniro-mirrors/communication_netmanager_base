@@ -38,6 +38,7 @@
 #include "netsys_controller.h"
 #include "netsys_ipc_interface_code.h"
 #include "netsys_net_diag_data.h"
+#include "distributed_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1195,5 +1196,97 @@ HWTEST_F(NetsysControllerTest, DisableWearableDistributedNetForward, TestSize.Le
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetsysControllerTest, EnableDistributedClientNet001, TestSize.Level1)
+{
+    std::string virnicAddr = "1.189.55.61";
+    std::string iif = "lo";
+    int32_t ret = NetsysController::GetInstance().EnableDistributedClientNet(virnicAddr, iif);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = false;
+    ret = NetsysController::GetInstance().DisableDistributedNet(isServer);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    std::string ifName = "virnic";
+    ret = DistributedManager::GetInstance().DestroyDistributedNic(ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, EnableDistributedServerNet001, TestSize.Level1)
+{
+    std::string iif = "lo";
+    std::string devIface = "lo";
+    std::string dstAddr = "1.189.55.61";
+    int32_t ret = NetsysController::GetInstance().EnableDistributedServerNet(iif, devIface, dstAddr);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    bool isServer = true;
+    ret = NetsysController::GetInstance().DisableDistributedNet(isServer);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)
+{
+    nmd::NetworkSharingTraffic traffic;
+    std::string ifaceName = "virnic";
+
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1000000;
+
+    NetsysController::GetInstance().netsysService_ = nullptr;
+
+    int32_t ret = NetsysController::GetInstance().SetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().GetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, UpdateIfIndexMap001, TestSize.Level1)
+{
+    uint8_t key = 1;
+    uint64_t index = 10;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().UpdateIfIndexMap(key, index);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, RegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, StartStopClat001, TestSize.Level1)
+{
+    std::string interfaceName = "eth0";
+    int32_t netId = 1;
+    std::string nat64PrefixStr = "2001:db8::/64";
+    NetsysController::GetInstance().netsysService_ = nullptr;
+
+    int32_t ret = NetsysController::GetInstance().StartClat(interfaceName, netId, nat64PrefixStr);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().StopClat(interfaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetNicTrafficAllowed001, TestSize.Level1)
+{
+    std::vector<std::string> ifaceNames = {"eth0", "wlan0"};
+    bool status = true;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+
+    int32_t ret = NetsysController::GetInstance().SetNicTrafficAllowed(ifaceNames, status);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
