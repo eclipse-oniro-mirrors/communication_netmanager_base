@@ -47,9 +47,7 @@ ohos_fuzztest("CommonFuzzTest") {
     "-fvisibility=hidden",
   ]
 
-  ldflags = [
-    "-flto",
-  ]
+  ldflags = [ "-flto" ]
 
   sources = [ "common_fuzzer.cpp" ]
 
