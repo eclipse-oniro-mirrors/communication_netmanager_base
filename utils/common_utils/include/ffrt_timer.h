@@ -26,7 +26,6 @@
 
 #include "ffrt.h"
 #include "ffrt_inner.h"
-#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -51,18 +50,12 @@ public:
     {
         StopPro();
         timer_ = ffrt_timer_start(ffrt_qos_default, interval, data, taskFun, true);
-        if (timer_ == ffrt_error) {
-            NETMGR_LOG_E("ffrt_timer_start err[%{public}d]", timer_);
-        }
     }
 
     void StopPro()
     {
         if (timer_ != ffrt_error) {
             auto ret = ffrt_timer_stop(ffrt_qos_default, timer_);
-            if (ret == ffrt_error) {
-                NETMGR_LOG_E("ffrt_timer_stop err[%{public}d]", ret);
-            }
         }
     }
 
@@ -71,7 +64,6 @@ public:
         if (stopStatus_ == false) {
             return;
         }
-        NETMGR_LOG_D("start thread...");
         stopStatus_ = false;
         std::function<void()> startTask = [this, interval, taskFun]() {
             while (!tryStopFlag_) {
@@ -93,7 +85,6 @@ public:
         if (stopStatus_ || tryStopFlag_) {
             return;
         }
-        NETMGR_LOG_D("stop thread...");
         tryStopFlag_ = true;
         std::unique_lock<ffrt::mutex> locker(mutex_);
         timerCond_.wait(locker, [this] { return stopStatus_ == true; });
