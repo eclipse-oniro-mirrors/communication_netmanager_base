@@ -988,19 +988,21 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     EventReport::SendSupplierBehaviorEvent(eventInfo);
     NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
                  supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
+        std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
+        locker.unlock();
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
     // Init score again here in case of net supplier type changed.
+    std::unique_lock<std::recursive_mutex> initLocker(netManagerMutex_);
     if (netSupplierInfo->score_ == 0) {
         supplier->InitNetScore();
     }
-    locker.unlock();
+    initLocker.unlock();
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
@@ -1146,7 +1148,6 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         std::lock_guard guard(uidActivateMutex_);
         netUidActivates_[callingUid].push_back(request);
     }
-    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
@@ -1158,14 +1159,14 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         request->SetServiceSupply(bestNet);
         CallbackForAvailable(bestNet, callback);
         if ((bestNet->GetNetSupplierType() == BEARER_CELLULAR) || (bestNet->GetNetSupplierType() == BEARER_WIFI)) {
+            std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
             struct EventInfo eventInfo = {.capabilities = bestNet->GetNetCapabilities().ToString(" "),
                                           .supplierIdent = bestNet->GetNetSupplierIdent()};
+            locker.unlock();
             EventReport::SendRequestBehaviorEvent(eventInfo);
         }
-        locker.unlock();
         return NETMANAGER_SUCCESS;
     }
-    locker.unlock();
     if (timeoutMS == 0) {
         callback->NetUnavailable();
     }
@@ -1570,8 +1571,8 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     *pNetAllCap = supplier->GetNetCapabilities();
-    callback->NetCapabilitiesChange(netHandle, pNetAllCap);
     locker.unlock();
+    callback->NetCapabilitiesChange(netHandle, pNetAllCap);
     sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
     auto network = supplier->GetNetwork();
     if (network != nullptr && pInfo != nullptr) {
@@ -1614,8 +1615,8 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     supplier->SetNetValid(netState);
     supplier->SetDetectionDone();
-    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     locker.unlock();
+    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     FindBestNetworkForAllRequest();
     bool ifValid = netState == VERIFICATION_STATE;
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
