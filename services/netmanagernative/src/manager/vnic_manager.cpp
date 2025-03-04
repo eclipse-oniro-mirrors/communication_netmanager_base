@@ -297,15 +297,15 @@ int32_t VnicManager::InitIfreq(ifreq &ifr, const std::string &cardName)
 int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                                 const std::set<int32_t> &uids)
 {
+    std::unique_lock<std::mutex> lock(vnicMutex_);
+    if (uids.size() > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETNATIVE_LOGE("vnic uids's size is over the max size.");
+        return NETMANAGER_ERROR;
+    }
+    
     uidRanges.clear();
     for (const auto &uid: uids) {
         uidRanges.push_back({uid, uid});
-    }
-
-    if (uidRanges.size() > MAX_VNIC_UID_ARRAY_SIZE) {
-        NETNATIVE_LOGE("vnic uidRanges's size is over the max size.");
-        uidRanges.clear();
-        return NETMANAGER_ERROR;
     }
 
     if (CreateVnicInterface() != NETMANAGER_SUCCESS) {
@@ -337,6 +337,7 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
 
 int32_t VnicManager::DestroyVnic()
 {
+    std::unique_lock<std::mutex> lock(vnicMutex_);
     nmd::NetLinkSocketDiag socketDiag;
     nmd::RouteManager::UpdateVnicUidRangesRule(uidRanges, false);
     DelDefaultRoute();
