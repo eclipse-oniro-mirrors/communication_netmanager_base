@@ -287,7 +287,8 @@ bool NetActivate::IsAllowCallback(CallbackType callbackType)
     bool isAppFrozened = isAppFrozened_.load();
     bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
     if (isAppFrozened && !isForegroundApp) {
-        if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST) {
+        if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST
+            && GetLastServiceSupply() == nullptr) {
             SetLastServiceSupply(netServiceSupplied_);
         }
         SetLastCallbackType(callbackType);
