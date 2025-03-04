@@ -442,12 +442,16 @@ void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
     std::function<void()> netCachedStats = [this] () {
+        isExec_ = true;
         CacheStats();
         WriteStats();
         isForce_ = false;
         LoadIfaceNameIdentMaps();
+        isExec_ = false;
     };
-    ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
+    if (!isExec_) {
+        ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
+    }
 }
 
 ffrt::task_handle NetStatsCached::ForceArchiveStats(uint32_t uid)

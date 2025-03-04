@@ -290,6 +290,7 @@ private:
     CachedInfo stats_;
     ffrt::mutex lock_;
     bool isForce_ = false;
+    bool isExec_ = false;
     std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
     std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
     uint32_t cycleThreshold_ = DEFAULT_CACHE_CYCLE_MS;

@@ -246,7 +246,7 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
 
     struct addrinfo *result = nullptr;
     struct queryparam qparam = {};
-    qparam.qp_netid = netId_;
+    qparam.qp_netid = static_cast<int>(netId_);
     qparam.qp_type = QEURY_TYPE_NETSYS;
 
     int32_t ret = getaddrinfo_ext(domain.c_str(), nullptr, nullptr, &result, &qparam);
