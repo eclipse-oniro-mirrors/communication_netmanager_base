@@ -146,7 +146,9 @@ protected:
 protected:
     uint32_t chainType_ = 0;
     std::string chainName_;
+    std::shared_mutex allowedListMutex_;
     std::vector<uint32_t> allowedList_;
+    std::shared_mutex deniedListMutex_;
     std::vector<uint32_t> deniedList_;
     bool modeEnable_ = false;
 
