@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-constexpr uint32_t MAX_RETRY_COUNT = 3;
+constexpr uint32_t MAX_RETRY_COUNT = 5;
 
 struct AppStateAwareCallback {
     std::function<void(const uint32_t uid)> OnForegroundAppChanged;
