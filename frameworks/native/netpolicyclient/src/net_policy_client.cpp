@@ -27,7 +27,21 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetPolicyClient::NetPolicyClient() : netPolicyService_(nullptr), deathRecipient_(nullptr), callback_(nullptr) {}
 
-NetPolicyClient::~NetPolicyClient() = default;
+NetPolicyClient::~NetPolicyClient()
+{
+    NETMGR_LOG_I("~NetPolicyClient : Destroy NetPolicyClient");
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+ 
+    auto serviceRemote = proxy->AsObject();
+    if (serviceRemote == nullptr) {
+        return;
+    }
+ 
+    serviceRemote->RemoveDeathRecipient(deathRecipient_);   
+}
 
 int32_t NetPolicyClient::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
