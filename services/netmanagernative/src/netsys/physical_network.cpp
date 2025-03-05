@@ -30,7 +30,7 @@ PhysicalNetwork::PhysicalNetwork(uint16_t netId, NetworkPermission permission)
 
 void PhysicalNetwork::AddDefault()
 {
-    std::lock_guard<std::mutex> lock(physicalNetMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     std::set<std::string>::iterator it;
     for (it = interfaces_.begin(); it != interfaces_.end(); ++it) {
         RouteManager::AddInterfaceToDefaultNetwork(*it, permission_);
@@ -40,7 +40,7 @@ void PhysicalNetwork::AddDefault()
 
 void PhysicalNetwork::RemoveDefault()
 {
-    std::lock_guard<std::mutex> lock(physicalNetMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     std::set<std::string>::iterator it;
     for (it = interfaces_.begin(); it != interfaces_.end(); ++it) {
         RouteManager::RemoveInterfaceFromDefaultNetwork(*it, permission_);
@@ -63,7 +63,7 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
     if (isDefault_) {
         RouteManager::AddInterfaceToDefaultNetwork(interfaceName, permission_);
     }
-    std::lock_guard<std::mutex> lock(physicalNetMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.insert(interfaceName);
 
     return NETMANAGER_SUCCESS;
@@ -84,7 +84,7 @@ int32_t PhysicalNetwork::RemoveInterface(std::string &interfaceName)
         NETNATIVE_LOGE("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
-    std::lock_guard<std::mutex> lock(physicalNetMutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
