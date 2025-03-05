@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-
+std::mutex AppStateAwareManager::instanceMutex_;
 AppStateAwareManager::AppStateAwareManager()
 {
     SubscribeAppState();
@@ -33,8 +33,6 @@ AppStateAwareManager::~AppStateAwareManager()
 {
     UnSubscribeAppState();
 }
-
-std::mutex AppStateAwareManager::instanceMutex_ {};
 
 AppStateAwareManager &AppStateAwareManager::GetInstance()
 {
