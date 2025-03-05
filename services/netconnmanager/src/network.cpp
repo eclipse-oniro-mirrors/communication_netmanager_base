@@ -379,6 +379,7 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
+        lock.unlock();
         auto family = GetAddrFamily(inetAddr.address_);
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
@@ -483,6 +484,7 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateMtu out. same with before.");
         return;
     }
+    lock.unlock();
 
     int32_t ret = NetsysController::GetInstance().SetInterfaceMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
     if (ret != NETMANAGER_SUCCESS) {
@@ -499,6 +501,7 @@ void Network::UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateTcpBufferSize out. same with before.");
         return;
     }
+    lock.unlock();
     int32_t ret = NetsysController::GetInstance().SetTcpBufferSizes(netLinkInfo.tcpBufferSizes_);
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_NET_TCP_BUFFER_SIZE_FAILED);
@@ -514,6 +517,7 @@ void Network::UpdateStatsCached(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateStatsCached out. same with before");
         return;
     }
+    lock.unlock();
     int32_t ret = NetStatsClient::GetInstance().UpdateStatsData();
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_STATS_CACHED);
@@ -796,6 +800,7 @@ bool Network::ResumeNetworkInfo()
 {
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo nli = netLinkInfo_;
+    lock.unlock();
     if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         isNeedResume_ = true;
     }
