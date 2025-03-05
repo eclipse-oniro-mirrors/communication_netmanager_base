@@ -273,6 +273,7 @@ int32_t BandwidthManager::SetCostlyAlert(Operate operate, const std::string &ifa
 {
     NETNATIVE_LOG_D("BandwidthManager SetCostlyAlert: operate=%{public}d, iface=%{public}s, bytes=%{public}" PRId64,
                     operate, iface.c_str(), bytes);
+    std::lock_guard<std::mutex> guard(ifaceAlertMutex_);
     bool hasError = false;
     std::string command;
     std::string chainName = std::string(CHAIN_NAME_COSTLY_PTR) + iface + "alert";
