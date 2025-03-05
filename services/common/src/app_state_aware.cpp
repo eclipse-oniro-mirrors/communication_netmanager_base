@@ -34,6 +34,8 @@ AppStateAwareManager::~AppStateAwareManager()
     UnSubscribeAppState();
 }
 
+std::mutex AppStateAwareManager::instanceMutex_ {};
+
 AppStateAwareManager &AppStateAwareManager::GetInstance()
 {
     std::lock_guard<std::mutex> lock(instanceMutex_);
