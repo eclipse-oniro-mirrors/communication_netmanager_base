@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "common_event_support.h"
 
 #include "broadcast_manager.h"
@@ -375,7 +376,7 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
-                        CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+                       CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
         lock.unlock();
