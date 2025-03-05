@@ -288,3 +288,13 @@ foundation/communication/netmanager_base/
 [communication_netmanager_ext](https://gitee.com/openharmony/communication_netmanager_ext)
 
 [communication_netstack](https://gitee.com/openharmony/communication_netstack)
+
+
+--------------------------------
+foundation/communication/netmanager_base/test/netpolicymanager/unittest/net_policy_manager_test/net_policy_callback_test.cpp：
+NetMeteredIfacesChange删掉循环打印
+
+---------------------------------------
+foundation/communication/netmanager_base/test/netpolicymanager/unittest/net_policy_manager_test/ut_net_policy_callback_ipc.cpp：
+NotifyNetMeteredIfacesChangeTest001用例新增std::vector<std::string> ifaces = {};
+
