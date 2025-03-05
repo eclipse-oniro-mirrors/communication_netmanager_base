@@ -317,7 +317,7 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
             }
         }
     }
-    lock.unlcok();
+    lock.unlock();
     UpdateQuotaPoliciesInner();
     NETMGR_LOG_I("NetPolicyTraffic::UpdateRemindPolicy end.");
     return NETMANAGER_SUCCESS;
