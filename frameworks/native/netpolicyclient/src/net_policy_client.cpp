@@ -39,7 +39,6 @@ NetPolicyClient::~NetPolicyClient()
     if (serviceRemote == nullptr) {
         return;
     }
- 
     serviceRemote->RemoveDeathRecipient(deathRecipient_);   
 }
 
