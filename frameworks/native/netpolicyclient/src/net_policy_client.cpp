@@ -39,7 +39,7 @@ NetPolicyClient::~NetPolicyClient()
     if (serviceRemote == nullptr) {
         return;
     }
-    serviceRemote->RemoveDeathRecipient(deathRecipient_);   
+    serviceRemote->RemoveDeathRecipient(deathRecipient_);
 }
 
 int32_t NetPolicyClient::SetPolicyByUid(uint32_t uid, uint32_t policy)
