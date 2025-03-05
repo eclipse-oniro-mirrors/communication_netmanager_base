@@ -36,6 +36,7 @@ AppStateAwareManager::~AppStateAwareManager()
 
 AppStateAwareManager &AppStateAwareManager::GetInstance()
 {
+    std::lock_guard<std::mutex> lock(instanceMutex_);
     static AppStateAwareManager gAppStateAwareManager;
     if (!gAppStateAwareManager.appStateObserver_) {
         if (gAppStateAwareManager.retryCount_ < MAX_RETRY_COUNT) {

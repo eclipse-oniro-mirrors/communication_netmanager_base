@@ -49,6 +49,7 @@ public:
     bool IsForegroundApp(const uint32_t uid);
 private:
     std::atomic<int32_t> foregroundAppUid_;
+    std::mutex instanceMutex_ {};
     std::mutex mutex_ {};
     sptr<AppStateObserver> appStateObserver_ = nullptr;
     AppStateAwareCallback appStateAwareCallback_;
