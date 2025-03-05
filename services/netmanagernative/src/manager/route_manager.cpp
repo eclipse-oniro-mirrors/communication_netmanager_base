@@ -809,7 +809,6 @@ int32_t RouteManager::ClearRules()
 
 int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netId)
 {
-    std::lock_guard lock(RouteManager::interfaceToTableLock_);
     uint32_t table = FindTableByInterfacename(interfaceName, netId);
     NETNATIVE_LOGI("ClearRoutes--table==:%{public}d", table);
     if (table == RT_TABLE_UNSPEC) {
@@ -1242,6 +1241,7 @@ uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName
         return RT_TABLE_UNSPEC;
     }
     table += THOUSAND_LEN;
+    std::lock_guard lock(RouteManager::interfaceToTableLock_);
     interfaceToTable_[interfaceName] = table;
     return ConvertTableByNetId(netId, table);
 }
