@@ -215,7 +215,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTrafficTest001, 
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     NetworkSharingTraffic traffic;
     std::string ifaceName;
-    int32_t ret = netsysNativeService->GetNetworkCellularSharingTraffic(traffic,ifaceName);
+    int32_t ret = netsysNativeService->GetNetworkCellularSharingTraffic(traffic, ifaceName);
     EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
 }
 
