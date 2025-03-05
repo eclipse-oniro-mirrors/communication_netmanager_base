@@ -1193,7 +1193,7 @@ HWTEST_F(NetsysControllerTest, GetNetworkCellularSharingTrafficTest001, TestSize
     NetsysController::GetInstance().netsysService_ = nullptr;
     nmd::NetworkSharingTraffic traffic;
     std::string ifaceName;
-    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic ,ifaceName);
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
     EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -1202,7 +1202,7 @@ HWTEST_F(NetsysControllerTest, GetNetworkCellularSharingTrafficTest002, TestSize
     NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     nmd::NetworkSharingTraffic traffic;
     std::string ifaceName;
-    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic ,ifaceName);
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
     EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 
