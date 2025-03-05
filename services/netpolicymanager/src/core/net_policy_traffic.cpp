@@ -513,7 +513,7 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
     message.append(TAB + "QuotaPolicies:\n");
     std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     std::vector<NetQuotaPolicy> quotaPoliciesTmp = quotaPolicies_;
-    lock.unlcok();
+    lock.unlock();
     std::for_each(quotaPoliciesTmp.begin(), quotaPoliciesTmp.end(), [&message](const auto &item) {
         message.append(TAB + TAB + "NetType: " + std::to_string(item.networkmatchrule.netType) + "\n" + TAB + TAB +
                        "simId: " + item.networkmatchrule.simId + "\n" + TAB + TAB +
