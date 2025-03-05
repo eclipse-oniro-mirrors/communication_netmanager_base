@@ -222,7 +222,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTrafficTest001, 
 HWTEST_F(NetsysNativeServiceProxyTest, SetNetStateTrafficMapTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    int32_t ret = netsysNativeService->SetNetStateTrafficMap(1,1);
+    int32_t ret = netsysNativeService->SetNetStateTrafficMap(1, 1);
     EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
 }
 
@@ -244,7 +244,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, ClearIncreaseTrafficMapTest001, TestSize.
 HWTEST_F(NetsysNativeServiceProxyTest, UpdateIfIndexMapTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    int32_t ret = netsysNativeService->UpdateIfIndexMap(1,1);
+    int32_t ret = netsysNativeService->UpdateIfIndexMap(1, 1);
     EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
 }
 
