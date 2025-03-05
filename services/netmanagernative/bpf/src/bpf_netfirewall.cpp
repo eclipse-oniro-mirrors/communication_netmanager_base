@@ -713,7 +713,7 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
     if (!info) {
         return;
     }
-    sptr<InterceptRecord> record = new (std::nothrow) InterceptRecord();
+    sptr<InterceptRecord> record = sptr<InterceptRecord>::MakeSptr();
     record->time = (int32_t)time(NULL);
     record->localPort = BitmapManager::Nstohl(info->sport);
     record->remotePort = BitmapManager::Nstohl(info->dport);
