@@ -42,7 +42,7 @@ public:
      *
      * @return const std::vector<uint32_t>& The firewall allow list
      */
-    virtual const std::vector<uint32_t> &GetAllowedList() const;
+    virtual std::vector<uint32_t> GetAllowedList();
 
     /**
      * Set the firewall allow list
@@ -70,7 +70,7 @@ public:
      *
      * @return const std::vector<uint32_t>& The firewall reject list
      */
-    virtual const std::vector<uint32_t> &GetDeniedList() const;
+    virtual std::vector<uint32_t> GetDeniedList();
 
     /**
      * Set the firewall reject list
