@@ -22,6 +22,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <mutex>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -62,6 +63,7 @@ private:
     std::atomic_int net4Sock_ = 0;
     std::atomic_int net6Sock_ = 0;
     std::vector<NetManagerStandard::UidRange> uidRanges;
+    std::mutex vnicMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -359,5 +359,28 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetStatsClientTest, SetAppStats001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    PushStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(info);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
+{
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    NetStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SaveSharingTraffic(info);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

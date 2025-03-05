@@ -379,6 +379,7 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
+        lock.unlock();
         auto family = GetAddrFamily(inetAddr.address_);
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
@@ -483,6 +484,7 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateMtu out. same with before.");
         return;
     }
+    lock.unlock();
 
     int32_t ret = NetsysController::GetInstance().SetInterfaceMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
     if (ret != NETMANAGER_SUCCESS) {
@@ -499,6 +501,7 @@ void Network::UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateTcpBufferSize out. same with before.");
         return;
     }
+    lock.unlock();
     int32_t ret = NetsysController::GetInstance().SetTcpBufferSizes(netLinkInfo.tcpBufferSizes_);
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_NET_TCP_BUFFER_SIZE_FAILED);
@@ -514,6 +517,7 @@ void Network::UpdateStatsCached(const NetLinkInfo &netLinkInfo)
         NETMGR_LOG_D("Network UpdateStatsCached out. same with before");
         return;
     }
+    lock.unlock();
     int32_t ret = NetStatsClient::GetInstance().UpdateStatsData();
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_STATS_CACHED);
@@ -566,7 +570,7 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
 #endif
-    if (needReport || netMonitor_) {
+    if (needReport && netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
         return;
@@ -575,6 +579,8 @@ void Network::StartNetDetection(bool needReport)
         NETMGR_LOG_I("netMonitor_ is null.");
         InitNetMonitor();
         return;
+    } else {
+        netMonitor_->Start();
     }
 }
 
@@ -609,8 +615,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
     if (IsDetectionForDnsSuccess(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
         isDetectingForDns_ = true;
-        StopNetDetection();
-        InitNetMonitor();
+        netMonitor_->Start();
     } else if (IsDetectionForDnsFail(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
@@ -633,14 +638,12 @@ void Network::InitNetMonitor()
     NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_,
-        isFallbackProbeWithProxy_);
+    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
     }
     netMonitor_->Start();
-    isFallbackProbeWithProxy_ = false;
 }
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
@@ -779,7 +782,7 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         return;
     }
     netMonitor_->UpdateGlobalHttpProxy(httpProxy);
-    StartNetDetection(false);
+    StartNetDetection(true);
 }
 
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
@@ -796,6 +799,7 @@ bool Network::ResumeNetworkInfo()
 {
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo nli = netLinkInfo_;
+    lock.unlock();
     if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         isNeedResume_ = true;
     }
@@ -862,9 +866,5 @@ void Network::SetScreenState(bool isScreenOn)
     netMonitor_->SetScreenState(isScreenOn);
 }
 
-void Network::SetIfFallbackProbeWithProxy(bool needProxy)
-{
-    isFallbackProbeWithProxy_ = needProxy;
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

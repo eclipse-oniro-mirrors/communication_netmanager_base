@@ -246,7 +246,7 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
 
     struct addrinfo *result = nullptr;
     struct queryparam qparam = {};
-    qparam.qp_netid = netId_;
+    qparam.qp_netid = static_cast<int>(netId_);
     qparam.qp_type = QEURY_TYPE_NETSYS;
 
     int32_t ret = getaddrinfo_ext(domain.c_str(), nullptr, nullptr, &result, &qparam);
@@ -476,11 +476,12 @@ bool NetHttpProbe::SetUserInfo(CURL *curlHandler)
     auto passwd = tempProxy.GetPassword();
     if (!username.empty()) {
         NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYUSERNAME, username.c_str());
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
-        NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
         if (!passwd.empty()) {
+            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
+            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
             NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYPASSWORD, passwd.c_str());
         } else {
+            NETPROBE_CURL_EASY_SET_OPTION(curlHandler, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
             NETMGR_LOG_I("passwd is empty.");
         }
     } else {

@@ -64,6 +64,10 @@ void NetConnClient::SubscribeSystemAbility()
         return;
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sam == nullptr) {
+        NETMGR_LOG_E("SubscribeSystemAbility sam is null.");
+        return;
+    }
     int32_t result =
         sam->SubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
     if (result != ERR_OK) {
@@ -78,6 +82,10 @@ void NetConnClient::UnsubscribeSystemAbility()
         return;
     }
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sam == nullptr) {
+        NETMGR_LOG_E("UnsubscribeSystemAbility sam is null.");
+        return;
+    }
     int32_t result =
         sam->UnSubscribeSystemAbility(static_cast<int32_t>(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID), saStatusListener_);
     if (result != ERR_OK) {

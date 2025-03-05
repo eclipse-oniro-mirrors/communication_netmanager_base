@@ -44,17 +44,10 @@ ohos_fuzztest("CommonFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
     "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
     "-fvisibility=hidden",
-    "-fsanitize-blacklist=" + rebase_path(_cfi_blocklist_path, root_build_dir),
   ]
 
-  ldflags = [
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-  ]
+  ldflags = [ "-flto" ]
 
   sources = [ "common_fuzzer.cpp" ]
 

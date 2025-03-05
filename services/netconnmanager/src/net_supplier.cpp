@@ -641,12 +641,5 @@ bool NetSupplier::IsInFirstTimeDetecting() const
     return !isFirstTimeDetectionDone;
 }
 
-void NetSupplier::SetIfFallbackProbeWithProxy(bool needProxy)
-{
-    NETMGR_LOG_I("supplierId[%{public}d] fallback probe with proxy = %{public}d.", supplierId_, needProxy);
-    if (network_) {
-        network_->SetIfFallbackProbeWithProxy(needProxy);
-    }
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
