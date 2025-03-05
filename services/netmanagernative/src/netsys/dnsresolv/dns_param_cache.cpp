@@ -639,7 +639,7 @@ void DnsParamCache::NotifyDomianIntercept(int32_t appUid, const std::string &hos
     }
     std::string host = hostName.substr(0, hostName.find(' '));
     NETNATIVE_LOGI("NotifyDomianIntercept: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
-    sptr<NetManagerStandard::InterceptRecord> record = new (std::nothrow) NetManagerStandard::InterceptRecord();
+    sptr<InterceptRecord> record = sptr<InterceptRecord>::MakeSptr();
     record->time = (int32_t)time(NULL);
     record->appUid = appUid;
     record->domain = host;
