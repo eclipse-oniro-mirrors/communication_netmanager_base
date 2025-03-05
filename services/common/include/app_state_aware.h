@@ -54,6 +54,8 @@ private:
     sptr<AppStateObserver> appStateObserver_ = nullptr;
     AppStateAwareCallback appStateAwareCallback_;
     uint32_t retryCount_ = 0;
+
+    static std::mutex instanceMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
