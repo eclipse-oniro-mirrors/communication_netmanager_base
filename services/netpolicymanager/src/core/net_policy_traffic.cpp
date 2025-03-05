@@ -216,7 +216,9 @@ void NetPolicyTraffic::UpdateQuotaNotify()
 {
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Traverse cellular network start");
     std::shared_lock<std::shared_mutex> lock(quotaMutex_);
-    for (auto &quotaPolicy : quotaPolicies_) {
+    std::vector<NetQuotaPolicy> quotaPoliciesTmp = quotaPolicies_;
+    lock.unlock();
+    for (auto &quotaPolicy : quotaPoliciesTmp) {
         NetmanagerHiTrace::NetmanagerStartSyncTrace("Get the start time of the metering cycle start");
         int64_t start = quotaPolicy.GetPeriodStart();
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("Get the start time of the metering cycle end");
@@ -299,7 +301,7 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
     if (!IsValidNetRemindType(remindType)) {
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     for (uint32_t i = 0; i < quotaPolicies_.size(); ++i) {
         NetQuotaPolicy &quotaPolicy = quotaPolicies_[i];
         int32_t netTypeTemp = quotaPolicy.networkmatchrule.netType;
@@ -509,7 +511,10 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
                   [&message](const std::string &item) { message.append(item + ", "); });
     message.append("}\n");
     message.append(TAB + "QuotaPolicies:\n");
-    std::for_each(quotaPolicies_.begin(), quotaPolicies_.end(), [&message](const auto &item) {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::vector<NetQuotaPolicy> quotaPoliciesTmp = quotaPolicies_;
+    lock.unlcok();
+    std::for_each(quotaPoliciesTmp.begin(), quotaPoliciesTmp.end(), [&message](const auto &item) {
         message.append(TAB + TAB + "NetType: " + std::to_string(item.networkmatchrule.netType) + "\n" + TAB + TAB +
                        "simId: " + item.networkmatchrule.simId + "\n" + TAB + TAB +
                        "Ident: " + item.networkmatchrule.ident + "\n");
