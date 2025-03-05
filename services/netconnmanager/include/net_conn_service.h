@@ -599,7 +599,6 @@ private:
     static constexpr int32_t INVALID_USER_ID = -1;
     static constexpr int32_t ROOT_USER_ID = 0;
     int32_t currentUserId_ = INVALID_USER_ID;
-    bool isFallbackProbeWithProxy_ = false;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

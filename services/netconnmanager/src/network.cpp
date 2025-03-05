@@ -570,7 +570,7 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
 #endif
-    if (needReport || netMonitor_) {
+    if (needReport && netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
         return;
@@ -579,6 +579,8 @@ void Network::StartNetDetection(bool needReport)
         NETMGR_LOG_I("netMonitor_ is null.");
         InitNetMonitor();
         return;
+    } else {
+        netMonitor_->Start();
     }
 }
 
@@ -613,8 +615,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
     if (IsDetectionForDnsSuccess(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
         isDetectingForDns_ = true;
-        StopNetDetection();
-        InitNetMonitor();
+        netMonitor_->Start();
     } else if (IsDetectionForDnsFail(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
@@ -637,14 +638,12 @@ void Network::InitNetMonitor()
     NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_,
-        isFallbackProbeWithProxy_);
+    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback, isScreenOn_);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
     }
     netMonitor_->Start();
-    isFallbackProbeWithProxy_ = false;
 }
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
@@ -783,7 +782,7 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         return;
     }
     netMonitor_->UpdateGlobalHttpProxy(httpProxy);
-    StartNetDetection(false);
+    StartNetDetection(true);
 }
 
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
@@ -867,9 +866,5 @@ void Network::SetScreenState(bool isScreenOn)
     netMonitor_->SetScreenState(isScreenOn);
 }
 
-void Network::SetIfFallbackProbeWithProxy(bool needProxy)
-{
-    isFallbackProbeWithProxy_ = needProxy;
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

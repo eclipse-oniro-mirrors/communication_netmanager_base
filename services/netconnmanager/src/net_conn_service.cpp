@@ -750,7 +750,6 @@ void NetConnService::HandlePowerMgrEvent(int code)
             });
         }
         isInSleep_.store(false);
-        isFallbackProbeWithProxy_ = true;
     }
 }
 #endif
@@ -1070,7 +1069,7 @@ int32_t NetConnService::NetDetectionAsync(int32_t netId)
         NETMGR_LOG_E("Could not find the corresponding network or network is not connected.");
         return NET_CONN_ERR_NETID_NOT_FOUND;
     }
-    iterNetwork->second->StartNetDetection(true);
+    iterNetwork->second->StartNetDetection(false);
     NETMGR_LOG_I("End NetDetection");
     return NETMANAGER_SUCCESS;
 }
@@ -2596,10 +2595,8 @@ void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
             if (supplier.second == nullptr) {
                 continue;
             }
-            supplier.second->SetIfFallbackProbeWithProxy(isFallbackProbeWithProxy_);
             supplier.second->UpdateGlobalHttpProxy(httpProxy);
         }
-        isFallbackProbeWithProxy_ = false;
         NETMGR_LOG_I("UpdateGlobalHttpProxy end");
     });
 }

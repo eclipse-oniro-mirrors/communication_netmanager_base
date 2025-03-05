@@ -149,7 +149,6 @@ public:
     bool IsNetQualityPoor();
     bool IsNetAcceptUnavalidate();
     bool IsInFirstTimeDetecting() const;
-    void SetIfFallbackProbeWithProxy(bool needProxy);
 
 private:
     NetBearType netSupplierType_;

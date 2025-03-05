@@ -45,7 +45,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, bool needProxy);
+        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
 
     /**
      * Destroy the NetMonitor
@@ -94,18 +94,15 @@ private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
     NetHttpProbeResult SendProbe();
-    NetHttpProbeResult ProcessThreadDetectResult(NetHttpProbeResult& httpProbeResult,
-        NetHttpProbeResult& httpsProbeResult, NetHttpProbeResult& fallbackHttpProbeResult,
-        NetHttpProbeResult& fallbackHttpsProbeResult, NetHttpProbeResult& fallbackProxyHttpProbeResult,
-        NetHttpProbeResult& fallbackProxyHttpsProbeResult);
+    NetHttpProbeResult ProcessThreadDetectResult(std::shared_ptr<ProbeThread>& httpProbeThread,
+        std::shared_ptr<ProbeThread>& httpsProbeThread, std::shared_ptr<ProbeThread>& backHttpThread,
+        std::shared_ptr<ProbeThread>& backHttpsThread);
+    void StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread, std::shared_ptr<ProbeThread>& httpsProbeThread,
+        std::shared_ptr<ProbeThread>& backHttpThread, std::shared_ptr<ProbeThread>& backHttpsThread, bool needProxy);
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
     bool CheckIfSettingsDataReady();
-    void SendProbeWithProxy(std::shared_ptr<ProbeThread>& httpProbeThread,
-        std::shared_ptr<ProbeThread>& httpsProbeThread);
-    void SendProbeWithoutProxy(std::shared_ptr<ProbeThread>& httpProbeThread,
-        std::shared_ptr<ProbeThread>& httpsProbeThread);
 
 private:
     uint32_t netId_ = 0;
@@ -129,7 +126,6 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
-    bool isFallbackProbeWithProxy_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
