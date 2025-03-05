@@ -737,6 +737,7 @@ public:
 
 private:
     void Clear();
+    void Insert();
 
     /**
      * build firewall rule bitmap map, with element seted
@@ -821,6 +822,7 @@ private:
     BpfAppUidMap appUidMap_;
     BpfUidMap uidMap_;
     BpfActionMap actionMap_;
+    std:mutex mutex_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H */
