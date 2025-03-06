@@ -26,21 +26,16 @@
 #include "napi_constant.h"
 #include "net_all_capabilities.h"
 #include "netconnection.h"
-#include "netinterface.h"
 #include "netmanager_base_log.h"
 #include "none_params_context.h"
 #include "module_template.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
-#include "interfaceregister_context.h"
 #include "setappnet_context.h"
 #include "setglobalhttpproxy_context.h"
 #include "setcustomdnsrule_context.h"
 #include "deletecustomdnsrule_context.h"
 #include "deletecustomdnsrules_context.h"
-#include "getinterfaceconfig_context.h"
-#include "registernetsupplier_context.h"
-#include "unregisternetsupplier_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 static thread_local uint64_t g_moduleId;
@@ -170,19 +165,6 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
     }
 }
 
-static void *ParseNetInterfaceParams(napi_env env, size_t argc, napi_value *argv, EventManager *manager)
-{
-    std::unique_ptr<NetInterface, decltype(&NetInterface::DeleteNetInterface)> netInterface(
-        NetInterface::MakeNetInterface(manager), NetInterface::DeleteNetInterface);
-    netInterface->moduleId_ = g_moduleId;
-
-    if (argc == ARG_NUM_0) {
-        return netInterface.release();
-    }
-    NETMANAGER_BASE_LOGE("constructor params invalid, should be none");
-    return nullptr;
-}
-
 static void AddCleanupHook(napi_env env)
 {
     NapiUtils::SetEnvValid(env);
@@ -231,23 +213,9 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_FACTORY_RESET_NETWORK_SYNC, FactoryResetNetworkSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_PAC_URL, SetPacUrl),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_PAC_URL, GetPacUrl),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_INTERFACE_UP, SetInterfaceUp),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_INTERFACE_IP_ADDRESS, SetNetInterfaceIpAddress),
-        DECLARE_NAPI_FUNCTION(FUNCTION_ADD_NETWORK_ROUTE, AddNetworkRoute),
-        DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_INTERFACE, CreateNetInterface),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_INTERFACE_CONFIG, GetNetInterfaceConfiguration),
-        DECLARE_NAPI_FUNCTION(FUNCTION_REGISTER_NET_SUPPLIER, RegisterNetSupplier),
-        DECLARE_NAPI_FUNCTION(FUNCTION_UNREGISTER_NET_SUPPLIER, UnregisterNetSupplier),
     };
     NapiUtils::DefineProperties(env, exports, functions);
-    InitClasses(env, exports);
-    InitProperties(env, exports);
-    AddCleanupHook(env);
-    return exports;
-}
 
-void ConnectionModule::InitClasses(napi_env env, napi_value exports)
-{
     std::initializer_list<napi_property_descriptor> netConnectionFunctions = {
         DECLARE_NAPI_FUNCTION(NetConnectionInterface::FUNCTION_ON, NetConnectionInterface::On),
         DECLARE_NAPI_FUNCTION(NetConnectionInterface::FUNCTION_REGISTER, NetConnectionInterface::Register),
@@ -255,12 +223,9 @@ void ConnectionModule::InitClasses(napi_env env, napi_value exports)
     };
     ModuleTemplate::DefineClass(env, exports, netConnectionFunctions, INTERFACE_NET_CONNECTION);
 
-    std::initializer_list<napi_property_descriptor> netInterfaceFunctions = {
-        DECLARE_NAPI_FUNCTION(NetInterfaceInterface::FUNCTION_ON, NetInterfaceInterface::On),
-        DECLARE_NAPI_FUNCTION(NetInterfaceInterface::FUNCTION_REGISTER, NetInterfaceInterface::Register),
-        DECLARE_NAPI_FUNCTION(NetInterfaceInterface::FUNCTION_UNREGISTER, NetInterfaceInterface::Unregister),
-    };
-    ModuleTemplate::DefineClass(env, exports, netInterfaceFunctions, INTERFACE_NET_INTERFACE);
+    InitProperties(env, exports);
+    AddCleanupHook(env);
+    return exports;
 }
 
 void ConnectionModule::InitProperties(napi_env env, napi_value exports)
@@ -361,18 +326,6 @@ napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_inf
                                            auto netConnection = static_cast<NetConnection *>(manager->GetData());
                                            delete manager;
                                            NetConnection::DeleteNetConnection(netConnection);
-                                       });
-}
-
-napi_value ConnectionModule::CreateNetInterface(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::NewInstance(env, info, INTERFACE_NET_INTERFACE, ParseNetInterfaceParams,
-                                       [](napi_env, void *data, void *) {
-                                           NETMANAGER_BASE_LOGI("finalize netInterface");
-                                           auto manager = static_cast<EventManager *>(data);
-                                           auto netInterface = static_cast<NetInterface *>(manager->GetData());
-                                           delete manager;
-                                           NetInterface::DeleteNetInterface(netInterface);
                                        });
 }
 
@@ -481,51 +434,6 @@ napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
                                                        ConnectionAsyncWork::SetAppNetCallback);
 }
 
-napi_value ConnectionModule::SetInterfaceUp(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<SetInterfaceUpContext>(env, info, FUNCTION_SET_INTERFACE_UP, nullptr,
-                                                            ConnectionAsyncWork::ExecSetInterfaceUp,
-                                                            ConnectionAsyncWork::SetInterfaceUpCallback);
-}
-
-napi_value ConnectionModule::SetNetInterfaceIpAddress(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<SetInterfaceIpAddrContext>(env, info, FUNCTION_SET_INTERFACE_IP_ADDRESS, nullptr,
-                                                                ConnectionAsyncWork::ExecSetInterfaceIpAddr,
-                                                                ConnectionAsyncWork::SetInterfaceIpAddrCallback);
-}
-
-napi_value ConnectionModule::AddNetworkRoute(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<AddNetworkRouteContext>(env, info, FUNCTION_ADD_NETWORK_ROUTE, nullptr,
-                                                             ConnectionAsyncWork::ExecAddNetworkRoute,
-                                                             ConnectionAsyncWork::AddNetworkRouteCallback);
-}
-
-napi_value ConnectionModule::GetNetInterfaceConfiguration(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<GetNetInterfaceConfigurationContext>(
-        env, info, FUNCTION_GET_INTERFACE_CONFIG, nullptr,
-        ConnectionAsyncWork::ExecGetNetInterfaceConfiguration,
-        ConnectionAsyncWork::GetNetInterfaceConfigurationCallback);
-}
-
-napi_value ConnectionModule::RegisterNetSupplier(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<RegisterNetSupplierContext>(
-        env, info, FUNCTION_REGISTER_NET_SUPPLIER, nullptr,
-        ConnectionAsyncWork::ExecRegisterNetSupplier,
-        ConnectionAsyncWork::RegisterNetSupplierCallback);
-}
-
-napi_value ConnectionModule::UnregisterNetSupplier(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<UnregisterNetSupplierContext>(
-        env, info, FUNCTION_UNREGISTER_NET_SUPPLIER, nullptr,
-        ConnectionAsyncWork::ExecUnregisterNetSupplier,
-        ConnectionAsyncWork::UnregisterNetSupplierCallback);
-}
-
 napi_value ConnectionModule::AddCustomDnsRule(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<SetCustomDNSRuleContext>(env, info, FUNCTION_SET_CUSTOM_DNS_RULE, nullptr,
@@ -616,50 +524,6 @@ napi_value ConnectionModule::NetConnectionInterface::Unregister(napi_env env, na
         },
         ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister,
         ConnectionAsyncWork::NetConnectionAsyncWork::UnregisterCallback);
-}
-
-napi_value ConnectionModule::NetInterfaceInterface::On(napi_env env, napi_callback_info info)
-{
-    std::initializer_list<std::string> events = {EVENT_IFACE_ADDRESS_UPDATED,
-                                                 EVENT_IFACE_ADDRESS_REMOVED,
-                                                 EVENT_IFACE_ADDED,
-                                                 EVENT_IFACE_REMOVED,
-                                                 EVENT_IFACE_CHANGED,
-                                                 EVENT_IFACE_LINK_STATE_CHANGED,
-                                                 EVENT_IFACE_ROUTE_CHANGED};
-    return ModuleTemplate::On(env, info, events, false);
-}
-
-napi_value ConnectionModule::NetInterfaceInterface::Register(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<IfaceRegisterContext>(
-        env, info, FUNCTION_REGISTER,
-        [](napi_env theEnv, napi_value thisVal, IfaceRegisterContext *context) -> bool {
-            if (context && context->GetManager() && !context->GetManager()->GetRef()) {
-                context->GetManager()->SetRef(NapiUtils::CreateReference(theEnv, thisVal));
-            }
-            return true;
-        },
-        ConnectionAsyncWork::NetInterfaceAsyncWork::ExecIfaceRegister,
-        ConnectionAsyncWork::NetInterfaceAsyncWork::IfaceRegisterCallback);
-}
-
-napi_value ConnectionModule::NetInterfaceInterface::Unregister(napi_env env, napi_callback_info info)
-{
-    return ModuleTemplate::Interface<IfaceUnregisterContext>(
-        env, info, FUNCTION_UNREGISTER,
-        [](napi_env theEnv, napi_value thisVal, IfaceUnregisterContext *context) -> bool {
-            if (context && context->GetManager()) {
-                if (context->GetManager()->GetRef()) {
-                    NapiUtils::DeleteReference(theEnv, context->GetManager()->GetRef());
-                    context->GetManager()->SetRef(nullptr);
-                }
-                context->GetManager()->DeleteAllListener();
-            }
-            return true;
-        },
-        ConnectionAsyncWork::NetInterfaceAsyncWork::ExecIfaceUnregister,
-        ConnectionAsyncWork::NetInterfaceAsyncWork::IfaceUnregisterCallback);
 }
 
 static napi_module g_connectionModule = {

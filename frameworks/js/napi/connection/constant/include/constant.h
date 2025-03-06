@@ -32,14 +32,6 @@ static constexpr const char *EVENT_NET_CONNECTION_PROPERTIES_CHANGE = "netConnec
 static constexpr const char *EVENT_NET_LOST = "netLost";
 static constexpr const char *EVENT_NET_UNAVAILABLE = "netUnavailable";
 
-static constexpr const char *EVENT_IFACE_ADDRESS_UPDATED = "interfaceAddressUpdated";
-static constexpr const char *EVENT_IFACE_ADDRESS_REMOVED = "interfaceAddressRemoved";
-static constexpr const char *EVENT_IFACE_ADDED = "interfaceAdded";
-static constexpr const char *EVENT_IFACE_REMOVED = "interfaceRemoved";
-static constexpr const char *EVENT_IFACE_CHANGED = "interfaceChanged";
-static constexpr const char *EVENT_IFACE_LINK_STATE_CHANGED = "interfaceLinkStateChanged";
-static constexpr const char *EVENT_IFACE_ROUTE_CHANGED = "routeChanged";
-
 static constexpr const char *KEY_LINK_UP_BAND_WIDTH_KPS = "linkUpBandwidthKbps";
 static constexpr const char *KEY_LINK_DOWN_BAND_WIDTH_KPS = "linkDownBandwidthKbps";
 static constexpr const char *KEY_NET_CAPABILITIES = "netCapabilities";
@@ -71,11 +63,6 @@ static constexpr const char *KEY_CONNECTION_PROPERTIES = "connectionProperties";
 static constexpr const char *KEY_NET_ID = "netId";
 
 static constexpr const char *KEY_SOCKET_FD = "socketFd";
-static constexpr const char *KEY_FLAGS = "flags";
-static constexpr const char *KEY_SCOPE = "scope";
-static constexpr const char *KEY_UP = "up";
-static constexpr const char *KEY_ROUTE = "route";
-static constexpr const char *KEY_UPDATED = "updated";
 
 enum {
     ARG_NUM_0,
