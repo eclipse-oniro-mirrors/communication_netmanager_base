@@ -34,12 +34,17 @@ static __always_inline __u32 get_current_uid(struct __sk_buff *skb)
     return get_user_id(sock_uid);
 }
 
-static __always_inline bool add_domain_cache(struct __sk_buff *skb, const __u8 *payload, const __u32 family)
+static __always_inline bool add_domain_cache(struct __sk_buff *skb, const __u8 *payload, const __u32 family,
+    __u32 appuid)
 {
     bool ret = false;
     struct domain_value value = { 0 };
     value.appuid = bpf_get_socket_uid(skb);
     value.uid = get_current_uid(skb);
+
+    if (appuid == 0) {
+        value.appuid = 0;
+    }
     if (family == AF_INET) {
         struct ipv4_lpm_key lpm_key = {
             .prefixlen = IPV4_MAX_PREFIXLEN,
@@ -90,7 +95,7 @@ static __always_inline __u16 parse_queries(struct __sk_buff *skb, __u16 dns_qry_
     return offset;
 }
 
-static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip)
+static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_off, __u8 save_ip, __u32 appuid)
 {
     __u16 type;
     __u16 str_len;
@@ -118,13 +123,13 @@ static __always_inline __u16 parse_answers(struct __sk_buff *skb, __u16 dns_qry_
         __u32 addr;
         bpf_skb_load_bytes(skb, offset, &addr, sizeof(__u32));
         if (save_ip) {
-            add_domain_cache(skb, (__u8*)&addr, AF_INET);
+            add_domain_cache(skb, (__u8*)&addr, AF_INET, appuid);
         }
     } else if (type == DNS_QRS_IPV6_TYPE && str_len == DNS_QRS_IPV6_LEN) {
         ip6_key ip6_addr;
         bpf_skb_load_bytes(skb, offset, &ip6_addr, sizeof(ip6_key));
         if (save_ip) {
-            add_domain_cache(skb, (__u8*)&ip6_addr, AF_INET6);
+            add_domain_cache(skb, (__u8*)&ip6_addr, AF_INET6, appuid);
         }
     }
     offset += str_len;
@@ -171,6 +176,7 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
 {
     __u16 offset;
     bool is_in_pass = 0;
+    __u32 appuid = 0;
 
     if (qu_num == 1) {
         __u16 key_len = 0;
@@ -194,8 +200,9 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
             sk_act = default_value->outaction;
         }
 
-        if ((allow_value != NULL && match_domain_value(skb, allow_value)) && (sk_act == SK_DROP)) {
+        if (allow_value != NULL && match_domain_value(skb, allow_value)) {
             is_in_pass = 1;
+            appuid = allow_value->appuid;
             log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         } else {
             return 0;
@@ -209,7 +216,7 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
         if (i >= as_num) {
             break;
         }
-        offset = parse_answers(skb, offset, is_in_pass);
+        offset = parse_answers(skb, offset, is_in_pass, appuid);
     }
 
     return 0;

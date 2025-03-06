@@ -393,7 +393,7 @@ static __always_inline bool match_action_key(struct match_tuple *tuple, struct b
 
 static __always_inline bool MatchDomain(const struct match_tuple *tuple)
 {
-    if (!tuple || tuple->dir == INGRESS) {
+    if (!tuple) {
         return false;
     }
     struct domain_value *result = NULL;
