@@ -574,7 +574,7 @@ private:
     sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
     std::shared_ptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
-    NET_SUPPLIER_MAP netSuppliers_;
+    afeMap<uint32_t, sptr<NetSupplier>> netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
     std::shared_mutex netActivatesMutex_;
     NET_UIDREQUEST_MAP netUidRequest_;
