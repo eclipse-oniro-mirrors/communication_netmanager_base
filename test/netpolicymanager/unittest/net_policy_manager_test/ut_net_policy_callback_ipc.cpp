@@ -108,7 +108,7 @@ HWTEST_F(UtNetPolicyCallbackIpcTest, NotifyNetQuotaPolicyChangeTest002, TestSize
 
 HWTEST_F(UtNetPolicyCallbackIpcTest, NotifyNetMeteredIfacesChangeTest001, TestSize.Level1)
 {
-    std::vector<std::string> ifaces;
+    std::vector<std::string> ifaces = {};
     int32_t ret = instance_->NotifyNetMeteredIfacesChangeAsync(ifaces);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

@@ -20,6 +20,7 @@
 #include <thread>
 
 #include "netmanager_base_test_security.h"
+#include "netsys_controller_service_impl.h"
 
 #ifdef GTEST_API_
 #define private public
@@ -1145,6 +1146,75 @@ HWTEST_F(NetsysControllerTest, DestroyVnic001, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerTest, EnableDistributedClientNetTest001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().EnableDistributedClientNet("192.168.1.100", ETH0);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, EnableDistributedClientNetTest002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    int32_t ret = NetsysController::GetInstance().EnableDistributedClientNet("192.168.1.100", ETH0);
+    EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, EnableDistributedServerNetTest001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100");
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, EnableDistributedServerNetTest002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    int32_t ret = NetsysController::GetInstance().EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100");
+    EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DisableDistributedNetTest001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().DisableDistributedNet(true);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DisableDistributedNetTest002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    int32_t ret = NetsysController::GetInstance().DisableDistributedNet(true);
+    EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, GetNetworkCellularSharingTrafficTest001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    nmd::NetworkSharingTraffic traffic;
+    std::string ifaceName;
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, GetNetworkCellularSharingTrafficTest002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    nmd::NetworkSharingTraffic traffic;
+    std::string ifaceName;
+    int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, CloseSocketsUid002, TestSize.Level1)
+{
+    std::string ipAddr = "";
+    uint32_t uid = 1000;
+    int32_t result = NetsysController::GetInstance().CloseSocketsUid(ipAddr, uid);
+    EXPECT_NE(result, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    NetsysController::GetInstance().netsysService_ = nullptr;
+}
+
 HWTEST_F(NetsysControllerTest, CloseSocketsUid001, TestSize.Level1)
 {
     std::string ipAddr = "";
@@ -1172,6 +1242,21 @@ HWTEST_F(NetsysControllerTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Leve
 {
     int32_t ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(TEST_UID_32);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetBrokerUidAccessPolicyMapTest003, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    std::unordered_map<uint32_t, uint32_t> params;
+    int32_t ret = NetsysController::GetInstance().SetBrokerUidAccessPolicyMap(params);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, DelBrokerUidAccessPolicyMapTest002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    int32_t ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(TEST_UID_32);
+    EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE

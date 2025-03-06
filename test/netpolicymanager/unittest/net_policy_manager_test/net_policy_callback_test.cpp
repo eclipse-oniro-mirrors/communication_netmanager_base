@@ -77,9 +77,6 @@ int32_t NetPolicyCallbackTest::NetQuotaPolicyChange(const std::vector<NetQuotaPo
 
 int32_t NetPolicyCallbackTest::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
-    for (auto &iface : ifaces) {
-        std::cout << "unittest NetMeteredIfacesChange, iface:" << iface.c_str() << std::endl;
-    }
     NotifyAll();
     return 0;
 }
