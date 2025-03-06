@@ -220,6 +220,13 @@ ohos_shared_library("netsys_native_manager") {
 
   external_deps += [ "hilog:libhilog" ]
 
+  if(defined(global_parts_info) &&
+    defined(global_parts_info.resourceschedule_qos_manager)) {
+      defines += ["QOS_MANAGER_ENABLE"]
+      external_deps += [ "qos_manager:qos" ]
+      external_deps += [ "qos_manager:concurrent_task_client" ]
+  }
+
   part_name = "netmanager_base"
   innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "communication"
@@ -285,6 +292,13 @@ ohos_static_library("netsys_native_manager_static") {
     "ffrt:libffrt",
     "hilog:libhilog",
   ]
+
+  if(defined(global_parts_info) &&
+    defined(global_parts_info.resourceschedule_qos_manager)) {
+      defines += ["QOS_MANAGER_ENABLE"]
+      external_deps += [ "qos_manager:qos" ]
+      external_deps += [ "qos_manager:concurrent_task_client" ]
+  }
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

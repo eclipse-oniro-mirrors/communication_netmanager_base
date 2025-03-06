@@ -81,7 +81,8 @@
                 "core_service",
                 "distributed_notification_service",
                 "i18n",
-                "netmanager_ext"
+                "netmanager_ext",
+                "qos_manager"
             ]
         },
         "build": {
