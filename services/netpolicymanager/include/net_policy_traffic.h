@@ -218,6 +218,7 @@ private:
 
 private:
     std::vector<uint32_t> idleAllowedList_;
+    std::shared_mutex quotaMutex_;
     std::vector<NetQuotaPolicy> quotaPolicies_;
     std::vector<std::string> meteredIfaces_;
     sptr<NetsysControllerCallback> netsysCallback_ = nullptr;

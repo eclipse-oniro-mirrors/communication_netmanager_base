@@ -123,6 +123,7 @@ private:
     bool dataSaverEnable_ = false;
     int64_t globalAlertBytes_ = 0;
     std::mutex bandwidthMutex_;
+    std::mutex ifaceAlertMutex_;
     std::map<std::string, int64_t> ifaceAlertBytes_;
     std::map<std::string, int64_t> ifaceQuotaBytes_;
     std::unordered_set<uint32_t> deniedListUids_;

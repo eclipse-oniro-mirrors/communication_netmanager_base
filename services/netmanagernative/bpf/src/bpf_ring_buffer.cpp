@@ -110,6 +110,7 @@ int NetsysBpfRingBuffer::HandleNetStatsEventCallback(void *ctx, void *data, size
     }
     int8_t *value = reinterpret_cast<int8_t *>(data);
 
+    std::lock_guard<std::mutex> lock(callbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             NETNATIVE_LOGI("HandleNetStatsEventCallback start. value:%{public}d", *value);

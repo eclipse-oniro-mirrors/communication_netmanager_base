@@ -145,27 +145,24 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
         return ret;
     }
 
-    Bitmap bitmap;
-    srcIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
-    dstIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
-    in6_addr otherIp6Key;
-    memset_s(&otherIp6Key, sizeof(in6_addr), 0xff, sizeof(in6_addr));
-    srcIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    dstIp6Map_.OrInsert(otherIp6Key, IPV6_MAX_PREFIXLEN, bitmap);
-    srcPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
-    dstPortMap_.OrInsert(OTHER_PORT_KEY, Bitmap());
-    protoMap_.OrInsert(OTHER_PROTO_KEY, Bitmap());
-    appUidMap_.OrInsert(OTHER_APPUID_KEY, Bitmap());
-    uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
-    action_key Key = 1;
-    actionMap_.OrInsert(Key, Bitmap());
-
     BuildNoMarkBitmap(ruleList);
     return NETFIREWALL_SUCCESS;
 }
 
+void BitmapManager::Insert()
+{
+    std::lock_guard<std::mutex> guard(mutex_);
+    Bitmap bitmap;
+    srcIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
+    dstIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
+    uidMap_.OrInsert(OTHER_UID_KEY, Bitmap());
+    action_key Key = 1;
+    actionMap_.OrInsert(Key, Bitmap());
+}
+
 void BitmapManager::Clear()
 {
+    std::lock_guard<std::mutex> guard(mutex_);
     srcIp4Map_.Clear();
     srcIp6Map_.Clear();
     dstIp4Map_.Clear();

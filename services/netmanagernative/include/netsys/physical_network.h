@@ -70,7 +70,6 @@ private:
     int32_t RemoveInterface(std::string &interfaceName) override;
     bool isDefault_ = false;
     NetworkPermission permission_;
-    std::mutex physicalNetMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

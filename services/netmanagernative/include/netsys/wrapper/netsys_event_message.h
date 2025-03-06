@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <shared_mutex>
 
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
@@ -108,6 +109,7 @@ private:
     Action action_ = Action::UNKNOWN;
     SubSys subSys_ = SubSys::UNKNOWN;
     int32_t seqNum_ = 0;
+    std::shared_mutex messageMapMutex_;
     std::map<Type, std::string> messageMap_;
 };
 } // namespace nmd

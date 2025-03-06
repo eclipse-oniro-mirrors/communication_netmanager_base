@@ -21,11 +21,13 @@ namespace OHOS {
 namespace nmd {
 void NetsysEventMessage::PushMessage(NetsysEventMessage::Type type, const std::string &value)
 {
+    std::unique_lock<std::shared_mutex> lock(messageMapMutex_);
     messageMap_[type] = value;
 }
 
 const std::string NetsysEventMessage::GetMessage(NetsysEventMessage::Type type)
 {
+    std::unique_lock<std::shared_mutex> lock(messageMapMutex_);
     const std::string empty = "";
     if (messageMap_.find(type) == messageMap_.end()) {
         return empty;
@@ -37,6 +39,7 @@ void NetsysEventMessage::DumpMessage()
 {
     NETNATIVE_LOG_D("DumpMessage: Action: %{public}d; SybSys: %{public}d; SeqNum: %{public}d; ", action_, subSys_,
                     seqNum_);
+    std::shared_lock<std::shared_mutex> lock(messageMapMutex_);
     for (auto &item : messageMap_) {
         NETNATIVE_LOG_D("type: %{public}d", item.first);
     }
