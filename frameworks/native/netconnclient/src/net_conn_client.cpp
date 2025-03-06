@@ -584,7 +584,12 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
-    if (registerConnTupleList_.empty() && globalHttpProxy_.GetHost().empty() &&
+    std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleListTmp;
+    {
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        registerConnTupleListTmp = registerConnTupleList_;
+    }
+    if (registerConnTupleListTmp.empty() && globalHttpProxy_.GetHost().empty() &&
         preAirplaneCallback_ == nullptr) {
         NETMGR_LOG_W("no need recovery");
         return;
@@ -592,7 +597,7 @@ void NetConnClient::RecoverCallbackAndGlobalProxy()
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s", proxy == nullptr ? "failed" : "success");
     if (proxy != nullptr) {
-        for (auto mem : registerConnTupleList_) {
+        for (auto mem : registerConnTupleListTmp) {
             sptr<NetSpecifier> specifier = std::get<0>(mem);
             sptr<INetConnCallback> callback = std::get<1>(mem);
             uint32_t timeoutMS = std::get<2>(mem);
