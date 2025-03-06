@@ -822,7 +822,7 @@ private:
     BpfAppUidMap appUidMap_;
     BpfUidMap uidMap_;
     BpfActionMap actionMap_;
-    std:mutex mutex_;
+    std::mutex mutex_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_EXT_NET_FIREWALL_BITMAP_MANAGER_H */
