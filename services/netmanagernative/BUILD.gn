@@ -220,7 +220,7 @@ ohos_shared_library("netsys_native_manager") {
 
   external_deps += [ "hilog:libhilog" ]
 
-  if(defined(global_parts_info) &&
+  if (defined(global_parts_info) &&
     defined(global_parts_info.resourceschedule_qos_manager)) {
       defines += ["QOS_MANAGER_ENABLE"]
       external_deps += [ "qos_manager:qos" ]
@@ -293,7 +293,7 @@ ohos_static_library("netsys_native_manager_static") {
     "hilog:libhilog",
   ]
 
-  if(defined(global_parts_info) &&
+  if (defined(global_parts_info) &&
     defined(global_parts_info.resourceschedule_qos_manager)) {
       defines += ["QOS_MANAGER_ENABLE"]
       external_deps += [ "qos_manager:qos" ]
