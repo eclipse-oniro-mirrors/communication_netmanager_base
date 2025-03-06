@@ -60,7 +60,13 @@ public:
     std::set<NetBearType> GetBearType() const;
     void StartTimeOutNetAvailable();
     uint32_t GetUid() const;
-
+    bool IsAppFrozened() const;
+    void SetIsAppFrozened(bool isFrozened);
+    CallbackType GetLastCallbackType() const;
+    void SetLastCallbackType(CallbackType callbackType);
+    bool IsAllowCallback(CallbackType callbackType);
+    sptr<NetSupplier> GetLastServiceSupply();
+    void SetLastServiceSupply(sptr<NetSupplier> lastNetServiceSupplied);
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -81,6 +87,10 @@ private:
     std::string activateName_ = "";
     uint32_t uid_ = 0;
     int32_t registerType_ = REGISTER;
+    std::atomic<bool> isAppFrozened_ = false;
+    std::atomic<int32_t> lastCallbackType_ = 0;
+    sptr<NetSupplier> lastNetServiceSupplied_ = nullptr;
+    std::mutex lastNetServiceSuppliedMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

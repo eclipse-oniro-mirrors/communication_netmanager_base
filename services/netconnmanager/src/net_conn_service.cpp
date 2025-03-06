@@ -34,6 +34,7 @@
 #include "event_report.h"
 #include "net_activate.h"
 #include "net_conn_service.h"
+#include "net_conn_callback_proxy_wrapper.h"
 #include "net_conn_types.h"
 #include "net_policy_client.h"
 #include "net_datashare_utils.h"
@@ -183,6 +184,22 @@ bool NetConnService::Init()
     AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+
+#ifdef ENABLE_SET_APP_FROZENED
+    if (netConnEventHandler_) {
+        int64_t delayTime = 3000;
+        appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
+            std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
+            if (netConnService) {
+                netConnService ->SetAppIsFrozened(uid, false);
+            }
+        };
+        netConnEventHandler_->PostAsyncTask([this]() {
+            AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(appStateAwareCallback_);
+        },
+            delayTime);
+    }
+#endif
     NETMGR_LOG_I("Init end");
     return true;
 }
@@ -1133,8 +1150,10 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
-    std::shared_ptr<NetActivate> request = std::make_shared<NetActivate>(
-        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+
+    std::shared_ptr<NetActivate> request = CreateNetActivateRequest(netSpecifier, callback,
+        timeoutMS, REQUEST, callingUid);
+
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
@@ -1173,6 +1192,32 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
     SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
+}
+
+std::shared_ptr<NetActivate> NetConnService::CreateNetActivateRequest(const sptr<NetSpecifier> &netSpecifier,
+                                                                      const sptr<INetConnCallback> &callback,
+                                                                      const uint32_t &timeoutMS,
+                                                                      const int32_t registerType,
+                                                                      const uint32_t callingUid)
+{
+    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
+    std::shared_ptr<NetActivate> request = nullptr;
+#ifndef ENABLE_SET_APP_FROZENED
+    sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
+    if (callbakWrapper == nullptr) {
+        NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
+        request = std::make_shared<NetActivate>(
+            netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+    } else {
+        request = std::make_shared<NetActivate>(
+        netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+        callbakWrapper->SetNetActivate(request);
+    }
+#else
+    request = std::make_shared<NetActivate>(
+        netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
+#endif
+    return request;
 }
 
 void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
@@ -1527,33 +1572,45 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
         sptr<NetHandle> netHandle = supplier->GetNetHandle();
-        switch (type) {
-            case CALL_TYPE_LOST:
-                callback->NetLost(netHandle);
-                break;
-            case CALL_TYPE_UPDATE_CAP: {
-                sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
-                std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-                *pNetAllCap = supplier->GetNetCapabilities();
-                callback->NetCapabilitiesChange(netHandle, pNetAllCap);
-                break;
-            }
-            case CALL_TYPE_UPDATE_LINK: {
-                sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
-                auto network = supplier->GetNetwork();
-                if (network != nullptr && pInfo != nullptr) {
-                    *pInfo = network->GetNetLinkInfo();
-                }
-                callback->NetConnectionPropertiesChange(netHandle, pInfo);
-                break;
-            }
-            case CALL_TYPE_BLOCK_STATUS:
-                callback->NetBlockStatusChange(netHandle, NetManagerCenter::GetInstance().IsUidNetAccess(
-                    supplier->GetSupplierUid(), supplier->HasNetCap(NET_CAPABILITY_NOT_METERED)));
-                break;
-            default:
-                break;
+        HandleCallback(supplier, netHandle, callback, type);
+    }
+}
+
+void NetConnService::HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
+    sptr<INetConnCallback> callback, CallbackType type)
+{
+    switch (type) {
+        case CALL_TYPE_LOST: {
+            callback->NetLost(netHandle);
+            break;
         }
+        case CALL_TYPE_UPDATE_CAP: {
+            sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
+            std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+            *pNetAllCap = supplier->GetNetCapabilities();
+            callback->NetCapabilitiesChange(netHandle, pNetAllCap);
+            break;
+        }
+        case CALL_TYPE_UPDATE_LINK: {
+            sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
+            auto network = supplier->GetNetwork();
+            if (network != nullptr && pInfo != nullptr) {
+                *pInfo = network->GetNetLinkInfo();
+            }
+            callback->NetConnectionPropertiesChange(netHandle, pInfo);
+            break;
+        }
+        case CALL_TYPE_BLOCK_STATUS: {
+            callback->NetBlockStatusChange(netHandle, NetManagerCenter::GetInstance().IsUidNetAccess(
+                supplier->GetSupplierUid(), supplier->HasNetCap(NET_CAPABILITY_NOT_METERED)));
+            break;
+        }
+        case CALL_TYPE_UNAVAILABLE: {
+            callback->NetUnavailable();
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -3195,6 +3252,7 @@ void NetConnService::RemoveALLClientDeathRecipient()
         item->AsObject()->RemoveDeathRecipient(deathRecipient_);
     }
     remoteCallback_.clear();
+    appStateAwareCallback_.OnForegroundAppChanged = nullptr;
     deathRecipient_ = nullptr;
 }
 
@@ -3493,5 +3551,87 @@ int32_t NetConnService::CloseSocketsUidAsync(int32_t netId, uint32_t uid)
     iterNetwork->second->CloseSocketsUid(uid);
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::SetAppIsFrozened(uint32_t uid, bool isFrozened)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+#ifdef ENABLE_SET_APP_FROZENED
+    if (netConnEventHandler_ && enableAppFrozenedCallbackLimitation_.load()) {
+        netConnEventHandler_->PostSyncTask(
+            [this, uid, isFrozened, &result]() { result = this->SetAppIsFrozenedAsync(uid, isFrozened); });
+    }
+#endif
+    return result;
+}
+
+int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
+{
+    std::lock_guard guard(uidActivateMutex_);
+    auto it = netUidActivates_.find(uid);
+    if ((it == netUidActivates_.end())) {
+        return NETMANAGER_SUCCESS;
+    }
+    std::vector<std::shared_ptr<NetActivate>> activates = it->second;
+    NETMGR_LOG_I("SetAppIsFrozenedAsync uid[%{public}d], isFrozened=[%{public}d].", uid, isFrozened);
+    for (auto iter = activates.begin(); iter != activates.end();++iter) {
+        auto curNetAct = (*iter);
+        if (curNetAct->IsAppFrozened() == isFrozened) {
+            continue;
+        }
+        curNetAct->SetIsAppFrozened(isFrozened);
+        if (isFrozened) {
+            continue;
+        }
+        sptr<NetSupplier> netSupplier = curNetAct->GetServiceSupply();
+        sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
+        CallbackType callbackType = curNetAct->GetLastCallbackType();
+        if (callbackType == CALL_TYPE_UNKNOWN) {
+            continue;
+        }
+        if (netSupplier == nullptr) {
+            if (callbackType != CALL_TYPE_LOST) {
+                continue;
+            }
+            netSupplier = curNetAct->GetLastServiceSupply();
+            if (netSupplier && callback) {
+                sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
+                callback->NetLost(netHandle);
+            }
+        } else if (callbackType == CALL_TYPE_AVAILABLE) {
+            CallbackForAvailable(netSupplier, curNetAct->GetNetCallback());
+        } else {
+            sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
+            HandleCallback(netSupplier, netHandle, callback, callbackType);
+        }
+        curNetAct->SetLastServiceSupply(nullptr);
+        curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::EnableAppFrozenedCallbackLimitation(bool flag)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, flag, &result]() {
+            result = this->EnableAppFrozenedCallbackLimitationAsync(flag);
+    });
+    }
+    return result;
+}
+
+int32_t NetConnService::EnableAppFrozenedCallbackLimitationAsync(bool flag)
+{
+    enableAppFrozenedCallbackLimitation_ = flag;
+    NETMGR_LOG_I("enableAppFrozenedCallbackLimitation_ = %{public}d", enableAppFrozenedCallbackLimitation_.load());
+    return NETMANAGER_SUCCESS;
+}
+
+bool NetConnService::IsAppFrozenedCallbackLimitation()
+{
+    bool ret = enableAppFrozenedCallbackLimitation_.load();
+    return ret;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

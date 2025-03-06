@@ -99,7 +99,8 @@ public:
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
-
+    virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
+    virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);

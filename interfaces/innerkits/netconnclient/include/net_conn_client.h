@@ -511,6 +511,9 @@ public:
 
     int32_t GetPacUrl(std::string &pacUrl);
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList);
+
+    int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened);
+    int32_t EnableAppFrozenedCallbackLimitation(bool flag);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

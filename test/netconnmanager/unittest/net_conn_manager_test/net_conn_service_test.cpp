@@ -1816,5 +1816,24 @@ HWTEST_F(NetConnServiceTest, GetPacUrlTest001, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+
+HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest001, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->SetAppIsFrozened(20020177, true);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest002, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->SetAppIsFrozened(20020177, false);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, EnableAppFrozenedCallbackLimitationTest001, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->EnableAppFrozenedCallbackLimitation(true);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

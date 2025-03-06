@@ -100,6 +100,7 @@ ohos_shared_library("net_service_common") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "src/app_state_aware.cpp",
     "src/broadcast_manager.cpp",
     "src/net_manager_center.cpp",
     "src/net_settings.cpp",
@@ -137,11 +138,14 @@ ohos_shared_library("net_service_common") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
