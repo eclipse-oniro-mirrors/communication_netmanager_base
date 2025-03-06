@@ -574,7 +574,7 @@ private:
     sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
     std::shared_ptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
-    afeMap<uint32_t, sptr<NetSupplier>> netSuppliers_;
+    NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
     std::shared_mutex netActivatesMutex_;
     NET_UIDREQUEST_MAP netUidRequest_;
@@ -587,7 +587,6 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isDataShareReady_ = false;
-    std::mutex globalHttpProxyMutex_;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
     std::recursive_mutex netManagerMutex_;
     std::mutex netUidRequestMutex_;
