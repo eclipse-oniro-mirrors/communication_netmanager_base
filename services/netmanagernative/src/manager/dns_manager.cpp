@@ -40,7 +40,7 @@ void StartListen()
 #ifdef QOS_MANAGER_ENABLE
     std::unordered_map<std::string, std::string> payload;
     payload["pid"] = std::to_string(getpid());
-    OHOS::ConcurrentTaskClient::GetInstance.RequestAuth(payload);
+    OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
     if (SetThreadQos(QOS::QosLevel::QOS_USER_INITIATED) != 0) {
         setpriority(PRIO_PROCESS, 0, PRIO_MIN);
     }
