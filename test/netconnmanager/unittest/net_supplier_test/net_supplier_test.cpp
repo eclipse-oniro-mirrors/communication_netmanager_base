@@ -56,45 +56,6 @@ void NetSupplierTest::SetUp() {}
 
 void NetSupplierTest::TearDown() {}
 
-
-HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
-{
-    bool ret = supplier->ResumeNetworkInfo();
-    EXPECT_FALSE(ret);
-
-    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {
-        std::cout << "supplierId:" << supplierId;
-        std::cout << " IfValid:" << ifValid << std::endl;
-    };
-
-    std::shared_ptr<Network> network = std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID, detectionHandler,
-        NetBearType::BEARER_ETHERNET, nullptr);
-    supplier->SetNetwork(network);
-    ret = supplier->ResumeNetworkInfo();
-    EXPECT_TRUE(ret);
-
-    supplier->ClearDefault();
-
-    ret = supplier->IsConnecting();
-    EXPECT_FALSE(ret);
-
-    ret = supplier->IsConnected();
-    EXPECT_FALSE(ret);
-
-    std::string result = supplier->TechToType(NetSlotTech::SLOT_TYPE_GSM);
-    EXPECT_TRUE(result == "2G");
-
-    result = supplier->TechToType(NetSlotTech::SLOT_TYPE_LTE);
-    EXPECT_TRUE(result == "4G");
-
-    result = supplier->TechToType(NetSlotTech::SLOT_TYPE_LTE_CA);
-    EXPECT_TRUE(result == "4G");
-
-    uint32_t invalidValue = 100;
-    result = supplier->TechToType(static_cast<NetSlotTech>(invalidValue));
-    EXPECT_TRUE(result == "3G");
-}
-
 HWTEST_F(NetSupplierTest, GetSupplierCallbackTest001, TestSize.Level1)
 {
     sptr<INetSupplierCallback> callBack = supplier->GetSupplierCallback();

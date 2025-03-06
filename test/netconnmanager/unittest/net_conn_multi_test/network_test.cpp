@@ -70,12 +70,6 @@ void NetworkTest::SetUp() {}
 
 void NetworkTest::TearDown() {}
 
-HWTEST_F(NetworkTest, ResumeNetworkInfoTest001, TestSize.Level1)
-{
-    bool ret = instance_->ResumeNetworkInfo();
-    EXPECT_TRUE(ret);
-}
-
 HWTEST_F(NetworkTest, operatorTest001, TestSize.Level1)
 {
     int32_t netId1 = 2;

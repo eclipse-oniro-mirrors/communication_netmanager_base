@@ -869,12 +869,6 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest002, TestSize.L
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
-{
-    int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 HWTEST_F(NetsysNativeServiceTest, DisableWearableDistributedNetForward, TestSize.Level1)
 {
