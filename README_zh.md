@@ -288,3 +288,6 @@ foundation/communication/netmanager_base/
 [communication_netmanager_ext](https://gitee.com/openharmony/communication_netmanager_ext)
 
 [communication_netstack](https://gitee.com/openharmony/communication_netstack)
+
+----------------------------------
+删除2个ResumeNetworkInfoTest001，还有DelBrokerUidAccessPolicyMapTest001（位于foundation/communication/netmanager_base/test/netmanagernative/unittest/netsys_manager_test/netsys_native_service_test.cpp）
