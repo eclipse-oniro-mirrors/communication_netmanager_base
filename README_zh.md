@@ -288,3 +288,192 @@ foundation/communication/netmanager_base/
 [communication_netmanager_ext](https://gitee.com/openharmony/communication_netmanager_ext)
 
 [communication_netstack](https://gitee.com/openharmony/communication_netstack)
+
+-------------------------------------
+foundation/communication/netmanager_base/test/netstatsmanager/unittest/net_stats_manager_test/BUILD.gn：
+ohos_unittest("net_stats_manager_test") {
+  module_out_path = "netmanager_base/net_stats_manager_test"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+    "data_flow_statistics_test.cpp",
+    "net_push_stats_info_test.cpp",
+    "net_stats_callback_interface_test.cpp",
+    "net_stats_callback_ipc_test.cpp",
+    "net_stats_callback_stub_test.cpp",
+    "net_stats_callback_test.cpp",
+    "net_stats_client_test.cpp",
+    "net_stats_data_handler_test.cpp",
+    "net_stats_database_helper_test.cpp",
+    "net_stats_history_test.cpp",
+    "net_stats_info_test.cpp",
+    "net_stats_listener_test.cpp",
+    "net_stats_network_test.cpp",
+    "net_stats_service_proxy_test.cpp",
+    "net_stats_service_stub_test.cpp",
+    "net_stats_sqlite_statement_test.cpp",
+  ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
+    "$NETSTATSMANAGER_SOURCE_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSYSBPFMAP_SOURCE_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/security",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
+  ]
+
+  deps = [
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
+    "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "ability_runtime:dataobs_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "cellular_data:tel_cellular_data_api",
+    "common_event_service:cesfwk_innerkits",
+    "core_service:tel_core_service_api",
+    "data_share:datashare_consumer",
+    "distributed_notification_service:ans_innerkits",
+    "ffrt:libffrt",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "sqlite:sqlite",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetStatsClient\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_unittest("net_stats_cached_service_test") {
+  module_out_path = "netmanager_base/net_stats_manager_test"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+    "net_stats_cached_test.cpp",
+    "net_stats_callback_test.cpp",
+    "net_stats_service_exception_test.cpp",
+    "net_stats_service_test.cpp",
+  ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
+    "$NETSTATSMANAGER_SOURCE_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSYSBPFMAP_SOURCE_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/security",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
+  ]
+
+  deps = [
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
+    "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "ability_runtime:dataobs_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "cellular_data:tel_cellular_data_api",
+    "common_event_service:cesfwk_innerkits",
+    "core_service:tel_core_service_api",
+    "data_share:datashare_consumer",
+    "distributed_notification_service:ans_innerkits",
+    "ffrt:libffrt",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "sqlite:sqlite",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetStatsClient\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+------------------------------------------------------------
+foundation/communication/netmanager_base/test/netstatsmanager/BUILD.gn：
+
+import("//build/test.gni")
+
+group("unittest") {
+  testonly = true
+  deps = [
+    "unittest/net_stats_manager_test:net_stats_cached_service_test",
+    "unittest/net_stats_manager_test:net_stats_manager_test",
+    "unittest/net_stats_manager_test:net_stats_mock_data",
+    "unittest/net_stats_manager_test:net_stats_service_common_test",
+  ]
+}
