@@ -33,7 +33,8 @@
             "netmanager_base_support_ebpf_memory_miniaturization",
             "netmanager_base_enable_traffic_statistic",
             "netmanager_base_extended_features",
-            "netmanager_base_share_traffic_limit_enable"
+            "netmanager_base_share_traffic_limit_enable",
+            "netmanager_base_enable_set_app_frozened"
         ],
         "adapted_system_type": [
             "standard"
@@ -82,6 +83,7 @@
                 "distributed_notification_service",
                 "i18n",
                 "netmanager_ext",
+                "jsoncpp",
                 "qos_manager"
             ]
         },

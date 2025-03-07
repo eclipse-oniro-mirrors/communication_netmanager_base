@@ -180,6 +180,74 @@ HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest001, TestSi
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest002, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->DelInterfaceAddress(INTERFACENAME, "192.168.113.209", 24, "internet");
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, InterfaceSetIffUpTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->InterfaceSetIffUp(INTERFACENAME);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedClientNetTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->EnableDistributedClientNet("192.168.113.209", INTERFACENAME);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DisableDistributedNetTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->DisableDistributedNet(true);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTrafficTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    NetworkSharingTraffic traffic;
+    std::string ifaceName;
+    int32_t ret = netsysNativeService->GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->SetNetStateTrafficMap(1, 1);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    uint64_t availableTraffic = 0;
+    int32_t ret = netsysNativeService->GetNetStateTrafficMap(1, availableTraffic);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, ClearIncreaseTrafficMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->ClearIncreaseTrafficMap();
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateIfIndexMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->UpdateIfIndexMap(1, 1);
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
 /**
  * @tc.name: DestroyNetworkTest001
  * @tc.desc: Test NetsysNativeServiceProxy DestroyNetwork.

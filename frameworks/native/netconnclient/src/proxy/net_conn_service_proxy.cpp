@@ -1960,5 +1960,50 @@ int32_t NetConnServiceProxy::CloseSocketsUid(int32_t netId, uint32_t uid)
     }
     return reply.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::SetAppIsFrozened(uint32_t uid, bool isFrozened)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteBool(isFrozened)) {
+        NETMGR_LOG_E("WriteBool failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::EnableAppFrozenedCallbackLimitation(bool flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteBool(flag)) {
+        NETMGR_LOG_E("WriteBool failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(
+        ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION), data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return reply.ReadInt32();
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -139,6 +139,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     // notify the the quota policy change.
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     GetCbInst()->NotifyNetQuotaPolicyChangeAsync(quotaPolicies_);
     NETMGR_LOG_I("End UpdateQuotaPoliciesInner.");
     return NETMANAGER_SUCCESS;
@@ -146,6 +147,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
 
 void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     quotaPolicies_.clear();
     for (auto quotaPolicy : quotaPolicies) {
         if (!IsValidQuotaPolicy(quotaPolicy)) {
@@ -175,6 +177,7 @@ void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> 
 const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
 {
     std::vector<std::string> newMeteredIfaces;
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     for (auto &quotaPolicy : quotaPolicies_) {
         std::string iface = GetMatchIfaces(quotaPolicy);
         // set quota for metered iface.
@@ -187,6 +190,7 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
             GetNetsysInst()->BandwidthSetIfaceQuota(iface, quotaRemain);
         }
     }
+    lock.unlock();
     // remove the iface quota that not metered.
     for (uint32_t i = 0; i < meteredIfaces_.size(); ++i) {
         if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfaces_[i])) {
@@ -211,7 +215,10 @@ void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredI
 void NetPolicyTraffic::UpdateQuotaNotify()
 {
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Traverse cellular network start");
-    for (auto &quotaPolicy : quotaPolicies_) {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::vector<NetQuotaPolicy> quotaPoliciesTmp = quotaPolicies_;
+    lock.unlock();
+    for (auto &quotaPolicy : quotaPoliciesTmp) {
         NetmanagerHiTrace::NetmanagerStartSyncTrace("Get the start time of the metering cycle start");
         int64_t start = quotaPolicy.GetPeriodStart();
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("Get the start time of the metering cycle end");
@@ -277,6 +284,7 @@ void NetPolicyTraffic::UpdateNetEnableStatus(const NetQuotaPolicy &quotaPolicy)
 
 int32_t NetPolicyTraffic::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     quotaPolicies.clear();
     quotaPolicies = quotaPolicies_;
     NETMGR_LOG_D("GetNetQuotaPolicies quotaPolicies end size[%{public}zu]", quotaPolicies.size());
@@ -293,7 +301,7 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
     if (!IsValidNetRemindType(remindType)) {
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     for (uint32_t i = 0; i < quotaPolicies_.size(); ++i) {
         NetQuotaPolicy &quotaPolicy = quotaPolicies_[i];
         int32_t netTypeTemp = quotaPolicy.networkmatchrule.netType;
@@ -311,6 +319,7 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
             }
         }
     }
+    lock.unlock();
     UpdateQuotaPoliciesInner();
     NETMGR_LOG_I("NetPolicyTraffic::UpdateRemindPolicy end.");
     return NETMANAGER_SUCCESS;
@@ -323,20 +332,24 @@ const std::vector<std::string> &NetPolicyTraffic::GetMeteredIfaces()
 
 int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
 {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     for (auto &quotaPolicy : quotaPolicies_) {
         if (quotaPolicy.networkmatchrule.simId == simId) {
             quotaPolicy.Reset();
         }
     }
+    lock.unlock();
     return UpdateQuotaPoliciesInner();
 }
 
 int32_t NetPolicyTraffic::ResetPolicies()
 {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     for (auto &quotaPolicy : quotaPolicies_) {
         NETMGR_LOG_I("NetPolicyTraffic::ResetPolicies [%{public}s.", quotaPolicy.networkmatchrule.simId.c_str());
         quotaPolicy.Reset();
     }
+    lock.unlock();
     return UpdateQuotaPoliciesInner();
 }
 
@@ -371,12 +384,15 @@ int64_t NetPolicyTraffic::GetTotalQuota(NetQuotaPolicy &quotaPolicy)
 
 void NetPolicyTraffic::ReadQuotaPolicies()
 {
+    std::unique_lock<std::shared_mutex> lock(quotaMutex_);
     GetFileInst()->ReadQuotaPolicies(quotaPolicies_);
+    lock.unlock();
     UpdateQuotaPoliciesInner();
 }
 
 bool NetPolicyTraffic::WriteQuotaPolicies()
 {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
     return GetFileInst()->WriteQuotaPolicies(quotaPolicies_);
 }
 
@@ -495,7 +511,10 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
                   [&message](const std::string &item) { message.append(item + ", "); });
     message.append("}\n");
     message.append(TAB + "QuotaPolicies:\n");
-    std::for_each(quotaPolicies_.begin(), quotaPolicies_.end(), [&message](const auto &item) {
+    std::shared_lock<std::shared_mutex> lock(quotaMutex_);
+    std::vector<NetQuotaPolicy> quotaPoliciesTmp = quotaPolicies_;
+    lock.unlock();
+    std::for_each(quotaPoliciesTmp.begin(), quotaPoliciesTmp.end(), [&message](const auto &item) {
         message.append(TAB + TAB + "NetType: " + std::to_string(item.networkmatchrule.netType) + "\n" + TAB + TAB +
                        "simId: " + item.networkmatchrule.simId + "\n" + TAB + TAB +
                        "Ident: " + item.networkmatchrule.ident + "\n");

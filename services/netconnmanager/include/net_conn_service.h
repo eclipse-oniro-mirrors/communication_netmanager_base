@@ -47,6 +47,7 @@
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "os_account_manager.h"
+#include "app_state_aware.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -383,6 +384,9 @@ public:
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
+    int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
+    int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
+    bool IsAppFrozenedCallbackLimitation();
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -541,6 +545,14 @@ private:
                                             const std::string &dstAddr);
     int32_t DisableDistributedNetAsync(bool isServer);
     int32_t CloseSocketsUidAsync(int32_t netId, uint32_t uid);
+    int32_t SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened);
+    int32_t EnableAppFrozenedCallbackLimitationAsync(bool flag);
+    void HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
+                        sptr<INetConnCallback> callback, CallbackType type);
+    std::shared_ptr<NetActivate> CreateNetActivateRequest(const sptr<NetSpecifier> &netSpecifier,
+                            const sptr<INetConnCallback> &callback,
+                            const uint32_t &timeoutMS, const int32_t registerType,
+                            const uint32_t callingUid);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
@@ -599,6 +611,9 @@ private:
     static constexpr int32_t INVALID_USER_ID = -1;
     static constexpr int32_t ROOT_USER_ID = 0;
     int32_t currentUserId_ = INVALID_USER_ID;
+    bool isFallbackProbeWithProxy_ = false;
+    AppStateAwareCallback appStateAwareCallback_;
+    std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {

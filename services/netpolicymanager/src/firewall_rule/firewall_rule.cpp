@@ -42,13 +42,15 @@ FirewallRule::FirewallRule(uint32_t chainType)
 
 FirewallRule::~FirewallRule() = default;
 
-const std::vector<uint32_t> &FirewallRule::GetAllowedList() const
+std::vector<uint32_t> FirewallRule::GetAllowedList()
 {
+    std::shared_lock<std::shared_mutex> lock(allowedListMutex_);
     return allowedList_;
 }
 
 void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids, uint32_t rule)
 {
+    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     for (auto &uid : uids) {
         SetAllowedList(uid, rule);
     }
@@ -57,6 +59,7 @@ void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids, uint32_t ru
 
 void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
 {
+    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     if (rule == FIREWALL_RULE_ALLOW) {
         if (std::find(allowedList_.begin(), allowedList_.end(), uid) == allowedList_.end()) {
             allowedList_.emplace_back(uid);
@@ -93,17 +96,20 @@ void FirewallRule::SetAllowedList()
 
 void FirewallRule::ClearAllowedList()
 {
+    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     allowedList_.clear();
     netsys_->FirewallSetUidsAllowedListChain(chainType_, allowedList_);
 }
 
-const std::vector<uint32_t> &FirewallRule::GetDeniedList() const
+std::vector<uint32_t> FirewallRule::GetDeniedList()
 {
+    std::shared_lock<std::shared_mutex> lock(deniedListMutex_);
     return deniedList_;
 }
 
 void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
 {
+    std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
     if (rule == FIREWALL_RULE_DENY) {
         if (std::find(deniedList_.begin(), deniedList_.end(), uid) == deniedList_.end()) {
             deniedList_.emplace_back(uid);
@@ -122,6 +128,7 @@ void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
 
 void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids)
 {
+    std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
     for (const auto &it : uids) {
         if (std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
             deniedList_.push_back(it);
@@ -138,6 +145,7 @@ void FirewallRule::SetDeniedList()
 
 void FirewallRule::ClearDeniedList()
 {
+    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     deniedList_.clear();
     netsys_->FirewallSetUidsAllowedListChain(chainType_, deniedList_);
 }
@@ -170,6 +178,7 @@ int32_t FirewallRule::ClearFirewallAllRules()
 
 void FirewallRule::RemoveFromDeniedList(uint32_t uid)
 {
+    std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
     for (auto iter = deniedList_.begin(); iter != deniedList_.end(); ++iter) {
         if (*iter == uid) {
             deniedList_.erase(iter);

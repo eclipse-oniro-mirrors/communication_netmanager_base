@@ -359,6 +359,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override
+    {
+        return 0;
+    }
+
+    int32_t EnableAppFrozenedCallbackLimitation(bool flag) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

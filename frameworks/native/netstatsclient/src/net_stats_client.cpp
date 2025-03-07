@@ -31,7 +31,21 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetStatsClient::NetStatsClient() : netStatsService_(nullptr), deathRecipient_(nullptr), callback_(nullptr) {}
 
-NetStatsClient::~NetStatsClient() = default;
+NetStatsClient::~NetStatsClient()
+{
+    NETMGR_LOG_I("~NetStatsClient : Destroy NetStatsClient");
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+ 
+    auto serviceRemote = proxy->AsObject();
+    if (serviceRemote == nullptr) {
+        return;
+    }
+ 
+    serviceRemote->RemoveDeathRecipient(deathRecipient_);
+}
 
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {

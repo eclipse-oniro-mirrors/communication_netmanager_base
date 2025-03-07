@@ -198,6 +198,22 @@ NetsysNativeClient::NetsysNativeClient()
     RegisterNotifyCallback();
 }
 
+NetsysNativeClient::~NetsysNativeClient()
+{
+    NETMGR_LOG_I("~NetsysNativeClient : Destroy NetsysNativeService");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+ 
+    auto serviceRemote = proxy->AsObject();
+    if (serviceRemote == nullptr) {
+        return;
+    }
+ 
+    serviceRemote->RemoveDeathRecipient(deathRecipient_);
+}
+
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
     auto proxy = GetProxy();
