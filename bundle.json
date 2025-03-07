@@ -83,7 +83,8 @@
                 "distributed_notification_service",
                 "i18n",
                 "netmanager_ext",
-                "jsoncpp"
+                "jsoncpp",
+                "qos_manager"
             ]
         },
         "build": {
