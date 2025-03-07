@@ -1202,7 +1202,7 @@ std::shared_ptr<NetActivate> NetConnService::CreateNetActivateRequest(const sptr
 {
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request = nullptr;
-#ifndef ENABLE_SET_APP_FROZENED
+#ifdef ENABLE_SET_APP_FROZENED
     sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
     if (callbakWrapper == nullptr) {
         NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
