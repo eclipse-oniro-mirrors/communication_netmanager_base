@@ -44,6 +44,7 @@ void StartListen()
     if (SetThreadQos(QOS::QosLevel::QOS_USER_INITIATED) != 0) {
         setpriority(PRIO_PROCESS, 0, PRIO_MIN);
     }
+    NETNATIVE_LOG_I("DnsMgerListen set qos end");
 #endif
     DnsResolvListen().StartListen();
 }
