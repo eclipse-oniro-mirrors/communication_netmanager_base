@@ -178,7 +178,9 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
 {
     std::vector<std::string> newMeteredIfaces;
     std::shared_lock<std::shared_mutex> lock(quotaMutex_);
-    for (auto &quotaPolicy : quotaPolicies_) {
+    std::vector<NetQuotaPolicy> quotaTmp = quotaPolicies_;
+    lock.unlock();
+    for (auto &quotaPolicy : quotaTmp) {
         std::string iface = GetMatchIfaces(quotaPolicy);
         // set quota for metered iface.
         if (iface == UNKNOW_IFACE || !quotaPolicy.quotapolicy.metered) {

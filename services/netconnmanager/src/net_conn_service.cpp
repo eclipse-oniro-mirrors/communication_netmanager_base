@@ -2633,10 +2633,8 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         httpProxyTracker.ReadFromSettingsDataUser(tmpHttpProxy, userId);
     }
     tmpHttpProxy.SetUserId(userId);
-    {
-        std::lock_guard guard(globalHttpProxyMutex_);
-        httpProxy = tmpHttpProxy;
-    }
+ 
+    httpProxy = tmpHttpProxy;
     globalHttpProxyCache_.EnsureInsert(userId, tmpHttpProxy);
 }
 

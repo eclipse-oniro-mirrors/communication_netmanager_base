@@ -224,7 +224,12 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateStatsCached(netLinkInfo);
     UpdateInterfaces(netLinkInfo);
     bool isIfaceNameInUse = NetConnServiceIface().IsIfaceNameInUse(netLinkInfo.ifaceName_, netId_);
-    if (!isIfaceNameInUse || netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+    bool flag = false;
+    {
+        std::shared_lock<std::shared_mutex> nlock(netCapsMutex);
+        flag = netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end();
+    }
+    if (!isIfaceNameInUse || flag) {
         UpdateIpAddrs(netLinkInfo);
     }
     UpdateRoutes(netLinkInfo);
@@ -800,8 +805,11 @@ bool Network::ResumeNetworkInfo()
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo nli = netLinkInfo_;
     lock.unlock();
-    if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
-        isNeedResume_ = true;
+    {
+        std::shared_lock<std::shared_mutex> lock(netCapsMutex);
+        if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
+            isNeedResume_ = true;
+        }
     }
     NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
