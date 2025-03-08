@@ -217,8 +217,8 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
     return NETMANAGER_SUCCESS;
 }
 
-NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient)
-    : netsysNativeClient_(netsysNativeClient)
+NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(
+    std::weak_ptr<NetsysNativeClient> netsysNativeClient) : netsysNativeClient_(netsysNativeClient)
 {
 }
 
@@ -1051,7 +1051,7 @@ void NetsysNativeClient::UnRegisterNotifyCallback()
     }
 
     if (nativeNetDnsResultCallback_ != nullptr) {
-        proxy->UnRegisterDnsResultCallback(nativeNetDnsResultCallback_);
+        proxy->UnregisterDnsResultCallback(nativeNetDnsResultCallback_);
         nativeNetDnsResultCallback_ = nullptr;
     }
 }
