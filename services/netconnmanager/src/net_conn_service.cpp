@@ -2874,7 +2874,7 @@ void NetConnService::NetPolicyCallback::SendNetPolicyChange(uint32_t uid, uint32
     auto netConnService = netConnService_.lock();
     if (netConnService == nullptr) {
         NETMGR_LOG_E("netConnService_ has destory");
-        return NETMANAGER_ERROR;
+        return;
     }
     sptr<NetHandle> defaultNetHandle = nullptr;
     bool metered = false;
