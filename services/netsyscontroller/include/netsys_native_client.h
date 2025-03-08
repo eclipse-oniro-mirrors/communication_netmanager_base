@@ -528,14 +528,14 @@ public:
      *
      * @return Return the return value of the netsys interface call.
      */
-    virtual int32_t StartDnsProxyListen();
+    int32_t StartDnsProxyListen();
 
     /**
      * stop dns proxy listen
      *
      * @return Return the return value of the netsys interface call.
      */
-    virtual int32_t StopDnsProxyListen();
+    int32_t StopDnsProxyListen();
 
     /**
      * Set net callback function.
