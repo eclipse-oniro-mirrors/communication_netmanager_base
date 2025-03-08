@@ -23,12 +23,10 @@
 #include "errorcode_convertor.h"
 #include "napi_utils.h"
 #include "net_conn_callback_observer.h"
-#include "net_interface_callback_observer.h"
 #include "net_conn_client.h"
 #include "net_handle_interface.h"
 #include "net_manager_constants.h"
 #include "netconnection.h"
-#include "netinterface.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "securec.h"
@@ -556,145 +554,6 @@ napi_value ConnectionExec::DeleteCustomDNSRulesCallback(DeleteCustomDNSRulesCont
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-bool ConnectionExec::ExecSetInterfaceUp(SetInterfaceUpContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecSetInterfaceUp");
-    int32_t errorCode = NetConnClient::GetInstance().SetInterfaceUp(context->interface_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec setInterfaceUp failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::SetInterfaceUpCallback(SetInterfaceUpContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-bool ConnectionExec::ExecSetInterfaceIpAddr(SetInterfaceIpAddrContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecSetInterfaceIpAddr");
-    int32_t errorCode = NetConnClient::GetInstance().SetNetInterfaceIpAddress(
-        context->interface_, context->ipAddr_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec setInterfaceIpAddr failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::SetInterfaceIpAddrCallback(SetInterfaceIpAddrContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-bool ConnectionExec::ExecAddNetworkRoute(AddNetworkRouteContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecAddNetworkRoute");
-    std::string destAddress =
-        context->route_.destination_.address_ + "/" + std::to_string(context->route_.destination_.prefixlen_);
-    int32_t errorCode = NetConnClient::GetInstance().AddNetworkRoute(
-        context->netId_, context->route_.iface_, destAddress, context->route_.gateway_.address_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec addNetworkRoute failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::AddNetworkRouteCallback(AddNetworkRouteContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-bool ConnectionExec::ExecGetNetInterfaceConfiguration(GetNetInterfaceConfigurationContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecAddNetworkRoute");
-    int32_t errorCode = NetConnClient::GetInstance().GetNetInterfaceConfiguration(
-        context->interface_, context->config_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec getNetInterfaceConfiguration failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::GetNetInterfaceConfigurationCallback(GetNetInterfaceConfigurationContext *context)
-{
-    int32_t errorCode = NetConnClient::GetInstance().GetNetInterfaceConfiguration(
-        context->interface_, context->config_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("getNetInterfaceConfiguration callback failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return NapiUtils::GetUndefined(context->GetEnv());
-    }
-    napi_value ifName = NapiUtils::CreateStringUtf8(context->GetEnv(), context->config_.ifName_);
-    napi_value hwAddr = NapiUtils::CreateStringUtf8(context->GetEnv(), context->config_.hwAddr_);
-    napi_value ipv4Addr = NapiUtils::CreateStringUtf8(context->GetEnv(), context->config_.ipv4Addr_);
-    napi_value prefixLength = NapiUtils::CreateInt32(context->GetEnv(), context->config_.prefixLength_);
-    napi_value flagsList = NapiUtils::CreateArray(context->GetEnv(), context->config_.flags_.size());
-    size_t index = 0;
-    for (auto flag : context->config_.flags_) {
-        napi_value jsList = NapiUtils::CreateStringUtf8(context->GetEnv(), flag);
-        NapiUtils::SetArrayElement(context->GetEnv(), flagsList, index++, jsList);
-    }
-    napi_value interfaceConfig = NapiUtils::CreateObject(context->GetEnv());
-    NapiUtils::SetNamedProperty(context->GetEnv(), interfaceConfig, "interfaceName", ifName);
-    NapiUtils::SetNamedProperty(context->GetEnv(), interfaceConfig, "hwAddress", hwAddr);
-    NapiUtils::SetNamedProperty(context->GetEnv(), interfaceConfig, "ipv4Address", ipv4Addr);
-    NapiUtils::SetNamedProperty(context->GetEnv(), interfaceConfig, "prefixLength", prefixLength);
-    NapiUtils::SetNamedProperty(context->GetEnv(), interfaceConfig, "flags", flagsList);
-    return interfaceConfig;
-}
-
-bool ConnectionExec::ExecRegisterNetSupplier(RegisterNetSupplierContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecRegisterNetSupplier");
-    int32_t errorCode = NetConnClient::GetInstance().RegisterNetSupplier(
-        context->bearerType_, context->ident_, context->netCaps_, context->netSupplierId_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec registerNetSupplier failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::RegisterNetSupplierCallback(RegisterNetSupplierContext *context)
-{
-    int32_t errorCode = NetConnClient::GetInstance().RegisterNetSupplier(
-        context->bearerType_, context->ident_, context->netCaps_, context->netSupplierId_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("registerNetSupplier callback failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return NapiUtils::GetUndefined(context->GetEnv());
-    }
-    napi_value netSupplierId = NapiUtils::CreateUint32(context->GetEnv(), context->netSupplierId_);
-    return netSupplierId;
-}
-
-bool ConnectionExec::ExecUnregisterNetSupplier(UnregisterNetSupplierContext *context)
-{
-    NETMANAGER_BASE_LOGI("ExecUnregisterNetSupplier");
-    int32_t errorCode = NetConnClient::GetInstance().UnregisterNetSupplier(context->netSupplierId_);
-    if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec addNetworkRoute failed errorCode: %{public}d", errorCode);
-        context->SetErrorCode(errorCode);
-        return false;
-    }
-    return true;
-}
-
-napi_value ConnectionExec::UnregisterNetSupplierCallback(UnregisterNetSupplierContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
 bool ConnectionExec::ExecFactoryResetNetwork(FactoryResetNetworkContext *context)
 {
     NETMANAGER_BASE_LOGI("ExecFactoryResetNetwork into");
@@ -942,48 +801,6 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 }
 
 napi_value ConnectionExec::NetConnectionExec::UnregisterCallback(RegisterContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-bool ConnectionExec::NetInterfaceExec::ExecIfaceRegister(IfaceRegisterContext *context)
-{
-    auto wCallback = context->GetNetInterfaceCallback();
-    sptr<INetInterfaceStateCallback> callback = wCallback.promote();
-    if (callback == nullptr) {
-        NETMANAGER_BASE_LOGE("ExecIfaceRegister getNetInterfaceCallback nullptr");
-        return false;
-    }
-
-    int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
-    NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
-    context->SetErrorCode(ret);
-    return ret == NETMANAGER_SUCCESS;
-}
-
-napi_value ConnectionExec::NetInterfaceExec::IfaceRegisterCallback(IfaceRegisterContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-bool ConnectionExec::NetInterfaceExec::ExecIfaceUnregister(IfaceUnregisterContext *context)
-{
-    auto wCallback = context->GetNetInterfaceCallback();
-    auto callback = wCallback.promote();
-    if (callback == nullptr) {
-        NETMANAGER_BASE_LOGE("ExecIfaceUnregister getNetInterfaceCallback nullptr");
-        return false;
-    }
-
-    int32_t ret = NetConnClient::GetInstance().UnregisterNetInterfaceCallback(callback);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("Unregister result %{public}d", ret);
-        context->SetErrorCode(ret);
-    }
-    return ret == NETMANAGER_SUCCESS;
-}
-
-napi_value ConnectionExec::NetInterfaceExec::IfaceUnregisterCallback(IfaceUnregisterContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }

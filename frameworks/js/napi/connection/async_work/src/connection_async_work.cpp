@@ -26,13 +26,6 @@
 #include "setcustomdnsrule_context.h"
 #include "deletecustomdnsrule_context.h"
 #include "deletecustomdnsrules_context.h"
-#include "setinterfaceup_context.h"
-#include "setinterfaceipaddr_context.h"
-#include "addnetworkroute_context.h"
-#include "interfaceregister_context.h"
-#include "getinterfaceconfig_context.h"
-#include "registernetsupplier_context.h"
-#include "unregisternetsupplier_context.h"
 
 namespace OHOS::NetManagerStandard {
 void ConnectionAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
@@ -207,75 +200,6 @@ void ConnectionAsyncWork::SetAppNetCallback(napi_env env, napi_status status, vo
     BaseAsyncWork::AsyncWorkCallback<SetAppNetContext, ConnectionExec::SetAppNetCallback>(env, status, data);
 }
 
-void ConnectionAsyncWork::ExecSetInterfaceUp(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<SetInterfaceUpContext, ConnectionExec::ExecSetInterfaceUp>(env, data);
-}
-
-void ConnectionAsyncWork::SetInterfaceUpCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<SetInterfaceUpContext, ConnectionExec::SetInterfaceUpCallback>(env, status, data);
-}
-
-void ConnectionAsyncWork::ExecSetInterfaceIpAddr(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<SetInterfaceIpAddrContext, ConnectionExec::ExecSetInterfaceIpAddr>(env, data);
-}
-
-void ConnectionAsyncWork::SetInterfaceIpAddrCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<SetInterfaceIpAddrContext, ConnectionExec::SetInterfaceIpAddrCallback>(env,
-                                                                                                            status,
-                                                                                                            data);
-}
-
-void ConnectionAsyncWork::ExecAddNetworkRoute(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<AddNetworkRouteContext, ConnectionExec::ExecAddNetworkRoute>(env, data);
-}
-
-void ConnectionAsyncWork::AddNetworkRouteCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<AddNetworkRouteContext, ConnectionExec::AddNetworkRouteCallback>(env, status,
-                                                                                                      data);
-}
-
-void ConnectionAsyncWork::ExecGetNetInterfaceConfiguration(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<GetNetInterfaceConfigurationContext,
-        ConnectionExec::ExecGetNetInterfaceConfiguration>(env, data);
-}
-
-void ConnectionAsyncWork::GetNetInterfaceConfigurationCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<GetNetInterfaceConfigurationContext,
-        ConnectionExec::GetNetInterfaceConfigurationCallback>(env, status, data);
-}
-
-void ConnectionAsyncWork::ExecRegisterNetSupplier(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<RegisterNetSupplierContext,
-        ConnectionExec::ExecRegisterNetSupplier>(env, data);
-}
-
-void ConnectionAsyncWork::RegisterNetSupplierCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<RegisterNetSupplierContext,
-        ConnectionExec::RegisterNetSupplierCallback>(env, status, data);
-}
-
-void ConnectionAsyncWork::ExecUnregisterNetSupplier(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<UnregisterNetSupplierContext,
-        ConnectionExec::ExecUnregisterNetSupplier>(env, data);
-}
-
-void ConnectionAsyncWork::UnregisterNetSupplierCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<UnregisterNetSupplierContext,
-        ConnectionExec::UnregisterNetSupplierCallback>(env, status, data);
-}
-
 void ConnectionAsyncWork::ExecSetCustomDNSRule(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<SetCustomDNSRuleContext, ConnectionExec::ExecSetCustomDNSRule>(env, data);
@@ -375,28 +299,5 @@ void ConnectionAsyncWork::NetConnectionAsyncWork::UnregisterCallback(napi_env en
 {
     BaseAsyncWork::AsyncWorkCallback<UnregisterContext, ConnectionExec::NetConnectionExec::UnregisterCallback>(
         env, status, data);
-}
-
-void ConnectionAsyncWork::NetInterfaceAsyncWork::ExecIfaceRegister(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<IfaceRegisterContext, ConnectionExec::NetInterfaceExec::ExecIfaceRegister>(env, data);
-}
-
-void ConnectionAsyncWork::NetInterfaceAsyncWork::IfaceRegisterCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<IfaceRegisterContext,
-        ConnectionExec::NetInterfaceExec::IfaceRegisterCallback>(env, status, data);
-}
-
-void ConnectionAsyncWork::NetInterfaceAsyncWork::ExecIfaceUnregister(napi_env env, void *data)
-{
-    BaseAsyncWork::ExecAsyncWork<IfaceUnregisterContext,
-        ConnectionExec::NetInterfaceExec::ExecIfaceUnregister>(env, data);
-}
-
-void ConnectionAsyncWork::NetInterfaceAsyncWork::IfaceUnregisterCallback(napi_env env, napi_status status, void *data)
-{
-    BaseAsyncWork::AsyncWorkCallback<IfaceUnregisterContext,
-        ConnectionExec::NetInterfaceExec::IfaceUnregisterCallback>(env, status, data);
 }
 } // namespace OHOS::NetManagerStandard

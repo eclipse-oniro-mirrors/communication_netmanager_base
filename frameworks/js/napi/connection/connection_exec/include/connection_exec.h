@@ -35,13 +35,6 @@
 #include "factoryresetnetwork_context.h"
 #include "setapphttpproxy_context.h"
 #include "pacurl_context.h"
-#include "setinterfaceup_context.h"
-#include "setinterfaceipaddr_context.h"
-#include "addnetworkroute_context.h"
-#include "interfaceregister_context.h"
-#include "getinterfaceconfig_context.h"
-#include "registernetsupplier_context.h"
-#include "unregisternetsupplier_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -127,30 +120,6 @@ public:
 
     static napi_value SetAppNetCallback(SetAppNetContext *context);
 
-    static bool ExecSetInterfaceUp(SetInterfaceUpContext *context);
-
-    static napi_value SetInterfaceUpCallback(SetInterfaceUpContext *context);
-
-    static bool ExecSetInterfaceIpAddr(SetInterfaceIpAddrContext *context);
-
-    static napi_value SetInterfaceIpAddrCallback(SetInterfaceIpAddrContext *context);
-
-    static bool ExecAddNetworkRoute(AddNetworkRouteContext *context);
-
-    static napi_value AddNetworkRouteCallback(AddNetworkRouteContext *context);
-
-    static bool ExecGetNetInterfaceConfiguration(GetNetInterfaceConfigurationContext *context);
-
-    static napi_value GetNetInterfaceConfigurationCallback(GetNetInterfaceConfigurationContext *context);
-
-    static bool ExecRegisterNetSupplier(RegisterNetSupplierContext *context);
-
-    static napi_value RegisterNetSupplierCallback(RegisterNetSupplierContext *context);
-
-    static bool ExecUnregisterNetSupplier(UnregisterNetSupplierContext *context);
-
-    static napi_value UnregisterNetSupplierCallback(UnregisterNetSupplierContext *context);
-
     static bool ExecSetCustomDNSRule(SetCustomDNSRuleContext *context);
 
     static napi_value SetCustomDNSRuleCallback(SetCustomDNSRuleContext *context);
@@ -212,21 +181,6 @@ public:
         static bool ExecUnregister(UnregisterContext *context);
 
         static napi_value UnregisterCallback(UnregisterContext *context);
-    };
-
-    class NetInterfaceExec final {
-    public:
-        NetInterfaceExec() = delete;
-
-        ~NetInterfaceExec() = delete;
-
-        static bool ExecIfaceRegister(IfaceRegisterContext *context);
-
-        static napi_value IfaceRegisterCallback(IfaceRegisterContext *context);
-
-        static bool ExecIfaceUnregister(IfaceUnregisterContext *context);
-
-        static napi_value IfaceUnregisterCallback(IfaceUnregisterContext *context);
     };
 
 private:

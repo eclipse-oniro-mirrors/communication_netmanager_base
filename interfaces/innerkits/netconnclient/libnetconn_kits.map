@@ -24,8 +24,6 @@
       "OHOS::NetManagerStandard::HttpProxy::FromString(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       VTT?for?OHOS::NetManagerStandard::NetLinkInfo;
       vtable?for?OHOS::NetManagerStandard::NetLinkInfo;
-      VTT?for?OHOS::NetManagerStandard::NetInterfaceConfiguration;
-      vtable?for?OHOS::NetManagerStandard::NetInterfaceConfiguration;
       "OHOS::NetManagerStandard::INetAddr::Marshalling(OHOS::Parcel&) const";
       "OHOS::NetManagerStandard::INetAddr::Unmarshalling(OHOS::Parcel&)";
       "OHOS::NetManagerStandard::Route::Marshalling(OHOS::Parcel&) const";
