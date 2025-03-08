@@ -34,11 +34,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetsysNativeClient {
+class NetsysNativeClient : public std::enable_shared_from_this<NetsysNativeClient> {
 private:
     class NativeNotifyCallback : public OHOS::NetsysNative::NotifyCallbackStub {
     public:
-        NativeNotifyCallback(NetsysNativeClient &netsysNativeClient);
+        explicit NativeNotifyCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient);
         ~NativeNotifyCallback() override = default;
         int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
                                           int scope) override;
@@ -54,17 +54,17 @@ private:
         int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
 
     private:
-        NetsysNativeClient &netsysNativeClient_;
+        std::weak_ptr<NetsysNativeClient> netsysNativeClient_;
     };
 
     class NativeNetDnsResultCallback : public OHOS::NetsysNative::NetDnsResultCallbackStub {
     public:
-        NativeNetDnsResultCallback(NetsysNativeClient &netsysNativeClient);
+        explicit NativeNetDnsResultCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient);
         ~NativeNetDnsResultCallback() override = default;
         int32_t OnDnsResultReport(uint32_t size, std::list<OHOS::NetsysNative::NetDnsResultReport> res) override;
 
     private:
-        NetsysNativeClient &netsysNativeClient_;
+        std::weak_ptr<NetsysNativeClient> netsysNativeClient_;
     };
 
 public:
@@ -1030,10 +1030,11 @@ private:
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
     void RegisterNotifyCallback();
+    void UnRegisterNotifyCallback();
 
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
-    sptr<OHOS::NetsysNative::INetDnsResultCallback> nativeDnsReportCallback_ = nullptr;
+    sptr<OHOS::NetsysNative::INetDnsResultCallback> nativeNetDnsResultCallback_ = nullptr;
     uint32_t dnsReportTimeStep = 500;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
@@ -1046,15 +1047,20 @@ private:
 private:
     class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        explicit NetNativeConnDeathRecipient(NetsysNativeClient &client) : client_(client) {}
+        explicit NetNativeConnDeathRecipient(std::weak_ptr<NetsysNativeClient> netsysNativeClient)
+            : netsysNativeClient_(netsysNativeClient) {}
         ~NetNativeConnDeathRecipient() override = default;
         void OnRemoteDied(const wptr<IRemoteObject> &remote) override
         {
-            client_.OnRemoteDied(remote);
+            auto netsysNativeClient = netsysNativeClient_.lock();
+            if (netsysNativeClient == nullptr) {
+                return;
+            }
+            netsysNativeClient->OnRemoteDied(remote);
         }
 
     private:
-        NetsysNativeClient &client_;
+        std::weak_ptr<NetsysNativeClient> netsysNativeClient_;
     };
 };
 } // namespace NetManagerStandard

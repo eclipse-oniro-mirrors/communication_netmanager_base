@@ -262,6 +262,7 @@ public:
     int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
+    int32_t GetAllNetsAsync(std::list<int32_t> &netIdList);
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
@@ -433,14 +434,14 @@ private:
 
     class NetPolicyCallback : public NetPolicyCallbackStub {
     public:
-        NetPolicyCallback(NetConnService &client) : client_(client) {}
+        NetPolicyCallback(std::weak_ptr<NetConnService> netConnService) : netConnService_(netConnService) {}
         int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
 
     private:
         void SendNetPolicyChange(uint32_t uid, uint32_t policy);
 
     private:
-        NetConnService &client_;
+        std::weak_ptr<NetConnService> netConnService_;
     };
 
 protected:
