@@ -58,7 +58,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -79,7 +79,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -98,7 +98,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -117,7 +117,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -136,7 +136,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -155,7 +155,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -175,7 +175,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(co
 int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
                                                                  const std::string &gateway, const std::string &ifName)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -215,7 +215,7 @@ NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(Netsy
 int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32_t size,
     std::list<OHOS::NetsysNative::NetDnsResultReport> res)
 {
-    auto netsysNativeClient = netsysNativeClient_.lock
+    auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient has destory");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
