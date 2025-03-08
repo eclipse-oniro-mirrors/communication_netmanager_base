@@ -195,6 +195,11 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
 int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     NETMGR_LOG_I("OnDhcpSuccess");
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     netsysNativeClient->ProcessDhcpResult(dhcpResult);
     return NETMANAGER_SUCCESS;
 }
@@ -203,6 +208,11 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
                                                                           const std::string &iface)
 {
     NETMGR_LOG_I("OnBandwidthReachedLimit");
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     netsysNativeClient->ProcessBandwidthReachedLimit(limitName, iface);
     return NETMANAGER_SUCCESS;
 }
