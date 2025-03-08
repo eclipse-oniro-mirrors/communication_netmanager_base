@@ -217,7 +217,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
     return NETMANAGER_SUCCESS;
 }
 
-NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(NetsysNativeClient &netsysNativeClient)
+NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
 {
 }
