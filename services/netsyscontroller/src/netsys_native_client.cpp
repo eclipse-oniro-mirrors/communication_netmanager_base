@@ -977,7 +977,7 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
         return nullptr;
     }
 
-    deathRecipient_ = sptr<NetNativeConnDeathRecipient>::MakeSptr(std::shared_from_this());
+    deathRecipient_ = sptr<NetNativeConnDeathRecipient>::MakeSptr(shared_from_this());
     if (deathRecipient_ == nullptr) {
         NETMGR_LOG_E("Recipient new failed!");
         return nullptr;
@@ -1009,14 +1009,14 @@ void NetsysNativeClient::RegisterNotifyCallback()
         NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
         if (proxy != nullptr) {
             if (nativeNotifyCallback_ == nullptr) {
-                nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(std::shared_from_this());
+                nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(shared_from_this());
             }
 
             NETMGR_LOG_D("call proxy->RegisterNotifyCallback");
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
 
             if (nativeNetDnsResultCallback_ == nullptr) {
-                nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(std::shared_from_this());
+                nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(shared_from_this());
             }
 
             NETMGR_LOG_D("call proxy->RegisterDnsResultCallback");

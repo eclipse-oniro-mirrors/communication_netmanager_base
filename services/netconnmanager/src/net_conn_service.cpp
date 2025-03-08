@@ -3027,7 +3027,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
             registerToService_ = true;
         }
     } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {
-        policyCallback_ = sptr<NetPolicyCallback>::MakeSptr(std::shared_from_this());
+        policyCallback_ = sptr<NetPolicyCallback>::MakeSptr(shared_from_this());
         std::shared_ptr<NetPolicyClient> netPolicy = DelayedSingleton<NetPolicyClient>::GetInstance();
         int32_t registerRet = netPolicy->RegisterNetPolicyCallback(policyCallback_);
         if (registerRet != NETMANAGER_SUCCESS) {
