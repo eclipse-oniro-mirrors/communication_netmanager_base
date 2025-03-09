@@ -39,7 +39,7 @@ struct NET_SYMBOL_VISIBLE INetAddr final : public Parcelable {
     uint8_t port_ = 0;
 
     bool operator==(const INetAddr &obj) const;
-
+    bool operator<(const INetAddr &obj) const;
     bool Marshalling(Parcel &parcel) const override;
     static sptr<INetAddr> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<INetAddr> &object);

@@ -36,6 +36,32 @@ bool INetAddr::operator==(const INetAddr &obj) const
     return out;
 }
 
+bool INetAddr::operator<(const INetAddr &obj) const
+{
+    if (type_ < obj.type_) return true;
+    if (type_ > obj.type_) return false;
+
+    if (family_ < obj.family_) return true;
+    if (family_ > obj.family_) return false;
+
+    if (prefixlen_ < obj.prefixlen_) return true;
+    if (prefixlen_ > obj.prefixlen_) return false;
+
+    if (address_ < obj.address_) return true;
+    if (address_ > obj.address_) return false;
+
+    if (netMask_ < obj.netMask_) return true;
+    if (netMask_ > obj.netMask_) return false;
+
+    if (hostName_ < obj.hostName_) return true;
+    if (hostName_ > obj.hostName_) return false;
+
+    if (port_ < obj.port_) return true;
+    if (port_ > obj.port_) return false;
+
+    return false;
+}
+
 bool INetAddr::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint8(type_)) {
