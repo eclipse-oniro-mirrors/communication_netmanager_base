@@ -32,7 +32,7 @@ void NetsysControllerServiceImpl::Init()
 
 int32_t NetsysControllerServiceImpl::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    return netsysClient_.SetInternetPermission(uid, allow);
+    return netsysClient_->SetInternetPermission(uid, allow);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_t permission)
@@ -41,13 +41,13 @@ int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKCREATEPHYSICAL_API)) {
         return mockNetsysClient_.NetworkCreatePhysical(netId, permission);
     }
-    return netsysClient_.NetworkCreatePhysical(netId, permission);
+    return netsysClient_->NetworkCreatePhysical(netId, permission);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
     NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
-    return netsysClient_.NetworkCreateVirtual(netId, hasDns);
+    return netsysClient_->NetworkCreateVirtual(netId, hasDns);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, bool isVpnNet)
@@ -56,51 +56,51 @@ int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, bool isVpnNet
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKDESTROY_API)) {
         return mockNetsysClient_.NetworkDestroy(netId);
     }
-    return netsysClient_.NetworkDestroy(netId, isVpnNet);
+    return netsysClient_->NetworkDestroy(netId, isVpnNet);
 }
 
 int32_t NetsysControllerServiceImpl::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
                                                 const std::set<int32_t> &uids)
 {
     NETMGR_LOG_I("Create Vnic network");
-    return netsysClient_.CreateVnic(mtu, tunAddr, prefix, uids);
+    return netsysClient_->CreateVnic(mtu, tunAddr, prefix, uids);
 }
 
 int32_t NetsysControllerServiceImpl::DestroyVnic()
 {
     NETMGR_LOG_I("Destroy Vnic network");
-    return netsysClient_.DestroyVnic();
+    return netsysClient_->DestroyVnic();
 }
 
 int32_t NetsysControllerServiceImpl::EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif)
 {
     NETMGR_LOG_I("EnableDistributedClientNet");
-    return netsysClient_.EnableDistributedClientNet(virnicAddr, iif);
+    return netsysClient_->EnableDistributedClientNet(virnicAddr, iif);
 }
 
 int32_t NetsysControllerServiceImpl::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
                                                                 const std::string &dstAddr)
 {
     NETMGR_LOG_I("EnableDistributedServerNet");
-    return netsysClient_.EnableDistributedServerNet(iif, devIface, dstAddr);
+    return netsysClient_->EnableDistributedServerNet(iif, devIface, dstAddr);
 }
 
 int32_t NetsysControllerServiceImpl::DisableDistributedNet(bool isServer)
 {
     NETMGR_LOG_I("DisableDistributedNet");
-    return netsysClient_.DisableDistributedNet(isServer);
+    return netsysClient_->DisableDistributedNet(isServer);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);
-    return netsysClient_.NetworkAddUids(netId, uidRanges);
+    return netsysClient_->NetworkAddUids(netId, uidRanges);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
     NETMGR_LOG_I("Remove uids from vpn network: netId[%{public}d]", netId);
-    return netsysClient_.NetworkDelUids(netId, uidRanges);
+    return netsysClient_->NetworkDelUids(netId, uidRanges);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const std::string &iface,
@@ -111,7 +111,7 @@ int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const st
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDINTERFACE_API)) {
         return mockNetsysClient_.NetworkAddInterface(netId, iface, netBearerType);
     }
-    return netsysClient_.NetworkAddInterface(netId, iface, netBearerType);
+    return netsysClient_->NetworkAddInterface(netId, iface, netBearerType);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveInterface(int32_t netId, const std::string &iface)
@@ -120,7 +120,7 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveInterface(int32_t netId, const
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKREMOVEINTERFACE_API)) {
         return mockNetsysClient_.NetworkRemoveInterface(netId, iface);
     }
-    return netsysClient_.NetworkRemoveInterface(netId, iface);
+    return netsysClient_->NetworkRemoveInterface(netId, iface);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddRoute(int32_t netId, const std::string &ifName,
@@ -131,7 +131,7 @@ int32_t NetsysControllerServiceImpl::NetworkAddRoute(int32_t netId, const std::s
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDROUTE_API)) {
         return mockNetsysClient_.NetworkAddRoute(netId, ifName, destination, nextHop);
     }
-    return netsysClient_.NetworkAddRoute(netId, ifName, destination, nextHop);
+    return netsysClient_->NetworkAddRoute(netId, ifName, destination, nextHop);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
@@ -142,19 +142,19 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKREMOVEROUTE_API)) {
         return mockNetsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
     }
-    return netsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
+    return netsysClient_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
 int32_t NetsysControllerServiceImpl::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
     NETMGR_LOG_D("Interface get config");
-    return netsysClient_.GetInterfaceConfig(cfg);
+    return netsysClient_->GetInterfaceConfig(cfg);
 }
 
 int32_t NetsysControllerServiceImpl::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
     NETMGR_LOG_I("Interface set config");
-    return netsysClient_.SetInterfaceConfig(cfg);
+    return netsysClient_->SetInterfaceConfig(cfg);
 }
 
 int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
@@ -163,7 +163,7 @@ int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEDOWN_API)) {
         return mockNetsysClient_.SetInterfaceDown(iface);
     }
-    return netsysClient_.SetInterfaceDown(iface);
+    return netsysClient_->SetInterfaceDown(iface);
 }
 
 int32_t NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
@@ -172,7 +172,7 @@ int32_t NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEUP_API)) {
         return mockNetsysClient_.SetInterfaceUp(iface);
     }
-    return netsysClient_.SetInterfaceUp(iface);
+    return netsysClient_->SetInterfaceUp(iface);
 }
 
 void NetsysControllerServiceImpl::ClearInterfaceAddrs(const std::string &ifName)
@@ -181,7 +181,7 @@ void NetsysControllerServiceImpl::ClearInterfaceAddrs(const std::string &ifName)
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACECLEARADDRS_API)) {
         return mockNetsysClient_.ClearInterfaceAddrs(ifName);
     }
-    return netsysClient_.ClearInterfaceAddrs(ifName);
+    return netsysClient_->ClearInterfaceAddrs(ifName);
 }
 
 int32_t NetsysControllerServiceImpl::GetInterfaceMtu(const std::string &ifName)
@@ -190,7 +190,7 @@ int32_t NetsysControllerServiceImpl::GetInterfaceMtu(const std::string &ifName)
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEGETMTU_API)) {
         return mockNetsysClient_.GetInterfaceMtu(ifName);
     }
-    return netsysClient_.GetInterfaceMtu(ifName);
+    return netsysClient_->GetInterfaceMtu(ifName);
 }
 
 int32_t NetsysControllerServiceImpl::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
@@ -199,13 +199,13 @@ int32_t NetsysControllerServiceImpl::SetInterfaceMtu(const std::string &ifName, 
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACESETMTU_API)) {
         return mockNetsysClient_.SetInterfaceMtu(ifName, mtu);
     }
-    return netsysClient_.SetInterfaceMtu(ifName, mtu);
+    return netsysClient_->SetInterfaceMtu(ifName, mtu);
 }
 
 int32_t NetsysControllerServiceImpl::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 {
     NETMGR_LOG_I("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
-    return netsysClient_.SetTcpBufferSizes(tcpBufferSizes);
+    return netsysClient_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
 int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
@@ -216,7 +216,7 @@ int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifNa
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEADDADDRESS_API)) {
         return mockNetsysClient_.AddInterfaceAddress(ifName, ipAddr, prefixLength);
     }
-    return netsysClient_.AddInterfaceAddress(ifName, ipAddr, prefixLength);
+    return netsysClient_->AddInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
@@ -227,7 +227,7 @@ int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifNa
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
         return mockNetsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
     }
-    return netsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    return netsysClient_->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
@@ -238,20 +238,20 @@ int32_t NetsysControllerServiceImpl::DelInterfaceAddress(const std::string &ifNa
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
         return mockNetsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength);
     }
-    return netsysClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+    return netsysClient_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
 }
 
 int32_t NetsysControllerServiceImpl::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
 {
     NETMGR_LOG_I("set ip address: ifName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),
                  ToAnonymousIp(ipAddress).c_str());
-    return netsysClient_.InterfaceSetIpAddress(ifaceName, ipAddress);
+    return netsysClient_->InterfaceSetIpAddress(ifaceName, ipAddress);
 }
 
 int32_t NetsysControllerServiceImpl::InterfaceSetIffUp(const std::string &ifaceName)
 {
     NETMGR_LOG_I("set iff up: ifName[%{public}s]", ifaceName.c_str());
-    return netsysClient_.InterfaceSetIffUp(ifaceName);
+    return netsysClient_->InterfaceSetIffUp(ifaceName);
 }
 
 int32_t NetsysControllerServiceImpl::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -262,7 +262,7 @@ int32_t NetsysControllerServiceImpl::SetResolverConfig(uint16_t netId, uint16_t 
     if (mockNetsysClient_.CheckMockApi(MOCK_SETRESOLVERCONFIG_API)) {
         return mockNetsysClient_.SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
     }
-    return netsysClient_.SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
+    return netsysClient_->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
 
 int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
@@ -273,7 +273,7 @@ int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vect
     if (mockNetsysClient_.CheckMockApi(MOCK_GETRESOLVERICONFIG_API)) {
         return mockNetsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
     }
-    return netsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    return netsysClient_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
 int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId, bool isVpnNet)
@@ -282,33 +282,33 @@ int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId, bool isV
     if (mockNetsysClient_.CheckMockApi(MOCK_CREATENETWORKCACHE_API)) {
         return mockNetsysClient_.CreateNetworkCache(netId);
     }
-    return netsysClient_.CreateNetworkCache(netId, isVpnNet);
+    return netsysClient_->CreateNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId, bool isVpnNet)
 {
     NETMGR_LOG_D("Destroy dns cache: netId[%{public}d]", netId);
-    return netsysClient_.DestroyNetworkCache(netId, isVpnNet);
+    return netsysClient_->DestroyNetworkCache(netId, isVpnNet);
 }
 
 int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                                  const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
-    return netsysClient_.GetAddrInfo(hostName, serverName, hints, netId, res);
+    return netsysClient_->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
 
 int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
     nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_I("GetNetworkSharingTraffic");
-    return netsysClient_.GetNetworkSharingTraffic(downIface, upIface, traffic);
+    return netsysClient_->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 
 int32_t NetsysControllerServiceImpl::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic,
     std::string &ifaceName)
 {
     NETMGR_LOG_I("GetNetworkCellularSharingTraffic");
-    return netsysClient_.GetNetworkCellularSharingTraffic(traffic, ifaceName);
+    return netsysClient_->GetNetworkCellularSharingTraffic(traffic, ifaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetCellularRxBytes()
@@ -317,7 +317,7 @@ int64_t NetsysControllerServiceImpl::GetCellularRxBytes()
     if (mockNetsysClient_.CheckMockApi(MOCK_GETCELLULARRXBYTES_API)) {
         return mockNetsysClient_.GetCellularRxBytes();
     }
-    return netsysClient_.GetCellularRxBytes();
+    return netsysClient_->GetCellularRxBytes();
 }
 
 int64_t NetsysControllerServiceImpl::GetCellularTxBytes()
@@ -326,7 +326,7 @@ int64_t NetsysControllerServiceImpl::GetCellularTxBytes()
     if (mockNetsysClient_.CheckMockApi(MOCK_GETCELLULARTXBYTES_API)) {
         return mockNetsysClient_.GetCellularTxBytes();
     }
-    return netsysClient_.GetCellularTxBytes();
+    return netsysClient_->GetCellularTxBytes();
 }
 
 int64_t NetsysControllerServiceImpl::GetAllRxBytes()
@@ -335,7 +335,7 @@ int64_t NetsysControllerServiceImpl::GetAllRxBytes()
     if (mockNetsysClient_.CheckMockApi(MOCK_GETALLRXBYTES_API)) {
         return mockNetsysClient_.GetAllRxBytes();
     }
-    return netsysClient_.GetAllRxBytes();
+    return netsysClient_->GetAllRxBytes();
 }
 
 int64_t NetsysControllerServiceImpl::GetAllTxBytes()
@@ -344,7 +344,7 @@ int64_t NetsysControllerServiceImpl::GetAllTxBytes()
     if (mockNetsysClient_.CheckMockApi(MOCK_GETALLTXBYTES_API)) {
         return mockNetsysClient_.GetAllTxBytes();
     }
-    return netsysClient_.GetAllTxBytes();
+    return netsysClient_->GetAllTxBytes();
 }
 
 int64_t NetsysControllerServiceImpl::GetUidRxBytes(uint32_t uid)
@@ -353,7 +353,7 @@ int64_t NetsysControllerServiceImpl::GetUidRxBytes(uint32_t uid)
     if (mockNetsysClient_.CheckMockApi(MOCK_GETUIDRXBYTES_API)) {
         return mockNetsysClient_.GetUidRxBytes(uid);
     }
-    return netsysClient_.GetUidRxBytes(uid);
+    return netsysClient_->GetUidRxBytes(uid);
 }
 
 int64_t NetsysControllerServiceImpl::GetUidTxBytes(uint32_t uid)
@@ -362,7 +362,7 @@ int64_t NetsysControllerServiceImpl::GetUidTxBytes(uint32_t uid)
     if (mockNetsysClient_.CheckMockApi(MOCK_GETUIDTXBYTES_API)) {
         return mockNetsysClient_.GetUidTxBytes(uid);
     }
-    return netsysClient_.GetUidTxBytes(uid);
+    return netsysClient_->GetUidTxBytes(uid);
 }
 
 int64_t NetsysControllerServiceImpl::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
@@ -371,7 +371,7 @@ int64_t NetsysControllerServiceImpl::GetUidOnIfaceRxBytes(uint32_t uid, const st
     if (mockNetsysClient_.CheckMockApi(MOCK_GETUIDRXBYTES_API)) {
         return mockNetsysClient_.GetUidOnIfaceRxBytes(uid, interfaceName);
     }
-    return netsysClient_.GetUidOnIfaceRxBytes(uid, interfaceName);
+    return netsysClient_->GetUidOnIfaceRxBytes(uid, interfaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
@@ -380,7 +380,7 @@ int64_t NetsysControllerServiceImpl::GetUidOnIfaceTxBytes(uint32_t uid, const st
     if (mockNetsysClient_.CheckMockApi(MOCK_GETUIDTXBYTES_API)) {
         return mockNetsysClient_.GetUidOnIfaceTxBytes(uid, interfaceName);
     }
-    return netsysClient_.GetUidOnIfaceTxBytes(uid, interfaceName);
+    return netsysClient_->GetUidOnIfaceTxBytes(uid, interfaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetIfaceRxBytes(const std::string &interfaceName)
@@ -389,7 +389,7 @@ int64_t NetsysControllerServiceImpl::GetIfaceRxBytes(const std::string &interfac
     if (mockNetsysClient_.CheckMockApi(MOCK_GETIFACERXBYTES_API)) {
         return mockNetsysClient_.GetIfaceRxBytes(interfaceName);
     }
-    return netsysClient_.GetIfaceRxBytes(interfaceName);
+    return netsysClient_->GetIfaceRxBytes(interfaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetIfaceTxBytes(const std::string &interfaceName)
@@ -398,7 +398,7 @@ int64_t NetsysControllerServiceImpl::GetIfaceTxBytes(const std::string &interfac
     if (mockNetsysClient_.CheckMockApi(MOCK_GETIFACETXBYTES_API)) {
         return mockNetsysClient_.GetIfaceTxBytes(interfaceName);
     }
-    return netsysClient_.GetIfaceTxBytes(interfaceName);
+    return netsysClient_->GetIfaceTxBytes(interfaceName);
 }
 
 std::vector<std::string> NetsysControllerServiceImpl::InterfaceGetList()
@@ -407,7 +407,7 @@ std::vector<std::string> NetsysControllerServiceImpl::InterfaceGetList()
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEGETLIST_API)) {
         return mockNetsysClient_.InterfaceGetList();
     }
-    return netsysClient_.InterfaceGetList();
+    return netsysClient_->InterfaceGetList();
 }
 
 std::vector<std::string> NetsysControllerServiceImpl::UidGetList()
@@ -416,7 +416,7 @@ std::vector<std::string> NetsysControllerServiceImpl::UidGetList()
     if (mockNetsysClient_.CheckMockApi(MOCK_UIDGETLIST_API)) {
         return mockNetsysClient_.UidGetList();
     }
-    return netsysClient_.UidGetList();
+    return netsysClient_->UidGetList();
 }
 
 int64_t NetsysControllerServiceImpl::GetIfaceRxPackets(const std::string &interfaceName)
@@ -425,7 +425,7 @@ int64_t NetsysControllerServiceImpl::GetIfaceRxPackets(const std::string &interf
     if (mockNetsysClient_.CheckMockApi(MOCK_GETIFACERXPACKETS_API)) {
         return mockNetsysClient_.GetIfaceRxPackets(interfaceName);
     }
-    return netsysClient_.GetIfaceRxPackets(interfaceName);
+    return netsysClient_->GetIfaceRxPackets(interfaceName);
 }
 
 int64_t NetsysControllerServiceImpl::GetIfaceTxPackets(const std::string &interfaceName)
@@ -434,7 +434,7 @@ int64_t NetsysControllerServiceImpl::GetIfaceTxPackets(const std::string &interf
     if (mockNetsysClient_.CheckMockApi(MOCK_GETIFACETXPACKETS_API)) {
         return mockNetsysClient_.GetIfaceTxPackets(interfaceName);
     }
-    return netsysClient_.GetIfaceTxPackets(interfaceName);
+    return netsysClient_->GetIfaceTxPackets(interfaceName);
 }
 
 int32_t NetsysControllerServiceImpl::SetDefaultNetWork(int32_t netId)
@@ -443,7 +443,7 @@ int32_t NetsysControllerServiceImpl::SetDefaultNetWork(int32_t netId)
     if (mockNetsysClient_.CheckMockApi(MOCK_SETDEFAULTNETWORK_API)) {
         return mockNetsysClient_.SetDefaultNetWork(netId);
     }
-    return netsysClient_.SetDefaultNetWork(netId);
+    return netsysClient_->SetDefaultNetWork(netId);
 }
 
 int32_t NetsysControllerServiceImpl::ClearDefaultNetWorkNetId()
@@ -452,7 +452,7 @@ int32_t NetsysControllerServiceImpl::ClearDefaultNetWorkNetId()
     if (mockNetsysClient_.CheckMockApi(MOCK_CLEARDEFAULTNETWORK_API)) {
         return mockNetsysClient_.ClearDefaultNetWorkNetId();
     }
-    return netsysClient_.ClearDefaultNetWorkNetId();
+    return netsysClient_->ClearDefaultNetWorkNetId();
 }
 
 int32_t NetsysControllerServiceImpl::BindSocket(int32_t socketFd, uint32_t netId)
@@ -461,44 +461,44 @@ int32_t NetsysControllerServiceImpl::BindSocket(int32_t socketFd, uint32_t netId
     if (mockNetsysClient_.CheckMockApi(MOCK_BINDSOCKET_API)) {
         return mockNetsysClient_.BindSocket(socketFd, netId);
     }
-    return netsysClient_.BindSocket(socketFd, netId);
+    return netsysClient_->BindSocket(socketFd, netId);
 }
 
 int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("IpEnableForwarding");
-    return netsysClient_.IpEnableForwarding(requestor);
+    return netsysClient_->IpEnableForwarding(requestor);
 }
 
 int32_t NetsysControllerServiceImpl::IpDisableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("IpDisableForwarding");
-    return netsysClient_.IpDisableForwarding(requestor);
+    return netsysClient_->IpDisableForwarding(requestor);
 }
 
 int32_t NetsysControllerServiceImpl::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETMGR_LOG_D("EnableNat");
-    return netsysClient_.EnableNat(downstreamIface, upstreamIface);
+    return netsysClient_->EnableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysControllerServiceImpl::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETMGR_LOG_D("DisableNat");
-    return netsysClient_.DisableNat(downstreamIface, upstreamIface);
+    return netsysClient_->DisableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETMGR_LOG_D("IpfwdAddInterfaceForward");
-    return netsysClient_.IpfwdAddInterfaceForward(fromIface, toIface);
+    return netsysClient_->IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
 int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(const std::string &fromIface,
                                                                  const std::string &toIface)
 {
     NETMGR_LOG_D("IpfwdRemoveInterfaceForward");
-    return netsysClient_.IpfwdRemoveInterfaceForward(fromIface, toIface);
+    return netsysClient_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
 int32_t NetsysControllerServiceImpl::ShareDnsSet(uint16_t netId)
@@ -507,19 +507,19 @@ int32_t NetsysControllerServiceImpl::ShareDnsSet(uint16_t netId)
     if (mockNetsysClient_.CheckMockApi(MOCK_SHAREDNSSET_API)) {
         return mockNetsysClient_.ShareDnsSet(netId);
     }
-    return netsysClient_.ShareDnsSet(netId);
+    return netsysClient_->ShareDnsSet(netId);
 }
 
 int32_t NetsysControllerServiceImpl::StartDnsProxyListen()
 {
     NETMGR_LOG_D("StartDnsProxyListen");
-    return netsysClient_.StartDnsProxyListen();
+    return netsysClient_->StartDnsProxyListen();
 }
 
 int32_t NetsysControllerServiceImpl::StopDnsProxyListen()
 {
     NETMGR_LOG_D("StopDnsProxyListen");
-    return netsysClient_.StopDnsProxyListen();
+    return netsysClient_->StopDnsProxyListen();
 }
 
 int32_t NetsysControllerServiceImpl::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)
@@ -528,7 +528,7 @@ int32_t NetsysControllerServiceImpl::RegisterNetsysNotifyCallback(const NetsysNo
     if (mockNetsysClient_.CheckMockApi(MOCK_REGISTERNETSYSNOTIFYCALLBACK_API)) {
         return mockNetsysClient_.RegisterNetsysNotifyCallback(callback);
     }
-    return netsysClient_.RegisterNetsysNotifyCallback(callback);
+    return netsysClient_->RegisterNetsysNotifyCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::BindNetworkServiceVpn(int32_t socketFd)
@@ -537,7 +537,7 @@ int32_t NetsysControllerServiceImpl::BindNetworkServiceVpn(int32_t socketFd)
     if (mockNetsysClient_.CheckMockApi(MOCK_BINDNETWORKSERVICEVPN_API)) {
         return mockNetsysClient_.BindNetworkServiceVpn(socketFd);
     }
-    return netsysClient_.BindNetworkServiceVpn(socketFd);
+    return netsysClient_->BindNetworkServiceVpn(socketFd);
 }
 
 int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest,
@@ -547,7 +547,7 @@ int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd,
     if (mockNetsysClient_.CheckMockApi(MOCK_ENABLEVIRTUALNETIFACECARD_API)) {
         return mockNetsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
     }
-    return netsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
+    return netsysClient_->EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
 }
 
 int32_t NetsysControllerServiceImpl::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
@@ -557,7 +557,7 @@ int32_t NetsysControllerServiceImpl::SetIpAddress(int32_t socketFd, const std::s
     if (mockNetsysClient_.CheckMockApi(MOCK_SETIPADDRESS_API)) {
         return mockNetsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     }
-    return netsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    return netsysClient_->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
 }
 
 int32_t NetsysControllerServiceImpl::SetBlocking(int32_t ifaceFd, bool isBlock)
@@ -566,7 +566,7 @@ int32_t NetsysControllerServiceImpl::SetBlocking(int32_t ifaceFd, bool isBlock)
     if (mockNetsysClient_.CheckMockApi(MOCK_SETBLOCKING_API)) {
         return mockNetsysClient_.SetBlocking(ifaceFd, isBlock);
     }
-    return netsysClient_.SetBlocking(ifaceFd, isBlock);
+    return netsysClient_->SetBlocking(ifaceFd, isBlock);
 }
 
 int32_t NetsysControllerServiceImpl::StartDhcpClient(const std::string &iface, bool bIpv6)
@@ -575,7 +575,7 @@ int32_t NetsysControllerServiceImpl::StartDhcpClient(const std::string &iface, b
     if (mockNetsysClient_.CheckMockApi(MOCK_STARTDHCPCLIENT_API)) {
         return mockNetsysClient_.StartDhcpClient(iface, bIpv6);
     }
-    return netsysClient_.StartDhcpClient(iface, bIpv6);
+    return netsysClient_->StartDhcpClient(iface, bIpv6);
 }
 
 int32_t NetsysControllerServiceImpl::StopDhcpClient(const std::string &iface, bool bIpv6)
@@ -584,7 +584,7 @@ int32_t NetsysControllerServiceImpl::StopDhcpClient(const std::string &iface, bo
     if (mockNetsysClient_.CheckMockApi(MOCK_STOPDHCPCLIENT_API)) {
         return mockNetsysClient_.StopDhcpClient(iface, bIpv6);
     }
-    return netsysClient_.StopDhcpClient(iface, bIpv6);
+    return netsysClient_->StopDhcpClient(iface, bIpv6);
 }
 
 int32_t NetsysControllerServiceImpl::RegisterCallback(sptr<NetsysControllerCallback> callback)
@@ -593,7 +593,7 @@ int32_t NetsysControllerServiceImpl::RegisterCallback(sptr<NetsysControllerCallb
     if (mockNetsysClient_.CheckMockApi(MOCK_REGISTERNOTIFYCALLBACK_API)) {
         return mockNetsysClient_.RegisterCallback(callback);
     }
-    return netsysClient_.RegisterCallback(callback);
+    return netsysClient_->RegisterCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
@@ -602,7 +602,7 @@ int32_t NetsysControllerServiceImpl::StartDhcpService(const std::string &iface, 
     if (mockNetsysClient_.CheckMockApi(MOCK_STARTDHCPSERVICE_API)) {
         return mockNetsysClient_.StartDhcpService(iface, ipv4addr);
     }
-    return netsysClient_.StartDhcpService(iface, ipv4addr);
+    return netsysClient_->StartDhcpService(iface, ipv4addr);
 }
 
 int32_t NetsysControllerServiceImpl::StopDhcpService(const std::string &iface)
@@ -611,250 +611,250 @@ int32_t NetsysControllerServiceImpl::StopDhcpService(const std::string &iface)
     if (mockNetsysClient_.CheckMockApi(MOCK_STOPDHCPSERVICE_API)) {
         return mockNetsysClient_.StopDhcpService(iface);
     }
-    return netsysClient_.StopDhcpService(iface);
+    return netsysClient_->StopDhcpService(iface);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthEnableDataSaver(bool enable)
 {
     NETMGR_LOG_D("BandwidthEnableDataSaver: enable=%{public}d", enable);
-    return netsysClient_.BandwidthEnableDataSaver(enable);
+    return netsysClient_->BandwidthEnableDataSaver(enable);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
 {
     NETMGR_LOG_D("BandwidthSetIfaceQuota: ifName=%{public}s", ifName.c_str());
-    return netsysClient_.BandwidthSetIfaceQuota(ifName, bytes);
+    return netsysClient_->BandwidthSetIfaceQuota(ifName, bytes);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthRemoveIfaceQuota(const std::string &ifName)
 {
     NETMGR_LOG_D("BandwidthRemoveIfaceQuota: ifName=%{public}s", ifName.c_str());
-    return netsysClient_.BandwidthRemoveIfaceQuota(ifName);
+    return netsysClient_->BandwidthRemoveIfaceQuota(ifName);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthAddDeniedList(uint32_t uid)
 {
     NETMGR_LOG_D("BandwidthAddDeniedList: uid=%{public}d", uid);
-    return netsysClient_.BandwidthAddDeniedList(uid);
+    return netsysClient_->BandwidthAddDeniedList(uid);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthRemoveDeniedList(uint32_t uid)
 {
     NETMGR_LOG_D("BandwidthRemoveDeniedList: uid=%{public}d", uid);
-    return netsysClient_.BandwidthRemoveDeniedList(uid);
+    return netsysClient_->BandwidthRemoveDeniedList(uid);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthAddAllowedList(uint32_t uid)
 {
     NETMGR_LOG_D("BandwidthAddAllowedList: uid=%{public}d", uid);
-    return netsysClient_.BandwidthAddAllowedList(uid);
+    return netsysClient_->BandwidthAddAllowedList(uid);
 }
 
 int32_t NetsysControllerServiceImpl::BandwidthRemoveAllowedList(uint32_t uid)
 {
     NETMGR_LOG_D("BandwidthRemoveAllowedList: uid=%{public}d", uid);
-    return netsysClient_.BandwidthRemoveAllowedList(uid);
+    return netsysClient_->BandwidthRemoveAllowedList(uid);
 }
 
 int32_t NetsysControllerServiceImpl::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("FirewallSetUidsAllowedListChain: chain=%{public}d", chain);
-    return netsysClient_.FirewallSetUidsAllowedListChain(chain, uids);
+    return netsysClient_->FirewallSetUidsAllowedListChain(chain, uids);
 }
 
 int32_t NetsysControllerServiceImpl::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("FirewallSetUidsDeniedListChain: chain=%{public}d", chain);
-    return netsysClient_.FirewallSetUidsDeniedListChain(chain, uids);
+    return netsysClient_->FirewallSetUidsDeniedListChain(chain, uids);
 }
 
 int32_t NetsysControllerServiceImpl::FirewallEnableChain(uint32_t chain, bool enable)
 {
     NETMGR_LOG_D("FirewallEnableChain: chain=%{public}d, enable=%{public}d", chain, enable);
-    return netsysClient_.FirewallEnableChain(chain, enable);
+    return netsysClient_->FirewallEnableChain(chain, enable);
 }
 
 int32_t NetsysControllerServiceImpl::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
                                                         uint32_t firewallRule)
 {
-    return netsysClient_.FirewallSetUidRule(chain, uids, firewallRule);
+    return netsysClient_->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 int32_t NetsysControllerServiceImpl::GetTotalStats(uint64_t &stats, uint32_t type)
 {
     NETMGR_LOG_D("GetTotalStats: type=%{public}d", type);
-    return netsysClient_.GetTotalStats(stats, type);
+    return netsysClient_->GetTotalStats(stats, type);
 }
 
 int32_t NetsysControllerServiceImpl::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
 {
     NETMGR_LOG_D("GetUidStats: type=%{public}d uid=%{public}d", type, uid);
-    return netsysClient_.GetUidStats(stats, type, uid);
+    return netsysClient_->GetUidStats(stats, type, uid);
 }
 
 int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
 {
     NETMGR_LOG_D("GetIfaceStats: type=%{public}d", type);
-    return netsysClient_.GetIfaceStats(stats, type, interfaceName);
+    return netsysClient_->GetIfaceStats(stats, type, interfaceName);
 }
 
 int32_t NetsysControllerServiceImpl::GetAllSimStatsInfo(
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     NETMGR_LOG_D("GetAllSimStatsInfo");
-    return netsysClient_.GetAllSimStatsInfo(stats);
+    return netsysClient_->GetAllSimStatsInfo(stats);
 }
 
 int32_t NetsysControllerServiceImpl::DeleteSimStatsInfo(uint32_t uid)
 {
     NETMGR_LOG_D("DeleteSimStatsInfo");
-    return netsysClient_.DeleteSimStatsInfo(uid);
+    return netsysClient_->DeleteSimStatsInfo(uid);
 }
 
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     NETMGR_LOG_D("GetAllStatsInfo");
-    return netsysClient_.GetAllStatsInfo(stats);
+    return netsysClient_->GetAllStatsInfo(stats);
 }
 
 int32_t NetsysControllerServiceImpl::DeleteStatsInfo(uint32_t uid)
 {
     NETMGR_LOG_D("DeleteStatsInfo");
-    return netsysClient_.DeleteStatsInfo(uid);
+    return netsysClient_->DeleteStatsInfo(uid);
 }
 
 int32_t NetsysControllerServiceImpl::SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic)
 {
     NETMGR_LOG_D("SetNetStateTrafficMap");
-    return netsysClient_.SetNetStateTrafficMap(flag, availableTraffic);
+    return netsysClient_->SetNetStateTrafficMap(flag, availableTraffic);
 }
 
 int32_t NetsysControllerServiceImpl::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
 {
     NETMGR_LOG_D("GetNetStateTrafficMap");
-    return netsysClient_.GetNetStateTrafficMap(flag, availableTraffic);
+    return netsysClient_->GetNetStateTrafficMap(flag, availableTraffic);
 }
 
 int32_t NetsysControllerServiceImpl::ClearIncreaseTrafficMap()
 {
     NETMGR_LOG_D("ClearIncreaseTrafficMap");
-    return netsysClient_.ClearIncreaseTrafficMap();
+    return netsysClient_->ClearIncreaseTrafficMap();
 }
 
 int32_t NetsysControllerServiceImpl::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     NETMGR_LOG_D("UpdateIfIndexMap");
-    return netsysClient_.UpdateIfIndexMap(key, index);
+    return netsysClient_->UpdateIfIndexMap(key, index);
 }
 
 int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                                               NetsysNative::IptablesType ipType)
 {
-    return netsysClient_.SetIptablesCommandForRes(cmd, respond, ipType);
+    return netsysClient_->SetIptablesCommandForRes(cmd, respond, ipType);
 }
 
 int32_t NetsysControllerServiceImpl::SetIpCommandForRes(const std::string &cmd, std::string &respond)
 {
-    return netsysClient_.SetIpCommandForRes(cmd, respond);
+    return netsysClient_->SetIpCommandForRes(cmd, respond);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
                                                      const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
 {
     NETMGR_LOG_D("NetDiagPingHost");
-    return netsysClient_.NetDiagPingHost(pingOption, callback);
+    return netsysClient_->NetDiagPingHost(pingOption, callback);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagGetRouteTable(std::list<OHOS::NetsysNative::NetDiagRouteTable> &routeTables)
 {
     NETMGR_LOG_D("NetDiagGetRouteTable");
-    return netsysClient_.NetDiagGetRouteTable(routeTables);
+    return netsysClient_->NetDiagGetRouteTable(routeTables);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagGetSocketsInfo(OHOS::NetsysNative::NetDiagProtocolType socketType,
                                                            OHOS::NetsysNative::NetDiagSocketsInfo &socketsInfo)
 {
     NETMGR_LOG_D("NetDiagGetSocketsInfo");
-    return netsysClient_.NetDiagGetSocketsInfo(socketType, socketsInfo);
+    return netsysClient_->NetDiagGetSocketsInfo(socketType, socketsInfo);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagGetInterfaceConfig(
     std::list<OHOS::NetsysNative::NetDiagIfaceConfig> &configs, const std::string &ifaceName)
 {
     NETMGR_LOG_D("NetDiagGetInterfaceConfig");
-    return netsysClient_.NetDiagGetInterfaceConfig(configs, ifaceName);
+    return netsysClient_->NetDiagGetInterfaceConfig(configs, ifaceName);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagUpdateInterfaceConfig(const OHOS::NetsysNative::NetDiagIfaceConfig &config,
                                                                   const std::string &ifaceName, bool add)
 {
     NETMGR_LOG_D("NetDiagUpdateInterfaceConfig");
-    return netsysClient_.NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+    return netsysClient_->NetDiagUpdateInterfaceConfig(config, ifaceName, add);
 }
 
 int32_t NetsysControllerServiceImpl::NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up)
 {
     NETMGR_LOG_D("NetDiagSetInterfaceActiveState");
-    return netsysClient_.NetDiagSetInterfaceActiveState(ifaceName, up);
+    return netsysClient_->NetDiagSetInterfaceActiveState(ifaceName, up);
 }
 
 int32_t NetsysControllerServiceImpl::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                                   const std::string &ifName)
 {
     NETMGR_LOG_D("AddStaticArp");
-    return netsysClient_.AddStaticArp(ipAddr, macAddr, ifName);
+    return netsysClient_->AddStaticArp(ipAddr, macAddr, ifName);
 }
 
 int32_t NetsysControllerServiceImpl::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                                   const std::string &ifName)
 {
     NETMGR_LOG_D("DelStaticArp");
-    return netsysClient_.DelStaticArp(ipAddr, macAddr, ifName);
+    return netsysClient_->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
 int32_t NetsysControllerServiceImpl::RegisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
 {
     NETMGR_LOG_D("RegisterDnsResultListener");
-    return netsysClient_.RegisterDnsResultCallback(callback, timeStep);
+    return netsysClient_->RegisterDnsResultCallback(callback, timeStep);
 }
 
 int32_t NetsysControllerServiceImpl::UnregisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
 {
     NETMGR_LOG_D("UnregisterDnsResultListener");
-    return netsysClient_.UnregisterDnsResultCallback(callback);
+    return netsysClient_->UnregisterDnsResultCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
 {
     NETMGR_LOG_D("RegisterDnsResultListener");
-    return netsysClient_.RegisterDnsHealthCallback(callback);
+    return netsysClient_->RegisterDnsHealthCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
 {
     NETMGR_LOG_D("UnregisterDnsResultListener");
-    return netsysClient_.UnregisterDnsHealthCallback(callback);
+    return netsysClient_->UnregisterDnsHealthCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     NETMGR_LOG_D("GetCookieStats: type=%{public}u", type);
-    return netsysClient_.GetCookieStats(stats, type, cookie);
+    return netsysClient_->GetCookieStats(stats, type, cookie);
 }
 
 int32_t NetsysControllerServiceImpl::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
     NETMGR_LOG_D("GetNetworkSharingType");
-    return netsysClient_.GetNetworkSharingType(sharingTypeIsOn);
+    return netsysClient_->GetNetworkSharingType(sharingTypeIsOn);
 }
 
 int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, bool isOpen)
 {
     NETMGR_LOG_D("UpdateNetworkSharingType: type=%{public}d isOpen=%{public}d",
                  type, isOpen);
-    return netsysClient_.UpdateNetworkSharingType(type, isOpen);
+    return netsysClient_->UpdateNetworkSharingType(type, isOpen);
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
@@ -863,39 +863,39 @@ int32_t NetsysControllerServiceImpl::SetFirewallRules(NetFirewallRuleType type,
                                                       bool isFinish)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallRules");
-    return netsysClient_.SetFirewallRules(type, ruleList, isFinish);
+    return netsysClient_->SetFirewallRules(type, ruleList, isFinish);
 }
 
 int32_t NetsysControllerServiceImpl::SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
                                                               FirewallRuleAction outDefault)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallDefaultAction");
-    return netsysClient_.SetFirewallDefaultAction(userId, inDefault, outDefault);
+    return netsysClient_->SetFirewallDefaultAction(userId, inDefault, outDefault);
 }
 
 int32_t NetsysControllerServiceImpl::SetFirewallCurrentUserId(int32_t userId)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetFirewallCurrentUserId");
-    return netsysClient_.SetFirewallCurrentUserId(userId);
+    return netsysClient_->SetFirewallCurrentUserId(userId);
 }
 
 int32_t NetsysControllerServiceImpl::ClearFirewallRules(NetFirewallRuleType type)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::ClearFirewallRules");
-    return netsysClient_.ClearFirewallRules(type);
+    return netsysClient_->ClearFirewallRules(type);
 }
 int32_t NetsysControllerServiceImpl::RegisterNetFirewallCallback(
     const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::RegisterNetFirewallCallback");
-    return netsysClient_.RegisterNetFirewallCallback(callback);
+    return netsysClient_->RegisterNetFirewallCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::UnRegisterNetFirewallCallback(
     const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::UnRegisterNetFirewallCallback");
-    return netsysClient_.UnRegisterNetFirewallCallback(callback);
+    return netsysClient_->UnRegisterNetFirewallCallback(callback);
 }
 #endif
 
@@ -904,13 +904,13 @@ int32_t NetsysControllerServiceImpl::EnableWearableDistributedNetForward(const i
                                                                          const int32_t udpPortId)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl enable wearable distributed net forward");
-    return netsysClient_.EnableWearableDistributedNetForward(tcpPortId, udpPortId);
+    return netsysClient_->EnableWearableDistributedNetForward(tcpPortId, udpPortId);
 }
 
 int32_t NetsysControllerServiceImpl::DisableWearableDistributedNetForward()
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl disable wearable distributed net forward");
-    return netsysClient_.DisableWearableDistributedNetForward();
+    return netsysClient_->DisableWearableDistributedNetForward();
 }
 #endif
 
@@ -918,73 +918,73 @@ int32_t NetsysControllerServiceImpl::RegisterNetsysTrafficCallback(
     const sptr<NetsysNative::INetsysTrafficCallback> &callback)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl::RegisterNetsysTrafficCallback");
-    return netsysClient_.RegisterNetsysTrafficCallback(callback);
+    return netsysClient_->RegisterNetsysTrafficCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::UnRegisterNetsysTrafficCallback(
     const sptr<NetsysNative::INetsysTrafficCallback> &callback)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl::UnRegisterNetsysTrafficCallback");
-    return netsysClient_.UnRegisterNetsysTrafficCallback(callback);
+    return netsysClient_->UnRegisterNetsysTrafficCallback(callback);
 }
 
 int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_I("SetIpv6PrivacyExtensions: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
-    return netsysClient_.SetIpv6PrivacyExtensions(interfaceName, on);
+    return netsysClient_->SetIpv6PrivacyExtensions(interfaceName, on);
 }
 
 int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
 {
     NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
-    return netsysClient_.SetEnableIpv6(interfaceName, on);
+    return netsysClient_->SetEnableIpv6(interfaceName, on);
 }
 
 int32_t NetsysControllerServiceImpl::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy,
                                                             bool reconfirmFlag)
 {
-    return netsysClient_.SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    return netsysClient_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
 }
 
 int32_t NetsysControllerServiceImpl::DeleteNetworkAccessPolicy(uint32_t uid)
 {
-    return netsysClient_.DeleteNetworkAccessPolicy(uid);
+    return netsysClient_->DeleteNetworkAccessPolicy(uid);
 }
 
 int32_t NetsysControllerServiceImpl::ClearFirewallAllRules()
 {
-    return netsysClient_.ClearFirewallAllRules();
+    return netsysClient_->ClearFirewallAllRules();
 }
 
 int32_t NetsysControllerServiceImpl::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
 {
-    return netsysClient_.NotifyNetBearerTypeChange(bearerTypes);
+    return netsysClient_->NotifyNetBearerTypeChange(bearerTypes);
 }
 
 int32_t NetsysControllerServiceImpl::StartClat(const std::string &interfaceName, int32_t netId,
                                                const std::string &nat64PrefixStr)
 {
     NETMGR_LOG_I("StartClat: interfaceName=%{public}s netId=%{public}d", interfaceName.c_str(), netId);
-    return netsysClient_.StartClat(interfaceName, netId, nat64PrefixStr);
+    return netsysClient_->StartClat(interfaceName, netId, nat64PrefixStr);
 }
 
 int32_t NetsysControllerServiceImpl::StopClat(const std::string &interfaceName)
 {
     NETMGR_LOG_I("StopClat: interfaceName=%{public}s", interfaceName.c_str());
-    return netsysClient_.StopClat(interfaceName);
+    return netsysClient_->StopClat(interfaceName);
 }
 
 int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status)
 {
     NETMGR_LOG_D("SetNicTrafficAllowed: status = %{public}d", status);
-    return netsysClient_.SetNicTrafficAllowed(ifaceNames, status);
+    return netsysClient_->SetNicTrafficAllowed(ifaceNames, status);
 }
 
 #ifdef SUPPORT_SYSVPN
 int32_t NetsysControllerServiceImpl::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
 {
     NETMGR_LOG_I("ProcessVpnStage stage=%{public}d", stage);
-    return netsysClient_.ProcessVpnStage(stage);
+    return netsysClient_->ProcessVpnStage(stage);
 }
 #endif // SUPPORT_SYSVPN
 
@@ -994,25 +994,25 @@ int32_t NetsysControllerServiceImpl::CloseSocketsUid(const std::string &ipAddr, 
     if (mockNetsysClient_.CheckMockApi(MOCK_STOPDHCPSERVICE_API)) {
         return mockNetsysClient_.CloseSocketsUid(ipAddr, uid);
     }
-    return netsysClient_.CloseSocketsUid(ipAddr, uid);
+    return netsysClient_->CloseSocketsUid(ipAddr, uid);
 }
 
 int32_t NetsysControllerServiceImpl::SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps)
 {
     NETMGR_LOG_I("SetBrokerUidAccessPolicyMap Enter. size[%{public}zu]", uidMaps.size());
-    return netsysClient_.SetBrokerUidAccessPolicyMap(uidMaps);
+    return netsysClient_->SetBrokerUidAccessPolicyMap(uidMaps);
 }
 
 int32_t NetsysControllerServiceImpl::DelBrokerUidAccessPolicyMap(uint32_t uid)
 {
     NETMGR_LOG_I("DelBrokerUidAccessPolicyMap Enter. uid[%{public}u]", uid);
-    return netsysClient_.DelBrokerUidAccessPolicyMap(uid);
+    return netsysClient_->DelBrokerUidAccessPolicyMap(uid);
 }
 
 int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer)
 {
     NETMGR_LOG_I("SetUserDefinedServerFlag isUserDefinedServer = %{public}d", isUserDefinedServer);
-    return netsysClient_.SetUserDefinedServerFlag(netId, isUserDefinedServer);
+    return netsysClient_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

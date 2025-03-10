@@ -69,7 +69,8 @@ public:
     void SetUp();
 
     void TearDown();
-    static inline NetsysNativeClient nativeClient_;
+    static inline std::shared_ptr<NetsysNativeClient> nativeClientInstance_ = std::make_shared<NetsysNativeClient>();
+    static inline NetsysNativeClient &nativeClient_ = *nativeClientInstance_;
 };
 
 void NetsysNativeClientTest::SetUpTestCase() {}
@@ -312,7 +313,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest008, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest009, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
     std::string ifName = "wlan";
     bool up = true;
     int32_t ret = notifyCallback.OnInterfaceChanged(ifName, up);
@@ -321,7 +322,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest009, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest010, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
     sptr<OHOS::NetsysNative::DhcpResultParcel> dhcpResult = new (std::nothrow) OHOS::NetsysNative::DhcpResultParcel();
     int32_t ret = notifyCallback.OnDhcpSuccess(dhcpResult);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -329,7 +330,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest010, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest011, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
     std::string limitName = "wlan";
     std::string iface = "vpncard";
     int32_t ret = notifyCallback.OnBandwidthReachedLimit(limitName, iface);

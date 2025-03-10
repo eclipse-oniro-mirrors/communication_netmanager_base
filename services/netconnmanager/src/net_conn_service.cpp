@@ -1770,7 +1770,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
+int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     auto currentUid = IPCSkeleton::GetCallingUid();
@@ -1790,6 +1790,17 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
     }
     NETMGR_LOG_D("netSuppliers_ size[%{public}zd] netIdList size[%{public}zd]", netSuppliers_.size(), netIdList.size());
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, &netIdList, &result]() {
+            result = this->GetAllNetsAsync(netIdList);
+        });
+    }
+    return result;
 }
 
 bool NetConnService::IsInRequestNetUids(int32_t uid)
@@ -2842,12 +2853,17 @@ void NetConnService::NetInterfaceStateCallback::AddIfaceDeathRecipient(const spt
 int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
-    if (client_.defaultNetSupplier_ == nullptr) {
+    auto netConnService = netConnService_.lock();
+    if (netConnService == nullptr) {
+        NETMGR_LOG_E("netConnService_ has destory");
+        return NETMANAGER_ERROR;
+    }
+    if (netConnService->defaultNetSupplier_ == nullptr) {
         NETMGR_LOG_E("defaultNetSupplier_ is nullptr");
         return NETMANAGER_ERROR;
     }
-    if (client_.netConnEventHandler_) {
-        client_.netConnEventHandler_->PostSyncTask([this, uid, policy]() { SendNetPolicyChange(uid, policy); });
+    if (netConnService->netConnEventHandler_) {
+        netConnService->netConnEventHandler_->PostSyncTask([this, uid, policy]() { SendNetPolicyChange(uid, policy); });
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERROR;
@@ -2855,29 +2871,34 @@ int32_t NetConnService::NetPolicyCallback::NetUidPolicyChange(uint32_t uid, uint
 
 void NetConnService::NetPolicyCallback::SendNetPolicyChange(uint32_t uid, uint32_t policy)
 {
+    auto netConnService = netConnService_.lock();
+    if (netConnService == nullptr) {
+        NETMGR_LOG_E("netConnService_ has destory");
+        return;
+    }
     sptr<NetHandle> defaultNetHandle = nullptr;
     bool metered = false;
     bool newBlocked = false;
     {
-        std::lock_guard<std::recursive_mutex> locker(client_.netManagerMutex_);
-        if (client_.defaultNetSupplier_ == nullptr) {
+        std::lock_guard<std::recursive_mutex> locker(netConnService->netManagerMutex_);
+        if (netConnService->defaultNetSupplier_ == nullptr) {
             NETMGR_LOG_E("SendNetPolicyChange defaultNetSupplier_ is nullptr");
             return;
         }
-        defaultNetHandle = client_.defaultNetSupplier_->GetNetHandle();
-        metered = client_.defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+        defaultNetHandle = netConnService->defaultNetSupplier_->GetNetHandle();
+        metered = netConnService->defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     }
     newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(uid, metered);
     std::vector<std::shared_ptr<NetActivate>> activates;
     {
-        std::lock_guard guard(client_.uidActivateMutex_);
-        auto it = client_.netUidActivates_.find(uid);
-        if (it != client_.netUidActivates_.end()) {
+        std::lock_guard guard(netConnService->uidActivateMutex_);
+        auto it = netConnService->netUidActivates_.find(uid);
+        if (it != netConnService->netUidActivates_.end()) {
             activates = it->second;
         }
     }
     for (auto &activate : activates) {
-        if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(client_.defaultNetSupplier_)) {
+        if (activate->GetNetCallback() && activate->MatchRequestAndNetwork(netConnService->defaultNetSupplier_)) {
             NETMGR_LOG_D("NetUidPolicyChange Uid=%{public}d, policy=%{public}d", uid, policy);
             activate->GetNetCallback()->NetBlockStatusChange(defaultNetHandle, newBlocked);
         }
@@ -3006,7 +3027,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
             registerToService_ = true;
         }
     } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {
-        policyCallback_ = new (std::nothrow) NetPolicyCallback(*this);
+        policyCallback_ = sptr<NetPolicyCallback>::MakeSptr(shared_from_this());
         std::shared_ptr<NetPolicyClient> netPolicy = DelayedSingleton<NetPolicyClient>::GetInstance();
         int32_t registerRet = netPolicy->RegisterNetPolicyCallback(policyCallback_);
         if (registerRet != NETMANAGER_SUCCESS) {

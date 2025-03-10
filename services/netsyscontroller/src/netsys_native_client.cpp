@@ -49,7 +49,7 @@ static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 static constexpr uint32_t IPV4_MAX_LENGTH = 32;
 static constexpr int UID_FOUNDATION = 5523;
 
-NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
+NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
 {
 }
@@ -58,10 +58,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
             ++cb;
@@ -74,10 +79,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
             ++cb;
@@ -88,10 +98,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceAdded(ifName);
             ++cb;
@@ -102,10 +117,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceRemoved(ifName);
             ++cb;
@@ -116,10 +136,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceChanged(ifName, up);
             ++cb;
@@ -130,10 +155,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnInterfaceLinkStateChanged(ifName, up);
             ++cb;
@@ -145,10 +175,15 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(co
 int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
                                                                  const std::string &gateway, const std::string &ifName)
 {
-    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbObjMutex_);
+    for (auto cb = netsysNativeClient->cbObjects_.begin(); cb != netsysNativeClient->cbObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbObjects_.erase(cb);
+            cb = netsysNativeClient->cbObjects_.erase(cb);
         } else {
             (*cb)->OnRouteChanged(updated, route, gateway, ifName);
             ++cb;
@@ -160,7 +195,12 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
 int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     NETMGR_LOG_I("OnDhcpSuccess");
-    netsysNativeClient_.ProcessDhcpResult(dhcpResult);
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netsysNativeClient->ProcessDhcpResult(dhcpResult);
     return NETMANAGER_SUCCESS;
 }
 
@@ -168,23 +208,33 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
                                                                           const std::string &iface)
 {
     NETMGR_LOG_I("OnBandwidthReachedLimit");
-    netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netsysNativeClient->ProcessBandwidthReachedLimit(limitName, iface);
     return NETMANAGER_SUCCESS;
 }
 
-NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(NetsysNativeClient &netsysNativeClient)
-    : netsysNativeClient_(netsysNativeClient)
+NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(
+    std::weak_ptr<NetsysNativeClient> netsysNativeClient) : netsysNativeClient_(netsysNativeClient)
 {
 }
 
 int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32_t size,
     std::list<OHOS::NetsysNative::NetDnsResultReport> res)
 {
-    std::lock_guard lock(netsysNativeClient_.cbDnsReportObjMutex_);
-    for (auto cb = netsysNativeClient_.cbDnsReportObjects_.begin();
-         cb != netsysNativeClient_.cbDnsReportObjects_.end();) {
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbDnsReportObjMutex_);
+    for (auto cb = netsysNativeClient->cbDnsReportObjects_.begin();
+         cb != netsysNativeClient->cbDnsReportObjects_.end();) {
         if (*cb == nullptr) {
-            cb = netsysNativeClient_.cbDnsReportObjects_.erase(cb);
+            cb = netsysNativeClient->cbDnsReportObjects_.erase(cb);
         } else {
             (*cb)->OnDnsResultReport(size, res);
             ++cb;
@@ -937,7 +987,7 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
         return nullptr;
     }
 
-    deathRecipient_ = new (std::nothrow) NetNativeConnDeathRecipient(*this);
+    deathRecipient_ = sptr<NetNativeConnDeathRecipient>::MakeSptr(shared_from_this());
     if (deathRecipient_ == nullptr) {
         NETMGR_LOG_E("Recipient new failed!");
         return nullptr;
@@ -969,23 +1019,41 @@ void NetsysNativeClient::RegisterNotifyCallback()
         NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
         if (proxy != nullptr) {
             if (nativeNotifyCallback_ == nullptr) {
-                nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
+                nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(shared_from_this());
             }
 
             NETMGR_LOG_D("call proxy->RegisterNotifyCallback");
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
 
-            if (nativeDnsReportCallback_ == nullptr) {
-                nativeDnsReportCallback_ = new (std::nothrow) NativeNetDnsResultCallback(*this);
+            if (nativeNetDnsResultCallback_ == nullptr) {
+                nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(shared_from_this());
             }
 
             NETMGR_LOG_D("call proxy->RegisterDnsResultCallback");
-            proxy->RegisterDnsResultCallback(nativeDnsReportCallback_, dnsReportTimeStep);
+            proxy->RegisterDnsResultCallback(nativeNetDnsResultCallback_, dnsReportTimeStep);
         }
     });
     std::string threadName = "netsysGetProxy";
     pthread_setname_np(t.native_handle(), threadName.c_str());
     t.detach();
+}
+
+void NetsysNativeClient::UnRegisterNotifyCallback()
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return;
+    }
+    if (nativeNotifyCallback_ != nullptr) {
+        proxy->UnRegisterNotifyCallback(nativeNotifyCallback_);
+        nativeNotifyCallback_ = nullptr;
+    }
+
+    if (nativeNetDnsResultCallback_ != nullptr) {
+        proxy->UnregisterDnsResultCallback(nativeNetDnsResultCallback_);
+        nativeNetDnsResultCallback_ = nullptr;
+    }
 }
 
 void NetsysNativeClient::OnRemoteDied(const wptr<IRemoteObject> &remote)

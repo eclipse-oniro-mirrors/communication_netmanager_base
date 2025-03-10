@@ -24,7 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetsysControllerServiceImpl : public INetsysControllerService {
 public:
-    NetsysControllerServiceImpl() = default;
+    NetsysControllerServiceImpl() : netsysClient_(std::make_shared<NetsysNativeClient>()) {};
     ~NetsysControllerServiceImpl() = default;
     void Init() override;
 
@@ -1007,7 +1007,7 @@ public:
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
-    NetsysNativeClient netsysClient_;
+    std::shared_ptr<NetsysNativeClient> netsysClient_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
