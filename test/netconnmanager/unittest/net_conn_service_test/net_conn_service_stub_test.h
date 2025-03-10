@@ -157,6 +157,12 @@ public:
         return 0;
     }
 
+    int32_t GetSpecificNetByIdent(NetBearType bearerType,
+        const std::string &ident, std::list<int32_t> &netIdList) override
+    {
+        return 0;
+    }
+
     int32_t GetAllNets(std::list<int32_t> &netIdList) override
     {
         return 0;
@@ -294,7 +300,12 @@ public:
         return 0;
     }
 
-    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override
+    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident, uint32_t& supplierId) override
+    {
+        return 0;
+    }
+
+    int32_t IncreaseSupplierScore(uint32_t supplierId) override
     {
         return 0;
     }

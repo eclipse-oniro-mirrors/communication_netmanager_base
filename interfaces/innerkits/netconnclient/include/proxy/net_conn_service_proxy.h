@@ -60,6 +60,8 @@ public:
     int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
+    int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
+                                  std::list<int32_t> &netIdList) override;
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
@@ -95,7 +97,9 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
-    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override;
+    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
+                                  uint32_t& supplierId) override;
+    int32_t IncreaseSupplierScore(uint32_t supplierId) override;
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;

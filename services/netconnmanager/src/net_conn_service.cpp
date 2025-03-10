@@ -1770,6 +1770,30 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
+                                              std::list<int32_t> &netIdList)
+{
+    if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
+        NETMGR_LOG_E("netType parameter invalid");
+        return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
+    }
+
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    NET_SUPPLIER_MAP::iterator iterSupplier;
+    for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+        if (iterSupplier->second == nullptr) {
+            continue;
+        }
+        auto supplierType = iterSupplier->second->GetNetSupplierType();
+        std::string supplierIdent = iterSupplier->second->GetNetSupplierIdent();
+        if (bearerType == supplierType && ident == supplierIdent) {
+            netIdList.push_back(iterSupplier->second->GetNetId());
+        }
+    }
+    NETMGR_LOG_D("netSuppliers_ size[%{public}zd] networks_ size[%{public}zd]", netSuppliers_.size(), networks_.size());
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
@@ -3275,7 +3299,8 @@ void NetConnService::RemoveALLClientDeathRecipient()
     deathRecipient_ = nullptr;
 }
 
-std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerType(NetBearType bearerType)
+std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerType(
+    NetBearType bearerType, const std::string &ident)
 {
     std::vector<sptr<NetSupplier>> result;
     NET_SUPPLIER_MAP::iterator iterSupplier;
@@ -3287,6 +3312,9 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
         if (!iterSupplier->second->GetNetCaps().HasNetCap(NET_CAPABILITY_INTERNET)) {
             continue;
         }
+        if (iterSupplier->second->GetNetSupplierIdent() != ident) {
+            continue;
+        }
         std::set<NetBearType>::iterator iter = iterSupplier->second->GetNetCapabilities().bearerTypes_.find(bearerType);
         if (iter != iterSupplier->second->GetNetCapabilities().bearerTypes_.end()) {
             NETMGR_LOG_I("found supplierId[%{public}d] by bearertype[%{public}d].", iterSupplier->first, bearerType);
@@ -3296,40 +3324,47 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
+int32_t NetConnService::DecreaseSupplierScore(NetBearType bearerType, const std::string &ident, uint32_t& supplierId)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, detectionStatus, &supplierId, &result]() {
-            result = this->UpdateSupplierScoreAsync(bearerType, detectionStatus, supplierId);
+        netConnEventHandler_->PostSyncTask([this, bearerType, ident, &supplierId, &result]() {
+            result = this->DecreaseSupplierScoreAsync(bearerType, ident, supplierId);
         });
     }
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
+int32_t NetConnService::IncreaseSupplierScore(uint32_t supplierId)
 {
-    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
-        bearerType, detectionStatus, supplierId);
-    NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
-    if (state == QUALITY_POOR_STATE) {
-        // In poor network, supplierId should be an output parameter.
-        std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
-        if (suppliers.empty()) {
-            NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
-            return NETMANAGER_ERR_INVALID_PARAMETER;
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, supplierId, &result]() {
+            result = this->IncreaseSupplierScoreAsync(supplierId);
+        });
+    }
+    return result;
+}
+
+int32_t NetConnService::DecreaseSupplierScoreAsync(
+    NetBearType bearerType, const std::string &ident, uint32_t& supplierId)
+{
+    NETMGR_LOG_I("decrease supplier score by type[%{public}d], ident[%{public}s]", bearerType, ident.c_str());
+    std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType, ident);
+    if (suppliers.empty()) {
+        NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
+    if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+        if (bearerType == BEARER_WIFI) {
+            tmpSupplierId = FindSupplierForConnected(suppliers);
+            supplierId = tmpSupplierId;
+            NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
         }
-        uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
         if (tmpSupplierId == INVALID_SUPPLIER_ID) {
-            if (bearerType == BEARER_WIFI) {
-                tmpSupplierId = FindSupplierForConnected(suppliers);
-                supplierId = tmpSupplierId;
-                NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
-            }
-            if (tmpSupplierId == INVALID_SUPPLIER_ID) {
-                NETMGR_LOG_E("not found supplierId");
-                return NETMANAGER_ERR_INVALID_PARAMETER;
-            }
+            NETMGR_LOG_E("not found supplierId");
+            return NETMANAGER_ERR_INVALID_PARAMETER;
         }
     }
     // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
@@ -3340,7 +3375,28 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, uint32_
         NETMGR_LOG_E("supplier doesn't exist.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    supplier->SetNetValid(state);
+    supplier->SetNetValid(QUALITY_POOR_STATE);
+    locker.unlock();
+    // Find best network because supplier score changed.
+    FindBestNetworkForAllRequest();
+    // Tell other suppliers to enable if current default supplier is not better than others.
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
+        RequestAllNetworkExceptDefault();
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::IncreaseSupplierScoreAsync(uint32_t supplierId)
+{
+    NETMGR_LOG_I("Increase supplier score by supplierId[%{public}d]", supplierId);
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    auto supplier = FindNetSupplier(supplierId);
+    if (supplier == nullptr) {
+        locker.unlock();
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    supplier->SetNetValid(QUALITY_GOOD_STATE);
     locker.unlock();
     // Find best network because supplier score changed.
     FindBestNetworkForAllRequest();

@@ -470,7 +470,9 @@ public:
 
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
 
-    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
+    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident, uint32_t& supplierId);
+
+    int32_t IncreaseSupplierScore(uint32_t supplierId);
 
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
 
@@ -511,6 +513,7 @@ public:
 
     int32_t GetPacUrl(std::string &pacUrl);
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList);
+    int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident, std::list<int32_t> &netIdList);
 
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened);
     int32_t EnableAppFrozenedCallbackLimitation(bool flag);

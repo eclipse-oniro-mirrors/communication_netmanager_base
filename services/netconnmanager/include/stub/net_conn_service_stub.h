@@ -37,6 +37,7 @@ private:
 
 private:
     void InitQueryFuncToInterfaceMap();
+    void InitQueryFuncToInterfaceMapExt();
     void InitVnicFuncToInterfaceMap();
     void InitVirnicFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
@@ -73,6 +74,7 @@ private:
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetDetection(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSpecificNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetSpecificNetByIdent(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAllNets(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSpecificUidNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetConnectionProperties(MessageParcel &data, MessageParcel &reply);
@@ -106,7 +108,8 @@ private:
     int32_t OnIsPreferCellularUrl(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDecreaseSupplierScore(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIncreaseSupplierScore(MessageParcel &data, MessageParcel &reply);
     int32_t OnCloseSocketsUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPacUrl(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPacUrl(MessageParcel &data, MessageParcel &reply);

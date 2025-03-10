@@ -262,6 +262,8 @@ public:
     int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
+    int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
+        std::list<int32_t> &netIdList) override;
     int32_t GetAllNetsAsync(std::list<int32_t> &netIdList);
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
@@ -374,7 +376,9 @@ public:
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
-    int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) override;
+    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
+                                  uint32_t &supplierId) override;
+    int32_t IncreaseSupplierScore(uint32_t supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
@@ -506,7 +510,9 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo, int32_t callingUid);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
-    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId);
+    int32_t DecreaseSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
+                                       uint32_t& supplierId);
+    int32_t IncreaseSupplierScoreAsync(uint32_t supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
@@ -528,7 +534,8 @@ private:
     bool IsValidDecValue(const std::string &inputValue);
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
-    std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
+    std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(
+        NetBearType bearerType, const std::string &ident);
     uint32_t FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers);
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);

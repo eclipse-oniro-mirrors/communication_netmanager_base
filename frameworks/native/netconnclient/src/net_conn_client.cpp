@@ -1090,14 +1090,25 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
     return ret;
 }
 
-int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId)
+int32_t NetConnClient::DecreaseSupplierScore(NetBearType bearerType,
+    const std::string &ident, uint32_t& supplierId)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr.");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->UpdateSupplierScore(bearerType, detectionStatus, supplierId);
+    return proxy->DecreaseSupplierScore(bearerType, ident, supplierId);
+}
+
+int32_t NetConnClient::IncreaseSupplierScore(uint32_t supplierId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr.");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->IncreaseSupplierScore(supplierId);
 }
 
 std::optional<int32_t> NetConnClient::ObtainTargetApiVersionForSelf()
@@ -1181,6 +1192,17 @@ int32_t NetConnClient::GetSpecificNet(NetBearType bearerType, std::list<int32_t>
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetSpecificNet(bearerType, netIdList);
+}
+
+int32_t NetConnClient::GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
+                                             std::list<int32_t> &netIdList)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("GetSpecificNetByIdent proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetSpecificNetByIdent(bearerType, ident, netIdList);
 }
 
 int32_t NetConnClient::SetAppIsFrozened(uint32_t uid, bool isFrozened)

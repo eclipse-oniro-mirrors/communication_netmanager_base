@@ -98,6 +98,7 @@ void NetConnServiceStub::InitAll()
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
+    InitQueryFuncToInterfaceMapExt();
     InitVnicFuncToInterfaceMap();
     InitVirnicFuncToInterfaceMap();
 }
@@ -112,8 +113,10 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
-        &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE)] = {
+        &NetConnServiceStub::OnDecreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE)] = {
+        &NetConnServiceStub::OnIncreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
         &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED)] = {
@@ -188,6 +191,12 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnSetPacUrl, {Permission::SET_PAC_URL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {
         &NetConnServiceStub::OnGetPacUrl, {}};
+}
+
+void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT)] = {
+        &NetConnServiceStub::OnGetSpecificNetByIdent, {}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -972,6 +981,49 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceStub::OnGetSpecificNetByIdent(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type;
+    std::string ident = "";
+    if (!data.ReadUint32(type)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    NetBearType bearerType = static_cast<NetBearType>(type);
+    if (!data.ReadString(ident)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    NETMGR_LOG_D("stub execute GetSpecificNetByIdent");
+    std::list<int32_t> netIdList;
+    int32_t ret = GetSpecificNetByIdent(bearerType, ident, netIdList);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
+        if (!reply.WriteUint32(size)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+
+        uint32_t index = 0;
+        for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {
+            if (++index > MAX_IFACE_NUM) {
+                break;
+            }
+            if (!reply.WriteInt32(*p)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("stub execute GetAllNets");
@@ -1710,25 +1762,25 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnDecreaseSupplierScore(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t type = 0;
-    uint32_t detectionStatus = 0;
+    std::string ident = "";
     uint32_t supplierId;
     if (!data.ReadUint32(type)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    if (!data.ReadUint32(detectionStatus)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
         return NETMANAGER_ERR_INTERNAL;
     }
+    if (!data.ReadString(ident)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
     if (!data.ReadUint32(supplierId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(type);
-    int32_t ret = UpdateSupplierScore(bearerType, detectionStatus, supplierId);
+    int32_t ret = DecreaseSupplierScore(bearerType, ident, supplierId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -1737,6 +1789,19 @@ int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessagePa
         if (!reply.WriteUint32(supplierId)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnIncreaseSupplierScore(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t supplierId;
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = IncreaseSupplierScore(supplierId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }
