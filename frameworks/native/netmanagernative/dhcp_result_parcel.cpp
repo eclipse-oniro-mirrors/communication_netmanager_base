@@ -35,6 +35,9 @@ bool DhcpResultParcel::Marshalling(Parcel &parcel) const
 sptr<DhcpResultParcel> DhcpResultParcel::Unmarshalling(Parcel &parcel)
 {
     sptr<DhcpResultParcel> ptr = sptr<DhcpResultParcel>::MakeSptr();
+    if (ptr == nullptr) {
+        return nullptr;
+    }
     ptr->iface_ = parcel.ReadString();
     ptr->ipAddr_ = parcel.ReadString();
     ptr->gateWay_ = parcel.ReadString();
