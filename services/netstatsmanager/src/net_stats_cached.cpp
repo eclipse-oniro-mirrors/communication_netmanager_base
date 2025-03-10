@@ -756,8 +756,7 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
         if (tmp.flag_ <= STATS_DATA_FLAG_DEFAULT || tmp.flag_ >= STATS_DATA_FLAG_LIMIT) {
             tmp.flag_ = GetUidStatsFlag(tmp.uid_);
         }
-
-        if(tmp.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+        if (tmp.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
             tmp.uid_ = Sim_UID;
         } else if (tmp.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
             tmp.uid_ = SIM2_UID;
