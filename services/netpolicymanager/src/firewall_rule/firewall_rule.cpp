@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// t
+
 #include "firewall_rule.h"
 
 #include "device_idle_firewall_rule.h"
@@ -50,7 +50,6 @@ std::vector<uint32_t> FirewallRule::GetAllowedList()
 
 void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids, uint32_t rule)
 {
-    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     for (auto &uid : uids) {
         SetAllowedList(uid, rule);
     }
@@ -78,9 +77,12 @@ void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
 
 void FirewallRule::SetAllowedList(const std::set<uint32_t> &uids)
 {
-    for (const auto &it : uids) {
-        if (std::find(allowedList_.begin(), allowedList_.end(), it) == allowedList_.end()) {
-            allowedList_.push_back(it);
+    {
+        std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
+        for (const auto &it : uids) {
+            if (std::find(allowedList_.begin(), allowedList_.end(), it) == allowedList_.end()) {
+                allowedList_.push_back(it);
+            }
         }
     }
 
@@ -89,6 +91,7 @@ void FirewallRule::SetAllowedList(const std::set<uint32_t> &uids)
 
 void FirewallRule::SetAllowedList()
 {
+    std::shared_lock<std::shared_mutex> lock(allowedListMutex_);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Set allowed list start");
     netsys_->FirewallSetUidsAllowedListChain(chainType_, allowedList_);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Set allowed list end");
@@ -123,15 +126,18 @@ void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
             }
         }
     }
+    lock.unlock();
     netsys_->FirewallSetUidRule(chainType_, {uid}, rule);
 }
 
 void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids)
 {
-    std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
-    for (const auto &it : uids) {
-        if (std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
-            deniedList_.push_back(it);
+    {
+        std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
+        for (const auto &it : uids) {
+            if (std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
+                deniedList_.push_back(it);
+            }
         }
     }
 
@@ -140,12 +146,13 @@ void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids)
 
 void FirewallRule::SetDeniedList()
 {
+    std::shared_lock<std::shared_mutex> lock(deniedListMutex_);
     netsys_->FirewallSetUidsDeniedListChain(chainType_, deniedList_);
 }
 
 void FirewallRule::ClearDeniedList()
 {
-    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
+    std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
     deniedList_.clear();
     netsys_->FirewallSetUidsAllowedListChain(chainType_, deniedList_);
 }
@@ -162,6 +169,7 @@ void FirewallRule::EnableFirewall(bool enable)
 
 void FirewallRule::RemoveFromAllowedList(uint32_t uid)
 {
+    std::unique_lock<std::shared_mutex> lock(allowedListMutex_);
     for (auto iter = allowedList_.begin(); iter != allowedList_.end(); ++iter) {
         if (*iter == uid) {
             allowedList_.erase(iter);
