@@ -790,4 +790,14 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
 {
     return installSource == INSTALL_SOURCE_FROM_SIM2;
 }
+
+bool IsSimAnco(const std::string &bundleName)
+{
+    return bundleName == INSTALL_SOURCE_FROM_SIM;
+}
+
+bool IsSim2Anco(const std::string &bundleName)
+{
+    return bundleName == INSTALL_SOURCE_FROM_SIM2;
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils

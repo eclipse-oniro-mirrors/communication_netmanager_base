@@ -756,14 +756,25 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
             continue;
         }
         if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid() &&
-            (CommonUtils::IsInstallSourceFromSim(iter->second.installSource_) ||
-             iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
+            (CommonUtils::IsSim(iter->second.bundleName_) || CommonUtils::IsSimAnco(iter->second.bundleName_) ||
+            iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
             params.emplace(iter->second.uid_, simFindRet->second.uid_);
+            continue;
+        }
+        if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid() &&
+            (CommonUtils::IsInstallSourceFromSim(iter->second.installSource_))) {
+            params.emplace(iter->second.uid_, iter->second.uid_);
+            continue;
+        }
+        if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
+            (CommonUtils::IsSim2(iter->second.bundleName_) || CommonUtils::IsSim2Anco(iter->second.bundleName_) ||
+            iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
+            params.emplace(iter->second.uid_, sim2FindRet->second.uid_);
             continue;
         }
         if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
             CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
-            params.emplace(iter->second.uid_, sim2FindRet->second.uid_);
+            params.emplace(iter->second.uid_,  iter->second.uid_);
             continue;
         }
     }

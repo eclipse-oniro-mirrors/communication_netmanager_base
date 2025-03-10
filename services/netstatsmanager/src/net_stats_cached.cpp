@@ -129,10 +129,10 @@ void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStats
                       return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                   }), tmpList.end());
     std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
-        if (info.flag_ == STATS_DATA_FLAG_SIM2) {
-            info.uid_ = SIM2_UID;
-        } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+        if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
             info.uid_ = Sim_UID;
+        } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+            info.uid_ = SIM2_UID;
         }
         return info;
     });
@@ -530,6 +530,13 @@ void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleIn
             NETMGR_LOG_W("SetUidStatsFlag sampleBundleInfo is invalid. [%{public}s]", iter->second.ToString().c_str());
             continue;
         }
+        if (CommonUtils::IsSim(iter->second.bundleName_) || CommonUtils::IsSimAnco(iter->second.bundleName_)) {
+            uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM_BASIC);
+            continue;
+        } else if (CommonUtils::IsSim2(iter->second.bundleName_) || CommonUtils::IsSim2Anco(iter->second.bundleName_)) {
+            uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2_BASIC);
+            continue;
+        }
         if (CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
             uidStatsFlagMap_.EnsureInsert(iter->first,
                                           isExistSim2 ? STATS_DATA_FLAG_SIM2 : STATS_DATA_FLAG_DEFAULT);
@@ -542,9 +549,9 @@ void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleIn
             }
             if (earlySampleBundleOpt.has_value() &&
                 CommonUtils::IsSim2(earlySampleBundleOpt.value().bundleName_) && isExistSim2) {
-                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2);
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2_BASIC);
             } else if (isExistSim) {
-                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM);
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM_BASIC);
             } else {
                 uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_DEFAULT);
             }
@@ -579,7 +586,7 @@ NetStatsDataFlag NetStatsCached::GetUidStatsFlag(uint32_t uid)
             isExistSim = true;
         }
     });
-    flag = isExistSim ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_DEFAULT;
+    flag = isExistSim ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_DEFAULT;
     uidStatsFlagMap_.EnsureInsert(uid, flag);
     return flag;
 }
@@ -653,30 +660,37 @@ void NetStatsCached::DeleteUidSimStats(uint32_t uid)
     }
     if (CommonUtils::IsSim(sampleBundleInfo.bundleName_) ||
         CommonUtils::IsSim2(sampleBundleInfo.bundleName_)) {
-        auto flag =
-            CommonUtils::IsSim(sampleBundleInfo.bundleName_) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
-        auto handler = std::make_unique<NetStatsDataHandler>();
-        if (handler == nullptr || handler->UpdateSimDataFlag(flag, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("DeleteUidSimStats updateFlag failed. uid:[%{public}d], flag[%{public}u]", uid, flag);
-        }
-        std::lock_guard<ffrt::mutex> lock(lock_);
-        lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
-                                                  [flag](const auto &item) { return item.flag_ == flag; }),
-                                   lastUidSimStatsInfo_.end());
-        std::vector<uint32_t> uidList{uid};
-        uidStatsFlagMap_.Iterate([flag, &uidList](const uint32_t &k, const NetStatsDataFlag &v) {
-            if (flag == v) {
-                uidList.push_back(k);
-            }
-        });
-        std::for_each(uidList.begin(), uidList.end(), [this](const uint32_t uid) {
-            uidStatsFlagMap_.EnsureInsert(uid, STATS_DATA_FLAG_DEFAULT);
-            auto ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
-            if (ret != NETMANAGER_SUCCESS) {
-                NETMGR_LOG_E("DeleteUidSimStats SimStatsInfo Failed. ret[%{public}d], uid[%{public}u]", ret, uid);
-            }
-        });
+        auto flagBasic =
+            CommonUtils::IsSim(sampleBundleInfo.bundleName_) ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_SIM2_BASIC;
+        auto flagHap = (flagBasic == STATS_DATA_FLAG_SIM_BASIC) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
+        DeleteUidSimStatsWithFlag(uid, flagBasic);
+        DeleteUidSimStatsWithFlag(uid, flagHap);
     }
+}
+
+void NetStatsCached::DeleteUidSimStatsWithFlag(uint32_t uid, uint32_t flag)
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    if (handler == nullptr || handler->UpdateSimDataFlag(flag, STATS_DATA_FLAG_UNINSTALLED) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("DeleteUidSimStats updateFlag failed. uid:[%{public}d], flag[%{public}u]", uid, flag);
+    }
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    lastUidSimStatsInfo_.erase(std::remove_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
+                                              [flag](const auto &item) { return item.flag_ == flag; }),
+                               lastUidSimStatsInfo_.end());
+    std::vector<uint32_t> uidList{uid};
+    uidStatsFlagMap_.Iterate([flag, &uidList](const uint32_t &k, const NetStatsDataFlag &v) {
+        if (flag == v) {
+            uidList.push_back(k);
+        }
+    });
+    std::for_each(uidList.begin(), uidList.end(), [this](const uint32_t uid) {
+        uidStatsFlagMap_.EnsureInsert(uid, STATS_DATA_FLAG_DEFAULT);
+        auto ret = NetsysController::GetInstance().DeleteSimStatsInfo(uid);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("DeleteUidSimStats SimStatsInfo Failed. ret[%{public}d], uid[%{public}u]", ret, uid);
+        }
+    });
 }
 
 #ifdef SUPPORT_NETWORK_SHARE
@@ -742,11 +756,12 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
         if (tmp.flag_ <= STATS_DATA_FLAG_DEFAULT || tmp.flag_ >= STATS_DATA_FLAG_LIMIT) {
             tmp.flag_ = GetUidStatsFlag(tmp.uid_);
         }
-        if (tmp.flag_ == STATS_DATA_FLAG_SIM2) {
-            tmp.uid_ = SIM2_UID;
-        } else if (tmp.flag_ == STATS_DATA_FLAG_SIM) {
+
+        if(tmp.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
             tmp.uid_ = Sim_UID;
-        } else {
+        } else if (tmp.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+            tmp.uid_ = SIM2_UID;
+        } else if (tmp.flag_ != STATS_DATA_FLAG_SIM && tmp.flag_ != STATS_DATA_FLAG_SIM2) {
             return;
         }
         statsInfo.push_back(std::move(tmp));

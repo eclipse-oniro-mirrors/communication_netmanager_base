@@ -47,11 +47,13 @@ enum NetStatsResultCode {
 };
 
 enum NetStatsDataFlag {
-    STATS_DATA_FLAG_DEFAULT,     // The minimum value of DataFlag, Do not less than the limit. No actual meaning.
-    STATS_DATA_FLAG_UNINSTALLED, // the stats of the uninstalled uid.
-    STATS_DATA_FLAG_SIM2,      // the stats of the sim2 uid.
-    STATS_DATA_FLAG_SIM,        // the stats of the sim uid.
-    STATS_DATA_FLAG_LIMIT,       // The maximum value of DataFlag, Do not exceed the limit. No actual meaning.
+    STATS_DATA_FLAG_DEFAULT,        // The minimum value of DataFlag, Do not less than the limit. No actual meaning.
+    STATS_DATA_FLAG_UNINSTALLED,    // the stats of the uninstalled uid.
+    STATS_DATA_FLAG_SIM2,           // the stats of the sim2 (hap)uid.
+    STATS_DATA_FLAG_SIM,            // the stats of the sim (hap)uid.
+    STATS_DATA_FLAG_SIM_BASIC,      // the stats of the sim (basic)uid.
+    STATS_DATA_FLAG_SIM2_BASIC,     // the stats of the sim2 (basic)uid.
+    STATS_DATA_FLAG_LIMIT,          // The maximum value of DataFlag, Do not exceed the limit. No actual meaning.
 };
 
 enum NetStatsNotificationFlag {
