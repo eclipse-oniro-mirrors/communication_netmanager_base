@@ -514,6 +514,8 @@ public:
 
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened);
     int32_t EnableAppFrozenedCallbackLimitation(bool flag);
+
+    void UnsubscribeSystemAbility();
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -540,7 +542,6 @@ private:
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
     static std::optional<std::string> ObtainBundleNameFromBundleMgr();
     void SubscribeSystemAbility();
-    void UnsubscribeSystemAbility();
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
