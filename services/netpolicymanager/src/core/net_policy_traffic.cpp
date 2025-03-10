@@ -192,7 +192,6 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
             GetNetsysInst()->BandwidthSetIfaceQuota(iface, quotaRemain);
         }
     }
-    lock.unlock();
     // remove the iface quota that not metered.
     for (uint32_t i = 0; i < meteredIfaces_.size(); ++i) {
         if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfaces_[i])) {
