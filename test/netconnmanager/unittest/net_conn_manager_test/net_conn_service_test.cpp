@@ -804,6 +804,12 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->GetSpecificNet(BEARER_DEFAULT, netIdList);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
 
+    ret = NetConnService::GetInstance()->GetSpecificNetByIdent(BEARER_CELLULAR, "test", netIdList);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = NetConnService::GetInstance()->GetSpecificNetByIdent(BEARER_DEFAULT, "test", netIdList);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
+
     ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -1202,11 +1208,11 @@ HWTEST_F(NetConnServiceTest, FindSupplierWithInternetByBearerType001, TestSize.L
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::vector<sptr<NetSupplier>> suppliers =
-        NetConnService::GetInstance()->FindSupplierWithInternetByBearerType(NetBearType::BEARER_WIFI);
+        NetConnService::GetInstance()->FindSupplierWithInternetByBearerType(NetBearType::BEARER_WIFI, TEST_IDENT);
     EXPECT_FALSE(suppliers.empty());
 }
 
-HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, DecreaseSupplierScore001, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
@@ -1218,15 +1224,14 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->MakeDefaultNetWork(NetConnService::GetInstance()->defaultNetSupplier_,
         NetConnService::GetInstance()->netSuppliers_[supplierId]);
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
-        QUALITY_POOR_STATE, supplierId);
+    ret = NetConnService::GetInstance()->DecreaseSupplierScoreAsync(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     auto supplier = NetConnService::GetInstance()->FindNetSupplier(supplierId);
     supplier->SetDetectionDone();
     EXPECT_EQ(supplier->GetRealScore(), supplier->GetNetScore() - DIFF_SCORE_BETWEEN_GOOD_POOR);
 }
 
-HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, DecreaseSupplierScore002, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
@@ -1236,12 +1241,11 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore002, TestSize.Level1)
     int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
         netCaps, supplierId, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
-        QUALITY_GOOD_STATE, supplierId);
+    ret = NetConnService::GetInstance()->DecreaseSupplierScoreAsync(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, UpdateSupplierScore003, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, DecreaseSupplierScore003, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_MMS);
@@ -1262,8 +1266,21 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore003, TestSize.Level1)
     netLinkInfo->netAddrList_.push_back(netAddr);
     ret = NetConnService::GetInstance()->UpdateNetLinkInfoAsync(supplierId, netLinkInfo, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = NetConnService::GetInstance()->UpdateSupplierScoreAsync(NetBearType::BEARER_WIFI,
-        QUALITY_POOR_STATE, supplierId);
+    ret = NetConnService::GetInstance()->DecreaseSupplierScoreAsync(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, IncreaseSupplierScore001, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_MMS);
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    uint32_t supplierId = 0;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplierAsync(NetBearType::BEARER_WIFI, TEST_IDENT,
+        netCaps, supplierId, callingUid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->IncreaseSupplierScoreAsync(supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1584,16 +1601,16 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesAsStringTest001, TestSize.Level1)
     ASSERT_TRUE(ret != str);
 }
 
-HWTEST_F(NetConnServiceTest, UpdateSupplierScoreTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, DecreaseSupplierScoreTest001, TestSize.Level1)
 {
     NetBearType bearerType = BEARER_WIFI;
     bool isBetter = true;
     uint32_t supplierId = 1;
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    int32_t ret = NetConnService::GetInstance()->UpdateSupplierScore(bearerType, isBetter, supplierId);
+    int32_t ret = NetConnService::GetInstance()->DecreaseSupplierScore(bearerType, "test", supplierId);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
     NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->UpdateSupplierScore(bearerType, isBetter, supplierId);
+    ret = NetConnService::GetInstance()->DecreaseSupplierScore(bearerType, "test", supplierId);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 

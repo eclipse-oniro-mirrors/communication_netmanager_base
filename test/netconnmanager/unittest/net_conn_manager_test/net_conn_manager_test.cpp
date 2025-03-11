@@ -467,6 +467,13 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     for (auto it : netIdList) {
         std::cout << "netid = " << it << std::endl;
     }
+
+    std::list<int32_t> netIdList1;
+    result = proxy->GetSpecificNetByIdent(bearerType, "ident", netIdList1);
+    ASSERT_TRUE(result == NETMANAGER_SUCCESS);
+    for (auto it : netIdList) {
+        std::cout << "netid = " << it << std::endl;
+    }
 }
 
 /**

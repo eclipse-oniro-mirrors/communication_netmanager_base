@@ -70,6 +70,8 @@ public:
     virtual int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) = 0;
     virtual int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) = 0;
     virtual int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) = 0;
+    virtual int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
+                                          std::list<int32_t> &netIdList) = 0;
     virtual int32_t GetAllNets(std::list<int32_t> &netIdList) = 0;
     virtual int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) = 0;
     virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
@@ -108,7 +110,9 @@ public:
     virtual int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) = 0;
     virtual int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
     virtual int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
-    virtual int32_t UpdateSupplierScore(NetBearType bearerType, uint32_t detectionStatus, uint32_t& supplierId) = 0;
+    virtual int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
+                                          uint32_t& supplierId) = 0;
+    virtual int32_t IncreaseSupplierScore(uint32_t supplierId) = 0;
     virtual int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) = 0;
     virtual int32_t DisableVnicNetwork() = 0;
     virtual int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) = 0;

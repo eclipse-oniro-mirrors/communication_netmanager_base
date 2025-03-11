@@ -966,6 +966,38 @@ void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), dataParcelNoBearerType);
 }
 
+void GetSpecificNetByIdentFuzzTest(const uint8_t *data, size_t size)
+{
+    uint32_t bearerType = NetConnGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    std::string ident = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteUint32(bearerType);
+    dataParcel.WriteString(ident);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT), dataParcel);
+    
+    MessageParcel dataParcelNoBearerType;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoBearerType)) {
+        return;
+    }
+    dataParcel.WriteString(ident);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT), dataParcelNoBearerType);
+
+    MessageParcel dataParcelNoIdent;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoIdent)) {
+        return;
+    }
+    dataParcel.WriteUint32(bearerType);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT), dataParcelNoIdent);
+}
+
 void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 {
     int32_t netId = NetConnGetData<int32_t>();
@@ -1353,48 +1385,67 @@ void IsPreferCellularUrlFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL), dataParcelNoUrl);
 }
 
-void StaticUpdateSupplierScoreProcess(const uint8_t *data, size_t size, MessageParcel &dataParcel, uint8_t paramsModel)
+void StaticDecreaseSupplierScoreProcess(
+    const uint8_t *data, size_t size, MessageParcel &dataParcel, uint8_t paramsModel)
 {
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     // ! without the first param.
     if (paramsModel != WITHOUT_FIRST_PARM_MODEL) {
-        int32_t supplierId = NetConnGetData<int32_t>();
-        dataParcel.WriteInt32(supplierId);
-    }
-    // ! without the second param.
-    if (paramsModel != WITHOUT_SECOND_PARM_MODEL) {
-        bool isBetter = NetConnGetData<bool>();
-        dataParcel.WriteBool(isBetter);
-    }
-    // ! without the third param.
-    if (paramsModel != WITHOUT_THIRD_PARM_MODEL) {
         int32_t type = NetConnGetData<int32_t>();
         dataParcel.WriteInt32(type);
     }
+    // ! without the second param.
+    if (paramsModel != WITHOUT_SECOND_PARM_MODEL) {
+        std::string ident = NetConnGetString(STR_LEN);
+        dataParcel.WriteString(ident);
+    }
+    // ! without the third param.
+    if (paramsModel != WITHOUT_THIRD_PARM_MODEL) {
+        int32_t supplierId = NetConnGetData<int32_t>();
+        dataParcel.WriteInt32(supplierId);
+    }
 }
 
-void UpdateSupplierScoreFuzzTest(const uint8_t *data, size_t size)
+void DecreaseSupplierScoreFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcelWithAllParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITH_ALL_PARM_MODEL);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE), dataParcelWithAllParam);
+    StaticDecreaseSupplierScoreProcess(data, size, dataParcelWithAllParam, WITH_ALL_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE), dataParcelWithAllParam);
 
     MessageParcel dataParcelWithOutFirstParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+    StaticDecreaseSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE),
                     dataParcelWithOutFirstParam);
 
     MessageParcel dataParcelWithOutSecondParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+    StaticDecreaseSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE),
                     dataParcelWithOutSecondParam);
 
     MessageParcel dataParcelWithOutThirdParam;
-    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+    StaticDecreaseSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE),
                     dataParcelWithOutThirdParam);
+}
+
+void IncreaseSupplierScoreFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcelWithAllParam;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelWithAllParam)) {
+        return;
+    }
+    int32_t supplierId = NetConnGetData<int32_t>();
+    dataParcelWithAllParam.WriteInt32(supplierId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE), dataParcelWithAllParam);
+
+    MessageParcel dataParcelWithOutFirstParam;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelWithOutFirstParam)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE),
+                    dataParcelWithOutFirstParam);
 }
 
 void RegisterPreAirplaneCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -1585,6 +1636,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UnregisterNetInterfaceCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAppIsFrozenedTest(data, size);
     OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitationTest(data, size);
+    OHOS::NetManagerStandard::GetSpecificNetByIdentFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
