@@ -430,8 +430,7 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
 int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName)
 {
     const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
-    for (IpType ipType : {IPTYPE_IPV4, IPTYPE_IPV6})
-    {
+    for (IpType ipType : {IPTYPE_IPV4, IPTYPE_IPV6}) {
         NetworkSharingTraffic traffic0;
         std::string ifaceName0 = "";
         std::string result = iptablesWrapper_->RunCommandForRes(ipType, cmds);
