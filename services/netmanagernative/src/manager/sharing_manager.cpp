@@ -447,7 +447,6 @@ int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &
         ifaceName = ifaceName0;
     }
     NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic success");
-    NETNATIVE_LOGI("wd::GetNetworkCellularSharingTraffic all %{public}s", std::to_string(traffic.all).c_str());
     return NETMANAGER_SUCCESS;
 }
 
