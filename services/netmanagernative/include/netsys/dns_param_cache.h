@@ -88,11 +88,9 @@ public:
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);
 
-    int32_t SetFirewallCurrentUserId(int32_t userId)
-    {
-        currentUserId_ = userId;
-        return 0;
-    }
+    int32_t SetFirewallCurrentUserId(int32_t userId);
+
+    void ClearAllDnsCache();
 
     int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                              bool isFinish);
