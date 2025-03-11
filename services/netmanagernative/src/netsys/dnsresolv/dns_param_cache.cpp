@@ -406,6 +406,7 @@ int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
             break;
         }
         case NetFirewallRuleType::RULE_DOMAIN: {
+            ClearAllDnsCache();
             for (const auto &rule : ruleList) {
                 firewallDomainRules_.emplace_back(firewall_rule_cast<NetFirewallDomainRule>(rule));
             }
@@ -681,6 +682,21 @@ int32_t DnsParamCache::UnRegisterNetFirewallCallback(const sptr<NetsysNative::IN
         }
     }
     return -1;
+}
+
+int32_t DnsParamCache::SetFirewallCurrentUserId(int32_t userId)
+{
+    currentUserId_ = userId;
+    ClearAllDnsCache();
+    return 0;
+}
+
+void DnsParamCache::ClearAllDnsCache()
+{
+    NETNATIVE_LOGI("ClearAllDnsCache");
+    for (auto it = serverConfigMap_.begin(); it != serverConfigMap_.end(); it++) {
+        it->second.GetCache().Clear();
+    }
 }
 #endif
 
