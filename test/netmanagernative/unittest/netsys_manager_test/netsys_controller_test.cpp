@@ -1254,9 +1254,9 @@ HWTEST_F(NetsysControllerTest, SetBrokerUidAccessPolicyMapTest003, TestSize.Leve
 
 HWTEST_F(NetsysControllerTest, DelBrokerUidAccessPolicyMapTest002, TestSize.Level1)
 {
-    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    NetsysController::GetInstance().netsysService_ = nullptr;
     int32_t ret = NetsysController::GetInstance().DelBrokerUidAccessPolicyMap(TEST_UID_32);
-    EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
