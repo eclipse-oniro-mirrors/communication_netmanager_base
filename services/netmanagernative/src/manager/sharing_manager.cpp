@@ -430,8 +430,30 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
 int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName)
 {
     const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
-    std::string result = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmds);
+    for (IpType ipType : {IPTYPE_IPV4, IPTYPE_IPV6})
+    {
+        NetworkSharingTraffic traffic0;
+        std::string ifaceName0 = "";
+        std::string result = iptablesWrapper_->RunCommandForRes(ipType, cmds);
+        int32_t ret = QueryCellularSharingTraffic(traffic0, result, ifaceName0);
+        if (ret != NETMANAGER_SUCCESS)
+        {
+            NETNATIVE_LOGE("ipv4 GetNetworkSharingTraffic failed");
+            return NETMANAGER_ERROR;
+        }
+        traffic.receive += traffic0.receive;
+        traffic.send += traffic0.send;
+        traffic.all += traffic0.all;
+        ifaceName = ifaceName0;
+    }
+    NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic success");
+    NETNATIVE_LOGI("wd::GetNetworkCellularSharingTraffic all %{public}s", std::to_string(traffic.all).c_str());
+    return NETMANAGER_SUCCESS;
+}
 
+int32_t SharingManager::QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,
+    const std::string &result, std::string &ifaceName)
+{
     const std::string num = "(\\d+)";
     const std::string iface = "([^\\s]+)";
     const std::string dst = "(0.0.0.0/0|::/0)";

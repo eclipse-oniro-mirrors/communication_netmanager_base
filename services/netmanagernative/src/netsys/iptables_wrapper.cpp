@@ -59,15 +59,6 @@ void IptablesWrapper::ExecuteCommand(const std::string &command)
     }
 }
 
-void IptablesWrapper::ExecuteCommandForTraffic(const std::string &command)
-{
-    std::string cmdWithWait = command + " -w 5 ";
-    NETNATIVE_LOGI("ExecuteCommandForTraffic %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
-    if (CommonUtils::ForkExec(cmdWithWait, &resultTraffic_) == NETMANAGER_ERROR) {
-        NETNATIVE_LOGE("run exec faild");
-    }
-}
-
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
