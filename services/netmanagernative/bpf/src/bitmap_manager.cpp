@@ -152,7 +152,7 @@ int32_t BitmapManager::BuildBitmapMap(const std::vector<sptr<NetFirewallIpRule>>
 
 void BitmapManager::Insert()
 {
-    std::lock_guardstd::mutex guard(mutex_);
+    std::lock_guard<std::mutex> guard(mutex_);
     Bitmap bitmap;
     srcIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
     dstIp4Map_.OrInsert(OTHER_IP4_KEY, IPV4_MAX_PREFIXLEN, bitmap);
