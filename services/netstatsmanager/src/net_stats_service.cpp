@@ -528,15 +528,13 @@ bool NetStatsService::IsSharingOn()
 
 void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, uint32_t endtime)
 {
-    if (endtime > netStatsCached_->GetWriteDateTime())
-    {
+    if (endtime > netStatsCached_->GetWriteDateTime()) {
         // 跑在非ipc线程防止鉴权失败
         bool isSharingOn = false;
         auto task = ffrt::submit_h([&isSharingOn, this]() { isSharingOn = NetStatsService::IsSharingOn(); }, {}, {},
             ffrt::task_attr().name("isSharingOn"));
         ffrt::wait({task});
-        if (isSharingOn)
-        {
+        if (isSharingOn) {
             NETMGR_LOG_D("GetSharingStats enter");
             netStatsCached_->GetIptablesStatsIncrease(sharingStats);
         }
