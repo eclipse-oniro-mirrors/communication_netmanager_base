@@ -103,6 +103,8 @@ public:
 
     void DeleteUidStatsFlag(uint32_t uid);
 
+    void DeleteUidSimStatsWithFlag(uint32_t uid, uint32_t flag);
+
     void ClearUidStatsFlag();
 
 #ifdef SUPPORT_NETWORK_SHARE

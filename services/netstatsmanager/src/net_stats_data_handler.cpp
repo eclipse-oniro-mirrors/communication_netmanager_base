@@ -94,10 +94,10 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
                            }),
                            uidSimTableInfos.end());
     std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-        if (info.flag_ == STATS_DATA_FLAG_SIM2) {
-            info.uid_ = SIM2_UID;
-        } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+        if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
             info.uid_ = Sim_UID;
+        } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+            info.uid_ = SIM2_UID;
         }
     });
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
@@ -127,10 +127,10 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
                                }),
                                uidSimTableInfos.end());
         std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-            if (info.flag_ == STATS_DATA_FLAG_SIM2) {
-                info.uid_ = SIM2_UID;
-            } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+            if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
                 info.uid_ = Sim_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                info.uid_ = SIM2_UID;
             }
         });
     } else {
