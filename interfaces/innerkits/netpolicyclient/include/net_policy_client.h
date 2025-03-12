@@ -30,7 +30,7 @@ class NetPolicyClient : public std::enable_shared_from_this<NetPolicyClient> {
 public:
     NetPolicyClient();
     ~NetPolicyClient();
-    NetPolicyClient& GetInstance();
+    static NetPolicyClient& GetInstance();
     /**
      * Set the network policy for the specified UID.
      *

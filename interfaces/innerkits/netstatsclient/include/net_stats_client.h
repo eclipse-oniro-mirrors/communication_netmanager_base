@@ -35,7 +35,7 @@ class NetStatsClient : public Singleton<NetStatsClient> {
 public:
     NetStatsClient();
     ~NetStatsClient();
-    NetStatsClient& GetInstance();
+    static NetStatsClient& GetInstance();
 
     /**
      * Register network card traffic monitoring
