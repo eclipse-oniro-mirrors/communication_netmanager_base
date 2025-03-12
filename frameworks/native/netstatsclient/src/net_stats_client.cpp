@@ -47,6 +47,12 @@ NetStatsClient::~NetStatsClient()
     serviceRemote->RemoveDeathRecipient(deathRecipient_);
 }
 
+NetStatsClient& NetPolicyClient::GetInstance()
+{
+    static std::shared_ptr<NetStatsClient> instance = std::make_shared<NetStatsClient>();
+    return *instance;
+}
+
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     NETMGR_LOG_D("RegisterNetStatsCallback client in");
@@ -162,9 +168,7 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
-        std::thread t([this]() {
-            RecoverCallback();
-        });
+        std::thread t([sp = shared_from_this()]() { sp->RecoverCallback(); });
         std::string threadName = "nestatsRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();

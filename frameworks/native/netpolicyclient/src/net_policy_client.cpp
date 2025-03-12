@@ -42,6 +42,12 @@ NetPolicyClient::~NetPolicyClient()
     serviceRemote->RemoveDeathRecipient(deathRecipient_);
 }
 
+NetPolicyClient& NetPolicyClient::GetInstance()
+{
+    static std::shared_ptr<NetPolicyClient> instance = std::make_shared<NetPolicyClient>();
+    return *instance;
+}
+
 int32_t NetPolicyClient::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
     sptr<INetPolicyService> proxy = GetProxy();
@@ -187,9 +193,7 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
-        std::thread t([this]() {
-            RecoverCallback();
-        });
+        std::thread t([sp = shared_from_this()]() { sp->RecoverCallback(); });
         std::string threadName = "netpolicyRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
