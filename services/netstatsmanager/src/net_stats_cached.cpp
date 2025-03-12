@@ -768,14 +768,6 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
 }
 
 #ifdef SUPPORT_NETWORK_SHARE
-void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo)
-{
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    iptablesStatsInfo.insert(iptablesStatsInfo.end(),
-        stats_.GetIptablesStatsInfo().begin(), stats_.GetIptablesStatsInfo().end());
-    GetIptablesStatsIncrease(iptablesStatsInfo);
-}
-
 void NetStatsCached::CacheIptablesStats()
 {
     std::string ifaceName;
@@ -844,6 +836,7 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
     statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
     statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
     statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
+    statsInfos.date_ = CommonUtils::GetCurrentSecond();
 
     std::vector<NetStatsInfo> statsInfosVec;
     statsInfosVec.push_back(std::move(statsInfos));
@@ -855,24 +848,6 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             }
         });
     });
-    
-    std::vector<NetStatsInfo> tmpInfosVec;
-    if (!lastIptablesStatsInfo_.empty()) {
-        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
-            if (info.iface_ == IFACE_LO) {
-                return;
-            }
-            auto findRet = std::find_if(lastIptablesStatsInfo_.begin(), lastIptablesStatsInfo_.end(),
-                [this, &info](const NetStatsInfo &lastInfo) {return info.Equals(lastInfo); });
-            if (findRet == lastIptablesStatsInfo_.end()) {
-                tmpInfosVec.push_back(std::move(info));
-            } else {
-                tmpInfosVec.push_back(info - *findRet);
-            }
-        });
-    } else {
-        tmpInfosVec = statsInfosVec;
-    }
     infosVec.insert(infosVec.end(), tmpInfosVec.begin(), tmpInfosVec.end());
 }
 #endif
