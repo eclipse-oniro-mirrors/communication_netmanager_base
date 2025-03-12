@@ -47,7 +47,7 @@ NetStatsClient::~NetStatsClient()
     serviceRemote->RemoveDeathRecipient(deathRecipient_);
 }
 
-NetStatsClient& NetPolicyClient::GetInstance()
+NetStatsClient& NetStatsClient::GetInstance()
 {
     static std::shared_ptr<NetStatsClient> instance = std::make_shared<NetStatsClient>();
     return *instance;

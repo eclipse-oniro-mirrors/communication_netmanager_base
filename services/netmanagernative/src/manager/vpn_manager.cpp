@@ -323,9 +323,9 @@ void VpnManager::StartVpnInterfaceFdListen()
     }
 
     NETNATIVE_LOGI("StartVpnInterfaceFdListen...");
-    std::thread unixThread([this]() { StartUnixSocketListen(); });
-    unixThread.detach();
-    pthread_setname_np(unixThread.native_handle(), "unix_socket_tunfd");
+    std::thread t([sp = shared_from_this()]() { sp->StartUnixSocketListen(); });
+    t.detach();
+    pthread_setname_np(t.native_handle(), "unix_socket_tunfd");
     listeningFlag_ = true;
 }
 

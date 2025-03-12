@@ -1015,11 +1015,7 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
 
 void NetsysNativeClient::RegisterNotifyCallback()
 {
-    std::thread t([wp = std::weak_ptr<NetsysNativeClient>(shared_from_this())]() {
-        auto netsysNativeClient = wp.lock();
-        if (netsysNativeClient == nullptr) {
-            return;
-        }
+    std::thread t([client = shared_from_this()]() {
         uint32_t count = 0;
         while (client->GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
@@ -1029,14 +1025,14 @@ void NetsysNativeClient::RegisterNotifyCallback()
         NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
         if (proxy != nullptr) {
             if (client->nativeNotifyCallback_ == nullptr) {
-                client->nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(netsysNativeClient);
+                client->nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(client);
             }
 
             NETMGR_LOG_D("call proxy->RegisterNotifyCallback");
             proxy->RegisterNotifyCallback(client->nativeNotifyCallback_);
 
             if (client->nativeNetDnsResultCallback_ == nullptr) {
-                client->nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(netsysNativeClient);
+                client->nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(client);
             }
 
             NETMGR_LOG_D("call proxy->RegisterDnsResultCallback");

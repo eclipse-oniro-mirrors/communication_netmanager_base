@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class VpnManager {
+class VpnManager : public std::enable_shared_from_this<NetManagerStandard>{
 private:
     VpnManager() = default;
     ~VpnManager() = default;
@@ -32,8 +32,8 @@ private:
 public:
     static VpnManager &GetInstance()
     {
-        static VpnManager instance;
-        return instance;
+        static std::shared_ptr<VpnManager> instance = std::make_shared<VpnManager>();
+        return *instance;
     }
 
 public:
