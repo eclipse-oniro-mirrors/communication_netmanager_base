@@ -32,7 +32,7 @@ static const int32_t IFACE_NAME_MAP_SIZE = 200;
 static const int32_t IFACE_NAME_MAP_SIZE_MIN = 1;
 static const int32_t OH_SOCK_PERMISSION_MAP_SIZE = 200;
 static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1;
-static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 1;
+static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 1000;
 static const int32_t NET_NS_MAP_SIZE = 2000;
 #else
 static const int32_t APP_STATS_MAP_SIZE = 5000;
