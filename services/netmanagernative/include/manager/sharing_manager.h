@@ -118,6 +118,8 @@ private:
     void CheckInited();
     int32_t SetIpFwdEnable();
     int32_t SetForwardRules(bool set, const std::string &cmds);
+    int32_t QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,
+        const std::string &result, std::string &ifaceName);
 };
 } // namespace nmd
 } // namespace OHOS
