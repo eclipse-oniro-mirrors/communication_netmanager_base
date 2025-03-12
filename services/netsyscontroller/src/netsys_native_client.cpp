@@ -245,9 +245,9 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
 
 NetsysNativeClient::NetsysNativeClient()
 {
-    std::thread t([sp = shared_from_this()]() {
+    std::thread t([this]() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        sp->RegisterNotifyCallback();
+        RegisterNotifyCallback();
     });
     std::string threadName = "registerNotifyCallbackInConstructor";
     pthread_setname_np(t.native_handle(), threadName.c_str());

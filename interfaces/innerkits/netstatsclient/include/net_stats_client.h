@@ -31,7 +31,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetStatsClient : public Singleton<NetStatsClient> {
+class NetStatsClient : public std::enable_shared_from_this<NetStatsClient> {
 public:
     NetStatsClient();
     ~NetStatsClient();
