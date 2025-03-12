@@ -642,7 +642,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidSimStatsCached(allInfo);
 #ifdef SUPPORT_NETWORK_SHARE
     if (uid == IPTABLES_UID) {
-        GetSharingStats(allInfo, end);///增加一个只有是uid==热点的uid的时候才去查iptables
+        GetSharingStats(allInfo, end);
     }
 #endif
     FilterTrafficStatsByUidNetwork(allInfo, infos, uid, ident, start, end);
