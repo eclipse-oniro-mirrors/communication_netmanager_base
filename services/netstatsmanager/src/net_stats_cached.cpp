@@ -848,7 +848,7 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             }
         });
     });
-    infosVec.insert(infosVec.end(), tmpInfosVec.begin(), tmpInfosVec.end());
+    infosVec.insert(infosVec.end(), statsInfosVec.begin(), statsInfosVec.end());
 }
 #endif
 
