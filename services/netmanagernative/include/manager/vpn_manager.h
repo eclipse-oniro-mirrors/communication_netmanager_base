@@ -32,7 +32,7 @@ private:
 public:
     static VpnManager &GetInstance()
     {
-        static std::shared_ptr<VpnManager> instance = std::make_shared<VpnManager>();
+        static std::shared_ptr<VpnManager> instance = new VpnManager();
         return *instance;
     }
 
