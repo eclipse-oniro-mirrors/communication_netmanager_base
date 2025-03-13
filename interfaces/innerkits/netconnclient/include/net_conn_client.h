@@ -140,6 +140,16 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
 
     /**
+     * @param supplierId The id of the network supplier
+     * @param reuseSupplierId The id of the reused network supplier
+     * @param isReused whether to reuse supplier id
+     * @return Returns 0, successfully set reuse supplier id, otherwise it will fail
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused);
+
+    /**
      * Register net connection callback
      *
      * @param callback The callback of INetConnCallback interface

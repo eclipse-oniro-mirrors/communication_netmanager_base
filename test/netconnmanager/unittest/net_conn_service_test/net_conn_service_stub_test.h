@@ -101,6 +101,11 @@ public:
         return 0;
     }
 
+    int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override
+    {
+        return 0;
+    }
+
     int32_t GetDefaultNet(int32_t &netId) override
     {
         return 0;

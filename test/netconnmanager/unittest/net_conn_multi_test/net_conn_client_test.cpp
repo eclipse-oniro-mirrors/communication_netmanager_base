@@ -1642,5 +1642,14 @@ HWTEST_F(NetConnClientTest, EnableAppFrozenedCallbackLimitationTest001, TestSize
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetConnClientTest, SetReuseSupplierId001, TestSize.Level1)
+{
+    uint32_t supplierId = 1004;
+    uint32_t reuseSupplierId = 1008;
+    bool add = false;
+    int32_t ret = NetConnClient::GetInstance().SetReuseSupplierId(supplierId, reuseSupplierId, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

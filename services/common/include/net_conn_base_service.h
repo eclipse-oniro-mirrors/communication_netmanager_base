@@ -38,6 +38,7 @@ public:
     virtual int32_t RestrictBackgroundChanged(bool isRestrictBackground) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
+    virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1313,5 +1313,28 @@ HWTEST_F(NetConnServiceStubTest, OnEnableAppFrozenedCallbackLimitationTest001, T
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(NetConnServiceStubTest, OnSetReuseSupplierIdTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    uint32_t supplierId = 1;
+    uint32_t reuseSupplierId = 2;
+    bool isReused = false;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(supplierId)) {
+        return;
+    }
+    if (!data.WriteUint32(reuseSupplierId)) {
+        return;
+    }
+    if (!data.WriteBool(isReused)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

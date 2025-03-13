@@ -66,6 +66,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
     inline int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override
     {
         return NETMANAGER_SUCCESS;

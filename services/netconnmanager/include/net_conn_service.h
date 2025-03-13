@@ -202,6 +202,17 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
 
     /**
+     * The interface is set reuse supplier id
+     *
+     * @param supplierId The id of the network supplier
+     * @param reuseSupplierId The id of the reuse network supplier
+     * @param isReused whether to reuse supplier id
+     *
+     * @return Returns 0, successfully update the network link attribute information, otherwise it will fail
+     */
+    int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
+
+    /**
      * The interface names which NetBearType is equal than bearerType
      *
      * @param bearerType Network bearer type

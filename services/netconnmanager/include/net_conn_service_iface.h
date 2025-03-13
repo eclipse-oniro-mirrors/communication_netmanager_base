@@ -44,6 +44,7 @@ public:
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
+    int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

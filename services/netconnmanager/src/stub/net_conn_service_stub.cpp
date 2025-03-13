@@ -89,6 +89,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
         &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID)] = {
+        &NetConnServiceStub::OnSetReuseSupplierId, {Permission::CONNECTIVITY_INTERNAL}};
     InitAll();
 }
 
@@ -1916,6 +1918,27 @@ int32_t NetConnServiceStub::OnEnableAppFrozenedCallbackLimitation(MessageParcel 
     int32_t ret = EnableAppFrozenedCallbackLimitation(flag);
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("reply.WriteInt32 error");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t supplierId;
+    uint32_t reuseSupplierId;
+    bool isReused;
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(reuseSupplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadBool(isReused)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = SetReuseSupplierId(supplierId, reuseSupplierId, isReused);
+    if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;

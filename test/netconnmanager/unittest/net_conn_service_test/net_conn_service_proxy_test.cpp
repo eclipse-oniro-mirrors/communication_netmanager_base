@@ -736,6 +736,15 @@ HWTEST_F(NetConnServiceProxyTest, SetInterfaceTest001, TestSize.Level1)
     ret = instance_->SetInterfaceDown(iface);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, SetReuseSupplierId001, TestSize.Level1)
+{
+    uint32_t supplierId = 1004;
+    uint32_t reuseSupplierId = 1008;
+    bool add = false;
+    int32_t ret = instance_->SetReuseSupplierId(supplierId, reuseSupplierId, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

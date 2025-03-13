@@ -115,6 +115,7 @@ private:
     int32_t OnSetPacUrl(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppIsFrozened(MessageParcel &data, MessageParcel &reply);
     int32_t OnEnableAppFrozenedCallbackLimitation(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };

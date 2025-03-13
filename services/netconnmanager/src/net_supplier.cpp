@@ -641,5 +641,16 @@ bool NetSupplier::IsInFirstTimeDetecting() const
     return !isFirstTimeDetectionDone;
 }
 
+void NetSupplier::SetReuseCap(NetCap reuseCap, bool add)
+{
+    if (add) {
+        netCaps_.InsertNetCap(reuseCap);
+        netAllCapabilities_.netCaps_.insert(reuseCap);
+    } else {
+        netCaps_.RemoveNetCap(reuseCap);
+        netAllCapabilities_.netCaps_.erase(reuseCap);
+    }
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
