@@ -24,15 +24,15 @@ namespace OHOS {
 namespace NetManagerStandard {
 class VpnManager : public std::enable_shared_from_this<VpnManager> {
 private:
-    VpnManager() = default;
-    ~VpnManager() = default;
     VpnManager(const VpnManager &) = delete;
     VpnManager &operator=(const VpnManager &) = delete;
 
 public:
+    VpnManager() = default;
+    ~VpnManager() = default;
     static VpnManager &GetInstance()
     {
-        static std::shared_ptr<VpnManager> instance = new VpnManager();
+        static std::shared_ptr<VpnManager> instance = std::make_shared<VpnManager>();
         return *instance;
     }
 

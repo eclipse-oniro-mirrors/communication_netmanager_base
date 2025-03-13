@@ -77,7 +77,7 @@ public:
     };
     static std::shared_ptr<NetConnService> &GetInstance()
     {
-        static std::shared_ptr<NetConnService> instance = new NetConnService();
+        static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
         return instance;
     }
     void OnStart() override;

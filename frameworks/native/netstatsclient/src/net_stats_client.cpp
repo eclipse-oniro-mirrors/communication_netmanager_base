@@ -49,7 +49,7 @@ NetStatsClient::~NetStatsClient()
 
 NetStatsClient& NetStatsClient::GetInstance()
 {
-    static std::shared_ptr<NetStatsClient> instance = new NetStatsClient();
+    static std::shared_ptr<NetStatsClient> instance = std::make_shared<NetStatsClient>();
     return *instance;
 }
 
