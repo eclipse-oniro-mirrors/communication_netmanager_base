@@ -536,7 +536,7 @@ void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, u
         ffrt::wait({task});
         if (isSharingOn) {
             NETMGR_LOG_D("GetSharingStats enter");
-            netStatsCached_->GetIptablesStatsIncrease(sharingStats);
+            netStatsCached_->GetIptablesStatsCached(sharingStats);
         }
     }
 }
