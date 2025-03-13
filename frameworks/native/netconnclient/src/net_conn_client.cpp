@@ -91,7 +91,6 @@ void NetConnClient::UnsubscribeSystemAbility()
     if (result != ERR_OK) {
         NETMGR_LOG_E("NetConnAbilityListener Unsubscribe failed, code %{public}d.", result);
     }
-    saStatusListener_ = nullptr;
 }
 
 void NetConnAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -657,6 +656,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
 void NetConnClient::DlCloseRemoveDeathRecipient()
 {
+    UnsubscribeSystemAbility();
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
