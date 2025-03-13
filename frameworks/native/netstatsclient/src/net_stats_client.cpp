@@ -47,12 +47,6 @@ NetStatsClient::~NetStatsClient()
     serviceRemote->RemoveDeathRecipient(deathRecipient_);
 }
 
-NetStatsClient& NetStatsClient::GetInstance()
-{
-    static std::shared_ptr<NetStatsClient> instance = std::make_shared<NetStatsClient>();
-    return *instance;
-}
-
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     NETMGR_LOG_D("RegisterNetStatsCallback client in");
