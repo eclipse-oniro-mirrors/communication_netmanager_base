@@ -70,10 +70,10 @@ ani_object ObjectNew(ani_env *env, const char *className, const char *methodSign
     return result;
 }
 
-static ani_object getDefaultNetSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
+static ani_object getDefaultNetSync([[maybe_unused]] ani_env *env)
 {
-    ani_object nethandleInner = ObjectNew(env, "Lconnection/NetHandleInner;", nullptr);
-    ani_class cls = GetClass(env, "Lconnection/NetHandleInner;");
+    ani_object nethandleInner = ObjectNew(env, "L@ohos/net/connection/NetHandleInner;", nullptr);
+    ani_class cls = GetClass(env, "L@ohos/net/connection/NetHandleInner;");
     ani_method setter = GetMethod(env, cls, "<set>netId", nullptr);
     OHOS::NetManagerStandard::NetHandle nethandle;
     int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(nethandle);
@@ -87,7 +87,7 @@ static ani_object getDefaultNetSync([[maybe_unused]] ani_env *env, [[maybe_unuse
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    static const char *className = "Lconnection/ConnectionAni;";
+    static const char *className = "L@ohos/net/connection/connection;";
 
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {

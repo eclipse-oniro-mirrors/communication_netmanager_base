@@ -14,66 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_shared_library("connection_ani") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    all_ubsan = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
-  include_dirs = [
-    "ani/include",
-    "async_context/include",
-    "async_work/include",
-    "constant/include",
-    "connection_exec/include",
-    "connection_module/include",
-    "observer/include",
-    "options/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
-  ]
-
-  sources = [ "ani/src/connection_ani.cpp" ]
-
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
-  deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection_if",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
-  ]
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "runtime_core:ani",
-  ]
-
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-}
-
 ohos_shared_library("connection") {
   sanitize = {
     cfi = true
