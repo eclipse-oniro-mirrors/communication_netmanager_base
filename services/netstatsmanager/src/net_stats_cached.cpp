@@ -856,7 +856,24 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             }
         });
     });
-    infosVec.insert(infosVec.end(), statsInfosVec.begin(), statsInfosVec.end());
+    std::vector<NetStatsInfo> tmpInfosVec;
+    if (!lastIptablesStatsInfo_.empty()) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
+            if (info.iface_ == IFACE_LO) {
+                return;
+            }
+            auto findRet = std::find_if(lastIptablesStatsInfo_.begin(), lastIptablesStatsInfo_.end(),
+                [this, &info](const NetStatsInfo &lastInfo) {return info.Equals(lastInfo); });
+            if (findRet == lastIptablesStatsInfo_.end()) {
+                tmpInfosVec.push_back(std::move(info));
+            } else {
+                tmpInfosVec.push_back(info - *findRet);
+            }
+        });
+    } else {
+        tmpInfosVec = statsInfosVec;
+    }
+    infosVec.insert(infosVec.end(), tmpInfosVec.begin(), tmpInfosVec.end());
 }
 #endif
 
