@@ -68,6 +68,8 @@ public:
     void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
 #ifdef SUPPORT_NETWORK_SHARE
+    void GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo);
+
     void GetIptablesStatsIncrease(std::vector<NetStatsInfo> &InfosVec);
 #endif
     void SaveSharingTraffic(const NetStatsInfo &infos);
