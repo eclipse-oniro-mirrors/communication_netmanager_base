@@ -768,6 +768,14 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
 }
 
 #ifdef SUPPORT_NETWORK_SHARE
+void NetStatsCached::GetIptablesStatsCached(std::vector<NetStatsInfo> &iptablesStatsInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    iptablesStatsInfo.insert(iptablesStatsInfo.end(),
+        stats_.GetIptablesStatsInfo().begin(), stats_.GetIptablesStatsInfo().end());
+    GetIptablesStatsIncrease(iptablesStatsInfo);
+}
+
 void NetStatsCached::CacheIptablesStats()
 {
     std::string ifaceName;
