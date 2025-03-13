@@ -26,6 +26,7 @@
       "virtual thunk to OHOS::NetManagerStandard::NetStatsCallbackStub::~NetStatsCallbackStub()";
       "OHOS::NetManagerStandard::NetStatsClient::GetCellularRxBytes(unsigned long long&)";
       "OHOS::NetManagerStandard::NetStatsClient::NetStatsClient()";
+      "OHOS::NetManagerStandard::NetStatsClient::GetInstance()()";
       "OHOS::NetManagerStandard::NetStatsClient::GetCellularTxBytes(unsigned long long&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetAllRxBytes(unsigned long long&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetAllTxBytes(unsigned long long&)";
