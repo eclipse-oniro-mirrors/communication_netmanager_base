@@ -44,7 +44,7 @@ NetPolicyClient::~NetPolicyClient()
 
 NetPolicyClient& NetPolicyClient::GetInstance()
 {
-    static std::shared_ptr<NetPolicyClient> instance = new NetPolicyClient();
+    static std::shared_ptr<NetPolicyClient> instance = std::make_shared<NetPolicyClient>();
     return *instance;
 }
 
