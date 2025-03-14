@@ -133,7 +133,7 @@ void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStats
     tmpList.erase(std::remove_if(tmpList.begin(), tmpList.end(), [](const auto &item) {
                       return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                   }), tmpList.end());
-    std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
+    std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [this](NetStatsInfo &info) {
         if (!isDisplayTrafficAncoList) {
             if (info.flag_ == STATS_DATA_FLAG_SIM2) {
                 info.uid_ = SIM2_UID;
