@@ -16,6 +16,7 @@
 
 import type { AsyncCallback, Callback } from './@ohos.base';
 import type http from './@ohos.net.http';
+
 // import type socket from './@ohos.net.socket';
 
 type ObserverEventType = 'netAvailable' | 'netBlockStatusChange' | 'netCapabilitiesChange' | 'netConnectionPropertiesChange' | 'netLost' | 'netUnavailable'
@@ -137,7 +138,7 @@ export interface NetCapabilityInfo {
 }
 
 export interface NetHandle {
-  netId: int;
+  netId: number;
 
   // bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
 
@@ -152,41 +153,45 @@ export interface NetHandle {
   // getAddressByName(host: string): Promise<NetAddress>;
 }
 
-declare namespace connection {
+export default namespace connection {
   // type TCPSocket = socket.TCPSocket;
 
   // type UDPSocket = socket.UDPSocket;
 
+  loadLibrary("connection_ani") 
+  export native function getDefaultNetSync(): NetHandle;
 
-  function createNetConnection(netSpecifier?: NetSpecifier, timeout?: number): NetConnection;
+  // function createNetConnection(netSpecifier?: NetSpecifier, timeout?: number): NetConnection;
 
-  function getDefaultNet(callback: AsyncCallback<NetHandle>): void;
+  // function getDefaultNet(callback: AsyncCallback<NetHandle>): void;
 
-  function getDefaultNet(): Promise<NetHandle>;
+  // function getDefaultNet(): Promise<NetHandle>;
 
-  function getDefaultNetSync(): NetHandle;
+  // function getDefaultNetSync(): NetHandle 
 
-  function getAllNets(callback: AsyncCallback<Array<NetHandle>>): void;
+  // function getAllNets(callback: AsyncCallback<Array<NetHandle>>): void;
 
-  function getAllNets(): Promise<Array<NetHandle>>;
+  // function getAllNets(): Promise<Array<NetHandle>>;
 
-  function getAllNetsSync(): Array<NetHandle>;
+  // function getAllNetsSync(): Array<NetHandle>;
 
-  function getNetCapabilities(netHandle: NetHandle, callback: AsyncCallback<NetCapabilities>): void;
+  // function getNetCapabilities(netHandle: NetHandle, callback: AsyncCallback<NetCapabilities>): void;
 
-  function getNetCapabilities(netHandle: NetHandle): Promise<NetCapabilities>;
+  // function getNetCapabilities(netHandle: NetHandle): Promise<NetCapabilities>;
 
-  function getNetCapabilitiesSync(netHandle: NetHandle): NetCapabilities;
+  // function getNetCapabilitiesSync(netHandle: NetHandle): NetCapabilities;
 
-  function hasDefaultNet(callback: AsyncCallback<boolean>): void;
+  // function hasDefaultNet(callback: AsyncCallback<boolean>): void;
 
-  function hasDefaultNet(): Promise<boolean>;
+  // function hasDefaultNet(): Promise<boolean>;
 
-  function hasDefaultNetSync(): boolean;
+  // function hasDefaultNetSync(): boolean;
 
-  function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void;
+  // function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void;
 
-  function getDefaultHttpProxy(): Promise<HttpProxy>;
+  // function getDefaultHttpProxy(): Promise<HttpProxy>;
+
+
 
   // function getConnectionProperties(netHandle: NetHandle, callback: AsyncCallback<ConnectionProperties>): void;
 
@@ -255,4 +260,18 @@ declare namespace connection {
   // function factoryReset(): Promise<void>;
 }
 
-export default connection;
+class NetHandleInner implements NetHandle{
+   netId: double = 0;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
+
+  // bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
+
+  // getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
+
+  // getAddressesByName(host: string): Promise<Array<NetAddress>>;
+
+  // getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
+
+  // getAddressByName(host: string): Promise<NetAddress>;
+}
