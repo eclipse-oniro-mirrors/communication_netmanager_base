@@ -72,6 +72,7 @@ constexpr const char *TLDS_SPLIT_SYMBOL = "|";
 constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^(https?://)?[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
 constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
 constexpr const char *DEFAULT_IPV6_ANY_INIT_ADDR = "::";
+const std::string DISPLAY_TRAFFIC_ANCO_LIST = "const.netmanager.display_traffic_anco_list";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
