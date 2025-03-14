@@ -36,6 +36,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "parameters.h"
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
