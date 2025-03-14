@@ -162,9 +162,7 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
-        std::thread t([this]() {
-            RecoverCallback();
-        });
+        std::thread t([sp = shared_from_this()]() { sp->RecoverCallback(); });
         std::string threadName = "nestatsRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();

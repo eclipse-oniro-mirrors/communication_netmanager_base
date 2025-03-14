@@ -245,7 +245,13 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
 
 NetsysNativeClient::NetsysNativeClient()
 {
-    RegisterNotifyCallback();
+    std::thread t([this]() {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        RegisterNotifyCallback();
+    });
+    std::string threadName = "registerNotifyCallbackInConstructor";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 NetsysNativeClient::~NetsysNativeClient()
@@ -1009,28 +1015,28 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
 
 void NetsysNativeClient::RegisterNotifyCallback()
 {
-    std::thread t([this]() {
+    std::thread t([client = shared_from_this()]() {
         uint32_t count = 0;
-        while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+        while (client->GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
             count++;
         }
-        auto proxy = GetProxy();
+        auto proxy = client->GetProxy();
         NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
         if (proxy != nullptr) {
-            if (nativeNotifyCallback_ == nullptr) {
-                nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(shared_from_this());
+            if (client->nativeNotifyCallback_ == nullptr) {
+                client->nativeNotifyCallback_ = sptr<NativeNotifyCallback>::MakeSptr(client);
             }
 
             NETMGR_LOG_D("call proxy->RegisterNotifyCallback");
-            proxy->RegisterNotifyCallback(nativeNotifyCallback_);
+            proxy->RegisterNotifyCallback(client->nativeNotifyCallback_);
 
-            if (nativeNetDnsResultCallback_ == nullptr) {
-                nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(shared_from_this());
+            if (client->nativeNetDnsResultCallback_ == nullptr) {
+                client->nativeNetDnsResultCallback_ = sptr<NativeNetDnsResultCallback>::MakeSptr(client);
             }
 
             NETMGR_LOG_D("call proxy->RegisterDnsResultCallback");
-            proxy->RegisterDnsResultCallback(nativeNetDnsResultCallback_, dnsReportTimeStep);
+            proxy->RegisterDnsResultCallback(client->nativeNetDnsResultCallback_, client->dnsReportTimeStep);
         }
     });
     std::string threadName = "netsysGetProxy";

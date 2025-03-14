@@ -2485,7 +2485,7 @@ int32_t NetConnService::SetPacUrl(const std::string &pacUrl)
 void NetConnService::CreateActiveHttpProxyThread()
 {
     httpProxyThreadNeedRun_ = true;
-    std::thread t([this]() { ActiveHttpProxy(); });
+    std::thread t([sp = shared_from_this()]() { sp->ActiveHttpProxy(); });
     std::string threadName = "ActiveHttpProxy";
     pthread_setname_np(t.native_handle(), threadName.c_str());
     t.detach();
@@ -3052,8 +3052,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {
         policyCallback_ = sptr<NetPolicyCallback>::MakeSptr(shared_from_this());
-        std::shared_ptr<NetPolicyClient> netPolicy = DelayedSingleton<NetPolicyClient>::GetInstance();
-        int32_t registerRet = netPolicy->RegisterNetPolicyCallback(policyCallback_);
+        int32_t registerRet = NetPolicyClient::GetInstance().RegisterNetPolicyCallback(policyCallback_);
         if (registerRet != NETMANAGER_SUCCESS) {
             NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }

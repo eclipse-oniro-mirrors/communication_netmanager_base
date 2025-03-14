@@ -26,11 +26,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetPolicyClient : public Singleton<NetPolicyClient> {
+class NetPolicyClient : public std::enable_shared_from_this<NetPolicyClient> {
 public:
     NetPolicyClient();
     ~NetPolicyClient();
-
+    static NetPolicyClient& GetInstance();
     /**
      * Set the network policy for the specified UID.
      *

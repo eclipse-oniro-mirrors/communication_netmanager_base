@@ -31,10 +31,15 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetStatsClient : public Singleton<NetStatsClient> {
+class NetStatsClient : public std::enable_shared_from_this<NetStatsClient> {
 public:
     NetStatsClient();
     ~NetStatsClient();
+    static NetStatsClient& GetInstance()
+    {
+        static std::shared_ptr<NetStatsClient> instance = std::make_shared<NetStatsClient>();
+        return *instance;
+    }
 
     /**
      * Register network card traffic monitoring

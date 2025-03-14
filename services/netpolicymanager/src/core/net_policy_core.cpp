@@ -50,7 +50,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
         NETMGR_LOG_E("netAppStatusCallback is nullptr.");
         return;
     }
-    std::thread t([this]() {
+    std::thread t([netPolicyCore = shared_from_this()]() {
         auto appManager = std::make_unique<AppMgrClient>();
         uint32_t count = 0;
         int32_t connectResult = AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -62,7 +62,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
         if (count > MAX_RETRY_TIMES && connectResult != AppMgrResultCode::RESULT_OK) {
             NETMGR_LOG_E("Connect AppMgrService fail.");
         } else {
-            appManager->RegisterAppStateCallback(netAppStatusCallback_);
+            appManager->RegisterAppStateCallback(netPolicyCore->netAppStatusCallback_);
         }
     });
 
@@ -95,19 +95,19 @@ void NetPolicyCore::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eve
 void NetPolicyCore::SubscribeCommonEvent()
 {
     NETMGR_LOG_D("SubscribeCommonEvent");
-    std::thread t([this]() {
+    std::thread t([netPolicyCore = shared_from_this()]() {
         EventFwk::MatchingSkills matchingSkills;
         matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_PACKAGE_REMOVED);
         EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPriority(CORE_EVENT_PRIORITY);
-        subscriber_ = std::make_shared<ReceiveMessage>(subscribeInfo, shared_from_this());
+        netPolicyCore->subscriber_ = std::make_shared<ReceiveMessage>(subscribeInfo, netPolicyCore);
         uint32_t count = 0;
         bool result = false;
         while (!result && count <= MAX_RETRY_TIMES) {
             std::this_thread::sleep_for(std::chrono::milliseconds(AGAIN_REGISTER_CALLBACK_INTERVAL));
-            result = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+            result = EventFwk::CommonEventManager::SubscribeCommonEvent(netPolicyCore->subscriber_);
             count++;
         }
         if (count > MAX_RETRY_TIMES || !result) {
