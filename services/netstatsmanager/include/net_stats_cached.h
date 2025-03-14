@@ -39,7 +39,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetStatsCached {
 public:
-    NetStatsCached() = default;
+    NetStatsCached();
     ~NetStatsCached() = default;
     void ForceUpdateStats();
 
@@ -307,6 +307,7 @@ private:
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     SafeMap<uint32_t, NetStatsDataFlag> uidStatsFlagMap_;
     SafeMap<uint32_t, SampleBundleInfo> uidSimSampleBundleMap_;
+    bool isDisplayTrafficAncoList = false;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;

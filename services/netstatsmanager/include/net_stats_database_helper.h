@@ -66,6 +66,7 @@ private:
         Version_2,
         Version_3,
         Version_4,
+        Version_5,
     };
 
 private:

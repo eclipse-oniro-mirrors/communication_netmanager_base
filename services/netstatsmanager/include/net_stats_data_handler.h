@@ -24,7 +24,7 @@ namespace NetManagerStandard {
 
 class NetStatsDataHandler {
 public:
-    NetStatsDataHandler() = default;
+    NetStatsDataHandler();
     ~NetStatsDataHandler() = default;
     int32_t WriteStatsData(const std::vector<NetStatsInfo> &infos, const std::string &tableName);
     int32_t WriteIptablesData(const NetStatsInfo &infos, const std::string &tableName);
@@ -44,6 +44,9 @@ public:
     int32_t UpdateSimStatsFlag(uint32_t uid, uint32_t flag);
     int32_t UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag);
     int32_t ClearData();
+
+private:
+    bool isDisplayTrafficAncoList = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -89,6 +89,7 @@ bool IsSim(const std::string &bundleName);
 bool IsInstallSourceFromSim(const std::string &installSource);
 bool IsSim2(const std::string &bundleName);
 bool IsInstallSourceFromSim2(const std::string &installSource);
+bool IsNeedDisplayTrafficAncoList();
 bool IsSimAnco(const std::string &bundleName);
 bool IsSim2Anco(const std::string &bundleName);
 

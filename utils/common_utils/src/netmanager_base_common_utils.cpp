@@ -791,6 +791,13 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
     return installSource == INSTALL_SOURCE_FROM_SIM2;
 }
 
+bool IsNeedDisplayTrafficAncoList()
+{
+    NETMGR_LOG_I("Is need display traffic anco list: %{public}s",
+        system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false").c_str());
+    return system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false") == "true";
+}
+
 bool IsSimAnco(const std::string &bundleName)
 {
     return bundleName == INSTALL_SOURCE_FROM_SIM;
