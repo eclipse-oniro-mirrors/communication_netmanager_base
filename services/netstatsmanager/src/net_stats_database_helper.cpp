@@ -71,7 +71,9 @@ NetStatsDatabaseHelper::~NetStatsDatabaseHelper()
 int32_t NetStatsDatabaseHelper::ExecSql(const std::string &sql, void *recv, SqlCallback callback)
 {
     char *errMsg = nullptr;
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = sqlite3_exec(sqlite_, sql.c_str(), callback, recv, &errMsg);
+    lock.unlock();
     NETMGR_LOG_D("EXEC SQL : %{public}s", sql.c_str());
     if (errMsg != nullptr) {
         NETMGR_LOG_E("Exec sql failed err:%{public}s", errMsg);
@@ -92,6 +94,7 @@ int32_t NetStatsDatabaseHelper::CreateTable(const std::string &tableName, const 
 
 int32_t NetStatsDatabaseHelper::Open(const std::string &path)
 {
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = sqlite3_open_v2(path.c_str(), &sqlite_,
                                   SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nullptr);
     return ret == SQLITE_OK ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
@@ -108,6 +111,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
             params += ",";
         }
     }
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     std::string sql = "INSERT INTO " + tableName + " (" + paramList + ") " + "VALUES" + " (" + params + ") ";
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
@@ -143,6 +147,7 @@ int32_t NetStatsDatabaseHelper::SelectData(std::vector<NetStatsInfo> &infos, con
 {
     infos.clear();
     std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Date >= ?" + " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -168,6 +173,7 @@ int32_t NetStatsDatabaseHelper::SelectData(const uint32_t uid, uint64_t start, u
     infos.clear();
     std::string sql = "SELECT * FROM " + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID == ?" + " AND t.Date >= ?" +
                       " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -192,6 +198,7 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, uint64_t st
     infos.clear();
     std::string sql = "SELECT * FROM " + std::string(IFACE_TABLE) + " t WHERE 1=1 AND t.IFace = ?" +
                       " AND t.Date >= ?" + " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -216,6 +223,7 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
     infos.clear();
     std::string sql = "SELECT * FROM " + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID = ?" + " AND t.IFace = ?" +
                       " AND t.Date >= ?" + " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -245,6 +253,7 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
     infos.clear();
     std::string sql =
         "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Ident = ?" + " AND t.Date >= ?" + " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -269,6 +278,7 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const ui
     infos.clear();
     std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND T.UID = ? AND t.Ident = ?" + " AND t.Date >= ?" +
                       " AND t.Date <= ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -302,6 +312,7 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t uid)
 {
     std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
@@ -320,6 +331,7 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
 
 int32_t NetStatsDatabaseHelper::Close()
 {
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = sqlite3_close_v2(sqlite_);
     return ret == SQLITE_OK ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
@@ -490,6 +502,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
 int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std::string &tableName)
 {
     std::string sql = "SELECT * FROM " + std::string(VERSION_TABLE) + " WHERE Name = ?;";
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     if (ret != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);

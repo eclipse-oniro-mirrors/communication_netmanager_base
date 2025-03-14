@@ -28,6 +28,7 @@
 
 #include "net_stats_sqlite_statement.h"
 #include "net_stats_info.h"
+#include "ffrt_inner.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -78,6 +79,7 @@ private:
     void ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
+    ffrt::mutex sqliteMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
