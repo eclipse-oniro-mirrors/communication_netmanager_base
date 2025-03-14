@@ -565,7 +565,7 @@ void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleIn
             }
             if (earlySampleBundleOpt.has_value() &&
                 CommonUtils::IsSim2(earlySampleBundleOpt.value().bundleName_) && isExistSim2) {
-                uidStatsFlagMap_.EnsureInsert(iter->first, 
+                uidStatsFlagMap_.EnsureInsert(iter->first,
                     isDisplayTrafficAncoList ? STATS_DATA_FLAG_SIM2_BASIC : STATS_DATA_FLAG_SIM2);
             } else if (isExistSim) {
                 uidStatsFlagMap_.EnsureInsert(iter->first,
