@@ -844,6 +844,7 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
     statsInfos.flag_ = STATS_DATA_FLAG_DEFAULT;
     statsInfos.rxPackets_ = statsInfos.rxBytes_ > 0 ? 1 : 0;
     statsInfos.txPackets_ = statsInfos.txBytes_ > 0 ? 1 : 0;
+    statsInfos.date_ = CommonUtils::GetCurrentSecond();
 
     std::vector<NetStatsInfo> statsInfosVec;
     statsInfosVec.push_back(std::move(statsInfos));
@@ -855,7 +856,6 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             }
         });
     });
-    
     std::vector<NetStatsInfo> tmpInfosVec;
     if (!lastIptablesStatsInfo_.empty()) {
         std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
