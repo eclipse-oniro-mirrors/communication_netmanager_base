@@ -144,7 +144,7 @@ public:
     std::string GetSupplierType();
     std::string TechToType(NetSlotTech type);
     void SetDetectionDone();
-
+    void SetReuseCap(NetCap reuseCap, bool add);
     bool ResumeNetworkInfo();
     bool IsNetQualityPoor();
     bool IsNetAcceptUnavalidate();

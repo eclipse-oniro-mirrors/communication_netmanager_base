@@ -2074,5 +2074,30 @@ int32_t NetConnServiceProxy::EnableAppFrozenedCallbackLimitation(bool flag)
     return reply.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(reuseSupplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteBool(isReused)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

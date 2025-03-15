@@ -3707,5 +3707,32 @@ bool NetConnService::IsAppFrozenedCallbackLimitation()
     return ret;
 }
 
+int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused)
+{
+    NETMGR_LOG_I("SetReuseSupplierId supplierId=[%{public}d], reuseSupplierId=[%{public}d], isReused=[%{public}d].",
+        supplierId, reuseSupplierId, isReused);
+    {
+        sptr<NetSupplier> supplier = nullptr;
+        NetCap reuseCap;
+        std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+        for (const auto& pNetSupplier : netSuppliers_) {
+            if (pNetSupplier.second == nullptr) {
+                continue;
+            }
+            if (pNetSupplier.second->GetSupplierId() == supplierId) {
+                supplier = pNetSupplier.second;
+            } else if (pNetSupplier.second->GetSupplierId() == reuseSupplierId) {
+                std::set<NetCap> netCaps = pNetSupplier.second->GetNetCaps().ToSet();
+                reuseCap = *netCaps.begin();
+            }
+        }
+        if (supplier != nullptr) {
+            supplier->SetReuseCap(reuseCap, isReused);
+        }
+    }
+    FindBestNetworkForAllRequest();
+    return NETMANAGER_SUCCESS;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

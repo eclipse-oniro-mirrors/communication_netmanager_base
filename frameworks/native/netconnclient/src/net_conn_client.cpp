@@ -1225,5 +1225,15 @@ int32_t NetConnClient::EnableAppFrozenedCallbackLimitation(bool flag)
     return proxy->EnableAppFrozenedCallbackLimitation(flag);
 }
 
+int32_t NetConnClient::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetReuseSupplierId(supplierId, reuseSupplierId, isReused);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

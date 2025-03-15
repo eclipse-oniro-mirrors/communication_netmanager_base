@@ -1628,6 +1628,21 @@ void SetNetInterfaceIpAddressFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS), dataParcel);
 }
 
+void SetReuseSupplierIdFuzzTest(const uint8_t *data, size_t size)
+{
+    uint32_t supplierId = NetConnGetData<uint32_t>();
+    uint32_t reuseSupplierId = NetConnGetData<uint32_t>();
+    bool isReused = NetConnGetData<uint32_t>();
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteUint32(supplierId);
+    dataParcel.WriteUint32(reuseSupplierId);
+    dataParcel.WriteBool(isReused);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
@@ -1693,6 +1708,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::EnableDistributedServerNetFuzzTest(data, size);
     OHOS::NetManagerStandard::DisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
+    OHOS::NetManagerStandard::SetReuseSupplierIdFuzzTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     return 0;
 }

@@ -124,6 +124,7 @@ public:
     virtual int32_t GetPacUrl(std::string &pacUrl) = 0;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) = 0;
     virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) = 0;
+    virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1852,5 +1852,17 @@ HWTEST_F(NetConnServiceTest, EnableAppFrozenedCallbackLimitationTest001, TestSiz
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, SetReuseSupplierIdTest001, TestSize.Level1)
+{
+    uint32_t supplierId = 1004;
+    uint32_t reuseSupplierId = 1008;
+    bool add = false;
+    auto ret = NetConnService::GetInstance()->SetReuseSupplierId(supplierId, reuseSupplierId, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    supplierId = -1;
+    ret = NetConnService::GetInstance()->SetReuseSupplierId(supplierId, reuseSupplierId, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
