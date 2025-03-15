@@ -53,6 +53,8 @@ ohos_shared_library("napi_utils") {
     "src/napi_utils.cpp",
   ]
 
+  branch_protector_ret = "pac_ret"
+
   configs = [ ":napi_utils_config" ]
 
   public_configs = [ ":napi_utils_public_config" ]
