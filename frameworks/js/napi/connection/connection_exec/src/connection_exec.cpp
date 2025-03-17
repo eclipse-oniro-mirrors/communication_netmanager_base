@@ -23,7 +23,6 @@
 #include "errorcode_convertor.h"
 #include "napi_utils.h"
 #include "net_conn_callback_observer.h"
-#include "net_interface_callback_observer.h"
 #include "net_conn_client.h"
 #include "net_handle_interface.h"
 #include "net_manager_constants.h"
@@ -32,8 +31,11 @@
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "securec.h"
+#include <mutex>
 
 namespace OHOS::NetManagerStandard {
+std::mutex g_predefinedHostMtx;
+
 namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
@@ -473,6 +475,7 @@ bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
         }
     }
 
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
     NETMANAGER_BASE_LOGI("set host with ip addr");
     int res = predefined_host_set_hosts(host_ips.c_str());
     if (res != NETMANAGER_SUCCESS) {
@@ -510,6 +513,7 @@ bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
     NETMANAGER_BASE_LOGI("delete host with ip addr");
     int res = predefined_host_remove_host(context->host_.c_str());
     if (res != NETMANAGER_SUCCESS) {
@@ -541,6 +545,7 @@ bool ConnectionExec::ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *conte
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(g_predefinedHostMtx);
     int res = predefined_host_clear_all_hosts();
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecDeleteCustomDNSRules failed %{public}d", res);
