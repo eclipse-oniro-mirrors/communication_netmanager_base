@@ -134,6 +134,8 @@ ohos_shared_library("net_data_share") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "data_share/src/net_datashare_utils.cpp",
     "data_share/src/net_datashare_utils_iface.cpp",
@@ -177,6 +179,8 @@ ohos_shared_library("net_bundle_utils") {
     debug = false
     blocklist = "./bundle_utils/net_bundle_utils_blocklist.txt"
   }
+
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
     "bundle_utils/include",

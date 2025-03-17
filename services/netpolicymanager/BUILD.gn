@@ -212,6 +212,8 @@ ohos_shared_library("net_access_policy_dialog") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "include",
