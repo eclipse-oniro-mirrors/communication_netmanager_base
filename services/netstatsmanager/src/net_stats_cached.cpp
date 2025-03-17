@@ -39,6 +39,11 @@ const std::string CELLULAR_IFACE_NAME = "rmnet";
 } // namespace
 const int8_t RETRY_TIME = 3;
 
+NetStatsCached::NetStatsCached()
+{
+    isDisplayTrafficAncoList = CommonUtils::IsNeedDisplayTrafficAncoList();
+}
+
 int32_t NetStatsCached::StartCached()
 {
     auto ret = CreatNetStatsTables();
@@ -128,11 +133,19 @@ void NetStatsCached::GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStats
     tmpList.erase(std::remove_if(tmpList.begin(), tmpList.end(), [](const auto &item) {
                       return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                   }), tmpList.end());
-    std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [](NetStatsInfo &info) {
-        if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
-            info.uid_ = Sim_UID;
-        } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
-            info.uid_ = SIM2_UID;
+    std::transform(tmpList.begin(), tmpList.end(), std::back_inserter(uidSimStatsInfo), [this](NetStatsInfo &info) {
+        if (!isDisplayTrafficAncoList) {
+            if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+                info.uid_ = SIM2_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+                info.uid_ = Sim_UID;
+            }
+        } else {
+            if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+                info.uid_ = Sim_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                info.uid_ = SIM2_UID;
+            }
         }
         return info;
     });
@@ -530,12 +543,15 @@ void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleIn
             NETMGR_LOG_W("SetUidStatsFlag sampleBundleInfo is invalid. [%{public}s]", iter->second.ToString().c_str());
             continue;
         }
-        if (CommonUtils::IsSim(iter->second.bundleName_) || CommonUtils::IsSimAnco(iter->second.bundleName_)) {
-            uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM_BASIC);
-            continue;
-        } else if (CommonUtils::IsSim2(iter->second.bundleName_) || CommonUtils::IsSim2Anco(iter->second.bundleName_)) {
-            uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2_BASIC);
-            continue;
+        if (isDisplayTrafficAncoList) {
+            if (CommonUtils::IsSim(iter->second.bundleName_) || CommonUtils::IsSimAnco(iter->second.bundleName_)) {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM_BASIC);
+                continue;
+            } else if (CommonUtils::IsSim2(iter->second.bundleName_) ||
+                CommonUtils::IsSim2Anco(iter->second.bundleName_)) {
+                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2_BASIC);
+                continue;
+            }
         }
         if (CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
             uidStatsFlagMap_.EnsureInsert(iter->first,
@@ -549,9 +565,11 @@ void NetStatsCached::SetUidStatsFlag(std::unordered_map<uint32_t, SampleBundleIn
             }
             if (earlySampleBundleOpt.has_value() &&
                 CommonUtils::IsSim2(earlySampleBundleOpt.value().bundleName_) && isExistSim2) {
-                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM2_BASIC);
+                uidStatsFlagMap_.EnsureInsert(iter->first,
+                    isDisplayTrafficAncoList ? STATS_DATA_FLAG_SIM2_BASIC : STATS_DATA_FLAG_SIM2);
             } else if (isExistSim) {
-                uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_SIM_BASIC);
+                uidStatsFlagMap_.EnsureInsert(iter->first,
+                    isDisplayTrafficAncoList ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_SIM);
             } else {
                 uidStatsFlagMap_.EnsureInsert(iter->first, STATS_DATA_FLAG_DEFAULT);
             }
@@ -586,7 +604,8 @@ NetStatsDataFlag NetStatsCached::GetUidStatsFlag(uint32_t uid)
             isExistSim = true;
         }
     });
-    flag = isExistSim ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_DEFAULT;
+    flag = isExistSim ? (isDisplayTrafficAncoList ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_SIM) :
+        STATS_DATA_FLAG_DEFAULT;
     uidStatsFlagMap_.EnsureInsert(uid, flag);
     return flag;
 }
@@ -660,11 +679,16 @@ void NetStatsCached::DeleteUidSimStats(uint32_t uid)
     }
     if (CommonUtils::IsSim(sampleBundleInfo.bundleName_) ||
         CommonUtils::IsSim2(sampleBundleInfo.bundleName_)) {
-        auto flagBasic =
-            CommonUtils::IsSim(sampleBundleInfo.bundleName_) ? STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_SIM2_BASIC;
-        auto flagHap = (flagBasic == STATS_DATA_FLAG_SIM_BASIC) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
-        DeleteUidSimStatsWithFlag(uid, flagBasic);
-        DeleteUidSimStatsWithFlag(uid, flagHap);
+        if (!isDisplayTrafficAncoList) {
+            auto flag = CommonUtils::IsSim(sampleBundleInfo.bundleName_) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
+            DeleteUidSimStatsWithFlag(uid, flag);
+        } else {
+            auto flagBasic = CommonUtils::IsSim(sampleBundleInfo.bundleName_) ?
+                STATS_DATA_FLAG_SIM_BASIC : STATS_DATA_FLAG_SIM2_BASIC;
+            auto flagHap = (flagBasic == STATS_DATA_FLAG_SIM_BASIC) ? STATS_DATA_FLAG_SIM : STATS_DATA_FLAG_SIM2;
+            DeleteUidSimStatsWithFlag(uid, flagBasic);
+            DeleteUidSimStatsWithFlag(uid, flagHap);
+        }
     }
 }
 
@@ -756,12 +780,23 @@ void NetStatsCached::GetKernelUidSimStats(std::vector<NetStatsInfo> &statsInfo)
         if (tmp.flag_ <= STATS_DATA_FLAG_DEFAULT || tmp.flag_ >= STATS_DATA_FLAG_LIMIT) {
             tmp.flag_ = GetUidStatsFlag(tmp.uid_);
         }
-        if (tmp.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
-            tmp.uid_ = Sim_UID;
-        } else if (tmp.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
-            tmp.uid_ = SIM2_UID;
-        } else if (tmp.flag_ != STATS_DATA_FLAG_SIM && tmp.flag_ != STATS_DATA_FLAG_SIM2) {
-            return;
+
+        if (!isDisplayTrafficAncoList) {
+            if (tmp.flag_ == STATS_DATA_FLAG_SIM2) {
+                tmp.uid_ = SIM2_UID;
+            } else if (tmp.flag_ == STATS_DATA_FLAG_SIM) {
+                tmp.uid_ = Sim_UID;
+            } else {
+                return;
+            }
+        } else {
+            if (tmp.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+                tmp.uid_ = Sim_UID;
+            } else if (tmp.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                tmp.uid_ = SIM2_UID;
+            } else if (tmp.flag_ != STATS_DATA_FLAG_SIM && tmp.flag_ != STATS_DATA_FLAG_SIM2) {
+                return;
+            }
         }
         statsInfo.push_back(std::move(tmp));
     });

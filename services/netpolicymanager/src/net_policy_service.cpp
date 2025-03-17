@@ -85,6 +85,7 @@ static std::atomic<bool> g_RegisterToService(
 NetPolicyService::NetPolicyService()
     : SystemAbility(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, true), state_(STATE_STOPPED)
 {
+    isDisplayTrafficAncoList_ = CommonUtils::IsNeedDisplayTrafficAncoList();
 }
 
 NetPolicyService::~NetPolicyService() = default;
@@ -763,7 +764,7 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
         }
         if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid() &&
             (CommonUtils::IsInstallSourceFromSim(iter->second.installSource_))) {
-            params.emplace(iter->second.uid_, iter->second.uid_);
+            params.emplace(iter->second.uid_, isDisplayTrafficAncoList_ ? iter->second.uid_ : simFindRet->second.uid_);
             continue;
         }
         if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
@@ -774,7 +775,8 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
         }
         if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
             CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
-            params.emplace(iter->second.uid_,  iter->second.uid_);
+            params.emplace(iter->second.uid_, isDisplayTrafficAncoList_ ? iter->second.uid_ :
+                sim2FindRet->second.uid_);
             continue;
         }
     }

@@ -431,6 +431,10 @@ int32_t NetStatsDatabaseHelper::Upgrade()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_4);
     }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_5);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_4);
+    }
     return ret;
 }
 
@@ -496,6 +500,20 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
             NETMGR_LOG_E("ExecTableUpgrade Version_4 failed. ret = %{public}d", ret);
         }
         oldVersion = Version_4;
+    }
+    if (oldVersion < Version_5 && newVersion >= Version_5) {
+        if (CommonUtils::IsNeedDisplayTrafficAncoList()) {
+            std::string sqlsim = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM_BASIC) +
+                              " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_SIM) + ";";
+            ret = ExecSql(sqlsim, nullptr, sqlCallback);
+            std::string sqlsim2 = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM2_BASIC) +
+                              " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_SIM2) + ";";
+            int32_t retsim2 = ExecSql(sqlsim2, nullptr, sqlCallback);
+            if (ret != SQLITE_OK || retsim2 != SQLITE_OK) {
+                NETMGR_LOG_E("ExecTableUpgrade Version_5 failed. ret = %{public}d", ret);
+            }
+            oldVersion = Version_5;
+        }
     }
 }
 

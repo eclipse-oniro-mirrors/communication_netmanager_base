@@ -26,6 +26,11 @@ namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 
+NetStatsDataHandler::NetStatsDataHandler()
+{
+    isDisplayTrafficAncoList = CommonUtils::IsNeedDisplayTrafficAncoList();
+}
+
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
@@ -93,11 +98,19 @@ int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &inf
                                return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                            }),
                            uidSimTableInfos.end());
-    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-        if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
-            info.uid_ = Sim_UID;
-        } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
-            info.uid_ = SIM2_UID;
+    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [this](NetStatsInfo &info) {
+        if (!isDisplayTrafficAncoList) {
+            if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+                info.uid_ = SIM2_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+                info.uid_ = Sim_UID;
+            }
+        } else {
+            if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+                info.uid_ = Sim_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                info.uid_ = SIM2_UID;
+            }
         }
     });
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
@@ -126,15 +139,30 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
                                    return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
                                }),
                                uidSimTableInfos.end());
-        std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](NetStatsInfo &info) {
-            if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
-                info.uid_ = Sim_UID;
-            } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
-                info.uid_ = SIM2_UID;
+        std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [this](NetStatsInfo &info) {
+            if (!isDisplayTrafficAncoList) {
+                if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+                    info.uid_ = SIM2_UID;
+                } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+                    info.uid_ = Sim_UID;
+                }
+            } else {
+                if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+                    info.uid_ = Sim_UID;
+                } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                    info.uid_ = SIM2_UID;
+                }
             }
         });
     } else {
         ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
+        if (!uidSimTableInfos.empty() && isDisplayTrafficAncoList) {
+            uidSimTableInfos.erase(std::remove_if(uidSimTableInfos.begin(), uidSimTableInfos.end(),
+                [](const auto &item) {
+                    return item.flag_ != STATS_DATA_FLAG_SIM && item.flag_ != STATS_DATA_FLAG_SIM2;
+                }),
+                uidSimTableInfos.end());
+        }
     }
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);

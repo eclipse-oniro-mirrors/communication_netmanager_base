@@ -1204,14 +1204,14 @@ void NetStatsService::UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t v
             }
             break;
         case NET_STATS_MONTHLY_MARK:
-            if (value >= 0 || value <= 100) { // 100: 百分比最大值
+            if (value >= 0 && value <= 100) { // 100: 百分比最大值
                 settingsTrafficMap_[simId].second->monthlyMark = value;
                 settingsTrafficMap_[simId].second->isCanNotifyMonthlyMark = true;
                 UpdateTrafficLimitDate(simId);
             }
             break;
         case NET_STATS_DAILY_MARK:
-            if (value >= 0 || value <= 100) { // 100: 百分比最大值
+            if (value >= 0 && value <= 100) { // 100: 百分比最大值
                 settingsTrafficMap_[simId].second->dailyMark = value;
             }
             break;
