@@ -18,11 +18,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <mutex>
 
 #include "constant.h"
 #include "errorcode_convertor.h"
 #include "napi_utils.h"
 #include "net_conn_callback_observer.h"
+#include "net_interface_callback_observer.h"
 #include "net_conn_client.h"
 #include "net_handle_interface.h"
 #include "net_manager_constants.h"
@@ -31,7 +33,7 @@
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "securec.h"
-#include <mutex>
+
 
 namespace OHOS::NetManagerStandard {
 std::mutex g_predefinedHostMtx;
