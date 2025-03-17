@@ -775,7 +775,7 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
         }
         if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
             CommonUtils::IsInstallSourceFromSim2(iter->second.installSource_)) {
-            params.emplace(iter->second.uid_, isDisplayTrafficAncoList_ ? iter->second.uid_ : 
+            params.emplace(iter->second.uid_, isDisplayTrafficAncoList_ ? iter->second.uid_ :
                 sim2FindRet->second.uid_);
             continue;
         }
