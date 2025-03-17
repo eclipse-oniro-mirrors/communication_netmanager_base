@@ -85,7 +85,7 @@ static std::atomic<bool> g_RegisterToService(
 NetPolicyService::NetPolicyService()
     : SystemAbility(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, true), state_(STATE_STOPPED)
 {
-    isDisplayTrafficAncoList__ = CommonUtils::IsNeedDisplayTrafficAncoList();
+    isDisplayTrafficAncoList_ = CommonUtils::IsNeedDisplayTrafficAncoList();
 }
 
 NetPolicyService::~NetPolicyService() = default;
