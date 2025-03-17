@@ -300,6 +300,7 @@ private:
     std::vector<uint16_t> monthDay_;
 
     bool hasSARemoved_ = false;
+    bool isDisplayTrafficAncoList_ = false;
 
 private:
     void RegisterFactoryResetCallback();
