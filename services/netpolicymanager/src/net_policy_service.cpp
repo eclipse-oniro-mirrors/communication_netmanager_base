@@ -758,7 +758,7 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
         }
         if (simFindRet != sampleBundleInfos.end() && simFindRet->second.Valid() &&
             (CommonUtils::IsSim(iter->second.bundleName_) || CommonUtils::IsSimAnco(iter->second.bundleName_) ||
-             iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
+            iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
             params.emplace(iter->second.uid_, simFindRet->second.uid_);
             continue;
         }
@@ -769,7 +769,7 @@ void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
         }
         if (sim2FindRet != sampleBundleInfos.end() && sim2FindRet->second.Valid() &&
             (CommonUtils::IsSim2(iter->second.bundleName_) || CommonUtils::IsSim2Anco(iter->second.bundleName_) ||
-             iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
+            iter->second.installSource_ == INSTALL_SOURCE_DEFAULT)) {
             params.emplace(iter->second.uid_, sim2FindRet->second.uid_);
             continue;
         }
