@@ -236,6 +236,8 @@ private:
 
     static void FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 };
+
+extern std::mutex g_predefinedHostMtx;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H */
