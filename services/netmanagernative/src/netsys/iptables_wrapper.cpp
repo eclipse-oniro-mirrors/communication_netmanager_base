@@ -93,7 +93,7 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
         }
 #else
         iptablesWrapperFfrtQueue_->submit(executeCommand);
-#endif // UNITTEST_WAIT_FFRT
+#endif // UNITTEST_FORBID_FFRT
     }
 
     if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
@@ -112,7 +112,7 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
         }
 #else
         iptablesWrapperFfrtQueue_->submit(executeCommand);
-#endif // UNITTEST_WAIT_FFRT
+#endif // UNITTEST_FORBID_FFRT
     }
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
@@ -164,7 +164,7 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
             std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
-            executeCommand(cmd);
+            executeCommand();
 #elif UNITTEST_WAIT_FFRT
             // if too much task in queue, wait until task finish
             if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
