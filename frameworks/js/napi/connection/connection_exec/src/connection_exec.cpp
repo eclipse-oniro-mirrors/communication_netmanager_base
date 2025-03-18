@@ -34,7 +34,6 @@
 #include "netmanager_base_log.h"
 #include "securec.h"
 
-
 namespace OHOS::NetManagerStandard {
 std::mutex g_predefinedHostMtx;
 
