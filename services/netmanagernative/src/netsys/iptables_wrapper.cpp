@@ -22,10 +22,10 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
-#ifdef UNITTEST_FORBID_FFRT
-#undef UNITTEST_FORBID_FFRT
+#ifdef UNITTEST_WAIT_FFRT
+#undef UNITTEST_WAIT_FFRT
 #endif
-#define UNITTEST_FORBID_FFRT 1
+#define UNITTEST_WAIT_FFRT 1
 
 namespace OHOS {
 namespace nmd {
@@ -33,6 +33,7 @@ using namespace NetManagerStandard;
 namespace {
 constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
 constexpr const char *IP6TABLES_CMD_PATH = "/system/bin/ip6tables";
+constexpr const int32_t MAX_IPTABLES_FFRT_TASK_NUM = 200;
 } // namespace
 
 IptablesWrapper::IptablesWrapper()
@@ -78,20 +79,38 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
     if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
         ExecuteCommand(cmd);
+#elif UNITTEST_WAIT_FFRT
+        // if too much task in queue, wait until task finish
+        if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
+            NETNATIVE_LOGE("iptables queue task count overmax, wait");
+            ffrt::task_handle handle = iptablesWrapperFfrtQueue_->submit_h(executeCommand);
+            iptablesWrapperFfrtQueue_->wait(handle);
+        } else {
+            iptablesWrapperFfrtQueue_->submit(executeCommand);
+        }
 #else
-        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
         iptablesWrapperFfrtQueue_->submit(executeCommand);
 #endif // UNITTEST_FORBID_FFRT
     }
 
     if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
         ExecuteCommand(cmd);
+#elif UNITTEST_WAIT_FFRT
+        // if too much task in queue, wait until task finish
+        if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
+            NETNATIVE_LOGE("iptables queue task count overmax, wait");
+            ffrt::task_handle handle = iptablesWrapperFfrtQueue_->submit_h(executeCommand);
+            iptablesWrapperFfrtQueue_->wait(handle);
+        } else {
+            iptablesWrapperFfrtQueue_->submit(executeCommand);
+        }
 #else
-        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
         iptablesWrapperFfrtQueue_->submit(executeCommand);
 #endif // UNITTEST_FORBID_FFRT
     }
@@ -113,12 +132,8 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
             std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
 
         int64_t start = GetTickCount();
-#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
-        executeCommandForRes();
-#else
         ffrt::task_handle RunCommandForResTaskIpv4 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
         iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv4);
-#endif // UNITTEST_FORBID_FFRT
         NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
     }
 
@@ -128,12 +143,8 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
             std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
 
         int64_t start = GetTickCount();
-#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
-        executeCommandForRes();
-#else
         ffrt::task_handle RunCommandForResTaskIpv6 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
         iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv6);
-#endif // UNITTEST_FORBID_FFRT
         NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
     }
 
@@ -154,6 +165,15 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
             executeCommand();
+#elif UNITTEST_WAIT_FFRT
+            // if too much task in queue, wait until task finish
+            if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
+                NETNATIVE_LOGE("iptables queue task count overmax, wait");
+                ffrt::task_handle handle = iptablesWrapperFfrtQueue_->submit_h(executeCommand);
+                iptablesWrapperFfrtQueue_->wait(handle);
+            } else {
+                iptablesWrapperFfrtQueue_->submit(executeCommand);
+            }
 #else
             iptablesWrapperFfrtQueue_->submit(executeCommand);
 #endif
@@ -164,6 +184,15 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
             executeCommand();
+#elif UNITTEST_WAIT_FFRT
+            // if too much task in queue, wait until task finish
+            if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
+                NETNATIVE_LOGE("iptables queue task count overmax, wait");
+                ffrt::task_handle handle = iptablesWrapperFfrtQueue_->submit_h(executeCommand);
+                iptablesWrapperFfrtQueue_->wait(handle);
+            } else {
+                iptablesWrapperFfrtQueue_->submit(executeCommand);
+            }
 #else
             iptablesWrapperFfrtQueue_->submit(executeCommand);
 #endif
