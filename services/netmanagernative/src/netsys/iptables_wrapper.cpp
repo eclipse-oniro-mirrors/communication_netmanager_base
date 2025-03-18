@@ -80,7 +80,9 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
         std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
-#if UNITTEST_WAIT_FFRT
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteCommand(cmd);
+#elif UNITTEST_WAIT_FFRT
         // if too much task in queue, wait until task finish
         if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
             NETNATIVE_LOGE("iptables queue task count overmax, wait");
@@ -97,7 +99,9 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
         std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
         std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
-#if UNITTEST_WAIT_FFRT
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteCommand(cmd);
+#elif UNITTEST_WAIT_FFRT
         // if too much task in queue, wait until task finish
         if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
             NETNATIVE_LOGE("iptables queue task count overmax, wait");
@@ -159,7 +163,9 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
         if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
             std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
-#if UNITTEST_WAIT_FFRT
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+            executeCommand(cmd);
+#elif UNITTEST_WAIT_FFRT
             // if too much task in queue, wait until task finish
             if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
                 NETNATIVE_LOGE("iptables queue task count overmax, wait");
@@ -176,7 +182,9 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
         if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
             std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
             std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
-#if UNITTEST_WAIT_FFRT
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+            executeCommand();
+#elif UNITTEST_WAIT_FFRT
             // if too much task in queue, wait until task finish
             if (iptablesWrapperFfrtQueue_->get_task_cnt() >= MAX_IPTABLES_FFRT_TASK_NUM) {
                 NETNATIVE_LOGE("iptables queue task count overmax, wait");
