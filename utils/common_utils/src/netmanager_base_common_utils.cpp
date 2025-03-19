@@ -36,7 +36,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifndef CROSS_PLATFORM
 #include "parameters.h"
 #endif
 #include "securec.h"
@@ -797,7 +797,7 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
 
 bool IsNeedDisplayTrafficAncoList()
 {
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifndef CROSS_PLATFORM
     NETMGR_LOG_I("Is need display traffic anco list: %{public}s",
         system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false").c_str());
     return system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false") == "true";
