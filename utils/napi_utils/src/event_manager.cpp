@@ -62,8 +62,11 @@ void EventManager::DeleteListener(const std::string &type, napi_value callback)
 void EventManager::Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv)
 {
     std::unique_lock<std::shared_mutex> lock1(mutexForListenersAndEmitByUv_);
-    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
-    std::for_each(listeners_.begin(), listeners_.end(), [type, argv](const EventListener &listener) {
+    std::list<EventListener> tmpListeners(listeners_);
+    lock1.unlock();
+
+    std::unique_lock lock2(mutexForEmitAndEmitByUv_);
+    std::for_each(tmpListeners.begin(), tmpListeners.end(), [type, argv](const EventListener &listener) {
         if (listener.IsAsyncCallback()) {
             /* AsyncCallback(BusinessError error, T data) */
             napi_value arg[ASYNC_CALLBACK_PARAM_NUM] = {argv.first, argv.second};
@@ -74,7 +77,9 @@ void EventManager::Emit(const std::string &type, const std::pair<napi_value, nap
             listener.Emit(type, CALLBACK_PARAM_NUM, arg);
         }
     });
+    lock2.unlock();
 
+    std::unique_lock<std::shared_mutex> lock3(mutexForListenersAndEmitByUv_);
     auto it = std::remove_if(listeners_.begin(), listeners_.end(),
                              [type](const EventListener &listener) -> bool { return listener.MatchOnce(type); });
     listeners_.erase(it, listeners_.end());
