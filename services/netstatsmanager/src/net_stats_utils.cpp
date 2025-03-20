@@ -24,6 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 
 const int32_t TM_YEAR_START = 1900;
+static const int32_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
 {
@@ -110,15 +111,16 @@ bool NetStatsUtils::IsLeapYear(int32_t year)
  
 int32_t NetStatsUtils::GetDaysInMonth(int32_t year, int32_t month)
 {
-    // 每个月的天数，默认是28天（适用于2月，即使不是闰年）
-    static const int32_t daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    if (year <= 0 || month <= 0 || month > static_cast<int32_t>(sizeof(DAYS_IN_MONTH) / sizeof(int32_t))) {
+        return -1;
+    }
  
     if (month == 2 && NetStatsUtils::IsLeapYear(year)) { // 如果是2月并且是闰年
         return 29;  // 则天数为29
     }
  
     // 返回对应月份的天数
-    return daysInMonth[month - 1];
+    return DAYS_IN_MONTH[month - 1];
 }
 
 bool NetStatsUtils::IsMobileDataEnabled()
