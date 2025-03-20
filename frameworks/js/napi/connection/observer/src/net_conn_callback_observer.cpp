@@ -109,7 +109,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     }
     auto netConnection = *iter;
     lock.unlock();
-    if (netConnectio.second == nullptr) {
+    if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
     }
