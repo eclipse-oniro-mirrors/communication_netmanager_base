@@ -63,6 +63,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     }
     std::shared_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     auto netConnection = NET_CONNECTIONS.find(this);
+    lock.unlock();
     if (netConnection == NET_CONNECTIONS.end()) {
         NETMANAGER_BASE_LOGI("can not find netConnection key");
         return 0;
