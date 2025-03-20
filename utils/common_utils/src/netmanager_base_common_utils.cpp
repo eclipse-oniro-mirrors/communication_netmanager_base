@@ -36,7 +36,9 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#ifndef CROSS_PLATFORM
 #include "parameters.h"
+#endif
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
@@ -795,9 +797,13 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
 
 bool IsNeedDisplayTrafficAncoList()
 {
+#ifndef CROSS_PLATFORM
     NETMGR_LOG_I("Is need display traffic anco list: %{public}s",
         system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false").c_str());
     return system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false") == "true";
+#else
+    return false;
+#endif
 }
 
 bool IsSimAnco(const std::string &bundleName)
