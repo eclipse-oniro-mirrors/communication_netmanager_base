@@ -99,6 +99,7 @@ void NetConnAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const s
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         NETMGR_LOG_I("net conn manager sa is added.");
         NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
+        NetConnClient::GetInstance().UnsubscribeSystemAbility();
     }
 }
 
@@ -532,7 +533,6 @@ sptr<INetConnService> NetConnClient::GetProxy()
 {
     std::lock_guard lock(mutex_);
 
-    SubscribeSystemAbility();
     if (NetConnService_) {
         NETMGR_LOG_D("get proxy is ok");
         return NetConnService_;
@@ -651,6 +651,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
+    SubscribeSystemAbility();
 }
 
 void NetConnClient::DlCloseRemoveDeathRecipient()
