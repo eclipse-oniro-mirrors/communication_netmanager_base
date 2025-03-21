@@ -15,8 +15,8 @@
 
 #include "net_stats_cached.h"
 
+#include <cinttypes>
 #include <initializer_list>
-#include <inttypes.h>
 #include <list>
 #include <pthread.h>
 
