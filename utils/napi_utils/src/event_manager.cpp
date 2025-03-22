@@ -98,13 +98,12 @@ void *EventManager::GetData()
 void EventManager::EmitByUvWithModuleId(const std::string &type, const NapiUtils::UvHandler &handler, uint64_t moduleId)
 {
     std::shared_lock<std::shared_mutex> lock1(mutexForListenersAndEmitByUv_);
-    auto listenersTmp = listeners_;
-    lock1.unlock();
+    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
     if (!IsValid()) {
         return;
     }
-    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
-    std::for_each(listenersTmp.begin(), listenersTmp.end(), [type, handler, moduleId](const EventListener &listener) {
+
+    std::for_each(listeners_.begin(), listeners_.end(), [type, handler, moduleId](const EventListener &listener) {
         listener.EmitByUvByModuleId(type, handler, moduleId);
     });
 }
