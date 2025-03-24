@@ -259,7 +259,6 @@ NetsysNativeClient::~NetsysNativeClient()
 
     sptr<IRemoteObject> local = netsysNativeService_->AsObject();
     if (local != remote.promote()) {
-        NETMGR_LOG_E("proxy and stub is not same remote object");
         return;
     }
     local->RemoveDeathRecipient(deathRecipient_);
