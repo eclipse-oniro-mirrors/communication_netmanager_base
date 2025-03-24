@@ -906,7 +906,7 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
                 tmpInfosVec.push_back(std::move(info));
             } else {
                 auto currentStats = info - *findRet;
-                currentStats.date_ = CommonUtils::GetCurrentSecond();
+                currentStats.date_ = statsInfos.date_;
                 tmpInfosVec.push_back(currentStats);
             }
         });
