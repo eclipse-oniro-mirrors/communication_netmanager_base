@@ -111,14 +111,12 @@ void EventManager::EmitByUvWithModuleId(const std::string &type, const NapiUtils
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
     std::shared_lock<std::shared_mutex> lock1(mutexForListenersAndEmitByUv_);
-    auto listenersTmp = listeners_;
-    lock1.unlock();
     std::lock_guard lock2(mutexForEmitAndEmitByUv_);
     if (!IsValid()) {
         return;
     }
 
-    std::for_each(listenersTmp.begin(), listenersTmp.end(), [type, data, handler, this](const EventListener &listener) {
+    std::for_each(listeners_.begin(), listeners_.end(), [type, data, handler, this](const EventListener &listener) {
         auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), type, this);
         listener.EmitByUv(type, workWrapper, handler);
     });
