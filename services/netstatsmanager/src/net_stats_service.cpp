@@ -1120,11 +1120,11 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
     }
     sptr<NetStatsNetwork> network = (std::make_unique<NetStatsNetwork>()).release();
     network->startTime_ =
-        NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate);
+        static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate));
     network->endTime_ = NetStatsUtils::GetNowTimestamp();
     NETMGR_LOG_I("endTime: %{public}lu. simId: %{public}d", network->endTime_, simId);
     network->type_ = 0;
-    network->simId_ = simId;
+    network->simId_ = static_cast<uint32_t>(simId);
     uint64_t allUsedTraffic = 0;
     int ret = GetAllUsedTrafficStatsByNetwork(network, allUsedTraffic);
     if (ret != NETMANAGER_SUCCESS) {
@@ -1146,7 +1146,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
         if (monthTmp > allUsedTraffic) {
             monthlyMarkAvailable = monthTmp - allUsedTraffic;
         }
-        uint64_t todayStartTime = NetStatsUtils::GetTodayStartTimestamp();
+        uint64_t todayStartTime = static_cast<uint64_t>(NetStatsUtils::GetTodayStartTimestamp());
         network->startTime_ = todayStartTime;
         uint64_t allTodayUsedTraffix = 0;
         ret = GetAllUsedTrafficStatsByNetwork(network, allTodayUsedTraffix);
