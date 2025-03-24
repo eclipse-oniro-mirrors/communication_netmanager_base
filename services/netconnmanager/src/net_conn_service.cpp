@@ -3045,9 +3045,11 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == ACCESS_TOKEN_MANAGER_SERVICE_ID) {
         if (!registerToService_) {
+#ifndef NETMANAGER_TEST
             if (!Publish(NetConnService::GetInstance().get())) {
                 NETMGR_LOG_E("Register to sa manager failed");
             }
+#endif
             registerToService_ = true;
         }
     } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {

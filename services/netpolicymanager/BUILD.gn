@@ -193,6 +193,7 @@ ohos_static_library("net_policy_manager_static") {
   defines = [
     "NETMGR_LOG_TAG = \"NetPolicyService\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "NETMANAGER_TEST",
   ]
 
   if (enable_netmgr_debug) {

@@ -251,10 +251,12 @@ bool NetStatsService::Init()
         return false;
     }
     if (!registerToService_) {
+#ifndef NETMANAGER_TEST
         if (!Publish(DelayedSingleton<NetStatsService>::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
+#endif
         registerToService_ = true;
     }
     if (nullptr == netStatsCached_) {

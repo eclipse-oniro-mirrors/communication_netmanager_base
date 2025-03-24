@@ -150,9 +150,11 @@ void NetPolicyService::Init()
             NetAccessPolicyRDB netAccessPolicy;
             netAccessPolicy.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
+#ifndef NETMANAGER_TEST
             if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
                 NETMGR_LOG_E("Register to sa manager failed");
             }
+#endif
         }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
     ffrtQueue_.submit([this]() { SetBrokerUidAccessPolicyMap(std::nullopt); },
                       ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
@@ -204,6 +206,9 @@ int32_t NetPolicyService::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAl
 int32_t NetPolicyService::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed)
 {
     NETMGR_LOG_D("IsUidNetAllowed uid[%{public}d ifaceName[%{public}s]", uid, ifaceName.c_str());
+    if (netPolicyTraffic_ == nullptr) {
+        return 0;
+    }
     const auto &vec = netPolicyTraffic_->GetMeteredIfaces();
     if (std::find(vec.begin(), vec.end(), ifaceName) != vec.end()) {
         return IsUidNetAllowed(uid, true, isAllowed);
