@@ -896,7 +896,8 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
 
     std::vector<NetStatsInfo> tmpInfosVec;
     if (!lastIptablesStatsInfo_.empty()) {
-        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(),
+            [this, &tmpInfosVec, &statsInfos](NetStatsInfo &info) {
             if (info.iface_ == IFACE_LO) {
                 return;
             }
