@@ -206,6 +206,7 @@ ohos_static_library("net_stats_manager_static") {
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
     "UNITTEST_FORBID_FFRT",
+    "NETMANAGER_TEST",
   ]
 
   if (netmanager_base_enable_netsys_access_policy_diag_listen) {

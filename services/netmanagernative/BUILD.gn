@@ -266,6 +266,7 @@ ohos_static_library("netsys_native_manager_static") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "UNITTEST_FORBID_FFRT=1",
+    "NETMANAGER_TEST",
     "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 
