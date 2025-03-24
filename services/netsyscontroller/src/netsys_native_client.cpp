@@ -258,7 +258,7 @@ NetsysNativeClient::~NetsysNativeClient()
     }
 
     sptr<IRemoteObject> local = netsysNativeService_->AsObject();
-    if (local != remote.promote()) {
+    if (local == nullptr || local != remote.promote()) {
         return;
     }
     local->RemoveDeathRecipient(deathRecipient_);
