@@ -253,6 +253,16 @@ void NetsysNativeClient::Init()
 NetsysNativeClient::~NetsysNativeClient()
 {
     NETMGR_LOG_I("~NetsysNativeClient : Destroy NetsysNativeService");
+    if (netsysNativeService_ == nullptr || deathRecipient_ == nullptr) {
+        return;
+    }
+
+    sptr<IRemoteObject> local = netsysNativeService_->AsObject();
+    if (local != remote.promote()) {
+        NETMGR_LOG_E("proxy and stub is not same remote object");
+        return;
+    }
+    local->RemoveDeathRecipient(deathRecipient_);
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
