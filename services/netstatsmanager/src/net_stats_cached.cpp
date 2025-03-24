@@ -15,6 +15,7 @@
 
 #include "net_stats_cached.h"
 
+#include <cinttypes>
 #include <initializer_list>
 #include <list>
 #include <pthread.h>
@@ -868,9 +869,10 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
     nmd::NetworkSharingTraffic traffic;
     int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetTrafficBytes err, ret[%{public}d]", ret);
+        NETMGR_LOG_E("GetTrafficIncreaseBytes err, ret[%{public}d]", ret);
         return;
     }
+    NETMGR_LOG_I("GetIptablesStatsIncrease traffic all=%{public}" PRId64, traffic.all);
     NetStatsInfo statsInfos;
     statsInfos.uid_ = IPTABLES_UID;
     statsInfos.iface_ = ifaceName;
@@ -891,9 +893,11 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             }
         });
     });
+
     std::vector<NetStatsInfo> tmpInfosVec;
     if (!lastIptablesStatsInfo_.empty()) {
-        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &tmpInfosVec](NetStatsInfo &info) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(),
+            [this, &tmpInfosVec, &statsInfos](NetStatsInfo &info) {
             if (info.iface_ == IFACE_LO) {
                 return;
             }
@@ -902,7 +906,9 @@ void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVe
             if (findRet == lastIptablesStatsInfo_.end()) {
                 tmpInfosVec.push_back(std::move(info));
             } else {
-                tmpInfosVec.push_back(info - *findRet);
+                auto currentStats = info - *findRet;
+                currentStats.date_ = statsInfos.date_;
+                tmpInfosVec.push_back(currentStats);
             }
         });
     } else {
@@ -928,6 +934,7 @@ void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
     CacheIptablesStatsService(traffic, ifaceName);
     WriteIptablesStats();
     lastIptablesStatsInfo_.clear();
+    NETMGR_LOG_D("SaveSharingTraffic success");
 #endif
 }
 } // namespace NetManagerStandard
