@@ -39,6 +39,7 @@ static constexpr uint8_t WITH_ALL_PARM_MODEL = 0;
 static constexpr uint8_t WITHOUT_FIRST_PARM_MODEL = 1;
 static constexpr uint8_t WITHOUT_SECOND_PARM_MODEL = 2;
 static constexpr uint8_t WITHOUT_THIRD_PARM_MODEL = 3;
+static constexpr uint8_t WITHOUT_FOURTH_PARM_MODEL = 4;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
@@ -1428,6 +1429,60 @@ void DecreaseSupplierScoreFuzzTest(const uint8_t *data, size_t size)
     StaticDecreaseSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE),
                     dataParcelWithOutThirdParam);
+}
+
+void StaticUpdateSupplierScoreProcess(const uint8_t *data, size_t size, MessageParcel &dataParcel, uint8_t paramsModel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    // ! without the first param.
+    if (paramsModel != WITHOUT_FIRST_PARM_MODEL) {
+        int32_t type = NetConnGetData<int32_t>();
+        dataParcel.WriteInt32(type);
+    }
+    // ! without the second param.
+    if (paramsModel != WITHOUT_SECOND_PARM_MODEL) {
+        std::string ident = NetConnGetString(STR_LEN);
+        dataParcel.WriteString(ident);
+    }
+    // ! without the third param.
+    if (paramsModel != WITHOUT_THIRD_PARM_MODEL) {
+        bool isBetter = NetConnGetData<bool>();
+        dataParcel.WriteBool(isBetter);
+    }
+    // ! without the fourth param.
+    if (paramsModel != WITHOUT_FOURTH_PARM_MODEL) {
+        int32_t supplierId = NetConnGetData<int32_t>();
+        dataParcel.WriteInt32(supplierId);
+    }
+}
+
+void UpdateSupplierScoreFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcelWithAllParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITH_ALL_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE), dataParcelWithAllParam);
+
+    MessageParcel dataParcelWithOutFirstParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FIRST_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutFirstParam);
+
+    MessageParcel dataParcelWithOutSecondParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_SECOND_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutSecondParam);
+
+    MessageParcel dataParcelWithOutThirdParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_THIRD_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutThirdParam);
+
+    MessageParcel dataParcelWithOutFourthParam;
+    StaticUpdateSupplierScoreProcess(data, size, dataParcelWithAllParam, WITHOUT_FOURTH_PARM_MODEL);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+                    dataParcelWithOutFourthParam);
 }
 
 void IncreaseSupplierScoreFuzzTest(const uint8_t *data, size_t size)

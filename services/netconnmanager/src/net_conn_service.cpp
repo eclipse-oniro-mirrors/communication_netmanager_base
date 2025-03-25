@@ -3347,6 +3347,18 @@ int32_t NetConnService::IncreaseSupplierScore(uint32_t supplierId)
     return result;
 }
 
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, bearerType, ident, detectionStatus, &supplierId, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, ident, detectionStatus, supplierId);
+        });
+    }
+    return result;
+}
+
 int32_t NetConnService::DecreaseSupplierScoreAsync(
     NetBearType bearerType, const std::string &ident, uint32_t& supplierId)
 {
@@ -3398,6 +3410,51 @@ int32_t NetConnService::IncreaseSupplierScoreAsync(uint32_t supplierId)
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     supplier->SetNetValid(QUALITY_GOOD_STATE);
+    locker.unlock();
+    // Find best network because supplier score changed.
+    FindBestNetworkForAllRequest();
+    // Tell other suppliers to enable if current default supplier is not better than others.
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
+        RequestAllNetworkExceptDefault();
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
+        bearerType, detectionStatus, supplierId);
+    NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
+    if (state == QUALITY_POOR_STATE) {
+        // In poor network, supplierId should be an output parameter.
+        std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType, ident);
+        if (suppliers.empty()) {
+            NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+        uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
+        if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+            if (bearerType == BEARER_WIFI) {
+                tmpSupplierId = FindSupplierForConnected(suppliers);
+                supplierId = tmpSupplierId;
+                NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
+            }
+            if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+                NETMGR_LOG_E("not found supplierId");
+                return NETMANAGER_ERR_INVALID_PARAMETER;
+            }
+        }
+    }
+    // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    auto supplier = FindNetSupplier(supplierId);
+    if (supplier == nullptr || supplier->GetNetSupplierType() != bearerType) {
+        locker.unlock();
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    supplier->SetNetValid(state);
     locker.unlock();
     // Find best network because supplier score changed.
     FindBestNetworkForAllRequest();
