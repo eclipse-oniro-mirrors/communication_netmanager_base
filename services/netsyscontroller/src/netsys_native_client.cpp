@@ -243,7 +243,7 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
     return NETMANAGER_SUCCESS;
 }
 
-NetsysNativeClient::NetsysNativeClient() = default();
+NetsysNativeClient::NetsysNativeClient() = default;
 
 void NetsysNativeClient::Init()
 {
@@ -258,7 +258,7 @@ NetsysNativeClient::~NetsysNativeClient()
     }
 
     sptr<IRemoteObject> local = netsysNativeService_->AsObject();
-    if (local == nullptr || local != remote.promote()) {
+    if (local == nullptr) {
         return;
     }
     local->RemoveDeathRecipient(deathRecipient_);
