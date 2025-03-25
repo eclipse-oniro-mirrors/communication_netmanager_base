@@ -243,31 +243,25 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
     return NETMANAGER_SUCCESS;
 }
 
-NetsysNativeClient::NetsysNativeClient()
+NetsysNativeClient::NetsysNativeClient() = default;
+
+void NetsysNativeClient::Init()
 {
-    std::thread t([this]() {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        RegisterNotifyCallback();
-    });
-    std::string threadName = "registerNotifyCallbackInConstructor";
-    pthread_setname_np(t.native_handle(), threadName.c_str());
-    t.detach();
+    RegisterNotifyCallback();
 }
 
 NetsysNativeClient::~NetsysNativeClient()
 {
     NETMGR_LOG_I("~NetsysNativeClient : Destroy NetsysNativeService");
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
+    if (netsysNativeService_ == nullptr || deathRecipient_ == nullptr) {
         return;
     }
- 
-    auto serviceRemote = proxy->AsObject();
-    if (serviceRemote == nullptr) {
+
+    sptr<IRemoteObject> local = netsysNativeService_->AsObject();
+    if (local == nullptr) {
         return;
     }
- 
-    serviceRemote->RemoveDeathRecipient(deathRecipient_);
+    local->RemoveDeathRecipient(deathRecipient_);
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)

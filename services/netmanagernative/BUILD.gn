@@ -236,8 +236,6 @@ ohos_static_library("netsys_native_manager_static") {
   testonly = true
 
   sanitize = {
-    cfi = true
-    cfi_cross_dso = true
     debug = false
   }
 

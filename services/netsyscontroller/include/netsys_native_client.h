@@ -70,6 +70,7 @@ private:
 public:
     NetsysNativeClient();
     ~NetsysNativeClient();
+    void Init();
 
     /**
      * Disallow or allow a app to create AF_INET or AF_INET6 socket

@@ -28,6 +28,7 @@ using namespace OHOS::NetsysNative;
 void NetsysControllerServiceImpl::Init()
 {
     mockNetsysClient_.RegisterMockApi();
+    netsysClient_->Init();
 }
 
 int32_t NetsysControllerServiceImpl::SetInternetPermission(uint32_t uid, uint8_t allow)
