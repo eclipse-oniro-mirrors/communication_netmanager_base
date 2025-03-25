@@ -32,7 +32,7 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    uint32_t netSupplierId_;
+    uint32_t netSupplierId_ { 0 };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
