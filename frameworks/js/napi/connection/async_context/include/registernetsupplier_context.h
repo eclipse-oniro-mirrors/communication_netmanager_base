@@ -33,10 +33,10 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    NetBearType bearerType_;
+    NetBearType bearerType_ { BEARER_DEFAULT };
     std::string ident_;
     std::set<NetCap> netCaps_;
-    uint32_t netSupplierId_;
+    uint32_t netSupplierId_ { 0 };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
