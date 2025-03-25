@@ -80,7 +80,7 @@ private:
     void ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
-    ffrt::mutex sqliteMutex_;
+    static ffrt::mutex sqliteMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
