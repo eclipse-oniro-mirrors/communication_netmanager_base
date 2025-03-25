@@ -112,7 +112,7 @@ bool AppStateAwareManager::IsForegroundApp(const uint32_t uid)
     if (!appStateObserver_) {
         return false;
     }
-    uint32_t foregroundAppUid = foregroundAppUid_.load();
+    uint32_t foregroundAppUid = static_cast<uint32_t>(foregroundAppUid_.load());
     return foregroundAppUid == uid;
 }
 

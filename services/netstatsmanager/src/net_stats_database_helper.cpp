@@ -54,6 +54,8 @@ bool CheckFilePath(const std::string &fileName)
 }
 } // namespace
 
+ffrt::mutex NetStatsDatabaseHelper::sqliteMutex_;
+
 NetStatsDatabaseHelper::NetStatsDatabaseHelper(const std::string &path)
 {
     if (!CheckFilePath(path)) {
