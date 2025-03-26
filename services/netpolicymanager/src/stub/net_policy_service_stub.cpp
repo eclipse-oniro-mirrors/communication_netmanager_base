@@ -160,10 +160,14 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         int32_t result = NETMANAGER_SUCCESS;
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
+#ifndef UNITTEST_FORBID_FFRT
             auto task = ffrtQueue_.submit_h([this, &data, &reply, &requestFunc, &result]() {
-                          result = (this->*requestFunc)(data, reply);
+#endif
+                result = (this->*requestFunc)(data, reply);
+#ifndef UNITTEST_FORBID_FFRT
             }, ffrt::task_attr().name("FfrtOnRemoteRequest"));
             ffrtQueue_.wait(task);
+#endif
             NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, result);
             return result;
         }

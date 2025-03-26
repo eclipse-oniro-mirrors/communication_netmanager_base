@@ -82,9 +82,9 @@ void Init()
 {
     if (!g_isInited) {
         DelayedSingleton<NetStatsService>::GetInstance()->Init();
-        g_isInited = false;
-    } else {
         g_isInited = true;
+    } else {
+        g_isInited = false;
     }
 }
 
