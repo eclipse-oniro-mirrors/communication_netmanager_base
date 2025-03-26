@@ -1152,7 +1152,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
 
     std::shared_ptr<NetActivate> request = CreateNetActivateRequest(netSpecifier, callback,
-        timeoutMS, REQUEST, callingUid);
+        timeoutMS, registerType, callingUid);
 
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
