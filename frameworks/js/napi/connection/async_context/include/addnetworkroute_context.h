@@ -34,7 +34,7 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    int32_t netId_;
+    int32_t netId_ { 0 };
     Route route_;
 };
 } // namespace NetManagerStandard
