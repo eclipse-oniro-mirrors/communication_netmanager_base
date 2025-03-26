@@ -484,6 +484,9 @@ public:
 
     int32_t IncreaseSupplierScore(uint32_t supplierId);
 
+    int32_t UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+                                uint32_t detectionStatus, uint32_t& supplierId);
+
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
 
     int32_t DisableVnicNetwork();

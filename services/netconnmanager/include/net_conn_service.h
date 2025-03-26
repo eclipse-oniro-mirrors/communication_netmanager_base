@@ -390,6 +390,8 @@ public:
     int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
                                   uint32_t &supplierId) override;
     int32_t IncreaseSupplierScore(uint32_t supplierId) override;
+    int32_t UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+                                uint32_t detectionStatus, uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
@@ -524,6 +526,8 @@ private:
     int32_t DecreaseSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
                                        uint32_t& supplierId);
     int32_t IncreaseSupplierScoreAsync(uint32_t supplierId);
+    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
+                                     uint32_t detectionStatus, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);

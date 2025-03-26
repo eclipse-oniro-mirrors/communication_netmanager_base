@@ -1112,6 +1112,17 @@ int32_t NetConnClient::IncreaseSupplierScore(uint32_t supplierId)
     return proxy->IncreaseSupplierScore(supplierId);
 }
 
+int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr.");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateSupplierScore(bearerType, ident, detectionStatus, supplierId);
+}
+
 std::optional<int32_t> NetConnClient::ObtainTargetApiVersionForSelf()
 {
     void *handler = dlopen(LIB_NET_BUNDLE_UTILS_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);

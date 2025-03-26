@@ -2006,6 +2006,45 @@ int32_t NetConnServiceProxy::IncreaseSupplierScore(uint32_t supplierId)
     return ret;
 }
 
+int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    uint32_t type = static_cast<uint32_t>(bearerType);
+    if (!data.WriteUint32(type)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteString(ident)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(detectionStatus)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadUint32(supplierId)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
 int32_t NetConnServiceProxy::CloseSocketsUid(int32_t netId, uint32_t uid)
 {
     MessageParcel data;
