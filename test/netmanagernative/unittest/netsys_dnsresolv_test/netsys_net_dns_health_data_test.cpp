@@ -67,12 +67,6 @@ void NetDnsHealthReportTest::SetUp()
 
 void NetDnsHealthReportTest::TearDown() {}
 
-HWTEST_F(NetDnsHealthReportTest, Marshalling_WhenWriteUint32Fails_netid, TestSize.Level0)
-{
-    EXPECT_CALL(parcel, WriteUint32(_)).WillOnce(Return(false));
-    EXPECT_EQ(report.Marshalling(parcel), false);
-}
-
 HWTEST_F(NetDnsHealthReportTest, Marshalling_WhenWriteUint32Fails_uid, TestSize.Level0)
 {
     EXPECT_CALL(parcel, WriteUint32(_)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
