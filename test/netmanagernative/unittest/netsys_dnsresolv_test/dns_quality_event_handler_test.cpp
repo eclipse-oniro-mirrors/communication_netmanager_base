@@ -50,17 +50,6 @@ void DnsQualityEventHandlerTest::SetUp() {}
 
 void DnsQualityEventHandlerTest::TearDown() {}
 
-HWTEST_F(DnsQualityEventHandlerTest, ProcessEvent_ShouldCallHandleEvent_WhenEventIsNotNullptr, TestSize.Level0)
-{
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(DNS_DIAG_WORK_THREAD);
-    if (runner) {
-        std::shared_ptr<DnsQualityEventHandlerMock> pMockHandler = std::make_shared<DnsQualityEventHandlerMock>(runner);
-        AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
-        EXPECT_CALL(*pMockHandler, ProcessEvent(testing::_)).Times(1);
-        pMockHandler->ProcessEvent(event);
-    }
-}
-
 HWTEST_F(DnsQualityEventHandlerTest, ProcessEvent_ShouldHandleEvent_WhenEventIsNotNull, TestSize.Level0)
 {
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(DNS_DIAG_WORK_THREAD);
