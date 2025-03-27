@@ -287,7 +287,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
             uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
             if (IsAbnormalAddress(addr)) {
                 HILOG_ERROR(LOG_CORE,
-                    "GetResolvCache get abnormal cache[%{public}u] netId[%{public}u]", addr, netId);
+                    "GetResolvCache get abnormal zero[%{public}d] netId[%{public}u]", (addr == 0), netId);
             }
         }
     }
@@ -345,7 +345,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
         if (addrInfo[resNum].aiFamily == AF_INET) {
             uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
             if (IsAbnormalAddress(addr)) {
-                HILOG_ERROR(LOG_CORE, "SetDnsCache set abnormal cache[%{public}u]", addr);
+                HILOG_ERROR(LOG_CORE, "SetDnsCache set abnormal zero[%{public}d]", (addr == 0));
             }
         }
 
