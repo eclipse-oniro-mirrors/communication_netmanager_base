@@ -2960,12 +2960,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
             NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        SubscribeCommonEvent("usual.event.DATA_SHARE_READY");
-#ifdef FEATURE_SUPPORT_POWERMANAGER
-        SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED");
-#endif
-        SubscribeCommonEvent("usual.event.SCREEN_ON");
-        SubscribeCommonEvent("usual.event.SCREEN_OFF");
+        SubscribeCommonEvent();
     }
 }
 
@@ -2977,11 +2972,15 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
-void NetConnService::SubscribeCommonEvent(const std::string &eventName)
+void NetConnService::SubscribeCommonEvent()
 {
-    NETMGR_LOG_I("eventName=%{public}s", eventName.c_str());
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(eventName);
+    matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    matchingSkills.AddEvent("usual.event.POWER_MANAGER_STATE_CHANGED");
+#endif
+    matchingSkills.AddEvent("usual.event.SCREEN_ON");
+    matchingSkills.AddEvent("usual.event.SCREEN_OFF");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
