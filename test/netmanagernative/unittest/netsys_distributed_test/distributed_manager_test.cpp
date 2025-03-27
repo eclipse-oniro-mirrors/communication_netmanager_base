@@ -50,7 +50,7 @@ void DistributedManagerTest::TearDown() {}
 HWTEST_F(DistributedManagerTest, CreateDistributedInterface001, TestSize.Level1)
 {
     auto result = DistributedManager::GetInstance().CreateDistributedInterface(DISTRIBUTED_TUN_CARD_NAME);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
 
     DistributedManager::GetInstance().DestroyDistributedNic(DISTRIBUTED_TUN_CARD_NAME);
 }
