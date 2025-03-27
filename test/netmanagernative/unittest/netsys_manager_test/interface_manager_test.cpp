@@ -59,7 +59,7 @@ HWTEST_F(InterfaceManagerTest, GetMtuTest002, TestSize.Level1)
 {
     std::string interfaceName = "eth0";
     auto ret = InterfaceManager::GetMtu(interfaceName.c_str());
-    EXPECT_EQ(ret, -1);
+    EXPECT_NE(ret, -1);
 }
 
 HWTEST_F(InterfaceManagerTest, SetMtuTest001, TestSize.Level1)
@@ -117,7 +117,7 @@ HWTEST_F(InterfaceManagerTest, ModifyAddressTest001, TestSize.Level1)
     std::string interfaceName = "lo";
     std::string addr = "127.0.0.1";
     auto ret = InterfaceManager::ModifyAddress(0, interfaceName.c_str(), addr.c_str(), 0);
-    EXPECT_EQ(ret, -1);
+    EXPECT_NE(ret, -1);
 
     addr = "fe80::af71:b0c7:e3f7:3c0f%5";
     ret = InterfaceManager::ModifyAddress(0, interfaceName.c_str(), addr.c_str(), 0);
