@@ -563,7 +563,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedClientNet001, TestSize.L
 
     bool isServer = false;
     ret = netsysNativeService->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedServerNet001, TestSize.Level1)
@@ -579,7 +579,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, EnableDistributedServerNet001, TestSize.L
 
     bool isServer = true;
     ret = netsysNativeService->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)

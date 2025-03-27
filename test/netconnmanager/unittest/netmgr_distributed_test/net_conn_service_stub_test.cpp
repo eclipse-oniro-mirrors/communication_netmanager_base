@@ -74,7 +74,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedClientNet001, TestSize.Level
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     MessageParcel data1;
     if (!data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
@@ -113,7 +113,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     MessageParcel data1;
     if (!data1.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {

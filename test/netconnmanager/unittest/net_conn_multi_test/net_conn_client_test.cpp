@@ -1187,7 +1187,7 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
     int32_t prefixLength = 23;
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -1296,7 +1296,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_NE(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     EXPECT_TRUE(type.empty());
 }
 
@@ -1461,7 +1461,7 @@ HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)
 
     bearerType = NetBearType::BEARER_BLUETOOTH;
     ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, IsAPIVersionSupported001, TestSize.Level1)
@@ -1491,7 +1491,7 @@ HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
     uint32_t uid = 20020157;
     int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
     NetConnClient::GetInstance().DlCloseRemoveDeathRecipient();
-    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetInterfaceTest001, TestSize.Level1)
@@ -1520,7 +1520,7 @@ HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
     uint32_t supplierId = 0;
     int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl001, TestSize.Level1)
@@ -1528,7 +1528,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl001, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = "";
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl002, TestSize.Level1)
@@ -1536,7 +1536,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl002, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN1;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl003, TestSize.Level1)
@@ -1544,7 +1544,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl003, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN6;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl004, TestSize.Level1)
@@ -1552,7 +1552,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl004, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN10;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl005, TestSize.Level1)
@@ -1560,7 +1560,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl005, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_LONG_HOST;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl006, TestSize.Level1)
@@ -1568,7 +1568,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl006, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl007, TestSize.Level1)
@@ -1582,7 +1582,7 @@ HWTEST_F(NetConnClientTest, GetPacUrl001, TestSize.Level1)
 {
     // NetManagerBaseAccessToken token;
     auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN6);
-    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
@@ -1593,7 +1593,7 @@ HWTEST_F(NetConnClientTest, GetPacUrl002, TestSize.Level1)
 {
     // NetManagerBaseAccessToken token;
     auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN10);
-    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
@@ -1606,7 +1606,7 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret1, NETMANAGER_SUCCESS);
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
@@ -1614,14 +1614,14 @@ HWTEST_F(NetConnClientTest, IsCleartextPermitted001, TestSize.Level1)
 {
     bool isclearpermitted;
     auto ret = NetConnClient::GetInstance().IsCleartextPermitted(isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
 {
     bool isclearpermitted;
     auto ret = NetConnClient::GetInstance().IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)

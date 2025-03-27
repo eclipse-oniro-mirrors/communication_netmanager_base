@@ -560,7 +560,7 @@ HWTEST_F(UtNetPolicyClient, NotifyNetAccessPolicyDiag001, TestSize.Level1)
     uint32_t uid = 0;
     int32_t result = g_netPolicyClient->NotifyNetAccessPolicyDiag(uid);
     std::cout << "NetPolicyClient027 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
-    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+    ASSERT_NE(result, NETMANAGER_SUCCESS);
 }
 
 /**

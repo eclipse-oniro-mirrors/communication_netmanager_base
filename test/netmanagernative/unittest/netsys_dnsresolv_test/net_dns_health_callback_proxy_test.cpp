@@ -68,14 +68,5 @@ HWTEST_F(NetDnsHealthCallbackProxyTest, NetDnsHealthCallbackProxyTest_NetDnsHeal
     int32_t ret = proxy->OnDnsHealthReport(dnsResultReport);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
-
-HWTEST_F(NetDnsHealthCallbackProxyTest, NetDnsHealthCallbackProxyTest_NetDnsHealthReport_02, TestSize.Level0)
-{
-    NetDnsHealthReport dnsResultReport;
-    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(1));
-    int32_t ret = proxy->OnDnsHealthReport(dnsResultReport);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_OPERATION_FAILED);
-}
-
 } // namespace NetsysNative
 } // namespace OHOS

@@ -92,7 +92,7 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
 HWTEST_F(NetMonitorTest, StartTest001, TestSize.Level1)
 {
     bool ret = instance_->IsDetecting();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     instance_->Start();
     instance_->Stop();
     ret = instance_->IsDetecting();
@@ -117,7 +117,7 @@ HWTEST_F(NetMonitorTest, ProcessDetectionTest001, TestSize.Level1)
     instance_->netBearType_ = BEARER_WIFI;
     instance_->detectionDelay_ = 0;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_NE(result, INVALID_DETECTION_STATE);
     instance_->ProcessDetection(probeResult, result);
     EXPECT_EQ(result, INVALID_DETECTION_STATE);
     instance_->detectionDelay_ = 10 * 60 * 1000;

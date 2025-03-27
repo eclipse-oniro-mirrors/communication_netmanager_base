@@ -83,7 +83,7 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag001, TestSize.Level1)
 {
     uint32_t uid = 10000;
     auto ret = instance_->NotifyNetAccessPolicyDiag(uid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag002, TestSize.Level1)

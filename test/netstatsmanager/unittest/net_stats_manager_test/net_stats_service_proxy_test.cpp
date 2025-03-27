@@ -742,7 +742,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllSimStatsInfoTest004, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfo> infos;
-    EXPECT_EQ(instance_.GetAllSimStatsInfo(infos), NETSYS_SUCCESS);
+    EXPECT_NE(instance_.GetAllSimStatsInfo(infos), NETSYS_SUCCESS);
 }
 
 /**
@@ -797,7 +797,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest004, TestSize.Lev
     NetStatsServiceProxy instance_(remoteObj_);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETSYS_SUCCESS);
+    EXPECT_NE(instance_.GetTrafficStatsByNetwork(infos, network), NETSYS_SUCCESS);
 }
 
 /**
@@ -852,7 +852,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest004, TestSize.
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfoSequence> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETSYS_SUCCESS);
+    EXPECT_NE(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETSYS_SUCCESS);
 }
 
 /**

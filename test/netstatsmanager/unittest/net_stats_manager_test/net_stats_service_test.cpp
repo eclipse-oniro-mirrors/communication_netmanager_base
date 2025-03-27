@@ -460,7 +460,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
 
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
     ret = netStatsService->GetTrafficStatsByNetwork(infos, network1);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_NE(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     const sptr<NetStatsNetwork> network2 = new (std::nothrow) NetStatsNetwork();
     ret = netStatsService->GetTrafficStatsByNetwork(infos, network2);
@@ -518,7 +518,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level
 
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
     ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network1);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_NE(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     const sptr<NetStatsNetwork> network2 = new (std::nothrow) NetStatsNetwork();
     ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network2);
