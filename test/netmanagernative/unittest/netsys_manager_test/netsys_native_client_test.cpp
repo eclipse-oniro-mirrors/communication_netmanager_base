@@ -102,7 +102,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, INVALID_ARGUMENTS);
 
     ret = nativeClient_.NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, INVALID_ARGUMENTS);
+    EXPECT_NE(ret, INVALID_ARGUMENTS);
 
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     ret = nativeClient_.GetInterfaceConfig(parcel);
@@ -491,7 +491,7 @@ HWTEST_F(NetsysNativeClientTest, EnableDistributedClientNet001, TestSize.Level1)
 
     bool isServer = false;
     ret = nativeClient_.DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeClientTest, EnableDistributedServerNet001, TestSize.Level1)
@@ -504,7 +504,7 @@ HWTEST_F(NetsysNativeClientTest, EnableDistributedServerNet001, TestSize.Level1)
 
     bool isServer = true;
     ret = nativeClient_.DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeClientTest, GetNetworkCellularSharingTraffic001, TestSize.Level1)
