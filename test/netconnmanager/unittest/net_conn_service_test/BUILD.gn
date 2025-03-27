@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("net_conn_service_test") {
-  module_out_path = "netmanager_base/net_conn_service_test"
+  module_out_path = "netmanager_base/netmanager_base/net_conn_service_test"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
