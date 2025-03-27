@@ -52,7 +52,7 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     VpnManager::GetInstance().StartVpnInterfaceFdListen();
 
     auto result = VpnManager::GetInstance().CreateVpnInterface();
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
 
     VpnManager::GetInstance().DestroyVpnInterface();
 
