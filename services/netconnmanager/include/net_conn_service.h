@@ -635,7 +635,7 @@ private:
     void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
-    void SubscribeCommonEvent(const std::string &eventName);
+    void SubscribeCommonEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     std::mutex remoteMutex_;
