@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("firewall_manager_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
     debug = false
@@ -68,7 +68,7 @@ ohos_unittest("firewall_manager_test") {
 }
 
 ohos_unittest("firewall_manager_class_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
     debug = false

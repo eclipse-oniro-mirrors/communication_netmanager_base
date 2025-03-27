@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netsys_native_manager_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
     debug = false
@@ -110,7 +110,7 @@ ohos_unittest("netsys_native_manager_test") {
 }
 
 ohos_unittest("netsys_native_manager_fault_through_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
     debug = false
@@ -181,7 +181,7 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
 }
 
 ohos_unittest("netsys_native_manager_netsys_native_service_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
     debug = false
@@ -247,7 +247,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
 }
 
 ohos_unittest("netsys_controller_test") {
-  module_out_path = "netmanager_base/netsys_controller_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_controller_test"
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "netsys_controller_test.cpp",
@@ -310,7 +310,7 @@ ohos_unittest("netsys_controller_test") {
 }
 
 ohos_unittest("netsys_native_client_test") {
-  module_out_path = "netmanager_base/netsys_native_client_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_client_test"
 
   sanitize = {
     cfi = true
@@ -381,7 +381,8 @@ ohos_unittest("netsys_native_service_proxy_test") {
 
   branch_protector_ret = "pac_ret"
 
-  module_out_path = "netmanager_base/netsys_native_service_proxy_test"
+  module_out_path =
+      "netmanager_base/netmanager_base/netsys_native_service_proxy_test"
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "netsys_native_service_proxy_test.cpp",
@@ -445,7 +446,7 @@ ohos_unittest("netsys_native_service_proxy_test") {
 }
 
 ohos_unittest("resolver_config_test") {
-  module_out_path = "netmanager_base/resolver_config_test"
+  module_out_path = "netmanager_base/netmanager_base/resolver_config_test"
 
   sanitize = {
     cfi = true
@@ -504,7 +505,7 @@ ohos_unittest("resolver_config_test") {
 }
 
 ohos_unittest("conn_manager_test") {
-  module_out_path = "netmanager_base/solve_conn_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/solve_conn_manager_test"
 
   sanitize = {
     cfi = true
@@ -563,7 +564,7 @@ ohos_unittest("conn_manager_test") {
 }
 
 ohos_unittest("nat464_clat_test") {
-  module_out_path = "netmanager_base/nat464_clat_test"
+  module_out_path = "netmanager_base/netmanager_base/nat464_clat_test"
 
   sanitize = {
     cfi = true
