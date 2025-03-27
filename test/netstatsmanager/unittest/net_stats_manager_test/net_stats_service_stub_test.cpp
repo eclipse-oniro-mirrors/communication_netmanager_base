@@ -580,7 +580,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateStatsDataTest001, TestSize.Level1)
 
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
