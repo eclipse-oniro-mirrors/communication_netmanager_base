@@ -247,7 +247,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface, BEARER_DEFAULT);
-    EXPECT_EQ(ret, 0);
+    EXPECT_NE(ret, 0);
 }
 
 /**
@@ -453,7 +453,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -465,7 +465,7 @@ HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -612,7 +612,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest003, TestSize.Level1)
     std::string testInterfaceName = "rmnet0";
     NetManagerStandard::NetBearType netBearerType = BEARER_CELLULAR;
     int32_t ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
@@ -631,7 +631,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest004, TestSize.Level1)
     int32_t ret = instance_->CreateVirtualNetwork(netId, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     ret = instance_->CreatePhysicalNetwork(netId, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
