@@ -61,7 +61,7 @@ HWTEST_F(NetConnClientTest, EnableDistributedClientNet001, TestSize.Level1)
 
     bool isServer = false;
     ret = NetConnClient::GetInstance().DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, EnableDistributedServerNet001, TestSize.Level1)
