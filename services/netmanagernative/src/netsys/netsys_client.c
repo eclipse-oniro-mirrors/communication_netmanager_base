@@ -287,7 +287,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
             uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
             if (IsAbnormalAddress(addr)) {
                 HILOG_ERROR(LOG_CORE,
-                    "GetResolvCache get abnormal cache[%{public}u] netid[%{public}u]", addr, netid);
+                    "GetResolvCache get abnormal cache[%{public}u] netId[%{public}u]", addr, netId);
             }
         }
     }
