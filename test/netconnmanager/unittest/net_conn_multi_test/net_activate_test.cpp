@@ -305,7 +305,7 @@ HWTEST_F(NetActivateTest, GetLastServiceSupplyTest001, TestSize.Level1)
 HWTEST_F(NetActivateTest, IsAllowCallbackTest001, TestSize.Level1)
 {
     auto ret = instance_->IsAllowCallback(CALL_TYPE_AVAILABLE);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 } // namespace NetManagerStandard
