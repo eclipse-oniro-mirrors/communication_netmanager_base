@@ -1149,7 +1149,6 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
 
     std::shared_ptr<NetActivate> request = CreateNetActivateRequest(netSpecifier, callback,
         timeoutMS, registerType, callingUid);
