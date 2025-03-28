@@ -116,6 +116,13 @@ void NetConnServiceExtTest::SetUp() {}
 
 void NetConnServiceExtTest::TearDown() {}
 
+HWTEST_F(NetConnServiceTest, CheckIfSettingsDataReadyTest001, TestSize.Level1)
+{
+    NetConnService::GetInstance()->isDataShareReady_ = true;
+    auto ret = NetConnService::GetInstance()->CheckIfSettingsDataReady();
+    EXPECT_TRUE(ret);
+}
+
 HWTEST_F(NetConnServiceExtTest, CheckIfSettingsDataReadyTest002, TestSize.Level1)
 {
     NetConnService::GetInstance()->isDataShareReady_ = false;
