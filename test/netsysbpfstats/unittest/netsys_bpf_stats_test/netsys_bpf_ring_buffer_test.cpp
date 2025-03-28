@@ -64,12 +64,12 @@ HWTEST_F(NetsysBpfRingBufferTest, HandleNetworkPolicyEventCallbackTest001, TestS
 {
     void *ctx = malloc(100);
     void *data = malloc(100);
-    size_t data_sz = 1;
+    size_t dataSize = 1;
 
     std::unique_ptr<NetsysBpfRingBuffer> bpfringbuffer = std::make_unique<NetsysBpfRingBuffer>();
-    EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, data_sz), 1);
+    EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, dataSize), 1);
     data = nullptr;
-    EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, data_sz), 1);
+    EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, dataSize), 1);
 }
 
 HWTEST_F(NetsysBpfRingBufferTest, RegisterNetsysTrafficCallbackTest001, TestSize.Level1)
@@ -100,17 +100,17 @@ HWTEST_F(NetsysBpfRingBufferTest, HandleNetStatsEventCallbackTest001, TestSize.L
 {
     void *ctx = malloc(100);
     void *data = malloc(100);
-    size_t data_sz = 1;
+    size_t dataSize = 1;
 
     std::unique_ptr<NetsysBpfRingBuffer> bpfringbuffer = std::make_unique<NetsysBpfRingBuffer>();
-    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, data_sz), 0);
-    data_sz = 0;
-    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, data_sz), 1);
+    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, dataSize), 0);
+    dataSize = 0;
+    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, dataSize), 1);
     data = nullptr;
-    data_sz = 1;
-    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, data_sz), 1);
-    data_sz = 0;
-    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, data_sz), 1);
+    dataSize = 1;
+    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, dataSize), 1);
+    dataSize = 0;
+    EXPECT_EQ(bpfringbuffer->HandleNetStatsEventCallback(ctx, data, dataSize), 1);
 }
 
 HWTEST_F(NetsysBpfRingBufferTest, ListenNetStatsRingBufferThreadTest001, TestSize.Level1)
