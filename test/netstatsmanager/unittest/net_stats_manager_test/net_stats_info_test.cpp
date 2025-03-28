@@ -145,5 +145,32 @@ HWTEST_F(NetStatsInfoTest, NetStatsInfoOperator, TestSize.Level1)
     infoc += infoa;
     EXPECT_EQ(infoc.rxBytes_, infoa.rxBytes_);
 }
+
+/**
+ * @tc.name: MarshallingTest002
+ * @tc.desc: Test NetStatsInfo Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, MarshallingTest002, TestSize.Level1)
+{
+    Parcel parcel;
+    std::vector<NetStatsInfo> statsInfos(5001);
+    EXPECT_FALSE(NetStatsInfo::Marshalling(parcel, statsInfos));
+}
+
+/**
+ * @tc.name: MarshallingTest002
+ * @tc.desc: Test NetStatsInfo Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, MarshallingTest003, TestSize.Level1)
+{
+    Parcel parcel;
+    std::unordered_map<uint32_t, NetStatsInfo> statsInfos;
+    for (uint32_t i = 0; i < 5001; ++i) {
+        statsInfos[i] = NetStatsInfo();
+    }
+    EXPECT_FALSE(NetStatsInfo::Marshalling(parcel, statsInfos));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
