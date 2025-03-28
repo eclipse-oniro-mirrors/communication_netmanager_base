@@ -38,6 +38,7 @@
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
+#include "common_mock_net_remote_object_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
