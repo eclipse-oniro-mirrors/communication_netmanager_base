@@ -21,6 +21,7 @@
 
 #include "dns_proxy_request_socket.h"
 #include "netnative_log_wrapper.h"
+#include "dns_proxy_listen.h"
 
 namespace OHOS::nmd {
     
