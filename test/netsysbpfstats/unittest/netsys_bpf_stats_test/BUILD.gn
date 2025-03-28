@@ -27,7 +27,7 @@ ohos_unittest("netsys_bpf_stats_test") {
 
   sources = [
     "netsys_bpf_stats_test.cpp",
-    "BpfRingbufferTest.cpp",
+    "bpf_ring_buffer_test.cpp",
     ]
 
   include_dirs = [
