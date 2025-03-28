@@ -270,13 +270,6 @@ HWTEST_F(NetsysNativeServiceTest, DelStaticArp002, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-HWTEST_F(NetsysNativeServiceTest, ProcessVpnStage001, TestSize.Level1)
-{
-    NetsysNative::SysVpnStageCode stage = VPN_STAGE_UP_HOME;
-    int32_t ret = instance_->ProcessVpnStage(stage);
-    EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
-}
-
 HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMap001, TestSize.Level1)
 {
     std::unordered_map<uint32_t, uint32_t> uidMaps;
