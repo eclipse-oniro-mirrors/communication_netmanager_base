@@ -192,5 +192,13 @@ HWTEST_F(NetlinkSocketDiagTest, SetSocketDestroyType001, TestSize.Level1)
     netLinkSocketDiag.SetSocketDestroyType("OTHER_CAPABILITY");
     EXPECT_EQ(netLinkSocketDiag.socketDestroyType_, SocketDestroyType::DESTROY_DEFAULT);
 }
+
+HWTEST_F(NetlinkSocketDiagTest, InLookBack002, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    uint32_t a = 0x6f000000;
+    bool result = netLinkSocketDiag.InLookBack(a);
+    EXPECT_EQ(result, false);
+}
 } // namespace nmd
 } // namespace OHOS

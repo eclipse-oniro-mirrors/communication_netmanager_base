@@ -382,5 +382,49 @@ HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SaveSharingTraffic(info);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetStatsClientTest, OnRemoteDiedTest001, TestSize.Level1)
+{
+    wptr<IRemoteObject> remote = nullptr;
+    DelayedSingleton<NetStatsClient>::GetInstance()->OnRemoteDied(remote);
+    EXPECT_EQ(remote, nullptr);
+}
+
+HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network = nullptr;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::vector<NetStatsInfoSequence> infos;
+    uint32_t uid = 1;
+    sptr<NetStatsNetwork> network = nullptr;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient009, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t sockfd = 1;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdRxBytes(stats, sockfd);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdTxBytes(stats, sockfd);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

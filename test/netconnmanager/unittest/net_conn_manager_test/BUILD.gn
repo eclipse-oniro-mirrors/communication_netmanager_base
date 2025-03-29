@@ -30,6 +30,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_callback_stub_test.cpp",
     "net_conn_callback_test.cpp",
     "net_conn_manager_test.cpp",
+    "net_conn_service_ext_test.cpp",
     "net_conn_service_test.cpp",
     "net_detection_callback_stub_test.cpp",
     "net_detection_callback_test.cpp",
