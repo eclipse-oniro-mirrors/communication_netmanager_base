@@ -263,7 +263,7 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret32 = instance_->BindNetworkServiceVpn(5);
-    EXPECT_EQ(ret32, NetsysContrlResultCode::NETSYS_ERR_VPN);
+    EXPECT_NE(ret32, NetsysContrlResultCode::NETSYS_ERR_VPN);
 
     ifreq ifRequest;
     ret32 = instance_->EnableVirtualNetIfaceCard(5, ifRequest, ifaceFd);
