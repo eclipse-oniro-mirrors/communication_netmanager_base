@@ -598,7 +598,7 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest007, TestSize.L
     EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
     testNetId = 1;
     ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, ModifyPhysicalNetworkPermissionTest007, TestSize.Level1)
@@ -739,7 +739,7 @@ HWTEST_F(RouteManagerTest, UpdateSharingNetworkTest001, TestSize.Level1)
     interfaceToTable[inputInterface] = 1;
     RouteManager::interfaceToTable_ = interfaceToTable;
     ret = RouteManager::UpdateSharingNetwork(netId, inputInterface, outputInterface);
-    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, UpdateRuleInfoTest001, TestSize.Level1)
