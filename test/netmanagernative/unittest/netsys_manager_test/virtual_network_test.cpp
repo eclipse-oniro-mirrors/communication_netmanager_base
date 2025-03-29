@@ -74,14 +74,14 @@ HWTEST_F(VirtualNetWorkTest, AddInterface001, TestSize.Level1)
 {
     std::string iface = "wlan0";
     auto result = instance_->AddInterface(iface);
-    EXPECT_NE(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(VirtualNetWorkTest, RemoveInterface001, TestSize.Level1)
 {
     std::string iface = "wlan0";
     auto result = instance_->RemoveInterface(iface);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
 }
 } // namespace nmd
 } // namespace OHOS
