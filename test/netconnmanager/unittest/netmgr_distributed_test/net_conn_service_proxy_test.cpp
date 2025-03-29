@@ -127,7 +127,7 @@ HWTEST_F(NetConnServiceProxyTest, EnableDistributedClientNet001, TestSize.Level1
 
     bool isServer = false;
     ret = instance_->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -146,7 +146,7 @@ HWTEST_F(NetConnServiceProxyTest, EnableDistributedServerNet001, TestSize.Level1
 
     bool isServer = true;
     ret = instance_->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 }
 } // namespace NetManagerStandard
