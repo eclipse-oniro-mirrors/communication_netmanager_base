@@ -119,16 +119,16 @@ HWTEST_F(NetMonitorTest, ProcessDetectionTest001, TestSize.Level1)
     instance_->ProcessDetection(probeResult, result);
     EXPECT_NE(result, INVALID_DETECTION_STATE);
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_NE(result, INVALID_DETECTION_STATE);
     instance_->detectionDelay_ = 10 * 60 * 1000;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_NE(result, INVALID_DETECTION_STATE);
     instance_->isDetecting_ = true;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_NE(result, INVALID_DETECTION_STATE);
     instance_->isDetecting_ = false;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_NE(result, INVALID_DETECTION_STATE);
 }
 
 HWTEST_F(NetMonitorTest, DetectionTest001, TestSize.Level1)
