@@ -97,7 +97,6 @@
                     "//foundation/communication/netmanager_base/utils/napi_utils:napi_utils",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection_if",
-                    "//foundation/communication/netmanager_base/frameworks/cj/connection:cj_net_connection_ffi",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/network:network",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
@@ -298,6 +297,14 @@
                         "header_files": [
                         ],
                         "header_base": "//foundation/communication/netmanager_base/frameworks/js/napi/connection"
+                    }
+                },
+                {
+                    "name": "//foundation/communication/netmanager_base/frameworks/cj/connection:cj_net_connection_ffi",
+                    "header": {
+                        "header_files": [
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/frameworks/cj/connection/include"
                     }
                 }
             ],
