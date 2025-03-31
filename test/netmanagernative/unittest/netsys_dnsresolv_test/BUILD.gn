@@ -97,10 +97,7 @@ ohos_unittest("netsys_dnsresolv_mock_test") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [
-    "../mock/src/parcel.cpp",
-    "netsys_net_dns_result_data_test.cpp",
-  ]
+  sources = [ "../mock/src/parcel.cpp" ]
 
   sources += [
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",

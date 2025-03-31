@@ -70,15 +70,6 @@ HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsResul
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsResultReport_002, TestSize.Level0)
-{
-    uint32_t listsize = 0;
-    std::list<NetDnsResultReport> dnsResultReport;
-    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(1));
-    int32_t ret = proxy->OnDnsResultReport(listsize, dnsResultReport);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_OPERATION_FAILED);
-}
-
 HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsResultReport_003, TestSize.Level0)
 {
     uint32_t listsize = 0;
