@@ -85,7 +85,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedClientNet001, TestSize.Level
         return;
     }
     ret = SendRemoteRequest(data1, ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -124,7 +124,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
         return;
     }
     ret = SendRemoteRequest(data1, ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

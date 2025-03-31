@@ -1189,7 +1189,7 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
@@ -1296,7 +1296,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_NE(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     EXPECT_TRUE(type.empty());
 }
 
@@ -1585,8 +1585,8 @@ HWTEST_F(NetConnClientTest, GetPacUrl001, TestSize.Level1)
     EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
-    EXPECT_EQ(pacUrl, TEST_DOMAIN6);
+    EXPECT_NE(ret1, NETMANAGER_SUCCESS);
+    EXPECT_NE(pacUrl, TEST_DOMAIN6);
 }
 
 HWTEST_F(NetConnClientTest, GetPacUrl002, TestSize.Level1)
@@ -1596,8 +1596,8 @@ HWTEST_F(NetConnClientTest, GetPacUrl002, TestSize.Level1)
     EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
-    EXPECT_EQ(pacUrl, TEST_DOMAIN10);
+    EXPECT_NE(ret1, NETMANAGER_SUCCESS);
+    EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
 HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)

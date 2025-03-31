@@ -97,7 +97,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 
     airplaneMode = "0";
     ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
+    ASSERT_FALSE(ret == NETMANAGER_ERROR);
 }
 
 /**

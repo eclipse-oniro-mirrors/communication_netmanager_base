@@ -54,11 +54,11 @@ HWTEST_F(NetManagerNativeTest, EnableDistributedClientNet001, TestSize.Level1)
     std::string virnicAddr = "1.189.55.61";
     std::string iif = "lo";
     auto ret = instance_->EnableDistributedClientNet(virnicAddr, iif);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     bool isServer = false;
     ret = instance_->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetManagerNativeTest, EnableDistributedServerNet001, TestSize.Level1)

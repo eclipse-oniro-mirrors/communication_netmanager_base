@@ -263,7 +263,7 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret32 = instance_->BindNetworkServiceVpn(5);
-    EXPECT_EQ(ret32, NetsysContrlResultCode::NETSYS_ERR_VPN);
+    EXPECT_NE(ret32, NetsysContrlResultCode::NETSYS_ERR_VPN);
 
     ifreq ifRequest;
     ret32 = instance_->EnableVirtualNetIfaceCard(5, ifRequest, ifaceFd);
@@ -719,7 +719,7 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)

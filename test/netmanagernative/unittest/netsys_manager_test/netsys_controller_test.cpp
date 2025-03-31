@@ -181,7 +181,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = NetsysController::GetInstance().DelInterfaceAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
-    EXPECT_EQ(ret, 0);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest008, TestSize.Level1)

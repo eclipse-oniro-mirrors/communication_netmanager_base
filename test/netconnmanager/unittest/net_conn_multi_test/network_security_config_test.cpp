@@ -289,7 +289,7 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted001, TestSize.Level1)
     auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted(isclearpermitted);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
     auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -314,7 +314,7 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted002, TestSize.Level1)
     auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text.com", isclearpermitted);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
     auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text2.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 }

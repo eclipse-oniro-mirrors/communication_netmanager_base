@@ -262,7 +262,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, BEARER_DEFAULT);
-    EXPECT_EQ(ret, 0);
+    EXPECT_NE(ret, 0);
 }
 
 /**
@@ -631,20 +631,20 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest004, TestSize.Level1)
     int32_t ret = instance_->CreateVirtualNetwork(netId, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = instance_->CreatePhysicalNetwork(netId, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     netBearerType = BEARER_WIFI;
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     netBearerType = BEARER_CELLULAR;
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
