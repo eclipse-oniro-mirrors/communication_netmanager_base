@@ -92,6 +92,9 @@ bool IsInstallSourceFromSim2(const std::string &installSource);
 bool IsNeedDisplayTrafficAncoList();
 bool IsSimAnco(const std::string &bundleName);
 bool IsSim2Anco(const std::string &bundleName);
+std::string GetGatewayAddr(const std::string& ipAddr, const std::string& subnetMask);
+uint32_t IpToInt(const std::string& ipAddr);
+std::string IpToString(uint32_t ipAddr);
 
 inline uint64_t GetCurrentSecond()
 {
