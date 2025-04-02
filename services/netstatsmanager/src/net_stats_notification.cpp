@@ -385,19 +385,22 @@ void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNt
 
 std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 {
-    const char* units[] = {"B", "KB", "MB", "GB", "TB"}; // 流量单位数组
-    int record = 0; // 记录单位索引
- 
-    // 确定应该使用的单位
-    while (traffic >= UNIT_CONVERT_1024 && record < 4) { // 4: 防止units数组越界
+    const char* units[] = {"B", "KB", "MB", "GB", "TB"};
+    int record = 0;
+    while (traffic >= UNIT_CONVERT_1024 && record < 4) { // 4: units array max index
         traffic /= UNIT_CONVERT_1024;
         record++;
     }
  
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record];  // 2: 保留两位小数
-    // 返回格式化后的字符串
+    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record]; // 2: 保留两位小数
+    std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
+    auto ret = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
+    if (ret) {
+        return "‪" + oss.str() + "‬";
+    }
     return oss.str();
 }
 }  // namespace NetManagerStandard
-}  // namespace OHOS
+}  // namespace OHOS
+

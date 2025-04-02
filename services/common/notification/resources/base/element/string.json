@@ -4,12 +4,12 @@
             "name":"netstats_excess_monthlimit_notofication_title",
             "value":"Over monthly limit",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthmark_notofication_title",
-            "value":"Over monthly mark",
+            "value":"Over monthly limit",
             "attr":{
                 "priority":"translate"
             }
@@ -18,28 +18,28 @@
             "name":"netstats_excess_daymark_notofication_title",
             "value":"Over daily mark",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthlimit_notofication_title_sub",
             "value":"SIM %d data usage alert",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthmark_notofication_title_sub",
             "value":"SIM %d data usage alert",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_daymark_notofication_title_sub",
             "value":"SIM %d data usage alert",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

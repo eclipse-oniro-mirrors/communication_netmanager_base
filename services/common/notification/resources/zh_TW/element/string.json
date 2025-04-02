@@ -4,63 +4,63 @@
             "name":"netstats_excess_daymark_notofication_title",
             "value":"超過每天標記",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_month_limit_message",
-            "value":"每月數據用量達到上限 (%s)",
+            "value":"每月數據流量用量達到上限 (%s)",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthmark_notofication_title",
             "value":"超過每月標記",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_daily_notify_message",
-            "value":"今日數據用量達到上限 (%s)",
+            "value":"今日數據流量用量達到上限 (%s)",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthmark_notofication_title_sub",
             "value":"卡 %d 月超額提醒",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthlimit_notofication_title_sub",
             "value":"卡 %d 月超限提醒",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_daymark_notofication_title_sub",
             "value":"卡 %d 日超額提醒",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_month_notify_message",
-            "value":"每月數據用量達到上限的 %s",
+            "value":"每月數據流量用量達到上限的 %s",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"netstats_excess_monthlimit_notofication_title",
             "value":"超過每月限制",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]
