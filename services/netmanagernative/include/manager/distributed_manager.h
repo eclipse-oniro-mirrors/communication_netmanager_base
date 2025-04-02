@@ -16,12 +16,12 @@
 #ifndef NET_DISTRIBUTED_MANAGER_H
 #define NET_DISTRIBUTED_MANAGER_H
 
-#include "uid_range.h"
 #include <cstdint>
-#include <linux/if.h>
 #include <map>
 #include <set>
 #include <string>
+#include <linux/if.h>
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -44,6 +44,9 @@ public:
     void CloseDistributedTunFd();
     std::string GetServerIifNic();
     std::string GetServerDevIfaceNic();
+    int32_t ConfigVirnicAndVeth(const std::string &virNicAddr, const std::string &virnicName,
+        const std::string &virnicVethName);
+    void DisableVirnic(const std::string &virnicName);
 
 private:
     DistributedManager() = default;
