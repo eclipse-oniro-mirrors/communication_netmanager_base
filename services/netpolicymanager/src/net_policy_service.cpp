@@ -649,10 +649,10 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
 
     if (parameter.flag) {
         std::string uidBundleName;
-        if (bundleMgrProxy->GetBundleNameForUid(parameter.uid, uidBundleName)) {
+        if (bundleMgrProxy->GetNameForUid(parameter.uid, uidBundleName) == ERR_OK) {
             UpdateNetworkAccessPolicyFromConfig(uidBundleName, policy.policy);
         } else {
-            NETMGR_LOG_E("GetBundleNameForUid Failed");
+            NETMGR_LOG_E("GetNameForUid Failed");
         }
         NetAccessPolicyData policyData;
         if (netAccessPolicy.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {
