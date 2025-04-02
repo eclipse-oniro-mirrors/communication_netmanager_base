@@ -30,12 +30,29 @@ ohos_shared_library("connection_ani") {
 
   sources = [ "src/connection_ani.cpp" ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
   ]
   external_deps = [
     "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
     "runtime_core:ani",
   ]
 
