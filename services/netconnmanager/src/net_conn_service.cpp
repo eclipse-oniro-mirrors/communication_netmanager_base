@@ -2007,11 +2007,10 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
-    }
-    auto startTime = std::chrono::steady_clock::now();
-    if (httpProxy.GetUserId() > 0) {
+    } else if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.
         LoadGlobalHttpProxy(SPECIFY, httpProxy);
     } else {
@@ -2382,11 +2381,6 @@ int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activ
             httpProxy.SetUserId(currentUserId_);
             currentUserId_ = INVALID_USER_ID;
         } else {
-            HttpProxy emptyHttpProxy;
-            emptyHttpProxy.SetUserId(currentUserId_);
-            if (SetGlobalHttpProxyInner(emptyHttpProxy) != NETMANAGER_SUCCESS) {
-                return NETMANAGER_ERR_INTERNAL;
-            }
             currentUserId_ = activeUserId;
             httpProxy.SetUserId(currentUserId_);
         }
