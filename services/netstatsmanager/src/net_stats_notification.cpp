@@ -393,7 +393,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     }
  
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record]; // 2: Keep two decimal places
+    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record]; // 2: 保留两位小数
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     auto ret = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
     if (ret) {
@@ -402,4 +402,5 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     return oss.str();
 }
 }  // namespace NetManagerStandard
-}  // namespace OHOS
+}  // namespace OHOS
+
