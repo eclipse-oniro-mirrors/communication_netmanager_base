@@ -439,7 +439,11 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
+        return;
     }
+    ifaceNameIdentMap_.Iterate([](const std::string &k, const std::string &v) {
+        NETMGR_LOG_I("GetIfaceNameIdentMaps. ifname: %{public}s, simId: %{public}s", k.c_str(), v.c_str());
+    });
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
