@@ -569,17 +569,18 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest001, TestSize.Level1
 {
     std::string hostname = "example.com";
     NetworkSecurityConfig networksecurityconfig;
-    auto ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    bool cleartextPermitted = true;
+    auto ret = networksecurityconfig.IsCleartextPermitted(hostname, cleartextPermitted);
     Domain domain1;
     domain1.domainName_ = "example.com";
     DomainConfig config;
     config.domains_.push_back(domain1);
     networksecurityconfig.domainConfigs_.push_back(config);
     std::cout << "IsCleartextPermittedTest001 In" << std::endl;
-    ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    ret = networksecurityconfig.IsCleartextPermitted(hostname, cleartextPermitted);
     EXPECT_NE(ret, true);
     hostname = "example.com2";
-    ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    ret = networksecurityconfig.IsCleartextPermitted(hostname, cleartextPermitted);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 }
