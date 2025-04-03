@@ -696,11 +696,11 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicyTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: DestroyNetworkTest005
+ * @tc.name: DestroyNetworkTest006
  * @tc.desc: Test ConnManager DestroyNetwork.
  * @tc.type: FUNC
  */
-HWTEST_F(ConnManagerTest, DestroyNetworkTest005, TestSize.Level1)
+HWTEST_F(ConnManagerTest, DestroyNetworkTest006, TestSize.Level1)
 {
     ConnManager connmanager;
     connmanager.defaultNetId_ = NETID;
