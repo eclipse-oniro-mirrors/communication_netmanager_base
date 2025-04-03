@@ -317,5 +317,270 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+/**
+ * @tc.name: IsCACertFileNameTest002
+ * @tc.desc: Test NetworkSecurityConfig::IsCACertFileName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsCACertFileNameTest002, TestSize.Level1)
+{
+    std::string fileName("c");
+    std::cout << "IsCACertFileNameTest002 In" << std::endl;
+    auto ret = NetworkSecurityConfig::GetInstance().IsCACertFileName(fileName.c_str());
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: AddSurfixToCACertFileNameTest002
+ * @tc.desc: Test NetworkSecurityConfig::AddSurfixToCACertFileName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, AddSurfixToCACertFileNameTest002, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::set<std::string> allFileNames;
+    allFileNames.insert("123");
+    std::string caFile("cacert.pem");
+    std::cout << "AddSurfixToCACertFileNameTest002 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().AddSurfixToCACertFileName(caPath, allFileNames, caFile);
+    EXPECT_EQ(allFileNames.size(), 2);
+}
+
+/**
+ * @tc.name: IsPinOpenModeTest001
+ * @tc.desc: Test NetworkSecurityConfig::IsPinOpenMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeTest001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname("example.com");
+    std::cout << "IsPinOpenModeTest001 In" << std::endl;
+    auto ret = networksecurityconfig.IsPinOpenMode(hostname);
+    EXPECT_NE(ret, true);
+    hostname = "example.com2";
+    ret = networksecurityconfig.IsPinOpenMode(hostname);
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: IsPinOpenModeTest002
+ * @tc.desc: Test NetworkSecurityConfig::IsPinOpenMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeTest002, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    Pin pin;
+    pin.digestAlgorithm_ = "123";
+    pin.digest_ = "123";
+    PinSet pinset;
+    pinset.isOpenMode = true;
+    pinset.shouldVerifyRootCa_ = true;
+    pinset.pins_.push_back(pin);
+    pinset.expiration_ = "123";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.pinSet_ = pinset;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::cout << "IsPinOpenModeTest002 In" << std::endl;
+    auto ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsPinOpenModeVerifyRootCaTest001
+ * @tc.desc: Test NetworkSecurityConfig::IsPinOpenModeVerifyRootCa
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeVerifyRootCaTest001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname;
+    std::cout << "IsPinOpenModeVerifyRootCaTest001 In" << std::endl;
+    auto ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_NE(ret, true);
+    hostname = "example.com";
+    ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    hostname = "example.com2";
+    ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: IsPinOpenModeVerifyRootCaTest002
+ * @tc.desc: Test NetworkSecurityConfig::IsPinOpenModeVerifyRootCa
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeVerifyRootCaTest002, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    Pin pin;
+    pin.digestAlgorithm_ = "123";
+    pin.digest_ = "123";
+    PinSet pinset;
+    pinset.isOpenMode = true;
+    pinset.shouldVerifyRootCa_ = true;
+    pinset.pins_.push_back(pin);
+    pinset.expiration_ = "123";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.pinSet_ = pinset;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::cout << "IsPinOpenModeVerifyRootCaTest002 In" << std::endl;
+    auto ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsPinOpenModeVerifyRootCaTest003
+ * @tc.desc: Test NetworkSecurityConfig::IsPinOpenModeVerifyRootCa
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeVerifyRootCaTest003, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    Pin pin;
+    pin.digestAlgorithm_ = "123";
+    pin.digest_ = "123";
+    PinSet pinset;
+    pinset.isOpenMode = false;
+    pinset.shouldVerifyRootCa_ = true;
+    pinset.pins_.push_back(pin);
+    pinset.expiration_ = "123";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.pinSet_ = pinset;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::cout << "IsPinOpenModeVerifyRootCaTest003 In" << std::endl;
+    auto ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: GetPinSetForHostNameTest001
+ * @tc.desc: Test NetworkSecurityConfig::GetPinSetForHostName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostNameTest001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::string pins;
+    std::cout << "GetPinSetForHostNameTest001 In" << std::endl;
+    auto ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_NE(ret, true);
+    hostname = "example.com2";
+    ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetPinSetForHostNameTest002
+ * @tc.desc: Test NetworkSecurityConfig::GetPinSetForHostName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostNameTest002, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    Pin pin;
+    pin.digestAlgorithm_ = "123";
+    pin.digest_ = "123";
+    PinSet pinset;
+    pinset.isOpenMode = true;
+    pinset.shouldVerifyRootCa_ = true;
+    pinset.pins_.push_back(pin);
+    pinset.expiration_ = "123";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.pinSet_ = pinset;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::string pins;
+    std::cout << "GetPinSetForHostNameTest002 In" << std::endl;
+    auto ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetPinSetForHostNameTest003
+ * @tc.desc: Test NetworkSecurityConfig::GetPinSetForHostName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostNameTest003, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    Pin pin;
+    pin.digestAlgorithm_ = "123";
+    pin.digest_ = "123";
+    PinSet pinset;
+    pinset.isOpenMode = true;
+    pinset.shouldVerifyRootCa_ = true;
+    pinset.pins_.push_back(pin);
+    pinset.expiration_ = "";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.pinSet_ = pinset;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::string hostname = "example.com";
+    std::string pins;
+    std::cout << "GetPinSetForHostNameTest003 In" << std::endl;
+    auto ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    pins = "123";
+    ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: IsCleartextPermittedTest001
+ * @tc.desc: Test NetworkSecurityConfig::IsCleartextPermitted
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest001, TestSize.Level1)
+{
+    std::string hostname = "example.com";
+    NetworkSecurityConfig networksecurityconfig;
+    auto ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    Domain domain1;
+    domain1.domainName_ = "example.com";
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    networksecurityconfig.domainConfigs_.push_back(config);
+    std::cout << "IsCleartextPermittedTest001 In" << std::endl;
+    ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    EXPECT_NE(ret, true);
+    hostname = "example.com2";
+    ret = networksecurityconfig.IsCleartextPermitted(hostname, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 }
