@@ -84,13 +84,15 @@
                 "i18n",
                 "netmanager_ext",
                 "jsoncpp",
-                "qos_manager"
+                "qos_manager",
+                "runtime_core"
             ]
         },
         "build": {
             "group_type": {
                 "base_group": [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection" ],
                 "fwk_group": [
+                    "//foundation/communication/netmanager_base/frameworks/ets/ani:ani_package",
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/utils:net_data_share",
                     "//foundation/communication/netmanager_base/utils:net_bundle_utils",
