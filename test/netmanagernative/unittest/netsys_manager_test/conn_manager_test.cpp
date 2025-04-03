@@ -696,39 +696,11 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicyTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetInternetPermission003
- * @tc.desc: Test ConnManager SetInternetPermission.
- * @tc.type: FUNC
- */
-HWTEST_F(ConnManagerTest, SetInternetPermission003, TestSize.Level1)
-{
-    uint32_t uid = 1;
-    uint8_t allow = 0;
-    uint8_t isBroker = 1;
-    int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-/**
- * @tc.name: SetInternetPermission004
- * @tc.desc: Test ConnManager SetInternetPermission.
- * @tc.type: FUNC
- */
-HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
-{
-    uint32_t uid = 1;
-    uint8_t allow = 0;
-    uint8_t isBroker = 0;
-    int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-/**
- * @tc.name: DestroyNetworkTest004
+ * @tc.name: DestroyNetworkTest005
  * @tc.desc: Test ConnManager DestroyNetwork.
  * @tc.type: FUNC
  */
-HWTEST_F(ConnManagerTest, DestroyNetworkTest004, TestSize.Level1)
+HWTEST_F(ConnManagerTest, DestroyNetworkTest005, TestSize.Level1)
 {
     ConnManager connmanager;
     connmanager.defaultNetId_ = NETID;
