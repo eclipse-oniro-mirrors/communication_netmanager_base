@@ -176,7 +176,6 @@ void FirewallRule::RemoveFromAllowedList(uint32_t uid)
             break;
         }
     }
-    netsys_->FirewallSetUidsAllowedListChain(chainType_, allowedList_);
 }
 
 int32_t FirewallRule::ClearFirewallAllRules()
