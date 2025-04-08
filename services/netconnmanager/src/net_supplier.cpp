@@ -365,6 +365,10 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         NETMGR_LOG_D("Same net supplier, no need to disconnect.");
         return;
     }
+    if (requestList_.empty() && HasNetCap(NET_CAPABILITY_INTERNET)) {
+        SupplierDisconnection(netCaps_.ToSet());
+        return;
+    }
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         NETMGR_LOG_W("Can not find request[%{public}d]", netrequest.requestId);
         return;
