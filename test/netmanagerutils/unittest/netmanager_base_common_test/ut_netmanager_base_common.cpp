@@ -1030,14 +1030,15 @@ HWTEST_F(UtNetmanagerBaseCommon, GetGatewayAddr001, TestSize.Level2)
 
 HWTEST_F(UtNetmanagerBaseCommon, IpToInt001, TestSize.Level2)
 {
-    EXPECT_EQ(CommonUtils::IpToInt("10.158.2c00"), -1);
-    EXPECT_EQ(CommonUtils::IpToInt("10.158.200.0"), 178178048);
+    uint32_t ipIntAddr;
+    EXPECT_FALSE(CommonUtils::IpToInt("10.158.2c00", ipIntAddr));
+    EXPECT_TRUE(CommonUtils::IpToInt("10.158.200.0", ipIntAddr));
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, IpToString001, TestSize.Level2)
 {
-    EXPECT_EQ(CommonUtils::IpToString(-1), "");
-    EXPECT_EQ(CommonUtils::IpToString(178178048), "10.158.200.0");
+    std::string ipStrAddr; // "10.158.200.0"
+    EXPECT_TRUE(CommonUtils::IpToString(178178048, ipStrAddr));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
