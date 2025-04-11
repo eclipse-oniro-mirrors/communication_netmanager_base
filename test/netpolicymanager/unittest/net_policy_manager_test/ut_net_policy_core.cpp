@@ -238,7 +238,6 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent007, TestSize.Level1)
 }
 
 /**
-
 @tc.name: OnReceiveEvent008
 @tc.desc: Test NetPolicyCore OnReceiveEvent.
 @tc.type: FUNC
@@ -253,8 +252,8 @@ eventData.SetWant(want);
 ASSERT_NE(g_netPolicyCore, nullptr);
 g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
-/**
 
+/**
 @tc.name: SendAppStatusMessage001
 @tc.desc: Test NetPolicyCore SendAppStatusMessage.
 @tc.type: FUNC
@@ -266,8 +265,8 @@ appProcessData.appState = AppExecFwk::ApplicationState::APP_STATE_FOREGROUND;
 ASSERT_NE(g_netPolicyCore, nullptr);
 g_netPolicyCore->SendAppStatusMessage(appProcessData);
 }
-/**
 
+/**
 @tc.name: SendAppStatusMessage002
 @tc.desc: Test NetPolicyCore SendAppStatusMessage.
 @tc.type: FUNC
@@ -279,8 +278,8 @@ appProcessData.appState = AppExecFwk::ApplicationState::APP_STATE_BACKGROUND;
 ASSERT_NE(g_netPolicyCore, nullptr);
 g_netPolicyCore->SendAppStatusMessage(appProcessData);
 }
-/**
 
+/**
 @tc.name: SendAppStatusMessage003
 @tc.desc: Test NetPolicyCore SendAppStatusMessage.
 @tc.type: FUNC
