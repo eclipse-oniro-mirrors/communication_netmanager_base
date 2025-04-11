@@ -396,7 +396,7 @@ HWTEST_F(UtNetPolicyRule, IsUidNetAllowed001, TestSize.Level1)
 uint32_t uid = 1;
 bool metered = true;
 bool isAllowed = true;
-UidPolicyRule x1,x2,x3,x4,x5;
+UidPolicyRule x1, x2, x3, x4, x5;
 x1.rule_ = NET_RULE_REJECT_ALL;
 x2.rule_ = NET_RULE_REJECT_METERED;
 x3.rule_ = NET_RULE_ALLOW_METERED;
