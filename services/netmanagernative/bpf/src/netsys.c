@@ -160,14 +160,16 @@ static inline __u8 socket_ringbuf_net_stats_event_submit(__u8 flag)
 static inline __u32 get_data_len(struct __sk_buff *skb)
 {
     __u32 length = skb->len;
+    __u32 packages = skb->gso_segs;
+
     if (skb->vlan_present == 1) {
         length += VLAN_HEADER_LENGTH;
     }
     if (skb->family == AF_INET) {
-        length += IPV4_HEADERS_LENGTH;
+        length += (IPV4_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (package - 1);
     }
     if (skb->family == AF_INET6) {
-        length += IPV6_HEADERS_LENGTH;
+        length += (IPV6_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (package - 1);;
     }
     return length;
 }
