@@ -161,6 +161,9 @@ static inline __u32 get_data_len(struct __sk_buff *skb)
 {
     __u32 length = skb->len;
     __u32 packages = skb->gso_segs;
+    if (packets < 1) {
+        packets = 1;
+    }
 
     if (skb->vlan_present == 1) {
         length += VLAN_HEADER_LENGTH;
