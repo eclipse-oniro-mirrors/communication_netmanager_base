@@ -166,10 +166,10 @@ static inline __u32 get_data_len(struct __sk_buff *skb)
         length += VLAN_HEADER_LENGTH;
     }
     if (skb->family == AF_INET) {
-        length += (IPV4_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (package - 1);
+        length += (IPV4_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (packages - 1);
     }
     if (skb->family == AF_INET6) {
-        length += (IPV6_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (package - 1);
+        length += (IPV6_HEADER_LENGTH + TRANSFER_HEADER_LENGTH) * (packages - 1);
     }
     return length;
 }
