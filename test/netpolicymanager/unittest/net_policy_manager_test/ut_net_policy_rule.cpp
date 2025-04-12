@@ -310,174 +310,174 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRuleBranchTest001, TestSize.Level1)
 }
 
 /**
-@tc.name: BuildTransCondition001
-@tc.desc: Test NetPolicyRule BuildTransCondition.
-@tc.type: FUNC
-*/
+ * @tc.name: BuildTransCondition001
+ * @tc.desc: Test NetPolicyRule BuildTransCondition.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, BuildTransCondition001, TestSize.Level1)
 {
-uint32_t uid = 2;
-uint32_t policy = 2;
-NetPolicyRule netpolicyrule;
-netpolicyrule.deviceIdleMode_ = true;
-netpolicyrule.deviceIdleAllowedList_ = {1, 2, 3};
-netpolicyrule.powerSaveMode_ = true;
-netpolicyrule.powerSaveAllowedList_ = {1, 2, 3};
-auto ret = netpolicyrule.BuildTransCondition(uid, policy);
-EXPECT_NE(ret, 0);
+    uint32_t uid = 2;
+    uint32_t policy = 2;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.deviceIdleMode_ = true;
+    netpolicyrule.deviceIdleAllowedList_ = {1, 2, 3};
+    netpolicyrule.powerSaveMode_ = true;
+    netpolicyrule.powerSaveAllowedList_ = {1, 2, 3};
+    auto ret = netpolicyrule.BuildTransCondition(uid, policy);
+    EXPECT_NE(ret, 0);
 }
 
 /**
-@tc.name: NetsysCtrl001
-@tc.desc: Test NetPolicyRule NetsysCtrl.
-@tc.type: FUNC
-*/
+ * @tc.name: NetsysCtrl001
+ * @tc.desc: Test NetPolicyRule NetsysCtrl.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, NetsysCtrl001, TestSize.Level1)
 {
-uint32_t uid = 2;
-uint32_t netsysCtrl = POLICY_TRANS_CTRL_NONE;
-NetPolicyRule netpolicyrule;
-netpolicyrule.NetsysCtrl(uid, netsysCtrl);
-EXPECT_EQ(netpolicyrule.powerSaveMode_, false);
-netsysCtrl = 0;
-netpolicyrule.NetsysCtrl(uid, netsysCtrl);
-EXPECT_EQ(netpolicyrule.powerSaveMode_, false);
+    uint32_t uid = 2;
+    uint32_t netsysCtrl = POLICY_TRANS_CTRL_NONE;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.NetsysCtrl(uid, netsysCtrl);
+    EXPECT_EQ(netpolicyrule.powerSaveMode_, false);
+    netsysCtrl = 0;
+    netpolicyrule.NetsysCtrl(uid, netsysCtrl);
+    EXPECT_EQ(netpolicyrule.powerSaveMode_, false);
 }
 
 /**
-@tc.name: ProcessCtrlNone001
-@tc.desc: Test NetPolicyRule ProcessCtrlNone.
-@tc.type: FUNC
-*/
+ * @tc.name: ProcessCtrlNone001
+ * @tc.desc: Test NetPolicyRule ProcessCtrlNone.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, ProcessCtrlNone001, TestSize.Level1)
 {
-uint32_t uid = 2;
-NetPolicyRule netpolicyrule;
-netpolicyrule.ProcessCtrlNone(uid);
-netpolicyrule.powerSaveMode_ = true;
-netpolicyrule.ProcessCtrlNone(uid);
-EXPECT_EQ(netpolicyrule.powerSaveMode_, true);
+    uint32_t uid = 2;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.ProcessCtrlNone(uid);
+    netpolicyrule.powerSaveMode_ = true;
+    netpolicyrule.ProcessCtrlNone(uid);
+    EXPECT_EQ(netpolicyrule.powerSaveMode_, true);
 }
 
 /**
-@tc.name: ProcessCtrlAddAllowedList001
-@tc.desc: Test NetPolicyRule ProcessCtrlAddAllowedList.
-@tc.type: FUNC
-*/
+ * @tc.name: ProcessCtrlAddAllowedList001
+ * @tc.desc: Test NetPolicyRule ProcessCtrlAddAllowedList.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, ProcessCtrlAddAllowedList001, TestSize.Level1)
 {
-uint32_t uid = 2;
-NetPolicyRule netpolicyrule;
-netpolicyrule.powerSaveMode_ = true;
-netpolicyrule.ProcessCtrlAddAllowedList(uid);
-EXPECT_EQ(netpolicyrule.powerSaveMode_, true);
+    uint32_t uid = 2;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.powerSaveMode_ = true;
+    netpolicyrule.ProcessCtrlAddAllowedList(uid);
+    EXPECT_EQ(netpolicyrule.powerSaveMode_, true);
 }
 
 /**
-@tc.name: GetUidsByPolicy001
-@tc.desc: Test NetPolicyRule GetUidsByPolicy.
-@tc.type: FUNC
-*/
+ * @tc.name: GetUidsByPolicy001
+ * @tc.desc: Test NetPolicyRule GetUidsByPolicy.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, GetUidsByPolicy001, TestSize.Level1)
 {
-uint32_t policy = 3;
-std::vector<uint32_t> uids = {1, 2, 3};
-NetPolicyRule netpolicyrule;
-EXPECT_EQ(netpolicyrule.GetUidsByPolicy(policy, uids), POLICY_ERR_INVALID_POLICY);
+    uint32_t policy = 3;
+    std::vector<uint32_t> uids = {1, 2, 3};
+    NetPolicyRule netpolicyrule;
+    EXPECT_EQ(netpolicyrule.GetUidsByPolicy(policy, uids), POLICY_ERR_INVALID_POLICY);
 }
 
 /**
-@tc.name: IsUidNetAllowed001
-@tc.desc: Test NetPolicyRule IsUidNetAllowed.
-@tc.type: FUNC
-*/
+ * @tc.name: IsUidNetAllowed001
+ * @tc.desc: Test NetPolicyRule IsUidNetAllowed.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, IsUidNetAllowed001, TestSize.Level1)
 {
-uint32_t uid = 1;
-bool metered = true;
-bool isAllowed = true;
-UidPolicyRule x1, x2, x3, x4, x5;
-x1.rule_ = NET_RULE_REJECT_ALL;
-x2.rule_ = NET_RULE_REJECT_METERED;
-x3.rule_ = NET_RULE_ALLOW_METERED;
-x4.rule_ = NET_RULE_ALLOW_METERED_FOREGROUND;
-NetPolicyRule netpolicyrule;
-netpolicyrule.uidPolicyRules_ = {
-{1, {x1}},
-{2, {x2}},
-{3, {x3}},
-{4, {x4}},
-{5, {x5}}
-};
-netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
-EXPECT_EQ(isAllowed, false);
-uid = 2;
-netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
-EXPECT_EQ(isAllowed, false);
-uid = 3;
-netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
-EXPECT_EQ(isAllowed, true);
-uid = 4;
-netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
-EXPECT_EQ(isAllowed, true);
-uid = 5;
-netpolicyrule.backgroundAllow_ = false;
-netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
-EXPECT_EQ(isAllowed, false);
+    uint32_t uid = 1;
+    bool metered = true;
+    bool isAllowed = true;
+    UidPolicyRule x1,x2,x3,x4,x5;
+    x1.rule_ = NET_RULE_REJECT_ALL;
+    x2.rule_ = NET_RULE_REJECT_METERED;
+    x3.rule_ = NET_RULE_ALLOW_METERED;
+    x4.rule_ = NET_RULE_ALLOW_METERED_FOREGROUND;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.uidPolicyRules_ = {
+        {1, {x1}},
+        {2, {x2}},
+        {3, {x3}},
+        {4, {x4}},
+        {5, {x5}}
+        };
+    netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
+    EXPECT_EQ(isAllowed, false);
+    uid = 2;
+    netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
+    EXPECT_EQ(isAllowed, false);
+    uid = 3;
+    netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
+    EXPECT_EQ(isAllowed, true);
+    uid = 4;
+    netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
+    EXPECT_EQ(isAllowed, true);
+    uid = 5;
+    netpolicyrule.backgroundAllow_ = false;
+    netpolicyrule.IsUidNetAllowed(uid, metered, isAllowed);
+    EXPECT_EQ(isAllowed, false);
 }
 
 /**
-@tc.name: GetBackgroundPolicyByUid001
-@tc.desc: Test NetPolicyRule GetBackgroundPolicyByUid.
-@tc.type: FUNC
-*/
+ * @tc.name: GetBackgroundPolicyByUid001
+ * @tc.desc: Test NetPolicyRule GetBackgroundPolicyByUid.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, GetBackgroundPolicyByUid001, TestSize.Level1)
 {
-uint32_t uid = 1;
-uint32_t backgroundPolicyOfUid = 0;
-NetPolicyRule netpolicyrule;
-netpolicyrule.backgroundAllow_ = false;
-netpolicyrule.GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
-EXPECT_EQ(backgroundPolicyOfUid, NET_BACKGROUND_POLICY_DISABLE);
+    uint32_t uid = 1;
+    uint32_t backgroundPolicyOfUid = 0;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.backgroundAllow_ = false;
+    netpolicyrule.GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
+    EXPECT_EQ(backgroundPolicyOfUid, NET_BACKGROUND_POLICY_DISABLE);
 }
 
 /**
-@tc.name: InIdleAllowedList001
-@tc.desc: Test NetPolicyRule InIdleAllowedList.
-@tc.type: FUNC
-*/
+ * @tc.name: InIdleAllowedList001
+ * @tc.desc: Test NetPolicyRule InIdleAllowedList.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, InIdleAllowedList001, TestSize.Level1)
 {
-uint32_t uid = 1;
-NetPolicyRule netpolicyrule;
-netpolicyrule.deviceIdleAllowedList_ = {1, 2, 3};
-EXPECT_TRUE(netpolicyrule.InIdleAllowedList(uid));
+    uint32_t uid = 1;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.deviceIdleAllowedList_ = {1, 2, 3};
+    EXPECT_TRUE(netpolicyrule.InIdleAllowedList(uid));
 }
 
 /**
-@tc.name: HandleEvent001
-@tc.desc: Test NetPolicyRule HandleEvent.
-@tc.type: FUNC
-*/
+ * @tc.name: HandleEvent001
+ * @tc.desc: Test NetPolicyRule HandleEvent.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UtNetPolicyRule, HandleEvent001, TestSize.Level1)
 {
-int32_t eventId = 1;
-std::shared_ptr policyEvent = std::make_shared();
-std::set<uint32_t> devicelist = {1, 2, 3};
-policyEvent->deviceIdleList = devicelist;
-std::set<uint32_t> powersavelist = {1, 2, 3};
-policyEvent->powerSaveList = powersavelist;
-policyEvent->deviceIdleMode = true;
-policyEvent->powerSaveMode = true;
-NetPolicyRule netpolicyrule;
-netpolicyrule.HandleEvent(eventId, policyEvent);
-eventId = 2;
-netpolicyrule.HandleEvent(eventId, policyEvent);
-eventId = 3;
-netpolicyrule.HandleEvent(eventId, policyEvent);
-eventId = 5;
-netpolicyrule.HandleEvent(eventId, policyEvent);
-EXPECT_TRUE(netpolicyrule.deviceIdleMode_);
+    int32_t eventId = 1;
+    std::shared_ptr<PolicyEvent> policyEvent = std::make_shared<PolicyEvent>();
+    std::set<uint32_t> devicelist = {1, 2, 3};
+    policyEvent->deviceIdleList = devicelist;
+    std::set<uint32_t> powersavelist = {1, 2, 3};
+    policyEvent->powerSaveList = powersavelist;
+    policyEvent->deviceIdleMode = true;
+    policyEvent->powerSaveMode = true;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.HandleEvent(eventId, policyEvent);
+    eventId = 2;
+    netpolicyrule.HandleEvent(eventId, policyEvent);
+    eventId = 3;
+    netpolicyrule.HandleEvent(eventId, policyEvent);
+    eventId = 5;
+    netpolicyrule.HandleEvent(eventId, policyEvent);
+    EXPECT_TRUE(netpolicyrule.deviceIdleMode_);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
