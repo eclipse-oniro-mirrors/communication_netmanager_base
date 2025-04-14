@@ -793,7 +793,7 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
             continue;
         }
         if (netConnEventHandler_) {
-            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(false); }, delayTime);
+            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(true); }, delayTime);
         }
     }
 }
