@@ -53,9 +53,9 @@ HWTEST_F(NetworkTest, UpdateBasicNetworkTest001, TestSize.Level1)
 {
     int32_t netId = 1;
     auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    EXPECT_NE(network, nullptr);
     network->nat464Service_ = std::make_unique<Nat464Service>(netId, "ifaceName");
-    network->UpdateBasicNetwork(false);
+    auto ret = network->UpdateBasicNetwork(false);
+    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest001, TestSize.Level1)
