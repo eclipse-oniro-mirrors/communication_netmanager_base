@@ -179,6 +179,7 @@ int32_t CJ_GetNetCapabilities(int32_t netId, CNetCapabilities &ret)
             ret.networkCap = static_cast<int32_t *>(malloc(sizeof(int32_t) * ret.networkCapSize));
             if (ret.networkCap == nullptr) {
                 free(ret.bearerTypes);
+                ret.bearerTypes = nullptr;
                 return NETMANAGER_ERR_INTERNAL;
             }
             int i = 0;
@@ -213,6 +214,7 @@ bool SetDns(NetLinkInfo &linkInfo, CConnectionProperties &ret)
         ret.dnses = static_cast<CNetAddress *>(malloc(sizeof(CNetAddress) * ret.dnsSize));
         if (ret.dnses == nullptr) {
             free(ret.linkAddresses);
+            ret.linkAddresses = nullptr;
             return false;
         }
         int i = 0;
@@ -231,6 +233,8 @@ bool SetRoute(NetLinkInfo &linkInfo, CConnectionProperties &ret)
         if (ret.routes == nullptr) {
             free(ret.linkAddresses);
             free(ret.dnses);
+            ret.linkAddresses = nullptr;
+            ret.dnses = nullptr;
             return false;
         }
         int i = 0;
@@ -270,6 +274,10 @@ int32_t CJ_GetConnectionProperties(int32_t netId, CConnectionProperties &ret)
         ret.routeSize = static_cast<int64_t>(linkInfo.routeList_.size());
 
         if (!SetLinkAddr(linkInfo, ret) || !SetDns(linkInfo, ret) || !SetRoute(linkInfo, ret)) {
+            free(ret.interfaceName);
+            free(ret.domains);
+            ret.interfaceName = nullptr;
+            ret.domains = nullptr;
             return NETMANAGER_ERR_INTERNAL;
         }
     }
