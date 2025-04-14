@@ -3778,7 +3778,9 @@ int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSu
             supplier->SetReuseCap(reuseCap, isReused);
         }
     }
-    FindBestNetworkForAllRequest();
+    if (isReused) {
+        FindBestNetworkForAllRequest();
+    }
     return NETMANAGER_SUCCESS;
 }
 
