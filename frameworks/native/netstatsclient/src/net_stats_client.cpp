@@ -23,6 +23,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
+#include "net_stats_service_proxy.h"
 
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
