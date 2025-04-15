@@ -48,8 +48,8 @@ NetConnClient::~NetConnClient()
 
 NetConnClient &NetConnClient::GetInstance()
 {
-    static NetConnClient gInstance;
-    return gInstance;
+    static std::shared_ptr<NetConnClient> gInstance = std::make_shared<NetConnClient>();
+    return *gInstance;
 }
 
 void NetConnClient::SubscribeSystemAbility()
