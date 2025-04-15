@@ -552,8 +552,6 @@ private:
     };
 
 private:
-    NetConnClient();
-    ~NetConnClient();
     NetConnClient& operator=(const NetConnClient&) = delete;
     NetConnClient(const NetConnClient&) = delete;
 
