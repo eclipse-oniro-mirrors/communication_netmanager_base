@@ -70,7 +70,7 @@ ohos_source_set("net_stats_parcel") {
 idl_gen_interface("netstats_service_interface") {
   sources = [ "INetStatsService.idl" ]
 }
- 
+
 config("netstats_service_interface_stub_config") {
   include_dirs = [
     "${target_gen_dir}",
