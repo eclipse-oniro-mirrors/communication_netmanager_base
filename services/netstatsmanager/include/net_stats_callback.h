@@ -21,7 +21,7 @@
 #include <mutex>
 
 #include "ffrt.h"
-#include "i_net_stats_callback.h"
+#include "inet_stats_callback.h"
 #include "netsys_controller_callback.h"
 
 namespace OHOS {

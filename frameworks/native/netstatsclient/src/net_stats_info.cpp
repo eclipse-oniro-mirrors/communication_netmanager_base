@@ -110,6 +110,40 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const std::unordered_map<uint32_t
                        [&parcel](const auto &info) { return info.second.Marshalling(parcel); });
 }
 
+NetStatsInfo* NetStatsInfo::Unmarshalling(Parcel &parcel)
+{
+    NetStatsInfo* stats = new (std::nothrow) NetStatsInfo();
+    if (stats == nullptr) {
+        NETMGR_LOG_E("make ptr NetStatsInfo failed");
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->uid_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadString(stats->iface_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadString(stats->ident_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->date_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->rxBytes_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->txBytes_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->rxPackets_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->txPackets_)) {
+        return nullptr;
+    }
+    return stats;
+}
+
 bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos)
 {
     uint32_t vSize = 0;

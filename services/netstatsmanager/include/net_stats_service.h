@@ -70,9 +70,9 @@ public:
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &infos) override;
     int32_t GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos) override;
     int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
-                                     const sptr<NetStatsNetwork> &network) override;
+                                     const NetStatsNetwork &networkIpc) override;
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                        const sptr<NetStatsNetwork> &network) override;
+                                        const NetStatsNetwork &networkIpc) override;
     int32_t SetAppStats(const PushStatsInfo &info) override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;

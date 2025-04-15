@@ -76,6 +76,39 @@ bool PushStatsInfo::Marshalling(Parcel &parcel, const PushStatsInfo &info)
     return true;
 }
 
+PushStatsInfo* PushStatsInfo::Unmarshalling(Parcel &parcel)
+{
+    PushStatsInfo* stats = new (std::nothrow) PushStatsInfo();
+    if (stats == nullptr) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->uid_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadString(stats->iface_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->simId_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->netBearType_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->beginTime_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->endTime_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->rxBytes_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint32(stats->txBytes_)) {
+        return nullptr;
+    }
+    return stats;
+}
+
 bool PushStatsInfo::Unmarshalling(Parcel &parcel, PushStatsInfo &info)
 {
     if (!parcel.ReadUint32(info.uid_)) {

@@ -61,6 +61,27 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
                        [&parcel](const NetStatsInfoSequence &info) { return info.Marshalling(parcel); });
 }
 
+NetStatsInfoSequence* NetStatsInfoSequence::Unmarshalling(Parcel &parcel)
+{
+    NetStatsInfoSequence* stats = new (std::nothrow) NetStatsInfoSequence();
+    if (stats == nullptr) {
+        NETMGR_LOG_E("make ptr NetStatsInfoSequence failed");
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->startTime_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint64(stats->endTime_)) {
+        return nullptr;
+    }
+    NetStatsInfo* statsInfo = NetStatsInfo::Unmarshalling(parcel);
+    if (statsInfo == nullptr) {
+        return nullptr;
+    }
+    stats->info_ = *statsInfo;
+    return stats;
+}
+
 bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.ReadUint64(statsSequence.startTime_)) {

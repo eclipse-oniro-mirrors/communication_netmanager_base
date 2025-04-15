@@ -21,7 +21,7 @@
 #define private public
 #define protected public
 #endif
-#include "i_net_stats_service.h"
+#include "inet_stats_service.h"
 #include "iremote_proxy.h"
 #include "net_manager_center.h"
 #include "net_stats_callback.h"
@@ -755,7 +755,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest001, TestSize.Lev
     NetStatsServiceProxy instance_(nullptr);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, *network), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -769,7 +769,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest002, TestSize.Lev
     NetStatsServiceProxy instance_(remoteObj_);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, *network), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -783,7 +783,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest003, TestSize.Lev
     NetStatsServiceProxy instance_(remoteObj_);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_READ_REPLY_FAIL);
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, *network), NETMANAGER_ERR_READ_REPLY_FAIL);
 }
 
 /**
@@ -797,7 +797,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest004, TestSize.Lev
     NetStatsServiceProxy instance_(remoteObj_);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETSYS_SUCCESS);
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, *network), NETSYS_SUCCESS);
 }
 
 /**
@@ -810,7 +810,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest001, TestSize.
     NetStatsServiceProxy instance_(nullptr);
     std::vector<NetStatsInfoSequence> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, *network), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -824,7 +824,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest002, TestSize.
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfoSequence> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, *network), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -838,7 +838,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest003, TestSize.
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfoSequence> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_READ_REPLY_FAIL);
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, *network), NETMANAGER_ERR_READ_REPLY_FAIL);
 }
 
 /**
@@ -852,7 +852,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest004, TestSize.
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfoSequence> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETSYS_SUCCESS);
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, *network), NETSYS_SUCCESS);
 }
 
 /**

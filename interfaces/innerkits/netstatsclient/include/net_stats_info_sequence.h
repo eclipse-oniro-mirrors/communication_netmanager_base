@@ -36,6 +36,7 @@ struct NET_SYMBOL_VISIBLE_SEQ NetStatsInfoSequence final : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetStatsInfoSequence &statsSequence);
     static bool Marshalling(Parcel &parcel, const std::vector<NetStatsInfoSequence> &statsSequence);
+    static NetStatsInfoSequence* Unmarshalling(Parcel &parcel);
     static bool Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence);
     static bool Unmarshalling(Parcel &parcel, std::vector<NetStatsInfoSequence> &statsSequence);
 };

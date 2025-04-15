@@ -18,7 +18,7 @@
 
 #include "iremote_proxy.h"
 
-#include "i_net_stats_callback.h"
+#include "inet_stats_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

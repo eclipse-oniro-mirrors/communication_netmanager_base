@@ -23,6 +23,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
+#include "net_stats_service_proxy.h"
 
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
@@ -342,7 +343,7 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    return proxy->GetTrafficStatsByNetwork(infos, network);
+    return proxy->GetTrafficStatsByNetwork(infos, *network);
 }
 
 int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
@@ -365,7 +366,7 @@ int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequ
         NETMGR_LOG_E("network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    return proxy->GetTrafficStatsByUidNetwork(infos, uid, network);
+    return proxy->GetTrafficStatsByUidNetwork(infos, uid, *network);
 }
 
 int32_t NetStatsClient::SetAppStats(const PushStatsInfo &info)
