@@ -49,8 +49,13 @@ private:
     std::mutex mutex_;
 };
 
-class NetConnClient {
+class NetConnClient : public std::enable_shared_from_this<NetConnClient> {
 public:
+    /**
+     * Do not use constor directly to create instance, it just for std::make_shared in `GetInstance()`
+     */
+    NetConnClient();
+    ~NetConnClient();
     static NetConnClient &GetInstance();
 
     /**
