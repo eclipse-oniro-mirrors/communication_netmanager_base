@@ -545,7 +545,7 @@ void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, u
 #endif
 
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
-                                                  const NetStatsNetwork &network)
+                                                  const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
