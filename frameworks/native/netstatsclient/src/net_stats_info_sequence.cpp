@@ -79,7 +79,6 @@ NetStatsInfoSequence* NetStatsInfoSequence::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     stats->info_ = *statsInfo;
-    delete statsInfo;
     return stats;
 }
 
