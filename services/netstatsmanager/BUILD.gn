@@ -65,8 +65,8 @@ ohos_shared_library("net_stats_manager") {
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
+    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
@@ -181,8 +181,8 @@ ohos_static_library("net_stats_manager_static") {
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
+    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
