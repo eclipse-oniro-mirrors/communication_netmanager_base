@@ -44,6 +44,7 @@ struct NET_SYMBOL_VISIBLE_PUSH PushStatsInfo final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const PushStatsInfo &info);
+    static PushStatsInfo* Unmarshalling(Parcel &parcel);
     static bool Unmarshalling(Parcel &parcel, PushStatsInfo &info);
 };
 } // namespace NetManagerStandard

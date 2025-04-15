@@ -29,7 +29,7 @@ struct NET_SYMBOL_VISIBLE_NETWORK NetStatsNetwork final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const sptr<NetStatsNetwork> &object);
-    static sptr<NetStatsNetwork> Unmarshalling(Parcel &parcel);
+    static NetStatsNetwork* Unmarshalling(Parcel &parcel);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

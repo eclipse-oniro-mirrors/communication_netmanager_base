@@ -342,7 +342,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
     std::unordered_map<uint32_t, NetStatsInfo> infos;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -351,7 +351,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -455,19 +455,19 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
     std::unordered_map<uint32_t, NetStatsInfo> infos = {{1, netStatsInfo}};
     const sptr<NetStatsNetwork> network1 = nullptr;
     netStatsService->netStatsCached_ = nullptr;
-    int32_t ret = netStatsService->GetTrafficStatsByNetwork(infos, network1);
+    int32_t ret = netStatsService->GetTrafficStatsByNetwork(infos, *network1);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network1);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network1);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     const sptr<NetStatsNetwork> network2 = new (std::nothrow) NetStatsNetwork();
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network2);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network2);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network2->type_ = 1;
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network2);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network2);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -490,19 +490,19 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest003, TestSize.Level1)
     info.rxBytes_ = 1;
     info.txBytes_ = 1;
     netStatsService->netStatsCached_->SetAppStats(info);
-    int32_t ret = netStatsService->GetTrafficStatsByNetwork(infos, network);
+    int32_t ret = netStatsService->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->simId_ = info.simId_;
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->startTime_ = info.beginTime_;
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->endTime_ = info.endTime_;
-    ret = netStatsService->GetTrafficStatsByNetwork(infos, network);
+    ret = netStatsService->GetTrafficStatsByNetwork(infos, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -513,19 +513,19 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network1 = nullptr;
     netStatsService->netStatsCached_ = nullptr;
-    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network1);
+    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network1);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     netStatsService->netStatsCached_ = std::make_unique<NetStatsCached>();
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network1);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network1);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     const sptr<NetStatsNetwork> network2 = new (std::nothrow) NetStatsNetwork();
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network2);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network2);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network2->type_ = 1;
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network2);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network2);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -547,23 +547,23 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level
     info.rxBytes_ = 1;
     info.txBytes_ = 1;
     netStatsService->netStatsCached_->SetAppStats(info);
-    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network);
+    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     uid = info.uid_;
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->simId_ = info.simId_;
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->startTime_ = info.beginTime_;
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     network->endTime_ = info.endTime_;
-    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network);
+    ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -576,7 +576,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest004, TestSize.Level
     const sptr<NetStatsNetwork> network2 = new (std::nothrow) NetStatsNetwork();
     network2->type_ = 1;
     netStatsService->netStatsCached_->CacheUidStats();
-    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, network2);
+    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network2);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

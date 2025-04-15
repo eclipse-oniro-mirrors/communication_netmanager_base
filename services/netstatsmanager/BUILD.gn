@@ -59,13 +59,13 @@ ohos_shared_library("net_stats_manager") {
     "src/net_stats_service.cpp",
     "src/net_stats_sqlite_statement.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
-    "src/stub/net_stats_service_stub.cpp",
   ]
 
   configs = [ ":net_stats_manager_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
@@ -175,13 +175,13 @@ ohos_static_library("net_stats_manager_static") {
     "src/net_stats_service.cpp",
     "src/net_stats_sqlite_statement.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
-    "src/stub/net_stats_service_stub.cpp",
   ]
 
   configs = [ ":net_stats_manager_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",

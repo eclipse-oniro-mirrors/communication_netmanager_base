@@ -58,7 +58,7 @@ bool NetStatsNetwork::Marshalling(Parcel &parcel, const sptr<NetStatsNetwork> &o
     return true;
 }
 
-sptr<NetStatsNetwork> NetStatsNetwork::Unmarshalling(Parcel &parcel)
+NetStatsNetwork* NetStatsNetwork::Unmarshalling(Parcel &parcel)
 {
     sptr<NetStatsNetwork> ptr = new (std::nothrow) NetStatsNetwork();
     if (ptr == nullptr) {
