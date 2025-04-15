@@ -36,6 +36,7 @@ static const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 
 namespace OHOS {
 namespace NetManagerStandard {
+std::shared_ptr<NetConnClient> NetConnClient::instance_ = std::make_shared<NetConnClient>();
 NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr)
 {
     buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
@@ -48,8 +49,7 @@ NetConnClient::~NetConnClient()
 
 NetConnClient &NetConnClient::GetInstance()
 {
-    static std::shared_ptr<NetConnClient> gInstance = std::make_shared<NetConnClient>();
-    return *gInstance;
+    return *instance_;
 }
 
 void NetConnClient::SubscribeSystemAbility()
