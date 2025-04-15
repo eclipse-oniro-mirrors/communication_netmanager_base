@@ -1366,5 +1366,54 @@ HWTEST_F(NetConnServiceStubTest, OnSetReuseSupplierIdTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceStubTest, OnSetInternetPermissionTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterNetConnCallbackBySpecifierTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterNetDetectionCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnUnRegisterNetDetectionCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnGetNetInterfaceConfigurationTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterPreAirplaneCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnUnregisterPreAirplaneCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

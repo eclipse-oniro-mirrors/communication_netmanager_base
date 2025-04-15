@@ -34,6 +34,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_service_xtra_test.cpp",
     "net_detection_callback_stub_test.cpp",
     "net_detection_callback_test.cpp",
+    "network_test.cpp",
   ]
 
   include_dirs = [
