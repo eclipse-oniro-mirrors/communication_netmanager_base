@@ -78,7 +78,7 @@ config("netstats_service_interface_stub_config") {
     "include/proxy",
   ]
 }
- 
+
 ohos_source_set("netstats_service_interface_stub") {
   sanitize = {
     cfi = true
