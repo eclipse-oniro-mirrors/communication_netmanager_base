@@ -57,7 +57,7 @@ NetConnClient &NetConnClient::GetInstance()
             std::atomic_store_explicit(&instance_, temp, std::memory_order_release);
         }
     }
-    return temp;
+    return *temp;
 }
 
 void NetConnClient::SubscribeSystemAbility()
