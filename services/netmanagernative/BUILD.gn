@@ -256,6 +256,7 @@ ohos_static_library("netsys_native_manager_static") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
