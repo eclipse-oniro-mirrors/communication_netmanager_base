@@ -580,6 +580,8 @@ private:
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
     sptr<ISystemAbilityStatusChange> saStatusListener_ = nullptr;
+    static inline std::mutex instanceMtx_;
+    static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
