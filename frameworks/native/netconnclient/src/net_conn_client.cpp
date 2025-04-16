@@ -48,8 +48,16 @@ NetConnClient::~NetConnClient()
 
 NetConnClient &NetConnClient::GetInstance()
 {
-    static NetConnClient gInstance;
-    return gInstance;
+    auto temp = std::atomic_load_explicit(&instance_, std::memory_order_acquire);
+    if (temp == nullptr) {
+        std::lock_guard locker(instanceMtx_);
+        temp = std::atomic_load_explicit(&instance_, std::memory_order_relaxed);
+        if (temp == nullptr) {
+            temp = std::make_shared<NetConnClient>();
+            std::atomic_store_explicit(&instance_, temp, std::memory_order_release);
+        }
+    }
+    return *temp;
 }
 
 void NetConnClient::SubscribeSystemAbility()
