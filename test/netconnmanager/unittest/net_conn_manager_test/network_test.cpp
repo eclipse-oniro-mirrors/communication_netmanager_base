@@ -1078,7 +1078,7 @@ HWTEST_F(NetworkTest, OH_NetConn_GetNetCapabilitiesTest001, TestSize.Level1)
     auto ret = OH_NetConn_GetNetCapabilities(nullptr, nullptr);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 
-    NetConn_NetHandle netHandle; 
+    NetConn_NetHandle netHandle;
     NetConn_NetCapabilities netAllCapabilities;
     ret = OH_NetConn_GetNetCapabilities(&netHandle, nullptr);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
