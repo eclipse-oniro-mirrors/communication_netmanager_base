@@ -198,6 +198,7 @@ ohos_static_library("net_stats_manager_static") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "sqlite:sqlite",
   ]
 
