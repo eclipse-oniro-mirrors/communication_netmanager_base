@@ -420,12 +420,12 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
     std::string out;
     std::string createVirnicRoute = std::string(IP_CMD_PATH) + " route add default via " + virNicVethAddr +
         " dev " + DISTRIBUTED_TUN_CARD_NAME + " table " + std::to_string(table) + " proto static";
-    NETNATIVE_LOGI("create Virnic Route: %{public}s", CommonUtils::ToAnonymousIp(createVirnicRoute).c_str());
+    NETNATIVE_LOGI("create Virnic Route: %{public}s", CommonUtils::AnonymousIpInStr(createVirnicRoute).c_str());
     if (CommonUtils::ForkExec(createVirnicRoute.c_str(), &out) != ROUTEMANAGER_SUCCESS) {
         NETNATIVE_LOGE("create Virnic Route failed, output %{public}s", out.c_str());
         return ROUTEMANAGER_ERROR;
     }
-    NETNATIVE_LOGI("EnableDistributedClientNet add rule success.");
+    NETNATIVE_LOGI("EnableDistributedClientNet add route success.");
     return ROUTEMANAGER_SUCCESS;
 }
 

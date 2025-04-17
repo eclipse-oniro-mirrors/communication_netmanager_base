@@ -306,7 +306,7 @@ int32_t DistributedManager::ConfigVirnicAndVeth(const std::string &virNicAddr, c
  
     // Step3-1: ip addr add xx.xx.xx.xx/24 dev virnic
     std::string cfgVirnic = std::string(IP_CMD_PATH) + " addr add " + virNicAddr + "/24 dev " + virnicName;
-    NETNATIVE_LOGI("add virnic ip: %{public}s", CommonUtils::ToAnonymousIp(cfgVirnic).c_str());
+    NETNATIVE_LOGI("add virnic ip: %{public}s", CommonUtils::AnonymousIpInStr(cfgVirnic).c_str());
     if (CommonUtils::ForkExec(cfgVirnic.c_str(), &out) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("add virnic ip failed, output %{public}s.", out.c_str());
         return NETMANAGER_ERROR;
@@ -320,7 +320,7 @@ int32_t DistributedManager::ConfigVirnicAndVeth(const std::string &virNicAddr, c
 
     // Step3-1: ip addr add xx.xx.xx.1/24 dev virnic
     std::string cfgVirnicVeth = std::string(IP_CMD_PATH) + " addr add " + virNicVethAddr + "/24 dev " + virnicVethName;
-    NETNATIVE_LOGI("add virNic-veth ip: %{public}s", CommonUtils::ToAnonymousIp(cfgVirnicVeth).c_str());
+    NETNATIVE_LOGI("add virNic-veth ip: %{public}s", CommonUtils::AnonymousIpInStr(cfgVirnicVeth).c_str());
     if (CommonUtils::ForkExec(cfgVirnicVeth.c_str(), &out) != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("add virNic-veth ip failed, output %{public}s.", out.c_str());
         return NETMANAGER_ERROR;
