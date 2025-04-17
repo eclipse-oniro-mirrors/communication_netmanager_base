@@ -48,6 +48,7 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
@@ -56,7 +57,6 @@ ohos_unittest("net_conn_manager_test") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$THIRD_PARTY_ROOT/curl/include",
     "$THIRD_PARTY_ROOT/openssl/include",
-    "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient/include",
   ]
 
   deps = [
@@ -64,9 +64,9 @@ ohos_unittest("net_conn_manager_test") {
     "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
+    "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient:net_connection",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection",
   ]
 
   external_deps = [
