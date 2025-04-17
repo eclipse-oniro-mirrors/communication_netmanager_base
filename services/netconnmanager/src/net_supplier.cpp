@@ -381,8 +381,8 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (HasNetCap(NET_CAPABILITY_INTERNET)) {
-       RemoveRequest(netrequest);
-       SupplierDisconnection(netCaps_.ToSet());
+        RemoveRequest(netrequest);
+        SupplierDisconnection(netCaps_.ToSet());
     }
 }
 
