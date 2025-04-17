@@ -24,6 +24,7 @@
 #include "nat464_service.h"
 #include "net_http_probe_result.h"
 #include "probe_thread.h"
+#include "net_connection.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -36,6 +37,21 @@ constexpr int32_t PORTAL_CODE_MIN = 200;
 constexpr int32_t PORTAL_CODE_MAX = 399;
 constexpr size_t CURL_MAX_SIZE = 1024;
 constexpr size_t CURL_MAX_NITEMS = 100;
+constexpr int32_t HTTP_OK_CODE = 200;
+constexpr int32_t DEFAULT_CONTENT_LENGTH_VALUE = -1;
+constexpr int32_t MIN_VALID_CONTENT_LENGTH_VALUE = 5;
+constexpr int32_t FAIL_CODE = 599;
+constexpr int32_t PORTAL_CODE = 302;
+constexpr int32_t HTTP_RES_CODE_BAD_REQUEST = 400;
+constexpr int32_t HTTP_RES_CODE_CLIENT_ERRORS_MAX = 499;
+const std::string CONNECTION_CLOSE_VALUE = "close";
+const std::string CONNECTION_KEY = "Connection:";
+const std::string CONTENT_LENGTH_KEY = "Content-Length:";
+const std::string KEY_WORDS_REDIRECTION = "location.replace";
+const std::string HTML_TITLE_HTTP_EN = "http://";
+const std::string HTML_TITLE_HTTPS_EN = "https://";
+constexpr int32_t VALID_NETID_START = 100;
+constexpr int32_t PAC_URL_MAX_LEN = 1024;
 } // namespace
 
 class NetworkTest : public testing::Test {
@@ -776,6 +792,443 @@ HWTEST_F(NetworkTest, SetHttpOptionsTest001, TestSize.Level1)
     url = "http://example.com";
     ret = probe->SetHttpOptions(probeType, curl, url);
     EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, SetProxyOptionTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTPS;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    std::string url = "http://";
+    bool useHttpProxy = true;
+    probe->globalHttpProxy_.host_ = url;
+    probe->globalHttpProxy_.port_ = 1;
+    EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
+    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, SetProxyOptionTest002, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    std::string url = "http://192.168.1.1";
+    bool useHttpProxy = true;
+    probe->globalHttpProxy_.host_ = url;
+    probe->globalHttpProxy_.port_ = 1;
+    EXPECT_EQ(probe->httpCurl_, nullptr);
+    EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
+    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
+    EXPECT_FALSE(ret);
+
+    probe->httpCurl_ = curl_easy_init();
+    EXPECT_NE(probe->httpCurl_, nullptr);
+    ret = probe->SetProxyOption(probeType, useHttpProxy);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, SetProxyOptionTest003, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTPS;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    std::string url = "http://192.168.1.1";
+    bool useHttpProxy = true;
+    probe->globalHttpProxy_.host_ = url;
+    probe->globalHttpProxy_.port_ = 1;
+    EXPECT_EQ(probe->httpCurl_, nullptr);
+    EXPECT_TRUE(probe->defaultUseGlobalHttpProxy_);
+    auto ret = probe->SetProxyOption(probeType, useHttpProxy);
+    EXPECT_FALSE(ret);
+
+    probe->httpCurl_ = curl_easy_init();
+    EXPECT_NE(probe->httpCurl_, nullptr);
+    ret = probe->SetProxyOption(probeType, useHttpProxy);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, SetProxyInfoTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    CURL *curlHandler = nullptr;
+    std::string proxyHost = "http://192.168.1.1";
+    int32_t proxyPort = 1;
+    auto ret = probe->SetProxyInfo(curlHandler, proxyHost, proxyPort);
+    EXPECT_FALSE(ret);
+
+    probe->httpCurl_ = curl_easy_init();
+    EXPECT_NE(probe->httpCurl_, nullptr);
+    ret = probe->SetProxyInfo(curlHandler, proxyHost, proxyPort);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, SetResolveOptionTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP_HTTPS;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    std::string domain = "test";
+    std::string ipAddress = "test";
+    int32_t port = 1;
+    auto ret = probe->SetResolveOption(probeType, domain, ipAddress, port);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, GetHeaderFieldTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    std::string key = "test";
+    auto ret = probe->GetHeaderField(key);
+    EXPECT_EQ(ret, "");
+}
+
+HWTEST_F(NetworkTest, GetHeaderFieldTest002, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    probe->respHeader_ = "test";
+    std::string key = "1";
+    auto ret = probe->GetHeaderField(key);
+    EXPECT_EQ(ret, "");
+
+    key = "t";
+    ret = probe->GetHeaderField(key);
+    EXPECT_NE(ret, "");
+}
+
+HWTEST_F(NetworkTest, CheckRespCodeTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    int32_t respCode = HTTP_RES_CODE_CLIENT_ERRORS_MAX + 1;
+    auto ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, respCode);
+}
+
+HWTEST_F(NetworkTest, CheckRespCodeTest002, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTPS;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    int32_t respCode = HTTP_OK_CODE;
+    auto ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, FAIL_CODE);
+
+    probe->respHeader_ = "test";
+    ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, HTTP_OK_CODE);
+
+    probe->respHeader_ = CONTENT_LENGTH_KEY + "1\r\n";
+    ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, FAIL_CODE);
+}
+
+HWTEST_F(NetworkTest, CheckRespCodeTest003, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTPS;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    int32_t respCode = HTTP_OK_CODE;
+    probe->respHeader_ =  CONTENT_LENGTH_KEY + "123\r\n";
+    probe->respHeader_ += CONNECTION_KEY + CONNECTION_CLOSE_VALUE + "\r\n";
+    auto ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, HTTP_OK_CODE);
+
+    probe->probeType_ = PROBE_HTTP;
+    ret = probe->CheckRespCode(respCode);
+    EXPECT_EQ(ret, FAIL_CODE);
+}
+
+HWTEST_F(NetworkTest, CheckClientErrorRespCodeTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    int32_t respCode = HTTP_RES_CODE_BAD_REQUEST;
+    auto ret = probe->CheckClientErrorRespCode(respCode);
+    EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
+
+    strcpy_s(probe->errBuffer, CURL_ERROR_SIZE, HTML_TITLE_HTTP_EN.c_str());
+    ret = probe->CheckClientErrorRespCode(respCode);
+    EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
+
+    std::string errMsg = HTML_TITLE_HTTPS_EN + KEY_WORDS_REDIRECTION;
+    strcpy_s(probe->errBuffer, CURL_ERROR_SIZE, errMsg.c_str());
+    ret = probe->CheckClientErrorRespCode(respCode);
+    EXPECT_EQ(ret, PORTAL_CODE);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest001, TestSize.Level1)
+{
+    char *host = nullptr;
+    char *serv = nullptr;
+    struct addrinfo *hint = nullptr;
+    struct addrinfo **res = nullptr;
+    int32_t netId = 1;
+    auto ret = OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    char host1[] = "192.168.1.1";
+    ret = OH_NetConn_GetAddrInfo(host1, serv, hint, res, netId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest002, TestSize.Level1)
+{
+    char host[] = "";
+    char *serv = nullptr;
+    struct addrinfo info;
+    struct addrinfo *hint = &info;
+    struct addrinfo **res = &hint;
+    int32_t netId = 1;
+    auto ret = OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    char host1[] = "192.168.1.1";
+    ret = OH_NetConn_GetAddrInfo(host1, serv, hint, res, netId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    netId = -1;
+    OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
+
+    netId = VALID_NETID_START;
+    OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_FreeDnsResultTest001, TestSize.Level1)
+{
+    struct addrinfo *res = nullptr;
+    auto ret = OH_NetConn_FreeDnsResult(res);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    res = (struct addrinfo*)malloc(sizeof(struct addrinfo));
+    res->ai_addr = nullptr;
+    ret = OH_NetConn_FreeDnsResult(res);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetAllNetsTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_GetAllNets(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    NetConn_NetHandleList netHandleList;
+    OH_NetConn_GetAllNets(&netHandleList);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_HasDefaultNetTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_HasDefaultNet(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    int32_t hasDefaultNet;
+    OH_NetConn_HasDefaultNet(&hasDefaultNet);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetDefaultNetTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_GetDefaultNet(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    NetConn_NetHandle netHandle;
+    OH_NetConn_GetDefaultNet(&netHandle);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_IsDefaultNetMeteredTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_IsDefaultNetMetered(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    int32_t isMetered;
+    OH_NetConn_IsDefaultNetMetered(&isMetered);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetConnectionPropertiesTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_GetConnectionProperties(nullptr, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    NetConn_NetHandle netHandle; NetConn_ConnectionProperties prop;
+    ret = OH_NetConn_GetConnectionProperties(&netHandle, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    OH_NetConn_GetConnectionProperties(&netHandle, &prop);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetNetCapabilitiesTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_GetNetCapabilities(nullptr, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    NetConn_NetHandle netHandle; 
+    NetConn_NetCapabilities netAllCapabilities;
+    ret = OH_NetConn_GetNetCapabilities(&netHandle, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    OH_NetConn_GetNetCapabilities(&netHandle, &netAllCapabilities);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetDefaultHttpProxyTest001, TestSize.Level1)
+{
+    auto ret = OH_NetConn_GetDefaultHttpProxy(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    NetConn_HttpProxy httpProxy;
+    OH_NetConn_GetDefaultHttpProxy(&httpProxy);
+}
+
+HWTEST_F(NetworkTest, OHOS_NetConn_RegisterDnsResolverTest001, TestSize.Level1)
+{
+    OH_NetConn_CustomDnsResolver resolver = nullptr;
+    auto ret = OHOS_NetConn_RegisterDnsResolver(resolver);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    resolver = [](const char *host, const char *serv,
+        const struct addrinfo *hint, struct addrinfo **res) -> int {
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+    };
+    ret = OHOS_NetConn_RegisterDnsResolver(resolver);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RegisterDnsResolverTest001, TestSize.Level1)
+{
+    OH_NetConn_CustomDnsResolver resolver = nullptr;
+    auto ret = OH_NetConn_RegisterDnsResolver(resolver);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    resolver = [](const char *host, const char *serv,
+        const struct addrinfo *hint, struct addrinfo **res) -> int {
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+    };
+    ret = OH_NetConn_RegisterDnsResolver(resolver);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest001, TestSize.Level1)
+{
+    int32_t socketFd = -1;
+    NetConn_NetHandle netHandle;
+    auto ret = OH_NetConn_BindSocket(socketFd, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_BindSocket(socketFd, &netHandle);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest002, TestSize.Level1)
+{
+    int32_t socketFd = 1;
+    NetConn_NetHandle netHandle = {1};
+    auto ret = OH_NetConn_BindSocket(socketFd, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    netHandle.netId = VALID_NETID_START;
+    ret = OH_NetConn_BindSocket(socketFd, &netHandle);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RegisterNetConnCallbackTest001, TestSize.Level1)
+{
+    NetConn_NetSpecifier specifier;
+    NetConn_NetConnCallback netConnCallback;
+    uint32_t timeout = 1;
+    uint32_t callbackId = 1;
+    auto ret = OH_NetConn_RegisterNetConnCallback(nullptr, nullptr, timeout, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_RegisterNetConnCallback(&specifier, nullptr, timeout, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RegisterNetConnCallbackTest002, TestSize.Level1)
+{
+    NetConn_NetSpecifier specifier;
+    NetConn_NetConnCallback netConnCallback;
+    uint32_t timeout = 1;
+    uint32_t callbackId = 1;
+    auto ret = OH_NetConn_RegisterNetConnCallback(&specifier, &netConnCallback, timeout, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_RegisterNetConnCallback(&specifier, &netConnCallback, timeout, &callbackId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RegisterDefaultNetConnCallbackTest001, TestSize.Level1)
+{
+    NetConn_NetConnCallback netConnCallback;
+    uint32_t callbackId = 1;
+    auto ret = OH_NetConn_RegisterDefaultNetConnCallback(nullptr, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_RegisterDefaultNetConnCallback(&netConnCallback, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_RegisterDefaultNetConnCallback(&netConnCallback, &callbackId);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_SetAppHttpProxyTest001, TestSize.Level1)
+{
+    NetConn_HttpProxy httpProxy;
+    auto ret = OH_NetConn_SetAppHttpProxy(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_SetAppHttpProxy(&httpProxy);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_RegisterAppHttpProxyCallbackTest001, TestSize.Level1)
+{
+    OH_NetConn_AppHttpProxyChange appHttpProxyChange = nullptr;
+    uint32_t callbackId = 1;
+    auto ret = OH_NetConn_RegisterAppHttpProxyCallback(appHttpProxyChange, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    appHttpProxyChange = [](NetConn_HttpProxy *proxy) {};
+    ret = OH_NetConn_RegisterAppHttpProxyCallback(appHttpProxyChange, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_RegisterAppHttpProxyCallback(appHttpProxyChange, &callbackId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_SetPacUrlTest001, TestSize.Level1)
+{
+    const char *pacUrl = "test";
+    auto ret = OH_NetConn_SetPacUrl(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_SetPacUrl(pacUrl);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_GetPacUrlTest001, TestSize.Level1)
+{
+    char pacUrl[PAC_URL_MAX_LEN] = {0};
+    auto ret = OH_NetConn_GetPacUrl(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = OH_NetConn_GetPacUrl(pacUrl);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 } // namespace NetManagerStandard
