@@ -380,10 +380,10 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
     requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
-    if (requestList_.empty()) {
-        SupplierDisconnection(netCaps_.ToSet());
+    if (HasNetCap(NET_CAPABILITY_INTERNET)) {
+       RemoveRequest(netrequest);
+       SupplierDisconnection(netCaps_.ToSet());
     }
-    RemoveRequest(netrequest);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
@@ -394,11 +394,11 @@ int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
     }
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
     requestList_.erase(netrequest.requestId);
-    if (requestList_.empty()) {
+    bestReqList_.erase(netrequest.requestId);
+    if (HasNetCap(NET_CAPABILITY_INTERNET)) {
+        RemoveRequest(netrequest);
         SupplierDisconnection(netCaps_.ToSet());
     }
-    bestReqList_.erase(netrequest.requestId);
-    RemoveRequest(netrequest);
     return NETMANAGER_SUCCESS;
 }
 
