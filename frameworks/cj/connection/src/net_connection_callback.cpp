@@ -62,6 +62,7 @@ bool SetCapability(CNetCapabilities &capabilities, const std::set<NetBearType> &
         if (capabilities.networkCap == nullptr) {
             NETMANAGER_BASE_LOGE("NetCapabilitiesChange malloc networkCap failed");
             free(capabilities.bearerTypes);
+            capabilities.bearerTypes = nullptr;
             return false;
         }
         int j = 0;
