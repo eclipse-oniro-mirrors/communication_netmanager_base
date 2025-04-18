@@ -126,6 +126,8 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
+    std::string prevRedirectUrl_;
+    NetDetectionStatus prevProbeStatus_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
