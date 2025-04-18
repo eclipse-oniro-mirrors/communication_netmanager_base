@@ -51,6 +51,8 @@ private:
 
 class NetConnClient {
 public:
+    NetConnClient();
+    ~NetConnClient();
     static NetConnClient &GetInstance();
 
     /**
@@ -532,8 +534,6 @@ private:
     };
 
 private:
-    NetConnClient();
-    ~NetConnClient();
     NetConnClient& operator=(const NetConnClient&) = delete;
     NetConnClient(const NetConnClient&) = delete;
 
@@ -563,6 +563,8 @@ private:
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
     sptr<ISystemAbilityStatusChange> saStatusListener_ = nullptr;
+    static inline std::mutex instanceMtx_;
+    static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
