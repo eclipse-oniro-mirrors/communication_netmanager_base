@@ -390,6 +390,8 @@ public:
     int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
                                   uint32_t &supplierId) override;
     int32_t IncreaseSupplierScore(uint32_t supplierId) override;
+    int32_t UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+                                uint32_t detectionStatus, uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
@@ -524,6 +526,8 @@ private:
     int32_t DecreaseSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
                                        uint32_t& supplierId);
     int32_t IncreaseSupplierScoreAsync(uint32_t supplierId);
+    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
+                                     uint32_t detectionStatus, uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
@@ -667,7 +671,7 @@ private:
     void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
-    void SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver);
+    void SubscribeCommonEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     std::mutex remoteMutex_;
@@ -677,6 +681,7 @@ private:
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
+    std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -102,7 +102,7 @@ private:
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
     bool trustUser0Ca_ = true;
-    bool trustUserCa_ = false;
+    bool trustUserCa_ = true;
     bool isUserDnsCache_ = true;
     bool hasBaseConfig_ = false;
 };

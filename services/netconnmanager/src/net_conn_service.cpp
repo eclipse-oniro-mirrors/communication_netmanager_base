@@ -793,7 +793,7 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
             continue;
         }
         if (netConnEventHandler_) {
-            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(false); }, delayTime);
+            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(true); }, delayTime);
         }
     }
 }
@@ -1149,10 +1149,9 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
 
     std::shared_ptr<NetActivate> request = CreateNetActivateRequest(netSpecifier, callback,
-        timeoutMS, REQUEST, callingUid);
+        timeoutMS, registerType, callingUid);
 
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
@@ -2008,11 +2007,10 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
-    }
-    auto startTime = std::chrono::steady_clock::now();
-    if (httpProxy.GetUserId() > 0) {
+    } else if (httpProxy.GetUserId() > 0) {
         // if the valid userId is given. so load http proxy from specified user.
         LoadGlobalHttpProxy(SPECIFY, httpProxy);
     } else {
@@ -2383,11 +2381,6 @@ int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activ
             httpProxy.SetUserId(currentUserId_);
             currentUserId_ = INVALID_USER_ID;
         } else {
-            HttpProxy emptyHttpProxy;
-            emptyHttpProxy.SetUserId(currentUserId_);
-            if (SetGlobalHttpProxyInner(emptyHttpProxy) != NETMANAGER_SUCCESS) {
-                return NETMANAGER_ERR_INTERNAL;
-            }
             currentUserId_ = activeUserId;
             httpProxy.SetUserId(currentUserId_);
         }
@@ -3045,9 +3038,11 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == ACCESS_TOKEN_MANAGER_SERVICE_ID) {
         if (!registerToService_) {
+#ifndef NETMANAGER_TEST
             if (!Publish(NetConnService::GetInstance().get())) {
                 NETMGR_LOG_E("Register to sa manager failed");
             }
+#endif
             registerToService_ = true;
         }
     } else if (systemAbilityId == COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID) {
@@ -3057,16 +3052,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
             NETMGR_LOG_E("Register NetPolicyCallback failed, ret =%{public}d", registerRet);
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        SubscribeCommonEvent("usual.event.DATA_SHARE_READY",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-#ifdef FEATURE_SUPPORT_POWERMANAGER
-        SubscribeCommonEvent("usual.event.POWER_MANAGER_STATE_CHANGED",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-#endif
-        SubscribeCommonEvent("usual.event.SCREEN_ON",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
-        SubscribeCommonEvent("usual.event.SCREEN_OFF",
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+        SubscribeCommonEvent();
     }
 }
 
@@ -3078,19 +3064,24 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
-void NetConnService::SubscribeCommonEvent(const std::string &eventName, EventReceiver receiver)
+void NetConnService::SubscribeCommonEvent()
 {
-    NETMGR_LOG_I("eventName=%{public}s", eventName.c_str());
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(eventName);
+    matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    matchingSkills.AddEvent("usual.event.POWER_MANAGER_STATE_CHANGED");
+#endif
+    matchingSkills.AddEvent("usual.event.SCREEN_ON");
+    matchingSkills.AddEvent("usual.event.SCREEN_OFF");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
-    auto subscriberPtr = std::make_shared<NetConnListener>(subscribeInfo, receiver);
-    if (subscriberPtr == nullptr) {
-        NETMGR_LOG_E("subscriberPtr is nullptr");
-        return;
+    if (subscriberPtr_ == nullptr) {
+        subscriberPtr_ = std::make_shared<NetConnListener>(subscribeInfo,
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
     }
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr);
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
+        NETMGR_LOG_E("system event register fail.");
+    }
 }
 
 void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
@@ -3345,6 +3336,18 @@ int32_t NetConnService::IncreaseSupplierScore(uint32_t supplierId)
     return result;
 }
 
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, bearerType, ident, detectionStatus, &supplierId, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, ident, detectionStatus, supplierId);
+        });
+    }
+    return result;
+}
+
 int32_t NetConnService::DecreaseSupplierScoreAsync(
     NetBearType bearerType, const std::string &ident, uint32_t& supplierId)
 {
@@ -3396,6 +3399,51 @@ int32_t NetConnService::IncreaseSupplierScoreAsync(uint32_t supplierId)
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     supplier->SetNetValid(QUALITY_GOOD_STATE);
+    locker.unlock();
+    // Find best network because supplier score changed.
+    FindBestNetworkForAllRequest();
+    // Tell other suppliers to enable if current default supplier is not better than others.
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
+        RequestAllNetworkExceptDefault();
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    NETMGR_LOG_I("update supplier score by type[%{public}d], detectionStatus[%{public}d], supplierId:%{public}d",
+        bearerType, detectionStatus, supplierId);
+    NetDetectionStatus state = static_cast<NetDetectionStatus>(detectionStatus);
+    if (state == QUALITY_POOR_STATE) {
+        // In poor network, supplierId should be an output parameter.
+        std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType, ident);
+        if (suppliers.empty()) {
+            NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        }
+        uint32_t tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
+        if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+            if (bearerType == BEARER_WIFI) {
+                tmpSupplierId = FindSupplierForConnected(suppliers);
+                supplierId = tmpSupplierId;
+                NETMGR_LOG_I("FindSupplierForInterface supplierId by supplierId[%{public}d].", supplierId);
+            }
+            if (tmpSupplierId == INVALID_SUPPLIER_ID) {
+                NETMGR_LOG_E("not found supplierId");
+                return NETMANAGER_ERR_INVALID_PARAMETER;
+            }
+        }
+    }
+    // Check supplier exist by supplierId, and check supplier's type equals to bearerType.
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    auto supplier = FindNetSupplier(supplierId);
+    if (supplier == nullptr || supplier->GetNetSupplierType() != bearerType) {
+        locker.unlock();
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    supplier->SetNetValid(state);
     locker.unlock();
     // Find best network because supplier score changed.
     FindBestNetworkForAllRequest();
@@ -3730,7 +3778,9 @@ int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSu
             supplier->SetReuseCap(reuseCap, isReused);
         }
     }
-    FindBestNetworkForAllRequest();
+    if (isReused) {
+        FindBestNetworkForAllRequest();
+    }
     return NETMANAGER_SUCCESS;
 }
 

@@ -22,7 +22,7 @@
 #endif
 
 #include "common_net_stats_callback_test.h"
-#include "i_net_stats_callback.h"
+#include "inet_stats_callback.h"
 #include "net_all_capabilities.h"
 #include "net_push_stats_info.h"
 #include "net_stats_info_sequence.h"
@@ -111,13 +111,13 @@ public:
     }
 
     int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
-                                     const sptr<NetStatsNetwork> &network) override
+                                     const NetStatsNetwork &network) override
     {
         return 0;
     }
 
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                        const sptr<NetStatsNetwork> &network) override
+                                        const NetStatsNetwork &network) override
     {
         return 0;
     }

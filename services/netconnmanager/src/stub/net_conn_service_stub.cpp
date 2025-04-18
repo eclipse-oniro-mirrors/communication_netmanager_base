@@ -119,6 +119,8 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnDecreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE)] = {
         &NetConnServiceStub::OnIncreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
+        &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
         &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED)] = {
@@ -1804,6 +1806,41 @@ int32_t NetConnServiceStub::OnIncreaseSupplierScore(MessageParcel &data, Message
     int32_t ret = IncreaseSupplierScore(supplierId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = 0;
+    std::string ident = "";
+    uint32_t detectionStatus = 0;
+    uint32_t supplierId;
+    if (!data.ReadUint32(type)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadString(ident)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(detectionStatus)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(type);
+    int32_t ret = UpdateSupplierScore(bearerType, ident, detectionStatus, supplierId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("supplierId[%{public}d].", supplierId);
+        if (!reply.WriteUint32(supplierId)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }

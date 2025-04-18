@@ -1020,5 +1020,25 @@ HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL53, TestSize.Level2)
     std::string hostname = CommonUtils::GetHostnameFromURL("https://www.alibaba.com?data_string");
     EXPECT_STREQ(hostname.c_str(), "www.alibaba.com");
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, GetGatewayAddr001, TestSize.Level2)
+{
+    EXPECT_EQ(CommonUtils::GetGatewayAddr("10.21.156.a", "255.255.255.0"), "");
+    EXPECT_EQ(CommonUtils::GetGatewayAddr("10.21.156.222", "255.255.b.0"), "");
+    EXPECT_EQ(CommonUtils::GetGatewayAddr("10.21.156.222", "255.255.255.0"), "10.21.156.1");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IpToInt001, TestSize.Level2)
+{
+    uint32_t ipIntAddr;
+    EXPECT_FALSE(CommonUtils::IpToInt("10.158.2c00", ipIntAddr));
+    EXPECT_TRUE(CommonUtils::IpToInt("10.158.200.0", ipIntAddr));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IpToString001, TestSize.Level2)
+{
+    std::string ipStrAddr; // "10.158.200.0"
+    EXPECT_TRUE(CommonUtils::IpToString(178178048, ipStrAddr));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

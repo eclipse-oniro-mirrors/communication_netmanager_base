@@ -20,7 +20,7 @@
 #include <securec.h>
 
 #include "data_flow_statistics.h"
-#include "i_net_stats_service.h"
+#include "inet_stats_service.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
@@ -82,9 +82,9 @@ void Init()
 {
     if (!g_isInited) {
         DelayedSingleton<NetStatsService>::GetInstance()->Init();
-        g_isInited = false;
-    } else {
         g_isInited = true;
+    } else {
+        g_isInited = false;
     }
 }
 

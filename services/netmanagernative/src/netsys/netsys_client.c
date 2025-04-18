@@ -241,6 +241,16 @@ static int32_t NetsysSendKeyForCache(int sockFd, struct ParamWrapper param, stru
     return 0;
 };
 
+static bool IsAbnormalAddress(uint32_t addr)
+{
+    uint32_t address1 = 0; // 0.0.0.0
+    uint32_t address2 = 2130706433; // 127.0.0.1
+    if (addr == address1 || addr == address2) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
                                             struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
@@ -270,6 +280,16 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
     if (!PollRecvData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * (*num))) {
         DNS_CONFIG_PRINT("read failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
+    }
+
+    for (uint32_t resNum = 0; resNum < *num; resNum++) {
+        if (addrInfo[resNum].aiFamily == AF_INET) {
+            uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
+            if (IsAbnormalAddress(addr)) {
+                HILOG_ERROR(LOG_CORE,
+                    "GetResolvCache get abnormal zero[%{public}d] netId[%{public}u]", (addr == 0), netId);
+            }
+        }
     }
 
     DNS_CONFIG_PRINT("NetSysGetResolvCacheInternal end netid: %d", info.netId);
@@ -321,6 +341,12 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
             strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) != 0) {
             DNS_CONFIG_PRINT("strcpy_s failed");
             return -1;
+        }
+        if (addrInfo[resNum].aiFamily == AF_INET) {
+            uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
+            if (IsAbnormalAddress(addr)) {
+                HILOG_ERROR(LOG_CORE, "SetDnsCache set abnormal zero[%{public}d]", (addr == 0));
+            }
         }
 
         ++resNum;

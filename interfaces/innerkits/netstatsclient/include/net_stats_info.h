@@ -87,6 +87,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     static bool Marshalling(Parcel &parcel, const NetStatsInfo &stats);
     static bool Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos);
     static bool Marshalling(Parcel &parcel, const std::unordered_map<uint32_t, NetStatsInfo> &statsInfos);
+    static NetStatsInfo* Unmarshalling(Parcel &parcel);
     static bool Unmarshalling(Parcel &parcel, NetStatsInfo &stats);
     static bool Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos);
     static bool Unmarshalling(Parcel &parcel, std::unordered_map<uint32_t, NetStatsInfo> &statsInfos);

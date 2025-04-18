@@ -48,8 +48,16 @@ NetConnClient::~NetConnClient()
 
 NetConnClient &NetConnClient::GetInstance()
 {
-    static NetConnClient gInstance;
-    return gInstance;
+    auto temp = std::atomic_load_explicit(&instance_, std::memory_order_acquire);
+    if (temp == nullptr) {
+        std::lock_guard locker(instanceMtx_);
+        temp = std::atomic_load_explicit(&instance_, std::memory_order_relaxed);
+        if (temp == nullptr) {
+            temp = std::make_shared<NetConnClient>();
+            std::atomic_store_explicit(&instance_, temp, std::memory_order_release);
+        }
+    }
+    return *temp;
 }
 
 void NetConnClient::SubscribeSystemAbility()
@@ -1110,6 +1118,17 @@ int32_t NetConnClient::IncreaseSupplierScore(uint32_t supplierId)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->IncreaseSupplierScore(supplierId);
+}
+
+int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
+    uint32_t detectionStatus, uint32_t& supplierId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr.");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateSupplierScore(bearerType, ident, detectionStatus, supplierId);
 }
 
 std::optional<int32_t> NetConnClient::ObtainTargetApiVersionForSelf()

@@ -32,6 +32,9 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
     auto now = std::chrono::system_clock::now();
     time_t now_time_t = std::chrono::system_clock::to_time_t(now);
     tm* now_tm = std::localtime(&now_time_t);
+    if (now_tm == nullptr) {
+        return INT32_MAX;
+    }
  
     // 获取当前年份和月份
     int current_year = now_tm->tm_year + TM_YEAR_START;
@@ -80,6 +83,9 @@ int32_t NetStatsUtils::GetTodayStartTimestamp()
     auto now = std::chrono::system_clock::now();
     time_t now_time_t = std::chrono::system_clock::to_time_t(now);
     tm* now_tm = std::localtime(&now_time_t);
+    if (now_tm == nullptr) {
+        return INT32_MAX;
+    }
 
     tm last_month_xth_tm = {};
     last_month_xth_tm.tm_year = now_tm->tm_year;

@@ -108,3 +108,73 @@ ohos_shared_library("netsys_controller") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+ohos_static_library("netsys_controller_static") {
+  testonly = true
+
+  sanitize = {
+    boundary_sanitize = true
+    ubsan = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  public_configs = [ ":netsys_controller_include" ]
+  sources = [
+    "src/mock_netsys_native_client.cpp",
+    "src/netsys_controller.cpp",
+    "src/netsys_controller_service_impl.cpp",
+    "src/netsys_native_client.cpp",
+  ]
+
+  include_dirs = [
+    "include",
+    "$NETCONNMANAGER_SOURCE_DIR/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netconnclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+  ]
+
+  deps = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetConnManager\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (enable_sys_func) {
+    defines += [ "SYS_FUNC" ]
+  }
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+
+  external_deps += [ "hilog:libhilog" ]
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}

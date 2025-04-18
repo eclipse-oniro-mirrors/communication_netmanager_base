@@ -15,11 +15,9 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("firewall_manager_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
-    cfi = true
-    cfi_cross_dso = true
     debug = false
   }
 
@@ -40,8 +38,8 @@ ohos_unittest("firewall_manager_test") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
-    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller_static",
   ]
 
   external_deps = [
@@ -70,11 +68,9 @@ ohos_unittest("firewall_manager_test") {
 }
 
 ohos_unittest("firewall_manager_class_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_native_manager_test"
 
   sanitize = {
-    cfi = true
-    cfi_cross_dso = true
     debug = false
   }
 
@@ -96,7 +92,7 @@ ohos_unittest("firewall_manager_class_test") {
 
   deps = [
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
-    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller_static",
   ]
 
   external_deps = [

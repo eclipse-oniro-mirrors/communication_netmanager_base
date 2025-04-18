@@ -393,7 +393,7 @@ void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
     }
 
     bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
+    std::vector<uint32_t> uids;
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
@@ -423,7 +423,7 @@ void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
     }
 
     bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
+    std::vector<uint32_t> uids;
     dataParcel.WriteBool(isAllowed);
     dataParcel.WriteUInt32Vector(uids);
 

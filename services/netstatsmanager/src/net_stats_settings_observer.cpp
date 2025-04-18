@@ -153,8 +153,8 @@ void TrafficDataObserver::ReadTrafficDataSettings(std::shared_ptr<TrafficSetting
     value = "";
     dataShareHelperUtils->Query(beginTimeUri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE, value);
     info->beginDate = 1;
-    uint64_t dateInt = 0;
-    if (!value.empty() && NetStatsUtils::ConvertToUint64(value, dateInt)) {
+    int32_t dateInt = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToInt32(value, dateInt)) {
         info->beginDate = dateInt;
     }
 
@@ -316,4 +316,4 @@ void CellularDataObserver::OnChange()
 }
 
 } // namespace NetManagerStandard
-} // namespace OHOS
+} // namespace OHOS

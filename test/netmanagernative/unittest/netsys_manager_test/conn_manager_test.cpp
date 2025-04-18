@@ -694,5 +694,48 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicyTest002, TestSize.Level1)
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+/**
+ * @tc.name: DestroyNetworkTest006
+ * @tc.desc: Test ConnManager DestroyNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, DestroyNetworkTest006, TestSize.Level1)
+{
+    ConnManager connmanager;
+    connmanager.defaultNetId_ = NETID;
+    int32_t ret = connmanager.DestroyNetwork(NETID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = connmanager.DestroyNetwork(NETID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NotifyNetBearerTypeChange002
+ * @tc.desc: Test ConnManager NotifyNetBearerTypeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange002, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+    bearTypes.insert(NetManagerStandard::NetBearType::BEARER_WIFI);
+
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NotifyNetBearerTypeChange003
+ * @tc.desc: Test ConnManager NotifyNetBearerTypeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange003, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+    bearTypes.insert(NetManagerStandard::NetBearType::BEARER_BLUETOOTH);
+
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

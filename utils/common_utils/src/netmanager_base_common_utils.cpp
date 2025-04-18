@@ -33,6 +33,7 @@
 #include <numeric>
 #include <fstream>
 #include <random>
+#include <arpa/inet.h>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -814,5 +815,54 @@ bool IsSimAnco(const std::string &bundleName)
 bool IsSim2Anco(const std::string &bundleName)
 {
     return bundleName == INSTALL_SOURCE_FROM_SIM2;
+}
+
+std::string GetGatewayAddr(const std::string& ipAddr, const std::string& subnetMask)
+{
+    uint32_t ipIntAddr;
+    if (!IpToInt(ipAddr, ipIntAddr)) {
+        NETMGR_LOG_E("virNicAddr is not valid");
+        return "";
+    }
+
+    uint32_t maskIntAddr;
+    if (!IpToInt(subnetMask, maskIntAddr)) {
+        NETMGR_LOG_E("subnetMask is not valid");
+        return "";
+    }
+
+    uint32_t networkAddr = ipIntAddr & maskIntAddr;
+    uint32_t gatewayAddr = networkAddr + 1;
+    std::string gatewayStrAddr;
+    if (!IpToString(gatewayAddr, gatewayStrAddr)) {
+        return "";
+    }
+    return gatewayStrAddr;
+}
+ 
+bool IpToInt(const std::string& ipAddr, uint32_t &ipIntAddr)
+{
+    in_addr addr;
+    if (inet_pton(AF_INET, ipAddr.c_str(), &addr) != INET_OPTION_SUC) {
+        NETMGR_LOG_E("IpToInt failed for invalid IP address");
+        return false;
+    }
+
+    ipIntAddr = ntohl(addr.s_addr);
+    return true;
+}
+
+bool IpToString(uint32_t ipAddr, std::string &ipStrAddr)
+{
+    in_addr addr;
+    addr.s_addr = htonl(ipAddr);
+    char bufIp[INET_ADDRSTRLEN];
+    if (inet_ntop(AF_INET, &addr, bufIp, sizeof(bufIp)) == nullptr) {
+        NETMGR_LOG_E("IpToString conversion failed");
+        return false;
+    }
+
+    ipStrAddr = std::string(bufIp);
+    return true;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

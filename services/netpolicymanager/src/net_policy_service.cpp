@@ -138,24 +138,32 @@ void NetPolicyService::Init()
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    ffrtQueue_.submit(
-        [this]() {
-            serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
-            NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
-            netPolicyCore_ = DelayedSingleton<NetPolicyCore>::GetInstance();
-            netPolicyCallback_ = DelayedSingleton<NetPolicyCallback>::GetInstance();
-            netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
-            netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
-            netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
-            NetAccessPolicyRDB netAccessPolicy;
-            netAccessPolicy.InitRdbStore();
-            UpdateNetAccessPolicyToMapFromDB();
-            if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
-                NETMGR_LOG_E("Register to sa manager failed");
-            }
-        }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
-    ffrtQueue_.submit([this]() { SetBrokerUidAccessPolicyMap(std::nullopt); },
-                      ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
+#ifndef UNITTEST_FORBID_FFRT
+    ffrtQueue_.submit([this]() {
+#endif
+        serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
+        NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
+        netPolicyCore_ = DelayedSingleton<NetPolicyCore>::GetInstance();
+        netPolicyCallback_ = DelayedSingleton<NetPolicyCallback>::GetInstance();
+        netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
+        netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
+        netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
+        NetAccessPolicyRDB netAccessPolicy;
+        netAccessPolicy.InitRdbStore();
+        UpdateNetAccessPolicyToMapFromDB();
+#ifndef NETMANAGER_TEST
+        if (!Publish(DelayedSingleton<NetPolicyService>::GetInstance().get())) {
+            NETMGR_LOG_E("Register to sa manager failed");
+        }
+#endif
+#ifndef UNITTEST_FORBID_FFRT
+    }, ffrt::task_attr().name("FfrtNetPolicyServiceInit"));
+    ffrtQueue_.submit([this]() {
+#endif
+        SetBrokerUidAccessPolicyMap(std::nullopt);
+#ifndef UNITTEST_FORBID_FFRT
+    }, ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
+#endif
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
@@ -204,6 +212,9 @@ int32_t NetPolicyService::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAl
 int32_t NetPolicyService::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed)
 {
     NETMGR_LOG_D("IsUidNetAllowed uid[%{public}d ifaceName[%{public}s]", uid, ifaceName.c_str());
+    if (netPolicyTraffic_ == nullptr) {
+        return 0;
+    }
     const auto &vec = netPolicyTraffic_->GetMeteredIfaces();
     if (std::find(vec.begin(), vec.end(), ifaceName) != vec.end()) {
         return IsUidNetAllowed(uid, true, isAllowed);
@@ -398,8 +409,13 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         RegisterFactoryResetCallback();
     }
     if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-        ffrtQueue_.submit([this]() { SetBrokerUidAccessPolicyMap(std::nullopt); },
-                          ffrt::task_attr().name("SetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
+#ifndef UNITTEST_FORBID_FFRT
+        ffrtQueue_.submit([this]() {
+#endif
+            SetBrokerUidAccessPolicyMap(std::nullopt);
+#ifndef UNITTEST_FORBID_FFRT
+        }, ffrt::task_attr().name("SetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
+#endif
 
         EventFwk::MatchingSkills matchingSkills;
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
@@ -410,13 +426,14 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
             subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
         EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
-
-        ffrtQueue_.submit(
-            [this]() {
-                OverwriteNetAccessPolicyToDBFromConfig();
-                UpdateNetAccessPolicyToMapFromDB();
-            },
-            ffrt::task_attr().name("NetworkAccessPolicyConfigFlush"));
+#ifndef UNITTEST_FORBID_FFRT
+        ffrtQueue_.submit([this]() {
+#endif
+            OverwriteNetAccessPolicyToDBFromConfig();
+            UpdateNetAccessPolicyToMapFromDB();
+#ifndef UNITTEST_FORBID_FFRT
+        }, ffrt::task_attr().name("NetworkAccessPolicyConfigFlush"));
+#endif
     }
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
@@ -632,10 +649,10 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
 
     if (parameter.flag) {
         std::string uidBundleName;
-        if (bundleMgrProxy->GetBundleNameForUid(parameter.uid, uidBundleName)) {
+        if (bundleMgrProxy->GetNameForUid(parameter.uid, uidBundleName) == ERR_OK) {
             UpdateNetworkAccessPolicyFromConfig(uidBundleName, policy.policy);
         } else {
-            NETMGR_LOG_E("GetBundleNameForUid Failed");
+            NETMGR_LOG_E("GetNameForUid Failed");
         }
         NetAccessPolicyData policyData;
         if (netAccessPolicy.QueryByUid(parameter.uid, policyData) != NETMANAGER_SUCCESS) {

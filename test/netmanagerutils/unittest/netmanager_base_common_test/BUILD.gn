@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netmanager_utils_test") {
-  module_out_path = "netmanager_base/netmanager_utils_test"
+  module_out_path = "netmanager_base/netmanager_base/netmanager_utils_test"
 
   sanitize = {
     cfi = true
@@ -51,7 +51,7 @@ ohos_unittest("netmanager_datashare_test") {
 
   branch_protector_ret = "pac_ret"
 
-  module_out_path = "netmanager_base/netmanager_utils_test"
+  module_out_path = "netmanager_base/netmanager_base/netmanager_utils_test"
 
   include_dirs = [
     "$INNERKITS_ROOT/include",
@@ -114,7 +114,7 @@ ohos_unittest("netmanager_datashare_iface_test") {
 
   branch_protector_ret = "pac_ret"
 
-  module_out_path = "netmanager_base/netmanager_utils_test"
+  module_out_path = "netmanager_base/netmanager_base/netmanager_utils_test"
 
   include_dirs = [
     "$INNERKITS_ROOT/include",

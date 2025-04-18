@@ -251,10 +251,12 @@ bool NetStatsService::Init()
         return false;
     }
     if (!registerToService_) {
+#ifndef NETMANAGER_TEST
         if (!Publish(DelayedSingleton<NetStatsService>::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
+#endif
         registerToService_ = true;
     }
     if (nullptr == netStatsCached_) {
@@ -543,13 +545,14 @@ void NetStatsService::GetSharingStats(std::vector<NetStatsInfo> &sharingStats, u
 #endif
 
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
-                                                  const sptr<NetStatsNetwork> &network)
+                                                  const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
     if (netStatsCached_ == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork(networkIpc);
     if (network == nullptr || network->startTime_ > network->endTime_) {
         NETMGR_LOG_E("param network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
@@ -605,7 +608,7 @@ void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &all
 }
 
 int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                                     const sptr<NetStatsNetwork> &network)
+                                                     const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
@@ -613,6 +616,7 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
         NETMGR_LOG_E("Cached is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork(networkIpc);
     if (network == nullptr || network->startTime_ > network->endTime_) {
         NETMGR_LOG_E("param network is invalid");
         return NETMANAGER_ERR_INVALID_PARAMETER;
@@ -1041,7 +1045,7 @@ monthlyLimit:%{public}" PRIu64 ", monthlyMark:%{public}u, dailyMark:%{public}u",
 int32_t NetStatsService::GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic)
 {
     std::unordered_map<uint32_t, NetStatsInfo> infos;
-    int32_t ret = GetTrafficStatsByNetwork(infos, network);
+    int32_t ret = GetTrafficStatsByNetwork(infos, *network);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -1120,11 +1124,11 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
     }
     sptr<NetStatsNetwork> network = (std::make_unique<NetStatsNetwork>()).release();
     network->startTime_ =
-        NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate);
+        static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate));
     network->endTime_ = NetStatsUtils::GetNowTimestamp();
     NETMGR_LOG_I("endTime: %{public}lu. simId: %{public}d", network->endTime_, simId);
     network->type_ = 0;
-    network->simId_ = simId;
+    network->simId_ = static_cast<uint32_t>(simId);
     uint64_t allUsedTraffic = 0;
     int ret = GetAllUsedTrafficStatsByNetwork(network, allUsedTraffic);
     if (ret != NETMANAGER_SUCCESS) {
@@ -1146,7 +1150,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
         if (monthTmp > allUsedTraffic) {
             monthlyMarkAvailable = monthTmp - allUsedTraffic;
         }
-        uint64_t todayStartTime = NetStatsUtils::GetTodayStartTimestamp();
+        uint64_t todayStartTime = static_cast<uint64_t>(NetStatsUtils::GetTodayStartTimestamp());
         network->startTime_ = todayStartTime;
         uint64_t allTodayUsedTraffix = 0;
         ret = GetAllUsedTrafficStatsByNetwork(network, allTodayUsedTraffix);

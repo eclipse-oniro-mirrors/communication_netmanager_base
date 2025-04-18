@@ -236,8 +236,6 @@ ohos_static_library("netsys_native_manager_static") {
   testonly = true
 
   sanitize = {
-    cfi = true
-    cfi_cross_dso = true
     debug = false
   }
 
@@ -258,6 +256,7 @@ ohos_static_library("netsys_native_manager_static") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
@@ -266,6 +265,7 @@ ohos_static_library("netsys_native_manager_static") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
     "UNITTEST_FORBID_FFRT=1",
+    "NETMANAGER_TEST",
     "IPTABLES_CONFIG_PATH = \"/system/etc/wearable_distributed_net_forward.json\"",
   ]
 

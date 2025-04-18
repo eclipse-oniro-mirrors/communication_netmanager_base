@@ -23,7 +23,7 @@ ohos_unittest("net_common_test") {
 
   branch_protector_ret = "pac_ret"
 
-  module_out_path = "netmanager_base/net_common_test"
+  module_out_path = "netmanager_base/netmanager_base/net_common_test"
 
   include_dirs = [
     "$INNERKITS_ROOT/include",

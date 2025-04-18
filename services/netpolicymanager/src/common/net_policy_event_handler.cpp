@@ -38,8 +38,13 @@ void NetPolicyEventHandler::SendEvent(const AppExecFwk::InnerEvent::Pointer &eve
 {
     auto eventId = static_cast<int32_t>(event->GetInnerEventId());
     auto eventData = event->GetSharedObject<PolicyEvent>();
-    ffrtQueue_.submit([this, eventId, eventData] { ProcessEvent(eventId, eventData); },
-                      ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)).name("FfrtSendEvent"));
+#ifndef UNITTEST_FORBID_FFRT
+    ffrtQueue_.submit([this, eventId, eventData] {
+#endif
+        ProcessEvent(eventId, eventData);
+#ifndef UNITTEST_FORBID_FFRT
+    }, ffrt::task_attr().delay(static_cast<uint64_t>(delayTime)).name("FfrtSendEvent"));
+#endif
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

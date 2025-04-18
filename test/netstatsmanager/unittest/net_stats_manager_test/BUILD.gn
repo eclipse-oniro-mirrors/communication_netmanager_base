@@ -23,7 +23,7 @@ ohos_unittest("net_stats_mock_data") {
 
   branch_protector_ret = "pac_ret"
 
-  module_out_path = "netmanager_base/net_stats_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/net_stats_manager_test"
   sources = [ "net_stats_mock_data.cpp" ]
 
   include_dirs = [
@@ -80,7 +80,7 @@ ohos_unittest("net_stats_mock_data") {
 }
 
 ohos_unittest("net_stats_manager_test") {
-  module_out_path = "netmanager_base/net_stats_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/net_stats_manager_test"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -171,7 +171,7 @@ ohos_unittest("net_stats_manager_test") {
 }
 
 ohos_unittest("net_stats_cached_service_test") {
-  module_out_path = "netmanager_base/net_stats_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/net_stats_manager_test"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -250,7 +250,7 @@ ohos_unittest("net_stats_cached_service_test") {
 }
 
 ohos_unittest("net_stats_service_common_test") {
-  module_out_path = "netmanager_base/net_stats_manager_test"
+  module_out_path = "netmanager_base/netmanager_base/net_stats_manager_test"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

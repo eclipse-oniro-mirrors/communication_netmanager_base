@@ -112,14 +112,18 @@ bool AppStateAwareManager::IsForegroundApp(const uint32_t uid)
     if (!appStateObserver_) {
         return false;
     }
-    uint32_t foregroundAppUid = foregroundAppUid_.load();
+    uint32_t foregroundAppUid = static_cast<uint32_t>(foregroundAppUid_.load());
     return foregroundAppUid == uid;
 }
 
 void AppStateAwareManager::OnForegroundApplicationChanged(
     const AppExecFwk::AppStateData &appStateData)
 {
-    if (foregroundAppUid_ != appStateData.uid) {
+    int32_t state = appStateData.state;
+    auto appState = static_cast<AppExecFwk::ApplicationState>(state);
+    
+    if (appState == AppExecFwk::ApplicationState::APP_STATE_FOREGROUND
+        && foregroundAppUid_ != appStateData.uid) {
         foregroundAppUid_ = appStateData.uid;
         if (appStateAwareCallback_.OnForegroundAppChanged != nullptr) {
             appStateAwareCallback_.OnForegroundAppChanged(foregroundAppUid_);

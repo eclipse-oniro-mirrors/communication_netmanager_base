@@ -21,7 +21,7 @@
 #include "parcel.h"
 #include "singleton.h"
 
-#include "i_net_stats_service.h"
+#include "inet_stats_service.h"
 #include "net_push_stats_info.h"
 #include "net_stats_constants.h"
 #include "net_stats_info.h"

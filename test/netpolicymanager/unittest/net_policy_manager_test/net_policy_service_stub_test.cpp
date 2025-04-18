@@ -174,10 +174,7 @@ public:
         if (itFunc != memberFuncMap_.end()) {
             auto requestFunc = itFunc->second;
             if (requestFunc != nullptr) {
-                auto task = ffrtQueue_.submit_h([this, &data, &reply, &requestFunc, &result]() {
-                    result = (this->*requestFunc)(data, reply);
-                }, ffrt::task_attr().name("FfrtOnRemoteRequest"));
-                ffrtQueue_.wait(task);
+                result = (this->*requestFunc)(data, reply);
                 return result;
             }
         }

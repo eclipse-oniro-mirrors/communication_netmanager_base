@@ -1041,6 +1041,36 @@ HWTEST_F(NetConnServiceStubTest, OnIncreaseSupplierScore001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnUpdateSupplierScore001
+ * @tc.desc: Test NetConnServiceStub OnUpdateSupplierScore.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    uint32_t bearerType = 0;
+    if (!data.WriteUint32(bearerType)) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    if (!data.WriteUint32(QUALITY_GOOD_STATE)) {
+        return;
+    }
+    uint32_t supplierId = 100;
+    if (!data.WriteUint32(supplierId)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnRequestNetConnectionBySpecifierTest001
  * @tc.desc: Test NetConnServiceStub OnRequestNetConnection.
  * @tc.type: FUNC
@@ -1334,6 +1364,55 @@ HWTEST_F(NetConnServiceStubTest, OnSetReuseSupplierIdTest001, TestSize.Level1)
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnSetInternetPermissionTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterNetConnCallbackBySpecifierTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterNetDetectionCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnUnRegisterNetDetectionCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnGetNetInterfaceConfigurationTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnRegisterPreAirplaneCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceStubTest, OnUnregisterPreAirplaneCallbackTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 } // namespace NetManagerStandard

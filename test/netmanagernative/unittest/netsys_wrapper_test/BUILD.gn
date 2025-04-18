@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netsys_wrapper_test") {
-  module_out_path = "netmanager_base/manager_test"
+  module_out_path = "netmanager_base/netmanager_base/manager_test"
 
   sanitize = {
     cfi = true
@@ -69,7 +69,7 @@ ohos_unittest("netsys_wrapper_test") {
 }
 
 ohos_unittest("netsys_wrapper_fault_through_test") {
-  module_out_path = "netmanager_base/manager_test"
+  module_out_path = "netmanager_base/netmanager_base/manager_test"
 
   sanitize = {
     cfi = true

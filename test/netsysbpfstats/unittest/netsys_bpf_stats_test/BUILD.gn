@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netsys_bpf_stats_test") {
-  module_out_path = "netmanager_base/netsys_bpf_stats_test"
+  module_out_path = "netmanager_base/netmanager_base/netsys_bpf_stats_test"
 
   sanitize = {
     cfi = true
@@ -25,7 +25,10 @@ ohos_unittest("netsys_bpf_stats_test") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [ "netsys_bpf_stats_test.cpp" ]
+  sources = [
+    "netsys_bpf_ring_buffer_test.cpp",
+    "netsys_bpf_stats_test.cpp",
+  ]
 
   include_dirs = [
     "$NETSYSBPFMAP_SOURCE_DIR/include",

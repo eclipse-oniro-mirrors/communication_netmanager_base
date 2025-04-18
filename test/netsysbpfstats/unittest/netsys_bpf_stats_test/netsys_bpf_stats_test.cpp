@@ -428,5 +428,73 @@ HWTEST_F(NetsysBpfStatsTest, GetTotalStatsTest001, TestSize.Level1)
     bpfStats->GetTotalStats(stats4, StatsType::STATS_TYPE_TX_PACKETS);
     EXPECT_GE(stats4, 0);
 }
+
+HWTEST_F(NetsysBpfStatsTest, DeleteStatsInfoTest002, TestSize.Level1)
+{
+    BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfStatsMap(APP_UID_STATS_MAP_PATH, BPF_ANY);
+    EXPECT_FALSE(uidIfStatsMap.IsValid());
+
+    app_uid_if_stats_value value = {0};
+    value.rxBytes = TEST_BYTES0;
+    value.rxPackets = TEST_BYTES0;
+    value.txBytes = TEST_BYTES0;
+    value.txPackets = TEST_BYTES0;
+    app_uid_if_stats_key key1 = {0};
+    key1.ifIndex = TEST_UID_IF1;
+    key1.uId = TEST_UID1;
+    auto ret = uidIfStatsMap.Write(key1, value, BPF_ANY);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->DeleteStatsInfo(APP_UID_STATS_MAP_PATH, TEST_UID1), NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfStatsTest, SetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1;
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->SetNetStateTrafficMap(flag, availableTraffic), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1;
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->GetNetStateTrafficMap(flag, availableTraffic), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetNetStateIncreTrafficMapTest001, TestSize.Level1)
+{
+    std::vector<uint64_t> keys = {1};
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->GetNetStateIncreTrafficMap(keys), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, ClearIncreaseTrafficMapTest001, TestSize.Level1)
+{
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->ClearIncreaseTrafficMap(), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, UpdateIfIndexMapTest001, TestSize.Level1)
+{
+    int8_t key = 123;
+    uint64_t index = 123;
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), -1);
+    index = UINT64_MAX;
+    EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetIfIndexMapTest001, TestSize.Level1)
+{
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->GetIfIndexMap(), -1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

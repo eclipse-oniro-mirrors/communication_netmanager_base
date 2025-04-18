@@ -390,6 +390,11 @@ int32_t FirewallManager::EnableChain(ChainType chain, bool enable)
         command = "-t filter -D " + fChainName + " -j " + chainName;
         ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) ==
                       NETMANAGER_ERROR);
+        
+        command = "-t filter -F " + chainName;
+        ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) ==
+                      NETMANAGER_ERROR);
+        firewallChainStatus_[chain].uids.clear();
     } else {
         NETNATIVE_LOGI("FirewallManager::EnableChain chain was %{public}s, do not repeat",
                        enable == true ? "true" : "false");
@@ -409,6 +414,10 @@ int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule 
     NETNATIVE_LOGI("FirewallManager SetUidRule: chain=%{public}d, uid=%{public}d, firewallRule=%{public}d", chain,
                    uid, firewallRule);
     if (IsFirewallChian(chain) == NETMANAGER_ERROR) {
+        return NETMANAGER_ERROR;
+    }
+
+    if (!firewallChainStatus_[chain].enable) {
         return NETMANAGER_ERROR;
     }
 

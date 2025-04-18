@@ -26,8 +26,9 @@ static const int32_t SIM_UID_MAX = 20000;
 static const int32_t SIM_UID_MIN = 10000;
 static const uint64_t DEFAULT_BROKER_UID_KEY = 65535;
 static const uint32_t VLAN_HEADER_LENGTH = 8;    // vlan header length
-static const uint32_t IPV4_HEADERS_LENGTH = 54; // transfer header:20, ip header:20, link header:14
-static const uint32_t IPV6_HEADERS_LENGTH = 74; // transfer header:20, ip header:40, link header:14
+static const uint32_t TRANSFER_HEADER_LENGTH = 20;
+static const uint32_t IPV4_HEADER_LENGTH = 20;
+static const uint32_t IPV6_HEADER_LENGTH = 40;
 enum { IFNAME_SIZE = 32 };
 enum { DEFAULT_NETWORK_BEARER_MAP_KEY = 0 };
 

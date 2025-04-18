@@ -222,5 +222,73 @@ HWTEST_F(UtNetPolicyService, NotifyNetAccessPolicyDiag009, TestSize.Level1)
     auto ret = instance_->GetNetworkAccessPolicy(parameter, policys);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(UtNetPolicyService, OnStart002, TestSize.Level1)
+{
+    instance_->state_ = NetPolicyService::ServiceRunningState::STATE_RUNNING;
+    instance_->OnStart();
+    EXPECT_NE(instance_->state_, instance_->ServiceRunningState::STATE_STOPPED);
+}
+
+HWTEST_F(UtNetPolicyService, OnAddSystemAbility002, TestSize.Level1)
+{
+    int32_t systemAbilityId = COMM_NET_CONN_MANAGER_SYS_ABILITY_ID;
+    std::string deviceId = "";
+    instance_->OnAddSystemAbility(systemAbilityId, deviceId);
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
+HWTEST_F(UtNetPolicyService, OnNetSysRestart001, TestSize.Level1)
+{
+    instance_->netPolicyRule_ = std::make_shared<NetPolicyRule>();
+    instance_->OnNetSysRestart();
+    EXPECT_NE(instance_->netPolicyRule_, nullptr);
+}
+
+HWTEST_F(UtNetPolicyService, OverwriteNetAccessPolicyToDBFromConfig001, TestSize.Level1)
+{
+    instance_->OverwriteNetAccessPolicyToDBFromConfig();
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
+HWTEST_F(UtNetPolicyService, GetActivatedOsAccountId001, TestSize.Level1)
+{
+    int32_t userId = 0;
+    instance_->GetActivatedOsAccountId(userId);
+    EXPECT_NE(userId, 0);
+}
+
+HWTEST_F(UtNetPolicyService, UpdateNetAccessPolicyToMapFromDB001, TestSize.Level1)
+{
+    instance_->netPolicyRule_ = nullptr;
+    instance_->UpdateNetAccessPolicyToMapFromDB();
+    EXPECT_EQ(instance_->netPolicyRule_, nullptr);
+}
+
+HWTEST_F(UtNetPolicyService, ResetNetAccessPolicy001, TestSize.Level1)
+{
+    instance_->ResetNetAccessPolicy();
+    EXPECT_EQ(instance_->netPolicyRule_, nullptr);
+}
+
+HWTEST_F(UtNetPolicyService, SetBrokerUidAccessPolicyMap001, TestSize.Level1)
+{
+    std::optional<uint32_t> uid = 123;
+    instance_->SetBrokerUidAccessPolicyMap(uid);
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
+HWTEST_F(UtNetPolicyService, DelBrokerUidAccessPolicyMap001, TestSize.Level1)
+{
+    uint32_t uid = 123;
+    instance_->DelBrokerUidAccessPolicyMap(uid);
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
+HWTEST_F(UtNetPolicyService, GetSampleBundleInfosForActiveUser001, TestSize.Level1)
+{
+    instance_->GetSampleBundleInfosForActiveUser();
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
