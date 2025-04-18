@@ -49,7 +49,7 @@ private:
     std::mutex mutex_;
 };
 
-class NetConnClient {
+class NetConnClient : public std::enable_shared_from_this<NetConnClient> {
 public:
     NetConnClient();
     ~NetConnClient();
