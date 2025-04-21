@@ -142,5 +142,16 @@ HWTEST_F(NetMonitorTest, DetectionTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(NetMonitorTest, DetectionTest002, TestSize.Level1)
+{
+    instance_->isDetecting_ = true;
+    instance_->detectionDelay_ = 0;
+    instance_->Start();
+    EXPECT_TRUE(instance_->IsDetecting());
+    instance_->detectionDelay_ = 1;
+    instance_->Start();
+    EXPECT_TRUE(instance_->IsDetecting());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
