@@ -282,6 +282,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return CloseSocketReturn(sockFd, -errno);
     }
 
+    uint32_t validNum = 0;
     for (uint32_t resNum = 0; resNum < *num; resNum++) {
         if (addrInfo[resNum].aiFamily == AF_INET) {
             uint32_t addr = addrInfo[resNum].aiAddr.sin.sin_addr.s_addr;
@@ -289,8 +290,13 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
                 HILOG_ERROR(LOG_CORE,
                     "GetResolvCache get abnormal zero[%{public}d] netId[%{public}u]", (addr == 0), netId);
             }
+            if (addr == 0) {
+                continue;
+            }
         }
+        addrInfo[validNum++] = addrInfo[resNum];
     }
+    *num = validNum;
 
     DNS_CONFIG_PRINT("NetSysGetResolvCacheInternal end netid: %d", info.netId);
     return CloseSocketReturn(sockFd, 0);
