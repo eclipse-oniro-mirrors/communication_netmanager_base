@@ -117,7 +117,7 @@ std::vector<NetFirewallPortParam> GetPortList(const uint16_t startPort, const ui
     return localPortParamList;
 }
 
-std::string generateRandomString(int32_t length)
+std::string GenerateRandomString(int32_t length)
 {
     std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::string result;
@@ -139,8 +139,8 @@ sptr<NetFirewallRule> GetNetFirewallRuleSptr(NetFirewallRuleType ruleType = NetF
     }
     rule->ruleId = 1;
     rule->userId = USER_ID1;
-    rule->ruleName = generateRandomString(MAX_RULE_NAME_LEN);
-    rule->ruleDescription = generateRandomString(MAX_RULE_DESCRITION_LEN);
+    rule->ruleName = GenerateRandomString(MAX_RULE_NAME_LEN);
+    rule->ruleDescription = GenerateRandomString(MAX_RULE_DESCRITION_LEN);
     rule->ruleDirection = ruleDirection;
     rule->ruleAction = FirewallRuleAction::RULE_ALLOW;
     rule->ruleType = ruleType;
@@ -181,8 +181,8 @@ sptr<NetFirewallRule> GetNetFirewallIpV4RuleSptr(
     }
     rule->ruleId = 1;
     rule->userId = USER_ID1;
-    rule->ruleName = generateRandomString(MAX_RULE_NAME_LEN);
-    rule->ruleDescription = generateRandomString(MAX_RULE_DESCRITION_LEN);
+    rule->ruleName = GenerateRandomString(MAX_RULE_NAME_LEN);
+    rule->ruleDescription = GenerateRandomString(MAX_RULE_DESCRITION_LEN);
     rule->ruleDirection = ruleDirection;
     rule->ruleAction = FirewallRuleAction::RULE_ALLOW;
     rule->ruleType = NetFirewallRuleType::RULE_IP;
