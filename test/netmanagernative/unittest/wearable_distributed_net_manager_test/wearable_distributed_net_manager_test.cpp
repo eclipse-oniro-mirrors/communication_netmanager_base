@@ -59,7 +59,7 @@ void WearableDistributedNetManagerTest::SetUp() {}
 
 void WearableDistributedNetManagerTest::TearDown() {}
 
-std::string createTempFile(const std::string& content)
+std::string CreateTempFile(const std::string& content)
 {
     std::string filePath = "temp_test_file.json";
     std::ofstream outfile(filePath);
@@ -290,7 +290,7 @@ HWTEST_F(WearableDistributedNetManagerTest, EnableWearableDistributedNetForward,
 HWTEST_F(WearableDistributedNetManagerTest, ReadSystemIptablesConfiguration, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configPath_ = createTempFile("");
+    net.configPath_ = CreateTempFile("");
     bool result = net.ReadSystemIptablesConfiguration();
     EXPECT_FALSE(result);
 }
@@ -306,7 +306,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile001, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configPath_ = createTempFile(R"({"key": "value"})");
+    net.configPath_ = CreateTempFile(R"({"key": "value"})");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ(R"({"key": "value"})", result);
 }
@@ -322,7 +322,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile002, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile003, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configPath_ = createTempFile("");
+    net.configPath_ = CreateTempFile("");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ("", result);
 }
@@ -330,7 +330,7 @@ HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile003, TestSize.Level1)
 HWTEST_F(WearableDistributedNetManagerTest, ReadJsonFile004, TestSize.Level1)
 {
     WearableDistributedNet net;
-    net.configPath_ = createTempFile(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})");
+    net.configPath_ = CreateTempFile(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})");
     std::string result = net.ReadJsonFile();
     EXPECT_EQ(R"({"key": "value"}\n{\"anotherKey\": \"anotherValue\"})", result);
 }
