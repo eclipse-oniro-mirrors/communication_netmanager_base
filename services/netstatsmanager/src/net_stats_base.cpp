@@ -219,6 +219,7 @@ std::vector<NetStatsData> NetStatsRDB::QueryAll()
         queryResultSet->GetInt(NetStatsRdbFiledConst::FILED_COLUMN_INDEX_SIX, stats.monNoticeState);
         result.emplace_back(stats);
     }
+    queryResultSet->Close();
     return result;
 }
 
@@ -245,10 +246,12 @@ int32_t NetStatsRDB::QueryBySimId(int simId, NetStatsData& simStats)
     ret = queryResultSet->GetRowCount(rowCount);
     if (ret != OHOS::NativeRdb::E_OK) {
         NETMGR_LOG_E("query setting failed, get row count failed, name:%{public}d, ret:%{public}d", simId, ret);
+        queryResultSet->Close();
         return ret;
     }
     if (rowCount == 0) {
         NETMGR_LOG_E("query setting name:%{public}d, num is 0", simId);
+        queryResultSet->Close();
         return NETMANAGER_ERROR;
     }
 
@@ -260,10 +263,12 @@ int32_t NetStatsRDB::QueryBySimId(int simId, NetStatsData& simStats)
         queryResultSet->GetInt(NetStatsRdbFiledConst::FILED_COLUMN_INDEX_FW, simStats.dayNoticeState);
         queryResultSet->GetInt(NetStatsRdbFiledConst::FILED_COLUMN_INDEX_SIX, simStats.monNoticeState);
         if (simStats.simId == simId) {
+            queryResultSet->Close();
             return NETMANAGER_SUCCESS;
         }
     }
 
+    queryResultSet->Close();
     return NETMANAGER_ERROR;
 }
 

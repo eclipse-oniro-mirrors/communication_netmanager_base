@@ -208,6 +208,7 @@ std::vector<NetAccessPolicyData> NetAccessPolicyRDB::QueryAll()
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_THREE, policy.setFromConfigFlag);
         result.emplace_back(policy);
     }
+    queryResultSet->Close();
     return result;
 }
 
@@ -234,10 +235,12 @@ int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
     ret = queryResultSet->GetRowCount(rowCount);
     if (ret != OHOS::NativeRdb::E_OK) {
         NETMGR_LOG_E("query setting failed, get row count failed, name:%{public}d, ret:%{public}d", uid, ret);
+        queryResultSet->Close();
         return ret;
     }
     if (rowCount == 0) {
         NETMGR_LOG_E("query setting name:%{public}d, num is 0", uid);
+        queryResultSet->Close();
         return NETMANAGER_ERROR;
     }
 
@@ -247,10 +250,12 @@ int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_TWO, uidPolicy.cellularPolicy);
         queryResultSet->GetInt(NetAccessPolicyRdbFiledConst::FILED_COLUMN_INDEX_THREE, uidPolicy.setFromConfigFlag);
         if (uidPolicy.uid == uid) {
+            queryResultSet->Close();
             return NETMANAGER_SUCCESS;
         }
     }
 
+    queryResultSet->Close();
     return NETMANAGER_ERROR;
 }
 
