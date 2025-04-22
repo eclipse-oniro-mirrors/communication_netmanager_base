@@ -286,6 +286,10 @@ bool NetStatsService::Init()
 int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     NETMGR_LOG_I("Enter RegisterNetStatsCallback");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     if (callback == nullptr) {
         NETMGR_LOG_E("RegisterNetStatsCallback parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -297,6 +301,10 @@ int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> 
 int32_t NetStatsService::UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     NETMGR_LOG_I("Enter UnregisterNetStatsCallback");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     if (callback == nullptr) {
         NETMGR_LOG_E("UnregisterNetStatsCallback parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -388,6 +396,10 @@ int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t 
 {
     // Start of get traffic data by interface name.
     NETMGR_LOG_D("Enter GetIfaceStatsDetail, iface= %{public}s", iface.c_str());
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetIfaceStatsDetail start");
     if (start > end) {
         NETMGR_LOG_E("start is after end.");
@@ -423,6 +435,10 @@ int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t ui
 {
     // Start of get traffic data by usr id.
     NETMGR_LOG_D("Enter GetIfaceStatsDetail, iface= %{public}s uid= %{public}d", iface.c_str(), uid);
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetUidStatsDetail start");
     if (start > end) {
         NETMGR_LOG_E("start is after end.");
@@ -458,6 +474,10 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
 {
     // Start of update traffic data by date.
     NETMGR_LOG_I("UpdateIfacesStats ifaces is %{public}s", iface.c_str());
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService UpdateIfacesStats start");
     if (start > end) {
         NETMGR_LOG_E("start is after end.");
@@ -483,6 +503,12 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
 int32_t NetStatsService::UpdateStatsData()
 {
     NETMGR_LOG_I("Enter UpdateStatsData.");
+    if (!NetManagerPermission::IsSystemCaller()) {
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -494,6 +520,10 @@ int32_t NetStatsService::UpdateStatsData()
 
 int32_t NetStatsService::ResetFactory()
 {
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     auto handler = std::make_unique<NetStatsDataHandler>();
     return handler->ClearData();
 }
@@ -501,6 +531,10 @@ int32_t NetStatsService::ResetFactory()
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
     NETMGR_LOG_D("Enter GetAllStatsInfo.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     if (netStatsCached_ != nullptr) {
         netStatsCached_->GetUidPushStatsCached(infos);
         netStatsCached_->GetAllPushStatsCached(infos);
@@ -513,6 +547,10 @@ int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 int32_t NetStatsService::GetAllSimStatsInfo(std::vector<NetStatsInfo> &infos)
 {
     NETMGR_LOG_D("Enter GetAllSimStatsInfo.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     return NetsysController::GetInstance().GetAllSimStatsInfo(infos);
 }
 
@@ -548,6 +586,10 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
                                                   const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByNetwork.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
     if (netStatsCached_ == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -611,6 +653,10 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
                                                      const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
@@ -672,7 +718,11 @@ void NetStatsService::FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &
 
 int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
 {
-    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NETMGR_LOG_D("Enter SetAppStats.");
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetAppStats start");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
@@ -856,6 +906,18 @@ bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
         RefreshUidStatsFlag(0);
     }
     return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
+}
+
+int32_t NetStatsService::CheckNetManagerAvailable()
+{
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
