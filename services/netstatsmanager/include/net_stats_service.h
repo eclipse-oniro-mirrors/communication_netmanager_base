@@ -113,6 +113,7 @@ private:
         const std::string ident, uint32_t startTime, uint32_t endTime);
     void FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &allInfo, std::vector<NetStatsInfoSequence> &infos,
         const uint32_t uid, const std::string ident, uint32_t startTime, uint32_t endTime);
+    int32_t CheckNetManagerAvailable();
 #ifdef SUPPORT_NETWORK_SHARE
     bool IsSharingOn();
     void GetSharingStats(std::vector<NetStatsInfo> &sharingStats, uint32_t endtime);
