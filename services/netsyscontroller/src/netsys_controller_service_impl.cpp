@@ -405,9 +405,6 @@ int64_t NetsysControllerServiceImpl::GetIfaceTxBytes(const std::string &interfac
 std::vector<std::string> NetsysControllerServiceImpl::InterfaceGetList()
 {
     NETMGR_LOG_I("InterfaceGetList");
-    if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEGETLIST_API)) {
-        return mockNetsysClient_.InterfaceGetList();
-    }
     return netsysClient_->InterfaceGetList();
 }
 
