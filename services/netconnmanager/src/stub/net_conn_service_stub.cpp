@@ -115,7 +115,6 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE)] = {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
         &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID)] = {
