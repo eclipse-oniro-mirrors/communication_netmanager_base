@@ -1947,8 +1947,34 @@ int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirpla
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::DecreaseSupplierScore(NetBearType bearerType,
-    const std::string &ident, uint32_t& supplierId)
+int32_t NetConnServiceProxy::UpdateSupplierScore(uint32_t supplierId, uint32_t detectionStatus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(detectionStatus)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::GetDefaultSupplierId(NetBearType bearerType, const std::string &ident,
+    uint32_t& supplierId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1966,8 +1992,8 @@ int32_t NetConnServiceProxy::DecreaseSupplierScore(NetBearType bearerType,
     if (!data.WriteUint32(supplierId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE),
-        data, reply);
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID),
+         data, reply);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
@@ -1979,29 +2005,6 @@ int32_t NetConnServiceProxy::DecreaseSupplierScore(NetBearType bearerType,
         if (!reply.ReadUint32(supplierId)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
-    }
-    return ret;
-}
-
-int32_t NetConnServiceProxy::IncreaseSupplierScore(uint32_t supplierId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    if (!data.WriteUint32(supplierId)) {
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE),
-        data, reply);
-    if (retCode != NETMANAGER_SUCCESS) {
-        return retCode;
-    }
-    int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     return ret;
 }
