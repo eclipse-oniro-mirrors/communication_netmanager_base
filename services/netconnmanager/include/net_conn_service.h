@@ -556,7 +556,6 @@ private:
     {
         return userId == PRIMARY_USER_ID;
     }
-    uint32_t FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers);
     int32_t EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids);
     int32_t DisableVnicNetworkAsync();
     int32_t EnableDistributedClientNetAsync(const std::string &virnicAddr, const std::string &iif);
