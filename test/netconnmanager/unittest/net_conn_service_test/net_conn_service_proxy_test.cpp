@@ -745,6 +745,21 @@ HWTEST_F(NetConnServiceProxyTest, SetReuseSupplierId001, TestSize.Level1)
     int32_t ret = instance_->SetReuseSupplierId(supplierId, reuseSupplierId, add);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, UpdateSupplierScore001, TestSize.Level1)
+{
+    uint32_t supplierId = 1004;
+    int32_t ret = instance_->UpdateSupplierScore(supplierId, 4);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, GetDefaultSupplierId001, TestSize.Level1)
+{
+    uint32_t supplierId = 1004;
+    int32_t ret = instance_->GetDefaultSupplierId(NetBearType::BEARER_WIFI, TEST_IDENT,
+        supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
