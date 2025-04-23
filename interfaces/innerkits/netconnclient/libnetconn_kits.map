@@ -66,7 +66,7 @@
       "OHOS::NetManagerStandard::NetConnClient::RegisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
-      "OHOS::NetManagerStandard::NetConnClient::DecreaseSupplierScore(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(unsigned int, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateNetCaps(std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::EnableVnicNetwork(OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&, std::__h::set<int, std::__h::less<int>, std::__h::allocator<int>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::DisableVnicNetwork()";
@@ -254,8 +254,7 @@
       "OHOS::NetManagerStandard::NetConnClient::SetAppIsFrozened(unsigned int, bool)";
       "OHOS::NetManagerStandard::NetConnClient::EnableAppFrozenedCallbackLimitation(bool)";
       "OHOS::NetManagerStandard::NetConnClient::GetSpecificNetByIdent(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::list<int, std::__h::allocator<int>>&)";
-      "OHOS::NetManagerStandard::NetConnClient::IncreaseSupplierScore(unsigned int)";
-      "OHOS::NetManagerStandard::NetConnClient::UpdateSupplierScore(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetDefaultSupplierId(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int&)";
     };
   local:
    *;
