@@ -3356,7 +3356,8 @@ int32_t NetConnService::GetDefaultSupplierId(NetBearType bearerType, const std::
         netConnEventHandler_->PostSyncTask([this, bearerType, ident, &supplierId, &result]() {
             result = this->GetDefaultSupplierIdAsync(bearerType, ident, supplierId);
         });
-    return result;      
+    }
+    return result;
 }
 
 int32_t NetConnService::GetDefaultSupplierIdAsync(NetBearType bearerType, const std::string &ident,
