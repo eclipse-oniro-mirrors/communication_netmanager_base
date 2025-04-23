@@ -1545,7 +1545,6 @@ int32_t NetConnServiceStub::OnAddNetworkRoute(MessageParcel &data, MessageParcel
     return NETMANAGER_SUCCESS;
 }
 
-
 int32_t NetConnServiceStub::OnRemoveNetworkRoute(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = 0;
