@@ -116,11 +116,10 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE)] = {
-        &NetConnServiceStub::OnDecreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE)] = {
-        &NetConnServiceStub::OnIncreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
         &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID)] = {
+        &NetConnServiceStub::OnGetDefaultSupplierId, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
         &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED)] = {
@@ -1766,7 +1765,7 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnDecreaseSupplierScore(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnGetDefaultSupplierId(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t type = 0;
     std::string ident = "";
@@ -1784,7 +1783,7 @@ int32_t NetConnServiceStub::OnDecreaseSupplierScore(MessageParcel &data, Message
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(type);
-    int32_t ret = DecreaseSupplierScore(bearerType, ident, supplierId);
+    int32_t ret = GetDefaultSupplierId(bearerType, ident, supplierId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -1797,13 +1796,17 @@ int32_t NetConnServiceStub::OnDecreaseSupplierScore(MessageParcel &data, Message
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnIncreaseSupplierScore(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t supplierId;
+    uint32_t detectionStatus = 0;
     if (!data.ReadUint32(supplierId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t ret = IncreaseSupplierScore(supplierId);
+    if (!data.ReadUint32(detectionStatus)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = UpdateSupplierScore(supplierId, detectionStatus);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
