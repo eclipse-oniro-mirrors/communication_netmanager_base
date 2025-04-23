@@ -3368,7 +3368,7 @@ int32_t NetConnService::GetDefaultSupplierIdAsync(NetBearType bearerType, const 
     if (suppliers.empty()) {
         NETMGR_LOG_E("not found supplierId by bearertype[%{public}d].", bearerType);
         return NETMANAGER_ERR_INVALID_PARAMETER;
-     }
+    }
     uint32_t tmpSupplierId = FindSupplierForConnected(suppliers);
     if (tmpSupplierId == INVALID_SUPPLIER_ID) {
         NETMGR_LOG_E("not found supplierId");
