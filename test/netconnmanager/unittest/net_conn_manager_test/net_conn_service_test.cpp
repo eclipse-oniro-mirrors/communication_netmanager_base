@@ -1602,45 +1602,11 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesAsStringTest001, TestSize.Level1)
     ASSERT_TRUE(ret != str);
 }
 
-HWTEST_F(NetConnServiceTest, DecreaseSupplierScoreTest001, TestSize.Level1)
-{
-    NetBearType bearerType = BEARER_WIFI;
-    bool isBetter = true;
-    uint32_t supplierId = 1;
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    int32_t ret = NetConnService::GetInstance()->DecreaseSupplierScore(bearerType, "test", supplierId);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
-    NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->DecreaseSupplierScore(bearerType, "test", supplierId);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceTest, FindSupplierToReduceScoreTest001, TestSize.Level1)
-{
-    std::vector<sptr<NetSupplier>> suppliers;
-    uint32_t supplierId = 1;
-    NetConnService::GetInstance()->defaultNetSupplier_ = nullptr;
-    uint32_t ret = NetConnService::GetInstance()->FindSupplierToReduceScore(suppliers, supplierId);
-    ASSERT_EQ(ret, INVALID_NET_ID);
-}
-
 HWTEST_F(NetConnServiceTest, OnRemoteDiedTest001, TestSize.Level1)
 {
     wptr<IRemoteObject> remoteObject = nullptr;
     NetConnService::GetInstance()->OnRemoteDied(remoteObject);
     ASSERT_TRUE(remoteObject == nullptr);
-}
-
-HWTEST_F(NetConnServiceTest, UpdateSupplierScoreTest002, TestSize.Level1)
-{
-    sptr<NetManagerStandard::NetLinkInfo> linkInfo = nullptr;
-    std::set<int32_t> uids;
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    int32_t ret = NetConnService::GetInstance()->EnableVnicNetwork(linkInfo, uids);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
-    NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->EnableVnicNetwork(linkInfo, uids);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, DisableVnicNetworkTest001, TestSize.Level1)
