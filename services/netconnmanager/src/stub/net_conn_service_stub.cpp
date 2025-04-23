@@ -1813,41 +1813,6 @@ int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
-{
-    uint32_t type = 0;
-    std::string ident = "";
-    uint32_t detectionStatus = 0;
-    uint32_t supplierId;
-    if (!data.ReadUint32(type)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    if (!data.ReadString(ident)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    if (!data.ReadUint32(detectionStatus)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    if (!data.ReadUint32(supplierId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    NetBearType bearerType = static_cast<NetBearType>(type);
-    int32_t ret = UpdateSupplierScore(bearerType, ident, detectionStatus, supplierId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("supplierId[%{public}d].", supplierId);
-        if (!reply.WriteUint32(supplierId)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
 int32_t NetConnServiceStub::OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
