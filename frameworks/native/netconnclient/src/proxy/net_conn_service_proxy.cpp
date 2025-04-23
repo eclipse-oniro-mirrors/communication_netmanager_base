@@ -1993,7 +1993,7 @@ int32_t NetConnServiceProxy::GetDefaultSupplierId(NetBearType bearerType, const 
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID),
-         data, reply);
+        data, reply);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
