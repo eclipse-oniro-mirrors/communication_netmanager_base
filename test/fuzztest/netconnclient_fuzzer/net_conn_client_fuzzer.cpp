@@ -1448,7 +1448,6 @@ void GetDefaultSupplierIdFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcelWithAllParam;
     StaticDefaultSupplierIdProcess(data, size, dataParcelWithAllParam, WITH_ALL_PARM_MODEL);
-    (ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID), 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID), dataParcelWithAllParam);
 
     MessageParcel dataParcelWithOutFirstParam;
