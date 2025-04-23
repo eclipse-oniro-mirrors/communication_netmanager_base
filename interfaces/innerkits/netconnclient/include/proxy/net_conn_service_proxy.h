@@ -97,11 +97,9 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
-    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
-                                  uint32_t& supplierId) override;
-    int32_t IncreaseSupplierScore(uint32_t supplierId) override;
-    int32_t UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
-                                uint32_t detectionStatus, uint32_t& supplierId) override;
+    int32_t GetDefaultSupplierId(NetBearType bearerType, const std::string &ident,
+        uint32_t& supplierId) override;
+    int32_t UpdateSupplierScore(uint32_t supplierId, uint32_t detectionStatus) override;
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
