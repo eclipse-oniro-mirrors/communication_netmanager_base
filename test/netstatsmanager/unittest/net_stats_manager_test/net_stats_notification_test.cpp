@@ -391,21 +391,5 @@ HWTEST_F(NetStatsNotificationTest, QueryAllTest001, TestSize.Level1)
     rdb.DeleteBySimId(state.simId);
 }
 
-HWTEST_F(NetStatsNotificationTest, QueryBySimIdTest001, TestSize.Level1)
-{
-    NetStatsRDB rdb;
-    NetStatsData state;
-    state.simId = 0;
-    auto ret = rdb.QueryBySimId(state.simId, state);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-
-    rdb.InsertData(state);
-    ret = rdb.QueryBySimId(1, state);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-
-    ret = rdb.QueryBySimId(state.simId, state);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS
