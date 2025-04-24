@@ -247,5 +247,29 @@ HWTEST_F(NetStatsDatabaseHelperTest, NetStatsDatabaseHelperBranchTest001, TestSi
     ret = helper->ClearData("");
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(NetStatsDatabaseHelperTest, UpgradeTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    int32_t ret = helper->Upgrade();
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::string tableName;
+    auto oldVersion = NetStatsDatabaseHelper::Version_5;
+    auto newVersion = NetStatsDatabaseHelper::Version_0;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    oldVersion = NetStatsDatabaseHelper::Version_0;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    newVersion = NetStatsDatabaseHelper::Version_5;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+    EXPECT_NE(oldVersion, NetStatsDatabaseHelper::Version_0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
