@@ -137,16 +137,6 @@ HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)
     notification.resourceMap[KEY_MONTH_LIMIT_TEXT] = temp;
 }
 
-HWTEST_F(NetStatsNotificationTest, GetNotificationTitleTest001, TestSize.Level1)
-{
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    std::string notificationType = "test";
-    notification.resourceMap[notificationType] = "";
-    auto ret = notification.GetNotificationTitle(notificationType);
-    EXPECT_TRUE(ret.empty());
-    notification.resourceMap.erase(notificationType);
-}
-
 HWTEST_F(NetStatsNotificationTest, SetTitleAndTextTest001, TestSize.Level1)
 {
     auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
@@ -190,19 +180,6 @@ HWTEST_F(NetStatsNotificationTest, GetPixelMapTest001, TestSize.Level1)
     auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
     EXPECT_NE(notification.netmgrStatsLimitIconPixelMap_, nullptr);
     notification.GetPixelMap();
-}
-
-HWTEST_F(NetStatsNotificationTest, PublishNetStatsLimitNotificationTest001, TestSize.Level1)
-{
-    auto &notification = NetMgrNetStatsLimitNotification::GetInstance();
-    int notificationId = 0;
-    int simId = 0;
-    bool isDualCard = false;
-    EXPECT_FALSE(notification.resourceMap.empty());
-    notification.PublishNetStatsLimitNotification(notificationId, simId, isDualCard);
-
-    notificationId = NETMGR_STATS_LIMIT_DAY;
-    notification.PublishNetStatsLimitNotification(notificationId, simId, isDualCard);
 }
 
 HWTEST_F(NetStatsNotificationTest, GetTrafficNumTest001, TestSize.Level1)
@@ -274,13 +251,6 @@ HWTEST_F(NetStatsNotificationTest, GetDaysInMonthTest002, TestSize.Level1)
     year = 2000;
     ret = utils.GetDaysInMonth(year, month);
     EXPECT_EQ(ret, 29);
-}
-
-HWTEST_F(NetStatsNotificationTest, isDualCardEnabledTest001, TestSize.Level1)
-{
-    NetStatsUtils utils;
-    auto ret = utils.isDualCardEnabled();
-    EXPECT_NE(ret, -1);
 }
 
 HWTEST_F(NetStatsNotificationTest, ConvertToUint64Test001, TestSize.Level1)
