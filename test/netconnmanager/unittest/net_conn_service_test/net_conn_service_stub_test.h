@@ -305,18 +305,12 @@ public:
         return 0;
     }
 
-    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident, uint32_t& supplierId) override
+    int32_t UpdateSupplierScore(uint32_t supplierId, uint32_t detectionStatus) override
     {
         return 0;
     }
 
-    int32_t IncreaseSupplierScore(uint32_t supplierId) override
-    {
-        return 0;
-    }
-
-    int32_t UpdateSupplierScore(NetBearType bearerType, const std::string &ident,
-        uint32_t detectionStatus, uint32_t& supplierId) override
+    int32_t GetDefaultSupplierId(NetBearType bearerType, const std::string &ident, uint32_t& supplierId) override
     {
         return 0;
     }

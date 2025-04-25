@@ -1019,69 +1019,6 @@ HWTEST_F(NetConnServiceExtTest, FindSupplierWithInternetByBearerTypeTest001, Tes
     EXPECT_TRUE(ret.empty());
 }
 
-HWTEST_F(NetConnServiceExtTest, DecreaseSupplierScoreTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 1;
-    EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
-    auto ret = netConnService->DecreaseSupplierScore(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceExtTest, IncreaseSupplierScoreTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 1;
-    EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
-    auto ret = netConnService->IncreaseSupplierScore(supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceExtTest, DecreaseSupplierScoreTest002, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 1;
-    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
-    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
-    auto ret = netConnService->DecreaseSupplierScore(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
-    EXPECT_NE(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceExtTest, IncreaseSupplierScoreTest002, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 1;
-    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
-    auto ret = netConnService->IncreaseSupplierScore(supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceExtTest, DecreaseSupplierScoreAsyncTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 1;
-    auto ret = netConnService->DecreaseSupplierScoreAsync(NetBearType::BEARER_WIFI, TEST_IDENT, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-}
-
-HWTEST_F(NetConnServiceExtTest, IncreaseSupplierScoreAsyncTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    uint32_t supplierId = 2;
-    auto ret = netConnService->IncreaseSupplierScoreAsync(supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-}
-
-HWTEST_F(NetConnServiceExtTest, FindSupplierToReduceScoreTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->defaultNetSupplier_ = nullptr;
-    uint32_t supplierId = 2;
-    std::vector<sptr<NetSupplier>> suppliers;
-    auto ret = netConnService->FindSupplierToReduceScore(suppliers, supplierId);
-    EXPECT_EQ(ret, 0);
-}
-
 HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest001, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
