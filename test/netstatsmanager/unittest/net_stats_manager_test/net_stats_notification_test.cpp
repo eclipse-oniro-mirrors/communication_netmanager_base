@@ -35,8 +35,8 @@ const int32_t UNIT_CONVERT_1024 = 1024;
 
 class MockRdbStore : public NativeRdb::RdbStore {
 public:
-    int Delete(
-        int &deletedRows, const std::string &table, const std::string &whereClause = "", const Values &args = {}) override
+    int Delete(int &deletedRows, const std::string &table,
+        const std::string &whereClause = "", const Values &args = {}) override
     {
         return 0;
     }
@@ -52,7 +52,8 @@ public:
         return nullptr;
     }
 
-    std::pair<int32_t, NativeRdb::ValueObject> Execute(const std::string &sql, const Values &args = {}, int64_t trxId = 0) override
+    std::pair<int32_t, NativeRdb::ValueObject> Execute(
+        const std::string &sql, const Values &args = {}, int64_t trxId = 0) override
     {
         return std::make_pair(0, NativeRdb::ValueObject());
     }
@@ -389,6 +390,22 @@ HWTEST_F(NetStatsNotificationTest, QueryAllTest001, TestSize.Level1)
     ret = rdb.QueryAll();
     EXPECT_EQ(ret.size(), 1);
     rdb.DeleteBySimId(state.simId);
+}
+
+HWTEST_F(NetStatsNotificationTest, QueryBySimIdTest001, TestSize.Level1)
+{
+    NetStatsRDB rdb;
+    NetStatsData state;
+    state.simId = 0;
+    auto ret = rdb.QueryBySimId(state.simId, state);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    rdb.InsertData(state);
+    ret = rdb.QueryBySimId(1, state);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = rdb.QueryBySimId(state.simId, state);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 } // namespace NetManagerStandard
