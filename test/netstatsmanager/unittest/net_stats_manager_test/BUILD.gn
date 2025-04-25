@@ -160,6 +160,10 @@ ohos_unittest("net_stats_manager_test") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
+  if (netmanager_base_enable_netsys_access_policy_diag_listen) {
+    sources += [ "net_stats_notification_test.cpp" ]
+  }
+  
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
