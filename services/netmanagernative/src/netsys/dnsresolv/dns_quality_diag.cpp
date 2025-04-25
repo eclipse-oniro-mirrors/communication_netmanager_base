@@ -175,7 +175,7 @@ int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallbac
     }
     std::lock_guard<std::mutex> locker(resultListenersMutex_);
     auto iter = resultListeners_.begin();
-    while (iter != iter != resultListeners_.end()) {
+    while (iter != resultListeners_.end()) {
         if ((*iter)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
             iter = resultListeners_.erase(iter);
         } else {
