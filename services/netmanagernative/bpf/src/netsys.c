@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "bpf/bpf_helpers.h"
+#include "bpf_helpers.h"
 #include "bpf_def.h"
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
