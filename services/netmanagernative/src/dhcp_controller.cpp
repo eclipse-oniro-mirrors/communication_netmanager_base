@@ -156,8 +156,7 @@ void DhcpController::Process(const std::string &iface, DhcpResult *result)
     ptr->dns2_ = result->strOptDns2;
     NETNATIVE_LOGI("DhcpController Process iface[%{public}s]", iface.c_str());
     std::shared_lock<std::shared_mutex> locker(callbackMutex_);
-    for (auto cb : callback_)
-    {
+    for (auto cb : callback_) {
         cb->OnDhcpSuccess(ptr);
     }
 }
