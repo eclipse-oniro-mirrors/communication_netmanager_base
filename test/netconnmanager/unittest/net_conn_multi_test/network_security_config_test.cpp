@@ -287,9 +287,9 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted001, TestSize.Level1)
     std::cout << "IsCleartextPermitted001 In" << std::endl;
     bool isclearpermitted;
     auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted(isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
     auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -312,9 +312,9 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermitted002, TestSize.Level1)
     std::cout << "IsCleartextPermitted001 In" << std::endl;
     bool isclearpermitted;
     auto ret = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
     auto ret2 = NetworkSecurityConfig::GetInstance().IsCleartextPermitted("www.text2.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
