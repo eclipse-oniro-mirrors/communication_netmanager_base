@@ -34,7 +34,7 @@ constexpr const char *CELLULAR_IFACE_3 = "rmnet3";
 constexpr const char *VRINIC_IFACE = "vrinic";
 constexpr const char *WIFI_IFACE = "wlan0";
 constexpr const char *WIFI_IFACE_1 = "wlan1";
-std::set<std::string> ifnameSet { CELLULAR_IFACE, CELLULAR_IFACE_1, CELLULAR_IFACE_2, CELLULAR_IFACE_3,
+std::set<std::string> IFACE_NAME_SET { CELLULAR_IFACE, CELLULAR_IFACE_1, CELLULAR_IFACE_2, CELLULAR_IFACE_3,
     VRINIC_IFACE, WIFI_IFACE, WIFI_IFACE_1 };
 }
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
@@ -83,7 +83,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
         }
 
         char *pName = if_indextoname(value, if_name);
-        if (pName != nullptr && ifnameSet.find(pName) == ifnameSet.end()) {
+        if (pName != nullptr && IFACE_NAME_SET.find(pName) == IFACE_NAME_SET.end()) {
             needFilterIfIndex.insert(value);
         }
     }
