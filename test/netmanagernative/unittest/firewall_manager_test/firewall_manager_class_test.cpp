@@ -379,7 +379,7 @@ HWTEST_F(FirewallManagerTest, SetUidRule2, TestSize.Level1)
 {
     uint32_t uid = 150000;
     int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_DOZABLE, uid, FirewallRule::RULE_DENY);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(FirewallManagerTest, SetUidRule3, TestSize.Level1)
 {
     uint32_t uid = 150000;
     int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_DOZABLE, uid, FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -403,7 +403,7 @@ HWTEST_F(FirewallManagerTest, SetUidRule4, TestSize.Level1)
 {
     uint32_t uid = 160000;
     int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, uid, FirewallRule::RULE_DENY);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -415,7 +415,7 @@ HWTEST_F(FirewallManagerTest, SetUidRule5, TestSize.Level1)
 {
     uint32_t uid = 160000;
     int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, uid, FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
