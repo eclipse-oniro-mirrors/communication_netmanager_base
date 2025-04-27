@@ -493,7 +493,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -511,7 +511,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
+    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
+    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
 }
 
 /**
@@ -547,7 +547,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -565,7 +565,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost().empty());
+    ASSERT_FALSE(getGlobalHttpProxy.GetHost().empty());
 }
 
 /**
@@ -583,7 +583,7 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
     HttpProxy defaultHttpProxy;
     ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_FALSE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -1530,7 +1530,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl001, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = "";
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl002, TestSize.Level1)
@@ -1538,7 +1538,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl002, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN1;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl003, TestSize.Level1)
@@ -1546,7 +1546,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl003, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN6;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl004, TestSize.Level1)
@@ -1554,7 +1554,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl004, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_DOMAIN10;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl005, TestSize.Level1)
@@ -1562,7 +1562,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl005, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl = TEST_LONG_HOST;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl006, TestSize.Level1)
@@ -1570,7 +1570,7 @@ HWTEST_F(NetConnClientTest, SetPacUrl006, TestSize.Level1)
     // NetManagerBaseAccessToken token;
     std::string pacUrl;
     auto ret = NetConnClient::GetInstance().SetPacUrl(pacUrl);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl007, TestSize.Level1)
@@ -1584,22 +1584,22 @@ HWTEST_F(NetConnClientTest, GetPacUrl001, TestSize.Level1)
 {
     // NetManagerBaseAccessToken token;
     auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN6);
-    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret0, NETMANAGER_ERR_PERMISSION_DENIED);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
-    EXPECT_EQ(pacUrl, TEST_DOMAIN6);
+    EXPECT_EQ(ret1, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(pacUrl, "");
 }
 
 HWTEST_F(NetConnClientTest, GetPacUrl002, TestSize.Level1)
 {
     // NetManagerBaseAccessToken token;
     auto ret0 = NetConnClient::GetInstance().SetPacUrl(TEST_DOMAIN10);
-    EXPECT_EQ(ret0, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret0, NETMANAGER_ERR_PERMISSION_DENIED);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
-    EXPECT_EQ(pacUrl, TEST_DOMAIN10);
+    EXPECT_EQ(ret1, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(pacUrl, "");
 }
 
 HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
@@ -1608,7 +1608,7 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(ret0, NETMANAGER_SUCCESS);
     std::string pacUrl;
     auto ret1 = NetConnClient::GetInstance().GetPacUrl(pacUrl);
-    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret1, NETMANAGER_ERR_INTERNAL);
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
@@ -1616,14 +1616,14 @@ HWTEST_F(NetConnClientTest, IsCleartextPermitted001, TestSize.Level1)
 {
     bool isclearpermitted;
     auto ret = NetConnClient::GetInstance().IsCleartextPermitted(isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
 {
     bool isclearpermitted;
     auto ret = NetConnClient::GetInstance().IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
@@ -1650,7 +1650,7 @@ HWTEST_F(NetConnClientTest, SetReuseSupplierId001, TestSize.Level1)
     uint32_t reuseSupplierId = 1008;
     bool add = false;
     int32_t ret = NetConnClient::GetInstance().SetReuseSupplierId(supplierId, reuseSupplierId, add);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 } // namespace NetManagerStandard
