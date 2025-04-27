@@ -412,6 +412,23 @@ HWTEST_F(NetsysBpfStatsTest, GetNumberFromStatsValue, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 }
 
+HWTEST_F(NetsysBpfStatsTest, GetTotalStatsTest001, TestSize.Level1)
+{
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    uint64_t stats1 = 0;
+    bpfStats->GetTotalStats(stats1, StatsType::STATS_TYPE_RX_BYTES);
+    EXPECT_GE(stats1, 0);
+    uint64_t stats2 = 0;
+    bpfStats->GetTotalStats(stats2, StatsType::STATS_TYPE_RX_PACKETS);
+    EXPECT_GE(stats2, 0);
+    uint64_t stats3 = 0;
+    bpfStats->GetTotalStats(stats3, StatsType::STATS_TYPE_TX_BYTES);
+    EXPECT_GE(stats3, 0);
+    uint64_t stats4 = 0;
+    bpfStats->GetTotalStats(stats4, StatsType::STATS_TYPE_TX_PACKETS);
+    EXPECT_GE(stats4, 0);
+}
+
 HWTEST_F(NetsysBpfStatsTest, DeleteStatsInfoTest002, TestSize.Level1)
 {
     BpfMapper<app_uid_if_stats_key, app_uid_if_stats_value> uidIfStatsMap(APP_UID_STATS_MAP_PATH, BPF_ANY);
