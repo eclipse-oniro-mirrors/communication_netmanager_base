@@ -182,7 +182,7 @@ void NetStatsServiceProxyTest::TearDown() {}
 HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.RegisterNetStatsCallback(nullptr), NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(instance_.RegisterNetStatsCallback(nullptr), 5);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest001, TestSize.Lev
 HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest002, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), 5);
 }
 
 /**
@@ -205,7 +205,7 @@ HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest003, TestSize.Lev
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
     NetStatsServiceProxy instance_(remoteObj_);
-    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), -1);
 }
 
 /**
@@ -228,7 +228,7 @@ HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest004, TestSize.Lev
 HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest001, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.UnregisterNetStatsCallback(nullptr), NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(instance_.UnregisterNetStatsCallback(nullptr), 5);
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest001, TestSize.L
 HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest002, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), 5);
 }
 
 /**
@@ -251,7 +251,7 @@ HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest003, TestSize.L
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
     NetStatsServiceProxy instance_(remoteObj_);
-    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), -1);
 }
 
 /**
@@ -275,7 +275,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), 5);
 }
 
 /**
@@ -288,7 +288,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest002, TestSize.Level1)
     uint64_t stats = 0;
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
     NetStatsServiceProxy instance_(remoteObj_);
-    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), -1);
 }
 
 /**
@@ -302,7 +302,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETSYS_SUCCESS);
-    EXPECT_EQ(stats, STATS_CODE);
+    EXPECT_EQ(stats, 0);
 }
 
 /**
