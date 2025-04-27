@@ -26,6 +26,7 @@
 #include "third_party/musl/include/netdb.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
+#include "common_notify_callback_test.h"
 
 namespace OHOS {
 namespace nmd {
@@ -149,14 +150,23 @@ HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldIgnore_WhenQueryTypeIsOne, Te
 
 HWTEST_F(DnsQualityDiagTest, RegisterResultListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
 {
-    sptr<NetsysNative::INetDnsResultCallback> callback;
+    sptr<NetsysNative::INetDnsResultCallback> callback = nullptr;
     uint32_t timeStep = 1;
     EXPECT_EQ(dnsQualityDiag.RegisterResultListener(callback, timeStep), 0);
 }
 
 HWTEST_F(DnsQualityDiagTest, UnregisterResultListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
 {
-    sptr<NetsysNative::INetDnsResultCallback> callback;
+    sptr<NetsysNative::INetDnsResultCallback> callback = nullptr;
+    EXPECT_EQ(dnsQualityDiag.UnregisterResultListener(callback), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, UnregisterResultListener_Unreg_After_Reg, TestSize.Level0)
+{
+    sptr<NetsysNative::INetDnsResultCallback> callback = new NetsysNative::DnsResultCallbackTest();
+    uint32_t timeStep = 1;
+    EXPECT_EQ(dnsQualityDiag.RegisterResultListener(callback, timeStep), 0);
+    
     EXPECT_EQ(dnsQualityDiag.UnregisterResultListener(callback), 0);
 }
 

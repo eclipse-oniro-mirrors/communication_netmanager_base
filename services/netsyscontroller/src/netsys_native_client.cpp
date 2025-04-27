@@ -262,6 +262,8 @@ NetsysNativeClient::~NetsysNativeClient()
         return;
     }
     local->RemoveDeathRecipient(deathRecipient_);
+
+    UnRegisterNotifyCallback();
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)

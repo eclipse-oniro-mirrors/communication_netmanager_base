@@ -52,6 +52,19 @@ HWTEST_F(DhcpControllerTest, RegisterNotifyCallbackTest001, TestSize.Level1)
     sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     auto ret = instance_->RegisterNotifyCallback(callback);
     ASSERT_EQ(ret, 0);
+
+    ret = instance_->UnregisterNotifyCallback(callback);
+    ASSERT_EQ(ret, 0);
+}
+
+HWTEST_F(DhcpControllerTest, RegisterNotifyCallbackTest002, TestSize.Level1)
+{
+    sptr<INotifyCallback> callback = nullptr;
+    auto ret = instance_->RegisterNotifyCallback(callback);
+    ASSERT_EQ(ret, 0);
+
+    ret = instance_->UnregisterNotifyCallback(callback);
+    ASSERT_EQ(ret, 0);
 }
 
 HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
