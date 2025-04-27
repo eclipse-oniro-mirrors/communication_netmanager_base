@@ -18,8 +18,6 @@ ohos_unittest("netsys_dnsresolv_test") {
   module_out_path = "netmanager_base/netmanager_base/dnsresolv_test"
 
   sanitize = {
-    cfi = true
-    cfi_cross_dso = true
     debug = false
   }
 
@@ -57,7 +55,7 @@ ohos_unittest("netsys_dnsresolv_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
   ]
 
   external_deps = [
