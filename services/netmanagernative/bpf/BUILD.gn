@@ -18,9 +18,10 @@ ohos_bpf("netsys") {
   sources = [ "src/netsys.c" ]
 
   include_dirs = [ "include" ]
+  defines = []
 
   if (netmanager_base_enable_feature_net_firewall) {
-    defines = [
+    defines += [
       "FEATURE_NET_FIREWALL_ENABLE",
       "NET_FIREWALL_DEBUG=0",
       "NET_FIREWALL_DEBUG_TUPLE=0",
@@ -28,9 +29,9 @@ ohos_bpf("netsys") {
   }
 
   if (netmanager_base_support_ebpf_memory_miniaturization) {
-    defines = [ "SUPPORT_EBPF_MEM_MIN" ]
+    defines += [ "SUPPORT_EBPF_MEM_MIN" ]
   }
-
+  defines += [ "__MUSL__" ]
   subsystem_name = "communication"
   part_name = "netmanager_base"
 }
