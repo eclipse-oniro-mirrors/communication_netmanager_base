@@ -60,7 +60,7 @@ bool NetStatsNetwork::Marshalling(Parcel &parcel, const sptr<NetStatsNetwork> &o
 
 NetStatsNetwork* NetStatsNetwork::Unmarshalling(Parcel &parcel)
 {
-    std::unique_ptr<NetStatsNetwork> ptr(new (std::nothrow) NetStatsNetwork());
+    std::unique_ptr<NetStatsNetwork> ptr = std::make_unique<NetStatsNetwork>();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<NetStatsNetwork>() failed");
         return nullptr;
