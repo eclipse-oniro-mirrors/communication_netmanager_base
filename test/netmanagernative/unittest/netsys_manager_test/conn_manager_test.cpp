@@ -737,5 +737,17 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange003, TestSize.Level1)
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(ConnManagerTest, SetInternetPermission003, TestSize.Level1)
+{
+    uint32_t uid = 1;
+    uint8_t allow = 0;
+    uint8_t isBroker = 0;
+    int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    isBroker = 1;
+    ret = instance_->SetInternetPermission(uid, allow, isBroker);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetsysNative
 } // namespace OHOS
