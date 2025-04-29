@@ -114,5 +114,100 @@ HWTEST_F(DistributedManagerTest, InitIfreq001, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(DistributedManagerTest, SetDistributedNicResult001, TestSize.Level1)
+{
+    std::atomic_int fd = -1;
+    unsigned long cmd = 0;
+    ifreq ifr;
+    auto result = DistributedManager::GetInstance().SetDistributedNicResult(fd, cmd, ifr);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, InitIfreq002, TestSize.Level1)
+{
+    ifreq ifr;
+    std::string cardName = "12345678901234567890";
+    auto result = DistributedManager::GetInstance().InitIfreq(ifr, cardName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, SetDistributedNicMtu003, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    int32_t mtu = 1;
+    auto result = DistributedManager::GetInstance().SetDistributedNicMtu(ifName, mtu);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, SetDistributedNicAddress002, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    std::string tunAddr = "123";
+    auto result = DistributedManager::GetInstance().SetDistributedNicAddress(ifName, tunAddr);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    ifName = "";
+    result = DistributedManager::GetInstance().SetDistributedNicAddress(ifName, tunAddr);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, SetDistributedNicUp002, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    auto result = DistributedManager::GetInstance().SetDistributedNicUp(ifName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, SetDistributedNicDown001, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    auto result = DistributedManager::GetInstance().SetDistributedNicDown(ifName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, CreateDistributedNic001, TestSize.Level1)
+{
+    std::string virNicAddr = "";
+    std::string ifName = "12345678901234567890";
+    auto result = DistributedManager::GetInstance().CreateDistributedNic(virNicAddr, DISTRIBUTED_TUN_CARD_NAME);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    virNicAddr = "1.23.45.6";
+    result = DistributedManager::GetInstance().CreateDistributedNic(virNicAddr, DISTRIBUTED_TUN_CARD_NAME);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    result = DistributedManager::GetInstance().CreateDistributedNic(virNicAddr, ifName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(DistributedManagerTest, CloseDistributedTunFd001, TestSize.Level1)
+{
+    DistributedManager::GetInstance().CloseDistributedTunFd();
+    auto result = DistributedManager::GetInstance().CreateDistributedInterface(DISTRIBUTED_TUN_CARD_NAME);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    DistributedManager::GetInstance().CloseDistributedTunFd();
+}
+
+HWTEST_F(DistributedManagerTest, ConfigVirnicAndVeth001, TestSize.Level1)
+{
+    std::string virNicAddr = "";
+    std::string virnicName = "";
+    std::string virnicVethName = "1";
+    auto result = DistributedManager::GetInstance().ConfigVirnicAndVeth(virNicAddr, virnicName, virnicVethName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    virnicName = "1";
+    virnicVethName = "";
+    result = DistributedManager::GetInstance().ConfigVirnicAndVeth(virNicAddr, virnicName, virnicVethName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    virnicName = "";
+    result = DistributedManager::GetInstance().ConfigVirnicAndVeth(virNicAddr, virnicName, virnicVethName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    virnicName = "1";
+    virnicVethName = "1";
+    result = DistributedManager::GetInstance().ConfigVirnicAndVeth(virNicAddr, virnicName, virnicVethName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    virNicAddr = "192.168.1.1";
+    virnicName = "virnic0";
+    virnicVethName = "virnic1";
+    result = DistributedManager::GetInstance().ConfigVirnicAndVeth(virNicAddr, virnicName, virnicVethName);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
