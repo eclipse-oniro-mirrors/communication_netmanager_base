@@ -112,7 +112,7 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const std::unordered_map<uint32_t
 
 NetStatsInfo* NetStatsInfo::Unmarshalling(Parcel &parcel)
 {
-    std::unique_ptr<NetStatsInfo> stats(new (std::nothrow) NetStatsInfo());
+    std::unique_ptr<NetStatsInfo> stats = std::make_unique<NetStatsInfo>();
     if (stats == nullptr) {
         NETMGR_LOG_E("make ptr NetStatsInfo failed");
         return nullptr;
