@@ -294,7 +294,8 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
                 continue;
             }
         }
-        addrInfo[validNum++] = addrInfo[resNum];
+        addrInfo[validNum] = addrInfo[resNum];
+        validNum++;
     }
     *num = validNum;
 
