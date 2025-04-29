@@ -572,7 +572,10 @@ ohos_unittest("nat464_clat_test") {
 
   branch_protector_ret = "pac_ret"
 
-  sources = [ "clatd_packet_converter_test.cpp" ]
+    sources = [
+    "clatd_packet_converter_test.cpp",
+    "clatd_test.cpp",
+  ]
 
   include_dirs = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
@@ -596,6 +599,7 @@ ohos_unittest("nat464_clat_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gmock_main",
     "init:libbegetutil",
     "ipc:ipc_core",
