@@ -253,7 +253,7 @@
       "OHOS::NetManagerStandard::NetConnClient::SetAppIsFrozened(unsigned int, bool)";
       "OHOS::NetManagerStandard::NetConnClient::EnableAppFrozenedCallbackLimitation(bool)";
       "OHOS::NetManagerStandard::NetConnClient::GetSpecificNetByIdent(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::list<int, std::__h::allocator<int>>&)";
-      "O"OHOS::NetManagerStandard::NetConnClient::GetDefaultSupplierId(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetDefaultSupplierId(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int&)";
     };
   local:
    *;
