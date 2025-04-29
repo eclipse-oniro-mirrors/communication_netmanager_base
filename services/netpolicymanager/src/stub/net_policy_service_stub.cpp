@@ -54,6 +54,9 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
+constexpr int UID_EDM = 3057;
+constexpr int UID_NET_MANAGER = 1099;
+constexpr int UID_IOT_NET_MANAGER = 7211;
 } // namespace
 
 NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
@@ -782,6 +785,12 @@ int32_t NetPolicyServiceStub::OnSetNicTrafficAllowed(MessageParcel &data, Messag
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETMGR_LOG_E("OnSetNicTrafficAllowed CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (uid != UID_EDM && uid != UID_NET_MANAGER && uid != UID_IOT_NET_MANAGER) {
+        NETMGR_LOG_E("OnSetNicTrafficAllowed CheckUidPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
