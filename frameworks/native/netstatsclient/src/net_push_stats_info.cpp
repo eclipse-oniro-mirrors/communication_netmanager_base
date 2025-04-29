@@ -78,7 +78,7 @@ bool PushStatsInfo::Marshalling(Parcel &parcel, const PushStatsInfo &info)
 
 PushStatsInfo* PushStatsInfo::Unmarshalling(Parcel &parcel)
 {
-    std::unique_ptr<PushStatsInfo> stats(new (std::nothrow) PushStatsInfo());
+    std::unique_ptr<PushStatsInfo> stats = std::make_unique<PushStatsInfo>();
     if (stats == nullptr) {
         return nullptr;
     }
