@@ -797,5 +797,37 @@ HWTEST_F(RouteManagerTest, GetRouteTableFromTypeTest005, TestSize.Level1)
     uint32_t ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
     EXPECT_EQ(ret, 1);
 }
+
+HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork002, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "vpn";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, EnableDistributedClientNet001, TestSize.Level1)
+{
+    std::string virNicAddr;
+    std::string iif;
+    auto ret = RouteManager::EnableDistributedClientNet(virNicAddr, iif);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, AddClatTunInterface001, TestSize.Level1)
+{
+    std::string interfaceName;
+    std::string dstAddr;
+    std::string nxtHop;
+    auto ret = RouteManager::AddClatTunInterface(interfaceName, dstAddr, nxtHop);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, RemoveClatTunInterface001, TestSize.Level1)
+{
+    std::string interfaceName;
+    auto ret = RouteManager::RemoveClatTunInterface(interfaceName);
+    EXPECT_NE(ret, 0);
+}
 } // namespace nmd
 } // namespace OHOS
