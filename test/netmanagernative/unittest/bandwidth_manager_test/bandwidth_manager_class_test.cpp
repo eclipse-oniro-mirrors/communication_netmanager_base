@@ -438,5 +438,29 @@ HWTEST_F(BandwidthManagerTest, BandwidthManagerBranchTest001, TestSize.Level1)
     ret = g_BandwidthManager->SetIfaceQuotaDetail(ifName, bytes);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: RemoveIfaceQuota003
+ * @tc.desc: Test BandwidthManager RemoveIfaceQuota.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BandwidthManagerTest, RemoveIfaceQuota003, TestSize.Level1)
+{
+    std::string iface = "abc";
+    int32_t ret = g_BandwidthManager->RemoveIfaceQuota(iface);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: RemoveDeniedList002
+ * @tc.desc: Test BandwidthManager RemoveDeniedList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BandwidthManagerTest, RemoveDeniedList002, TestSize.Level1)
+{
+    uint32_t uid = -1;
+    int32_t ret = g_BandwidthManager->RemoveDeniedList(uid);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetsysNative
 } // namespace OHOS
