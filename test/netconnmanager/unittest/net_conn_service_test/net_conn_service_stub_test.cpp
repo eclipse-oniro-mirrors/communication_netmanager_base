@@ -994,11 +994,34 @@ HWTEST_F(NetConnServiceStubTest, OnIsPreferCellularUrlTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnDecreaseSupplierScore001
- * @tc.desc: Test NetConnServiceStub OnDecreaseSupplierScore.
+ * @tc.name: OnUpdateSupplierScore001
+ * @tc.desc: Test NetConnServiceStub OnUpdateSupplierScore001
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnServiceStubTest, OnDecreaseSupplierScore001, TestSize.Level1)
+HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    uint32_t supplierId = 100;
+    if (!data.WriteUint32(supplierId)) {
+        return;
+    }
+    if (!data.WriteUint32(QUALITY_GOOD_STATE)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: GetDefaultSupplierId001
+ * @tc.desc: Test NetConnServiceStub GetDefaultSupplierId001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, GetDefaultSupplierId001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     MessageParcel data;
@@ -1016,28 +1039,8 @@ HWTEST_F(NetConnServiceStubTest, OnDecreaseSupplierScore001, TestSize.Level1)
     if (!data.WriteUint32(supplierId)) {
         return;
     }
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: OnIncreaseSupplierScore001
- * @tc.desc: Test NetConnServiceStub OnIncreaseSupplierScore.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceStubTest, OnIncreaseSupplierScore001, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
-    uint32_t supplierId = 100;
-    if (!data.WriteUint32(supplierId)) {
-        return;
-    }
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**
