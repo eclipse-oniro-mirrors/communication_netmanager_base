@@ -63,7 +63,7 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const std::vector<NetStat
 
 NetStatsInfoSequence* NetStatsInfoSequence::Unmarshalling(Parcel &parcel)
 {
-    std::unique_ptr<NetStatsInfoSequence> stats(new (std::nothrow) NetStatsInfoSequence());
+    std::unique_ptr<NetStatsInfoSequence> stats = std::make_unique<NetStatsInfoSequence>();
     if (stats == nullptr) {
         NETMGR_LOG_E("make ptr NetStatsInfoSequence failed");
         return nullptr;
