@@ -128,5 +128,91 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest007, TestSize.Level1)
     auto ret = VpnManager::GetInstance().SetVpnDown();
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(VpnManagerTest, CreateVpnInterfaceTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    vpnmanager.tunFd_ = 1;
+    vpnmanager.listeningFlag_ = 1;
+    auto result = vpnmanager.CreateVpnInterface();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnMtuTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+    int32_t mtu = 1;
+    auto result = vpnmanager.SetVpnMtu(ifName, mtu);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnMtuTest002, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    vpnmanager.net4Sock_ = -1;
+    vpnmanager.net6Sock_ = -1;
+    std::string ifName = "123456789abcdef";
+    int32_t mtu = 1;
+    auto result = vpnmanager.SetVpnMtu(ifName, mtu);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnAddressTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+    std::string tunAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    int32_t prefix = 1;
+    auto result = vpnmanager.SetVpnAddress(ifName, tunAddr, prefix);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnAddressTest002, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+    std::string tunAddr = "192.168.1.1";
+    int32_t prefix = 1;
+    auto result = vpnmanager.SetVpnAddress(ifName, tunAddr, prefix);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnAddressTest003, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+    std::string tunAddr = "";
+    int32_t prefix = 1;
+    auto result = vpnmanager.SetVpnAddress(ifName, tunAddr, prefix);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnUpTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    vpnmanager.net4Sock_ = -1;
+    vpnmanager.net6Sock_ = -1;
+    auto result = vpnmanager.SetVpnUp();
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnDownTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    vpnmanager.net4Sock_ = -1;
+    vpnmanager.net6Sock_ = -1;
+    auto result = vpnmanager.SetVpnDown();
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, InitIfreqTest001, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    ifreq ifr;
+    std::string cardName = "12345678901234567890";
+    auto result = vpnmanager.InitIfreq(ifr, cardName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
