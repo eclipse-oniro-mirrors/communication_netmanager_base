@@ -376,9 +376,9 @@ public:
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
-    int32_t DecreaseSupplierScore(NetBearType bearerType, const std::string &ident,
-                                  uint32_t &supplierId) override;
-    int32_t IncreaseSupplierScore(uint32_t supplierId) override;
+    int32_t UpdateSupplierScore(uint32_t supplierId, uint32_t detectionStatus) override;
+    int32_t GetDefaultSupplierId(NetBearType bearerType, const std::string &ident,
+        uint32_t& supplierId) override;
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
@@ -510,9 +510,9 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo, int32_t callingUid);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
-    int32_t DecreaseSupplierScoreAsync(NetBearType bearerType, const std::string &ident,
-                                       uint32_t& supplierId);
-    int32_t IncreaseSupplierScoreAsync(uint32_t supplierId);
+    int32_t UpdateSupplierScoreAsync(uint32_t supplierId, uint32_t detectionStatus);
+    int32_t GetDefaultSupplierIdAsync(NetBearType bearerType, const std::string &ident,
+        uint32_t& supplierId);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
