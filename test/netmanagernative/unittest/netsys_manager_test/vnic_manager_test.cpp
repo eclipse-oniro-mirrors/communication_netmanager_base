@@ -138,5 +138,50 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic003, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
+HWTEST_F(VnicManagerTest, DestroyVnicInterface001, TestSize.Level1)
+{
+    VnicManager vnicmanager;
+    vnicmanager.net4Sock_ = 0;
+    vnicmanager.net6Sock_ = 0;
+    vnicmanager.tunFd_ = 0;
+    vnicmanager.DestroyVnicInterface();
+    EXPECT_EQ(vnicmanager.net4Sock_, 0);
+    EXPECT_EQ(vnicmanager.net6Sock_, 0);
+    EXPECT_EQ(vnicmanager.tunFd_, 0);
+}
+
+HWTEST_F(VnicManagerTest, SetVnicMtu002, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    int32_t mtu = 1;
+    auto result = VnicManager::GetInstance().SetVnicMtu(ifName, mtu);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VnicManagerTest, SetVnicAddress002, TestSize.Level1)
+{
+    std::string ifName = "12345678901234567890";
+    std::string tunAddr = "2001:db8:85a3::8a2e:370:7334";
+    int32_t testNumber = 0;
+    auto result = VnicManager::GetInstance().SetVnicAddress(ifName, tunAddr, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    ifName = "";
+    result = VnicManager::GetInstance().SetVnicAddress(ifName, tunAddr, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    tunAddr = "192.168.1.1";
+    result = VnicManager::GetInstance().SetVnicAddress(ifName, tunAddr, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    testNumber = 32;
+    result = VnicManager::GetInstance().SetVnicAddress(ifName, tunAddr, testNumber);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VnicManagerTest, InitIfreq002, TestSize.Level1)
+{
+    ifreq ifr;
+    std::string cardName = "12345678901234567890";
+    auto result = VnicManager::GetInstance().InitIfreq(ifr, cardName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
