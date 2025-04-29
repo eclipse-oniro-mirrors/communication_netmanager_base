@@ -79,7 +79,7 @@ NetStatsInfoSequence* NetStatsInfoSequence::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     stats->info_ = *statsInfo;
-    return stats;
+    return stats.release();
 }
 
 bool NetStatsInfoSequence::Unmarshalling(Parcel &parcel, NetStatsInfoSequence &statsSequence)
