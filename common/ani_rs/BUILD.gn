@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,11 +15,11 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-rust_cxx("connection_ani_cxx") {
+rust_cxx("ani_rs_cxx_gen") {
   sources = [ "src/wrapper.rs" ]
 }
 
-ohos_static_library("connection_ani_static") {
+ohos_static_library("ani_rs_cxx") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -33,29 +33,31 @@ ohos_static_library("connection_ani_static") {
     "include",
     "${target_gen_dir}/src",
   ]
-  sources = [ "src/cxx/connection_ani.cpp" ]
-  sources += get_target_outputs(":connection_ani_cxx")
+  sources = ["cxx/ani_rs_context.cpp"]
+  sources += get_target_outputs(":ani_rs_cxx_gen")
   
   deps = [
-    ":connection_ani_cxx",
+    ":ani_rs_cxx_gen",
     "//third_party/rust/crates/cxx:cxx_cppdeps",
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/connection:connection_if",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+
   ]
   external_deps = [
     "c_utils:utils",
+    "runtime_core:ani",
     "hilog:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
+    "ability_runtime:app_context",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:data_ability_helper",
+    "ability_runtime:extensionkit_native",
   ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
 
-ohos_rust_shared_library("connection_ani") {
+ohos_rust_static_library("ani_rs") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -65,35 +67,18 @@ ohos_rust_shared_library("connection_ani") {
   }
 
   sources = [ "src/lib.rs" ]
-  
+  deps = [
+    "../ani_sys:ani_sys",
+    "../ani_rs_macros:ani_rs_macros(${host_toolchain})",
+    "//third_party/rust/crates/serde/serde:lib",
+    "//third_party/rust/crates/cxx:lib",
+    ":ani_rs_cxx",
+  ]
+
   external_deps = [
     "runtime_core:ani",
-    "hilog:hilog_rust",
-  ]
-  deps = [
-    ":connection_ani_static",
-    "../../../../common/ani_rs:ani_rs",
-    "../../../../common/ani_sys:ani_sys",
-    "//third_party/rust/crates/cxx:lib",
-    "//third_party/rust/crates/serde/serde:lib"
   ]
   clippy_lints = "none"
   part_name = "netmanager_base"
   subsystem_name = "communication"
-  output_extension = "so"
-}
-
-generate_static_abc("connection") {
-  base_url = "./ets"
-  files = [ "ets/@ohos.net.connection.ets" ]
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/connection.abc"
-}
-
-ohos_prebuilt_etc("connection_etc") {
-  source = "$target_out_dir/connection.abc"
-  module_install_dir = "framework"
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-  deps = [ ":connection" ]
 }
