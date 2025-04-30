@@ -90,8 +90,11 @@
         },
         "build": {
             "group_type": {
-                "base_group": [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection" ],
+                "base_group": [
+                    "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection"
+                ],
                 "fwk_group": [
+                    "//foundation/communication/netmanager_base/frameworks/ets/ani:ani_package",
                     "//foundation/communication/netmanager_base/frameworks/ets/ani:ani_package",
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/utils:net_data_share",
@@ -301,6 +304,10 @@
                         ],
                         "header_base": "//foundation/communication/netmanager_base/frameworks/js/napi/connection"
                     }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/common/ani_rs:ani_rs"
                 }
             ],
             "test": [

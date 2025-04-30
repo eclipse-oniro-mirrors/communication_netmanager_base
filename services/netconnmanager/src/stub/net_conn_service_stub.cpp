@@ -42,55 +42,55 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY)] = {
         &NetConnServiceStub::OnSystemReady, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnRegisterNetConnCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER)] = {
-        &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION)] = {
         &NetConnServiceStub::OnRequestNetConnectionBySpecifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK)] = {
-        &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnUnregisterNetConnCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
-        &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterNetSupplier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
-        &NetConnServiceStub::OnUnregisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUnregisterNetSupplier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS)] = {
-        &NetConnServiceStub::OnUpdateNetCaps, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUpdateNetCaps, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO)] = {
-        &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUpdateNetSupplierInfo, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
-        &NetConnServiceStub::OnUpdateNetLinkInfo, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUpdateNetLinkInfo, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK)] = {
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION)] = {
-        &NetConnServiceStub::OnNetDetection, {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
+        &NetConnServiceStub::OnNetDetection, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET)] = {&NetConnServiceStub::OnBindSocket,
                                                                                     {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetSupplierCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE)] = {
-        &NetConnServiceStub::OnSetAirplaneMode, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetAirplaneMode, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY)] = {
-        &NetConnServiceStub::OnSetGlobalHttpProxy, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetGlobalHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET)] = {&NetConnServiceStub::OnSetAppNet,
-                                                                                    {Permission::INTERNET}};
+                                                                                    {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION)] = {
-        &NetConnServiceStub::OnSetInternetPermission, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetInternetPermission, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetInterfaceCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterNetInterfaceCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_INTERFACE_CALLBACK)] = {
-        &NetConnServiceStub::OnUnregisterNetInterfaceCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUnregisterNetInterfaceCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE)] = {
-        &NetConnServiceStub::OnAddNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnAddNetworkRoute, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
-        &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRemoveNetworkRoute, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
-        &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnIsPreferCellularUrl, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID)] = {
-        &NetConnServiceStub::OnSetReuseSupplierId, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetReuseSupplierId, {}};
     InitAll();
 }
 
@@ -108,39 +108,39 @@ void NetConnServiceStub::InitAll()
 void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ADDRESS)] = {
-        &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnAddInterfaceAddress, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
-        &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnDelInterfaceAddress, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterPreAirplaneCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
-        &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DECREASE_SUPPLIER_SCORE)] = {
-        &NetConnServiceStub::OnDecreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnDecreaseSupplierScore, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_INCREASE_SUPPLIER_SCORE)] = {
-        &NetConnServiceStub::OnIncreaseSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnIncreaseSupplierScore, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CLOSE_SOCKETS_UID)] = {
-        &NetConnServiceStub::OnCloseSocketsUid, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnCloseSocketsUid, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_IS_FROZENED)] = {
-        &NetConnServiceStub::OnSetAppIsFrozened, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetAppIsFrozened, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_APP_FROZENED_CALLBACK_LIMITATION)] = {
-        &NetConnServiceStub::OnEnableAppFrozenedCallbackLimitation, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnEnableAppFrozenedCallbackLimitation, {}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK)] = {
-        &NetConnServiceStub::OnFactoryResetNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnFactoryResetNetwork, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetFactoryResetCallback, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterNetFactoryResetCallback, {}};
 }
 
 void NetConnServiceStub::InitStaticArpToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_ARP)] = {
-        &NetConnServiceStub::OnAddStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnAddStaticArp, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP)] = {
-        &NetConnServiceStub::OnDelStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnDelStaticArp, {}};
 }
 
 void NetConnServiceStub::InitQueryFuncToInterfaceMap()
@@ -150,27 +150,27 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE)] = {
         &NetConnServiceStub::OnGetIfaceNameByType, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS)] = {
-        &NetConnServiceStub::OnGetIfaceNameIdentMaps, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnGetIfaceNameIdentMaps, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK)] = {
-        &NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnGetDefaultNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)] = {
-        &NetConnServiceStub::OnHasDefaultNet, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnHasDefaultNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET)] = {
         &NetConnServiceStub::OnGetSpecificNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS)] = {&NetConnServiceStub::OnGetAllNets,
-                                                                                     {Permission::GET_NETWORK_INFO}};
+                                                                                     {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET)] = {
         &NetConnServiceStub::OnGetSpecificUidNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES)] = {
-        &NetConnServiceStub::OnGetConnectionProperties, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnGetConnectionProperties, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES)] = {
-        &NetConnServiceStub::OnGetNetCapabilities, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnGetNetCapabilities, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME)] = {
-        &NetConnServiceStub::OnGetAddressesByName, {Permission::INTERNET}};
+        &NetConnServiceStub::OnGetAddressesByName, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME)] = {
-        &NetConnServiceStub::OnGetAddressByName, {Permission::INTERNET}};
+        &NetConnServiceStub::OnGetAddressByName, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED)] = {
-        &NetConnServiceStub::OnIsDefaultNetMetered, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnIsDefaultNetMetered, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)] = {
         &NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY)] = {
@@ -178,17 +178,17 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER)] = {
         &NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
-        &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnGetNetInterfaceConfiguration, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS)] = {
-        &NetConnServiceStub::OnSetNetInterfaceIpAddress, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetNetInterfaceIpAddress, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_UP)] = {
-        &NetConnServiceStub::OnSetInterfaceUp, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetInterfaceUp, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_DOWN)] = {
-        &NetConnServiceStub::OnSetInterfaceDown, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnSetInterfaceDown, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE)] = {
-        &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnRegisterSlotType, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
-        &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
+        &NetConnServiceStub::OnGetSlotType, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL)] = {
         &NetConnServiceStub::OnSetPacUrl, {Permission::SET_PAC_URL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {
@@ -204,19 +204,19 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_VNIC_NET_WORK)] = {
-        &NetConnServiceStub::OnEnableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnEnableVnicNetwork, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_VNIC_NET_WORK)] = {
-        &NetConnServiceStub::OnDisableVnicNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnDisableVnicNetwork, {}};
 }
 
 void NetConnServiceStub::InitVirnicFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_CLIENT_NET)] = {
-        &NetConnServiceStub::OnEnableDistributedClientNet, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnEnableDistributedClientNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET)] = {
-        &NetConnServiceStub::OnEnableDistributedServerNet, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnEnableDistributedServerNet, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET)] = {
-        &NetConnServiceStub::OnDisableDistributedNet, {Permission::CONNECTIVITY_INTERNAL}};
+        &NetConnServiceStub::OnDisableDistributedNet, {}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -249,7 +249,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     if (code == static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION)) {
         // get uid should be called in this function
         auto uid = IPCSkeleton::GetCallingUid();
-        if (uid != UID_FOUNDATION && !CheckPermission({Permission::CONNECTIVITY_INTERNAL})) {
+        if (uid != UID_FOUNDATION && !CheckPermission({})) {
             if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
                 return IPC_STUB_WRITE_PARCEL_ERR;
             }
