@@ -572,7 +572,7 @@ ohos_unittest("nat464_clat_test") {
 
   branch_protector_ret = "pac_ret"
 
-    sources = [
+  sources = [
     "clatd_packet_converter_test.cpp",
     "clatd_test.cpp",
   ]
