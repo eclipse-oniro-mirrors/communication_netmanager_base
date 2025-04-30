@@ -447,5 +447,35 @@ HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
     ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(InterfaceManagerTest, GetIfaceConfigTest004, TestSize.Level1)
+{
+    std::string ifaceName = "12345678901234567890";
+    auto ret = InterfaceManager::GetIfaceConfig(ifaceName);
+    EXPECT_FALSE(ret.ifName.empty());
+}
+
+HWTEST_F(InterfaceManagerTest, SetIfaceConfigTest005, TestSize.Level1)
+{
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+    ifaceConfig.ifName = "";
+    auto ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIpAddressTest005, TestSize.Level1)
+{
+    std::string ifaceName = "12345678901234567890";
+    std::string ipAddress = "127.0.0.1";
+    auto ret = InterfaceManager::SetIpAddress(ifaceName, ipAddress);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIffUpTest004, TestSize.Level1)
+{
+    std::string ifaceName = "12345678901234567890";
+    auto ret = InterfaceManager::SetIffUp(ifaceName);
+    EXPECT_EQ(ret, -1);
+}
 } // namespace nmd
 } // namespace OHOS

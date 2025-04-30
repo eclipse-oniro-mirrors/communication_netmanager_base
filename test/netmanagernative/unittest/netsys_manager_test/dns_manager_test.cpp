@@ -78,5 +78,35 @@ HWTEST_F(DnsManagerTest, InterfaceTest001, TestSize.Level1)
     std::vector<AddrInfo> res;
     dnsManager.GetAddrInfo(hostName, serverName, hints, NET_ID, res);
 }
+
+HWTEST_F(DnsManagerTest, EnableIpv6Test001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    uint16_t netId = 123;
+    std::string destination = "123";
+    std::string nextHop = "";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    EXPECT_EQ(destination, "123");
+    destination = "2001:db8:85a3::8a2e:370:7334";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    nextHop = "2001:db8:85a3::8a2e:370:7335";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    destination = "123";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    destination = "2001:db8:85a3::8a2e:370:7334/64";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    EXPECT_NE(destination, "2001:db8:85a3::8a2e:370:7334/64");
+}
+
+HWTEST_F(DnsManagerTest, GetAddrInfoTest001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::string hostName;
+    std::string serverName = "www.baidu.com";
+    AddrInfo hints;
+    std::vector<AddrInfo> res;
+    auto result = dnsManager.GetAddrInfo(hostName, serverName, hints, NET_ID, res);
+    EXPECT_NE(result, -1);
+}
 } // namespace nmd
 } // namespace OHOS

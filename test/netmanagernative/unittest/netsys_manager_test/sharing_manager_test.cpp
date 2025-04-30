@@ -166,5 +166,30 @@ HWTEST_F(SharingManagerTest, SetIpFwdEnable001, TestSize.Level1)
     ret = sharingManager->SetForwardRules(false, " tetherctrl_FORWARD -j DROP");
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(SharingManagerTest, EnableNat003, TestSize.Level1)
+{
+    std::string downstreamIface = "eth0";
+    auto result = sharingManager->EnableNat(downstreamIface, downstreamIface);
+    EXPECT_EQ(result, -1);
+}
+
+HWTEST_F(SharingManagerTest, IpfwdAddInterfaceForward003, TestSize.Level1)
+{
+    std::string fromIface = "down";
+    std::string toIface = "up";
+    sharingManager->interfaceForwards_ = {"123"};
+    auto result = sharingManager->IpfwdAddInterfaceForward(fromIface, toIface);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)
+{
+    std::string fromIface = "down";
+    std::string toIface = "up";
+    sharingManager->interfaceForwards_ = {"123"};
+    auto result = sharingManager->IpfwdRemoveInterfaceForward(fromIface, toIface);
+    EXPECT_EQ(result, 0);
+}
 } // namespace NetsysNative
 } // namespace OHOS
