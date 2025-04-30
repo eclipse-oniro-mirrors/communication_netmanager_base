@@ -34,7 +34,6 @@ using namespace OHOS::NetManagerStandard;
 constexpr int V4ADDR_BIT_LEN = 32;
 }
 
-extern std::list<in_addr_t> g_tunV4AddrInUse;
 bool IsIpv4AddressFree(const in_addr_t v4Addr);
 in_addr_t GetAvailableIpv4Address(const in_addr initV4Addr, const int16_t prefixLen);
 int32_t GetSuitableIpv6Address(const std::string &v6IfaceStr, const in_addr v4Addr,
@@ -53,22 +52,16 @@ public:
 
 HWTEST_F(ClatdTest, IsIpv4AddressFreeTest001, TestSize.Level1)
 {
-    in_addr_t v4Addr = 1;
-    EXPECT_TRUE(g_tunV4AddrInUse.empty());
-    auto ret = IsIpv4AddressFree(v4Addr);
-
-    ret = IsIpv4AddressFree(v4Addr);
-    EXPECT_FALSE(ret);
-    g_tunV4AddrInUse.clear();
-}
-
-HWTEST_F(ClatdTest, FreeTunV4AddrTest001, TestSize.Level1)
-{
     std::string v4AddrStr;
-    EXPECT_TRUE(g_tunV4AddrInUse.empty());
     FreeTunV4Addr(v4AddrStr);
 
     v4AddrStr = "192.168.1.1";
+    in_addr v4Addr;
+    inet_pton(AF_INET, v4AddrStr.c_str(), &v4Addr);
+    auto ret = IsIpv4AddressFree(v4Addr.s_addr);
+
+    ret = IsIpv4AddressFree(v4Addr.s_addr);
+    EXPECT_FALSE(ret);
     FreeTunV4Addr(v4AddrStr);
 }
 
