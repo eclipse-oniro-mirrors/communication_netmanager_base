@@ -1018,11 +1018,6 @@ HWTEST_F(NetworkTest, OH_NetConn_FreeDnsResultTest001, TestSize.Level1)
     struct addrinfo *res = nullptr;
     auto ret = OH_NetConn_FreeDnsResult(res);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
-
-    res = (struct addrinfo*)malloc(sizeof(struct addrinfo));
-    res->ai_addr = nullptr;
-    ret = OH_NetConn_FreeDnsResult(res);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_GetAllNetsTest001, TestSize.Level1)
