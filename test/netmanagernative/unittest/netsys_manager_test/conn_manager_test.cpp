@@ -738,7 +738,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange003, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(ConnManagerTest, SetInternetPermission003, TestSize.Level1)
+HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
 {
     uint32_t uid = 1;
     uint8_t allow = 0;
