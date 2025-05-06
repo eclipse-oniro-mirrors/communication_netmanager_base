@@ -64,6 +64,7 @@ ohos_shared_library("net_manager_common") {
     "common_utils/src/netmanager_base_permission.cpp",
     "common_utils/src/netmanager_hitrace.cpp",
     "common_utils/src/tiny_count_down_latch.cpp",
+    "common_utils/src/system_timer.cpp",
     "errorcode_utils/src/errorcode_convertor.cpp",
     "log/src/net_mgr_log_wrapper.cpp",
   ]
@@ -100,6 +101,8 @@ ohos_shared_library("net_manager_common") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "ability_runtime:wantagent_innerkits",
+    "time_service:time_client",
   ]
 
   innerapi_tags = [ "platformsdk" ]

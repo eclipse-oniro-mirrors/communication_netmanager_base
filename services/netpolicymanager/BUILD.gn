@@ -98,6 +98,7 @@ ohos_shared_library("net_policy_manager") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
@@ -111,6 +112,7 @@ ohos_shared_library("net_policy_manager") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "time_service:time_client",
   ]
 
   defines = [
@@ -175,6 +177,7 @@ ohos_static_library("net_policy_manager_static") {
     "ability_base:want",
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
@@ -188,6 +191,7 @@ ohos_static_library("net_policy_manager_static") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "time_service:time_client",
   ]
 
   defines = [
@@ -259,6 +263,7 @@ ohos_shared_library("net_access_policy_dialog") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "time_service:time_client",
   ]
 
   part_name = "netmanager_base"

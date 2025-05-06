@@ -148,6 +148,9 @@ private:
     bool CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
         uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
 #endif // SUPPORT_TRAFFIC_STATISTIC
+    void StartSysTimer();
+    void StopSysTimer();
+    int32_t UpdateStatsDataInner();
 
 private:
     enum ServiceRunningState {
@@ -160,6 +163,7 @@ private:
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
     std::unique_ptr<NetStatsCached> netStatsCached_ = nullptr;
+    uint64_t netStatsSysTimerId_ = 0;
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t curActiviteSimId_ = -1;
     uint64_t curIfIndex_ = UINT64_MAX;

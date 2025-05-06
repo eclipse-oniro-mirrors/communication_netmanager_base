@@ -301,6 +301,7 @@ private:
 
     bool hasSARemoved_ = false;
     bool isDisplayTrafficAncoList_ = false;
+    uint64_t netPolicySysTimerId_ = 0;
 
 private:
     void RegisterFactoryResetCallback();

@@ -42,6 +42,7 @@ public:
     NetStatsCached();
     ~NetStatsCached() = default;
     void ForceUpdateStats();
+    void ForceUpdateStatsAndBackupDB(const std::string &sourceDb, const std::string &backupDb);
 
     ffrt::task_handle ForceArchiveStats(uint32_t uid);
 
@@ -49,7 +50,7 @@ public:
 
     int32_t StartCached();
 
-    int32_t CreatNetStatsTables();
+    int32_t CreatNetStatsTables(const std::string &tableName);
 
     void SetCycleThreshold(uint32_t threshold);
 
@@ -291,8 +292,9 @@ private:
 
     CachedInfo stats_;
     ffrt::mutex lock_;
-    bool isForce_ = false;
-    bool isExec_ = false;
+    std::atomic<bool> isForce_ = false;
+    std::atomic<bool> isExec_ = false;
+    std::atomic<bool> isExecBackUp_ = false;
     std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
     std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
     uint32_t cycleThreshold_ = DEFAULT_CACHE_CYCLE_MS;

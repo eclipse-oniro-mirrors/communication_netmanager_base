@@ -278,5 +278,19 @@ int32_t NetStatsDataHandler::ClearData()
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetStatsDataHandler::BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    bool ret = helper->BackupNetStatsDataDB(sourceDb, backupDb);
+    if (!ret) {
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

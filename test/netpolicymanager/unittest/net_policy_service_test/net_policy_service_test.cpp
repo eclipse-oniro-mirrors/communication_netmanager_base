@@ -290,5 +290,6 @@ HWTEST_F(UtNetPolicyService, GetSampleBundleInfosForActiveUser001, TestSize.Leve
     instance_->GetSampleBundleInfosForActiveUser();
     EXPECT_EQ(instance_->hasSARemoved_, false);
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS

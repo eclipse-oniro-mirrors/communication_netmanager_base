@@ -271,5 +271,28 @@ HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest001, TestSize.Level1)
     EXPECT_NE(oldVersion, NetStatsDatabaseHelper::Version_0);
 }
 
+HWTEST_F(NetStatsDatabaseHelperTest, BackupNetStatsDataTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
+    if (helper == nullptr) {return;}
+    bool ret = helper->BackupNetStatsData("xxxx/xxxx.db", NET_STATS_DATABASE_PATH);
+    EXPECT_EQ(ret, false);
+    helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
+    ret = helper->BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, "xxxx/xxxx.db");
+    EXPECT_EQ(ret, false);
+    helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    ret = helper->BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
+    int32_t ret = helper->DeleteAndBackup(SQLITE_NOTADB);
+    EXPECT_EQ(ret, SQLITE_NOTADB);
+    ret = helper->DeleteAndBackup(0);
+    EXPECT_EQ(ret, 0);
+    helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

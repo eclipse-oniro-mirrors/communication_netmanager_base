@@ -27,6 +27,7 @@
 #include "net_stats_database_helper.h"
 namespace OHOS {
 namespace NetManagerStandard {
+using namespace NetStatsDatabaseDefines;
 namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_UID = 1;
@@ -102,6 +103,13 @@ HWTEST_F(NetStatsCachedTest, StartCachedTest001, TestSize.Level1)
     instance_->SetCycleThreshold(threshold);
     instance_->ForceUpdateStats();
     instance_->Reset();
+}
+
+HWTEST_F(NetStatsCachedTest, StartCachedTest002, TestSize.Level1)
+{
+    instance_->ForceUpdateStatsAndBackupDB(NET_STATS_DATABASE_PATH, NET_STATS_DATABASE_BACK_PATH);
+    instance_->Reset();
+    EXPECT_NE(instance_, nullptr);
 }
 
 HWTEST_F(NetStatsCachedTest, WriteIfaceStatsTest001, TestSize.Level1)

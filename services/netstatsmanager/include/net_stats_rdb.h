@@ -45,6 +45,9 @@ namespace NetStatsRdbFiledConst {
     constexpr int32_t FILED_COLUMN_INDEX_SIX = 6;
 }
 
+constexpr const char* NOTICE_DATABASE_NAME = "/data/service/el1/public/netmanager/net_stats_notice_freq.db";
+constexpr const char* NOTICE_DATABASE_BACK_NAME = "/data/service/el1/public/netmanager/net_stats_notice_freq_back.db";
+
 typedef struct NetStatsData {
     int32_t simId;
     int monWarningDate;
@@ -67,6 +70,8 @@ public:
 
     std::vector<NetStatsData> QueryAll();
     int32_t QueryBySimId(int simId, NetStatsData& simStats);
+    int32_t BackUpNetStatsFreqDB(const std::string &sourceDB, const std::string &targetDB);
+    int32_t InitRdbStoreBackupDB();
 
     class RdbDataOpenCallback : public NativeRdb::RdbOpenCallback {
     public:
@@ -79,6 +84,7 @@ public:
 
 private:
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_{nullptr};
+    std::mutex mutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

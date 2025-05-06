@@ -253,5 +253,14 @@ HWTEST_F(NetStatsDataHandlerTest, NetStatsDataHandlerBranchTest001, TestSize.Lev
     ret = handler.ClearData();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetStatsDataHandlerTest, BackupNetStatsDataTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    int ret = handler.BackupNetStatsData(NET_STATS_DATABASE_PATH, NET_STATS_DATABASE_BACK_PATH);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = handler.BackupNetStatsData("xxxx/xxxx.db", NET_STATS_DATABASE_BACK_PATH);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

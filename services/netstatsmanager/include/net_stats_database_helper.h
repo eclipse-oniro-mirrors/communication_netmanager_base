@@ -59,6 +59,8 @@ public:
     int32_t Upgrade();
     int32_t UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag);
     int32_t UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag);
+    bool BackupNetStatsDataDB(const std::string &sourceDb, const std::string &backupDb);
+    int32_t DeleteAndBackup(int32_t errCode);
 
 private:
     enum TableVersion : int32_t {
@@ -78,9 +80,13 @@ private:
     int32_t UpdateTableVersion(TableVersion version, const std::string &tableName);
     int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
     void ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
+    bool BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
     static ffrt::mutex sqliteMutex_;
+    std::mutex mutex_;
+    std::atomic<bool> isNeedUpdate_ = false;
+    std::string path_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

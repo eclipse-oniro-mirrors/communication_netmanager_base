@@ -18,6 +18,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "rdb_errno.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,7 +26,6 @@ namespace {
 [[maybe_unused]] const int32_t RDB_VERSION_0 = 0;
 const int32_t RDB_VERSION_1 = 1;
 const int32_t RDB_VERSION_2 = 2;
-const std::string DATABASE_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy.db";
 const std::string NETMANAGER_DB_UID_ACCESS_POLICY_TABLE = "uid_access_policy_infos";
 const std::string SQL_TABLE_COLUMS = std::string(
     "uid INTEGER NOT NULL PRIMARY KEY, "
@@ -79,26 +79,68 @@ int32_t NetAccessPolicyRDB::GetRdbStore()
     NativeRdb::RdbStoreConfig config(DATABASE_NAME);
     NetAccessPolicyRDB::RdbDataOpenCallback helper;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    if (rdbStore_ != nullptr) {
+        return NETMANAGER_SUCCESS;
     }
-
-    return NETMANAGER_SUCCESS;
+    NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
+    if (errCode == NativeRdb::E_SQLITE_CORRUPT) {
+        int ret = NativeRdb::RdbHelper::DeleteRdbStore(config);
+        NETMGR_LOG_E("RDB DeleteRdbStore ret: %{public}d", ret);
+        rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+        if (rdbStore_ != nullptr) {
+            ret = rdbStore_->Restore(DATABASE_BACK_NAME);
+            NETMGR_LOG_E("RDB Restore ret: %{public}d", ret);
+            if (ret == 0) {
+                return NETMANAGER_SUCCESS;
+            }
+        }
+    }
+    return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
 int32_t NetAccessPolicyRDB::InitRdbStore()
 {
+    InitRdbStoreBackupDB();
     int32_t ret = GetRdbStore();
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
 
     std::string createTable =
-        "CREATE TABLE IF NOT EXISTS " + NETMANAGER_DB_UID_ACCESS_POLICY_TABLE + " (" + SQL_TABLE_COLUMS + ")";
+        CREATE_TABLE_IF_NOT_EXISTS + NETMANAGER_DB_UID_ACCESS_POLICY_TABLE + " (" + SQL_TABLE_COLUMS + ")";
     rdbStore_->ExecuteSql(createTable);
 
     NETMGR_LOG_D("InitRdbStore");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetAccessPolicyRDB::InitRdbStoreBackupDB()
+{
+    NETMGR_LOG_I("InitRdbStoreBackupDB start");
+    int errCode = NETMANAGER_SUCCESS;
+    NativeRdb::RdbStoreConfig config(DATABASE_BACK_NAME);
+    NetAccessPolicyRDB::RdbDataOpenCallback helper;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore =
+        NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
+        if (errCode == NativeRdb::E_SQLITE_CORRUPT) {
+            NETMGR_LOG_E("RDB create retry");
+            NativeRdb::RdbHelper::DeleteRdbStore(config);
+            rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+            if (rdbStore == nullptr) {
+                return NETMANAGER_ERROR;
+            }
+        } else {
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    std::string createTable =
+        CREATE_TABLE_IF_NOT_EXISTS + NETMANAGER_DB_UID_ACCESS_POLICY_TABLE + " (" + SQL_TABLE_COLUMS + ")";
+    rdbStore->ExecuteSql(createTable);
+
+    NETMGR_LOG_I("InitRdbStoreBackupDB end");
     return NETMANAGER_SUCCESS;
 }
 
@@ -127,13 +169,65 @@ int32_t NetAccessPolicyRDB::InsertData(NetAccessPolicyData policy)
             return NETMANAGER_ERROR;
         }
     }
+    InsertDataToBackDB(policy);
+    return NETMANAGER_SUCCESS;
+}
 
+int32_t NetAccessPolicyRDB::InsertDataToBackDB(NetAccessPolicyData policy)
+{
+    NETMGR_LOG_D("InsertDataToBackDB");
+    NativeRdb::RdbStoreConfig config(DATABASE_BACK_NAME);
+    NetAccessPolicyRDB::RdbDataOpenCallback helper;
+    int errCode = NETMANAGER_SUCCESS;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore =
+        NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("error: rdbStore is nullptr");
+        return NETMANAGER_ERROR;
+    }
+
+    int64_t id = 0;
+    NativeRdb::ValuesBucket policyValues;
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_UID, policy.uid);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_WIFI_POLICY, policy.wifiPolicy);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_CELLULAR_POLICY, policy.cellularPolicy);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_SET_FROM_CONFIG_FLAG, policy.setFromConfigFlag);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_IS_BROKER, 0);
+    int32_t ret = rdbStore->Insert(id, NETMANAGER_DB_UID_ACCESS_POLICY_TABLE, policyValues);
+    if (ret != NativeRdb::E_OK) {
+        ret = UpdateByUidToBackDB(policy.uid, policy);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("Update operation failed, result is %{public}d", ret);
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetAccessPolicyRDB::BackUpPolicyDB(const std::string &sourceDB, const std::string &targetDB)
+{
+    NETMGR_LOG_I("rdbStore BackUpPolicyDB start");
+    if (sourceDB.empty() || targetDB.empty()) {
+        NETMGR_LOG_E("sourceDB or targetDB is empty");
+        return NETMANAGER_ERROR;
+    }
+    int errCode = NETMANAGER_SUCCESS;
+    NativeRdb::RdbStoreConfig config(targetDB);
+    NetAccessPolicyRDB::RdbDataOpenCallback helper;
+    auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("RDB GetRdbStore failed, errCode: %{public}d", errCode);
+        return NETMANAGER_ERROR;
+    }
+    int ret = rdbStore->Restore(sourceDB);
+    NETMGR_LOG_I("rdbStore BackUpPolicyDB Restore ret: %{public}d", ret);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetAccessPolicyRDB::DeleteByUid(const int32_t uid)
 {
-    NETMGR_LOG_D("DeleteByUid");
+    NETMGR_LOG_I("DeleteByUid");
     int32_t ret = GetRdbStore();
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("error: rdbStore_ is nullptr");
@@ -145,6 +239,32 @@ int32_t NetAccessPolicyRDB::DeleteByUid(const int32_t uid)
     OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_UID_ACCESS_POLICY_TABLE};
     rdbPredicate.EqualTo(NetAccessPolicyRdbFiledConst::FILED_UID, std::to_string(uid));
     int32_t result = rdbStore_->Delete(deletedRows, rdbPredicate);
+    if (result != NativeRdb::E_OK) {
+        NETMGR_LOG_E("delete operation failed, result is %{public}d", result);
+        return result;
+    }
+    DeleteByUidToBackDB(uid);
+    return deletedRows;
+}
+
+int32_t NetAccessPolicyRDB::DeleteByUidToBackDB(const int32_t uid)
+{
+    NETMGR_LOG_I("DeleteByUidToBackDB");
+    NativeRdb::RdbStoreConfig config(DATABASE_BACK_NAME);
+    NetAccessPolicyRDB::RdbDataOpenCallback helper;
+    int errCode = NETMANAGER_SUCCESS;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore =
+        NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("error: rdbStore is nullptr");
+        return NETMANAGER_ERROR;
+    }
+
+    int32_t deletedRows = -1;
+    std::vector<std::string> whereArgs;
+    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_UID_ACCESS_POLICY_TABLE};
+    rdbPredicate.EqualTo(NetAccessPolicyRdbFiledConst::FILED_UID, std::to_string(uid));
+    int32_t result = rdbStore->Delete(deletedRows, rdbPredicate);
     if (result != NativeRdb::E_OK) {
         NETMGR_LOG_E("delete operation failed, result is %{public}d", result);
         return result;
@@ -173,6 +293,38 @@ int32_t NetAccessPolicyRDB::UpdateByUid(int32_t uid, NetAccessPolicyData policy)
 
     int32_t rowId = -1;
     int32_t result = rdbStore_->Update(rowId, policyValues, rdbPredicate);
+    if (result != NativeRdb::E_OK) {
+        NETMGR_LOG_E("Update operation failed. Result %{public}d", result);
+        return result;
+    }
+    UpdateByUidToBackDB(uid, policy);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetAccessPolicyRDB::UpdateByUidToBackDB(int32_t uid, NetAccessPolicyData policy)
+{
+    NETMGR_LOG_D("UpdateByUidToBackDB");
+    NativeRdb::RdbStoreConfig config(DATABASE_BACK_NAME);
+    NetAccessPolicyRDB::RdbDataOpenCallback helper;
+    int errCode = NETMANAGER_SUCCESS;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore =
+        NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("error: rdbStore is nullptr");
+        return NETMANAGER_ERROR;
+    }
+
+    OHOS::NativeRdb::RdbPredicates rdbPredicate{NETMANAGER_DB_UID_ACCESS_POLICY_TABLE};
+    rdbPredicate.EqualTo(NetAccessPolicyRdbFiledConst::FILED_UID, std::to_string(uid));
+
+    NativeRdb::ValuesBucket policyValues;
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_UID, uid);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_WIFI_POLICY, policy.wifiPolicy);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_CELLULAR_POLICY, policy.cellularPolicy);
+    policyValues.PutInt(NetAccessPolicyRdbFiledConst::FILED_SET_FROM_CONFIG_FLAG, policy.setFromConfigFlag);
+
+    int32_t rowId = -1;
+    int32_t result = rdbStore->Update(rowId, policyValues, rdbPredicate);
     if (result != NativeRdb::E_OK) {
         NETMGR_LOG_E("Update operation failed. Result %{public}d", result);
         return result;
