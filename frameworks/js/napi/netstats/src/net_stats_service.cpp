@@ -144,10 +144,9 @@ void NetStatsService::StartSysTimer()
         UpdateStatsDataInner();
     };
     netStatsSysTimer->SetCallbackInfo(callback);
-    netStatsSysTimer->SetName("netStats_data_persistence_timer");
+    netStatsSysTimer->SetName("netstats_data_persistence_timer");
     netStatsSysTimerId_ = MiscServices::TimeServiceClient::GetInstance()->CreateTimer(netStatsSysTimer);
     uint64_t todayStartTime = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 55)) * 1000;
-    NETMGR_LOG_I("time: %{public}lu", todayStartTime);
     MiscServices::TimeServiceClient::GetInstance()->StartTimer(netStatsSysTimerId_, todayStartTime);
     NETMGR_LOG_I("start netStatsSysTimerId_ success. value is %{public}" PRIu64, netStatsSysTimerId_);
 }
