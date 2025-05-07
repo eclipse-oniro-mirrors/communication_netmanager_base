@@ -23,13 +23,24 @@ import { BusinessError  }  from '@ohos.base';
 export default namespace connection {
   loadLibrary("connection_ani") 
 
+  class Cleaner {
+    private ptr: long = 0
+    constructor(ptr:long) {
+        this.ptr = ptr
+    }
+    native clean(): void
+  }
+
+  let destroyRegister = new FinalizationRegistry<Cleaner>((cleaner: Cleaner) => {cleaner.clean()})
+  let unregisterToken = new object()
+
   // type HttpRequest = http.HttpRequest;
 
   // type TCPSocket = socket.TCPSocket;
 
   // type UDPSocket = socket.UDPSocket;
 
-  // function createNetConnection(netSpecifier?: NetSpecifier, timeout?: int): NetConnection;
+  export native function createNetConnection(netSpecifier?: NetSpecifier, timeout?: int): NetConnection;
 
   export function getDefaultNet(callback: AsyncCallback<NetHandle>): void {
     let p1 = taskpool.execute((): NetHandle => {
@@ -193,8 +204,7 @@ export default namespace connection {
 
   export function enableAirplaneMode(callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute((): undefined => {
-        enableAirplaneModeSync();
-        return undefined;
+       return enableAirplaneModeSync();
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -206,8 +216,7 @@ export default namespace connection {
   export function enableAirplaneMode(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         taskpool.execute((): undefined => {
-            enableAirplaneModeSync();
-            return undefined;
+          return enableAirplaneModeSync();
         }).then(() => {
             resolve(undefined);
         }, (err: BusinessError): void => {
@@ -220,8 +229,7 @@ export default namespace connection {
 
   export function disableAirplaneMode(callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute((): undefined => {
-        disableAirplaneModeSync();
-        return undefined;
+      return disableAirplaneModeSync();
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -233,8 +241,7 @@ export default namespace connection {
   export function disableAirplaneMode(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         taskpool.execute((): undefined => {
-            disableAirplaneModeSync();
-            return undefined;
+          return disableAirplaneModeSync();
         }).then((content: NullishType) => {
             resolve(undefined);
         }, (err: BusinessError): void => {
@@ -243,13 +250,55 @@ export default namespace connection {
     });
   }
 
-  // function reportNetConnected(netHandle: NetHandle, callback: AsyncCallback<void>): void;
+  export function reportNetConnected(netHandle: NetHandle, callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): undefined => {
+        return reportNetConnectedSync(netHandle);
+    })
+    p1.then(() => {
+        callback(new BusinessError(), undefined);
+    }, (err: BusinessError): void => {
+        callback(err, undefined);
+    });
+  }
 
-  // function reportNetConnected(netHandle: NetHandle): Promise<void>;
+  export function reportNetConnected(netHandle: NetHandle): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        taskpool.execute((): undefined => {
+            return reportNetConnectedSync(netHandle);
+        }).then((content: NullishType) => {
+            resolve(undefined);
+        }, (err: BusinessError): void => {
+            reject(err);
+        });
+    });
+  }
 
-  // function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback<void>): void;
+  export native function reportNetConnectedSync(netHandle: NetHandle): void;
 
-  // function reportNetDisconnected(netHandle: NetHandle): Promise<void>;
+  export function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): undefined => {
+       return reportNetDisconnectedSync(netHandle)
+    })
+    p1.then(() => {
+        callback(new BusinessError(), undefined);
+    }, (err: BusinessError): void => {
+        callback(err, undefined);
+    });
+  }
+
+  export function reportNetDisconnected(netHandle: NetHandle): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        taskpool.execute((): undefined => {
+           return reportNetDisconnectedSync(netHandle);
+        }).then((content: NullishType) => {
+            resolve(undefined);
+        }, (err: BusinessError): void => {
+            reject(err);
+        });
+    });
+  }
+
+  export native function reportNetDisconnectedSync(netHandle: NetHandle): void;
 
   export function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void{
     let p1 = taskpool.execute((): Array<NetAddress> => {
@@ -376,7 +425,7 @@ export default namespace connection {
 
   export native function getGlobalHttpProxySync(): HttpProxy;
 
-  // function setAppHttpProxy(httpProxy: HttpProxy): void;
+  export native function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   export function setGlobalHttpProxy(httpProxy: HttpProxy, callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute((): undefined => {
@@ -407,17 +456,80 @@ export default namespace connection {
 
   export native function getPacUrl(): string;
 
-  // function addCustomDnsRule(host: string, ip: Array<string>, callback: AsyncCallback<void>): void;
+  export function addCustomDnsRule(host: string, ip: Array<string>, callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): undefined => {
+         return addCustomDnsRuleSync(host ,ip);
+    })
+    p1.then(() => {
+        callback(new BusinessError(), undefined);
+    }, (err: BusinessError): void => {
+        callback(err, undefined);
+    });
+  }
 
-  // function addCustomDnsRule(host: string, ip: Array<string>): Promise<void>;
+  export function addCustomDnsRule(host: string, ip: Array<string>): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute((): undefined => {
+          return addCustomDnsRuleSync(host, ip);
+      }).then(() => {
+          resolve(undefined);
+      }, (err: BusinessError): void => {
+          reject(err);
+      }); 
+    });
+  }
 
-  // function removeCustomDnsRule(host: string, callback: AsyncCallback<void>): void;
+  export native function addCustomDnsRuleSync(host: string, ip: Array<string>): void;
 
-  // function removeCustomDnsRule(host: string): Promise<void>;
+  export function removeCustomDnsRule(host: string, callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): undefined => {
+        return removeCustomDnsRuleSync(host);
+    })
+    p1.then(() => {
+        callback(new BusinessError(), undefined);
+    }, (err: BusinessError): void => {
+        callback(err, undefined);
+    });
+  }
 
-  // function clearCustomDnsRules(callback: AsyncCallback<void>): void;
+  export function removeCustomDnsRule(host: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute((): undefined => {
+          return removeCustomDnsRuleSync(host)
+      }).then(() => {
+          resolve(undefined);
+      }, (err: BusinessError): void => {
+          reject(err);
+      }); 
+    });
+  }
 
-  // function clearCustomDnsRules(): Promise<void>;
+  export native function removeCustomDnsRuleSync(host:string): void;
+
+  export function clearCustomDnsRules(callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): undefined => {
+         return clearCustomDnsRulesSync();
+    })
+    p1.then(() => {
+        callback(new BusinessError(), undefined);
+    }, (err: BusinessError): void => {
+        callback(err, undefined);
+    });
+  }
+
+  export function clearCustomDnsRules(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      taskpool.execute((): undefined => {
+          return clearCustomDnsRulesSync();
+      }).then(() => {
+          resolve(undefined);
+      }, (err: BusinessError): void => {
+          reject(err);
+      }); 
+    });
+  }
+
+  export native function clearCustomDnsRulesSync(): void;
 
   export native function factoryResetSync():void;
 
@@ -434,21 +546,79 @@ export default namespace connection {
   }
 
   export interface NetConnection {
-  //  on(type: 'netAvailable', callback: Callback<NetHandle>): void;
+      on(type: 'netAvailable' | 'netBlockStatusChange' | 'netCapabilitiesChange' | 'netConnectionPropertiesChange' | 'netLost' | 'netUnavailable' , callback: Object): void;
 
-  //  on(type: 'netBlockStatusChange', callback: Callback<NetBlockStatusInfo>): void;
+      register(callback: AsyncCallback<void>): void;
 
-  //  on(type: 'netCapabilitiesChange', callback: Callback<NetCapabilityInfo>): void;
+      unregister(callback: AsyncCallback<void>): void;
+  }
 
-  //  on(type: 'netConnectionPropertiesChange', callback: Callback<NetConnectionPropertyInfo>): void;
+  class NetConnectionInner implements NetConnection{
+    private  nativePtr:long = 0;
+    private cleaner: Cleaner | null = null;
 
-  //  on(type: 'netLost', callback: Callback<NetHandle>): void;
+    constructor(context:long) {
+        if(this.nativePtr == 0){
+             this.nativePtr = context;
+        }
+        this.registerCleaner(this.nativePtr)
+    }
 
-  //  on(type: 'netUnavailable', callback: Callback<void>): void;
+    registerCleaner(ptr: long): void {
+        this.cleaner = new Cleaner(ptr)
+        destroyRegister.register(this, this.cleaner!, unregisterToken);
+    }
+    unregisterCleaner(): void {
+        destroyRegister.unregister(unregisterToken);
+    }
 
-  //  register(callback: AsyncCallback<void>): void;
+    on(type: 'netAvailable' | 'netBlockStatusChange' | 'netCapabilitiesChange' | 'netConnectionPropertiesChange' | 'netLost' | 'netUnavailable' , callback: Object): void {
+      if (type == 'netAvailable') {
+        this.onNetAvailable(callback as Callback<NetHandle>);
+      } else if (type == 'netBlockStatusChange') {
+        this.onNetBlockStatusChange(callback as Callback<NetBlockStatusInfo>);
+      } else if (type == 'netCapabilitiesChange') {
+        this.onNetCapabilitiesChange(callback as Callback<NetCapabilityInfo>);
+      } else if (type == 'netConnectionPropertiesChange') {
+        this.onNetConnectionPropertiesChange(callback as Callback<NetConnectionPropertyInfo>);
+      } else if (type == 'netLost') {
+        this.onNetLost(callback as Callback<NetHandle>);
+      } else if (type == 'netUnavailable') {
+        this.onNetUnavailable(callback as Callback<void>);
+      }
+    }
 
-  //  unregister(callback: AsyncCallback<void>): void;
+    native onNetAvailable(callback: Callback<NetHandle>):void;
+    native onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>):void;
+    native onNetCapabilitiesChange(callback: Callback<NetCapabilityInfo>):void;
+    native onNetConnectionPropertiesChange(callback: Callback<NetConnectionPropertyInfo>):void;
+    native onNetLost(callback: Callback<NetHandle>):void;
+    native onNetUnavailable(callback: Callback<void>):void;
+
+    native registerSync():void;
+    register(callback: AsyncCallback<void>): void {
+      let p1 = taskpool.execute((): undefined => {
+         return this.registerSync();
+      })
+      p1.then(() => {
+          callback(new BusinessError(), undefined);
+      }, (err: BusinessError): void => {
+          callback(err, undefined);
+      });
+    }
+
+    native unregisterSync():void;
+
+    unregister(callback: AsyncCallback<void>): void {
+      let p1 = taskpool.execute((): undefined => {
+         return this.unregisterSync();
+      })
+      p1.then(() => {
+          callback(new BusinessError(), undefined);
+      }, (err: BusinessError): void => {
+          callback(err, undefined);
+      });
+    }
   }
 
   export interface NetSpecifier {
@@ -474,13 +644,39 @@ export default namespace connection {
 
     // getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
-    // getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
+    getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
 
-    // getAddressByName(host: string): Promise<NetAddress>;
+    getAddressByName(host: string): Promise<NetAddress>;
   }
 
   export class NetHandleInner implements NetHandle{
     netId: int;
+    static { loadLibrary("connection_ani") }
+
+    native getAddressByNameSync(host:string): NetAddress;
+
+    getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void {
+      let p1 = taskpool.execute((): NetAddress => {
+        return this.getAddressByNameSync(host);
+      })
+      p1.then((content: NullishType) => {
+          callback(new BusinessError(), content as NetAddress);
+      }, (err: BusinessError): void => {
+          callback(err, new NetAddressInner);
+      });
+    }
+
+    getAddressByName(host: string): Promise<NetAddress> {
+      return new Promise<NetAddress>((resolve, reject) => {
+        taskpool.execute((): NetAddress => {
+            return this.getAddressByNameSync(host);
+        }).then((content: NullishType) => {
+            resolve(content as NetAddress);
+        }, (err: BusinessError): void => {
+            reject(err);
+        });
+    });
+    }
   }
 
   export interface NetCapabilities {
@@ -656,18 +852,32 @@ function main() {
     // console.log(err);
     // console.log(handle);
     //})
-    let net_handle = connection.getDefaultNetSync();
-    connection.setGlobalHttpProxy({
-      host: "192.168.1.3",
-      port: 443,
-      exclusionList : new Array<string>,
-    }, (err) => {
+
+    let w = connection.createNetConnection();
+    console.log(w);
+    w.on('netAvailable', (n:connection.NetHandle) => {
+      console.log("netavailable");
+      console.log(n);
+    })
+
+    w.on('netLost', (n:connection.NetHandle) => {
+      console.log("netlost")
+      console.log(n);
+    })
+
+    w.on('netAvailable', (n:connection.NetHandle) => {
+      console.log("netavailable");
+      console.log(n);
+    })
+
+    w.register((err) => {
       console.log(err);
     });
-
-    connection.getGlobalHttpProxy((err, ret) => {
-      console.log(ret);
-    });
+    
+    w.unregister((err) => {
+      console.log(err);
+    })
+    
   } catch(e:BusinessError) {
     console.log(e.code);
     console.log(e);

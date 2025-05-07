@@ -40,8 +40,8 @@ macro_rules! bind {
         ];
 
         let path = unsafe { CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
-        let class = env.find_class(path).unwrap();
-        env.bind_class_methods(class, &functions).unwrap();
+        let class = $en.find_class(path).unwrap();
+        $en.bind_class_methods(class, &functions).unwrap();
     }};
 }
 

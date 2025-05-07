@@ -11,8 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnection")]
-pub struct NetConnection {}
+#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnectionInner")]
+pub struct NetConnection {
+    pub native_ptr: i64,
+}
+
+#[ani_rs::ani(path = "L@ohos/net/connection/connection/Cleaner")]
+pub struct Cleaner {
+    pub native_ptr: i64,
+}
 
 #[ani_rs::ani(path = "L@ohos/net/connection/connection/NetSpecifier")]
 pub struct NetSpecifier {
@@ -78,7 +85,9 @@ pub enum NetBearType {
 #[ani_rs::ani(path = "L@ohos/net/connection/connection/ConnectionPropertiesInner")]
 pub struct ConnectionProperties {
     pub interface_name: String,
+
     pub domains: String,
+
     pub link_addresses: Vec<LinkAddress>,
 
     pub dnses: Vec<NetAddress>,

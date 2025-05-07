@@ -15,10 +15,13 @@
 
 #include "connection_ani.h"
 #include "cxx.h"
+#include "http_proxy.h"
 #include "inet_addr.h"
+#include "net_conn_client.h"
 #include "net_handle.h"
 #include "net_link_info.h"
 #include "netmanager_secure_data.h"
+#include "refbase.h"
 #include "wrapper.rs.h"
 #include <memory>
 #include <string>
@@ -112,7 +115,7 @@ HttpProxy GetGlobalHttpProxy(int32_t &ret)
     };
 }
 
-int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy)
+NetManagerStandard::HttpProxy ConvertHttpProxy(const HttpProxy &httpProxy)
 {
     NetManagerStandard::HttpProxy nativeHttpProxy;
     nativeHttpProxy.SetHost(std::string(httpProxy.host));
@@ -131,7 +134,19 @@ int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy)
     password.append(httpProxy.password.data(), httpProxy.password.size());
     nativeHttpProxy.SetPassword(password);
 
+    return nativeHttpProxy;
+}
+
+int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    NetManagerStandard::HttpProxy nativeHttpProxy = ConvertHttpProxy(httpProxy);
     return NetManagerStandard::NetConnClient::GetInstance().SetGlobalHttpProxy(nativeHttpProxy);
+}
+
+int32_t SetAppHttpProxy(const HttpProxy &httpProxy)
+{
+    NetManagerStandard::HttpProxy nativeHttpProxy = ConvertHttpProxy(httpProxy);
+    return NetManagerStandard::NetConnClient::GetInstance().SetAppHttpProxy(nativeHttpProxy);
 }
 
 // Cxx has to have a &mut argument to return a &mut type
@@ -140,20 +155,38 @@ NetManagerStandard::NetConnClient &GetNetConnClient(int32_t &nouse)
     return NetManagerStandard::NetConnClient::GetInstance();
 }
 
-int32_t isDefaultNetMetered(bool &isMetered)
+int32_t IsDefaultNetMetered(bool &isMetered)
 {
     return NetManagerStandard::NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
+};
+
+RouteInfo ConvertRouteInfo(NetManagerStandard::Route &route)
+{
+    return RouteInfo{
+        .interface = route.iface_,
+        .destination =
+            LinkAddress{
+                .address =
+                    NetAddress{
+                        .address = route.destination_.address_,
+                        .family = route.destination_.family_,
+                        .port = route.destination_.port_,
+                    },
+                .prefix_length = route.destination_.prefixlen_,
+            },
+        .gateway =
+            NetAddress{
+                .address = route.gateway_.address_,
+                .family = route.gateway_.family_,
+                .port = route.gateway_.port_,
+            },
+        .has_gateway = route.hasGateway_,
+        .is_default_route = route.isDefaultRoute_,
+    };
 }
 
-ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
+ConnectionProperties ConvertConnectionProperties(NetManagerStandard::NetLinkInfo &info)
 {
-    NetManagerStandard::NetHandle netHandle;
-    netHandle.SetNetId(net_id);
-    NetManagerStandard::NetLinkInfo info;
-    ret = NetManagerStandard::NetConnClient::GetInstance().GetConnectionProperties(netHandle, info);
-    if (ret != 0) {
-        return ConnectionProperties{};
-    }
     rust::vec<LinkAddress> linkAddresses;
     for (const auto &addr : info.netAddrList_) {
         LinkAddress linkAddress{
@@ -167,7 +200,6 @@ ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
         };
         linkAddresses.push_back(linkAddress);
     }
-
     rust::vec<NetAddress> dnses;
     for (const auto &dns : info.dnsList_) {
         NetAddress dnsAddress{
@@ -179,32 +211,11 @@ ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
     }
 
     rust::vec<RouteInfo> routes;
-    for (const auto &route : info.routeList_) {
-        RouteInfo routeInfo{
-            .interface = route.iface_,
-            .destination =
-                LinkAddress{
-                    .address =
-                        NetAddress{
-                            .address = route.destination_.address_,
-                            .family = route.destination_.family_,
-                            .port = route.destination_.port_,
-                        },
-                    .prefix_length = route.destination_.prefixlen_,
-                },
-            .gateway =
-                NetAddress{
-                    .address = route.gateway_.address_,
-                    .family = route.gateway_.family_,
-                    .port = route.gateway_.port_,
-                },
-            .has_gateway = route.hasGateway_,
-            .is_default_route = route.isDefaultRoute_,
-        };
-        routes.push_back(routeInfo);
+    for (auto &route : info.routeList_) {
+        routes.push_back(ConvertRouteInfo(route));
     }
 
-    ConnectionProperties connectionProperties{
+    return ConnectionProperties{
         .interface_name = info.ifaceName_,
         .domains = info.domain_,
         .link_addresses = linkAddresses,
@@ -212,10 +223,22 @@ ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
         .routes = routes,
         .mtu = info.mtu_,
     };
-    return connectionProperties;
 }
 
-rust::vec<NetAddress> getAddressesByName(const std::string &host, int32_t netId, int32_t &ret)
+ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
+{
+    NetManagerStandard::NetHandle netHandle;
+    netHandle.SetNetId(net_id);
+    NetManagerStandard::NetLinkInfo info;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetConnectionProperties(netHandle, info);
+    if (ret != 0) {
+        return ConnectionProperties{};
+    }
+
+    return ConvertConnectionProperties(info);
+}
+
+rust::vec<NetAddress> GetAddressesByName(const std::string &host, int32_t netId, int32_t &ret)
 {
     std::vector<NetManagerStandard::INetAddr> addrList;
     rust::vec<NetAddress> addresses;
@@ -233,6 +256,109 @@ rust::vec<NetAddress> getAddressesByName(const std::string &host, int32_t netId,
         addresses.push_back(address);
     }
     return addresses;
+}
+
+NetAddress GetAddressByName(const std::string &host, int32_t netId, int32_t &ret)
+{
+    NetManagerStandard::INetAddr addr;
+    ret = NetManagerStandard::NetConnClient::GetInstance().GetAddressByName(host, netId, addr);
+    if (ret != 0) {
+        return NetAddress{};
+    }
+    return NetAddress{
+        .address = addr.address_,
+        .family = addr.family_,
+        .port = addr.port_,
+    };
+}
+
+void NetDetection(int32_t netId, int32_t &ret)
+{
+    NetManagerStandard::NetHandle netHandle;
+    netHandle.SetNetId(netId);
+    ret = NetManagerStandard::NetConnClient::GetInstance().NetDetection(netHandle);
+}
+
+NetCoonCallback::NetCoonCallback(rust::Box<ConnCallback> callback) : inner_(std::move(callback)) {}
+
+int32_t NetCoonCallback::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHandle)
+{
+    NetHandle handle{
+        .net_id = netHandle->GetNetId(),
+    };
+    return inner_->on_net_available(handle);
+}
+
+int32_t NetCoonCallback::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
+                                               const sptr<NetManagerStandard::NetAllCapabilities> &netAllCap)
+{
+    rust::vec<NetManagerStandard::NetCap> networkCap;
+    for (auto &cap : netAllCap->netCaps_) {
+        networkCap.push_back(cap);
+    }
+    rust::vec<NetManagerStandard::NetBearType> bearerTypes;
+    for (auto &bearerType : netAllCap->bearerTypes_) {
+        bearerTypes.push_back(bearerType);
+    }
+
+    NetCapabilityInfo info{
+        .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
+        .net_cap =
+            NetCapabilities{
+                .linkUpBandwidthKbps = netAllCap->linkUpBandwidthKbps_,
+                .linkDownBandwidthKbps = netAllCap->linkDownBandwidthKbps_,
+                .networkCap = networkCap,
+                .bearerTypes = bearerTypes,
+            },
+    };
+    return inner_->on_net_capabilities_change(info);
+}
+
+int32_t NetCoonCallback::NetConnectionPropertiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
+                                                       const sptr<NetManagerStandard::NetLinkInfo> &linkInfo)
+{
+    NetConnectionPropertyInfo info{
+        .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
+        .connection_properties = ConvertConnectionProperties(*linkInfo),
+    };
+    return inner_->on_net_connection_properties_change(info);
+}
+
+int32_t NetCoonCallback::NetLost(sptr<NetManagerStandard::NetHandle> &netHandle)
+{
+    return inner_->on_net_lost(NetHandle{.net_id = netHandle->GetNetId()});
+}
+
+int32_t NetCoonCallback::NetUnavailable()
+{
+    return inner_->on_net_unavailable();
+}
+
+int32_t NetCoonCallback::NetBlockStatusChange(sptr<NetManagerStandard::NetHandle> &netHandle, bool blocked)
+{
+    NetBlockStatusInfo info{
+        .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
+        .blocked = blocked,
+    };
+    return inner_->on_net_block_status_change(info);
+}
+
+std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret)
+{
+    auto callback = sptr<NetCoonCallback>::MakeSptr(std::move(Connection));
+    ret = NetManagerStandard::NetConnClient::GetInstance().RegisterNetConnCallback(callback);
+    if (ret != 0) {
+        return nullptr;
+    }
+    auto unregisterHandle = std::make_unique<UnregisterHandle>(callback);
+    return unregisterHandle;
+}
+
+UnregisterHandle::UnregisterHandle(sptr<NetCoonCallback> callback) : callback_(callback) {}
+
+int32_t UnregisterHandle::Unregister()
+{
+    return NetManagerStandard::NetConnClient::GetInstance().UnregisterNetConnCallback(callback_);
 }
 
 } // namespace NetManagerAni
