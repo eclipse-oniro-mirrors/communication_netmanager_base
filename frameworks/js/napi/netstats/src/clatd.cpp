@@ -286,7 +286,8 @@ int32_t Clatd::ReadV6Packet(msghdr &msgHdr, ssize_t &readLen)
         isSocketClosed_ = true;
         return NETMANAGER_ERR_OPERATION_FAILED;
     } else if (static_cast<size_t>(readLen) >= sizeof(ClatdReadV6Buf)) {
-        NETNATIVE_LOGW("recvmsg failed: packet oversize, readLen: %{public}zu, sizeof(ClatdReadV6Buf): %{public}zu", static_cast<size_t>(readLen), sizeof(ClatdReadV6Buf));
+        NETNATIVE_LOGW("recvmsg failed: packet oversize, readLen: %{public}zu, sizeof(ClatdReadV6Buf): %{public}zu",
+            static_cast<size_t>(readLen), sizeof(ClatdReadV6Buf));
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;
