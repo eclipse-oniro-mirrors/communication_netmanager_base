@@ -52,6 +52,11 @@ config("netsys_native_manager_config") {
 }
 
 netsys_native_manager_sources = [
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/clatd.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/data_receiver.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/dns_resolv_listen.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/netlink_manager.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/netlink_socket_diag.cpp",
   "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
   "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
   "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_net_diag_data.cpp",
@@ -72,7 +77,6 @@ netsys_native_manager_sources = [
   "src/manager/vpn_manager.cpp",
   "src/net_diag_callback_proxy.cpp",
   "src/netsys/clat_utils.cpp",
-  "src/netsys/clatd.cpp",
   "src/netsys/clatd_packet_converter.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
   "src/netsys/dnsresolv/dns_proxy_listen.cpp",
@@ -80,7 +84,6 @@ netsys_native_manager_sources = [
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
   "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
   "src/netsys/dnsresolv/dns_resolv_config.cpp",
-  "src/netsys/dnsresolv/dns_resolv_listen.cpp",
   "src/netsys/dnsresolv/net_dns_health_callback_proxy.cpp",
   "src/netsys/dnsresolv/net_dns_health_callback_stub.cpp",
   "src/netsys/dnsresolv/net_dns_result_callback_proxy.cpp",
@@ -94,13 +97,10 @@ netsys_native_manager_sources = [
   "src/netsys/net_manager_native.cpp",
   "src/netsys/netlink_msg.cpp",
   "src/netsys/netlink_socket.cpp",
-  "src/netsys/netlink_socket_diag.cpp",
   "src/netsys/netsys_network.cpp",
   "src/netsys/netsys_udp_transfer.cpp",
   "src/netsys/physical_network.cpp",
   "src/netsys/virtual_network.cpp",
-  "src/netsys/wrapper/data_receiver.cpp",
-  "src/netsys/wrapper/netlink_manager.cpp",
   "src/netsys/wrapper/netsys_event_message.cpp",
   "src/netsys/wrapper/wrapper_decoder.cpp",
   "src/netsys/wrapper/wrapper_distributor.cpp",
@@ -171,7 +171,7 @@ ohos_shared_library("netsys_native_manager") {
   if (netmanager_base_enable_feature_sysvpn) {
     cflags += [ "-DSUPPORT_SYSVPN" ]
     cflags_cc += [ "-DSUPPORT_SYSVPN" ]
-    sources += [ "src/netsys/system_vpn_wrapper.cpp" ]
+    sources += [ "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/system_vpn_wrapper.cpp" ]
   }
   deps = netsys_native_manager_deps
 
