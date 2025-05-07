@@ -47,6 +47,7 @@ ohos_unittest("net_stats_mock_data") {
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
@@ -62,6 +63,7 @@ ohos_unittest("net_stats_mock_data") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
+    "time_service:time_client",
   ]
 
   defines = [
@@ -137,6 +139,7 @@ ohos_unittest("net_stats_manager_test") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
@@ -153,6 +156,7 @@ ohos_unittest("net_stats_manager_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
+    "time_service:time_client",
   ]
 
   defines = [
@@ -220,6 +224,7 @@ ohos_unittest("net_stats_cached_service_test") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
@@ -236,11 +241,14 @@ ohos_unittest("net_stats_cached_service_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
+    "time_service:time_client",
   ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "private = public",
+    "protected = public",
   ]
 
   if (enable_netmgr_debug) {
@@ -294,6 +302,7 @@ ohos_unittest("net_stats_service_common_test") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:dataobs_manager",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
@@ -310,11 +319,14 @@ ohos_unittest("net_stats_service_common_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
+    "time_service:time_client",
   ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "private = public",
+    "protected = public",
   ]
 
   if (enable_netmgr_debug) {

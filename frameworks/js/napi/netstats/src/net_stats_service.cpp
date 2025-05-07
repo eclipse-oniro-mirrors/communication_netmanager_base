@@ -61,6 +61,7 @@
 #include "networkshare_client.h"
 #include "networkshare_constants.h"
 #endif // SUPPORT_NETWORK_SHARE
+#include "system_timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -72,6 +73,7 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
 };
 constexpr uint32_t DEFAULT_UPDATE_TRAFFIC_INFO_CYCLE_MS = 30 * 60 * 1000;
 constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
+constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
@@ -111,6 +113,7 @@ void NetStatsService::OnStart()
         return;
     }
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(TIME_SERVICE_ID);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
@@ -124,10 +127,47 @@ void NetStatsService::OnStart()
     NetManagerCenter::GetInstance().RegisterStatsService(baseService);
 }
 
+void NetStatsService::StartSysTimer()
+{
+    NETMGR_LOG_I("NetStatsService StartSysTimer()");
+    if (netStatsSysTimerId_ != 0) {
+        NETMGR_LOG_E("netStatsSysTimerId_ is not zero, value is %{public}" PRIu64, netStatsSysTimerId_);
+        return;
+    }
+    std::shared_ptr<NetmanagerSysTimer> netStatsSysTimer =
+        std::make_unique<NetmanagerSysTimer>(true, DAY_MILLISECONDS, true);
+    std::function<void()> callback = [this]() {
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+        NetStatsRDB netStats;
+        netStats.BackUpNetStatsFreqDB(NOTICE_DATABASE_NAME, NOTICE_DATABASE_BACK_NAME);
+#endif // SUPPORT_TRAFFIC_STATISTIC
+        UpdateStatsDataInner();
+    };
+    netStatsSysTimer->SetCallbackInfo(callback);
+    netStatsSysTimer->SetName("netstats_data_persistence_timer");
+    netStatsSysTimerId_ = MiscServices::TimeServiceClient::GetInstance()->CreateTimer(netStatsSysTimer);
+    uint64_t todayStartTime = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 55)) * 1000;
+    MiscServices::TimeServiceClient::GetInstance()->StartTimer(netStatsSysTimerId_, todayStartTime);
+    NETMGR_LOG_I("start netStatsSysTimerId_ success. value is %{public}" PRIu64, netStatsSysTimerId_);
+}
+
+void NetStatsService::StopSysTimer()
+{
+    if (netStatsSysTimerId_ == 0) {
+        NETMGR_LOG_W("netStatsSysTimerId_ is zero");
+        return;
+    }
+    MiscServices::TimeServiceClient::GetInstance()->StopTimer(netStatsSysTimerId_);
+    MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(netStatsSysTimerId_);
+    netStatsSysTimerId_ = 0;
+    NETMGR_LOG_I("stop netStatsSysTimerId_ success");
+}
+
 void NetStatsService::OnStop()
 {
     state_ = STATE_STOPPED;
     registerToService_ = true;
+    StopSysTimer();
 }
 
 int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -153,6 +193,10 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 #endif // SUPPORT_TRAFFIC_STATISTIC
     if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
         RefreshUidStatsFlag(DELAY_US);
+        return;
+    }
+    if (systemAbilityId == TIME_SERVICE_ID) {
+        StartSysTimer();
         return;
     }
     RegisterCommonEvent();
@@ -515,6 +559,18 @@ int32_t NetStatsService::UpdateStatsData()
     }
     netStatsCached_->ForceUpdateStats();
     NETMGR_LOG_D("End UpdateStatsData.");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsService::UpdateStatsDataInner()
+{
+    NETMGR_LOG_I("Enter UpdateStatsDataInner.");
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netStatsCached_->ForceUpdateStats();
+    NETMGR_LOG_I("End UpdateStatsDataInner.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1564,8 +1620,8 @@ void NetStatsService::UpdateTrafficLimitDate(int32_t simId)
     auto info = settingsTrafficMap_[simId];
     statsData.simId = simId;
     statsData.monWarningDate = info.second->lastMonAlertTime;
-    statsData.dayNoticeDate = info.second->lastMonNotifyTime;
-    statsData.monNoticeDate = info.second->lastDayNotifyTime;
+    statsData.dayNoticeDate = info.second->lastDayNotifyTime;
+    statsData.monNoticeDate = info.second->lastMonNotifyTime;
     statsData.monWarningState = info.second->isCanNotifyMonthlyLimit;
     statsData.dayNoticeState = info.second->isCanNotifyDailyMark;
     statsData.monNoticeState = info.second->isCanNotifyMonthlyMark;

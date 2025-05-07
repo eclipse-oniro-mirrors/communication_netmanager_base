@@ -54,6 +54,20 @@ HWTEST_F(NetAccessPolicyRDBTest, InitRdbStore001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetAccessPolicyRDBTest, InitRdbStoreBackupDB001, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.InitRdbStoreBackupDB();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, BackUpPolicyDB001, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.BackUpPolicyDB(DATABASE_NAME, DATABASE_BACK_NAME);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetAccessPolicyRDBTest, InsertData001, TestSize.Level1)
 {
     NetAccessPolicyData policy;
@@ -61,6 +75,16 @@ HWTEST_F(NetAccessPolicyRDBTest, InsertData001, TestSize.Level1)
     policy.wifiPolicy = 64;
     NetAccessPolicyRDB netAccessPolicy;
     auto ret = netAccessPolicy.InsertData(policy);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, InsertDataToBackDB001, TestSize.Level1)
+{
+    NetAccessPolicyData policy;
+    policy.uid = 10001;
+    policy.wifiPolicy = 64;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.InsertDataToBackDB(policy);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -72,6 +96,17 @@ HWTEST_F(NetAccessPolicyRDBTest, UpdateByUid001, TestSize.Level1)
     policy.wifiPolicy = 64;
     NetAccessPolicyRDB netAccessPolicy;
     auto ret = netAccessPolicy.UpdateByUid(uid, policy);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, UpdateByUidToBackDB001, TestSize.Level1)
+{
+    uint32_t uid = 10001;
+    NetAccessPolicyData policy;
+    policy.uid = uid;
+    policy.wifiPolicy = 64;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.UpdateByUidToBackDB(uid, policy);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -117,6 +152,14 @@ HWTEST_F(NetAccessPolicyRDBTest, DeleteByUid001, TestSize.Level1)
     uint32_t uid = 10000;
     NetAccessPolicyRDB netAccessPolicy;
     auto ret = netAccessPolicy.DeleteByUid(uid);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, DeleteByUidToBackDB001, TestSize.Level1)
+{
+    uint32_t uid = 10001;
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.DeleteByUidToBackDB(uid);
     EXPECT_EQ(ret, 1);
 }
 

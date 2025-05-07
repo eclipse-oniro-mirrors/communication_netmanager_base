@@ -47,11 +47,16 @@ NetStatsCached::NetStatsCached()
 
 int32_t NetStatsCached::StartCached()
 {
-    auto ret = CreatNetStatsTables();
+    auto retBackup = CreatNetStatsTables(NET_STATS_DATABASE_BACK_PATH);
+    if (retBackup != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("CreatNetStatsTables error. ret: %{public}d", retBackup);
+    }
+    auto ret = CreatNetStatsTables(NET_STATS_DATABASE_PATH);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("CreatNetStatsTables error. ret: %{public}d", ret);
         return ret;
     }
+
 #ifndef UNITTEST_FORBID_FFRT
     cacheTimer_ = std::make_unique<FfrtTimer>();
     writeTimer_ = std::make_unique<FfrtTimer>();
@@ -64,9 +69,15 @@ int32_t NetStatsCached::StartCached()
         }
     });
     writeTimer_->StartPro(STATS_PACKET_CYCLE_MS, this, [](void *netStatsCachedPtr) -> void {
+        NETMGR_LOG_I("NetStatsCached write timer start");
         if (netStatsCachedPtr != nullptr) {
             NetStatsCached *netStatsCached = reinterpret_cast<NetStatsCached *>(netStatsCachedPtr);
             netStatsCached->WriteStats();
+            auto handler = std::make_unique<NetStatsDataHandler>();
+            bool ret = handler->BackupNetStatsData(NET_STATS_DATABASE_PATH, NET_STATS_DATABASE_BACK_PATH);
+            if (!ret) {
+                NETMGR_LOG_E("BackupNetStatsData error");
+            }
         } else {
             NETMGR_LOG_E("not NetStatsCached obj");
         }
@@ -75,9 +86,10 @@ int32_t NetStatsCached::StartCached()
     return ret;
 }
 
-int32_t NetStatsCached::CreatNetStatsTables()
+int32_t NetStatsCached::CreatNetStatsTables(const std::string &tableName)
 {
-    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    NETMGR_LOG_I("Create table : %{public}s", tableName.c_str());
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(tableName);
     int8_t curRetryTimes = 0;
     int32_t ret = -1;
     while (curRetryTimes < RETRY_TIME) {
@@ -113,6 +125,7 @@ int32_t NetStatsCached::CreatNetStatsTables()
         return STATS_ERR_CREATE_TABLE_FAIL;
     }
     helper->Upgrade();
+    NETMGR_LOG_I("Create table end: %{public}s", tableName.c_str());
     return NETMANAGER_SUCCESS;
 }
 
@@ -469,6 +482,27 @@ void NetStatsCached::ForceUpdateStats()
     };
     if (!isExec_) {
         ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
+    }
+}
+
+void NetStatsCached::ForceUpdateStatsAndBackupDB(const std::string &sourceDb, const std::string &backupDb)
+{
+    isForce_ = true;
+    std::function<void()> netCachedStats = [this, sourceDb, backupDb] () {
+        isExecBackUp_ = true;
+        CacheStats();
+        WriteStats();
+        isForce_ = false;
+        LoadIfaceNameIdentMaps();
+        isExecBackUp_ = false;
+        auto handler = std::make_unique<NetStatsDataHandler>();
+        bool ret = handler->BackupNetStatsData(sourceDb, backupDb);
+        if (!ret) {
+            NETMGR_LOG_E("BackupNetStatsData error");
+        }
+    };
+    if (!isExecBackUp_) {
+        ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats_backup"));
     }
 }
 

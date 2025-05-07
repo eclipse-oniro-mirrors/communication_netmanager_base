@@ -62,6 +62,7 @@ NetStatsDatabaseHelper::NetStatsDatabaseHelper(const std::string &path)
         return;
     }
     Open(path);
+    path_ = path;
 }
 
 NetStatsDatabaseHelper::~NetStatsDatabaseHelper()
@@ -78,15 +79,22 @@ int32_t NetStatsDatabaseHelper::ExecSql(const std::string &sql, void *recv, SqlC
     lock.unlock();
     NETMGR_LOG_D("EXEC SQL : %{public}s", sql.c_str());
     if (errMsg != nullptr) {
-        NETMGR_LOG_E("Exec sql failed err:%{public}s", errMsg);
+        NETMGR_LOG_E("Exec sql failed err:%{public}s, path: %{public}s", errMsg, path_.c_str());
         sqlite3_free(errMsg);
     }
-    return ret == SQLITE_OK ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp == SQLITE_OK && rettmp != ret) {
+        std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+        int32_t ret = sqlite3_exec(sqlite_, sql.c_str(), callback, recv, &errMsg);
+        lock.unlock();
+    }
+    
+    return rettmp == SQLITE_OK ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
 int32_t NetStatsDatabaseHelper::CreateTable(const std::string &tableName, const std::string &tableInfo)
 {
-    std::string sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + tableInfo + ");";
+    std::string sql = CREATE_TABLE_IF_NOT_EXISTS + tableName + "(" + tableInfo + ");";
     int32_t ret = ExecSql(sql, nullptr, sqlCallback);
     if (ret != NETMANAGER_SUCCESS) {
         return STATS_ERR_CREATE_TABLE_FAIL;
@@ -116,9 +124,13 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     std::string sql = "INSERT INTO " + tableName + " (" + paramList + ") " + "VALUES" + " (" + params + ") ";
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     if (paramCount == UID_PARAM_NUM) {
@@ -151,9 +163,13 @@ int32_t NetStatsDatabaseHelper::SelectData(std::vector<NetStatsInfo> &infos, con
     std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Date >= ?" + " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindInt64(idx, start);
@@ -177,9 +193,13 @@ int32_t NetStatsDatabaseHelper::SelectData(const uint32_t uid, uint64_t start, u
                       " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindInt64(idx, uid);
@@ -202,9 +222,13 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, uint64_t st
                       " AND t.Date >= ?" + " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindText(idx, iface);
@@ -227,9 +251,13 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
                       " AND t.Date >= ?" + " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindInt64(idx, uid);
@@ -257,9 +285,13 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
         "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Ident = ?" + " AND t.Date >= ?" + " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindText(idx, ident);
@@ -282,9 +314,13 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const ui
                       " AND t.Date <= ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindInt64(idx, uid);
@@ -316,9 +352,13 @@ int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_
     std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_WRITE_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     statement_.BindInt64(idx, uid);
@@ -364,7 +404,7 @@ int32_t NetStatsDatabaseHelper::ClearData(const std::string &tableName)
 int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
 {
     int32_t rc = statement_.Step();
-    NETMGR_LOG_I("Step result:%{public}d", rc);
+    NETMGR_LOG_D("Step result:%{public}d", rc);
     while (rc != SQLITE_DONE) {
         if (rc != SQLITE_ROW) {
             NETMGR_LOG_E("sqlite step error: %{public}d", rc);
@@ -524,9 +564,13 @@ int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std
     std::string sql = "SELECT * FROM " + std::string(VERSION_TABLE) + " WHERE Name = ?;";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
-    if (ret != SQLITE_OK) {
+    int32_t rettmp = DeleteAndBackup(ret);
+    if (rettmp != SQLITE_OK) {
         NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
+    }
+    if (rettmp != ret) {
+        statement_.Prepare(sqlite_, sql);
     }
     int32_t idx = 1;
     ret = statement_.BindText(idx, tableName);
@@ -565,6 +609,73 @@ int32_t NetStatsDatabaseHelper::UpdateDataFlag(const std::string &tableName, uin
     std::string sql =
         "UPDATE " + tableName + " SET Flag = " + std::to_string(newFlag) + " WHERE Flag = " + std::to_string(oldFlag);
     return ExecSql(sql, nullptr, sqlCallback);
+}
+
+bool NetStatsDatabaseHelper::BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb)
+{
+    NETMGR_LOG_I("BackupNetStatsData start");
+    sqlite3* source = nullptr;
+    sqlite3* backup = nullptr;
+    int32_t ret = sqlite3_open(sourceDb.c_str(), &source);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("sqlite3_open failed ret:%{public}d", ret);
+        return false;
+    }
+    ret = sqlite3_open(backupDb.c_str(), &backup);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("sqlite3_open failed ret:%{public}d", ret);
+        return false;
+    }
+
+    sqlite3_backup* pBackup = sqlite3_backup_init(backup, "main", source, "main");
+    int rc = -1;
+    if (pBackup) {
+        while ((rc = sqlite3_backup_step(pBackup, -1)) == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
+            if (rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
+                break;
+            }
+        }
+        if (rc != SQLITE_DONE) {
+            NETMGR_LOG_E("Backup failed: %{public}s, ret: %{public}d", sqlite3_errmsg(backup), rc);
+        } else {
+            NETMGR_LOG_E("Backup completed successfully");
+        }
+        sqlite3_backup_finish(pBackup);
+    } else {
+        NETMGR_LOG_E("Failed to initialize backup: %{public}s", sqlite3_errmsg(backup));
+    }
+
+    sqlite3_close(source);
+    sqlite3_close(backup);
+    return (rc == SQLITE_DONE);
+}
+
+bool NetStatsDatabaseHelper::BackupNetStatsDataDB(const std::string &sourceDb, const std::string &backupDb)
+{
+    NETMGR_LOG_I("BackupNetStatsDataDB");
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    bool ret = BackupNetStatsData(sourceDb, backupDb);
+    return ret;
+}
+
+int32_t NetStatsDatabaseHelper::DeleteAndBackup(int32_t errCode)
+{
+    if (errCode != SQLITE_NOTADB || (path_ != NET_STATS_DATABASE_BACK_PATH &&
+        path_ != NET_STATS_DATABASE_PATH)) {
+        return errCode;
+    }
+    if (path_.find(NET_STATS_DATABASE_BACK_PATH) != std::string::npos) {
+        CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
+        return errCode;
+    }
+
+    CommonUtils::DeleteFile(NET_STATS_DATABASE_PATH);
+    bool backupRet = BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
+    if (backupRet) {
+        return SQLITE_OK;
+    }
+    
+    return errCode;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

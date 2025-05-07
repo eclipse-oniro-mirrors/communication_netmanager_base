@@ -22,6 +22,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr int NETMANAGER_ERROR = -1;
 constexpr int NETSYS_SUCCESS = 0;
+constexpr const char* CREATE_TABLE_IF_NOT_EXISTS = "CREATE TABLE IF NOT EXISTS ";
 
 enum {
     NETMANAGER_COMMON = 0x00,

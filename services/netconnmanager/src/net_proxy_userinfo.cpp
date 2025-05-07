@@ -21,6 +21,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "rdb_common.h"
+#include "net_manager_constants.h"
 
 using namespace OHOS::NativeRdb;
 using namespace OHOS::NetManagerStandard;
@@ -36,7 +37,7 @@ static const std::string NETCONNPROXY_PASS_COL = "pass";
 static const std::string NETCONNPROXY_PRIMARY_KEY = "ProxyPasswd";
 static const std::string NETCONNPROXY_BUNDLENAME = "net_conn_permission";
 
-static const std::string CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + NETCONNPROXY_TABLE_NAME + " (" +
+static const std::string CREATE_TABLE = CREATE_TABLE_IF_NOT_EXISTS + NETCONNPROXY_TABLE_NAME + " (" +
                                         NETCONNPROXY_PRIM_KEY_COL + " TEXT PRIMARY KEY, " + NETCONNPROXY_HOST_COL +
                                         " TEXT, " + NETCONNPROXY_PASS_COL + " TEXT);";
 

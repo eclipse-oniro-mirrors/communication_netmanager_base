@@ -25,6 +25,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace NetStatsDatabaseDefines {
 constexpr const char *NET_STATS_DATABASE_PATH = "/data/service/el1/public/netmanager/net_stats_data.db";
+constexpr const char *NET_STATS_DATABASE_BACK_PATH = "/data/service/el1/public/netmanager/net_stats_data_back.db";
 constexpr const char *VERSION_TABLE_CREATE_PARAM =
     "Name CHAR(20) NOT NULL UNIQUE,"
     "Version INTEGER NOT NULL DEFAULT 0";

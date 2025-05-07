@@ -32,7 +32,6 @@ namespace {
 [[maybe_unused]] const int32_t RDB_VERSION_0 = 0;
 const int32_t RDB_VERSION_1 = 1;
 const int32_t RDB_VERSION_2 = 2;
-const std::string DATABASE_NAME = "/data/service/el1/public/netmanager/net_stats_notice_freq.db";
 const std::string NETMANAGER_DB_SIMID_STATS_TABLE = "uid_stats_infos";
 const std::string SQL_TABLE_COLUMS = std::string(
     "simId INTEGER NOT NULL PRIMARY KEY, "
@@ -72,34 +71,101 @@ void NetStatsRDB::RdbDataOpenCallback::UpgradeDbVersionTo(NativeRdb::RdbStore &s
 
 int32_t NetStatsRDB::GetRdbStore()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (rdbStore_ != nullptr) {
         return NETMANAGER_SUCCESS;
     }
 
     int errCode = NETMANAGER_SUCCESS;
-    NativeRdb::RdbStoreConfig config(DATABASE_NAME);
+    NativeRdb::RdbStoreConfig config(NOTICE_DATABASE_NAME);
     NetStatsRDB::RdbDataOpenCallback helper;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
-    if (rdbStore_ == nullptr) {
-        NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    if (rdbStore_ != nullptr) {
+        NETMGR_LOG_E("RDB GetRdbStore success");
+        return NETMANAGER_SUCCESS;
     }
+    NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
+    if (errCode == NativeRdb::E_SQLITE_CORRUPT) {
+        int rettmp = NativeRdb::RdbHelper::DeleteRdbStore(config);
+        NETMGR_LOG_E("rdbStore_ DeleteRdbStore ret: %{public}d", rettmp);
+        rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+        if (rdbStore_ != nullptr) {
+            int restorRet = rdbStore_->Restore(NOTICE_DATABASE_BACK_NAME);
+            NETMGR_LOG_E("RDB Restore restorRet: %{public}d", restorRet);
+            if (restorRet == 0) {
+                NETMGR_LOG_E("RDB rdbStore success");
+                return NETMANAGER_SUCCESS;
+            }
+        }
+    }
+    return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+}
 
+int32_t NetStatsRDB::BackUpNetStatsFreqDB(const std::string &sourceDB, const std::string &targetDB)
+{
+    NETMGR_LOG_E("RDB rdbStore BackUpNetStatsFreqDB start");
+    if (sourceDB.empty() || targetDB.empty()) {
+        NETMGR_LOG_E("sourceDB or targetDB is empty");
+        return NETMANAGER_ERROR;
+    }
+    int errCode = NETMANAGER_SUCCESS;
+    NativeRdb::RdbStoreConfig config(targetDB);
+    NetStatsRDB::RdbDataOpenCallback helper;
+    auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("RDB GetRdbStore failed, errCode: %{public}d", errCode);
+        return NETMANAGER_ERROR;
+    }
+    int ret = rdbStore->Restore(sourceDB);
+    NETMGR_LOG_E("RDB rdbStore BackUpNetStatsFreqDB Restore ret: %{public}d", ret);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsRDB::InitRdbStore()
 {
+    InitRdbStoreBackupDB();
+    NETMGR_LOG_I("RDB NetStatsRDB InitRdbStore start");
     int32_t ret = GetRdbStore();
     if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_I("RDB NetStatsRDB InitRdbStore NETMANAGER_SUCCESS");
         return ret;
     }
 
     std::string createTable =
-        "CREATE TABLE IF NOT EXISTS " + NETMANAGER_DB_SIMID_STATS_TABLE + " (" + SQL_TABLE_COLUMS + ")";
+        CREATE_TABLE_IF_NOT_EXISTS + NETMANAGER_DB_SIMID_STATS_TABLE + " (" + SQL_TABLE_COLUMS + ")";
     int ret0 = rdbStore_->ExecuteSql(createTable);
-
     NETMGR_LOG_I("InitRdbStore ret = %{public}d", ret0);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsRDB::InitRdbStoreBackupDB()
+{
+    NETMGR_LOG_I("InitRdbStoreBackupDB start");
+    int errCode = NETMANAGER_SUCCESS;
+    NativeRdb::RdbStoreConfig config(NOTICE_DATABASE_BACK_NAME);
+    NetStatsRDB::RdbDataOpenCallback helper;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore =
+        NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+    if (rdbStore == nullptr) {
+        NETMGR_LOG_E("RDB create failed, errCode: %{public}d", errCode);
+        if (errCode == NativeRdb::E_SQLITE_CORRUPT) {
+            NETMGR_LOG_E("RDB create retry");
+            NativeRdb::RdbHelper::DeleteRdbStore(config);
+            rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, RDB_VERSION_2, helper, errCode);
+            if (rdbStore == nullptr) {
+                return NETMANAGER_ERROR;
+            }
+        } else {
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    std::string createTable =
+        CREATE_TABLE_IF_NOT_EXISTS + NETMANAGER_DB_SIMID_STATS_TABLE + " (" + SQL_TABLE_COLUMS + ")";
+    int ret = rdbStore->ExecuteSql(createTable);
+    NETMGR_LOG_I("InitRdbStore ret = %{public}d", ret);
+
+    NETMGR_LOG_I("InitRdbStoreBackupDB end");
     return NETMANAGER_SUCCESS;
 }
 

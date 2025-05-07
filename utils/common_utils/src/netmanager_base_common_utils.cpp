@@ -865,4 +865,35 @@ bool IpToString(uint32_t ipAddr, std::string &ipStrAddr)
     ipStrAddr = std::string(bufIp);
     return true;
 }
+
+int32_t GetTodayMidnightTimestamp(int hour, int min, int sec)
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t nowClock = std::chrono::system_clock::to_time_t(now);
+    std::tm* localTime = std::localtime(&nowClock);
+    if (localTime == nullptr) {
+        NETMGR_LOG_E("localTime is nullptr");
+        return 0;
+    }
+    localTime->tm_hour = hour;
+    localTime->tm_min = min;
+    localTime->tm_sec = sec;
+
+    std::time_t endOfDayTime = std::mktime(localTime);
+    auto timeXth = std::chrono::system_clock::from_time_t(endOfDayTime);
+    auto timestamp = std::chrono::system_clock::to_time_t(timeXth);
+
+    return timestamp;
+}
+
+void DeleteFile(const std::string &filePath)
+{
+    std::filesystem::path path = filePath;
+    if (std::filesystem::exists(path)) {
+        std::filesystem::remove(path);
+        NETMGR_LOG_I("file deleted success.");
+    } else {
+        NETMGR_LOG_E("file does not exist.");
+    }
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils

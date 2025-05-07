@@ -41,6 +41,7 @@
 #include "net_policy_listener.h"
 #include "net_access_policy_dialog.h"
 #include "os_account_manager.h"
+#include "system_timer.h"
 
 #ifdef __LP64__
 const std::string LIB_LOAD_PATH = "/system/lib64/libnet_access_policy_dialog.z.so";
@@ -55,6 +56,7 @@ namespace {
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
 constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
+constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();

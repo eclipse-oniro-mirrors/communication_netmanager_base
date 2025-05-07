@@ -44,6 +44,7 @@ public:
     int32_t UpdateSimStatsFlag(uint32_t uid, uint32_t flag);
     int32_t UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag);
     int32_t ClearData();
+    int32_t BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb);
 
 private:
     bool isDisplayTrafficAncoList = false;

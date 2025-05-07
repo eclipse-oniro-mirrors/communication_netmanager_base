@@ -40,6 +40,9 @@ namespace NetAccessPolicyRdbFiledConst {
     constexpr int32_t FILED_COLUMN_INDEX_THREE = 3;
 }
 
+constexpr const char* DATABASE_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy.db";
+constexpr const char* DATABASE_BACK_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy_back.db";
+
 typedef struct NetAccessPolicyData {
     int32_t uid;
     int32_t wifiPolicy;
@@ -57,6 +60,12 @@ public:
     int32_t InsertData(NetAccessPolicyData policy);
     int32_t DeleteByUid(const int32_t uid);
     int32_t UpdateByUid(int32_t uid, NetAccessPolicyData policy);
+    int32_t BackUpPolicyDB(const std::string &sourceDB, const std::string &targetDB);
+    int32_t InitRdbStoreBackupDB();
+    int32_t InsertDataToBackDB(NetAccessPolicyData policy);
+    int32_t DeleteByUidToBackDB(const int32_t uid);
+    int32_t UpdateByUidToBackDB(int32_t uid, NetAccessPolicyData policy);
+
     bool IsRdbNull()
     {
         return rdbStore_ == nullptr;

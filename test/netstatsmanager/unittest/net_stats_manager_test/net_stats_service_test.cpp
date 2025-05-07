@@ -28,9 +28,12 @@
 #include "net_stats_callback_test.h"
 #include "net_stats_constants.h"
 #include "net_stats_service.h"
+#include "net_stats_database_defines.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+using namespace NetStatsDatabaseDefines;
 namespace {
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 constexpr const char *ETH_IFACE_NAME = "lo";
@@ -317,6 +320,20 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsData001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsServiceTest, UpdateStatsDataInner001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.iface_ = "wlan1";
+    info.date_ = 115200;
+    info.rxBytes_ = 10000;
+    info.txBytes_ = 11000;
+    info.rxPackets_ = 1000;
+    info.txPackets_ = 1100;
+
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateStatsDataInner();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsServiceTest, GetCookieRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
@@ -431,6 +448,8 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsDataTest001, TestSize.Level1)
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
     netStatsService->netStatsCached_ = nullptr;
     int32_t ret = netStatsService->UpdateStatsData();
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    int32_t ret2 = netStatsService->UpdateStatsDataInner();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
@@ -588,5 +607,40 @@ HWTEST_F(NetStatsServiceTest, SetAppStatsTest001, TestSize.Level1)
     int32_t ret = netStatsService->SetAppStats(info);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+/**
+ * @tc.name: StartSysTimerTest001
+ * @tc.desc: Test NetStatsService StartSysTimer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, StartSysTimerTest001, TestSize.Level1)
+{
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 100;
+    DelayedSingleton<NetStatsService>::GetInstance()->StartSysTimer();
+    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 100);
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
+    DelayedSingleton<NetStatsService>::GetInstance()->StartSysTimer();
+    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+}
+
+/**
+ * @tc.name: StopSysTimerTest001
+ * @tc.desc: Test NetStatsService StopSysTimer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, StopSysTimerTest001, TestSize.Level1)
+{
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
+    DelayedSingleton<NetStatsService>::GetInstance()->StopSysTimer();
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 1000;
+    DelayedSingleton<NetStatsService>::GetInstance()->StopSysTimer();
+    EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+}
+
+HWTEST_F(NetStatsServiceTest, OnAddSystemAbilityTest001, TestSize.Level1)
+{
+    DelayedSingleton<NetStatsService>::GetInstance()->OnAddSystemAbility(TIME_SERVICE_ID, "10");
+    EXPECT_NE(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
