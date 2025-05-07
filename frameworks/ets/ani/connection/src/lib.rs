@@ -39,6 +39,7 @@ use ani_sys::{ani_native_function, ani_ref};
 ani_constructor!(
     namespace "L@ohos/net/connection/connection"
     [
+        "createNetConnection": connection::create_net_connection,
         "getDefaultNetSync" : connection::get_default_net,
         "getAllNetsSync" : connection::get_all_nets,
         "hasDefaultNetSync" : connection::has_default_net,
@@ -46,6 +47,7 @@ ani_constructor!(
         "getDefaultHttpProxySync": connection::get_default_http_proxy,
         "getGlobalHttpProxySync": connection::get_global_http_proxy,
         "setGlobalHttpProxySync": connection::set_global_http_proxy,
+        "setAppHttpProxy": connection::set_app_http_proxy,
         "enableAirplaneModeSync": connection::enable_airplane_mode,
         "disableAirplaneModeSync": connection::disable_airplane_mode,
         "getAppNetSync": connection::get_app_net,
@@ -56,5 +58,29 @@ ani_constructor!(
         "isDefaultNetMeteredSync" : connection::is_default_net_metered,
         "getConnectionPropertiesSync" : connection::get_connection_properties,
         "getAddressesByNameSync" : connection::get_addresses_by_name,
+        "reportNetConnectedSync" : connection::net_detection,
+        "reportNetDisconnectedSync" : connection::net_detection,
+        "clearCustomDnsRulesSync" : connection::clear_custom_dns_rules,
+        "addCustomDnsRuleSync" : connection::set_custom_dns_rule,
+        "removeCustomDnsRuleSync" : connection::remove_custom_dns_rule,
+    ]
+    class "L@ohos/net/connection/connection/NetHandleInner"
+    [
+        "getAddressByNameSync" : connection::get_address_by_name,
+    ]
+    class "L@ohos/net/connection/connection/NetConnectionInner"
+    [
+        "onNetAvailable": connection::on_net_available,
+        "onNetBlockStatusChange": connection::on_net_block_status_change,
+        "onNetCapabilitiesChange": connection::on_net_capabilities_change,
+        "onNetConnectionPropertiesChange": connection::on_net_connection_properties_change,
+        "onNetLost": connection::on_net_lost,
+        "onNetUnavailable": connection::on_net_unavailable,
+        "registerSync" : connection::register_network_change,
+        "unregisterSync" : connection::unregister_network_change,
+    ]
+    class "L@ohos/net/connection/connection/Cleaner"
+    [
+        "clean" : connection::connection_clean,
     ]
 );

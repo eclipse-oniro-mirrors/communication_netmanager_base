@@ -66,7 +66,6 @@ impl<'e, 'local, T> Callback<'local, T> {
     {
         let input = input.input(&env);
         env.function_object_call(&self.inner, &input)
-        
     }
 
     pub fn execute_current_thread<const N: usize>(
@@ -146,6 +145,18 @@ macro_rules! single_tuple_impl {
         }
 
     };
+}
+
+impl Input<0> for () {
+    fn input<'local>(&self, _env: &AniEnv<'local>) -> [AniRef<'local>; 0] {
+        []
+    }
+}
+
+impl InputVec for () {
+    fn input<'local>(&self, _env: &AniEnv<'local>) -> Vec<AniRef<'local>> {
+        vec![]
+    }
 }
 
 single_tuple_impl!(1 (0 A));

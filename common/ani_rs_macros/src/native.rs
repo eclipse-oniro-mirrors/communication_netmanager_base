@@ -23,10 +23,6 @@ use syn::{
 };
 
 pub(crate) fn entry(args: TokenStream2, item: TokenStream2, output: bool) -> Result<TokenStream2> {
-    const ENV: usize = 0;
-    const THIS: usize = 1;
-    const OBJ: usize = 2;
-
     let mut item = syn::parse2::<ItemFn>(item)?;
     let item_clone = item.clone();
 
@@ -50,6 +46,20 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2, output: bool) -> Res
                         #input
                         this,
                     };
+                } else if pat.ident.to_string() == "env" {
+                    input = quote! {
+                        #input
+                        &env,
+                    };
+                } else if pat.ident.to_string() == "callback" {
+                    input = quote! {
+                        #input
+                        callback,
+                    };
+                    sig = quote! {
+                        #sig
+                        #pat: ani_rs::objects::AniFnObject<'local>,
+                    }
                 } else {
                     let pat = pat.ident.clone();
                     block = quote! {

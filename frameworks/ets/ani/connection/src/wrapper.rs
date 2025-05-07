@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CStr;
+use std::ffi::{c_schar, CStr, CString};
 
+use crate::connection::{ConnCallback, Connection};
 use ani_rs::AniEnv;
 use ani_sys::ani_ref;
-use cxx::let_cxx_string;
-use ffi::NetHandle;
+use cxx::{let_cxx_string, UniquePtr};
+use ffi::{NetBlockStatusInfo, NetCapabilityInfo, NetConnectionPropertyInfo, NetHandle};
 use serde::{Deserialize, Serialize};
 
 use crate::bridge;
@@ -80,6 +81,14 @@ impl NetConnClient {
 
     pub fn set_global_http_proxy(proxy: bridge::HttpProxy) -> Result<(), i32> {
         let ret = ffi::SetGlobalHttpProxy(&proxy.into());
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn set_app_http_proxy(proxy: bridge::HttpProxy) -> Result<(), i32> {
+        let ret = ffi::SetAppHttpProxy(&proxy.into());
         if ret != 0 {
             return Err(ret);
         }
@@ -153,7 +162,7 @@ impl NetConnClient {
         let net_conn_client = ffi::GetNetConnClient(&mut 0);
 
         let mut is_metered = false;
-        let ret = ffi::isDefaultNetMetered(&mut is_metered);
+        let ret = ffi::IsDefaultNetMetered(&mut is_metered);
         if ret != 0 {
             return Err(ret);
         }
@@ -173,11 +182,148 @@ impl NetConnClient {
         let_cxx_string!(host = host);
 
         let mut ret = 0;
-        let addresses = ffi::getAddressesByName(&host, net_id, &mut ret);
+        let addresses = ffi::GetAddressesByName(&host, net_id, &mut ret);
         if ret != 0 {
             return Err(ret);
         }
         Ok(addresses.into_iter().map(Into::into).collect())
+    }
+
+    pub fn get_address_by_name(host: &str, net_id: i32) -> Result<bridge::NetAddress, i32> {
+        let_cxx_string!(host = host);
+
+        let mut ret = 0;
+        let address = ffi::GetAddressByName(&host, net_id, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(address.into())
+    }
+
+    pub fn bind_socket(fd: i32, net_id: i32) -> Result<(), i32> {
+        let net_conn_client = ffi::GetNetConnClient(&mut 0);
+
+        let ret = net_conn_client.BindSocket(fd, net_id);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn net_detection(net_id: i32) -> Result<(), i32> {
+        let mut ret = 0;
+        ffi::NetDetection(net_id, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn clear_custom_dns_rules() -> Result<(), i32> {
+        let ret = unsafe { predefined_host_clear_all_hosts() };
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn remove_custom_dns_rule(host: String) -> Result<(), i32> {
+        let Ok(c_host) = CString::new(host) else {
+            return Err(-1);
+        };
+        let ret = unsafe { predefined_host_remove_host(c_host.as_ptr()) };
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn set_custom_dns_rules(mut host: String, ips: Vec<String>) -> Result<(), i32> {
+        host.push(',');
+        for i in 0..ips.len() {
+            host.push_str(&ips[i]);
+            if (i < ips.len() - 1) {
+                host.push(',');
+            }
+        }
+        let Ok(c_host) = CString::new(host) else {
+            return Err(-1);
+        };
+
+        let ret = unsafe { predefined_host_set_hosts(c_host.as_ptr()) };
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+
+    pub fn register_net_conn_callback(
+        callback: Box<ConnCallback>,
+    ) -> Result<ConnUnregisterHandle, i32> {
+        let mut ret = 0;
+        let unregister = ffi::RegisterNetConnCallback(callback, &mut ret);
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(ConnUnregisterHandle { inner: unregister })
+    }
+}
+
+pub struct ConnUnregisterHandle {
+    inner: UniquePtr<ffi::UnregisterHandle>,
+}
+
+impl ConnUnregisterHandle {
+    pub fn unregister(&mut self) -> Result<(), i32> {
+        let ret = self.inner.pin_mut().Unregister();
+        if ret != 0 {
+            return Err(ret);
+        }
+        Ok(())
+    }
+}
+
+impl ConnCallback {
+    fn on_net_available(&self, handle: NetHandle) -> i32 {
+        if let Some(callback) = self.on_net_available.as_ref() {
+            callback.execute_collective((handle.into(),));
+        }
+        0
+    }
+
+    fn on_net_block_status_change(&self, status: NetBlockStatusInfo) -> i32 {
+        if let Some(callback) = self.on_net_block_status_change.as_ref() {
+            callback.execute_collective((status.into(),));
+        }
+        0
+    }
+
+    fn on_net_capabilities_change(&self, cap: NetCapabilityInfo) -> i32 {
+        if let Some(callback) = self.on_net_capabilities_change.as_ref() {
+            callback.execute_collective((cap.into(),));
+        }
+        0
+    }
+
+    fn on_net_connection_properties_change(&self, properties: NetConnectionPropertyInfo) -> i32 {
+        if let Some(callback) = self.on_net_connection_properties_change.as_ref() {
+            callback.execute_collective((properties.into(),));
+        }
+        0
+    }
+
+    fn on_net_lost(&self, handle: NetHandle) -> i32 {
+        if let Some(callback) = self.on_net_lost.as_ref() {
+            callback.execute_collective((handle.into(),));
+        }
+        0
+    }
+
+    fn on_net_unavailable(&self) -> i32 {
+        if let Some(callback) = self.on_net_unavailable.as_ref() {
+            callback.execute_collective(());
+        }
+        0
     }
 }
 
@@ -326,6 +472,33 @@ impl From<bridge::HttpProxy> for ffi::HttpProxy {
     }
 }
 
+impl From<ffi::NetBlockStatusInfo> for bridge::NetBlockStatusInfo {
+    fn from(value: ffi::NetBlockStatusInfo) -> Self {
+        bridge::NetBlockStatusInfo {
+            net_handle: value.net_handle.into(),
+            blocked: value.blocked,
+        }
+    }
+}
+
+impl From<ffi::NetCapabilityInfo> for bridge::NetCapabilityInfo {
+    fn from(value: ffi::NetCapabilityInfo) -> Self {
+        bridge::NetCapabilityInfo {
+            net_handle: value.net_handle.into(),
+            net_cap: value.net_cap.into(),
+        }
+    }
+}
+
+impl From<ffi::NetConnectionPropertyInfo> for bridge::NetConnectionPropertyInfo {
+    fn from(value: ffi::NetConnectionPropertyInfo) -> Self {
+        bridge::NetConnectionPropertyInfo {
+            net_handle: value.net_handle.into(),
+            connection_properties: value.connection_properties.into(),
+        }
+    }
+}
+
 #[cxx::bridge(namespace = "OHOS::NetManagerAni")]
 mod ffi {
 
@@ -355,11 +528,26 @@ mod ffi {
         pub net_id: i32,
     }
 
+    pub struct NetBlockStatusInfo {
+        pub net_handle: NetHandle,
+        pub blocked: bool,
+    }
+
     pub struct NetCapabilities {
         linkUpBandwidthKbps: i32,
         linkDownBandwidthKbps: i32,
         networkCap: Vec<NetCap>,
         bearerTypes: Vec<NetBearType>,
+    }
+
+    pub struct NetCapabilityInfo {
+        pub net_handle: NetHandle,
+        pub net_cap: NetCapabilities,
+    }
+
+    pub struct NetConnectionPropertyInfo {
+        pub net_handle: NetHandle,
+        pub connection_properties: ConnectionProperties,
     }
 
     pub struct HttpProxy {
@@ -405,7 +593,18 @@ mod ffi {
         pub mtu: i32,
     }
 
-    extern "Rust" {}
+    extern "Rust" {
+        type ConnCallback;
+
+        fn on_net_available(&self, handle: NetHandle) -> i32;
+        fn on_net_block_status_change(&self, status: NetBlockStatusInfo) -> i32;
+        fn on_net_capabilities_change(&self, cap: NetCapabilityInfo) -> i32;
+        fn on_net_connection_properties_change(&self, properties: NetConnectionPropertyInfo)
+            -> i32;
+        fn on_net_lost(&self, handle: NetHandle) -> i32;
+        fn on_net_unavailable(&self) -> i32;
+    }
+
     unsafe extern "C++" {
         include!("connection_ani.h");
         include!("net_all_capabilities.h");
@@ -417,6 +616,10 @@ mod ffi {
         #[namespace = "OHOS::NetManagerStandard"]
         type NetConnClient;
 
+        type UnregisterHandle;
+
+        fn Unregister(self: Pin<&mut UnregisterHandle>) -> i32;
+
         fn GetDefaultNetHandle(ret: &mut i32) -> NetHandle;
         fn GetAllNets(ret: &mut i32) -> Vec<NetHandle>;
         fn HasDefaultNet(ret: &mut i32) -> bool;
@@ -425,6 +628,7 @@ mod ffi {
         fn GetDefaultHttpProxy(ret: &mut i32) -> HttpProxy;
         fn GetGlobalHttpProxy(ret: &mut i32) -> HttpProxy;
         fn SetGlobalHttpProxy(proxy: &HttpProxy) -> i32;
+        fn SetAppHttpProxy(proxy: &HttpProxy) -> i32;
 
         fn GetNetConnClient(_: &mut i32) -> Pin<&'static mut NetConnClient>;
 
@@ -434,7 +638,7 @@ mod ffi {
 
         fn SetAirplaneMode(self: Pin<&mut NetConnClient>, enable: bool) -> i32;
 
-        fn isDefaultNetMetered(is_metered: &mut bool) -> i32;
+        fn IsDefaultNetMetered(is_metered: &mut bool) -> i32;
 
         fn GetPacUrl(self: Pin<&mut NetConnClient>, pac_url: Pin<&mut CxxString>) -> i32;
 
@@ -444,6 +648,23 @@ mod ffi {
 
         fn GetConnectionProperties(net_id: i32, ret: &mut i32) -> ConnectionProperties;
 
-        fn getAddressesByName(host: &CxxString, net_id: i32, ret: &mut i32) -> Vec<NetAddress>;
+        fn GetAddressesByName(host: &CxxString, net_id: i32, ret: &mut i32) -> Vec<NetAddress>;
+
+        fn GetAddressByName(host: &CxxString, net_id: i32, ret: &mut i32) -> NetAddress;
+
+        fn BindSocket(self: Pin<&mut NetConnClient>, fd: i32, net_id: i32) -> i32;
+
+        fn NetDetection(net_id: i32, ret: &mut i32);
+
+        fn RegisterNetConnCallback(
+            connection: Box<ConnCallback>,
+            ret: &mut i32,
+        ) -> UniquePtr<UnregisterHandle>;
     }
+}
+
+extern "C" {
+    fn predefined_host_clear_all_hosts() -> i32;
+    fn predefined_host_remove_host(host: *const ::std::os::raw::c_char) -> i32;
+    fn predefined_host_set_hosts(host_ips: *const ::std::os::raw::c_char) -> i32;
 }
