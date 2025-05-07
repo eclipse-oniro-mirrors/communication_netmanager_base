@@ -1,6 +1,9 @@
 .idea
+target
 cmake-build-debug
 @ohos.net.http.d.ts
 @ohos.net.socket.d.ts
 CMakeLists.txt
 *.diff
+Cargo.lock
+.vscode
