@@ -78,7 +78,7 @@ bool PushStatsInfo::Marshalling(Parcel &parcel, const PushStatsInfo &info)
 
 PushStatsInfo* PushStatsInfo::Unmarshalling(Parcel &parcel)
 {
-    PushStatsInfo* stats = new (std::nothrow) PushStatsInfo();
+    std::unique_ptr<PushStatsInfo> stats = std::make_unique<PushStatsInfo>();
     if (stats == nullptr) {
         return nullptr;
     }
@@ -106,7 +106,7 @@ PushStatsInfo* PushStatsInfo::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(stats->txBytes_)) {
         return nullptr;
     }
-    return stats;
+    return stats.release();
 }
 
 bool PushStatsInfo::Unmarshalling(Parcel &parcel, PushStatsInfo &info)
