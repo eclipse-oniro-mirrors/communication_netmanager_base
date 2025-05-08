@@ -551,5 +551,29 @@ HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest002, TestSize.Level1)
     instance_.RegisterPolicyService(netPolicyService);
     EXPECT_EQ(instance_.ResetPolicyFactory(), NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetManagerCenterTest, IsUidNetAccessTest003, TestSize.Level1)
+{
+    sptr<NetPolicyBaseService> netPolicyService = new (std::nothrow) TestNetPolicyService();
+    instance_.RegisterPolicyService(netPolicyService);
+    bool ret = instance_.IsUidNetAccess(0, true);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetManagerCenterTest, IsUidNetAllowedTest003, TestSize.Level1)
+{
+    sptr<NetPolicyBaseService> netPolicyService = new (std::nothrow) TestNetPolicyService();
+    instance_.RegisterPolicyService(netPolicyService);
+    bool ret = instance_.IsUidNetAllowed(0, false);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetManagerCenterTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
+{
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    auto ret = instance_.RegisterNetFactoryResetCallback(nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -288,5 +288,59 @@ HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest007, TestSize.Level1)
     int32_t ret = dnsParCache.GetUserDefinedServerFlag(netId, flag);
     EXPECT_EQ(ret, -ENOENT);
 }
+
+HWTEST_F(DNSParamCacheTest, CreateCacheForNetTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("CreateCacheForNetTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+
+    dnsParCache.SetDefaultNetwork(netId);
+
+    int32_t ret = dnsParCache.CreateCacheForNet(netId, false);
+    EXPECT_EQ(ret, 0);
+
+    uint16_t netId2 = 2;
+    ret = dnsParCache.CreateCacheForNet(netId2, false);
+    EXPECT_EQ(ret, 0);
+
+    auto it1 = dnsParCache.serverConfigMap_.find(netId);
+    auto it2 = dnsParCache.serverConfigMap_.find(netId2);
+    EXPECT_NE(it1, dnsParCache.serverConfigMap_.end());
+    EXPECT_NE(it2, dnsParCache.serverConfigMap_.end());
+
+    uint16_t vpnNetId = 3;
+    ret = dnsParCache.CreateCacheForNet(vpnNetId, true);
+    EXPECT_EQ(ret, 0);
+
+    auto it3 = dnsParCache.serverConfigMap_.find(vpnNetId);
+    EXPECT_NE(it3, dnsParCache.serverConfigMap_.end());
+}
+
+HWTEST_F(DNSParamCacheTest, DestroyNetworkCacheTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("DestroyNetworkCacheTest001 enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+
+    dnsParCache.SetDefaultNetwork(netId);
+    dnsParCache.CreateCacheForNet(netId);
+
+    int32_t ret = dnsParCache.DestroyNetworkCache(netId, false);
+    EXPECT_EQ(ret, 0);
+
+    uint16_t netId2 = 2;
+    ret = dnsParCache.DestroyNetworkCache(netId2, false);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, SetUserDefinedServerFlagTest, TestSize.Level1)
+{
+    NETNATIVE_LOGI("CreateCacheForNetTest enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    int32_t ret = dnsParCache.SetUserDefinedServerFlag(netId, true);
+    EXPECT_EQ(ret, -EEXIST);
+}
 } // namespace NetsysNative
 } // namespace OHOS

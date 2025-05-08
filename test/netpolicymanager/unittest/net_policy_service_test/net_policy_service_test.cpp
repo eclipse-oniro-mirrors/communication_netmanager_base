@@ -291,5 +291,29 @@ HWTEST_F(UtNetPolicyService, GetSampleBundleInfosForActiveUser001, TestSize.Leve
     EXPECT_EQ(instance_->hasSARemoved_, false);
 }
 
+HWTEST_F(UtNetPolicyService, IsUidNetAllowed001, TestSize.Level1)
+{
+    instance_->netPolicyTraffic_ = nullptr;
+    std::string ifaceName = "faces";
+    bool isAllowed = true;
+    auto ret = instance_->IsUidNetAllowed(0, ifaceName, isAllowed);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(UtNetPolicyService, OnAddSystemAbility003, TestSize.Level1)
+{
+    int32_t systemAbilityId = BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
+    std::string deviceId = "";
+    instance_->OnAddSystemAbility(systemAbilityId, deviceId);
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
+HWTEST_F(UtNetPolicyService, OnNetSysRestart002, TestSize.Level1)
+{
+    instance_->netPolicyRule_ = nullptr;
+    instance_->OnNetSysRestart();
+    EXPECT_EQ(instance_->netPolicyRule_, nullptr);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -275,5 +275,49 @@ HWTEST_F(RouteUtilsTest, RouteUtilsBranchTest001, TestSize.Level1)
     std::string str = RouteUtils::MaskAddress("", prefixLen);
     EXPECT_EQ(str, "");
 }
+
+HWTEST_F(RouteUtilsTest, UpdateRoutes03, TestSize.Level1)
+{
+    NetLinkInfo nlio;
+    NetLinkInfo nlin;
+
+    nlio.routeList_.push_back(GetRoute());
+
+    nlin.routeList_.push_back(GetRoute2());
+
+    Route newRoute = GetRoute();
+    newRoute.destination_.address_ = "192.168.2.11";
+    newRoute.gateway_.address_ = "192.168.2.2";
+    nlin.routeList_.push_back(newRoute);
+
+    Route updatedRoute = GetRoute();
+    updatedRoute.rtnType_ = RTN_UNICAST;
+    nlin.routeList_.push_back(updatedRoute);
+
+    EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
+}
+
+HWTEST_F(RouteUtilsTest, UpdateRoutes04, TestSize.Level1)
+{
+    NetLinkInfo nlio;
+    NetLinkInfo nlin;
+
+    Route newRoute = GetRoute();
+    newRoute.destination_.address_ = "192.168.2.11";
+    newRoute.gateway_.address_ = "192.168.2.2";
+    nlin.routeList_.push_back(newRoute);
+
+    EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
+}
+
+HWTEST_F(RouteUtilsTest, ModifyRouteTest001, TestSize.Level1)
+{
+    Route route = {};
+    route.rtnType_ = INVALID_VALUE;
+    routeOperateType op = static_cast<routeOperateType>(2);
+    int32_t netId = 100;
+    int32_t ret = RouteUtils::ModifyRoute(op, netId, route);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

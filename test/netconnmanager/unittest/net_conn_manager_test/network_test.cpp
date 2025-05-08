@@ -1226,5 +1226,29 @@ HWTEST_F(NetworkTest, OH_NetConn_GetPacUrlTest001, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest003, TestSize.Level1)
+{
+    char host[] = "192.168.1.1";
+    char *serv = nullptr;
+    struct addrinfo info;
+    struct addrinfo *hint = &info;
+    struct addrinfo **res = &hint;
+    int32_t netId = -1;
+    auto ret = OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
+{
+    int32_t socketFd = 1;
+    NetConn_NetHandle netHandle = {1};
+    auto ret = OH_NetConn_BindSocket(socketFd, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    netHandle.netId = 99;
+    ret = OH_NetConn_BindSocket(socketFd, &netHandle);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
