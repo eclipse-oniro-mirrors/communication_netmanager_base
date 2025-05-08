@@ -308,5 +308,20 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(NetActivateTest, TimeOutNetAvailableTest001, TestSize.Level1)
+{
+    instance_->netServiceSupplied_ = nullptr;
+    instance_->TimeOutNetAvailable();
+    EXPECT_TRUE(instance_->GetNetCallback() == nullptr);
+}
+
+HWTEST_F(NetActivateTest, SetLastCallbackTypeTest001, TestSize.Level1)
+{
+    instance_->lastCallbackType_ = CALL_TYPE_AVAILABLE;
+    instance_->SetLastCallbackType(CALL_TYPE_UPDATE_CAP);
+    auto ret = instance_->GetLastCallbackType();
+    EXPECT_TRUE(ret == CALL_TYPE_AVAILABLE);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
