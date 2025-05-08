@@ -31,7 +31,7 @@ class TrafficLimitDialog {
 public:
     TrafficLimitDialog();
     ~TrafficLimitDialog();
-    bool PopUpTrafficLimitDialog();
+    bool PopUpTrafficLimitDialog(int32_t simId);
     bool DismissTrafficLimitDialog();
 
 private:

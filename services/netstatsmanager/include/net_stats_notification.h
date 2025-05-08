@@ -40,7 +40,7 @@ class NetMgrNetStatsLimitNotification {
 public:
     static NetMgrNetStatsLimitNotification &GetInstance(void);
 
-    void PublishNetStatsLimitNotification(int notificationId, bool isDaulCard);
+    void PublishNetStatsLimitNotification(int notificationId, int32_t simId, bool isDaulCard);
     void RegNotificationCallback(NetMgrStatsLimitNtfCallback callback);
 
 private:
@@ -57,10 +57,7 @@ private:
     std::string GetDayNotificationText();
     std::string GetMonthNotificationText();
     std::string GetMonthAlertText();
-    std::string GetNotificationTile(std::string &notificationType);
-    void SetMonthWarningActionButton(Notification::NotificationRequest &request);
-    void SetDayWarningActionButton(Notification::NotificationRequest &request);
-    void SetNotificationWant(int notificationId, Notification::NotificationRequest &request);
+    std::string GetNotificationTitle(std::string &notificationType);
     bool SetTitleAndText(int notificationId,
         std::shared_ptr<Notification::NotificationNormalContent> content, bool isDaulCard);
     std::string GetTrafficNum(double traffic);
@@ -71,6 +68,7 @@ private:
     std::string localeBaseName;
     std::mutex mutex_;
     const int NETMGR_TRAFFIC_NTF_CONTROL_FLAG = 0;
+    int32_t simId_ = 0;
 };
 }  // namespace NetManagerStandard
 }  // namespace OHOS

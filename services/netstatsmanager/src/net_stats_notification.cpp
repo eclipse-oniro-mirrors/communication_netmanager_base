@@ -58,9 +58,9 @@ static const int32_t TWO_CHAR = 2;
 static constexpr const char *KEY_STRING = "string";
 static constexpr const char *KEY_NAME = "name";
 static constexpr const char *KEY_VALUE = "value";
-static constexpr const char *KEY_NETWORK_MONTH_LIMIT_SIMGLE_TITLE = "netstats_excess_monthlimit_notofication_title";
-static constexpr const char *KEY_NETWORK_MONTH_MARK_SIMGLE_TITLE = "netstats_excess_monthmark_notofication_title";
-static constexpr const char *KEY_NETWORK_DAY_MARK_SIMGLE_TITLE = "netstats_excess_daymark_notofication_title";
+static constexpr const char *KEY_NETWORK_MONTH_LIMIT_SINGLE_TITLE = "netstats_excess_monthlimit_notofication_title";
+static constexpr const char *KEY_NETWORK_MONTH_MARK_SINGLE_TITLE = "netstats_excess_monthmark_notofication_title";
+static constexpr const char *KEY_NETWORK_DAY_MARK_SINGLE_TITLE = "netstats_excess_daymark_notofication_title";
 
 static constexpr const char *KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE = "netstats_excess_monthlimit_notofication_title_sub";
 static constexpr const char *KEY_NETWORK_MONTH_MARK_DUAL_TITLE = "netstats_excess_monthmark_notofication_title_sub";
@@ -138,6 +138,12 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
     }
 
     std::string resourcePath = LANGUAGE_RESOURCE_PARENT_PATH + languagePath + LANGUAGE_RESOURCE_CHILD_PATH;
+    char tmpPath[PATH_MAX] = { 0 };
+    if (!realpath(resourcePath.c_str(), tmpPath)) {
+        NETMGR_LOG_E("file name is illegal");
+        return;
+    }
+    resourcePath = tmpPath;
     NETMGR_LOG_I("UpdateResourceMap: resourcePath = %{public}s", resourcePath.c_str());
     if (!std::filesystem::exists(resourcePath)) {
         NETMGR_LOG_E("resource path not exist: %{public}s", resourcePath.c_str());
@@ -149,45 +155,45 @@ void NetMgrNetStatsLimitNotification::UpdateResourceMap()
 
 std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
 {
-    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetDayNotificationText");
-    int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-    auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
-    if (settingsObserverMap_.find(simId) == settingsObserverMap_.end()) {
-        NETMGR_LOG_I("settingsObserverMap_ has no simId key:: simId %{public}d", simId);
+    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetDayNotificationText, simId:%{public}d", simId_);
+    if (resourceMap.find(KEY_DAILY_NOTIFY_TEXT) == resourceMap.end() ||
+        resourceMap[KEY_DAILY_NOTIFY_TEXT].find("%s") == std::string::npos) {
+        NETMGR_LOG_E("GetDayNotificationText error");
+        return "";
+    }
+    
+    std::string outText = resourceMap[KEY_DAILY_NOTIFY_TEXT];
+    int32_t simId = simId_;
+    uint64_t traffic = 0;
+    uint16_t dayPercent = 0;
+    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetdailyMarkBySimId(simId, dayPercent);
+    DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyLimitBySimId(simId, traffic);
+    if (!ret) {
+        NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
     }
 
-    std::string outText = resourceMap[KEY_DAILY_NOTIFY_TEXT];
-    NETMGR_LOG_I("NetMgrNetStatsLimitNotification:: simId [%{public}d]", simId);
-    if (outText.find("%s") == std::string::npos) {
-        NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
-        return "";
-    }
-    uint64_t traffic = settingsObserverMap_[simId].second->monthlyLimit;
-    double dailyTraffic = traffic / 100.0 * settingsObserverMap_[simId].second->dailyMark;
+    double dailyTraffic = static_cast<double>(traffic) / 100 * dayPercent;
     std::string num = GetTrafficNum(dailyTraffic);
     outText = outText.replace(outText.find("%s"), TWO_CHAR, num);
-    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::outText [%{public}s]", outText.c_str());
+    NETMGR_LOG_I("NetMgrNetStatsLimitNotification::outText [%{public}s]", outText.c_str());
     return outText;
 }
 
 std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
 {
-    std::string outText;
-    
-    int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-
-    auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
-    if (settingsObserverMap_.find(simId) == settingsObserverMap_.end()) {
-        NETMGR_LOG_I("settingsObserverMap_ has no simId key:: simId %{public}d", simId);
+    if (resourceMap.find(KEY_MONTH_NOTIFY_TEXT) == resourceMap.end() ||
+        resourceMap[KEY_MONTH_NOTIFY_TEXT].find("%s") == std::string::npos) {
+        NETMGR_LOG_E("GetMonthNotificationText error");
         return "";
     }
+    std::string outText = resourceMap[KEY_MONTH_NOTIFY_TEXT];
 
-    int32_t monUsedPercent = settingsObserverMap_[simId].second->monthlyMark;
-    
-    outText = resourceMap[KEY_MONTH_NOTIFY_TEXT];
-    if (outText.find("%s") == std::string::npos) {
-        NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
+    int32_t simId = simId_;
+    uint16_t monUsedPercent = 0;
+    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyMarkBySimId(simId, monUsedPercent);
+    if (!ret) {
+        NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
     }
     outText = outText.replace(outText.find("%s"), TWO_CHAR, std::to_string(monUsedPercent) + "%");
@@ -197,41 +203,38 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
 
 std::string NetMgrNetStatsLimitNotification::GetMonthAlertText()
 {
-    std::string outText;
-    
-    int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-
-    auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
-    if (settingsObserverMap_.find(simId) == settingsObserverMap_.end()) {
-        NETMGR_LOG_I("settingsObserverMap_ has no simId key:: simId %{public}d", simId);
+    if (resourceMap.find(KEY_MONTH_LIMIT_TEXT) == resourceMap.end() ||
+        resourceMap[KEY_MONTH_LIMIT_TEXT].find("%s") == std::string::npos) {
+        NETMGR_LOG_E("GetMonthAlertText error");
         return "";
     }
 
-    // 检验simId是否合法
-    outText = resourceMap[KEY_MONTH_LIMIT_TEXT];
-    if (outText.find("%s") == std::string::npos) {
-        NETMGR_LOG_I("incorrect format [%{public}s]", outText.c_str());
+    std::string outText = resourceMap[KEY_MONTH_LIMIT_TEXT];
+    int32_t simId = simId_;
+    uint64_t traffic = 0;
+    bool ret = DelayedSingleton<NetStatsService>::GetInstance()->GetMonthlyLimitBySimId(simId, traffic);
+    NETMGR_LOG_I("GetMonthAlertText trafficLimit:%{public}" PRIu64 "", traffic);
+    if (!ret) {
         return "";
     }
-    std::string num = GetTrafficNum(settingsObserverMap_[simId].second->monthlyLimit);
+    std::string num = GetTrafficNum(static_cast<double>(traffic));
     outText = outText.replace(outText.find("%s"), TWO_CHAR, num);
+    NETMGR_LOG_I("GetMonthAlertText::outText [%{public}s]", outText.c_str());
     return outText;
 }
 
-std::string NetMgrNetStatsLimitNotification::GetNotificationTile(std::string &notificationType)
+std::string NetMgrNetStatsLimitNotification::GetNotificationTitle(std::string &notificationType)
 {
-    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetNotificationTile");
-    std::string outText;
-    int32_t simId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-
-    outText = resourceMap[notificationType];
-    
+    NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::GetNotificationTitle");
+    std::string outText = resourceMap[notificationType];
     if (outText.find("%d") == std::string::npos) {
         NETMGR_LOG_I("incorrect format %{public}s", outText.c_str());
         return "";
     }
+
+    int32_t simId = simId_;
     int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
-    NETMGR_LOG_I("GetNotificationTile. simId:%{public}d, slotId:%{public}d", simId, slotId);
+    NETMGR_LOG_I("GetNotificationTitle. simId:%{public}d, slotId:%{public}d", simId, slotId);
     outText = outText.replace(outText.find("%d"), TWO_CHAR, std::to_string(slotId + 1));
     return outText;
 }
@@ -239,39 +242,38 @@ std::string NetMgrNetStatsLimitNotification::GetNotificationTile(std::string &no
 bool NetMgrNetStatsLimitNotification::SetTitleAndText(
     int notificationId,
     std::shared_ptr<Notification::NotificationNormalContent> content,
-    bool isDaulCard)
+    bool isDualCard)
 {
     NETMGR_LOG_I("start NetMgrNetStatsLimitNotification::SetTitleAndText");
-    std::string strText;
     if (content == nullptr) {
-        NETMGR_LOG_I("content is null");
+        NETMGR_LOG_E("content is null");
         return false;
     }
 
     std::string title = "";
-    if (isDaulCard) {
+    if (isDualCard) {
         title = (notificationId == NETMGR_STATS_LIMIT_DAY) ? KEY_NETWORK_DAY_MARK_DUAL_TITLE : title;
         title = (notificationId == NETMGR_STATS_LIMIT_MONTH) ? KEY_NETWORK_MONTH_MARK_DUAL_TITLE : title;
         title = (notificationId == NETMGR_STATS_ALERT_MONTH) ? KEY_NETWORK_MONTH_LIMIT_DUAL_TITLE : title;
     } else {
-        title = (notificationId == NETMGR_STATS_LIMIT_DAY) ? KEY_NETWORK_DAY_MARK_SIMGLE_TITLE : title;
-        title = (notificationId == NETMGR_STATS_LIMIT_MONTH) ? KEY_NETWORK_MONTH_MARK_SIMGLE_TITLE : title;
-        title = (notificationId == NETMGR_STATS_ALERT_MONTH) ? KEY_NETWORK_MONTH_LIMIT_SIMGLE_TITLE : title;
+        title = (notificationId == NETMGR_STATS_LIMIT_DAY) ? KEY_NETWORK_DAY_MARK_SINGLE_TITLE : title;
+        title = (notificationId == NETMGR_STATS_LIMIT_MONTH) ? KEY_NETWORK_MONTH_MARK_SINGLE_TITLE : title;
+        title = (notificationId == NETMGR_STATS_ALERT_MONTH) ? KEY_NETWORK_MONTH_LIMIT_SINGLE_TITLE : title;
     }
 
     if (resourceMap.find(title) == resourceMap.end()) {
-        NETMGR_LOG_I("cannot get title from resources");
+        NETMGR_LOG_E("cannot get title from resources");
         return false;
     }
     std::string strTitle;
-    if (isDaulCard) {
-        strTitle = GetNotificationTile(title);
+    if (isDualCard) {
+        strTitle = GetNotificationTitle(title);
     } else {
         strTitle = resourceMap[title];
     }
-
     NETMGR_LOG_I("NetMgrNetStatsLimitNotification: strTitle = %{public}s", strTitle.c_str());
 
+    std::string strText;
     switch (notificationId) {
         case NETMGR_STATS_LIMIT_DAY:
             strText = GetDayNotificationText();
@@ -336,45 +338,41 @@ NetMgrNetStatsLimitNotification::~NetMgrNetStatsLimitNotification()
     NETMGR_LOG_I("NetMgr Notification destructor enter.");
 }
 
-void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notificationId, bool isDaulCard)
+void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notificationId, int simId, bool isDualCard)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    simId_ = simId;
     NETMGR_LOG_I("PublishNetMgrNetStatsLimitNotification: id = %{public}d", notificationId);
     UpdateResourceMap();
     std::shared_ptr<Notification::NotificationNormalContent> notificationContent =
         std::make_shared<Notification::NotificationNormalContent>();
     if (notificationContent == nullptr) {
-        NETMGR_LOG_I("get notification content nullptr");
+        NETMGR_LOG_E("get notification content nullptr");
         return;
     }
-    if (!SetTitleAndText(notificationId, notificationContent, isDaulCard)) {
-        NETMGR_LOG_I("error setting title and text");
+    if (!SetTitleAndText(notificationId, notificationContent, isDualCard)) {
+        NETMGR_LOG_E("error setting title and text");
         return;
     }
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(notificationContent);
     if (content == nullptr) {
-        NETMGR_LOG_I("get notification content nullptr");
+        NETMGR_LOG_E("get notification content nullptr");
         return;
     }
 
     Notification::NotificationRequest request;
     request.SetNotificationId(static_cast<int32_t>(notificationId));
     request.SetContent(content);
-
     request.SetCreatorUid(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     request.SetAutoDeletedTime(NTF_AUTO_DELETE_TIME);
     request.SetTapDismissed(true);
     request.SetSlotType(OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request.SetNotificationControlFlags(NETMGR_TRAFFIC_NTF_CONTROL_FLAG);
-
     request.SetLittleIcon(netmgrStatsLimitIconPixelMap_);
-
     int ret = Notification::NotificationHelper::PublishNotification(request);
     NETMGR_LOG_I("publish notification result = %{public}d", ret);
-
-    auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
 }
 
 void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNtfCallback callback)
@@ -403,4 +401,3 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 }
 }  // namespace NetManagerStandard
 }  // namespace OHOS
-
