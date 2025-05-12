@@ -40,6 +40,14 @@ pub struct GlobalCallback<T> {
     phantom: std::marker::PhantomData<T>,
 }
 
+impl<T> PartialEq for GlobalCallback<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+impl<T> Eq for GlobalCallback<T> {}
+
 impl<'e, 'local, T> Callback<'local, T> {
     pub fn new(inner: AniFnObject<'local>) -> Self {
         Self {
@@ -48,7 +56,7 @@ impl<'e, 'local, T> Callback<'local, T> {
         }
     }
 
-    pub fn into_global(self, env: AniEnv) -> Result<GlobalCallback<T>, AniError> {
+    pub fn into_global(self, env: &AniEnv) -> Result<GlobalCallback<T>, AniError> {
         let global = env.create_global_ref(self.inner.into())?;
         Ok(GlobalCallback {
             inner: Arc::new(GlobalDrop(global.into())),

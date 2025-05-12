@@ -26,7 +26,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ani::{AniDe, AniSer},
-    business_error,
     error::AniError,
     iterator::AniIter,
     objects::{
@@ -485,6 +484,50 @@ impl<'local> AniEnv<'local> {
             Err(AniError::from_code(msg, res))
         } else {
             Ok(AniRef::from_raw(result))
+        }
+    }
+
+    pub fn reference_equals(
+        &self,
+        a: &AniRef<'local>,
+        b: &AniRef<'local>,
+    ) -> Result<bool, AniError> {
+        let mut is_equal = 0u8;
+        let res = unsafe {
+            (**self.inner).Reference_Equals.unwrap()(
+                self.inner,
+                a.as_raw(),
+                b.as_raw(),
+                &mut is_equal as *mut _,
+            )
+        };
+        if res != 0 {
+            let msg = String::from("Failed to compare references");
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(is_equal == 1)
+        }
+    }
+
+    pub fn reference_strict_equals(
+        &self,
+        a: &AniRef<'local>,
+        b: &AniRef<'local>,
+    ) -> Result<bool, AniError> {
+        let mut is_equal = 0u8;
+        let res = unsafe {
+            (**self.inner).Reference_StrictEquals.unwrap()(
+                self.inner,
+                a.as_raw(),
+                b.as_raw(),
+                &mut is_equal as *mut _,
+            )
+        };
+        if res != 0 {
+            let msg = String::from("Failed to compare references");
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(is_equal == 1)
         }
     }
 

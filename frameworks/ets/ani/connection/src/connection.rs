@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    ffi::CStr,
-    mem::{self, ManuallyDrop},
-    net,
-};
+use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
     callback::{Callback, GlobalCallback},
     objects::{AniFnObject, AniObject, AniRef},
-    signature::CTOR,
-    AniDe, AniEnv, AniSer,
+    AniEnv,
 };
-use serde::{Deserialize, Serialize};
 
 use crate::{
     bridge::{
@@ -72,13 +66,13 @@ pub(crate) fn get_global_http_proxy() -> Result<HttpProxy, BusinessError> {
         .map_err(|e| BusinessError::new(e, format!("Failed to get global http proxy")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn enable_airplane_mode() -> Result<(), BusinessError> {
     NetConnClient::set_airplane_mode(true)
         .map_err(|e| BusinessError::new(e, format!("Failed to enable airplane mode")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn disable_airplane_mode() -> Result<(), BusinessError> {
     NetConnClient::set_airplane_mode(false)
         .map_err(|e| BusinessError::new(e, format!("Failed to disable airplane mode")))
@@ -91,7 +85,7 @@ pub(crate) fn get_app_net() -> Result<NetHandle, BusinessError> {
         .map_err(|e| BusinessError::new(e, format!("Failed to get app net")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn set_app_net(net_handle: NetHandle) -> Result<(), BusinessError> {
     NetConnClient::set_app_net(net_handle.net_id)
         .map_err(|e| BusinessError::new(e, format!("Failed to set app net")))
@@ -103,13 +97,13 @@ pub(crate) fn get_pac_url() -> Result<String, BusinessError> {
         .map_err(|e| BusinessError::new(e, format!("Failed to get PAC URL")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn set_pac_url(pac_url: String) -> Result<(), BusinessError> {
     NetConnClient::set_pac_url(&pac_url)
         .map_err(|e| BusinessError::new(e, format!("Failed to set PAC URL")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn factory_reset_network() -> Result<(), BusinessError> {
     NetConnClient::factory_reset_network()
         .map_err(|e| BusinessError::new(e, format!("Failed to factory reset network")))
@@ -146,43 +140,43 @@ pub(crate) fn get_address_by_name(
         .map_err(|e| BusinessError::new(e, format!("Failed to get address by name")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn set_global_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> {
     NetConnClient::set_global_http_proxy(proxy)
         .map_err(|e| BusinessError::new(e, format!("Failed to set HTTP proxy")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn set_app_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> {
     NetConnClient::set_app_http_proxy(proxy)
         .map_err(|e| BusinessError::new(e, format!("Failed to set app HTTP proxy")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn bind_socket(this: NetHandle, socket: i32) -> Result<(), BusinessError> {
     NetConnClient::bind_socket(socket, this.net_id)
         .map_err(|e| BusinessError::new(e, format!("Failed to bind socket")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn net_detection(net_handle: NetHandle) -> Result<(), BusinessError> {
     NetConnClient::net_detection(net_handle.net_id)
         .map_err(|e| BusinessError::new(e, format!("Failed to detect network")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn clear_custom_dns_rules() -> Result<(), BusinessError> {
     NetConnClient::clear_custom_dns_rules()
         .map_err(|e| BusinessError::new(e, format!("Failed to clear custom DNS rules")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn set_custom_dns_rule(host: String, ips: Vec<String>) -> Result<(), BusinessError> {
     NetConnClient::set_custom_dns_rules(host, ips)
         .map_err(|e| BusinessError::new(e, format!("Failed to set custom DNS rules")))
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> {
     NetConnClient::remove_custom_dns_rule(host)
         .map_err(|e| BusinessError::new(e, format!("Failed to remove custom DNS rules")))
@@ -253,19 +247,18 @@ pub(crate) fn create_net_connection<'local>(
     obj.into()
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_available(
     env: &AniEnv,
     this: NetConnection,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
-    connection.callback.on_net_available =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+    connection.callback.on_net_available = Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_block_status_change(
     env: &AniEnv,
     this: NetConnection,
@@ -273,11 +266,11 @@ pub(crate) fn on_net_block_status_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_block_status_change =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+        Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_capabilities_change(
     env: &AniEnv,
     this: NetConnection,
@@ -285,11 +278,11 @@ pub(crate) fn on_net_capabilities_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_capabilities_change =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+        Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_connection_properties_change(
     env: &AniEnv,
     this: NetConnection,
@@ -297,23 +290,22 @@ pub(crate) fn on_net_connection_properties_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_connection_properties_change =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+        Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_lost(
     env: &AniEnv,
     this: NetConnection,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
-    connection.callback.on_net_lost =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+    connection.callback.on_net_lost = Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn on_net_unavailable(
     env: &AniEnv,
     this: NetConnection,
@@ -321,11 +313,11 @@ pub(crate) fn on_net_unavailable(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_unavailable =
-        Some(Callback::new(callback).into_global(env.clone()).unwrap());
+        Some(Callback::new(callback).into_global(env).unwrap());
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn register_network_change(this: NetConnection) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
 
@@ -340,7 +332,7 @@ pub(crate) fn register_network_change(this: NetConnection) -> Result<(), Busines
     Ok(())
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
 
@@ -360,8 +352,8 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
     }
 }
 
-#[ani_rs::native_v]
+#[ani_rs::native]
 pub(crate) fn connection_clean(this: Cleaner) -> Result<(), BusinessError> {
-    unsafe { Box::from_raw(this.native_ptr as *mut Connection) };
+    let _ = unsafe { Box::from_raw(this.native_ptr as *mut Connection) };
     Ok(())
 }

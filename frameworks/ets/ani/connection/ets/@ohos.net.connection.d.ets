@@ -15,7 +15,7 @@
 
 
 import type { AsyncCallback, Callback } from '@ohos.base';
-import { BusinessError  }  from '@ohos.base';
+import { BusinessError }  from '@ohos.base';
 
 // import type http from './@ohos.net.http';
 // import type socket from './@ohos.net.socket';
@@ -842,44 +842,5 @@ export default namespace connection {
     password?: string;
 
     exclusionList: Array<string>;
-  }
-}
-
-function main() {
-  
-  try {
-    //connection.getAllNets((err, handle) => {
-    // console.log(err);
-    // console.log(handle);
-    //})
-
-    let w = connection.createNetConnection();
-    console.log(w);
-    w.on('netAvailable', (n:connection.NetHandle) => {
-      console.log("netavailable");
-      console.log(n);
-    })
-
-    w.on('netLost', (n:connection.NetHandle) => {
-      console.log("netlost")
-      console.log(n);
-    })
-
-    w.on('netAvailable', (n:connection.NetHandle) => {
-      console.log("netavailable");
-      console.log(n);
-    })
-
-    w.register((err) => {
-      console.log(err);
-    });
-    
-    w.unregister((err) => {
-      console.log(err);
-    })
-    
-  } catch(e:BusinessError) {
-    console.log(e.code);
-    console.log(e);
   }
 }

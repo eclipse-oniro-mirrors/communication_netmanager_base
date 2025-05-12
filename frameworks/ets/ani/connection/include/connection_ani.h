@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CONNECTION_ANI_H
-#define CONNECTION_ANI_H
+#ifndef NET_CONNECTION_ANI_H
+#define NET_CONNECTION_ANI_H
 #include "cxx.h"
 #include "i_net_conn_callback.h"
 #include "net_conn_callback_stub.h"

@@ -18,7 +18,7 @@ use ani_sys::{ani_object, ani_ref};
 use super::AniRef;
 
 #[repr(transparent)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AniObject<'local>(AniRef<'local>);
 
 impl<'local> AsRef<AniObject<'local>> for AniObject<'local> {

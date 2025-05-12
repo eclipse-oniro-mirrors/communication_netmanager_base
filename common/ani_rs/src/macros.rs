@@ -17,13 +17,13 @@ macro_rules! bind {
         let functions = [
             $(
                 (
-                    unsafe { CStr::from_bytes_with_nul_unchecked(concat!($func_path, "\0").as_bytes()) },
+                    unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($func_path, "\0").as_bytes()) },
                     $func as _,
                 ),
             )*
         ];
 
-        let path = unsafe { CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
+        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
 
         let namespace = $en.find_namespace(path).unwrap();
         $en.bind_namespace_functions(namespace, &functions).unwrap();
@@ -33,13 +33,13 @@ macro_rules! bind {
         let functions = [
             $(
                 (
-                    unsafe { CStr::from_bytes_with_nul_unchecked(concat!($func_path, "\0").as_bytes()) },
+                    unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($func_path, "\0").as_bytes()) },
                     $func as _,
                 ),
             )*
         ];
 
-        let path = unsafe { CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
+        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
         let class = $en.find_class(path).unwrap();
         $en.bind_class_methods(class, &functions).unwrap();
     }};
@@ -51,7 +51,7 @@ macro_rules! ani_constructor {
         #[no_mangle]
         pub extern "C" fn ANI_Constructor(vm: ani_rs::AniVm, result: *mut u32) -> std::ffi::c_uint {
             let env = vm.get_env().unwrap();
-            AniVm::init(vm);
+            ani_rs::AniVm::init(vm);
             $(
                 ani_rs::bind!($type env $path [$($func_path : $func),*]);
             )*
