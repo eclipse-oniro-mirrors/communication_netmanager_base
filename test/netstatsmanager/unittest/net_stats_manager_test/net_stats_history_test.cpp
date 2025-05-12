@@ -144,5 +144,17 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest010, TestSize.Level1)
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetStatsHistoryTest, HistoryTest011, TestSize.Level1)
+{
+    auto history = std::make_unique<NetStatsHistory>();
+    std::vector<NetStatsInfo> infos;
+    uint32_t uid = UID;
+    std::string ident = "2";
+    int32_t userId = 100;
+    int32_t ret = history->GetHistoryByIdentAndUserId(infos, ident, userId, 0, LONG_MAX);
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

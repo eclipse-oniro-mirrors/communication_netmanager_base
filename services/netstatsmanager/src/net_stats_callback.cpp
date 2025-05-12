@@ -49,7 +49,7 @@ void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &c
 void NetStatsCallback::UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is null");
+        NETMGR_LOG_E("callback is null");
         return;
     }
     std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);

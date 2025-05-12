@@ -44,6 +44,11 @@ uint32_t GetUint32()
     return static_cast<uint32_t>(g_regn()) % UID_MAX_TEST;
 }
 
+uint32_t GetIndet()
+{
+    return static_cast<uint32_t>(g_regn()) % 3;  // 3: eg. ident 0-2
+}
+
 uint64_t GetUint64()
 {
     return static_cast<uint64_t>(g_regn());
@@ -59,7 +64,7 @@ NetStatsInfo CreateMockStatsInfo()
 {
     NetStatsInfo info;
     info.uid_ = GetUint32();
-    info.ident_ = std::to_string(GetUint32());
+    info.ident_ = std::to_string(GetIndet());
     info.date_ = GetUint64();
     info.iface_ = GetMockIface();
     info.rxBytes_ = GetUint64();
@@ -72,10 +77,10 @@ NetStatsInfo CreateMockStatsInfo()
 void CreateMockStatsData()
 {
     g_statsData.clear();
-    for (uint32_t i = 0; i < MAX_TEST_DATA; i++) {
+    for (uint32_t i = 0; i < MAX_TEST_DATA - 3; i++) {  // 3： add other info
         NetStatsInfo info;
         info.uid_ = GetUint32();
-        info.ident_ = std::to_string(GetUint32());
+        info.ident_ = std::to_string(GetIndet());
         info.date_ = GetUint64();
         info.iface_ = GetMockIface();
         info.rxBytes_ = GetUint64();
@@ -84,6 +89,39 @@ void CreateMockStatsData()
         info.txPackets_ = GetUint64();
         g_statsData.push_back(info);
     }
+    NetStatsInfo info1;
+    info1.uid_ = GetUint32();
+    info1.ident_ = std::to_string(1);
+    info1.date_ = GetUint64();
+    info1.iface_ = GetMockIface();
+    info1.rxBytes_ = GetUint64();
+    info1.rxPackets_ = GetUint64();
+    info1.txBytes_ = GetUint64();
+    info1.txPackets_ = GetUint64();
+    info1.flag_ = STATS_DATA_FLAG_SIM2;
+    g_statsData.push_back(info1);
+    NetStatsInfo info2;
+    info2.uid_ = GetUint32();
+    info2.ident_ = std::to_string(2);  // ident:2
+    info2.date_ = GetUint64();
+    info2.iface_ = GetMockIface();
+    info2.rxBytes_ = GetUint64();
+    info2.rxPackets_ = GetUint64();
+    info2.txBytes_ = GetUint64();
+    info2.txPackets_ = GetUint64();
+    info2.flag_ = STATS_DATA_FLAG_SIM;
+    g_statsData.push_back(info2);
+    NetStatsInfo info0;
+    info0.uid_ = GetUint32();
+    info0.ident_ = std::to_string(0);
+    info0.date_ = GetUint64();
+    info0.iface_ = GetMockIface();
+    info0.rxBytes_ = GetUint64();
+    info0.rxPackets_ = GetUint64();
+    info0.txBytes_ = GetUint64();
+    info0.txPackets_ = GetUint64();
+    info0.flag_ = STATS_DATA_FLAG_SIM2_BASIC;
+    g_statsData.push_back(info0);
 }
 
 void ClearMockStatsData()
@@ -237,6 +275,12 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest007, TestSize.Level1)
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    uid = SIM2_UID;
+    ret = handler.ReadStatsData(infos, uid, ident, 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    uid = Sim_UID;
+    ret = handler.ReadStatsData(infos, uid, ident, 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, NetStatsDataHandlerBranchTest001, TestSize.Level1)
@@ -261,6 +305,49 @@ HWTEST_F(NetStatsDataHandlerTest, BackupNetStatsDataTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = handler.BackupNetStatsData("xxxx/xxxx.db", NET_STATS_DATABASE_BACK_PATH);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataByIdentAndUserIdTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    handler.isDisplayTrafficAncoList = false;
+    std::vector<NetStatsInfo> infos;
+    std::string ident = "0";
+    int32_t userId = 100;
+    uint64_t start = 1745894718;
+    uint64_t end = 1745895733;
+    int32_t ret = handler.ReadStatsDataByIdentAndUserId(infos, ident, userId, start, end);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    handler.isDisplayTrafficAncoList = true;
+    ret = handler.ReadStatsDataByIdentAndUserId(infos, ident, userId, start, end);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, UpdateStatsFlagByUserIdTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    int32_t userId = 100;
+    uint32_t flag = 0;
+    int32_t ret = handler.UpdateStatsFlagByUserId(userId, flag);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, UpdateSimStatsFlagByUserIdTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    int32_t userId = 100;
+    uint32_t flag = 0;
+    int32_t ret = handler.UpdateSimStatsFlagByUserId(userId, flag);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, UpdateStatsUserIdByUserIdTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    int32_t userId = 100;
+    int32_t newUserId = 0;
+    int32_t ret = handler.UpdateStatsUserIdByUserId(userId, newUserId);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -29,6 +29,7 @@
 #include "netsys_controller.h"
 #include "bpf_stats.h"
 #include "ffrt_inner.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -197,6 +198,7 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     if (info.netBearType_ == BEARER_CELLULAR) {
         stats.ident_ = std::to_string(info.simId_);
     }
+    stats.userId_ = info.userId_;
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
     uidPushStatsInfo_.push_back(std::move(stats));
 }
@@ -248,6 +250,9 @@ void NetStatsCached::CacheUidStats()
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
+        }
+        if (info.uid_ > 0) {
+            info.userId_ = info.uid_ / USER_ID_DIVIDOR;
         }
         auto findRet = std::find_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
@@ -318,6 +323,9 @@ void NetStatsCached::CacheUidSimStats()
         }
         if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
             info.flag_ = GetUidStatsFlag(info.uid_);
+        }
+        if (info.uid_ > 0) {
+            info.userId_ = info.uid_ / USER_ID_DIVIDOR;
         }
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
@@ -407,8 +415,13 @@ void NetStatsCached::WriteUidStats()
     if (!(CheckUidStor() || isForce_)) {
         return;
     }
+
     std::for_each(stats_.GetUidStatsInfo().begin(), stats_.GetUidStatsInfo().end(), [this](NetStatsInfo &info) {
         if (info.uid_ == uninstalledUid_) {
+            info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+        }
+        if (info.userId_ != curDefaultUserId_ && info.userId_ != SYSTEM_DEFAULT_USERID &&
+            info.userId_ != curPrivateUserId_) {
             info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
         }
     });
@@ -452,11 +465,7 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
-        return;
     }
-    ifaceNameIdentMap_.Iterate([](const std::string &k, const std::string &v) {
-        NETMGR_LOG_I("GetIfaceNameIdentMaps. ifname: %{public}s, simId: %{public}s", k.c_str(), v.c_str());
-    });
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
@@ -784,6 +793,9 @@ void NetStatsCached::GetKernelUidStats(std::vector<NetStatsInfo> &statsInfo)
         if (tmp.HasNoData()) {
             return;
         }
+        if (tmp.uid_ > 0) {
+            tmp.userId_ = tmp.uid_ / USER_ID_DIVIDOR;
+        }
         tmp.date_ = CommonUtils::GetCurrentSecond();
         statsInfo.push_back(std::move(tmp));
     });
@@ -974,6 +986,32 @@ void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
     lastIptablesStatsInfo_.clear();
     NETMGR_LOG_D("SaveSharingTraffic success");
 #endif
+}
+
+int32_t NetStatsCached::GetCurPrivateUserId()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return curPrivateUserId_;
+}
+
+void NetStatsCached::SetCurPrivateUserId(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    NETMGR_LOG_I("set privateUserId: %{public}d", userId);
+    curPrivateUserId_ = userId;
+}
+
+int32_t NetStatsCached::GetCurDefaultUserId()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return curDefaultUserId_;
+}
+
+void NetStatsCached::SetCurDefaultUserId(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    NETMGR_LOG_I("set defaultUserId: %{public}d", userId);
+    curDefaultUserId_ = userId;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

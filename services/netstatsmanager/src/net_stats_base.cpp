@@ -164,8 +164,6 @@ int32_t NetStatsRDB::InitRdbStoreBackupDB()
         CREATE_TABLE_IF_NOT_EXISTS + NETMANAGER_DB_SIMID_STATS_TABLE + " (" + SQL_TABLE_COLUMS + ")";
     int ret = rdbStore->ExecuteSql(createTable);
     NETMGR_LOG_I("InitRdbStore ret = %{public}d", ret);
-
-    NETMGR_LOG_I("InitRdbStoreBackupDB end");
     return NETMANAGER_SUCCESS;
 }
 

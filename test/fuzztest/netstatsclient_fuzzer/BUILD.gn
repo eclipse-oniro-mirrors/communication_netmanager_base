@@ -86,6 +86,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "os_account:os_account_innerkits"
   ]
 }
 

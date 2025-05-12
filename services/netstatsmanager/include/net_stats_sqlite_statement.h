@@ -42,6 +42,7 @@ public:
     int32_t GetColumnString(int32_t index, std::string &value) const;
     int32_t GetColumnLong(int32_t index, uint64_t &value) const;
     int32_t GetColumnInt(int32_t index, uint32_t &value) const;
+    int32_t GetColumnInt(int32_t index, int32_t &value) const;
     int32_t GetColumnCount() const
     {
         return columnCount_;

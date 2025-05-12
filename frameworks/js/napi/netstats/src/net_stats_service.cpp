@@ -62,6 +62,7 @@
 #include "networkshare_constants.h"
 #endif // SUPPORT_NETWORK_SHARE
 #include "system_timer.h"
+#include "net_stats_subscriber.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -118,6 +119,7 @@ void NetStatsService::OnStart()
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 #endif // SUPPORT_TRAFFIC_STATISTIC
+    AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     state_ = STATE_RUNNING;
     sptr<NetStatsBaseService> baseService = new (std::nothrow) NetStatsServiceCommon();
     if (baseService == nullptr) {
@@ -199,6 +201,12 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         StartSysTimer();
         return;
     }
+
+    if (systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
+        InitPrivateUserId();
+        StartAccountObserver();
+        return;
+    }
     RegisterCommonEvent();
 }
 
@@ -253,6 +261,59 @@ void NetStatsService::RegisterCommonEvent()
         });
 #endif // SUPPORT_TRAFFIC_STATISTIC
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+}
+
+void NetStatsService::InitPrivateUserId()
+{
+    std::vector<AccountSA::OsAccountInfo> osAccountInfos;
+    AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(osAccountInfos);
+    for (auto info : osAccountInfos) {
+        AccountSA::OsAccountType accountType;
+        AccountSA::OsAccountManager::GetOsAccountType(info.GetLocalId(), accountType);
+        NETMGR_LOG_I("InitPrivateUserId, info: %{public}d", info.GetLocalId());
+        if (accountType == AccountSA::OsAccountType::PRIVATE) {
+            netStatsCached_->SetCurPrivateUserId(info.GetLocalId());
+        }
+    }
+    int32_t defaultUserId = -1;
+    int32_t ret = AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
+    NETMGR_LOG_I("default userId: %{public}d", defaultUserId);
+    netStatsCached_->SetCurDefaultUserId(defaultUserId);
+}
+
+int32_t NetStatsService::ProcessOsAccountChanged(int32_t userId, AccountSA::OsAccountState state)
+{
+    NETMGR_LOG_I("OsAccountChanged toId: %{public}d, state:%{public}d", userId, state);
+    if (state == AccountSA::OsAccountState::CREATED) {
+        AccountSA::OsAccountType accountType;
+        AccountSA::OsAccountManager::GetOsAccountType(userId, accountType);
+        if (accountType == AccountSA::OsAccountType::PRIVATE) {
+            netStatsCached_->SetCurPrivateUserId(userId);
+        }
+        return 0;
+    }
+    if (state == AccountSA::OsAccountState::STOPPING || state ==  AccountSA::OsAccountState::STOPPED ||
+        state ==  AccountSA::OsAccountState::REMOVED) {
+        if (netStatsCached_->GetCurPrivateUserId() != userId) {
+            return 0;
+        }
+        netStatsCached_->SetCurPrivateUserId(-1);  // -1:invalid userID
+        auto handler = std::make_unique<NetStatsDataHandler>();
+        if (handler == nullptr) {
+            NETMGR_LOG_E("handler is nullptr");
+            return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
+        }
+        auto ret1 = handler->UpdateStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        if (ret1 != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("update stats flag failed, uid:[%{public}d]", userId);
+        }
+        auto ret2 = handler->UpdateSimStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        if (ret2 != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("update sim stats flag failed, uid:[%{public}d]", userId);
+        }
+        UpdateStatsData();
+    }
+    return 0;
 }
 
 void NetStatsService::GetDumpMessage(std::string &message)
@@ -680,6 +741,7 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
 #ifdef SUPPORT_NETWORK_SHARE
     GetSharingStats(allInfo, end);
 #endif
+    MergeTrafficStatsByAccount(allInfo);
     FilterTrafficStatsByNetwork(allInfo, infos, ident, start, end);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
     return NETMANAGER_SUCCESS;
@@ -703,6 +765,65 @@ void NetStatsService::FilterTrafficStatsByNetwork(std::vector<NetStatsInfo> &all
             item->second += info;
         }
     });
+}
+
+void NetStatsService::MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &infos)
+{
+    int32_t curUserId = -1;
+    int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
+    int32_t defaultUserId = netStatsCached_->GetCurDefaultUserId();
+    if (ret != 0) {
+        NETMGR_LOG_E("get userId error. ret1: %{public}d", ret);
+    }
+
+    if (curUserId == defaultUserId) {
+        for (auto &info : infos) {
+            if (info.userId_ == netStatsCached_->GetCurPrivateUserId()) {
+                info.uid_ = OTHER_ACCOUNT_UID;
+            }
+        }
+    } else if (curUserId == netStatsCached_->GetCurPrivateUserId()) {
+        for (auto &info : infos) {
+            if (info.userId_ != curUserId) {
+                info.uid_ = DEFAULT_ACCOUNT_UID;
+            }
+        }
+    } else {
+        NETMGR_LOG_W("curUserId:%{public}d, defaultUserId:%{public}d", curUserId, defaultUserId);
+    }
+}
+
+int32_t NetStatsService::GetHistoryData(std::vector<NetStatsInfo> &infos, std::string ident,
+    uint32_t uid, uint32_t start, uint32_t end)
+{
+    auto history = std::make_unique<NetStatsHistory>();
+    if (history == nullptr) {
+        NETMGR_LOG_E("history is null");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (uid != DEFAULT_ACCOUNT_UID && uid != OTHER_ACCOUNT_UID) {
+        int32_t ret = history->GetHistory(infos, uid, ident, start, end);
+        return ret;
+    }
+    int32_t userId = -1;
+    if (uid == DEFAULT_ACCOUNT_UID) {
+        userId = netStatsCached_->GetCurDefaultUserId();
+        std::vector<NetStatsInfo> infos1;
+        std::vector<NetStatsInfo> infos2;
+        history->GetHistoryByIdentAndUserId(infos1, ident, userId, start, end);
+        history->GetHistoryByIdentAndUserId(infos2, ident, SYSTEM_DEFAULT_USERID, start, end);
+        infos.insert(infos.end(), infos1.begin(), infos1.end());
+        infos.insert(infos.end(), infos2.begin(), infos2.end());
+    } else if (netStatsCached_->GetCurPrivateUserId() != -1) {
+        userId = netStatsCached_->GetCurPrivateUserId();
+        history->GetHistoryByIdentAndUserId(infos, ident, userId, start, end);
+    }
+    if (userId == -1) {
+        NETMGR_LOG_E("GetHistoryData error. uid:%{public}u, curPrivateUserId: %{public}d",
+            uid, netStatsCached_->GetCurPrivateUserId());
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
@@ -731,17 +852,14 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     uint32_t end = network->endTime_;
     NETMGR_LOG_D("GetTrafficStatsByUidNetwork param: "
         "uid=%{public}u, ident=%{public}s, start=%{public}u, end=%{public}u", uid, ident.c_str(), start, end);
-    auto history = std::make_unique<NetStatsHistory>();
-    if (history == nullptr) {
-        NETMGR_LOG_E("history is null");
-        return NETMANAGER_ERR_INTERNAL;
-    }
+
     std::vector<NetStatsInfo> allInfo;
-    int32_t ret = history->GetHistory(allInfo, uid, ident, start, end);
+    int32_t ret = GetHistoryData(allInfo, ident, uid, start, end);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("get history by uid and ident failed, err code=%{public}d", ret);
         return ret;
     }
+
     netStatsCached_->GetKernelStats(allInfo);
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
@@ -752,8 +870,31 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     }
 #endif
     FilterTrafficStatsByUidNetwork(allInfo, infos, uid, ident, start, end);
+    DeleteTrafficStatsByAccount(infos, uid);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
     return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequence> &infos, uint32_t uid)
+{
+    int32_t defaultUserId = netStatsCached_->GetCurDefaultUserId();
+    if (uid == DEFAULT_ACCOUNT_UID) {
+        for (auto it = infos.begin(); it != infos.end();) {
+            if (it->info_.userId_ != defaultUserId && it->info_.userId_ != SYSTEM_DEFAULT_USERID) {
+                it = infos.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    } else if (uid == OTHER_ACCOUNT_UID) {
+        for (auto it = infos.begin(); it != infos.end();) {
+            if (it->info_.userId_ == defaultUserId || it->info_.userId_ == SYSTEM_DEFAULT_USERID) {
+                it = infos.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 }
 
 void NetStatsService::FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &allInfo,
@@ -762,7 +903,11 @@ void NetStatsService::FilterTrafficStatsByUidNetwork(std::vector<NetStatsInfo> &
 {
     std::for_each(allInfo.begin(), allInfo.end(),
         [this, &infos, &uid, &ident, &startTime, &endTime](const NetStatsInfo &info) {
-        if (uid != info.uid_ || ident != info.ident_ || startTime > info.date_ || endTime < info.date_) {
+        if (uid != DEFAULT_ACCOUNT_UID && uid != OTHER_ACCOUNT_UID && uid != info.uid_) {
+            return;
+        }
+
+        if (ident != info.ident_ || startTime > info.date_ || endTime < info.date_) {
             return;
         }
         if (info.flag_ == STATS_DATA_FLAG_UNINSTALLED) {
@@ -943,6 +1088,12 @@ bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 
 bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
 {
+    if (uid / USER_ID_DIVIDOR != netStatsCached_->GetCurDefaultUserId() &&
+        uid / USER_ID_DIVIDOR != SYSTEM_DEFAULT_USERID &&
+        uid / USER_ID_DIVIDOR != netStatsCached_->GetCurPrivateUserId()) {
+        NETMGR_LOG_E("CommonEventPackageRemoved uid:%{public}d", uid);
+        return true;
+    }
     auto handler = std::make_unique<NetStatsDataHandler>();
     if (handler == nullptr) {
         NETMGR_LOG_E("Net Manager package removed, get db handler failed. uid:[%{public}d]", uid);
@@ -974,6 +1125,23 @@ int32_t NetStatsService::CheckNetManagerAvailable()
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::StartAccountObserver()
+{
+    NETMGR_LOG_I("StartAccountObserver start");
+    std::set<AccountSA::OsAccountState> states = {
+        AccountSA::OsAccountState::STOPPING, AccountSA::OsAccountState::CREATED,
+        AccountSA::OsAccountState::SWITCHING, AccountSA::OsAccountState::SWITCHED, AccountSA::OsAccountState::UNLOCKED,
+        AccountSA::OsAccountState::STOPPED, AccountSA::OsAccountState::REMOVED };
+    bool withHandShake = false;
+    AccountSA::OsAccountSubscribeInfo subscribeInfo(states, withHandShake);
+    accountSubscriber_ = std::make_shared<NetStatsAccountSubscriber>(subscribeInfo);
+    ErrCode errCode = AccountSA::OsAccountManager::SubscribeOsAccount(accountSubscriber_);
+    if (errCode != 0) {
+        NETMGR_LOG_E("SubscribeOsAccount error. errCode:%{public}d", errCode);
+    }
+    NETMGR_LOG_I("StartAccountObserver end");
 }
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC

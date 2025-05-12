@@ -83,7 +83,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest004, TestSize.Level1)
 
 HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
 {
-    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     NETMGR_LOG_I("InsertDataHelperTest001");
     NetStatsInfo info;
     info.uid_ = 10222;
@@ -93,6 +93,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
     info.txBytes_ = 8536;
     info.rxPackets_ = 45122;
     info.txPackets_ = 144215;
+    info.userId_ = 100;
     int32_t ret = helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = helper->InsertData("", UID_TABLE_PARAM_LIST, info);
@@ -248,6 +249,32 @@ HWTEST_F(NetStatsDatabaseHelperTest, NetStatsDatabaseHelperBranchTest001, TestSi
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetStatsDatabaseHelperTest, QueryDataTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("QueryDataTest001");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    std::vector<NetStatsInfo> infos;
+    std::string ident = "2";
+    int32_t ret = helper->QueryData(UID_TABLE, ident, 100, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->QueryData(UID_TABLE, ident, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->QueryData("", ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlNextTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("ExecUpgradeSqlNextTest001");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    NetStatsDatabaseHelper::TableVersion oldVersion = NetStatsDatabaseHelper::Version_0;
+    NetStatsDatabaseHelper::TableVersion newVersion = NetStatsDatabaseHelper::Version_0;
+    helper->ExecUpgradeSqlNext(NET_STATS_DATABASE_TEST_PATH, oldVersion, newVersion);
+    EXPECT_EQ(oldVersion, NetStatsDatabaseHelper::Version_0);
+}
+
 HWTEST_F(NetStatsDatabaseHelperTest, UpgradeTest001, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
@@ -269,6 +296,17 @@ HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest001, TestSize.Level1)
     newVersion = NetStatsDatabaseHelper::Version_5;
     helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
     EXPECT_NE(oldVersion, NetStatsDatabaseHelper::Version_0);
+
+    oldVersion = NetStatsDatabaseHelper::Version_5;
+    newVersion = NetStatsDatabaseHelper::Version_6;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+    EXPECT_EQ(oldVersion, NetStatsDatabaseHelper::Version_6);
+
+    oldVersion = NetStatsDatabaseHelper::Version_6;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    newVersion = NetStatsDatabaseHelper::Version_5;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, BackupNetStatsDataTest001, TestSize.Level1)
@@ -293,6 +331,10 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
     ret = helper->DeleteAndBackup(0);
     EXPECT_EQ(ret, 0);
     helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    ret = helper->DeleteAndBackup(SQLITE_NOTADB);
+    
+    auto helper2 = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
+    ret = helper2->DeleteAndBackup(SQLITE_NOTADB);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

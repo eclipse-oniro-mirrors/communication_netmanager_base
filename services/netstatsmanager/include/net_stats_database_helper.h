@@ -51,6 +51,8 @@ public:
                       std::vector<NetStatsInfo> &infos);
     int32_t QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident, uint64_t start,
                       uint64_t end, std::vector<NetStatsInfo> &infos);
+    int32_t QueryData(const std::string &tableName, const std::string &ident, const int32_t userId,
+                      uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t DeleteData(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t DeleteData(const std::string &tableName, uint64_t uid);
     int32_t ClearData(const std::string &tableName);
@@ -61,6 +63,8 @@ public:
     int32_t UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag);
     bool BackupNetStatsDataDB(const std::string &sourceDb, const std::string &backupDb);
     int32_t DeleteAndBackup(int32_t errCode);
+    int32_t UpdateStatsFlagByUserId(const std::string &tableName, int32_t userId, uint32_t flag);
+    int32_t UpdateStatsUserIdByUserId(const std::string &tableName, int32_t oldUserId, int32_t newUserId);
 
 private:
     enum TableVersion : int32_t {
@@ -70,6 +74,7 @@ private:
         Version_3,
         Version_4,
         Version_5,
+        Version_6, // private space
     };
 
 private:
@@ -81,6 +86,7 @@ private:
     int32_t ExecTableUpgrade(const std::string &tableName, TableVersion newVersion);
     void ExecUpgradeSql(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
     bool BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb);
+    void ExecUpgradeSqlNext(const std::string &tableName, TableVersion &oldVersion, TableVersion newVersion);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
     static ffrt::mutex sqliteMutex_;

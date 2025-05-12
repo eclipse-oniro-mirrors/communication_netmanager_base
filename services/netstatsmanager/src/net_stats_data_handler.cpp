@@ -172,6 +172,46 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uin
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetStatsDataHandler::ReadStatsDataByIdentAndUserId(std::vector<NetStatsInfo> &infos,
+    const std::string &ident, const int32_t userId, uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    int32_t ret1;
+    int32_t ret2;
+    std::vector<NetStatsInfo> uidSimTableInfos;
+    ret1 = helper->QueryData(UID_TABLE, ident, userId, start, end, infos);
+    ret2 = helper->QueryData(UID_SIM_TABLE, ident, userId, start, end, uidSimTableInfos);
+    uidSimTableInfos.erase(std::remove_if(uidSimTableInfos.begin(), uidSimTableInfos.end(), [](const auto &item) {
+                               return item.flag_ <= STATS_DATA_FLAG_DEFAULT || item.flag_ >= STATS_DATA_FLAG_LIMIT;
+                           }),
+                           uidSimTableInfos.end());
+    std::for_each(uidSimTableInfos.begin(), uidSimTableInfos.end(), [this](NetStatsInfo &info) {
+        if (!isDisplayTrafficAncoList) {
+            if (info.flag_ == STATS_DATA_FLAG_SIM2) {
+                info.uid_ = SIM2_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM) {
+                info.uid_ = Sim_UID;
+            }
+        } else {
+            if (info.flag_ == STATS_DATA_FLAG_SIM_BASIC) {
+                info.uid_ = Sim_UID;
+            } else if (info.flag_ == STATS_DATA_FLAG_SIM2_BASIC) {
+                info.uid_ = SIM2_UID;
+            }
+        }
+    });
+    if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
+        return ret1 != NETMANAGER_SUCCESS ? ret1 : ret2;
+    }
+    infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &infos, const std::string &tableName)
 {
     NETMGR_LOG_I("WriteStatsData enter tableName:%{public}s", tableName.c_str());
@@ -241,6 +281,46 @@ int32_t NetStatsDataHandler::UpdateStatsFlag(uint32_t uid, uint32_t flag)
         return NETMANAGER_ERR_INTERNAL;
     }
     return helper->UpdateStatsFlag(UID_TABLE, uid, flag);
+}
+
+int32_t NetStatsDataHandler::UpdateStatsFlagByUserId(int32_t userId, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsFlagByUserId(UID_TABLE, userId, flag);
+}
+
+int32_t NetStatsDataHandler::UpdateStatsUserIdByUserId(int32_t userId, int32_t newUserId)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsUserIdByUserId(UID_TABLE, userId, newUserId);
+}
+
+int32_t NetStatsDataHandler::UpdateSimStatsUserIdByUserId(int32_t userId, int32_t newUserId)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsUserIdByUserId(UID_TABLE, userId, newUserId);
+}
+
+int32_t NetStatsDataHandler::UpdateSimStatsFlagByUserId(int32_t userId, uint32_t flag)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    if (helper == nullptr) {
+        NETMGR_LOG_E("db helper instance is nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return helper->UpdateStatsFlag(UID_SIM_TABLE, userId, flag);
 }
 
 int32_t NetStatsDataHandler::UpdateSimStatsFlag(uint32_t uid, uint32_t flag)

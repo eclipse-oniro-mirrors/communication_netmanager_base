@@ -27,6 +27,16 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
+
+constexpr const char* SELECT_FROM = "SELECT * FROM ";
+constexpr const char* DELETE_FROM = "DELETE FROM ";
+constexpr const char* UPDATE = "UPDATE ";
+constexpr const char* ALTER_TABLE = "ALTER TABLE ";
+constexpr const char* DATA_MORE_THAN = " AND t.Date >= ?";
+constexpr const char* DATA_LESS_THAN = " AND t.Date <= ?";
+constexpr const char* INSERT_OR_REPLACE_INTO = "INSERT OR REPLACE INTO ";
+constexpr const char* SET_FLAG = " SET Flag = ";
+constexpr const char* SET_USERID = " SET UserId = ";
 namespace {
 NetStatsDatabaseHelper::SqlCallback sqlCallback = [](void *notUsed, int argc, char **argv, char **colName) {
     std::string data;
@@ -147,6 +157,7 @@ int32_t NetStatsDatabaseHelper::InsertData(const std::string &tableName, const s
         statement_.BindText(++idx, info.ident_);
     }
     statement_.BindInt64(++idx, info.flag_);
+    statement_.BindInt64(++idx, info.userId_);
     ret = statement_.Step();
     statement_.ResetStatementAndClearBindings();
     if (ret != SQLITE_DONE) {
@@ -160,7 +171,7 @@ int32_t NetStatsDatabaseHelper::SelectData(std::vector<NetStatsInfo> &infos, con
                                            uint64_t start, uint64_t end)
 {
     infos.clear();
-    std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Date >= ?" + " AND t.Date <= ?";
+    std::string sql = SELECT_FROM + tableName + " t WHERE 1=1" + DATA_MORE_THAN + DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -189,8 +200,8 @@ int32_t NetStatsDatabaseHelper::SelectData(const uint32_t uid, uint64_t start, u
                                            std::vector<NetStatsInfo> &infos)
 {
     infos.clear();
-    std::string sql = "SELECT * FROM " + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID == ?" + " AND t.Date >= ?" +
-                      " AND t.Date <= ?";
+    std::string sql = SELECT_FROM + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID == ?" + DATA_MORE_THAN +
+                      DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -218,8 +229,8 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, uint64_t st
                                            std::vector<NetStatsInfo> &infos)
 {
     infos.clear();
-    std::string sql = "SELECT * FROM " + std::string(IFACE_TABLE) + " t WHERE 1=1 AND t.IFace = ?" +
-                      " AND t.Date >= ?" + " AND t.Date <= ?";
+    std::string sql = SELECT_FROM + std::string(IFACE_TABLE) + " t WHERE 1=1 AND t.IFace = ?" +
+                      DATA_MORE_THAN + DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -247,8 +258,8 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
                                            std::vector<NetStatsInfo> &infos)
 {
     infos.clear();
-    std::string sql = "SELECT * FROM " + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID = ?" + " AND t.IFace = ?" +
-                      " AND t.Date >= ?" + " AND t.Date <= ?";
+    std::string sql = SELECT_FROM + std::string(UID_TABLE) + " t WHERE 1=1 AND t.UID = ?" + " AND t.IFace = ?" +
+                      DATA_MORE_THAN + DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -282,7 +293,7 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
 {
     infos.clear();
     std::string sql =
-        "SELECT * FROM " + tableName + " t WHERE 1=1 AND t.Ident = ?" + " AND t.Date >= ?" + " AND t.Date <= ?";
+        SELECT_FROM + tableName + " t WHERE 1=1 AND t.Ident = ?" + DATA_MORE_THAN + DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -306,12 +317,42 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
     return Step(infos);
 }
 
+int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const std::string &ident, const int32_t userId,
+                                          uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
+{
+    infos.clear();
+    std::string sql =
+        SELECT_FROM + tableName + " t WHERE 1=1 AND t.Ident = ? " + " AND t.UserId = ? " +
+        DATA_MORE_THAN + DATA_LESS_THAN;
+    std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
+    int32_t ret = statement_.Prepare(sqlite_, sql);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Prepare failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    int32_t idx = 1;
+    ret = statement_.BindText(idx, ident);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("bind text ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = statement_.BindInt32(++idx, userId);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    ret = BindInt64(idx, start, end);
+    if (ret != SQLITE_OK) {
+        return ret;
+    }
+    return Step(infos);
+}
+
 int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident,
                                           uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
 {
     infos.clear();
-    std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND T.UID = ? AND t.Ident = ?" + " AND t.Date >= ?" +
-                      " AND t.Date <= ?";
+    std::string sql = SELECT_FROM + tableName + " t WHERE 1=1 AND T.UID = ? AND t.Ident = ?" + DATA_MORE_THAN +
+                      DATA_LESS_THAN;
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -343,13 +384,13 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const ui
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t start, uint64_t end)
 {
     std::string sql =
-        "DELETE FROM " + tableName + " WHERE Date >= " + std::to_string(start) + " AND Date <= " + std::to_string(end);
+        DELETE_FROM + tableName + " WHERE Date >= " + std::to_string(start) + " AND Date <= " + std::to_string(end);
     return ExecSql(sql, nullptr, sqlCallback);
 }
 
 int32_t NetStatsDatabaseHelper::DeleteData(const std::string &tableName, uint64_t uid)
 {
-    std::string sql = "DELETE FROM " + tableName + " WHERE UID = ?";
+    std::string sql = DELETE_FROM + tableName + " WHERE UID = ?";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -380,7 +421,7 @@ int32_t NetStatsDatabaseHelper::Close()
 
 int32_t NetStatsDatabaseHelper::ClearData(const std::string &tableName)
 {
-    std::string sql = "DELETE FROM " + tableName;
+    std::string sql = DELETE_FROM + tableName;
     std::string shrinkMemSql = "PRAGMA shrink_memory";
     int32_t execSqlRet = ExecSql(sql, nullptr, sqlCallback);
     if (execSqlRet != NETMANAGER_SUCCESS) {
@@ -427,6 +468,7 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
             statement_.GetColumnString(++i, info.ident_);
         }
         statement_.GetColumnInt(++i, info.flag_);
+        statement_.GetColumnInt(++i, info.userId_);
         infos.emplace_back(info);
         rc = statement_.Step();
         NETMGR_LOG_D("Step result:%{public}d", rc);
@@ -475,7 +517,15 @@ int32_t NetStatsDatabaseHelper::Upgrade()
     }
     ret = ExecTableUpgrade(UID_SIM_TABLE, Version_5);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_4);
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_5);
+    }
+    ret = ExecTableUpgrade(UID_TABLE, Version_6);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_6);
+    }
+    ret = ExecTableUpgrade(UID_SIM_TABLE, Version_6);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Upgrade db failed. table is %{public}s, version is %{public}d", UID_SIM_TABLE, Version_6);
     }
     return ret;
 }
@@ -512,7 +562,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
 {
     int32_t ret = NETMANAGER_SUCCESS;
     if (oldVersion < Version_1 && newVersion >= Version_1) {
-        std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
+        std::string sql = ALTER_TABLE + tableName + " ADD COLUMN Ident CHAR(100) NOT NULL DEFAULT '';";
         ret = ExecSql(sql, nullptr, sqlCallback);
         if (ret != SQLITE_OK) {
             NETMGR_LOG_E("ExecTableUpgrade version_1 failed. ret = %{public}d", ret);
@@ -527,7 +577,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
         oldVersion = Version_2;
     }
     if (oldVersion < Version_3 && newVersion >= Version_3) {
-        std::string sql = "ALTER TABLE " + tableName + " ADD COLUMN Flag INTEGER NOT NULL DEFAULT 0;";
+        std::string sql = ALTER_TABLE + tableName + " ADD COLUMN Flag INTEGER NOT NULL DEFAULT 0;";
         ret = ExecSql(sql, nullptr, sqlCallback);
         if (ret != SQLITE_OK) {
             NETMGR_LOG_E("ExecTableUpgrade version_3 failed. ret = %{public}d", ret);
@@ -535,7 +585,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
         oldVersion = Version_3;
     }
     if (oldVersion < Version_4 && newVersion >= Version_4) {
-        std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM) +
+        std::string sql = UPDATE + tableName + SET_FLAG + std::to_string(STATS_DATA_FLAG_SIM) +
                           " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_DEFAULT) + ";";
         ret = ExecSql(sql, nullptr, sqlCallback);
         if (ret != SQLITE_OK) {
@@ -545,23 +595,38 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
     }
     if (oldVersion < Version_5 && newVersion >= Version_5) {
         if (CommonUtils::IsNeedDisplayTrafficAncoList()) {
-            std::string sqlsim = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM_BASIC) +
+            std::string sqlsim = UPDATE + tableName + SET_FLAG + std::to_string(STATS_DATA_FLAG_SIM_BASIC) +
                               " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_SIM) + ";";
             ret = ExecSql(sqlsim, nullptr, sqlCallback);
-            std::string sqlsim2 = "UPDATE " + tableName + " SET Flag = " + std::to_string(STATS_DATA_FLAG_SIM2_BASIC) +
+            std::string sqlsim2 = UPDATE + tableName + SET_FLAG + std::to_string(STATS_DATA_FLAG_SIM2_BASIC) +
                               " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_SIM2) + ";";
             int32_t retsim2 = ExecSql(sqlsim2, nullptr, sqlCallback);
             if (ret != SQLITE_OK || retsim2 != SQLITE_OK) {
                 NETMGR_LOG_E("ExecTableUpgrade Version_5 failed. ret = %{public}d", ret);
             }
-            oldVersion = Version_5;
         }
+        oldVersion = Version_5;
+    }
+    ExecUpgradeSqlNext(tableName, oldVersion, newVersion);
+}
+
+void NetStatsDatabaseHelper::ExecUpgradeSqlNext(const std::string &tableName, TableVersion &oldVersion,
+                                                TableVersion newVersion)
+{
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (oldVersion < Version_6 && newVersion >= Version_6) {
+        std::string sql = ALTER_TABLE + tableName + " ADD COLUMN UserId INTEGER NOT NULL DEFAULT 0;";
+        ret = ExecSql(sql, nullptr, sqlCallback);
+        if (ret != SQLITE_OK) {
+            NETMGR_LOG_E("ExecTableUpgrade Version_6 failed. ret = %{public}d", ret);
+        }
+        oldVersion = Version_6;
     }
 }
 
 int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std::string &tableName)
 {
-    std::string sql = "SELECT * FROM " + std::string(VERSION_TABLE) + " WHERE Name = ?;";
+    std::string sql = SELECT_FROM + std::string(VERSION_TABLE) + " WHERE Name = ?;";
     std::unique_lock<ffrt::mutex> lock(sqliteMutex_);
     int32_t ret = statement_.Prepare(sqlite_, sql);
     int32_t rettmp = DeleteAndBackup(ret);
@@ -592,22 +657,37 @@ int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std
 
 int32_t NetStatsDatabaseHelper::UpdateTableVersion(TableVersion version, const std::string &tableName)
 {
-    std::string sql = "INSERT OR REPLACE INTO "+ std::string(VERSION_TABLE) + "(Name, Version) VALUES('" +
+    std::string sql = INSERT_OR_REPLACE_INTO + std::string(VERSION_TABLE) + "(Name, Version) VALUES('" +
                       tableName + "', " + std::to_string(version) + ");";
     return ExecSql(sql, nullptr, sqlCallback);
 }
 
 int32_t NetStatsDatabaseHelper::UpdateStatsFlag(const std::string &tableName, uint32_t uid, uint32_t flag)
 {
-    std::string sql = "UPDATE " + tableName + " SET Flag = " + std::to_string(flag) +
+    std::string sql = UPDATE + tableName + SET_FLAG + std::to_string(flag) +
                       " WHERE UID = " + std::to_string(uid);
+    return ExecSql(sql, nullptr, sqlCallback);
+}
+
+int32_t NetStatsDatabaseHelper::UpdateStatsFlagByUserId(const std::string &tableName, int32_t userId, uint32_t flag)
+{
+    std::string sql = UPDATE + tableName + SET_FLAG + std::to_string(flag) +
+                      " WHERE UserId = " + std::to_string(userId);
+    return ExecSql(sql, nullptr, sqlCallback);
+}
+
+int32_t NetStatsDatabaseHelper::UpdateStatsUserIdByUserId(const std::string &tableName,
+    int32_t oldUserId, int32_t newUserId)
+{
+    std::string sql = UPDATE + tableName + SET_USERID + std::to_string(newUserId) +
+                      " WHERE UserId = " + std::to_string(oldUserId);
     return ExecSql(sql, nullptr, sqlCallback);
 }
 
 int32_t NetStatsDatabaseHelper::UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag)
 {
     std::string sql =
-        "UPDATE " + tableName + " SET Flag = " + std::to_string(newFlag) + " WHERE Flag = " + std::to_string(oldFlag);
+        UPDATE + tableName + SET_FLAG + std::to_string(newFlag) + " WHERE Flag = " + std::to_string(oldFlag);
     return ExecSql(sql, nullptr, sqlCallback);
 }
 
