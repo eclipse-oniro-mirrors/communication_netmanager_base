@@ -30,10 +30,17 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetDnsResultCallback");
     enum {
         ON_DNS_RESULT_REPORT = 0,
+        ON_DNS_QUERY_RESULT_REPORT,
+        ON_DNS_QUERY_ABNORMAL_REPORT,
     };
 
 public:
     virtual int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) = 0;
+    virtual int32_t OnDnsQueryResultReport(uint32_t size, const std::list<NetDnsQueryResultReport>) = 0;
+    virtual int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, const NetDnsQueryResultReport report)
+    {
+        return 0;
+    }
 };
 } // namespace NetsysNative
 } // namespace OHOS

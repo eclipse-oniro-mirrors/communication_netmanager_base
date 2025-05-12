@@ -405,6 +405,13 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
+    ret = nativeClient_.RegisterDnsQueryResultCallback(queryCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = nativeClient_.UnregisterDnsQueryResultCallback(queryCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)

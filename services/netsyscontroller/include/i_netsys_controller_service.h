@@ -874,6 +874,25 @@ public:
      */
     virtual int32_t UnregisterDnsResultCallback(
         const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback) = 0;
+ 
+    /**
+     * Register Dns query Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @param timestep Time gap between two callbacks
+     * @return Value the return value of the netsys interface call
+     */
+    virtual int32_t RegisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback) = 0;
+
+    /**
+     * Unregister Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    virtual int32_t UnregisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback) = 0;
 
     /**
      * Register Dns Health Callback Listener.

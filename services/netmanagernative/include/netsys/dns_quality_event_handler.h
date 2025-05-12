@@ -29,6 +29,8 @@ public:
     static constexpr int32_t MSG_DNS_QUERY_FAIL = 2;
     static constexpr int32_t MSG_DNS_REPORT_LOOP = 3;
     static constexpr int32_t MSG_DNS_NEW_REPORT = 4;
+    static constexpr int32_t MSG_DNS_QUERY_RESULT_REPORT = 5;
+    static constexpr int32_t MSG_DNS_QUERY_ABNORMAL_REPORT = 6;
 
     DnsQualityEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
     virtual ~DnsQualityEventHandler() override;

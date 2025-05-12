@@ -24,6 +24,10 @@ NetDnsResultCallbackStub::NetDnsResultCallbackStub()
 {
     memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT)] =
         &NetDnsResultCallbackStub::CmdDnsResultReport;
+    memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_QUERY_RESULT_REPORT)] =
+        &NetDnsResultCallbackStub::CmdDnsQueryResultReport;
+    memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_QUERY_ABNORMAL_REPORT)] =
+        &NetDnsResultCallbackStub::CmdDnsQueryAbnormalReport;
 }
 
 int32_t NetDnsResultCallbackStub::OnRemoteRequest(
@@ -72,7 +76,56 @@ int32_t NetDnsResultCallbackStub::CmdDnsResultReport(MessageParcel &data, Messag
     return ERR_NONE;
 }
 
+int32_t NetDnsResultCallbackStub::CmdDnsQueryResultReport(MessageParcel &data, MessageParcel &reply)
+{
+    std::list<NetDnsQueryResultReport> dnsResultReport;
+    uint32_t size = data.ReadUint32();
+    size = size > MAX_SIZE ? MAX_SIZE : size;
+    for (uint32_t i = 0; i < size; ++i) {
+        NetDnsQueryResultReport report;
+        if (!NetDnsQueryResultReport::Unmarshalling(data, report)) {
+            return -1;
+        }
+        dnsResultReport.push_back(report);
+    }
+    int32_t result = OnDnsQueryResultReport(size, dnsResultReport);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return result;
+    }
+ 
+    return ERR_NONE;
+}
+
+int32_t NetDnsResultCallbackStub::CmdDnsQueryAbnormalReport(MessageParcel &data, MessageParcel &reply)
+{
+    NetDnsQueryResultReport dnsResultReport;
+    uint32_t eventfailcause = data.ReadUint32();
+    if (!NetDnsQueryResultReport::Unmarshalling(data, dnsResultReport)) {
+        return -1;
+    }
+    int32_t result = OnDnsQueryAbnormalReport(eventfailcause, dnsResultReport);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdDnsQueryAbnormalReport parcel failed");
+        return result;
+    }
+
+    return ERR_NONE;
+}
+
 int32_t NetDnsResultCallbackStub::OnDnsResultReport(uint32_t size, std::list<NetDnsResultReport> dnsResultReport)
+{
+    return 0;
+}
+
+int32_t NetDnsResultCallbackStub::OnDnsQueryResultReport(
+    uint32_t size, std::list<NetDnsQueryResultReport> dnsResultReport)
+{
+    return 0;
+}
+
+int32_t NetDnsResultCallbackStub::OnDnsQueryAbnormalReport(
+    uint32_t eventfailcause, NetDnsQueryResultReport dnsResultReport)
 {
     return 0;
 }

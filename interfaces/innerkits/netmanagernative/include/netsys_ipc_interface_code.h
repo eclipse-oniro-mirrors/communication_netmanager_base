@@ -167,6 +167,8 @@ enum class NetDiagInterfaceCode {
 
 enum class NetDnsResultInterfaceCode {
     ON_DNS_RESULT_REPORT = 0,
+    ON_DNS_QUERY_RESULT_REPORT,
+    ON_DNS_QUERY_ABNORMAL_REPORT,
 };
 
 enum class NetDnsHealthInterfaceCode {

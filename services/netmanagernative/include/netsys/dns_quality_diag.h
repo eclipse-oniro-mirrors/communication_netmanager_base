@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <map>
+#include <time.h>
 
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
@@ -36,7 +37,20 @@
 #define DNS_CONFIG_PRINT(fmt, ...)
 #endif
 
+#define FROM_CACHE_FLAG         (1 << 0)
+#define VPN_NET_FLAG            (1 << 1)
+#define IPV4_NO_ANSWER_FLAG     (1 << 2)
+#define IPV4_CNAME_FLAG         (1 << 3)
+#define IPV6_NO_ANSWER_FLAG     (1 << 4)
+#define IPV6_CNAME_FLAG         (1 << 5)
+
 namespace OHOS::nmd {
+
+struct DnsAbnormalInfo {
+    uint32_t eventfailcause;
+    NetsysNative::NetDnsQueryResultReport report;
+};
+
 class DnsQualityDiag {
 public:
     ~DnsQualityDiag() = default;
@@ -46,6 +60,10 @@ public:
     // for net_conn_service
     int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, char* name,
                             uint32_t size, int32_t failreason, QueryParam param, AddrInfo* addrinfo);
+
+    int32_t ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo);
+
+    int32_t ReportDnsQueryAbnormal(int32_t eventfailcause, PostDnsQueryParam queryParam, AddrInfo* addrinfo);
 
     int32_t RegisterResultListener(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);
 
@@ -66,11 +84,15 @@ private:
 
     std::mutex resultListenersMutex_;
 
+    std::mutex dnsAbnormalTimeMutex_;
+
     std::atomic_uint defaultNetId_;
 
     uint32_t monitor_loop_delay;
 
     uint32_t report_delay;
+
+    uint32_t last_dns_abnormal_report_time;
 
     std::atomic_bool handler_started;
 
@@ -84,6 +106,8 @@ private:
 
     std::list<NetsysNative::NetDnsResultReport> report_;
 
+    std::list<NetsysNative::NetDnsQueryResultReport> dnsQueryReport_;
+
     int32_t SendHealthReport(NetsysNative::NetDnsHealthReport healthreport);
     int32_t InitHandler();
     int32_t query_default_host();
@@ -91,8 +115,15 @@ private:
     int32_t handle_dns_fail();
     int32_t send_dns_report();
     int32_t add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report);
+    int32_t add_dns_query_report(std::shared_ptr<NetsysNative::NetDnsQueryResultReport> report);
     int32_t load_query_addr(const char* defaultAddr);
+    void GetDefaultDnsServerList(int32_t uid, std::vector<std::string> &servers);
     int32_t ParseReportAddr(uint32_t size, AddrInfo* addrinfo, NetsysNative::NetDnsResultReport &report);
+    void FillDnsQueryResultReport(NetsysNative::NetDnsQueryResultReport &report,
+        PostDnsQueryParam &queryParam);
+    int32_t ParseDnsQueryReportAddr(uint8_t size,
+        AddrInfo* addrinfo, NetsysNative::NetDnsQueryResultReport &report);
+    int32_t handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abnormalInfo);
 };
 } // namespace OHOS::nmd
 #endif // NETSYS_DNS_QUALITY_DIAG_H

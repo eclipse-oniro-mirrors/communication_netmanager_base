@@ -16,9 +16,10 @@
 #include <fstream>
 #include <sstream>
 
+#include "dns_param_cache.h"
 #include "dns_quality_diag.h"
-#include "net_handle.h"
 #include "net_conn_client.h"
+#include "net_handle.h"
 
 namespace OHOS::nmd {
 namespace {
@@ -32,6 +33,7 @@ const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 const char *DNS_URL_HEADER = "DnsProbeUrl:";
 const char NEW_LINE_STR = '\n';
 const uint32_t TIME_DELAY = 500;
+const uint32_t DNS_ABNORMAL_REPORT_INTERVAL = 2;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
@@ -131,6 +133,121 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         handler_->SendEvent(event);
     }
 
+    return 0;
+}
+
+void DnsQualityDiag::GetDefaultDnsServerList(int32_t uid, std::vector<std::string> &servers)
+{
+    int32_t netId = DnsParamCache::GetInstance().GetDefaultNetwork();
+    std::vector<std::string> domains;
+    uint16_t baseTimeoutMsec;
+    uint8_t retryCount;
+    DnsParamCache::GetInstance().GetResolverConfig(
+        netId, uid, servers, domains, baseTimeoutMsec, retryCount);
+}
+
+void DnsQualityDiag::FillDnsQueryResultReport(NetsysNative::NetDnsQueryResultReport &report,
+    PostDnsQueryParam &queryParam)
+{
+    uint16_t resBitInfo = 0;
+    report.uid_ = queryParam.uid;
+    report.pid_ = queryParam.pid;
+    report.addrSize_ = queryParam.addrSize;
+    DnsProcessInfoExt processInfo = queryParam.processInfo;
+    report.sourceFrom_ = processInfo.sourceFrom;
+    std::string srcAddr(processInfo.srcAddr);
+    report.srcAddr_ = srcAddr;
+    std::vector<std::string> serverList;
+    GetDefaultDnsServerList(queryParam.uid, serverList);
+    report.dnsServerSize_ = static_cast<uint8_t>(serverList.size());
+    report.dnsServerList_ = serverList;
+    report.queryTime_ = processInfo.queryTime;
+    report.host_ = processInfo.hostname;
+    report.retCode_ = processInfo.retCode;
+    report.firstQueryEndDuration_ = processInfo.firstQueryEndDuration;
+    report.firstQueryEnd2AppDuration_ = processInfo.firstQueryEnd2AppDuration;
+    report.ipv4RetCode_ = processInfo.ipv4QueryInfo.retCode;
+    std::string ipv4ServerName(processInfo.ipv4QueryInfo.serverAddr);
+    report.ipv4ServerName_ = ipv4ServerName;
+    report.ipv6RetCode_ = processInfo.ipv6QueryInfo.retCode;
+    std::string ipv6ServerName(processInfo.ipv6QueryInfo.serverAddr);
+    report.ipv6ServerName_ = ipv6ServerName;
+    resBitInfo |= (DnsParamCache::GetInstance().IsUseVpnDns(queryParam.uid) ? VPN_NET_FLAG : 0);
+    resBitInfo |= (processInfo.isFromCache ? FROM_CACHE_FLAG : 0);
+    resBitInfo |= (processInfo.ipv4QueryInfo.isNoAnswer ? IPV4_NO_ANSWER_FLAG : 0);
+    resBitInfo |= (processInfo.ipv4QueryInfo.cname ? IPV4_CNAME_FLAG : 0);
+    resBitInfo |= (processInfo.ipv6QueryInfo.isNoAnswer ? IPV6_NO_ANSWER_FLAG : 0);
+    resBitInfo |= (processInfo.ipv6QueryInfo.cname ? IPV6_CNAME_FLAG : 0);
+    report.resBitInfo_ = resBitInfo;
+}
+
+int32_t DnsQualityDiag::ParseDnsQueryReportAddr(uint8_t size,
+    AddrInfo* addrinfo, NetsysNative::NetDnsQueryResultReport &report)
+{
+    for (uint8_t i = 0; i < size; i++) {
+        NetsysNative::NetDnsQueryResultAddrInfo ai;
+        AddrInfo *tmp = &(addrinfo[i]);
+        void* addr = NULL;
+        char c_addr[INET6_ADDRSTRLEN];
+        switch (tmp->aiFamily) {
+            case AF_INET:
+                ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
+                addr = &(tmp->aiAddr.sin.sin_addr);
+                break;
+            case AF_INET6:
+                ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
+                addr = &(tmp->aiAddr.sin6.sin6_addr);
+                break;
+        }
+        inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr));
+        ai.addr_ = c_addr;
+        if (report.addrlist_.size() < MAX_RESULT_SIZE) {
+            report.addrlist_.push_back(ai);
+        } else {
+            break;
+        }
+    }
+    return 0;
+}
+
+int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo)
+{
+    bool reportSizeReachLimit = (dnsQueryReport_.size() >= MAX_RESULT_SIZE);
+    if (!reportSizeReachLimit) {
+        NetsysNative::NetDnsQueryResultReport report;
+        FillDnsQueryResultReport(report, queryParam);
+        if (queryParam.addrSize > 0 && addrinfo != nullptr) {
+            ParseDnsQueryReportAddr(queryParam.addrSize, addrinfo, report);
+        }
+        std::shared_ptr<NetsysNative::NetDnsQueryResultReport> rpt =
+            std::make_shared<NetsysNative::NetDnsQueryResultReport>(report);
+        auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_QUERY_RESULT_REPORT, rpt);
+        handler_->SendEvent(event);
+    }
+
+    return 0;
+}
+
+int32_t DnsQualityDiag::ReportDnsQueryAbnormal(int32_t eventfailcause, PostDnsQueryParam queryParam, AddrInfo* addrinfo)
+{
+    std::unique_lock<std::mutex> locker(dnsAbnormalTimeMutex_);
+    uint32_t timeNow = static_cast<uint32_t>(time(NULL));
+    if (timeNow - last_dns_abnormal_report_time < DNS_ABNORMAL_REPORT_INTERVAL) {
+        locker.unlock();
+        return 0;
+    }
+    last_dns_abnormal_report_time = static_cast<uint32_t>(time(NULL));
+    locker.unlock();
+    NetsysNative::NetDnsQueryResultReport report;
+    FillDnsQueryResultReport(report, queryParam);
+    if (queryParam.addrSize > 0 && addrinfo != nullptr) {
+        ParseDnsQueryReportAddr(queryParam.addrSize, addrinfo, report);
+    }
+    std::shared_ptr<DnsAbnormalInfo> rpt = std::make_shared<DnsAbnormalInfo>();
+    rpt->eventfailcause = eventfailcause;
+    rpt->report = report;
+    auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_QUERY_ABNORMAL_REPORT, rpt);
+    handler_->SendEvent(event);
     return 0;
 }
 
@@ -275,8 +392,34 @@ int32_t DnsQualityDiag::send_dns_report()
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
     }
+    if (dnsQueryReport_.size() > 0) {
+        std::list<NetsysNative::NetDnsQueryResultReport> reportSend(dnsQueryReport_);
+        dnsQueryReport_.clear();
+        for (auto cb: resultListeners_) {
+            cb->OnDnsQueryResultReport(reportSend.size(), reportSend);
+        }
+    }
     locker.unlock();
     handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
+    return 0;
+}
+
+int32_t DnsQualityDiag::add_dns_query_report(std::shared_ptr<NetsysNative::NetDnsQueryResultReport> report)
+{
+    if (!report) {
+        return 0;
+    }
+    if (dnsQueryReport_.size() < MAX_RESULT_SIZE) {
+        dnsQueryReport_.push_back(*report);
+    }
+    return 0;
+}
+
+int32_t DnsQualityDiag::handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abnormalInfo)
+{
+    for (auto cb: resultListeners_) {
+        cb->OnDnsQueryAbnormalReport(abnormalInfo->eventfailcause, abnormalInfo->report);
+    }
     return 0;
 }
 
@@ -341,8 +484,22 @@ int32_t DnsQualityDiag::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event
             send_dns_report();
             break;
         case DnsQualityEventHandler::MSG_DNS_NEW_REPORT:
-            auto report = event->GetSharedObject<NetsysNative::NetDnsResultReport>();
-            add_dns_report(report);
+            {
+                auto report = event->GetSharedObject<NetsysNative::NetDnsResultReport>();
+                add_dns_report(report);
+            }
+            break;
+        case DnsQualityEventHandler::MSG_DNS_QUERY_RESULT_REPORT:
+            {
+                auto queryReport = event->GetSharedObject<NetsysNative::NetDnsQueryResultReport>();
+                add_dns_query_report(queryReport);
+            }
+            break;
+        case DnsQualityEventHandler::MSG_DNS_QUERY_ABNORMAL_REPORT:
+            {
+                auto queryReport = event->GetSharedObject<DnsAbnormalInfo>();
+                handle_dns_abnormal(queryReport);
+            }
             break;
     }
     return 0;

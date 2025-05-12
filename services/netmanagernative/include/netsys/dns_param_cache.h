@@ -117,6 +117,8 @@ public:
 
     int32_t GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint32_t uid);
 
+    bool IsUseVpnDns(uint32_t uid);
+
 private:
     DnsParamCache();
 

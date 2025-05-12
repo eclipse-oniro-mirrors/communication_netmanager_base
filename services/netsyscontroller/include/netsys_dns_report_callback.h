@@ -27,6 +27,17 @@ public:
     virtual ~NetsysDnsReportCallback() {};
     virtual int32_t OnDnsResultReport(uint32_t size, const std::list<OHOS::NetsysNative::NetDnsResultReport>) = 0;
 };
+
+
+class NetsysDnsQueryReportCallback : public RefBase {
+public:
+    virtual ~NetsysDnsQueryReportCallback() {};
+    virtual int32_t OnDnsQueryResultReport(uint32_t size,
+        const std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res) = 0;
+    virtual int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause,
+        const OHOS::NetsysNative::NetDnsQueryResultReport res) = 0;
+};
+
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NetsysDnsReportCallback

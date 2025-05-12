@@ -113,5 +113,112 @@ bool NetDnsResultReport::Unmarshalling(Parcel &parcel, NetDnsResultReport &resul
 
     return true;
 }
+
+bool NetDnsQueryResultAddrInfo::Marshalling(Parcel &parcel) const
+{
+    if (!parcel.WriteUint16(type_)) {
+        return false;
+    }
+    if (!parcel.WriteString(addr_)) {
+        return false;
+    }
+    return true;
+}
+
+bool NetDnsQueryResultAddrInfo::Unmarshalling(Parcel &parcel, NetDnsQueryResultAddrInfo &addrInfo)
+{
+    if (!parcel.ReadUint16(addrInfo.type_)) {
+        return false;
+    }
+    if (!parcel.ReadString(addrInfo.addr_)) {
+        return false;
+    }
+    return true;
+}
+
+bool NetDnsQueryResultReport::MarshallingExt(Parcel &parcel) const
+{
+    return (!parcel.WriteUint32(uid_)
+        ||!parcel.WriteUint32(pid_)
+        ||!parcel.WriteString(srcAddr_)
+        ||!parcel.WriteUint8(addrSize_)
+        ||!parcel.WriteUint64(queryTime_)
+        ||!parcel.WriteString(host_)
+        ||!parcel.WriteInt32(retCode_)
+        ||!parcel.WriteUint32(firstQueryEndDuration_)
+        ||!parcel.WriteUint32(firstQueryEnd2AppDuration_)
+        ||!parcel.WriteInt32(ipv4RetCode_)
+        ||!parcel.WriteString(ipv4ServerName_)
+        ||!parcel.WriteInt32(ipv6RetCode_)
+        ||!parcel.WriteString(ipv6ServerName_)
+        ||!parcel.WriteUint8(sourceFrom_)
+        ||!parcel.WriteUint8(dnsServerSize_)
+        ||!parcel.WriteUint16(resBitInfo_)
+    );
+}
+
+bool NetDnsQueryResultReport::Marshalling(Parcel &parcel) const
+{
+    if (MarshallingExt(parcel)) {
+        return false;
+    }
+    for (std::string server : dnsServerList_) {
+        if (!parcel.WriteString(server)) {
+            return false;
+        }
+    }
+    for (const auto &addr : addrlist_) {
+        if (!addr.Marshalling(parcel)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NetDnsQueryResultReport::UnmarshallingExt(Parcel &parcel, NetDnsQueryResultReport &resultReport)
+{
+    return (
+        !parcel.ReadUint32(resultReport.uid_)
+        ||!parcel.ReadUint32(resultReport.pid_)
+        ||!parcel.ReadString(resultReport.srcAddr_)
+        ||!parcel.ReadUint8(resultReport.addrSize_)
+        ||!parcel.ReadUint64(resultReport.queryTime_)
+        ||!parcel.ReadString(resultReport.host_)
+        ||!parcel.ReadInt32(resultReport.retCode_)
+        ||!parcel.ReadUint32(resultReport.firstQueryEndDuration_)
+        ||!parcel.ReadUint32(resultReport.firstQueryEnd2AppDuration_)
+        ||!parcel.ReadInt32(resultReport.ipv4RetCode_)
+        ||!parcel.ReadString(resultReport.ipv4ServerName_)
+        ||!parcel.ReadInt32(resultReport.ipv6RetCode_)
+        ||!parcel.ReadString(resultReport.ipv6ServerName_)
+        ||!parcel.ReadUint8(resultReport.sourceFrom_)
+        ||!parcel.ReadUint8(resultReport.dnsServerSize_)
+        ||!parcel.ReadUint16(resultReport.resBitInfo_)
+    );
+}
+
+bool NetDnsQueryResultReport::Unmarshalling(Parcel &parcel, NetDnsQueryResultReport &resultReport)
+{
+    if (NetDnsQueryResultReport::UnmarshallingExt(parcel, resultReport)) {
+        return false;
+    }
+    for (uint32_t i = 0; i < resultReport.dnsServerSize_; ++i) {
+        std::string dnsServer;
+        if (!parcel.ReadString(dnsServer)) {
+            return false;
+        }
+        resultReport.dnsServerList_.push_back(dnsServer);
+    }
+    
+    uint8_t size = resultReport.addrSize_;
+    for (uint8_t j = 0; j < size; ++j) {
+        NetDnsQueryResultAddrInfo addrInfo;
+        if (!NetDnsQueryResultAddrInfo::Unmarshalling(parcel, addrInfo)) {
+            return false;
+        }
+        resultReport.addrlist_.push_back(addrInfo);
+    }
+    return true;
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -776,4 +776,18 @@ int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint
     }
     return GetUserDefinedServerFlag(netId, flag);
 }
+
+bool DnsParamCache::IsUseVpnDns(uint32_t uid)
+{
+    for (auto mem : vpnUidRanges_) {
+        if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
+            auto it = serverConfigMap_.find(vpnNetId_);
+            if (it == serverConfigMap_.end()) {
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace OHOS::nmd

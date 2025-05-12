@@ -123,6 +123,14 @@ public:
     {
         return 0;
     }
+    int32_t OnDnsQueryResultReport(uint32_t size, std::list<NetsysNative::NetDnsQueryResultReport>) override
+    {
+        return 0;
+    }
+    int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, NetsysNative::NetDnsQueryResultReport res) override
+    {
+        return 0;
+    }
 };
 
 class TestNetDnsHealthCallbackFuzzTest : public NetsysNative::NetDnsHealthCallbackStub {

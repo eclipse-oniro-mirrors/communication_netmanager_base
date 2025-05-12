@@ -53,6 +53,40 @@ struct NET_SYMBOL_VISIBLE NetDnsResultReport final : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsResultReport &result);
 };
+
+struct NET_SYMBOL_VISIBLE NetDnsQueryResultAddrInfo final : public Parcelable {
+    uint16_t	    type_;
+    std::string     addr_;
+
+    bool Marshalling(Parcel &parcel) const override;
+    static bool Unmarshalling(Parcel &parcel, NetDnsQueryResultAddrInfo &addrinfo);
+};
+
+struct NET_SYMBOL_VISIBLE NetDnsQueryResultReport final : public Parcelable {
+    uint32_t        uid_;
+    uint32_t        pid_;
+    std::string     srcAddr_;
+    uint8_t         addrSize_;
+    uint64_t        queryTime_;
+    std::string     host_;
+    int32_t         retCode_;
+    uint32_t        firstQueryEndDuration_;
+    uint32_t        firstQueryEnd2AppDuration_;
+    int32_t         ipv4RetCode_;
+    std::string     ipv4ServerName_;
+    int32_t         ipv6RetCode_;
+    std::string     ipv6ServerName_;
+    uint8_t         sourceFrom_;
+    uint8_t         dnsServerSize_;
+    uint16_t        resBitInfo_;
+    std::vector<std::string> dnsServerList_;
+    std::vector<NetDnsQueryResultAddrInfo> addrlist_;
+
+    bool Marshalling(Parcel &parcel) const override;
+    bool MarshallingExt(Parcel &parcel) const;
+    static bool Unmarshalling(Parcel &parcel, NetDnsQueryResultReport &result);
+    static bool UnmarshallingExt(Parcel &parcel, NetDnsQueryResultReport &result);
+};
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // NETSYS_NET_DNS_RESULT_DATA_H
