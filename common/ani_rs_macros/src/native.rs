@@ -11,18 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{
-    parse::{Parse, ParseStream, Parser},
-    punctuated::Punctuated,
-    spanned::Spanned,
-    token::Comma,
-    Attribute, Error, Expr, ItemEnum, ItemFn, ItemStruct, LitStr, MetaNameValue, Result, Stmt,
-};
+use quote::quote;
+use syn::{ItemFn, Result};
 
-pub(crate) fn entry(args: TokenStream2, item: TokenStream2, output: bool) -> Result<TokenStream2> {
+pub(crate) fn entry(args_: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item = syn::parse2::<ItemFn>(item)?;
     let item_clone = item.clone();
 
@@ -32,6 +25,37 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2, output: bool) -> Res
         env: ani_rs::AniEnv<'local>,
         this: ani_rs::objects::AniObject<'local>,
     };
+
+    let out = item.sig.output;
+    let mut out_arg = None;
+
+    match out {
+        syn::ReturnType::Default => {}
+        syn::ReturnType::Type(_, output) => match *output {
+            syn::Type::Path(path) => {
+                let argument = &path.path.segments.iter().next().unwrap().arguments;
+                match argument {
+                    syn::PathArguments::AngleBracketed(args) => {
+                        let arg0 = args.args.iter().next().unwrap();
+                        match arg0 {
+                            syn::GenericArgument::Type(ty) => match ty {
+                                syn::Type::Path(path) => {
+                                    let ident =
+                                        path.path.segments.iter().next().unwrap().ident.to_string();
+                                    out_arg = Some(ident);
+                                }
+                                syn::Type::Tuple(_) => {}
+                                _ => unimplemented!(),
+                            },
+                            _ => unimplemented!(),
+                        }
+                    }
+                    _ => unimplemented!(),
+                }
+            }
+            _ => unimplemented!(),
+        },
+    }
 
     let mut input = quote! {};
     for i in item.sig.inputs.iter() {
@@ -79,53 +103,115 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2, output: bool) -> Res
         }
     }
     let ident = item.sig.ident.clone();
-    if output {
-        sig = quote! {
-        fn #ident<'local>(#sig) -> AniRef<'local>
-        };
-    } else {
-        sig = quote! {fn #ident<'local>(#sig)}
-    }
-
-    let mut sig = syn::parse2(sig).unwrap();
-
-    item.sig = sig;
 
     let block = quote!(
-
         #item_clone
         #block
         let res = #ident (#input);
-
     );
 
-    let block = if output {
-        quote! {
-           { #block
-            match res {
-                Ok(res) => {
-                    env.serialize(&res).unwrap()
-                }
-                Err(err) => {
-                    let res = env.undefined().unwrap();
-                    env.throw_business_error(err.code(), err.message())
-                        .unwrap();
-                    res
+    let block = match out_arg {
+        Some(out) => match out.as_str() {
+            "i32" | "i64" | "f32" | "f64" | "bool" => {
+                let default = match out.as_str() {
+                    "i32" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> i32
+                        };
+                        quote! {
+                            i32::default()
+                        }
+                    }
+                    "i64" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> i64
+                        };
+                        quote! {
+                            i64::default()
+                        }
+                    }
+                    "f32" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> f32
+                        };
+                        quote! {
+                            f32::default()
+                        }
+                    }
+                    "f64" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> f64
+                        };
+                        quote! {
+                            f64::default()
+                        }
+                    }
+                    "bool" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> bool
+                        };
+                        quote! {
+                            false
+                        }
+                    }
+                    _ => {
+                        unimplemented!()
+                    }
+                };
+                quote! {
+                    {
+                        #block
+                        match res {
+                            Ok(res) => {
+                                res
+                            }
+                            Err(err) => {
+                                env.throw_business_error(err.code(), err.message())
+                                    .unwrap();
+                                #default
+                            }
+                        }
+                    }
                 }
             }
+            _ => {
+                sig = quote! {
+                    fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
+                };
+                quote! {
+                {
+                    #block
+                    match res {
+                        Ok(res) => {
+                            env.serialize(&res).unwrap()
+                        }
+                        Err(err) => {
+                            let res = env.undefined().unwrap();
+                            env.throw_business_error(err.code(), err.message())
+                                .unwrap();
+                            res
+                        }
+                    }
+                    }
+                }
             }
-        }
-    } else {
-        quote! {
-            {
-                #block
-                if let Err(err) =  res {
-                    env.throw_business_error(err.code(), err.message())
-                        .unwrap();
+        },
+        None => {
+            sig = quote! {fn #ident<'local>(#sig)};
+            quote! {
+                {
+                    #block
+                    if let Err(err) =  res {
+                        env.throw_business_error(err.code(), err.message())
+                            .unwrap();
+                    }
                 }
             }
         }
     };
+
+    let sig = syn::parse2(sig).unwrap();
+    item.sig = sig;
 
     item.block = syn::parse2(block).unwrap();
     Ok(quote! {
