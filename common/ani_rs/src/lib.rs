@@ -11,11 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(lazy_cell)]
-
 pub use ani_rs_macros::ani;
 pub use ani_rs_macros::native;
-pub use ani_rs_macros::native_v;
 
 mod env;
 mod vm;

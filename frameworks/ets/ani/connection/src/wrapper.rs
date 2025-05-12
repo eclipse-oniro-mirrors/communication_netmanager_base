@@ -11,14 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::{c_schar, CStr, CString};
+use std::ffi::CString;
 
-use crate::connection::{ConnCallback, Connection};
-use ani_rs::AniEnv;
-use ani_sys::ani_ref;
+use crate::connection::ConnCallback;
 use cxx::{let_cxx_string, UniquePtr};
 use ffi::{NetBlockStatusInfo, NetCapabilityInfo, NetConnectionPropertyInfo, NetHandle};
-use serde::{Deserialize, Serialize};
 
 use crate::bridge;
 
@@ -159,8 +156,6 @@ impl NetConnClient {
     }
 
     pub fn is_default_net_metered() -> Result<bool, i32> {
-        let net_conn_client = ffi::GetNetConnClient(&mut 0);
-
         let mut is_metered = false;
         let ret = ffi::IsDefaultNetMetered(&mut is_metered);
         if ret != 0 {
@@ -242,7 +237,7 @@ impl NetConnClient {
         host.push(',');
         for i in 0..ips.len() {
             host.push_str(&ips[i]);
-            if (i < ips.len() - 1) {
+            if i < ips.len() - 1 {
                 host.push(',');
             }
         }

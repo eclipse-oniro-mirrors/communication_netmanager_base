@@ -15,6 +15,8 @@ use std::{marker::PhantomData, ops::Deref, ptr::null_mut};
 
 use ani_sys::ani_ref;
 
+use crate::AniVm;
+
 #[repr(transparent)]
 #[derive(Debug, Clone)]
 pub struct AniRef<'local> {
@@ -65,3 +67,14 @@ impl AniRef<'_> {
         Self::from_raw(null_mut() as _)
     }
 }
+
+impl PartialEq for AniRef<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        let Ok(env) = AniVm::get_instance().get_env() else {
+            return false;
+        };
+        env.reference_strict_equals(self, other).unwrap_or(false)
+    }
+}
+
+impl Eq for AniRef<'_> {}

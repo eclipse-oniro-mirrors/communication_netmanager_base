@@ -13,4 +13,4 @@
 
 [workspace]
 resolver = "2"
-members = ["common/ani_rs", "common/ani_rs_macros", "common/ani_sys", "common/ani_test", "frameworks/ets/ani/connection"]
+members = ["common/ani_rs", "common/ani_rs_macros", "common/ani_sys", "common/ani_test", "frameworks/ets/ani/connection", "frameworks/ets/ani/statistics"]
