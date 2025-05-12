@@ -1010,6 +1010,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
         locker.unlock();
+        ProcessHttpProxyCancel(supplier);
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
@@ -1022,6 +1023,16 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::ProcessHttpProxyCancel(const sptr<NetSupplier> &supplier)
+{
+    HttpProxy oldHttpProxy;
+    supplier->GetHttpProxy(oldHttpProxy);
+    if (!oldHttpProxy.GetHost().empty()) {
+        HttpProxy emptyProxy;
+        SendHttpProxyChangeBroadcast(emptyProxy);
+    }
 }
 
 int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo,
