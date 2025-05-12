@@ -36,6 +36,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
+#include "parameters.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
 
@@ -380,6 +381,30 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
     }
     sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
     ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+    EXPECT_EQ(ret, NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM);
+    for (auto& callback : uidCallbacks) {
+        ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(callback, TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+}
+
+HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest004, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    int64_t TEST_CALLBACK_UID = 1111;
+    auto ret = -1;
+    system::SetParameter("persist.edm.mms_disable", "true");
+    vector<sptr<INetConnCallback>> uidCallbacks;
+    for (int32_t i = 1; i <= 2000; ++i) {
+        sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0,
+                                                                                        TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        uidCallbacks.push_back(uidCallback);
+    }
+    sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+    OHOS::system::SetParameter("persist.edm.mms_disable", "false");
     EXPECT_EQ(ret, NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM);
     for (auto& callback : uidCallbacks) {
         ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(callback, TEST_CALLBACK_UID);
