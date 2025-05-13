@@ -91,13 +91,8 @@ void NetMonitor::Start()
 {
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
-        NETMGR_LOG_W("Net[%{public}d] monitor is detecting, no need to start", netId_);
-        if (detectionDelay_ != 0) {
-            auto monitorCallback = netMonitorCallback_.lock();
-            if (monitorCallback) {
-                monitorCallback->OnHandleNetMonitorResult(prevProbeStatus_, prevRedirectUrl_);
-            }
-        }
+        NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
+        detectionCond_.notify_all();
         return;
     }
     isDetecting_ = true;
@@ -154,8 +149,6 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
     if (monitorCallback) {
         monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
     }
-    prevProbeStatus_ = result;
-    prevRedirectUrl_ = probeResult.GetRedirectUrl();
     struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
     EventReport::SendMonitorBehaviorEvent(eventInfo);
     if (isDetecting_) {
