@@ -85,8 +85,8 @@ int32_t NetStatsHistory::GetHistory(std::vector<NetStatsInfo> &recv, uint32_t ui
     return handler->ReadStatsData(recv, uid, ident, start, end);
 }
 
-int32_t NetStatsHistory::GetHistoryByIdentAndUserId(std::vector<NetStatsInfo> &recv, +const std::string &ident,
-                                                int32_t userId, uint64_t start, uint64_t end)
+int32_t NetStatsHistory::GetHistoryByIdentAndUserId(std::vector<NetStatsInfo> &recv,
+    const std::string &ident, int32_t userId, uint64_t start, uint64_t end)
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
     if (handler == nullptr) {
