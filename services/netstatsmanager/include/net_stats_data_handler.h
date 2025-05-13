@@ -37,11 +37,17 @@ public:
                                  uint64_t end);
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t uid, const std::string &ident, uint64_t start,
                           uint64_t end);
+    int32_t ReadStatsDataByIdentAndUserId(std::vector<NetStatsInfo> &infos, const std::string &ident,
+                                          const int32_t userId, uint64_t start, uint64_t end);
     int32_t DeleteByUid(uint64_t uid);
     int32_t DeleteSimStatsByUid(uint64_t uid);
     int32_t DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t UpdateStatsFlag(uint32_t uid, uint32_t flag);
     int32_t UpdateSimStatsFlag(uint32_t uid, uint32_t flag);
+    int32_t UpdateStatsFlagByUserId(int32_t userId, uint32_t flag);
+    int32_t UpdateSimStatsFlagByUserId(int32_t userId, uint32_t flag);
+    int32_t UpdateStatsUserIdByUserId(int32_t userId, int32_t newUserId);
+    int32_t UpdateSimStatsUserIdByUserId(int32_t userId, int32_t newUserId);
     int32_t UpdateSimDataFlag(uint32_t oldFlag, uint32_t newFlag);
     int32_t ClearData();
     int32_t BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb);

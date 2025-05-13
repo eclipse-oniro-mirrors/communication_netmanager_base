@@ -31,12 +31,13 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     uint64_t rxPackets_ = 0;
     uint64_t txPackets_ = 0;
     uint32_t flag_ = 0;
+    int32_t userId_ = 0;
 
     inline const std::string UidData() const
     {
         return std::to_string(uid_) + "," + ident_ + "," + iface_ + "," + std::to_string(date_) + "," +
                std::to_string(rxBytes_) + "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) + "," +
-               std::to_string(txPackets_) + "," + std::to_string(flag_);
+               std::to_string(txPackets_) + "," + std::to_string(flag_) + "," + std::to_string(userId_);
     }
 
     inline const std::string IfaceData() const
@@ -71,6 +72,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
         info.txPackets_ = (txPackets_ > other.txPackets_) ? txPackets_ - other.txPackets_ : 0;
         info.txBytes_ = (txBytes_ > other.txBytes_) ? txBytes_ - other.txBytes_ : 0;
         info.flag_ = flag_;
+        info.userId_ = userId_;
         return info;
     }
 

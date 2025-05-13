@@ -29,6 +29,7 @@ struct NET_SYMBOL_VISIBLE_PUSH PushStatsInfo final : public Parcelable {
     uint32_t endTime_ = 0;
     uint32_t rxBytes_ = 0;
     uint32_t txBytes_ = 0;
+    int32_t userId_ = 0;
 
     ~PushStatsInfo() override = default;
 

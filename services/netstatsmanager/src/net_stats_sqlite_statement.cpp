@@ -144,5 +144,20 @@ int32_t NetStatsSqliteStatement::GetColumnInt(int32_t index, uint32_t &value) co
     value = static_cast<uint64_t>(sqlite3_column_int(stmtHandle_, index));
     return SQLITE_OK;
 }
+
+int32_t NetStatsSqliteStatement::GetColumnInt(int32_t index, int32_t &value) const
+{
+    if (stmtHandle_ == nullptr || index >= columnCount_) {
+        NETMGR_LOG_E("Get column int failed");
+        return SQLITE_ERROR;
+    }
+    int32_t type = sqlite3_column_type(stmtHandle_, index);
+    if (type != SQLITE_INTEGER) {
+        NETMGR_LOG_E("Get column int failed type is not interger");
+        return SQLITE_ERROR;
+    }
+    value = static_cast<int32_t>(sqlite3_column_int(stmtHandle_, index));
+    return SQLITE_OK;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

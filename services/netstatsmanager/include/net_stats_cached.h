@@ -90,6 +90,14 @@ public:
         stats_.SetNotifier(callbackManager);
     }
 
+    int32_t GetCurPrivateUserId();
+
+    void SetCurPrivateUserId(int32_t userId);
+
+    int32_t GetCurDefaultUserId();
+
+    void SetCurDefaultUserId(int32_t userId);
+
     void Reset();
 
     void SetUidSimSampleBundle(uint32_t uid, const SampleBundleInfo &info);
@@ -292,6 +300,7 @@ private:
 
     CachedInfo stats_;
     ffrt::mutex lock_;
+    std::mutex mutex_ {};
     std::atomic<bool> isForce_ = false;
     std::atomic<bool> isExec_ = false;
     std::atomic<bool> isExecBackUp_ = false;
@@ -310,6 +319,8 @@ private:
     SafeMap<uint32_t, NetStatsDataFlag> uidStatsFlagMap_;
     SafeMap<uint32_t, SampleBundleInfo> uidSimSampleBundleMap_;
     bool isDisplayTrafficAncoList = false;
+    int32_t curPrivateUserId_ = -1;
+    int32_t curDefaultUserId_ = -1;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;

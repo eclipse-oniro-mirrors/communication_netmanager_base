@@ -64,6 +64,7 @@ ohos_unittest("net_stats_mock_data") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
+    "os_account:os_account_innerkits"
   ]
 
   defines = [
@@ -157,6 +158,7 @@ ohos_unittest("net_stats_manager_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
+    "os_account:os_account_innerkits"
   ]
 
   defines = [
@@ -242,6 +244,7 @@ ohos_unittest("net_stats_cached_service_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
+    "os_account:os_account_innerkits"
   ]
 
   defines = [
@@ -320,6 +323,7 @@ ohos_unittest("net_stats_service_common_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
+    "os_account:os_account_innerkits"
   ]
 
   defines = [
