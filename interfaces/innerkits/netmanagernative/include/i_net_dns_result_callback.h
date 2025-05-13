@@ -37,10 +37,8 @@ public:
 public:
     virtual int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) = 0;
     virtual int32_t OnDnsQueryResultReport(uint32_t size, const std::list<NetDnsQueryResultReport>) = 0;
-    virtual int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, const NetDnsQueryResultReport report)
-    {
-        return 0;
-    }
+    virtual int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause,
+        const NetDnsQueryResultReport report) = 0;
 };
 } // namespace NetsysNative
 } // namespace OHOS
