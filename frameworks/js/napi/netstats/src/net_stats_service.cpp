@@ -1397,14 +1397,14 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
             }
             break;
         case NET_STATS_MONTHLY_MARK:
-            if (value >= 0 || value <= 100) { // 100: 百分比最大值
+            if (value >= 0 && value <= 100) { // 100: 百分比最大值
                 iter->second.second->monthlyMark = value;
                 iter->second.second->isCanNotifyMonthlyMark = true;
                 UpdateTrafficLimitDate(simId);
             }
             break;
         case NET_STATS_DAILY_MARK:
-            if (value >= 0 || value <= 100) { // 100: 百分比最大值
+            if (value >= 0 && value <= 100) { // 100: 百分比最大值
                 iter->second.second->dailyMark = value;
             }
             break;
