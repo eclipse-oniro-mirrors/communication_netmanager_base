@@ -161,7 +161,7 @@ std::string NetMgrNetStatsLimitNotification::GetDayNotificationText()
         NETMGR_LOG_E("GetDayNotificationText error");
         return "";
     }
-    
+
     std::string outText = resourceMap[KEY_DAILY_NOTIFY_TEXT];
     int32_t simId = simId_;
     uint64_t traffic = 0;
