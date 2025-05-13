@@ -21,6 +21,8 @@
 #include "net_manager_constants.h"
 #define private public
 #include "net_activate.h"
+#include "net_conn_service.h"
+#include "app_state_aware.h"
 #undef private
 
 namespace OHOS {
@@ -321,6 +323,114 @@ HWTEST_F(NetActivateTest, SetLastCallbackTypeTest001, TestSize.Level1)
     instance_->SetLastCallbackType(CALL_TYPE_UPDATE_CAP);
     auto ret = instance_->GetLastCallbackType();
     EXPECT_TRUE(ret == CALL_TYPE_AVAILABLE);
+}
+
+HWTEST_F(NetActivateTest, TimeOutNetAvailableTest002, TestSize.Level1)
+{
+    instance_->netServiceSupplied_ = nullptr;
+    EXPECT_EQ(instance_->GetNetCallback(), nullptr);
+    instance_->TimeOutNetAvailable();
+
+    instance_->timeoutCallback_.reset();
+    instance_->TimeOutNetAvailable();
+
+    instance_->netConnCallback_ = new (std::nothrow) NetConnCallbackStubCb();
+    instance_->TimeOutNetAvailable();
+}
+
+HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest003, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_INTERNET);
+    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    supplier->netAllCapabilities_.linkUpBandwidthKbps_ = 0;
+    instance_->netSpecifier_->netCapabilities_.linkUpBandwidthKbps_ = 0;
+    supplier->netAllCapabilities_.linkDownBandwidthKbps_ = 0;
+    instance_->netSpecifier_->netCapabilities_.linkDownBandwidthKbps_ = 1;
+    auto ret = instance_->MatchRequestAndNetwork(supplier, true);
+    EXPECT_FALSE(ret);
+
+    supplier->netSupplierIdent_ = "test";
+    instance_->netSpecifier_->ident_ =  "123";
+    ret = instance_->MatchRequestAndNetwork(supplier, false);
+    EXPECT_FALSE(ret);
+
+    instance_->netSpecifier_->netCapabilities_.bearerTypes_.erase(BEARER_ETHERNET);
+    ret = instance_->MatchRequestAndNetwork(supplier,true);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkIdentTest002, TestSize.Level1)
+{
+    std::string ident = "test";
+    instance_->netSpecifier_->ident_ = "123";
+    NetBearType bearerType = BEARER_DEFAULT;
+    bool skipCheckIdent = false;
+    auto ret = instance_->CompareByNetworkIdent(ident, bearerType, skipCheckIdent);
+    EXPECT_FALSE(ret);
+
+    skipCheckIdent = true;
+    ret = instance_->CompareByNetworkIdent(ident, bearerType, skipCheckIdent);
+    EXPECT_FALSE(ret);
+
+    bearerType = BEARER_WIFI;
+    ret = instance_->CompareByNetworkIdent(ident, bearerType, skipCheckIdent);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetActivateTest, SetLastCallbackTypeTest002, TestSize.Level1)
+{
+    CallbackType callbackType = CALL_TYPE_UPDATE_CAP;
+    instance_->lastCallbackType_ = CALL_TYPE_AVAILABLE;
+    instance_->SetLastCallbackType(callbackType);
+
+    callbackType = CALL_TYPE_UPDATE_LINK;
+    instance_->SetLastCallbackType(callbackType);
+    auto ret = instance_->GetLastCallbackType();
+    EXPECT_EQ(ret, CALL_TYPE_AVAILABLE);
+}
+
+HWTEST_F(NetActivateTest, IsAllowCallbackTest002, TestSize.Level1)
+{
+    NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = true;
+    instance_->isAppFrozened_ = false;
+    CallbackType callbackType = CALL_TYPE_AVAILABLE;
+    auto ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_TRUE(ret);
+
+    instance_->isAppFrozened_ = true;
+    instance_->uid_ = 1;
+    AppStateAwareManager::GetInstance().appStateObserver_ = new (std::nothrow)AppStateObserver();
+    AppStateAwareManager::GetInstance().foregroundAppUid_ = 1;
+    ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_TRUE(ret);
+
+    AppStateAwareManager::GetInstance().appStateObserver_ = nullptr;
+    instance_->lastCallbackType_ = CALL_TYPE_LOST;
+    ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
+{
+    NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = true;
+    instance_->isAppFrozened_ = true;
+    AppStateAwareManager::GetInstance().appStateObserver_ = nullptr;
+    instance_->lastCallbackType_ = CALL_TYPE_AVAILABLE;
+    CallbackType callbackType = CALL_TYPE_AVAILABLE;
+    auto ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
+
+    callbackType = CALL_TYPE_LOST;
+    std::set<NetCap> netCaps;
+    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    instance_->lastNetServiceSupplied_ = supplier;
+    ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
+
+    instance_->lastNetServiceSupplied_ = nullptr;
+    ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
 }
 
 } // namespace NetManagerStandard

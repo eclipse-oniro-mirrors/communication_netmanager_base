@@ -84,5 +84,20 @@ HWTEST_F(NetConnServiceTest, EnableDistributedServerNet001, TestSize.Level1)
     ret = NetConnService::GetInstance()->DisableDistributedNet(isServer);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, ActiveHttpProxy001, TestSize.Level1)
+{
+    NetConnService::GetInstance()->ActiveHttpProxy();
+    EXPECT_EQ(NetConnService::GetInstance()->currentUserId_, -1);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyOld001, TestSize.Level1)
+{
+    HttpProxy httpProxy;
+    httpProxy.SetHost("123");
+    int32_t activeUserId = 123;
+    NetConnService::GetInstance()->SetGlobalHttpProxyOld(httpProxy, activeUserId);
+    EXPECT_EQ(NetConnService::GetInstance()->currentUserId_, 123);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

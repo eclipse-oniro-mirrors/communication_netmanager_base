@@ -153,5 +153,10 @@ HWTEST_F(NetMonitorTest, DetectionTest002, TestSize.Level1)
     EXPECT_TRUE(instance_->IsDetecting());
 }
 
+HWTEST_F(NetMonitorTest, CheckIfSettingsDataReadyTest001, TestSize.Level1)
+{
+    instance_->isDataShareReady_ = true;
+    EXPECT_EQ(instance_->CheckIfSettingsDataReady(), true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

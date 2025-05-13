@@ -47,6 +47,7 @@ ohos_unittest("net_policy_manager_test") {
     "ut_net_policy_traffic.cpp",
     "ut_net_quota_policy.cpp",
     "ut_netsys_policy_wrapper.cpp",
+    "net_access_policy_test.cpp",
   ]
 
   include_dirs = [

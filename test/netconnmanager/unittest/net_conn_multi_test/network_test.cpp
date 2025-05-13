@@ -212,5 +212,28 @@ HWTEST_F(NetworkTest, NetworkTestBranchTest001, TestSize.Level1)
     code = instance_->NetDetectionResultConvert(INVALID_VALUE);
     EXPECT_EQ(code, NetDetectionResultCode::NET_DETECTION_FAIL);
 }
+
+HWTEST_F(NetworkTest, ReleaseBasicNetworkTest001, TestSize.Level1)
+{
+    instance_->isNeedResume_ = true;
+    auto ret = instance_->ReleaseBasicNetwork();
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetworkTest, OnHandleNetMonitorResultTest001, TestSize.Level1)
+{
+    NetDetectionStatus netDetectionState = INVALID_DETECTION_STATE;
+    std::string urlRedirect;
+    std::shared_ptr<AppExecFwk::EventRunner> runner;
+    instance_->eventHandler_ = std::make_shared<NetConnEventHandler>(runner);
+    instance_->OnHandleNetMonitorResult(netDetectionState, urlRedirect);
+    EXPECT_EQ(urlRedirect.size(), 0);
+}
+
+HWTEST_F(NetworkTest, ResumeNetworkInfoTest001, TestSize.Level1)
+{
+    auto result = instance_->ResumeNetworkInfo();
+    EXPECT_EQ(result, false);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

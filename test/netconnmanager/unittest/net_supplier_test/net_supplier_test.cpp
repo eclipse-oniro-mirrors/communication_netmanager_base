@@ -222,5 +222,35 @@ HWTEST_F(NetSupplierTest, RemoveBestRequestTest001, TestSize.Level1)
     auto iter2 = supplier->bestReqList_.find(reqId);
     EXPECT_TRUE(iter2 == supplier->bestReqList_.end());
 }
+
+HWTEST_F(NetSupplierTest, SetNetworkTest001, TestSize.Level1)
+{
+    std::shared_ptr<Network> network = nullptr;
+    supplier->SetNetwork(network);
+    ASSERT_NE(supplier->GetSupplierCallback(), nullptr);
+}
+
+HWTEST_F(NetSupplierTest, GetRealScoreTest001, TestSize.Level1)
+{
+    supplier->isAcceptUnvaliad = true;
+    auto result = supplier->GetRealScore();
+    EXPECT_EQ(result, 100);
+}
+
+HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
+{
+    auto result = supplier->ResumeNetworkInfo();
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NetSupplierTest, TechToTypeTest001, TestSize.Level1)
+{
+    NetSlotTech techType = NetSlotTech::SLOT_TYPE_GSM;
+    auto result = supplier->TechToType(techType);
+    EXPECT_EQ(result, "2G");
+    techType = NetSlotTech::SLOT_TYPE_LTE_CA;
+    result = supplier->TechToType(techType);
+    EXPECT_EQ(result, "4G");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
