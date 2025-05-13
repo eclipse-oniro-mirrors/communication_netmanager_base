@@ -1358,6 +1358,30 @@ int32_t NetsysController::UnregisterDnsResultCallback(
     return netsysService_->UnregisterDnsResultCallback(callback);
 }
 
+int32_t NetsysController::RegisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->RegisterDnsQueryResultCallback(callback);
+}
+
+int32_t NetsysController::UnregisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->UnregisterDnsQueryResultCallback(callback);
+}
+
 int32_t NetsysController::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
 {
     // LCOV_EXCL_START This will never happen.

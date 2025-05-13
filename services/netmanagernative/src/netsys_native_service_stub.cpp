@@ -60,7 +60,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
     InitDnsServerOpToInterfaceMap();
-    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+    uids_ = {UID_ROOT, UID_HIVIEW, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR, UID_IOT_NET_MANAGER};
 }
 
@@ -414,7 +414,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
     }
     auto uid = IPCSkeleton::GetCallingUid();
     if (std::find(uids_.begin(), uids_.end(), uid) == uids_.end()) {
-        NETNATIVE_LOGE("This uid connot use netsys");
+        NETNATIVE_LOGE("This uid connot use netsys %{public}d", uid);
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }

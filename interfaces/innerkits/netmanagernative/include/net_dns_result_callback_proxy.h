@@ -26,6 +26,8 @@ public:
     virtual ~NetDnsResultCallbackProxy() = default;
 
     int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) override;
+    int32_t OnDnsQueryResultReport(uint32_t size, const std::list<NetDnsQueryResultReport>) override;
+    int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, const NetDnsQueryResultReport report) override;
 
 private:
     static inline BrokerDelegator<NetDnsResultCallbackProxy> delegator_;

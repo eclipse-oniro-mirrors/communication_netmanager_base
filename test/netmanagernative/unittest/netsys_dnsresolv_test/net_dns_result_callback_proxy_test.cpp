@@ -89,5 +89,40 @@ HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsResul
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsQueryResultReport_001, TestSize.Level0)
+{
+    uint32_t listsize = 1;
+    std::list<NetDnsQueryResultReport> dnsResultReport;
+    int32_t ret = proxy->OnDnsQueryResultReport(listsize, dnsResultReport);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsQueryResultReport_002, TestSize.Level0)
+{
+    uint32_t listsize = 0;
+    std::list<NetDnsQueryResultReport> dnsResultReport;
+    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(1));
+    int32_t ret = proxy->OnDnsQueryResultReport(listsize, dnsResultReport);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsQueryResultReport_003, TestSize.Level0)
+{
+    uint32_t listsize = 1;
+    std::list<NetDnsQueryResultReport> dnsResultReport;
+    NetDnsQueryResultReport report;
+    dnsResultReport.push_back(report);
+    int32_t ret = proxy->OnDnsQueryResultReport(listsize, dnsResultReport);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetDnsResultCallbackProxyTest, NetDnsResultCallbackProxyTest_OnDnsQueryAbnormalReport_001, TestSize.Level0)
+{
+    uint32_t eventfailcause = 1;
+    NetDnsQueryResultReport report;
+    int32_t ret = proxy->OnDnsQueryAbnormalReport(eventfailcause, report);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

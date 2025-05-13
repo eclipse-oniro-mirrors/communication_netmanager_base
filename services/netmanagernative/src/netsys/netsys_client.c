@@ -27,6 +27,10 @@
 #include <sys/select.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <time.h>
+#include <pthread.h>
+#include <signal.h>
+#include <sys/time.h>
 
 #undef LOG_TAG
 #ifndef NETMGRNATIVE_LOG_TAG
@@ -40,6 +44,14 @@ extern "C" {
 #endif
 
 static volatile uint8_t g_allowInternet = 1;
+static int g_timer_exist = 0;
+static uint32_t g_curDnsStoreSize = 0;
+static struct DnsCacheInfo g_dnsCaches[MAX_DNS_CACHE_SIZE];
+static int64_t g_dnsReportTime[TOTAL_FAIL_CAUSE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
+static int64_t g_lastDnsErrorReportTime = 0;
+
+pthread_spinlock_t g_dnsReportLock;
+pthread_spinlock_t g_dnsReportTimeLock;
 
 void DisallowInternet(void)
 {
@@ -631,6 +643,328 @@ int32_t NetSysBindSocket(int32_t fd, uint32_t netId)
         return -1;
     }
 
+    return 0;
+}
+
+static void FillFamilyQueryInfo(struct FamilyQueryInfoExt *extInfo, struct FamilyQueryInfo *info)
+{
+    extInfo->retCode = info->retCode;
+    extInfo->isNoAnswer = info->isNoAnswer;
+    extInfo->cname = info->cname;
+    if (info->serverAddr && memcpy_s(extInfo->serverAddr, sizeof(extInfo->serverAddr),
+        info->serverAddr, strlen(info->serverAddr) + 1) != 0) {
+        HILOG_ERROR(LOG_CORE, "copy server error");
+    }
+}
+
+static void FillDnsProcessInfo(char *srcAddr, struct DnsProcessInfo *processInfo,
+    struct DnsProcessInfoExt *processInfoExt)
+{
+    processInfoExt->queryTime = processInfo->queryTime;
+    processInfoExt->retCode = processInfo->retCode;
+    processInfoExt->firstQueryEnd2AppDuration = processInfo->firstQueryEnd2AppDuration;
+    processInfoExt->firstQueryEndDuration = processInfo->firstQueryEndDuration;
+    processInfoExt->firstReturnType = processInfo->firstReturnType;
+    processInfoExt->isFromCache = processInfo->isFromCache;
+    processInfoExt->sourceFrom = processInfo->sourceFrom;
+    if (memcpy_s(processInfoExt->hostname, sizeof(processInfoExt->hostname),
+        processInfo->hostname, strlen(processInfo->hostname) + 1) != 0) {
+        HILOG_ERROR(LOG_CORE, "copy hostname error");
+    }
+    if (srcAddr) {
+        if (memcpy_s(processInfoExt->srcAddr, sizeof(processInfoExt->srcAddr),
+            srcAddr, strlen(srcAddr) + 1) != 0) {
+            HILOG_ERROR(LOG_CORE, "copy srcAddr error");
+        }
+    }
+    FillFamilyQueryInfo(&(processInfoExt->ipv4QueryInfo), &(processInfo->ipv4QueryInfo));
+    FillFamilyQueryInfo(&(processInfoExt->ipv6QueryInfo), &(processInfo->ipv6QueryInfo));
+}
+
+static int32_t GetDnsCacheSize(void)
+{
+    uint32_t size = 0;
+    for (uint32_t i = 0; i < g_curDnsStoreSize; i++) {
+        uint8_t addrSize = g_dnsCaches[i].addrSize;
+        size += (sizeof(uint8_t) + sizeof(struct DnsProcessInfoExt) + addrSize * sizeof(struct AddrInfo));
+    }
+    return size;
+}
+
+static int32_t NetSysPostDnsQueryForOne(int sockFd, struct DnsCacheInfo dnsInfo)
+{
+    uint8_t addrSize = dnsInfo.addrSize;
+    if (!PollSendData(sockFd, (char *)&addrSize, sizeof(uint8_t))) {
+        return -errno;
+    }
+
+    if (!PollSendData(sockFd, (char *)&dnsInfo.dnsProcessInfo, sizeof(struct DnsProcessInfoExt))) {
+        return -errno;
+    }
+
+    if (addrSize > 0) {
+        if (!PollSendData(sockFd, (char *)dnsInfo.addrInfo, sizeof(struct AddrInfo) * addrSize)) {
+            return -errno;
+        }
+    }
+    return 0;
+}
+
+static int32_t NetSysPostDnsQueryResultInternal(void)
+{
+    g_timer_exist = 0;
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        return sockFd;
+    }
+    int32_t uid = (int32_t)(getuid());
+    int32_t pid = getpid();
+    struct RequestInfo info = {
+        .uid = uid,
+        .command = POST_DNS_QUERY_RESULT,
+        .netId = 0,
+    };
+    uint32_t allDnsCacheSize = GetDnsCacheSize();
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    if (!PollSendData(sockFd, (char *)&g_curDnsStoreSize, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    if (!PollSendData(sockFd, (char *)&allDnsCacheSize, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    for (uint32_t i = 0; i < g_curDnsStoreSize; i++) {
+        int32_t ret = NetSysPostDnsQueryForOne(sockFd, g_dnsCaches[i]);
+        if (ret < 0) {
+            return CloseSocketReturn(sockFd, ret);
+        }
+    }
+    CloseSocketReturn(sockFd, 0);
+    pthread_spin_lock(&g_dnsReportLock);
+    memset_s(&g_dnsCaches, sizeof(struct DnsCacheInfo) * MAX_DNS_CACHE_SIZE, 0,
+        sizeof(struct DnsCacheInfo) * MAX_DNS_CACHE_SIZE);
+    g_curDnsStoreSize = 0;
+    pthread_spin_unlock(&g_dnsReportLock);
+    return 0;
+}
+
+static void DnsQueryReportTimerFunc(int unused)
+{
+    NetSysPostDnsQueryResultInternal();
+}
+
+char *addr_to_string(const AlignedSockAddr *addr, char *buf, size_t len)
+{
+    switch (addr->sa.sa_family) {
+        case AF_INET:
+            if (inet_ntop(AF_INET, &addr->sin.sin_addr, buf, len) == NULL) {
+                return NULL;
+            }
+            break;
+        case AF_INET6:
+            if (inet_ntop(AF_INET6, &addr->sin6.sin6_addr, buf, len) == NULL) {
+                return NULL;
+            }
+            break;
+        default:
+            return NULL;
+    }
+    return buf;
+}
+
+bool IsSystemUid(void)
+{
+    int32_t uid = (int32_t)(getuid());
+    if (uid == UID_PUSH || uid == UID_ACCOUNT) {
+        return false;
+    }
+    return uid < MIN_APP_UID;
+}
+
+bool IsLoopbackAddr(struct AddrInfo addrInfo[static MAX_RESULTS], int32_t addrSize)
+{
+    if (addrSize == 0) {
+        return false;
+    }
+    struct AddrInfo firstAddr = addrInfo[0];
+    char addrBuf[INET6_ADDRSTRLEN];
+    if (addr_to_string(&firstAddr.aiAddr, addrBuf, sizeof(addrBuf)) == NULL) {
+        return false;
+    }
+    if (!strcmp(addrBuf, LOOP_BACK_ADDR1) || !strcmp(addrBuf, LOOP_BACK_ADDR2)) {
+        return true;
+    }
+    return false;
+}
+
+bool IsAllCname(struct DnsProcessInfoExt *dnsProcessInfo)
+{
+    if (dnsProcessInfo->isFromCache) {
+        return false;
+    }
+    return dnsProcessInfo->ipv4QueryInfo.cname && dnsProcessInfo->ipv6QueryInfo.cname;
+}
+
+bool IsAllNoAnswer(struct DnsProcessInfoExt *dnsProcessInfo)
+{
+    if (dnsProcessInfo->isFromCache || dnsProcessInfo->retCode != 0) {
+        return false;
+    }
+    return dnsProcessInfo->ipv4QueryInfo.isNoAnswer && dnsProcessInfo->ipv6QueryInfo.isNoAnswer;
+}
+
+bool IsFailCauseAllowedReport(int failcause)
+{
+    if (failcause <= FAIL_CAUSE_NONE) {
+        return false;
+    }
+    int index = failcause - 1;
+    int64_t now = (int64_t)(time(NULL));
+    return now - g_dnsReportTime[index] > FAIL_CAUSE_REPORT_INTERVAL;
+}
+
+int32_t GetQueryFailCause(struct DnsProcessInfoExt *dnsProcessInfo,
+    struct AddrInfo addrInfo[static MAX_RESULTS], int32_t addrSize)
+{
+    if (dnsProcessInfo == NULL) {
+        return FAIL_CAUSE_NONE;
+    }
+    if (dnsProcessInfo->retCode != 0
+        && IsFailCauseAllowedReport(FAIL_CAUSE_QUERY_FAIL)) {
+        return FAIL_CAUSE_QUERY_FAIL;
+    }
+    if (dnsProcessInfo->firstQueryEndDuration > QUERY_CALLBACK_RETURN_SLOW_THRESHOLD
+        && IsFailCauseAllowedReport(FAIL_CAUSE_FIRST_RETURN_SLOW)) {
+        return FAIL_CAUSE_FIRST_RETURN_SLOW;
+    }
+    if (dnsProcessInfo->firstQueryEnd2AppDuration > FIRST_RETURN_SLOW_THRESHOLD
+        && IsFailCauseAllowedReport(FAIL_CAUSE_CALLBACK_RETURN_SLOW)) {
+        return FAIL_CAUSE_CALLBACK_RETURN_SLOW;
+    }
+    if (IsLoopbackAddr(addrInfo, addrSize)
+        && IsFailCauseAllowedReport(FAIL_CAUSE_RETURN_LOOPBACK_ADDR)) {
+        return FAIL_CAUSE_RETURN_LOOPBACK_ADDR;
+    }
+    if (IsAllCname(dnsProcessInfo)
+        && IsFailCauseAllowedReport(FAIL_CAUSE_RETURN_CNAME)) {
+        return FAIL_CAUSE_RETURN_CNAME;
+    }
+    if (IsAllNoAnswer(dnsProcessInfo)
+        && IsFailCauseAllowedReport(FAIL_CAUSE_RETURN_NO_ANSWER)) {
+        return FAIL_CAUSE_RETURN_NO_ANSWER;
+    }
+    return FAIL_CAUSE_NONE;
+}
+
+int32_t NetsysPostDnsAbnormal(int32_t failcause, struct DnsCacheInfo dnsInfo)
+{
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        return sockFd;
+    }
+    int32_t uid = (int32_t)(getuid());
+    int32_t pid = getpid();
+    struct RequestInfo info = {
+        .uid = uid,
+        .command = POST_DNS_ABNORMAL_RESULT,
+        .netId = 0,
+    };
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    if (!PollSendData(sockFd, (char *)&failcause, sizeof(int32_t))) {
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    int32_t ret = NetSysPostDnsQueryForOne(sockFd, dnsInfo);
+    return CloseSocketReturn(sockFd, ret);
+}
+
+void HandleQueryAbnormalReport(struct DnsProcessInfoExt dnsProcessInfo,
+    struct AddrInfo addrInfo[static MAX_RESULTS], int32_t addrSize)
+{
+    if (IsSystemUid()) {
+        return;
+    }
+    pthread_spin_lock(&g_dnsReportTimeLock);
+    int64_t timeNow = (int64_t)(time(NULL));
+    if (timeNow - g_lastDnsErrorReportTime < MIN_REPORT_INTERVAL) {
+        pthread_spin_unlock(&g_dnsReportTimeLock);
+        return;
+    }
+    int32_t failcause = GetQueryFailCause(&dnsProcessInfo, addrInfo, addrSize);
+    if (failcause > FAIL_CAUSE_NONE) {
+        g_dnsReportTime[failcause - 1] = timeNow;
+        g_lastDnsErrorReportTime = timeNow;
+        pthread_spin_unlock(&g_dnsReportTimeLock);
+        struct DnsCacheInfo dnsInfo;
+        dnsInfo.addrSize = addrSize;
+        dnsInfo.dnsProcessInfo = dnsProcessInfo;
+        if (memcpy_s(dnsInfo.addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS,
+            addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS) != 0) {
+            return;
+        }
+        NetsysPostDnsAbnormal(failcause, dnsInfo);
+    } else {
+        pthread_spin_unlock(&g_dnsReportTimeLock);
+    }
+}
+
+int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr,
+    struct DnsProcessInfo *processInfo)
+{
+    if (processInfo == NULL) {
+        return -1;
+    }
+    if (processInfo->hostname == NULL) {
+        return -1;
+    }
+    struct AddrInfo addrInfo[MAX_RESULTS] = {};
+    int32_t resNum = 0;
+    if (processInfo->retCode == 0) {
+        resNum = FillAddrInfo(addrInfo, addr);
+    }
+    if (resNum < 0) {
+        return -1;
+    }
+    struct DnsProcessInfoExt dnsProcessInfo;
+    FillDnsProcessInfo(srcAddr, processInfo, &dnsProcessInfo);
+    HandleQueryAbnormalReport(dnsProcessInfo, addrInfo, resNum);
+    pthread_spin_lock(&g_dnsReportLock);
+    if (g_curDnsStoreSize >= MAX_DNS_CACHE_SIZE) {
+        pthread_spin_unlock(&g_dnsReportLock);
+        return -1;
+    }
+    if (memcpy_s(g_dnsCaches[g_curDnsStoreSize].addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS,
+        addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS) != 0) {
+        pthread_spin_unlock(&g_dnsReportLock);
+        return -1;
+    }
+    g_dnsCaches[g_curDnsStoreSize].addrSize = (uint8_t)resNum;
+    g_dnsCaches[g_curDnsStoreSize].dnsProcessInfo = dnsProcessInfo;
+    g_curDnsStoreSize++;
+    if (g_timer_exist) {
+        pthread_spin_unlock(&g_dnsReportLock);
+        return -1;
+    }
+    g_timer_exist = 1;
+    (void)signal(SIGALRM, DnsQueryReportTimerFunc);
+    alarm(MIN_DNS_REPORT_PERIOD);
+    pthread_spin_unlock(&g_dnsReportLock);
     return 0;
 }
 

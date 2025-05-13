@@ -753,6 +753,13 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
+    ret = instance_->RegisterDnsQueryResultCallback(queryCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterDnsQueryResultCallback(queryCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)

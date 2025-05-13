@@ -139,6 +139,27 @@ HWTEST_F(NetsysNativeClientTest, OnDnsResultReportTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeClientTest, OnDnsQueryResultReportTest001, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    uint32_t size = 1;
+    OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultRepor{};
+    std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res = {netDnsResultRepor};
+    notifyCallback.netsysNativeClient_.cbDnsQueryReportObjects_ = {nullptr};
+    int32_t ret = notifyCallback.OnDnsQueryResultReport(size, res);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, OnDnsQueryAbnormalReportTest001, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    uint32_t eventfailcause = 1;
+    OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultRepor{};
+    notifyCallback.netsysNativeClient_.cbDnsQueryReportObjects_ = {nullptr};
+    int32_t ret = notifyCallback.OnDnsQueryAbnormalReport(eventfailcause, netDnsResultRepor);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeClientTest, DelInterfaceAddressTest001, TestSize.Level1)
 {
     const std::string ifName = INTERFACE_NAME;

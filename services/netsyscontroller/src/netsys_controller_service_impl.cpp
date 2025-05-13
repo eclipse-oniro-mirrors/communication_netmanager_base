@@ -824,6 +824,20 @@ int32_t NetsysControllerServiceImpl::UnregisterDnsResultCallback(
     return netsysClient_->UnregisterDnsResultCallback(callback);
 }
 
+int32_t NetsysControllerServiceImpl::RegisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    NETMGR_LOG_D("RegisterDnsQueryResultCallback");
+    return netsysClient_->RegisterDnsQueryResultCallback(callback);
+}
+
+int32_t NetsysControllerServiceImpl::UnregisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    NETMGR_LOG_D("UnregisterDnsQueryResultCallback");
+    return netsysClient_->UnregisterDnsQueryResultCallback(callback);
+}
+
 int32_t NetsysControllerServiceImpl::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
 {
     NETMGR_LOG_D("RegisterDnsResultListener");

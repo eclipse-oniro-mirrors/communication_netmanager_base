@@ -62,6 +62,10 @@ private:
         explicit NativeNetDnsResultCallback(std::weak_ptr<NetsysNativeClient> netsysNativeClient);
         ~NativeNetDnsResultCallback() override = default;
         int32_t OnDnsResultReport(uint32_t size, std::list<OHOS::NetsysNative::NetDnsResultReport> res) override;
+        int32_t OnDnsQueryResultReport(uint32_t size,
+            std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res) override;
+        int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause,
+            OHOS::NetsysNative::NetDnsQueryResultReport res) override;
 
     private:
         std::weak_ptr<NetsysNativeClient> netsysNativeClient_;
@@ -888,6 +892,24 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback);
 
     /**
+     * Register Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback);
+
+    /**
+     * Unregister Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback);
+
+    /**
      * Register Dns Health Callback Listener.
      *
      * @param callback Callback function
@@ -1041,9 +1063,11 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     std::list<sptr<NetsysControllerCallback>> cbObjects_;
     std::list<sptr<NetsysDnsReportCallback>> cbDnsReportObjects_;
+    std::list<sptr<NetsysDnsQueryReportCallback>> cbDnsQueryReportObjects_;
     std::mutex mutex_;
     std::mutex cbObjMutex_;
     std::mutex cbDnsReportObjMutex_;
+    std::mutex cbDnsQueryReportObjMutex_;
 
 private:
     class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {

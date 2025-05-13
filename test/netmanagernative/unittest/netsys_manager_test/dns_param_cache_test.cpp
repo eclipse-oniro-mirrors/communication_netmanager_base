@@ -289,6 +289,14 @@ HWTEST_F(DNSParamCacheTest, GetUserDefinedServerFlagTest007, TestSize.Level1)
     EXPECT_EQ(ret, -ENOENT);
 }
 
+HWTEST_F(DNSParamCacheTest, IsUseVpnDnsTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("IsUseVpnDnsTest007 enter");
+    DnsParamCache dnsParCache;
+    bool ret = dnsParCache.IsUseVpnDns(0);
+    EXPECT_FALSE(ret);
+}
+
 HWTEST_F(DNSParamCacheTest, CreateCacheForNetTest001, TestSize.Level1)
 {
     NETNATIVE_LOGI("CreateCacheForNetTest001 enter");

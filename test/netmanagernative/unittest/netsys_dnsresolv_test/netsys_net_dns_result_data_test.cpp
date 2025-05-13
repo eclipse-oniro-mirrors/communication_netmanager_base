@@ -36,10 +36,16 @@ public:
     MOCK_METHOD1(WriteString, bool(const std::string &));
     MOCK_METHOD1(WriteUint16, bool(uint16_t));
     MOCK_METHOD1(WriteBool, bool(bool));
+    MOCK_METHOD1(WriteUint8, bool(uint8_t));
+    MOCK_METHOD1(WriteUint64, bool(uint64_t));
+    MOCK_METHOD1(WriteInt32, bool(int32_t));
     MOCK_METHOD1(ReadUint32, bool(uint32_t &));
     MOCK_METHOD1(ReadString, bool(const std::string &));
     MOCK_METHOD1(ReadUint16, bool(uint16_t));
     MOCK_METHOD1(ReadBool, bool(bool));
+    MOCK_METHOD1(ReadUint8, bool(uint8_t));
+    MOCK_METHOD1(ReadUint64, bool(uint64_t));
+    MOCK_METHOD1(ReadInt32, bool(int32_t));
 };
 
 class NetDnsResultReportTest : public testing::Test {

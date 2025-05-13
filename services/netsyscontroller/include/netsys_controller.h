@@ -859,6 +859,25 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback);
 
     /**
+     * Register Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @param timestep Time gap between two callbacks
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback);
+
+    /**
+     * Unregister Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsQueryResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback);
+    
+    /**
      * Register Dns Health Callback Listener.
      *
      * @param callback Callback function

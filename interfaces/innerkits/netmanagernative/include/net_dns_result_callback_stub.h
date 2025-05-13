@@ -33,10 +33,14 @@ public:
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     int32_t OnDnsResultReport(uint32_t size, std::list<NetDnsResultReport> res) override;
+    int32_t OnDnsQueryResultReport(uint32_t size, std::list<NetDnsQueryResultReport> res) override;
+    int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, NetDnsQueryResultReport res) override;
 
 private:
     using NetDnsResultCallbackFunc = int32_t (NetDnsResultCallbackStub::*)(MessageParcel &, MessageParcel &);
     int32_t CmdDnsResultReport(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDnsQueryResultReport(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDnsQueryAbnormalReport(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, NetDnsResultCallbackFunc> memberFuncMap_;
 };
 } // namespace NetsysNative

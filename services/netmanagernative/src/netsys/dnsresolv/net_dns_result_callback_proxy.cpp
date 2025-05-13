@@ -69,5 +69,84 @@ int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetDnsResultCallbackProxy::OnDnsQueryResultReport(uint32_t listsize,
+    const std::list<NetDnsQueryResultReport> dnsResultReport)
+{
+    NETNATIVE_LOGE("Proxy OnDnsQueryResultReport");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    uint32_t size = listsize;
+    if (!data.WriteUint32(size)) {
+        return false;
+    }
+   
+    if (size > 0) {
+        for (NetDnsQueryResultReport report: dnsResultReport) {
+            if (!report.Marshalling(data)) {
+                NETNATIVE_LOGE("NetDnsQueryResultReport Marshalling failed");
+                return NETMANAGER_ERR_WRITE_DATA_FAIL;
+            }
+        }
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_QUERY_RESULT_REPORT),
+                            data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error: [%{public}d]", ret);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetDnsResultCallbackProxy::OnDnsQueryAbnormalReport(uint32_t eventfailcause,
+    const NetDnsQueryResultReport dnsResultReport)
+{
+    NETNATIVE_LOGE("Proxy OnDnsQueryAbnormalReport");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint32(eventfailcause)) {
+        return false;
+    }
+    if (!dnsResultReport.Marshalling(data)) {
+        NETNATIVE_LOGE("OnDnsQueryAbnormalReport Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_QUERY_ABNORMAL_REPORT),
+                            data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error: [%{public}d]", ret);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetsysNative
 } // namespace OHOS

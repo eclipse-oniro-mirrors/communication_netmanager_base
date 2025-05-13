@@ -32,6 +32,12 @@ public:
 
     virtual bool WriteBool(bool) = 0;
 
+    virtual bool WriteUint8(uint8_t) = 0;
+
+    virtual bool WriteUint64(uint64_t) = 0;
+
+    virtual bool WriteInt32(int32_t) = 0;
+
     virtual bool WriteString(const std::string &) = 0;
 
     virtual bool ReadUint32(uint32_t &) = 0;
@@ -41,6 +47,12 @@ public:
     virtual bool ReadUint16(uint16_t) = 0;
 
     virtual bool ReadBool(bool) = 0;
+
+    virtual bool ReadUint8(uint8_t) = 0;
+
+    virtual bool ReadUint64(uint64_t) = 0;
+
+    virtual bool ReadInt32(int32_t) = 0;
 };
 
 class Parcelable {
@@ -64,6 +76,12 @@ public:
 
     virtual bool WriteBool(bool) = 0;
 
+    virtual bool WriteUint8(uint8_t) = 0;
+
+    virtual bool WriteUint64(uint64_t) = 0;
+
+    virtual bool WriteInt32(int32_t) = 0;
+
     virtual bool WriteString(const std::string &) = 0;
 
     virtual bool ReadUint32(uint32_t) = 0;
@@ -73,6 +91,12 @@ public:
     virtual bool ReadUint16(uint16_t) = 0;
 
     virtual bool ReadBool(bool) = 0;
+
+    virtual bool ReadUint8(uint8_t) = 0;
+
+    virtual bool ReadUint64(uint64_t) = 0;
+
+    virtual bool ReadInt32(int32_t) = 0;
 };
 
 class Parcelable {

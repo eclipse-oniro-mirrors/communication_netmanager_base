@@ -243,6 +243,48 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsQueryResultReport(uint32_t size,
+    std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res)
+{
+    NETMGR_LOG_I("NetsysNativeClient OnDnsQueryResultReport");
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbDnsQueryReportObjMutex_);
+    for (auto cb = netsysNativeClient->cbDnsQueryReportObjects_.begin();
+         cb != netsysNativeClient->cbDnsQueryReportObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient->cbDnsQueryReportObjects_.erase(cb);
+        } else {
+            (*cb)->OnDnsQueryResultReport(size, res);
+            ++cb;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsQueryAbnormalReport(
+    uint32_t eventfailcause, OHOS::NetsysNative::NetDnsQueryResultReport res)
+{
+    NETMGR_LOG_I("NetsysNativeClient OnDnsQueryAbnormalReport");
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(netsysNativeClient->cbDnsQueryReportObjMutex_);
+    for (auto cb = netsysNativeClient->cbDnsQueryReportObjects_.begin();
+         cb != netsysNativeClient->cbDnsQueryReportObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient->cbDnsQueryReportObjects_.erase(cb);
+        } else {
+            (*cb)->OnDnsQueryAbnormalReport(eventfailcause, res);
+            ++cb;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 NetsysNativeClient::NetsysNativeClient() = default;
 
 void NetsysNativeClient::Init()
@@ -1693,6 +1735,31 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysNativeClient::RegisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    NETMGR_LOG_I("NetsysNativeClient::RegisterDnsQueryResultCallback");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(cbDnsQueryReportObjMutex_);
+    cbDnsQueryReportObjects_.push_back(callback);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeClient::UnregisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(cbDnsQueryReportObjMutex_);
+    cbDnsQueryReportObjects_.remove(callback);
+    return NETMANAGER_SUCCESS;
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE

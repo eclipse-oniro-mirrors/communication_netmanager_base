@@ -44,6 +44,7 @@ public:
 
 protected:
     NetsysNative::NetDnsResultReport report;
+    NetsysNative::NetDnsQueryResultReport queryReport;
     DnsQualityDiag dnsQualityDiag;
     struct AddrInfo addrinfoIpv4;
     struct AddrInfo addrinfoIpv6;
@@ -146,6 +147,105 @@ HWTEST_F(DnsQualityDiagTest, ReportDnsResult_ShouldIgnore_WhenQueryTypeIsOne, Te
     int32_t result =
         dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo);
     EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ReportDnsQueryResult_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    struct PostDnsQueryParam queryParam;
+    struct FamilyQueryInfoExt ipv4Info;
+    ipv4Info.retCode = 0;
+    ipv4Info.isNoAnswer = 0;
+    ipv4Info.cname = 0;
+    struct FamilyQueryInfoExt ipv6Info;
+    ipv6Info.retCode = 0;
+    ipv6Info.isNoAnswer = 0;
+    ipv6Info.cname = 0;
+    queryParam.netId = 100;
+    queryParam.uid = 10000;
+    queryParam.pid = 5896;
+    queryParam.addrSize = 0;
+    struct DnsProcessInfoExt processInfo;
+    processInfo.queryTime = 0;
+    processInfo.retCode = 0;
+    processInfo.firstQueryEndDuration = 10;
+    processInfo.firstQueryEnd2AppDuration = 10;
+    processInfo.firstReturnType = 1;
+    processInfo.isFromCache = 0;
+    processInfo.sourceFrom = 2;
+    processInfo.ipv4QueryInfo = ipv4Info;
+    processInfo.ipv6QueryInfo = ipv6Info;
+    AddrInfo addrinfo;
+    queryParam.processInfo = processInfo;
+    int32_t result =
+        dnsQualityDiag.ReportDnsQueryResult(queryParam, &addrinfo);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ReportDnsQueryAbnormal_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    struct PostDnsQueryParam queryParam;
+    struct FamilyQueryInfoExt ipv4Info;
+    ipv4Info.retCode = 0;
+    ipv4Info.isNoAnswer = 0;
+    ipv4Info.cname = 0;
+    struct FamilyQueryInfoExt ipv6Info;
+    ipv6Info.retCode = 0;
+    ipv6Info.isNoAnswer = 0;
+    ipv6Info.cname = 0;
+    queryParam.netId = 100;
+    queryParam.uid = 10000;
+    queryParam.pid = 5896;
+    queryParam.addrSize = 0;
+    struct DnsProcessInfoExt processInfo;
+    processInfo.queryTime = 0;
+    processInfo.retCode = 0;
+    processInfo.firstQueryEndDuration = 10;
+    processInfo.firstQueryEnd2AppDuration = 10;
+    processInfo.firstReturnType = 1;
+    processInfo.isFromCache = 0;
+    processInfo.sourceFrom = 2;
+    processInfo.ipv4QueryInfo = ipv4Info;
+    processInfo.ipv6QueryInfo = ipv6Info;
+    AddrInfo addrinfo;
+    queryParam.processInfo = processInfo;
+    int32_t result =
+        dnsQualityDiag.ReportDnsQueryAbnormal(1, queryParam, &addrinfo);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, Handle_dns_abnormal_AddIPv4AndIPv6_WhenCalledWithValidAddrInfo, TestSize.Level0)
+{
+    std::shared_ptr<DnsAbnormalInfo> abnormalInfo =
+        std::make_shared<DnsAbnormalInfo>();
+    NetsysNative::NetDnsQueryResultReport queryReport;
+    abnormalInfo->eventfailcause = 1;
+    abnormalInfo->report = queryReport;
+    EXPECT_EQ(dnsQualityDiag.handle_dns_abnormal(abnormalInfo), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ParseDnsQueryReportAddr_AddIPv4AndIPv6_WhenCalledWithValidAddrInfo, TestSize.Level0)
+{
+    uint32_t size = 2;
+    addrinfoIpv4.aiFamily = AF_INET;
+    addrinfoIpv6.aiFamily = AF_INET6;
+    struct AddrInfo addrinfo[2] = { addrinfoIpv4, addrinfoIpv6 };
+
+    int32_t returnCode = dnsQualityDiag.ParseDnsQueryReportAddr(size, addrinfo, queryReport);
+
+    EXPECT_EQ(queryReport.addrlist_.size(), 2);
+    EXPECT_EQ(returnCode, 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, ParseDnsQueryReportAddr_NotAddMoreThanMaxSize_WhenCalledWithMoreAddrInfo, TestSize.Level0)
+{
+    uint32_t size = MAX_RESULT_SIZE + 1;
+    addrinfoIpv4.aiFamily = AF_INET;
+    struct AddrInfo addrinfo[MAX_RESULT_SIZE + 1] = { addrinfoIpv4 };
+
+    int32_t returnCode = dnsQualityDiag.ParseDnsQueryReportAddr(size, addrinfo, queryReport);
+
+    EXPECT_EQ(queryReport.addrlist_.size(), MAX_RESULT_SIZE);
+    EXPECT_EQ(returnCode, 0);
 }
 
 HWTEST_F(DnsQualityDiagTest, RegisterResultListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
@@ -277,6 +377,34 @@ HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldNotAddReport_WhenReportListIsF
     AddrInfo addrinfo;
     EXPECT_EQ(dnsQualityDiag.ReportDnsResult(netId, uid, pid, usedtime, name, size, failreason, queryParam, &addrinfo),
               0);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_query_report_ShouldReturnZero_WhenCalled_01, TestSize.Level0)
+{
+    std::shared_ptr<NetsysNative::NetDnsQueryResultReport> queryReport;
+    queryReport = std::make_shared<NetsysNative::NetDnsQueryResultReport>();
+    EXPECT_EQ(dnsQualityDiag.add_dns_query_report(queryReport), 0);
+    EXPECT_EQ(dnsQualityDiag.dnsQueryReport_.size(), 1);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_query_report_ShouldReturnZero_WhenCalled_02, TestSize.Level0)
+{
+    std::shared_ptr<NetsysNative::NetDnsQueryResultReport> queryReport = nullptr;
+    EXPECT_EQ(dnsQualityDiag.add_dns_query_report(queryReport), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, add_dns_query_report_ShouldNotAddReport_WhenReportListIsFull, TestSize.Level0)
+{
+    for (int i = 0; i < MAX_RESULT_SIZE; i++) {
+        std::shared_ptr<NetsysNative::NetDnsQueryResultReport> report =
+            std::make_shared<NetsysNative::NetDnsQueryResultReport>();
+        dnsQualityDiag.add_dns_query_report(report);
+    }
+    std::shared_ptr<NetsysNative::NetDnsQueryResultReport> report =
+        std::make_shared<NetsysNative::NetDnsQueryResultReport>();
+    int32_t result = dnsQualityDiag.add_dns_query_report(report);
+    ASSERT_EQ(result, 0);
+    ASSERT_EQ(dnsQualityDiag.dnsQueryReport_.size(), MAX_RESULT_SIZE);
 }
 
 HWTEST_F(DnsQualityDiagTest, load_query_addr_ShouldReturnZero_WhenCalled, TestSize.Level0)
