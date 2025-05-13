@@ -33,7 +33,7 @@ const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 const char *DNS_URL_HEADER = "DnsProbeUrl:";
 const char NEW_LINE_STR = '\n';
 const uint32_t TIME_DELAY = 500;
-const uint32_t DNS_ABNORMAL_REPORT_INTERVAL = 2;
+constexpr const uint32_t DNS_ABNORMAL_REPORT_INTERVAL = 2;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
