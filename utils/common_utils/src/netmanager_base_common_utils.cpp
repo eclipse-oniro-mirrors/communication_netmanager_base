@@ -888,6 +888,7 @@ int32_t GetTodayMidnightTimestamp(int hour, int min, int sec)
 
 void DeleteFile(const std::string &filePath)
 {
+#ifndef CROSS_PLATFORM
     std::filesystem::path path = filePath;
     if (std::filesystem::exists(path)) {
         std::filesystem::remove(path);
@@ -895,5 +896,8 @@ void DeleteFile(const std::string &filePath)
     } else {
         NETMGR_LOG_E("file does not exist.");
     }
+#else
+    NETMGR_LOG_E("CROSS_PLATFORM not support");
+#endif
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
