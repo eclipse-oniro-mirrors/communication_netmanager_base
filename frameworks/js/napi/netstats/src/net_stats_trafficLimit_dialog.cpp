@@ -37,7 +37,8 @@ using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr int32_t INVALID_USERID = -1;
-constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 6;
+constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
+int32_t g_simId = 0;
 
 TrafficLimitDialog::TrafficLimitDialog() {}
 
@@ -48,8 +49,9 @@ TrafficLimitDialog::~TrafficLimitDialog()
     }
 }
 
-bool TrafficLimitDialog::PopUpTrafficLimitDialog()
+bool TrafficLimitDialog::PopUpTrafficLimitDialog(int32_t simId)
 {
+    g_simId = simId;
     isDialogOpen_ = true;
     return ShowTrafficLimitDialog();
 }
@@ -67,16 +69,11 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
     NETMGR_LOG_I("TrafficLimitDialog::OnAbilityConnectDone");
-    int32_t curSimId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(curSimId);
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(g_simId);
 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
-    std::string parameters =
-        "{\"ability.want.params.uiExtensionType\":\"sysDialog/common\",\"sysDialogZOrder\":1, \"slotId\":";
-    std::string paramStr = parameters + std::to_string(slotId) + "}";
 
     data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE);
     data.WriteString16(u"bundleName");
@@ -84,16 +81,33 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
     data.WriteString16(u"abilityName");
     data.WriteString16(u"DisableMobileDataDialogAbility");
 
+    cJSON* paramJson = cJSON_CreateObject();
+    std::string uiExtensionTypeStr = "sysDialog/common";
+
+    cJSON_AddStringToObject(paramJson, "ability.want.params.uiExtensionType", uiExtensionTypeStr.c_str());
+    cJSON_AddNumberToObject(paramJson, "sysDialogZOrder", 1);
+    cJSON_AddNumberToObject(paramJson, "slotId", slotId);
+
+    char *pParamJson = cJSON_PrintUnformatted(paramJson);
+    
+    if (!pParamJson) {
+        NETMGR_LOG_I("Print paramJson error");
+        cJSON_Delete(paramJson);
+        cJSON_free(pParamJson);
+        return;
+    }
+    std::string paramStr(pParamJson);
     data.WriteString16(u"parameters");
     data.WriteString16(Str8ToStr16(paramStr));
+    cJSON_Delete(paramJson);
+    cJSON_free(pParamJson);
 
-    NETMGR_LOG_I("OnAbilityConnectDone : curSimId = %{public}d", curSimId);
     NETMGR_LOG_I("OnAbilityConnectDone : tmpParameters = %{public}s", paramStr.c_str());
 
     const uint32_t cmdCode = 1;
     int32_t ret = remoteObject->SendRequest(cmdCode, data, reply, option);
     if (ret != ERR_OK) {
-        NETMGR_LOG_I("TrafficLimit Dialog failed: ret=%{public}u", ret);
+        NETMGR_LOG_E("TrafficLimit Dialog failed: ret=%{public}u", ret);
         return;
     }
     remoteObject_ = remoteObject;
@@ -103,7 +117,7 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
 void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityDisconnectDone(
     const AppExecFwk::ElementName& element, int resultCode)
 {
-    NETMGR_LOG_E("TrafficLimitAbilityConn::OnAbilityDisconnectDone");
+    NETMGR_LOG_I("TrafficLimitAbilityConn::OnAbilityDisconnectDone");
     remoteObject_ = nullptr;
     return;
 }
@@ -136,31 +150,22 @@ bool TrafficLimitDialog::ShowTrafficLimitDialog()
         trafficlimitAbilityConn_ = new (std::nothrow) TrafficLimitAbilityConn();
     }
     if (trafficlimitAbilityConn_ == nullptr) {
-        NETMGR_LOG_I("TrafficLimitAbilityConn create failed");
+        NETMGR_LOG_E("TrafficLimitAbilityConn create failed");
         return false;
     }
     auto abilityManager = OHOS::AAFwk::AbilityManagerClient::GetInstance();
     if (abilityManager == nullptr) {
-        NETMGR_LOG_I("AbilityManagerClient is nullptr");
+        NETMGR_LOG_E("AbilityManagerClient is nullptr");
         return false;
     }
-  
-    int32_t curSimId = DelayedSingleton<NetStatsService>::GetInstance()->GetCurActiviteSimId();
-    auto settingsObserverMap_ = DelayedSingleton<NetStatsService>::GetInstance()->GetSettingsObserverMap();
-    if (settingsObserverMap_.find(curSimId) == settingsObserverMap_.end()) {
-        return false;
-    }
-
-    NETMGR_LOG_I("Set CellularData false");
     DelayedRefSingleton<Telephony::CellularDataClient>::GetInstance().EnableCellularData(false);
 
     Want want;
-    NETMGR_LOG_I("SetElementName");
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
     NETMGR_LOG_I("ConnectAbility start");
     auto ret = abilityManager->ConnectAbility(want, trafficlimitAbilityConn_, INVALID_USERID);
     if (ret != ERR_OK) {
-        NETMGR_LOG_I("ConnectServiceExtensionAbility systemui failed");
+        NETMGR_LOG_E("ConnectServiceExtensionAbility systemui failed");
         trafficlimitAbilityConn_ = nullptr;
         return false;
     }
@@ -177,7 +182,7 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
 
     auto abmc = OHOS::AAFwk::AbilityManagerClient::GetInstance();
     if (abmc == nullptr) {
-        NETMGR_LOG_I("GetInstance failed");
+        NETMGR_LOG_E("GetInstance failed");
         return false;
     }
     NETMGR_LOG_I("Unshow TrafficLimit Dialog");
@@ -185,7 +190,7 @@ bool TrafficLimitDialog::UnShowTrafficLimitDialog()
 
     auto ret = abmc->DisconnectAbility(trafficlimitAbilityConn_);
     if (ret != 0) {
-        NETMGR_LOG_I("DisconnectAbility failed %{public}d", ret);
+        NETMGR_LOG_E("DisconnectAbility failed %{public}d", ret);
         return false;
     }
     NETMGR_LOG_I("Unshow TrafficLimit Dialog success");

@@ -46,12 +46,11 @@ int32_t NetInfoObserver::NetLost(sptr<NetManagerStandard::NetHandle> &netHandle)
 
 int32_t NetInfoObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
-    NETMGR_LOG_D("NetInfoObserver NetConnectionPropertiesChange");
     if (info == nullptr) {
         isNeedUpdate_ = true;
         return -1;
     }
-    NETMGR_LOG_D("NetInfoObserver ifName: %{public}s, idnet: %{public}s",
+    NETMGR_LOG_I("NetInfoObserver NetConnectionPropertiesChange ifName: %{public}s, idnet: %{public}s",
         info->ifaceName_.c_str(), info->ident_.c_str());
     if (info->ident_.empty()) {  // wifi场景
         uint64_t ifindex = if_nametoindex(info->ifaceName_.c_str());

@@ -97,7 +97,10 @@ public:
     bool ProcessNetConnectionPropertiesChange(int32_t simId, uint64_t ifIndex);
     int32_t GetCurActiviteSimId();
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> GetSettingsObserverMap();
-    int32_t NotifyTrafficAlert(uint8_t flag);
+    int32_t NotifyTrafficAlert(int32_t simId, uint8_t flag);
+    bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
+    bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark);
+    bool GetdailyMarkBySimId(int32_t simId, uint16_t &dailyMark);
 #endif // SUPPORT_TRAFFIC_STATISTIC
 
 private:
@@ -124,34 +127,33 @@ private:
     void GetSharingStats(std::vector<NetStatsInfo> &sharingStats, uint32_t endtime);
 #endif
 #ifdef SUPPORT_TRAFFIC_STATISTIC
+    void UpdateBpfMapTimer();
     bool CommonEventSimStateChanged(int32_t slotId, int32_t simState);
+    bool CommonEventSimStateChangedFfrt(int32_t slotId, int32_t simState);
+    bool CellularDataStateChangedFfrt(int32_t slotId, int32_t dataState);
     bool CommonEventCellularDataStateChanged(int32_t slotId, int32_t dataState);
     int32_t GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic);
-    void UpdateBpfMap();
-    void UpdateBeginDate(int32_t simId, int32_t beginDate);
-    void UpdateUnLimitedDataEnable(int32_t simId, int8_t unLimitedDataEnable);
-    void UpdateMonthlyLimitdNotifyType(int32_t simId, int8_t monthlyLimitdNotifyType);
-    void UpdateMonthlyLimit(int32_t simId, uint64_t monthlyLimit);
-    void UpdateMonthlyMark(int32_t simId, uint16_t monthlyMark);
-    void UpdateDailyMark(int32_t simId, uint16_t dailyMark);
+    void UpdateBpfMap(int32_t simId);
     void SetTrafficMapMaxValue();
     void StartNetObserver();
     void StartTrafficOvserver();
     void StopTrafficOvserver();
-    bool GetNotifyStats(uint8_t flag);
-    bool GetMonAlertStatus();
-    bool GetMonNotifyStatus();
-    bool GetDayNotifyStatus();
-    void DealMonAlert(bool isDaulCard);
-    void DealMonNotification(bool isDaulCard);
-    void DealDayNotification(bool isDaulCard);
-    void DealNotificaiton(uint8_t flag);
+    bool GetNotifyStats(int32_t simId, uint8_t flag);
+    bool GetMonAlertStatus(int32_t simId);
+    bool GetMonNotifyStatus(int32_t simId);
+    bool GetDayNotifyStatus(int32_t simId);
+    void DealMonAlert(int32_t simId, bool isDaulCard);
+    void DealMonNotification(int32_t simId, bool isDaulCard);
+    void DealDayNotification(int32_t simId, bool isDaulCard);
+    void DealNotificaiton(int32_t simId, uint8_t flag);
     bool IsMobileDataEnabled();
     void UpdateTrafficLimitDate(int32_t simId);
     void UpdateNetStatsToMapFromDB(int32_t simId);
-    void UpdateCurActiviteSimChanged();
+    void UpdateCurActiviteSimChanged(int32_t simId);
     bool CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
-        uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
+                                   uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
+    int32_t ProcessNetConnectionPropertiesChangeFfrt(int32_t simId, uint64_t ifIndex);
+    int32_t UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -187,6 +189,7 @@ private:
     sptr<NetsysControllerCallback> netsysControllerObserver_ = nullptr;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     std::shared_ptr<TrafficLimitDialog> dialog_ = nullptr;
+    std::shared_ptr<ffrt::queue> trafficPlanFfrtQueue_ = nullptr;
 #endif // SUPPORT_TRAFFIC_STATISTIC
 };
 
