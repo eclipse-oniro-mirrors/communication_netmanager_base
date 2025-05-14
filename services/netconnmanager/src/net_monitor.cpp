@@ -92,6 +92,7 @@ void NetMonitor::Start()
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
         NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
+        detectionDelay_ = 0;
         detectionCond_.notify_all();
         return;
     }
@@ -122,6 +123,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         isDetecting_ = false;
         needDetectionWithoutProxy_ = true;
         result = VERIFICATION_STATE;
+        detectionDelay_ = 0;
     } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
         NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
         detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
