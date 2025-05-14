@@ -35,15 +35,8 @@ pub fn ani(args: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn native_v(args: TokenStream, item: TokenStream) -> TokenStream {
-    native::entry(TokenStream2::from(args), TokenStream2::from(item), false)
-        .unwrap()
-        .into()
-}
-
-#[proc_macro_attribute]
 pub fn native(args: TokenStream, item: TokenStream) -> TokenStream {
-    native::entry(TokenStream2::from(args), TokenStream2::from(item), true)
+    native::entry(TokenStream2::from(args), TokenStream2::from(item))
         .unwrap()
         .into()
 }

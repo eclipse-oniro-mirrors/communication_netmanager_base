@@ -21,3 +21,11 @@ impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalDrop<T> {
 }
 
 pub(crate) struct GlobalDrop<T: Into<AniRef<'static>> + Clone>(pub T);
+
+impl<T: PartialEq + Into<AniRef<'static>> + Clone> PartialEq for GlobalDrop<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<T: Eq + Into<AniRef<'static>> + Clone> Eq for GlobalDrop<T> {}

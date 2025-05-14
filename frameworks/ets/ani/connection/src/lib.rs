@@ -11,30 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(fn_ptr_trait)]
-#![allow(unused, missing_docs, clippy::not_unsafe_ptr_arg_deref)]
+#![allow(missing_docs, clippy::not_unsafe_ptr_arg_deref)]
 
 mod bridge;
 mod connection;
 pub mod wrapper;
 
-use ani_rs::business_error::BusinessError;
-use ani_rs::objects::{AniObject, AniRef};
-use ani_rs::{AniDe, AniSer};
-use hilog_rust::{info, HiLogLabel, LogLevel, LogType};
-use serde::{Deserialize, Serialize};
-use std::ffi::{CStr, CString};
-use std::fmt::format;
-use std::marker::FnPtr;
-use std::os::raw::{c_char, c_void};
-use std::{ffi::c_uint, ptr::null_mut};
-use std::{prelude::*, vec};
-
-use hilog_rust::hilog;
-
 use ani_rs::ani_constructor;
-use ani_rs::{objects::AniNativeFunction, AniEnv, AniVm};
-use ani_sys::{ani_native_function, ani_ref};
 
 ani_constructor!(
     namespace "L@ohos/net/connection/connection"

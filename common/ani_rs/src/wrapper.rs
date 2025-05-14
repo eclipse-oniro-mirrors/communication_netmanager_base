@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_sys::{ani_env, ani_object};
-
 #[cxx::bridge(namespace = "OHOS::AniRs")]
 pub mod ffi {
 
@@ -27,6 +25,6 @@ pub mod ffi {
 
         fn GetStageModeContext(env: usize, object: usize) -> SharedPtr<Context>;
         fn GetBundleName(context: &Context) -> String;
-        
+
     }
 }
