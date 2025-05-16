@@ -259,7 +259,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
         }
     }
     if (find) {
-        StartNetDetection(false);
+        StartNetDetection(true);
     }
     return true;
 }
@@ -787,7 +787,7 @@ void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         return;
     }
     netMonitor_->UpdateGlobalHttpProxy(httpProxy);
-    StartNetDetection(false);
+    StartNetDetection(true);
 }
 
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
