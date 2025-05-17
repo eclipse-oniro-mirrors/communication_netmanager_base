@@ -32,22 +32,14 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
-#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
+class ISystemAbilityStatusChange;
 namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
 constexpr uint32_t RESERVED_BUFFER_SIZE = 512;
-
-class NetConnAbilityListener : public SystemAbilityStatusChangeStub {
-public:
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-private:
-    std::mutex mutex_;
-};
 
 class NetConnClient : public std::enable_shared_from_this<NetConnClient> {
 public:
@@ -575,7 +567,7 @@ private:
     std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
-    sptr<ISystemAbilityStatusChange> saStatusListener_ = nullptr;
+    sptr<ISystemAbilityStatusChange> saStatusListener_;
     static inline std::mutex instanceMtx_;
     static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
 };
