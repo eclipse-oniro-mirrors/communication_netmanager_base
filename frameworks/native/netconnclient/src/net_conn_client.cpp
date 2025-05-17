@@ -28,6 +28,7 @@
 #include "net_supplier_callback_stub.h"
 #include "netsys_sock_client.h"
 #include "network_security_config.h"
+#include "system_ability_status_change_stub.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
 static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
@@ -36,7 +37,14 @@ static const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr)
+class NetConnAbilityListener : public SystemAbilityStatusChangeStub {
+public:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+private:
+    std::mutex mutex_;
+};
+NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr), saStatusListener_(nullptr)
 {
     buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
 }
