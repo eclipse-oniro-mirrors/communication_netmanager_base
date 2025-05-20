@@ -319,5 +319,13 @@ HWTEST_F(RouteUtilsTest, ModifyRouteTest001, TestSize.Level1)
     int32_t ret = RouteUtils::ModifyRoute(op, netId, route);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(RouteUtilsTest, MaskAddressTest001, TestSize.Level1)
+{
+    std::string addr = "192.168.1.1";
+    int32_t prefixLen = 32;
+    auto ret = RouteUtils::MaskAddress(addr, prefixLen);
+    EXPECT_EQ(ret, "192.168.1.1");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
