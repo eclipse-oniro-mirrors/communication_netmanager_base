@@ -28,6 +28,12 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr uint32_t TEST_NETID = 999;
+constexpr int32_t SUCCESS_CODE = 204;
+constexpr int32_t PORTAL_CODE_MIN = 200;
+constexpr int32_t SIM_PORTAL_CODE = 302;
+constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
+constexpr int32_t ONE_URL_DETECT_NUM = 4;
+constexpr int32_t ALL_DETECT_THREAD_NUM = 8;
 
 class TestMonitorCallback : public INetMonitorCallback {
 public:
