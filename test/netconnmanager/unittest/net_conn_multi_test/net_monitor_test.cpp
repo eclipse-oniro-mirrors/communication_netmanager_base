@@ -158,5 +158,121 @@ HWTEST_F(NetMonitorTest, CheckIfSettingsDataReadyTest001, TestSize.Level1)
     instance_->isDataShareReady_ = true;
     EXPECT_EQ(instance_->CheckIfSettingsDataReady(), true);
 }
+
+HWTEST_F(NetMonitorTest, ProcessDetectionTest002, TestSize.Level1)
+{
+    instance_->isDetecting_ = true;
+    instance_->detectionDelay_ = 1;
+    auto monitorCallback = instance_->netMonitorCallback_.lock();
+    instance_->netMonitorCallback_.reset();
+    instance_->Start();
+    instance_->netMonitorCallback_ = monitorCallback;
+
+    instance_->isDetecting_ = false;
+    NetHttpProbeResult probeResult;
+    probeResult.responseCode_ = SIM_PORTAL_CODE + 1;
+    NetDetectionStatus result;
+    instance_->isScreenOn_ = true;
+    instance_->ProcessDetection(probeResult, result);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
+
+    instance_->isScreenOn_ = false;
+    instance_->netBearType_ = BEARER_CELLULAR;
+    instance_->ProcessDetection(probeResult, result);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
+
+    instance_->netBearType_ = BEARER_WIFI;
+    instance_->ProcessDetection(probeResult, result);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
+
+    probeResult.responseCode_ = PORTAL_CODE_MIN - 1;
+    instance_->detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
+    instance_->ProcessDetection(probeResult, result);
+    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest001, TestSize.Level1)
+{
+    auto latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
+    auto latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
+    auto netId = instance_->netId_;
+    auto netBearType = instance_->netBearType_;
+    auto &netLinkInfo = instance_->netLinkInfo_;
+    auto httpUrl = instance_->httpUrl_;
+    auto httpsUrl = instance_->httpsUrl_;
+    auto httpProbeThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl, httpsUrl);
+    auto httpsProbeThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl, httpsUrl);
+    auto backHttpThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, httpUrl, httpsUrl);
+    auto backHttpsThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, httpUrl, httpsUrl);
+    httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
+    auto ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+
+    httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
+    ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+
+    backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    httpsProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, SUCCESS_CODE);
+
+    httpsProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
+    backHttpsThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, SUCCESS_CODE);
+}
+
+HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest002, TestSize.Level1)
+{
+    auto latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
+    auto latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
+    auto netId = instance_->netId_;
+    auto netBearType = instance_->netBearType_;
+    auto &netLinkInfo = instance_->netLinkInfo_;
+    auto httpUrl = instance_->httpUrl_;
+    auto httpsUrl = instance_->httpsUrl_;
+    auto httpProbeThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl, httpsUrl);
+    auto httpsProbeThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl, httpsUrl);
+    auto backHttpThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, httpUrl, httpsUrl);
+    auto backHttpsThread = std::make_shared<ProbeThread>(netId, netBearType,
+        netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, httpUrl, httpsUrl);
+    httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN - 1;
+    backHttpsThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    httpsProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
+    backHttpsThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
+    auto ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+
+    httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN - 1;
+    ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+
+    httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
+    ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
+    EXPECT_EQ(ret.responseCode_, SUCCESS_CODE);
+}
+
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfigTest002, TestSize.Level1)
+{
+    auto isNeedSuffix = instance_->isNeedSuffix_;
+    instance_->isNeedSuffix_ = false;
+    instance_->GetHttpProbeUrlFromConfig();
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
+    instance_->isNeedSuffix_ = isNeedSuffix;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
