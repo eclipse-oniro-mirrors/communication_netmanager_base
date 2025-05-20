@@ -963,7 +963,6 @@ int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr
     }
     g_timer_exist = 1;
     (void)signal(SIGALRM, DnsQueryReportTimerFunc);
-    alarm(MIN_DNS_REPORT_PERIOD);
     pthread_spin_unlock(&g_dnsReportLock);
     return 0;
 }
