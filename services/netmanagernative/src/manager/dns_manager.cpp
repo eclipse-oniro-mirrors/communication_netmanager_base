@@ -21,6 +21,11 @@
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
 #include "dns_quality_diag.h"
+#ifdef QOS_MANAGER_ENABLE
+#include "qos.h"
+#include "concurrent_task_client.h"
+#include <sys/resource.h>
+#endif
 
 #include "dns_manager.h"
 #include <netdb.h>
@@ -32,6 +37,15 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
+#ifdef QOS_MANAGER_ENABLE
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(getpid());
+    OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
+    if (SetThreadQos(QOS::QosLevel::QOS_USER_INTERACTIVE) != 0) {
+        setpriority(PRIO_PROCESS, 0, PRIO_MIN);
+    }
+    NETNATIVE_LOGI("DnsMgerListen set qos end");
+#endif
     DnsResolvListen().StartListen();
 }
 
