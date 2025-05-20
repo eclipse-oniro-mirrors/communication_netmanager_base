@@ -416,9 +416,13 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
     NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = true;
     instance_->isAppFrozened_ = true;
     AppStateAwareManager::GetInstance().appStateObserver_ = nullptr;
-    instance_->lastCallbackType_ = CALL_TYPE_AVAILABLE;
+    instance_->lastCallbackType_ = CALL_TYPE_LOST;
     CallbackType callbackType = CALL_TYPE_AVAILABLE;
     auto ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
+
+    instance_->lastCallbackType_ = CALL_TYPE_AVAILABLE;
+    ret = instance_->IsAllowCallback(callbackType);
     EXPECT_FALSE(ret);
 
     callbackType = CALL_TYPE_LOST;
