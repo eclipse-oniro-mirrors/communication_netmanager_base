@@ -79,6 +79,7 @@ constexpr int32_t RETRY_TIMES = 3;
 constexpr long AUTH_TIME_OUT = 5L;
 constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager.ready";
 constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
+constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -607,6 +608,11 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         REQUEST : REGISTER;
     NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u], regType[%{public}u]",
                  callingUid, reqId, registerType);
+    if ((netSpecifier->netCapabilities_.netCaps_.count(
+        NetManagerStandard::NET_CAPABILITY_MMS) > 0) && system::GetBoolParameter(PERSIST_EDM_MMS_DISABLE, false)) {
+        NETMGR_LOG_E("NetConnService::RegisterNetConnCallbackAsync mms policy is disable");
+        return NET_CONN_ERR_POLICY_DISABLED;
+    }
     int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, registerType);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
