@@ -121,7 +121,7 @@ HWTEST_F(UtNetPolicyFile, NetPolicyFile002, TestSize.Level1)
 HWTEST_F(UtNetPolicyFile, Json2Obj001, TestSize.Level1)
 {
     std::string content = "";
-    NetPolicy netpolicy;
+    NetPolicy netPolicy;
     auto result = netPolicyFile_->Json2Obj(content, netPolicy);
     EXPECT_EQ(result, false);
 }
