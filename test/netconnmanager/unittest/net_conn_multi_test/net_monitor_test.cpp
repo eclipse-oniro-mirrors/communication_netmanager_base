@@ -280,5 +280,27 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfigTest002, TestSize.Level1)
     instance_->isNeedSuffix_ = isNeedSuffix;
 }
 
+HWTEST_F(NetMonitorTest, CreateProbeThreadTest001, TestSize.Level1)
+{
+    std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(1);
+    std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(2);
+    std::shared_ptr<ProbeThread> httpThread = nullptr;
+    std::shared_ptr<ProbeThread> httpsThread = nullptr;
+    instance_->netBearType_ = BEARER_CELLULAR;
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+    instance_->netBearType_ = BEARER_WIFI;
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+}
+
+HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
+{
+    instance_->netBearType_ = BEARER_CELLULAR;
+    EXPECT_NO_THROW(instance_->Detection());
+    instance_->netBearType_ = BEARER_WIFI;
+    EXPECT_NO_THROW(instance_->Detection());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
