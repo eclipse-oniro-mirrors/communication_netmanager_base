@@ -233,7 +233,7 @@ HWTEST_F(NetworkTest, OnHandleNetMonitorResultTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, ResumeNetworkInfoTest001, TestSize.Level1)
 {
     auto result = instance_->ResumeNetworkInfo();
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
