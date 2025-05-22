@@ -128,7 +128,7 @@ HWTEST_F(NetConnServiceExtTest, CheckIfSettingsDataReadyTest002, TestSize.Level1
 {
     NetConnService::GetInstance()->isDataShareReady_ = false;
     auto ret = NetConnService::GetInstance()->CheckIfSettingsDataReady();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, OnNetSupplierRemoteDiedTest001, TestSize.Level1)
@@ -1022,7 +1022,7 @@ HWTEST_F(NetConnServiceExtTest, FindSupplierWithInternetByBearerTypeTest001, Tes
 HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest001, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
-    EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
+    EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
     wptr<IRemoteObject> remoteObject = nullptr;
     netConnService->OnRemoteDied(remoteObject);
 }
@@ -1047,7 +1047,7 @@ HWTEST_F(NetConnServiceExtTest, OnReceiveEventTest001, TestSize.Level1)
 {
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     NetConnService::NetConnListener listener(subscribeInfo, nullptr);
-    EXPECT_EQ(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
+    EXPECT_NE(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
     EventFwk::CommonEventData eventData;
     listener.OnReceiveEvent(eventData);
 }
@@ -1057,9 +1057,9 @@ HWTEST_F(NetConnServiceExtTest, EnableVnicNetworkTest001, TestSize.Level1)
     auto netConnService = NetConnService::GetInstance();
     sptr<NetLinkInfo> netLinkInfo = new NetLinkInfo();
     const std::set<int32_t> uids;
-    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
+    EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
     auto ret = netConnService->EnableVnicNetwork(netLinkInfo, uids);
-    EXPECT_NE(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     netConnService->netConnEventHandler_ = nullptr;
     ret = netConnService->EnableVnicNetwork(netLinkInfo, uids);

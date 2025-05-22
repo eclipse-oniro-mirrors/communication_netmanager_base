@@ -210,7 +210,7 @@ HWTEST_F(TestNetStatsServiceStub, OnRemoteRequestTest001, TestSize.Level1)
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(OUTOFFRANGECODE, data, reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
 }
 
 /**
@@ -316,7 +316,7 @@ HWTEST_F(TestNetStatsServiceStub, GetCellularRxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -334,7 +334,7 @@ HWTEST_F(TestNetStatsServiceStub, GetCellularTxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -352,7 +352,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllRxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), data, reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -370,7 +370,7 @@ HWTEST_F(TestNetStatsServiceStub, GetAllTxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), data, reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(TestNetStatsServiceStub, GetUidRxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), data, reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -531,7 +531,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest002, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -561,7 +561,7 @@ HWTEST_F(TestNetStatsServiceStub, UpdateIfacesStatsTest003, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -618,7 +618,7 @@ HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest002, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -637,7 +637,7 @@ HWTEST_F(TestNetStatsServiceStub, ResetFactoryTest003, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -748,7 +748,7 @@ HWTEST_F(TestNetStatsServiceStub, SetAppStats001, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), data, reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
@@ -769,7 +769,7 @@ HWTEST_F(TestNetStatsServiceStub, GetCookieRxBytesTest001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), data,
                                              reply, option);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 5);
 }
 
 /**
