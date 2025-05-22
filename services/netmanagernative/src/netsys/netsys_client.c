@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 static volatile uint8_t g_allowInternet = 1;
+int64_t lastDnsQueryPollSendTime = 0;
 static int g_timer_exist = 0;
 static uint32_t g_curDnsStoreSize = 0;
 static struct DnsCacheInfo g_dnsCaches[MAX_DNS_CACHE_SIZE];
@@ -719,7 +720,6 @@ static int32_t NetSysPostDnsQueryForOne(int sockFd, struct DnsCacheInfo dnsInfo)
 
 static int32_t NetSysPostDnsQueryResultInternal(void)
 {
-    g_timer_exist = 0;
     int sockFd = CreateConnectionToNetSys();
     if (sockFd < 0) {
         return sockFd;
@@ -762,11 +762,6 @@ static int32_t NetSysPostDnsQueryResultInternal(void)
     g_curDnsStoreSize = 0;
     pthread_spin_unlock(&g_dnsReportLock);
     return 0;
-}
-
-static void DnsQueryReportTimerFunc(int unused)
-{
-    NetSysPostDnsQueryResultInternal();
 }
 
 char *addr_to_string(const AlignedSockAddr *addr, char *buf, size_t len)
@@ -964,13 +959,19 @@ int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr
     g_dnsCaches[g_curDnsStoreSize].addrSize = (uint8_t)resNum;
     g_dnsCaches[g_curDnsStoreSize].dnsProcessInfo = dnsProcessInfo;
     g_curDnsStoreSize++;
-    if (g_timer_exist) {
-        pthread_spin_unlock(&g_dnsReportLock);
-        return -1;
+    int64_t timeNow = (int64_t)(time(NULL));
+    if (lastDnsQueryPollSendTime == 0) {
+        lastDnsQueryPollSendTime = timeNow;
+        pthread_spin_unlock(&dnsReportLock);
+        return 0;
     }
-    g_timer_exist = 1;
-    (void)signal(SIGALRM, DnsQueryReportTimerFunc);
-    pthread_spin_unlock(&g_dnsReportLock);
+    if (timeNow - lastDnsQueryPollSendTime <  MIN_QUERY_REPORT_INTERVAL) {
+        pthread_spin_unlock(&dnsReportLock);
+        return 0;
+    }
+    lastDnsQueryPollSendTime = timeNow;
+    pthread_spin_unlock(&dnsReportLock);
+    NetSysPostDnsQueryResultInternal();
     return 0;
 }
 
