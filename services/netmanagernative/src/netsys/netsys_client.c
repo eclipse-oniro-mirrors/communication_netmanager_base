@@ -962,15 +962,15 @@ int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr
     int64_t timeNow = (int64_t)(time(NULL));
     if (lastDnsQueryPollSendTime == 0) {
         lastDnsQueryPollSendTime = timeNow;
-        pthread_spin_unlock(&dnsReportLock);
+        pthread_spin_unlock(&g_dnsReportLock);
         return 0;
     }
     if (timeNow - lastDnsQueryPollSendTime <  MIN_QUERY_REPORT_INTERVAL) {
-        pthread_spin_unlock(&dnsReportLock);
+        pthread_spin_unlock(&g_dnsReportLock);
         return 0;
     }
     lastDnsQueryPollSendTime = timeNow;
-    pthread_spin_unlock(&dnsReportLock);
+    pthread_spin_unlock(&g_dnsReportLock);
     NetSysPostDnsQueryResultInternal();
     return 0;
 }
