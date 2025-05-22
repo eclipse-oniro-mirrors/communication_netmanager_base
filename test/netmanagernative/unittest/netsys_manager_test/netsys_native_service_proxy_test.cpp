@@ -657,5 +657,15 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetNicTrafficAllowed001, TestSize.Level1)
     int32_t ret = netsysNativeService->SetNicTrafficAllowed(ifaceNames, status);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, UnRegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = netsysNativeService->UnRegisterNetsysTrafficCallback(callback);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

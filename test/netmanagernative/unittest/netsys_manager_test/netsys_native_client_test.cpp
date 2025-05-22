@@ -571,5 +571,42 @@ HWTEST_F(NetsysNativeClientTest, SetNicTrafficAllowed001, TestSize.Level1)
     int32_t ret = nativeClient_.SetNicTrafficAllowed(ifaceNames, status);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest015, TestSize.Level1)
+{
+    std::unique_ptr<NetsysNativeClient> client = std::make_unique<NetsysNativeClient>();
+    EXPECT_EQ(client->netsysNativeService_, nullptr);
+    EXPECT_EQ(client->deathRecipient_, nullptr);
+    client.reset();
+}
+
+HWTEST_F(NetsysNativeClientTest, DelInterfaceAddressTest001, TestSize.Level1)
+{
+    std::string netCapabilities = "";
+    auto ret = nativeClient_.DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH, netCapabilities);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNativeClientTest, OnRemoteDiedTest001, TestSize.Level1)
+{
+    wptr<IRemoteObject> remote = nullptr;
+    nativeClient_.OnRemoteDied(remote);
+    int handle = 1;
+    sptr<IRemoteObject> result = nullptr;
+    std::u16string descriptor = std::u16string();
+    result = new (std::nothrow) IPCObjectProxy(handle, descriptor);
+    IRemoteObject *object = result.GetRefPtr();
+    remote = object;
+    EXPECT_NE(nativeClient_.netsysNativeService_, nullptr);
+    nativeClient_.netsysNativeService_ = nullptr;
+    nativeClient_.OnRemoteDied(remote);
+}
+
+HWTEST_F(NetsysNativeClientTest, UnRegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = nativeClient_.UnRegisterNetsysTrafficCallback(callback);  
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

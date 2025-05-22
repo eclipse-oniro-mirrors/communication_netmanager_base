@@ -82,5 +82,14 @@ HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest003, TestSize.Level1)
     ASSERT_NE(instance_->core_, nullptr);
 }
 
+HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest004, TestSize.Level1)
+{
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
+    auto eventId = static_cast<int32_t>(event->GetInnerEventId());
+    auto eventData = event->GetSharedObject<PolicyEvent>();
+    instance_->core_ = nullptr;
+    instance_->ProcessEvent(eventId, eventData);
+    ASSERT_EQ(instance_->core_, nullptr);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

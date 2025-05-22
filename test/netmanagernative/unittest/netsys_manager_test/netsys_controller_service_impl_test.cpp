@@ -838,5 +838,15 @@ HWTEST_F(NetsysControllerServiceImplTest, DisableWearableDistributedNetForward, 
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetsysControllerServiceImplTest, DelInterfaceAddressTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    std::string ipAddr = "";
+    int32_t prefixLength = 123;
+    std::string netCapabilities = "";
+    int32_t ret = instance_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -657,5 +657,30 @@ HWTEST_F(UtNetPolicyTraffic, IsValidPeriodDuration012, TestSize.Level1)
     auto ret = g_netPolicyTraffic->IsValidPeriodDuration(periodDuration);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: UpdateRemindPolicy004
+ * @tc.desc: Test NetPolicyTraffic UpdateRemindPolicy No RemindType
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy004, TestSize.Level1)
+{
+    uint32_t errorRemindType = 3;
+    int32_t result = g_netPolicyTraffic->UpdateRemindPolicy(NetBearType::BEARER_DEFAULT, ICCID_2, errorRemindType);
+    ASSERT_EQ(result, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: IsQuotaPolicyExist001
+ * @tc.desc: Test NetPolicyTraffic IsQuotaPolicyExist No RemindType
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyTraffic, IsQuotaPolicyExist001, TestSize.Level1)
+{
+    int32_t netType = 123;
+    std::string simId = "123";
+    int32_t result = g_netPolicyTraffic->IsQuotaPolicyExist(netType, simId);
+    ASSERT_EQ(result, false);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

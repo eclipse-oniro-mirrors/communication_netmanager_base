@@ -19,6 +19,11 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "net_policy_file.h"
 
 namespace OHOS {
@@ -108,5 +113,29 @@ HWTEST_F(UtNetPolicyFile, NetPolicyFile002, TestSize.Level1)
     ASSERT_TRUE(deniedList == deniedList1);
 }
 
+/**
+ * @tc.name: Json2Obj001
+ * @tc.desc: Test Json2Obj WriteFirewallRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyFile, Json2Obj001, TestSize.Level1)
+{
+    std::string content = "";
+    NetPolicy netPolicy;
+    auto result = netPolicyFile_->Json2Obj(content, netPolicy);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AddBackgroundPolicy001
+ * @tc.desc: Test AddBackgroundPolicy WriteFirewallRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyFile, AddBackgroundPolicy001, TestSize.Level1)
+{
+    netPolicyFile_->netPolicy_.backgroundPolicyStatus = "";
+    netPolicyFile_->AddBackgroundPolicy(nullptr);
+    EXPECT_NE(netPolicyFile_->netPolicy_.backgroundPolicyStatus, "");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
