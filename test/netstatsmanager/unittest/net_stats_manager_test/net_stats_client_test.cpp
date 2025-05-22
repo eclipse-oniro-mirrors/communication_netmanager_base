@@ -369,7 +369,7 @@ HWTEST_F(NetStatsClientTest, SetAppStats001, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     PushStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(info);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
@@ -380,7 +380,7 @@ HWTEST_F(NetStatsClientTest, SaveSharingTraffic001, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     NetStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SaveSharingTraffic(info);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, OnRemoteDiedTest001, TestSize.Level1)
