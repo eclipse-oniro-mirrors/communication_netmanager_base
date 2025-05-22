@@ -20,7 +20,7 @@ config("statistics_config") {
   include_dirs = [
     "include",
     "include/context",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   cflags = [

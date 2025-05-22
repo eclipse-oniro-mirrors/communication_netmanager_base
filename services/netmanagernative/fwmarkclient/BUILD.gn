@@ -34,7 +34,7 @@ ohos_shared_library("fwmark_client") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/include",
     "include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   cflags = [

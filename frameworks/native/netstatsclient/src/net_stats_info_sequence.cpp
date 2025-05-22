@@ -23,11 +23,11 @@ static constexpr uint32_t STATS_INFO_MAX_SIZE = 5000;
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint64(startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}llu", startTime_);
         return false;
     }
     if (!parcel.WriteUint64(endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}llu", endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, info_);
@@ -36,11 +36,11 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.WriteUint64(statsSequence.startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", statsSequence.startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}llu", statsSequence.startTime_);
         return false;
     }
     if (!parcel.WriteUint64(statsSequence.endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", statsSequence.endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}llu", statsSequence.endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, statsSequence.info_);

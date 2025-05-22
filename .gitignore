@@ -4,3 +4,4 @@ cmake-build-debug
 @ohos.net.socket.d.ts
 CMakeLists.txt
 *.diff
+*.vscode

@@ -33,7 +33,6 @@ ohos_shared_library("connection") {
     "connection_module/include",
     "observer/include",
     "options/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
@@ -89,7 +88,6 @@ ohos_shared_library("connection_if") {
     "net_handle_interface/include",
     "observer/include",
     "options/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]

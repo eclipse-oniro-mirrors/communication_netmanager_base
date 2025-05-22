@@ -22,7 +22,7 @@ config("net_policy_manager_config") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "include",
     "include/stub",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
@@ -221,7 +221,7 @@ ohos_shared_library("net_access_policy_dialog") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "include",
     "include/stub",
   ]
