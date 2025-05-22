@@ -103,6 +103,8 @@ private:
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
     bool CheckIfSettingsDataReady();
+    void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
+        std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
 
 private:
     uint32_t netId_ = 0;

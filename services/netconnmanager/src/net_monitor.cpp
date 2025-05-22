@@ -174,14 +174,12 @@ NetHttpProbeResult NetMonitor::SendProbe()
     std::lock_guard<std::mutex> monitorLocker(probeMtx_);
     std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
     std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
-    std::shared_ptr<ProbeThread> httpProxyThread = std::make_shared<ProbeThread>(
-        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
-    std::shared_ptr<ProbeThread> httpsProxyThread = std::make_shared<ProbeThread>(
-        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
-    std::shared_ptr<ProbeThread> backHttpProxyThread = std::make_shared<ProbeThread>(netId_, netBearType_,
-        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
-    std::shared_ptr<ProbeThread> backHttpsProxyThread = std::make_shared<ProbeThread>(netId_, netBearType_,
-        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> httpProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> httpsProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> backHttpProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> backHttpsProxyThread = nullptr;
+    CreateProbeThread(httpProxyThread, httpsProxyThread, latch, latchAll, true);
+    CreateProbeThread(backHttpProxyThread, backHttpsProxyThread, latch, latchAll, false);
     StartProbe(httpProxyThread, httpsProxyThread, backHttpProxyThread, backHttpsProxyThread, true);
     latch->Await(std::chrono::milliseconds(PRIMARY_DETECTION_RESULT_WAIT_MS));
     NetHttpProbeResult proxyResult = ProcessThreadDetectResult(httpProxyThread, httpsProxyThread, backHttpProxyThread,
@@ -190,14 +188,12 @@ NetHttpProbeResult NetMonitor::SendProbe()
         return proxyResult;
     }
     NETMGR_LOG_I("backup url detection");
-    std::shared_ptr<ProbeThread> httpNoProxyThread = std::make_shared<ProbeThread>(
-        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
-    std::shared_ptr<ProbeThread> httpsNoProxyThread = std::make_shared<ProbeThread>(
-        netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
-    std::shared_ptr<ProbeThread> backHttpNoProxyThread = std::make_shared<ProbeThread>(netId_, netBearType_,
-        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
-    std::shared_ptr<ProbeThread> backHttpsNoProxyThread = std::make_shared<ProbeThread>(netId_, netBearType_,
-        netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_, fallbackHttpsUrl_);
+    std::shared_ptr<ProbeThread> httpNoProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> httpsNoProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> backHttpNoProxyThread = nullptr;
+    std::shared_ptr<ProbeThread> backHttpsNoProxyThread = nullptr;
+    CreateProbeThread(httpNoProxyThread, httpsNoProxyThread, latch, latchAll, true);
+    CreateProbeThread(backHttpNoProxyThread, backHttpsNoProxyThread, latch, latchAll, false);
     StartProbe(httpNoProxyThread, httpsNoProxyThread, backHttpNoProxyThread, backHttpsNoProxyThread, false);
     latchAll->Await(std::chrono::milliseconds(ALL_DETECTION_RESULT_WAIT_MS));
     proxyResult = ProcessThreadDetectResult(httpProxyThread, httpsProxyThread, backHttpProxyThread,
@@ -217,6 +213,44 @@ NetHttpProbeResult NetMonitor::SendProbe()
     }
 }
 
+void NetMonitor::CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
+    std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe)
+{
+    if (isPrimProbe) {
+        if (netBearType_ == BEARER_CELLULAR) {
+            NETMGR_LOG_I("create primary probeThread for cellular");
+            httpsThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
+            httpThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
+        } else {
+            NETMGR_LOG_I("create primary probeThread for others");
+            httpThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
+            httpsThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS, httpUrl_, httpsUrl_);
+        }
+    } else {
+        if (netBearType_ == BEARER_CELLULAR) {
+            NETMGR_LOG_I("create fallback probeThread for cellular");
+            httpsThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_,
+                fallbackHttpsUrl_);
+            httpThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_,
+                fallbackHttpsUrl_);
+        } else {
+            NETMGR_LOG_I("create fallback probeThread for others");
+            httpThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_,
+                fallbackHttpsUrl_);
+            httpsThread = std::make_shared<ProbeThread>(
+                netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, fallbackHttpUrl_,
+                fallbackHttpsUrl_);
+        }
+    }
+}
+
 void NetMonitor::StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread,
     std::shared_ptr<ProbeThread>& httpsProbeThread, std::shared_ptr<ProbeThread>& backHttpThread,
     std::shared_ptr<ProbeThread>& backHttpsThread, bool needProxy)
@@ -233,10 +267,17 @@ void NetMonitor::StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread,
         backHttpThread->ProbeWithoutGlobalHttpProxy();
         backHttpsThread->ProbeWithoutGlobalHttpProxy();
     }
-    httpProbeThread->Start();
-    httpsProbeThread->Start();
-    backHttpThread->Start();
-    backHttpsThread->Start();
+    if (netBearType_ == BEARER_CELLULAR) {
+        httpsProbeThread->Start();
+        httpProbeThread->Start();
+        backHttpsThread->Start();
+        backHttpThread->Start();
+    } else {
+        httpProbeThread->Start();
+        httpsProbeThread->Start();
+        backHttpThread->Start();
+        backHttpsThread->Start();
+    }
 }
 
 NetHttpProbeResult NetMonitor::GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType)
