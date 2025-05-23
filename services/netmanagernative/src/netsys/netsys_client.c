@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 static volatile uint8_t g_allowInternet = 1;
-int64_t lastDnsQueryPollSendTime = 0;
+int64_t g_lastDnsQueryPollSendTime = 0;
 static uint32_t g_curDnsStoreSize = 0;
 static struct DnsCacheInfo g_dnsCaches[MAX_DNS_CACHE_SIZE];
 static int64_t g_dnsReportTime[TOTAL_FAIL_CAUSE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -959,16 +959,16 @@ int32_t NetSysPostDnsQueryResult(int netid, struct addrinfo *addr, char *srcAddr
     g_dnsCaches[g_curDnsStoreSize].dnsProcessInfo = dnsProcessInfo;
     g_curDnsStoreSize++;
     int64_t timeNow = (int64_t)(time(NULL));
-    if (lastDnsQueryPollSendTime == 0) {
-        lastDnsQueryPollSendTime = timeNow;
+    if (g_lastDnsQueryPollSendTime == 0) {
+        g_lastDnsQueryPollSendTime = timeNow;
         pthread_spin_unlock(&g_dnsReportLock);
         return 0;
     }
-    if (timeNow - lastDnsQueryPollSendTime <  MIN_QUERY_REPORT_INTERVAL) {
+    if (timeNow - g_lastDnsQueryPollSendTime <  MIN_QUERY_REPORT_INTERVAL) {
         pthread_spin_unlock(&g_dnsReportLock);
         return 0;
     }
-    lastDnsQueryPollSendTime = timeNow;
+    g_lastDnsQueryPollSendTime = timeNow;
     pthread_spin_unlock(&g_dnsReportLock);
     NetSysPostDnsQueryResultInternal();
     return 0;
