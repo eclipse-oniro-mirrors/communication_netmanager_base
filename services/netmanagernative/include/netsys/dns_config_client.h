@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 #define MAX_SERVER_NUM 5
+#define MAX_SERVER_NUM_EXT 8
 #define MAX_SERVER_LENGTH 50
 #define DNS_SOCKET_PATH "/dev/unix/socket/dnsproxyd"
 #define DNS_SOCKET_NAME "dnsproxyd"
@@ -80,6 +81,7 @@ enum CommandType {
     BIND_SOCKET = 7,
     POST_DNS_QUERY_RESULT = 8,    // for musl and c-ares
     POST_DNS_ABNORMAL_RESULT = 9, // for musl and c-ares
+    GET_CONFIG_EXT = 10, // for musl and c-ares
 };
 
 struct RequestInfo {
@@ -94,6 +96,14 @@ struct ResolvConfig {
     uint32_t retryCount;
     uint32_t nonPublicNum;
     char nameservers[MAX_SERVER_NUM][MAX_SERVER_LENGTH + 1];
+};
+
+struct ResolvConfigExt {
+    int32_t error;
+    int32_t timeoutMs;
+    uint32_t retryCount;
+    uint32_t nonPublicNum;
+    char nameservers[MAX_SERVER_NUM_EXT][MAX_SERVER_LENGTH + 1];
 };
 
 typedef union {

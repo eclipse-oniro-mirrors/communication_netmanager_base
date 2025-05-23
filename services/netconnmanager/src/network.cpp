@@ -52,6 +52,8 @@ constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default ne
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
+constexpr int32_t MAX_IPV4_DNS_NUM = 5;
+constexpr int32_t MAX_IPV6_DNS_NUM = 2;
 } // namespace
 
 Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -458,10 +460,23 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     std::stringstream ss;
+    int32_t ipv4DnsCnt = 0;
+    int32_t ipv6DnsCnt = 0;
     for (const auto &dns : netLinkInfo.dnsList_) {
-        servers.emplace_back(dns.address_);
         domains.emplace_back(dns.hostName_);
-        ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
+        if (dns.type_ == NetManagerStandard::INetAddr::IPV4) {
+            if (ipv4DnsCnt++ < MAX_IPV4_DNS_NUM) {
+                servers.emplace_back(dns.address_);
+                ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
+            }
+        } else if (dns.type_ == NetManagerStandard::INetAddr::IPV6) {
+            if (ipv6DnsCnt++ < MAX_IPV6_DNS_NUM) {
+                servers.emplace_back(dns.address_);
+                ss << '[' << CommonUtils::ToAnonymousIp(dns.address_).c_str() << ']';
+            }
+        } else {
+            NETMGR_LOG_W("unknown dns.type_");
+        }
     }
     NETMGR_LOG_I("update dns server: %{public}s", ss.str().c_str());
     // Call netsys to set dns, use default timeout and retry

@@ -48,8 +48,8 @@ DnsParamCache &DnsParamCache::GetInstance()
 std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std::string> &servers)
 {
     std::vector<std::string> res = servers;
-    if (res.size() > MAX_SERVER_NUM - 1) {
-        res.resize(MAX_SERVER_NUM - 1);
+    if (res.size() > MAX_SERVER_NUM_EXT - 1) {
+        res.resize(MAX_SERVER_NUM_EXT - 1);
     }
     return res;
 }

@@ -44,6 +44,7 @@ public:
     }
     void StartListen();
     static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcGetConfigCommandExt(int clientSockFd, uint16_t netId, uint32_t uid);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
                                     AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum);
@@ -56,6 +57,7 @@ public:
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
+    static void AddPublicDnsServersExt(ResolvConfigExt &sendData, size_t serverSize);
     struct PostParam {
         uint32_t usedTime = 0;
         int32_t queryRet = 0;
@@ -159,12 +161,49 @@ HWTEST_F(DnsResolvListenTest, AddPublicDnsServers_ShouldNotAddServer_02, TestSiz
     EXPECT_EQ(dns, dns1);
 }
 
+/**
+ * @tc.name  : AddPublicDnsServersExt_ShouldNotAddServer_01
+ * @tc.number: DnsResolvListenTest_002
+ * @tc.desc  : Test when serverSize is equal to MAX_SERVER_NUM then AddPublicDnsServersExt should add server
+ */
+HWTEST_F(DnsResolvListenTest, AddPublicDnsServersExt_ShouldAddServer_01, TestSize.Level0)
+{
+    size_t serverSize = MAX_SERVER_NUM-1;
+    ResolvConfigExt sendData = {0};
+    std::string dns(sendData.nameservers[serverSize]);
+    EXPECT_EQ(dns, "");
+    dnsResolvListenInternal.AddPublicDnsServersExt(sendData, serverSize);
+}
+
+/**
+ * @tc.name  : AddPublicDnsServersExt_ShouldNotAddServer_02
+ * @tc.number: DnsResolvListenTest_003
+ * @tc.desc  : Test when publicDnsServer already exists then AddPublicDnsServersExt should not add server
+ */
+HWTEST_F(DnsResolvListenTest, AddPublicDnsServersExt_ShouldNotAddServer_02, TestSize.Level0)
+{
+    ResolvConfigExt sendData = {0};
+    size_t serverSize = MAX_SERVER_NUM;
+    std::string dns(sendData.nameservers[0]);
+    EXPECT_EQ(dns, "");
+    dnsResolvListenInternal.AddPublicDnsServersExt(sendData, serverSize);
+}
+
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand_ShouldHandleError_WhenGetResolverConfigFails, TestSize.Level0)
 {
     int clientSockFd = 1;
     uint16_t netId = 0;
     uint32_t uid = 1000;
     dnsResolvListenInternal.ProcGetConfigCommand(clientSockFd, netId, uid);
+    EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
+}
+
+HWTEST_F(DnsResolvListenTest, ProcGetConfigCommandExt_ShouldHandleError_WhenGetResolverConfigFails, TestSize.Level0)
+{
+    int clientSockFd = 1;
+    uint16_t netId = 0;
+    uint32_t uid = 1000;
+    dnsResolvListenInternal.ProcGetConfigCommandExt(clientSockFd, netId, uid);
     EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
 }
 

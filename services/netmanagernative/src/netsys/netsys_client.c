@@ -202,6 +202,36 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
     return CloseSocketReturn(sockFd, 0);
 }
 
+static int32_t NetSysGetResolvConfInternalExt(int sockFd, uint16_t netId, struct ResolvConfigExt *config)
+{
+    struct RequestInfo info = {
+        .uid = getuid(),
+        .command = GET_CONFIG_EXT,
+        .netId = netId,
+    };
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
+    DNS_CONFIG_PRINT("NetSysGetResolvConfInternalExt begin netid: %d", info.netId);
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        HILOG_ERROR(LOG_CORE, "send failed %{public}d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollRecvData(sockFd, (char *)(config), sizeof(struct ResolvConfigExt))) {
+        HILOG_ERROR(LOG_CORE, "receive failed %{public}d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (config->error < 0) {
+        HILOG_ERROR(LOG_CORE, "get Config error: %{public}d", config->error);
+        return CloseSocketReturn(sockFd, config->error);
+    }
+
+    DNS_CONFIG_PRINT("NetSysGetResolvConfInternalExt end netid: %d", info.netId);
+    return CloseSocketReturn(sockFd, 0);
+}
+
 int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
 {
     if (config == NULL) {
@@ -218,6 +248,31 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     int32_t err = NetSysGetResolvConfInternal(sockFd, netId, config);
     if (err < 0) {
         DNS_CONFIG_PRINT("NetSysGetResolvConf NetSysGetResolvConfInternal err: %d", errno);
+        return err;
+    }
+
+    if (strlen(config->nameservers[0]) == 0) {
+        return -1;
+    }
+    return 0;
+}
+
+int32_t NetSysGetResolvConfExt(uint16_t netId, struct ResolvConfigExt *config)
+{
+    if (config == NULL) {
+        DNS_CONFIG_PRINT("NetSysGetResolvConfExt Invalid Param");
+        return -EINVAL;
+    }
+
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysGetResolvConfExt CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return -errno;
+    }
+
+    int32_t err = NetSysGetResolvConfInternalExt(sockFd, netId, config);
+    if (err < 0) {
+        DNS_CONFIG_PRINT("NetSysGetResolvConfExt NetSysGetResolvConfInternal err: %d", errno);
         return err;
     }
 

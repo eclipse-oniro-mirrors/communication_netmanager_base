@@ -28,7 +28,7 @@ bool StatsInfoUnmarshallingVector(Parcel &parcel, std::vector<NetStatsInfo> &sta
 
 namespace NetsysNative {
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
-static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
 static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 

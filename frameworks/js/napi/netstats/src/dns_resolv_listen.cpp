@@ -38,6 +38,7 @@ static constexpr const uint32_t DNS_QUERY_ABNORMAL_SIZE =
 sizeof(int32_t) + sizeof(int32_t) + sizeof(DnsProcessInfoExt) + sizeof(int32_t) + sizeof(int8_t);
 const std::string PUBLIC_DNS_SERVER = "persist.sys.netsysnative_dns_servers_backup";
 using namespace NetManagerStandard;
+static constexpr int32_t DNS_REPLACE_NUM = 2;
 
 class DnsResolvListenInternal {
 public:
@@ -53,6 +54,7 @@ public:
 
 private:
     static void ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid);
+    static void ProcGetConfigCommandExt(int clientSockFd, uint16_t netId, uint32_t uid);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     static void ProcSetCacheCommand(const std::string &name, uint16_t netId, uint32_t callingUid,
                                     AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum);
@@ -65,6 +67,7 @@ private:
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
+    static void AddPublicDnsServersExt(ResolvConfigExt &sendData, size_t serverSize);
     static bool IsUserDefinedServer(uint16_t netId, uint32_t uid);
 
     ReceiverRunner ProcCommand();
@@ -121,6 +124,49 @@ void DnsResolvListenInternal::AddPublicDnsServers(ResolvConfig &sendData, size_t
     DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 
+void DnsResolvListenInternal::AddPublicDnsServersExt(ResolvConfigExt &sendData, size_t serverSize)
+{
+    std::string publicDnsServer = OHOS::system::GetParameter(PUBLIC_DNS_SERVER, "");
+    size_t i = 0;
+    for (; i < serverSize; i++) {
+        if (strcmp(sendData.nameservers[i], publicDnsServer.c_str()) == 0) {
+            return;
+        }
+    }
+    if (i >= MAX_SERVER_NUM_EXT) {
+        NETNATIVE_LOGI("Invalid serverSize or mPublicDns already exists");
+        return;
+    }
+    if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), publicDnsServer.c_str(),
+                 publicDnsServer.length() + 1) != ERR_OK) {
+        DNS_CONFIG_PRINT("mem copy failed");
+        return;
+    }
+    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
+}
+
+static void ReplaceDnsServer(ResolvConfig &sendData, const std::vector<std::string> &servers)
+{
+    int32_t dnsNumTotal = servers.size();
+    if (dnsNumTotal <= MAX_SERVER_NUM - 1) {
+        return;
+    }
+    for (int32_t k = 1; k <= DNS_REPLACE_NUM; k++) {
+        int32_t index = MAX_SERVER_NUM - k - 1;
+        if (memset_s(sendData.nameservers[index], sizeof(sendData.nameservers[index]),
+            0, sizeof(sendData.nameservers[index])) != EOK) {
+            DNS_CONFIG_PRINT("ReplaceDnsServer memset_s failed");
+            continue;
+        }
+
+        if (memcpy_s(sendData.nameservers[index], sizeof(sendData.nameservers[index]),
+            servers[dnsNumTotal - k].c_str(), servers[dnsNumTotal - k].length()) < 0) {
+            DNS_CONFIG_PRINT("ReplaceDnsServer mem copy failed");
+            continue;
+        }
+    }
+}
+
 void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t netId, uint32_t uid)
 {
     NETNATIVE_LOG_D("DnsResolvListenInternal::ProcGetConfigCommand uid = [%{public}u]", uid);
@@ -159,6 +205,7 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
             DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
         }
         sendData.nonPublicNum = i;
+        ReplaceDnsServer(sendData, servers);
         // the last one is for baidu DNS Server
 #ifdef ENABLE_PUBLIC_DNS_SERVER
         if (!IsUserDefinedServer(static_cast<uint16_t>(netId), uid)) {
@@ -167,6 +214,57 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
 #endif
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfig))) {
+        DNS_CONFIG_PRINT("send failed");
+    }
+    DNS_CONFIG_PRINT("ProcGetConfigCommand end");
+}
+
+void DnsResolvListenInternal::ProcGetConfigCommandExt(int clientSockFd, uint16_t netId, uint32_t uid)
+{
+    NETNATIVE_LOG_D("DnsResolvListenInternal::ProcGetConfigCommandExt uid = [%{public}u]", uid);
+    ResolvConfigExt sendData = {0};
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
+    uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
+    uint8_t retryCount = DEFAULT_RETRY;
+    bool isUserDefinedDnsServer = false;
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    DnsParamCache::GetInstance().SetCallingUid(uid);
+#endif
+
+    int status;
+    if (DnsParamCache::GetInstance().IsVpnOpen() && netId == 0) {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), uid, servers, domains,
+                                                                baseTimeoutMsec, retryCount);
+    } else {
+        status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers, domains,
+                                                                baseTimeoutMsec, retryCount);
+    }
+    DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
+    if (status < 0) {
+        sendData.error = status;
+    } else {
+        sendData.retryCount = retryCount;
+        sendData.timeoutMs = baseTimeoutMsec;
+        size_t i = 0;
+        for (; i < std::min<size_t>(MAX_SERVER_NUM_EXT - 1, servers.size()); i++) {
+            if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), servers[i].c_str(),
+                         servers[i].length()) < 0) {
+                DNS_CONFIG_PRINT("mem copy failed");
+                continue;
+            }
+            DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
+        }
+        sendData.nonPublicNum = i;
+        // the last one is for baidu DNS Server
+#ifdef ENABLE_PUBLIC_DNS_SERVER
+        if (!IsUserDefinedServer(static_cast<uint16_t>(netId), uid)) {
+            AddPublicDnsServersExt(sendData, i);
+        }
+#endif
+    }
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfigExt))) {
         DNS_CONFIG_PRINT("send failed");
     }
     DNS_CONFIG_PRINT("ProcGetConfigCommand end");
@@ -305,6 +403,9 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
         switch (info->command) {
             case GET_CONFIG:
                 ProcGetConfigCommand(fd, netId, uid);
+                return FixedLengthReceiverState::DATA_ENOUGH;
+            case GET_CONFIG_EXT:
+                ProcGetConfigCommandExt(fd, netId, uid);
                 return FixedLengthReceiverState::DATA_ENOUGH;
             case GET_CACHE:
             case SET_CACHE:
