@@ -45,7 +45,6 @@ extern "C" {
 
 static volatile uint8_t g_allowInternet = 1;
 int64_t lastDnsQueryPollSendTime = 0;
-static int g_timer_exist = 0;
 static uint32_t g_curDnsStoreSize = 0;
 static struct DnsCacheInfo g_dnsCaches[MAX_DNS_CACHE_SIZE];
 static int64_t g_dnsReportTime[TOTAL_FAIL_CAUSE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
