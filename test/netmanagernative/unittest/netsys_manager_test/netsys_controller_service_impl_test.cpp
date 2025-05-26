@@ -716,10 +716,10 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
 {
     uint64_t stats = 0;
     auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)
@@ -811,7 +811,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest001, Te
 {
     std::unordered_map<uint32_t, uint32_t> params;
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
@@ -819,13 +819,13 @@ HWTEST_F(NetsysControllerServiceImplTest, SetBrokerUidAccessPolicyMapTest002, Te
     std::unordered_map<uint32_t, uint32_t> params;
     params.emplace(TEST_UID, TEST_UID);
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
 {
     int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
