@@ -112,7 +112,7 @@ pub(crate) fn entry(args_: TokenStream2, item: TokenStream2) -> Result<TokenStre
 
     let block = match out_arg {
         Some(out) => match out.as_str() {
-            "i32" | "i64" | "f32" | "f64" | "bool" => {
+            "i32" | "i64" | "f32" | "f64" | "bool" | "AniRef" => {
                 let default = match out.as_str() {
                     "i32" => {
                         sig = quote! {
@@ -154,6 +154,14 @@ pub(crate) fn entry(args_: TokenStream2, item: TokenStream2) -> Result<TokenStre
                             false
                         }
                     }
+                    "AniRef" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
+                        };
+                        quote! {
+                            env.undefined().unwrap()
+                        }
+                    }
                     _ => {
                         unimplemented!()
                     }
@@ -166,9 +174,10 @@ pub(crate) fn entry(args_: TokenStream2, item: TokenStream2) -> Result<TokenStre
                                 res
                             }
                             Err(err) => {
+                                let ret = #default;
                                 env.throw_business_error(err.code(), err.message())
                                     .unwrap();
-                                #default
+                                ret
                             }
                         }
                     }

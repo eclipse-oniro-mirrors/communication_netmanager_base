@@ -18,7 +18,7 @@ pub struct NetConnection {
 
 #[ani_rs::ani(path = "L@ohos/net/connection/connection/Cleaner")]
 pub struct Cleaner {
-    pub native_ptr: i64,
+    pub ptr: i64,
 }
 
 #[ani_rs::ani(path = "L@ohos/net/connection/connection/NetSpecifier")]
