@@ -354,6 +354,6 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
 
 #[ani_rs::native]
 pub(crate) fn connection_clean(this: Cleaner) -> Result<(), BusinessError> {
-    let _ = unsafe { Box::from_raw(this.native_ptr as *mut Connection) };
+    let _ = unsafe { Box::from_raw(this.ptr as *mut Connection) };
     Ok(())
 }

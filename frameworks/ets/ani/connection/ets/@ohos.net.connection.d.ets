@@ -23,7 +23,7 @@ import { BusinessError }  from '@ohos.base';
 export default namespace connection {
   loadLibrary("connection_ani") 
 
-  class Cleaner {
+  export class Cleaner {
     private ptr: long = 0
     constructor(ptr:long) {
         this.ptr = ptr
