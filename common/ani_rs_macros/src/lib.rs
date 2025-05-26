@@ -45,6 +45,8 @@ fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let args = Punctuated::<MetaNameValue, Comma>::parse_terminated.parse2(args)?;
 
     let mut config = None;
+
+    let mut output_only = false;
     for arg in args {
         let ident = arg
             .path
@@ -55,6 +57,16 @@ fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
 
         match ident_string.as_str() {
             "path" => config = Some(arg.value),
+            "output" => {
+                let s = arg.value.to_token_stream();
+                let s = syn::parse2::<LitStr>(s)
+                    .map_err(|item| Error::new(item.span(), "Invalid Attribute `path`"))?;
+                if s.value() == "only" {
+                    output_only = true;
+                } else {
+                    return Err(Error::new(item.span(), "Invalid `output`"));
+                }
+            }
             name => {
                 return Err(Error::new(
                     arg.path.span(),
@@ -94,12 +106,27 @@ fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
                 .map_err(|item| Error::new(item.span(), "Invalid Attribute"))?;
             field.attrs.push(attr.attr);
         }
-        Ok(quote! {
-            #[derive(serde::Serialize, serde::Deserialize)]
-            #[serde(rename = #rename)]
-            #item
+        if rename.is_empty() {
+            Ok(quote! {
+                #[derive(serde::Deserialize)]
+                #item
+            })
+        } else {
+            if output_only {
+                Ok(quote! {
+                    #[derive(serde::Serialize)]
+                    #[serde(rename = #rename)]
+                    #item
+                })
+            } else {
+                Ok(quote! {
+                    #[derive(serde::Serialize, serde::Deserialize)]
+                    #[serde(rename = #rename)]
+                    #item
 
-        })
+                })
+            }
+        }
     } else {
         let mut item = syn::parse2::<ItemEnum>(item).unwrap();
         for variant in &mut item.variants {
