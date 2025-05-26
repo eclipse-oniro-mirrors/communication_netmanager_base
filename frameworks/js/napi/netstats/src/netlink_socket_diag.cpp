@@ -64,6 +64,7 @@ bool NetLinkSocketDiag::CreateNetlinkSocket()
         NETNATIVE_LOGE("Create netlink socket for destroy failed, error[%{public}d]: %{public}s", errno,
                        strerror(errno));
         close(dumpSock_);
+        dumpSock_ = -1;
         return false;
     }
 
@@ -79,8 +80,12 @@ bool NetLinkSocketDiag::CreateNetlinkSocket()
 
 void NetLinkSocketDiag::CloseNetlinkSocket()
 {
-    close(dumpSock_);
-    close(destroySock_);
+    if (dumpSock_ >= 0) {
+        close(dumpSock_);
+    }
+    if (destroySock_ >= 0) {
+        close(destroySock_);
+    }
     dumpSock_ = -1;
     destroySock_ = -1;
 }
