@@ -417,6 +417,9 @@ int32_t DnsQualityDiag::add_dns_query_report(std::shared_ptr<NetsysNative::NetDn
 
 int32_t DnsQualityDiag::handle_dns_abnormal(std::shared_ptr<DnsAbnormalInfo> abnormalInfo)
 {
+    if (!abnormalInfo) {
+        return 0;
+    }
     for (auto cb: resultListeners_) {
         cb->OnDnsQueryAbnormalReport(abnormalInfo->eventfailcause, abnormalInfo->report);
     }

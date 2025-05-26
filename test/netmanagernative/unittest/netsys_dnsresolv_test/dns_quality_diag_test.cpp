@@ -223,6 +223,12 @@ HWTEST_F(DnsQualityDiagTest, Handle_dns_abnormal_AddIPv4AndIPv6_WhenCalledWithVa
     EXPECT_EQ(dnsQualityDiag.handle_dns_abnormal(abnormalInfo), 0);
 }
 
+HWTEST_F(DnsQualityDiagTest, Handle_dns_abnormal_AddIPv4AndIPv6_WhenCalledWithNullptr, TestSize.Level0)
+{
+    std::shared_ptr<DnsAbnormalInfo> abnormalInfo = nullptr;
+    EXPECT_EQ(dnsQualityDiag.handle_dns_abnormal(abnormalInfo), 0);
+}
+
 HWTEST_F(DnsQualityDiagTest, ParseDnsQueryReportAddr_AddIPv4AndIPv6_WhenCalledWithValidAddrInfo, TestSize.Level0)
 {
     uint32_t size = 2;
