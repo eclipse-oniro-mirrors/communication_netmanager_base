@@ -17,14 +17,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_unittest("netsys_distributed_test") {
   module_out_path = "netmanager_base/netmanager_base/netsys_distributed_test"
 
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "distributed_manager_test.cpp",
