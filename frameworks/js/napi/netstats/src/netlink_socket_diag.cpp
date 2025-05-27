@@ -81,14 +81,14 @@ bool NetLinkSocketDiag::CreateNetlinkSocket()
 void NetLinkSocketDiag::CloseNetlinkSocket()
 {
     // avoid double close
-    if (dumpSock_ > 0) {
+    if (dumpSock_ >= 0) {
         close(dumpSock_);
-        dumpSock_ = -1;
     }
-    if (destroySock_ > 0) {
+    if (destroySock_ >= 0) {
         close(destroySock_);
-        destroySock_ = -1;
     }
+    dumpSock_ = -1;
+    destroySock_ = -1;
 }
 
 int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg)
