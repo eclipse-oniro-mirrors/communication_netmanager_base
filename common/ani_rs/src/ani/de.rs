@@ -75,7 +75,11 @@ impl<'local> StructDe<'local> {
     }
 
     fn get_value<T: AniExt>(&mut self) -> Result<T, AniError> {
+        println!("[StructDe] get_value: {:?}", self.fields[0]);
+        println!("get_value: {:?}", self.fields[0].as_bytes());
         let field_name = CStr::from_bytes_with_nul(self.fields[0].as_bytes())?;
+        println!("get_value: {:?}", field_name);
+        println!("get_value: {:?}", field_name.to_bytes_with_nul());
         self.fields = self.fields[1..].as_ref();
         self.env.get_property::<T>(&self.obj, field_name)
     }

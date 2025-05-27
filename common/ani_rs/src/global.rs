@@ -11,21 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ops::Deref;
+
 use crate::{objects::AniRef, AniVm};
 
-impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalDrop<T> {
+impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalRef<T> {
     fn drop(&mut self) {
         let env = AniVm::get_instance().get_env().unwrap();
         env.delete_global_ref(self.0.clone().into()).unwrap();
     }
 }
 
-pub(crate) struct GlobalDrop<T: Into<AniRef<'static>> + Clone>(pub T);
+#[repr(transparent)]
+pub struct GlobalRef<T: Into<AniRef<'static>> + Clone>(pub T);
 
-impl<T: PartialEq + Into<AniRef<'static>> + Clone> PartialEq for GlobalDrop<T> {
+impl<T: PartialEq + Into<AniRef<'static>> + Clone> PartialEq for GlobalRef<T> {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl<T: Eq + Into<AniRef<'static>> + Clone> Eq for GlobalDrop<T> {}
+impl<T: Into<AniRef<'static>> + Clone> Deref for GlobalRef<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}

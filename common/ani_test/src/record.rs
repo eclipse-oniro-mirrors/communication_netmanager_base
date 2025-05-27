@@ -11,31 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, ffi::CStr};
+use std::collections::HashMap;
 
-use ani_rs::objects::{AniObject, AniRef};
+use ani_rs::business_error::BusinessError;
 
-use crate::cstr;
-
-pub const RECORD_STRING: &CStr = cstr(b"RecordString\0");
-pub const RECORD_LONG: &CStr = cstr(b"RecordLong\0");
-
+#[ani_rs::native]
 pub fn record_string<'local>(
-    env: ani_rs::AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    record: AniObject<'local>,
-) -> ani_rs::objects::AniRef<'local> {
-    let input: HashMap<String, String> = env.deserialize(record).unwrap();
-    env.serialize(&input).unwrap()
+    input: HashMap<String, String>,
+) -> Result<HashMap<String, String>, BusinessError> {
+    Ok(input)
 }
 
-pub fn record_long<'local>(
-    env: ani_rs::AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    record: AniObject<'local>,
-) -> ani_rs::objects::AniRef<'local> {
-    let input: HashMap<i64, i64> = env.deserialize(record).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn record_long<'local>(input: HashMap<i64, i64>) -> Result<HashMap<i64, i64>, BusinessError> {
+    Ok(input)
 }
-
-

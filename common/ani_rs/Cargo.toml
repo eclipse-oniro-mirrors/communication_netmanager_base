@@ -20,4 +20,3 @@ edition = "2021"
 ani_rs_macros = { path = "../ani_rs_macros/" }
 ani_sys = { path = "../ani_sys" }
 serde = { version = "1.0" }
-cxx = "1.0.115"

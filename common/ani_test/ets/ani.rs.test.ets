@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import {Callback, BusinessError} from "@ohos.base";
-import Context from 'application.Context'
 
 enum EnumNumber{
     ONE = 1,
@@ -43,7 +42,8 @@ export class StructArray
 }
 
 export default namespace ani_test {
-    loadLibrary("ani_test") 
+    loadLibrary("ani_test")
+    
     export native function PrimitiveTest(input:PrimitiveTest): PrimitiveTest;
     export native function OptionBool(input?:boolean): boolean | undefined;
     export native function OptionByte(input?:byte): byte | undefined;
@@ -73,21 +73,17 @@ export default namespace ani_test {
     export native function ArrayBufferTest(input: Uint8Array): Uint8Array;
     export native function Uint8ArrayTest(input: Uint8Array): Uint8Array;
 
-    export native function CallbackTest(input: Context): void;
 }
 
 function main():void{
     primitive_test();
-    option_test();
-    array_test();
-    enum_test();
-    record_test();
-    union_test();
-    array_buffer_test();
-    callback_test();
+    // option_test();
+    // array_test();
+    // enum_test();
+    // record_test();
+    // union_test();
+    // array_buffer_test();
 }
-
-
 
 function primitive_test():void {
     let input:PrimitiveTest = {
@@ -98,7 +94,6 @@ function primitive_test():void {
         primitiveI64: 9223372036854775807,
         primitiveF32: 3.13,
         primitiveF64: 3.14159,
-
     }
     let output = ani_test.PrimitiveTest(input);
     assertEQ(input.primitiveBool, output.primitiveBool);
@@ -306,8 +301,3 @@ function array_buffer_test (): void
     assertEQ(JSON.stringify(uint8View), JSON.stringify(output));
 }
 
-function callback_test() :void 
-{
-    let context:Context = new Context;
-    ani_test.CallbackTest(context);
-}

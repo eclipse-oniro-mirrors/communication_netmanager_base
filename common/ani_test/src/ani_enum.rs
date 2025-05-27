@@ -11,41 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CStr;
+use ani_rs::business_error::BusinessError;
 
-use crate::cstr;
-
-#[ani_rs::ani(path = "Lani/rs/test/EnumNumber;")]
+#[ani_rs::ani(path = "Lani/rs/test/EnumNumber")]
 enum EnumNumber {
     One = 1,
     Two = 2,
     Three = 3,
 }
 
-#[ani_rs::ani(path = "Lani/rs/test/EnumString;")]
+#[ani_rs::ani(path = "Lani/rs/test/EnumString")]
 enum EnumString {
     One = 1,
     Two = 2,
     Three = 3,
 }
 
-pub const ENUM_TEST_NUMBER: &CStr = cstr(b"EnumTestNumber\0");
-pub const ENUM_TEST_STRING: &CStr = cstr(b"EnumTestString\0");
-
-pub fn enum_test_number<'local>(
-    env: ani_rs::AniEnv<'local>,
-    _ani_this: ani_rs::objects::AniRef<'local>,
-    ani_obj: ani_rs::objects::AniObject<'local>,
-) -> ani_rs::objects::AniRef<'local> {
-    let input: EnumNumber = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn enum_test_number<'local>(input: EnumNumber) -> Result<EnumNumber, BusinessError> {
+    Ok(input)
 }
 
-pub fn enum_test_string<'local>(
-    env: ani_rs::AniEnv<'local>,
-    _ani_this: ani_rs::objects::AniRef<'local>,
-    ani_obj: ani_rs::objects::AniObject<'local>,
-) -> ani_rs::objects::AniRef<'local> {
-    let input: EnumString = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn enum_test_string<'local>(input: EnumString) -> Result<EnumString, BusinessError> {
+    Ok(input)
 }

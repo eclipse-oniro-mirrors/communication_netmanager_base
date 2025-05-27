@@ -35,6 +35,7 @@ pub use array::AniArray;
 pub use class::AniClass;
 pub use enum_item::AniEnumItem;
 pub use fn_object::AniFnObject;
+pub use fn_object::GlobalRefCallback;
 pub use function::AniNativeFunction;
 pub use method::AniMethod;
 pub use module::AniModule;
