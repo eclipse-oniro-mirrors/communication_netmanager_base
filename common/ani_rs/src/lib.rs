@@ -29,12 +29,9 @@ pub use ani::AniSer;
 mod iterator;
 pub mod signature;
 
-pub mod callback;
-pub mod context;
 mod global;
 mod primitive;
 pub mod typed_array;
-mod wrapper;
 
 pub mod business_error;
 mod macros;

@@ -55,6 +55,7 @@ impl AniExt for bool {
         name: &CStr,
     ) -> Result<Self, AniError> {
         let mut value: ani_boolean = 0;
+        println!("name: {:?}", name);
         let res = unsafe {
             (**env.inner).Object_GetPropertyByName_Boolean.unwrap()(
                 env.inner,
@@ -63,6 +64,7 @@ impl AniExt for bool {
                 &mut value as *mut _,
             )
         };
+
         if res != 0 {
             let msg = format!(
                 "Get Property failed to retrieve bool value from field {}",
