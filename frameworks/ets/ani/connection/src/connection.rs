@@ -15,8 +15,7 @@ use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
-    callback::{Callback, GlobalCallback},
-    objects::{AniFnObject, AniObject, AniRef},
+    objects::{AniFnObject, AniObject, AniRef, GlobalRefCallback},
     AniEnv,
 };
 
@@ -190,12 +189,13 @@ pub struct Connection {
 }
 
 pub struct ConnCallback {
-    pub on_net_available: Option<GlobalCallback<(NetHandle,)>>,
-    pub on_net_block_status_change: Option<GlobalCallback<(NetBlockStatusInfo,)>>,
-    pub on_net_capabilities_change: Option<GlobalCallback<(NetCapabilityInfo,)>>,
-    pub on_net_connection_properties_change: Option<GlobalCallback<(NetConnectionPropertyInfo,)>>,
-    pub on_net_lost: Option<GlobalCallback<(NetHandle,)>>,
-    pub on_net_unavailable: Option<GlobalCallback<()>>,
+    pub on_net_available: Option<GlobalRefCallback<(NetHandle,)>>,
+    pub on_net_block_status_change: Option<GlobalRefCallback<(NetBlockStatusInfo,)>>,
+    pub on_net_capabilities_change: Option<GlobalRefCallback<(NetCapabilityInfo,)>>,
+    pub on_net_connection_properties_change:
+        Option<GlobalRefCallback<(NetConnectionPropertyInfo,)>>,
+    pub on_net_lost: Option<GlobalRefCallback<(NetHandle,)>>,
+    pub on_net_unavailable: Option<GlobalRefCallback<()>>,
 }
 
 impl ConnCallback {
@@ -254,7 +254,7 @@ pub(crate) fn on_net_available(
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
-    connection.callback.on_net_available = Some(Callback::new(callback).into_global(env).unwrap());
+    connection.callback.on_net_available = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
@@ -266,7 +266,7 @@ pub(crate) fn on_net_block_status_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_block_status_change =
-        Some(Callback::new(callback).into_global(env).unwrap());
+        Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
@@ -278,7 +278,7 @@ pub(crate) fn on_net_capabilities_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_capabilities_change =
-        Some(Callback::new(callback).into_global(env).unwrap());
+        Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
@@ -290,7 +290,7 @@ pub(crate) fn on_net_connection_properties_change(
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
     connection.callback.on_net_connection_properties_change =
-        Some(Callback::new(callback).into_global(env).unwrap());
+        Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
@@ -301,7 +301,7 @@ pub(crate) fn on_net_lost(
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
-    connection.callback.on_net_lost = Some(Callback::new(callback).into_global(env).unwrap());
+    connection.callback.on_net_lost = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
@@ -312,8 +312,7 @@ pub(crate) fn on_net_unavailable(
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
-    connection.callback.on_net_unavailable =
-        Some(Callback::new(callback).into_global(env).unwrap());
+    connection.callback.on_net_unavailable = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 

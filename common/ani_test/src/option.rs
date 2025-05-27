@@ -11,72 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CStr;
+use ani_rs::business_error::BusinessError;
 
-use ani_rs::{
-    objects::{AniObject, AniRef},
-    AniEnv,
-};
-
-use crate::cstr;
-
-pub const OPTION_BOOL: &CStr = cstr(b"OptionBool\0");
-pub const OPTION_I8: &CStr = cstr(b"OptionByte\0");
-pub const OPTION_I16: &CStr = cstr(b"OptionShort\0");
-pub const OPTION_I32: &CStr = cstr(b"OptionInt\0");
-pub const OPTION_I64: &CStr = cstr(b"OptionLong\0");
-pub const OPTION_F64: &CStr = cstr(b"OptionDouble\0");
-
-pub fn option_bool<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<bool> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_bool(input: Option<bool>) -> Result<Option<bool>, BusinessError> {
+    Ok(input)
 }
 
-pub fn option_byte<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<i8> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_byte(input: Option<u8>) -> Result<Option<u8>, BusinessError> {
+    Ok(input)
 }
 
-pub fn option_i16<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<i16> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_i16(input: Option<i16>) -> Result<Option<i16>, BusinessError> {
+    Ok(input)
 }
 
-pub fn option_i32<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<i32> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_i32(input: Option<i32>) -> Result<Option<i32>, BusinessError> {
+    Ok(input)
 }
 
-pub fn option_i64<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<i64> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_i64(input: Option<i64>) -> Result<Option<i64>, BusinessError> {
+    Ok(input)
 }
 
-pub fn option_f64<'local>(
-    env: AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> AniRef<'local> {
-    let input: Option<f64> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn option_f64(input: Option<f64>) -> Result<Option<f64>, BusinessError> {
+    Ok(input)
 }

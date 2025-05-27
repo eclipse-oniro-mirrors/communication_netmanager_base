@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CStr;
-
-use ani_rs::objects::{AniObject, AniRef};
+use ani_rs::business_error::BusinessError;
 use serde::{Deserialize, Serialize};
-
-use crate::cstr;
 
 #[derive(Serialize, Deserialize)]
 enum Data<'local> {
@@ -31,13 +27,7 @@ enum Data<'local> {
     Null(()),
 }
 
-pub const UNION_TEST: &CStr = cstr(b"UnionTest\0");
-
-pub fn union_test<'local>(
-    env: ani_rs::AniEnv<'local>,
-    _ani_this: AniRef<'local>,
-    ani_obj: AniObject<'local>,
-) -> ani_rs::objects::AniRef<'local> {
-    let input: Data<'local> = env.deserialize(ani_obj).unwrap();
-    env.serialize(&input).unwrap()
+#[ani_rs::native]
+pub fn union_test<'local>(input: Data<'local>) -> Result<Data<'local>, BusinessError> {
+    Ok(input)
 }
