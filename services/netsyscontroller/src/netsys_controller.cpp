@@ -1663,7 +1663,7 @@ int32_t NetsysController::SetUserDefinedServerFlag(uint16_t netId, bool isUserDe
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
@@ -1671,7 +1671,18 @@ int32_t NetsysController::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->ProcessVpnStage(stage);
+    return netsysService_->ProcessVpnStage(stage, message);
+}
+
+int32_t NetsysController::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("UpdateNetworkIpAddressMark netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->UpdateNetworkIpAddressMark(netId, addr, add);
 }
 #endif // SUPPORT_SYSVPN
 

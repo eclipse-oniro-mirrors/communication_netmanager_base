@@ -3516,7 +3516,7 @@ int32_t NetsysNativeServiceProxy::CloseSocketsUid(const std::string &ipAddr, uin
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -3524,6 +3524,11 @@ int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode 
     }
     if (!data.WriteInt32(stage)) {
         NETNATIVE_LOGE("ProcessVpnStage write stage error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(message)) {
+        NETNATIVE_LOGE("ProcessVpnStage write message error");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -3543,6 +3548,48 @@ int32_t NetsysNativeServiceProxy::ProcessVpnStage(NetsysNative::SysVpnStageCode 
     int32_t result = ERR_INVALID_DATA;
     if (!reply.ReadInt32(result)) {
         NETNATIVE_LOGE("ProcessVpnStage proxy read result failed");
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceProxy::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint16(netId)) {
+        NETNATIVE_LOGE("ModifyNetworkPackageMark netId error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(addr)) {
+        NETNATIVE_LOGE("ModifyNetworkPackageMark write addr error");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(add)) {
+        NETNATIVE_LOGE("ModifyNetworkPackageMark add error");
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RULE_IP_MARK),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("ModifyNetworkPackageMark proxy SendRequest failed, ret: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        NETNATIVE_LOGE("ModifyNetworkPackageMark proxy read result failed");
         return IPC_PROXY_TRANSACTION_ERR;
     }
     return result;

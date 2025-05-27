@@ -28,6 +28,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr const char *TUN_CARD_NAME = "vpn-tun";
 } // namespace
 
 class VpnManagerTest : public testing::Test {
@@ -51,10 +52,10 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     VpnManager::GetInstance().StartUnixSocketListen();
     VpnManager::GetInstance().StartVpnInterfaceFdListen();
 
-    auto result = VpnManager::GetInstance().CreateVpnInterface();
+    auto result = VpnManager::GetInstance().CreateVpnInterface(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
-    VpnManager::GetInstance().DestroyVpnInterface();
+    VpnManager::GetInstance().DestroyVpnInterface(TUN_CARD_NAME);
 
     std::string ifName = "";
     int32_t testNumber = 0;
@@ -69,10 +70,10 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     result = VpnManager::GetInstance().SetVpnAddress(ifName, tunAddr, testNumber);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 
-    result = VpnManager::GetInstance().SetVpnUp();
+    result = VpnManager::GetInstance().SetVpnUp(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
-    result = VpnManager::GetInstance().SetVpnDown();
+    result = VpnManager::GetInstance().SetVpnDown(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     ifreq ifr;
@@ -87,7 +88,7 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
 HWTEST_F(VpnManagerTest, VpnManagerBranchTest002, TestSize.Level1)
 {
     VpnManager::GetInstance().tunFd_ = 1;
-    auto ret = VpnManager::GetInstance().CreateVpnInterface();
+    auto ret = VpnManager::GetInstance().CreateVpnInterface(TUN_CARD_NAME);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -117,7 +118,7 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest006, TestSize.Level1)
 {
     VpnManager::GetInstance().net4Sock_ = -1;
     VpnManager::GetInstance().net6Sock_ = -1;
-    auto ret = VpnManager::GetInstance().SetVpnUp();
+    auto ret = VpnManager::GetInstance().SetVpnUp(TUN_CARD_NAME);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -125,7 +126,7 @@ HWTEST_F(VpnManagerTest, VpnManagerBranchTest007, TestSize.Level1)
 {
     VpnManager::GetInstance().net4Sock_ = -1;
     VpnManager::GetInstance().net6Sock_ = -1;
-    auto ret = VpnManager::GetInstance().SetVpnDown();
+    auto ret = VpnManager::GetInstance().SetVpnDown(TUN_CARD_NAME);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -134,7 +135,7 @@ HWTEST_F(VpnManagerTest, CreateVpnInterfaceTest001, TestSize.Level1)
     VpnManager vpnmanager;
     vpnmanager.tunFd_ = 1;
     vpnmanager.listeningFlag_ = 1;
-    auto result = vpnmanager.CreateVpnInterface();
+    auto result = vpnmanager.CreateVpnInterface(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -193,7 +194,7 @@ HWTEST_F(VpnManagerTest, SetVpnUpTest001, TestSize.Level1)
     VpnManager vpnmanager;
     vpnmanager.net4Sock_ = -1;
     vpnmanager.net6Sock_ = -1;
-    auto result = vpnmanager.SetVpnUp();
+    auto result = vpnmanager.SetVpnUp(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
@@ -202,7 +203,7 @@ HWTEST_F(VpnManagerTest, SetVpnDownTest001, TestSize.Level1)
     VpnManager vpnmanager;
     vpnmanager.net4Sock_ = -1;
     vpnmanager.net6Sock_ = -1;
-    auto result = vpnmanager.SetVpnDown();
+    auto result = vpnmanager.SetVpnDown(TUN_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 

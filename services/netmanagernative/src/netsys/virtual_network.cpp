@@ -34,6 +34,14 @@ bool VirtualNetwork::GetHasDns() const
     return hasDns_;
 }
 
+#ifdef SUPPORT_SYSVPN
+int32_t VirtualNetwork::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+{
+    NETNATIVE_LOGI("VirtualNetwork::UpdateNetworkIpAddressMark add %{public}d", add);
+    return NETMANAGER_SUCCESS;
+}
+#endif // SUPPORT_SYSVPN
+
 int32_t VirtualNetwork::AddUids(const std::vector<UidRange> &uidVec)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -74,7 +82,7 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    if (VpnManager::GetInstance().CreateVpnInterface()) {
+	if (VpnManager::GetInstance().CreateVpnInterface(interfaceName)) {
         NETNATIVE_LOGE("create vpn interface error");
         return NETMANAGER_ERROR;
     }
@@ -102,7 +110,7 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    VpnManager::GetInstance().DestroyVpnInterface();
+    VpnManager::GetInstance().DestroyVpnInterface(interfaceName);
 
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);

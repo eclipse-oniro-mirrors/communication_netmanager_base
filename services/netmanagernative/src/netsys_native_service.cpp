@@ -1148,19 +1148,27 @@ int32_t NetsysNativeService::SetNicTrafficAllowed(const std::vector<std::string>
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
     NETNATIVE_LOGI("ProcessVpnStage stage %{public}d", stage);
     if (SystemVpnWrapper::GetInstance() == nullptr) {
         NETNATIVE_LOGE("ProcessVpnStage SystemVpnWrapper is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    int32_t ret = SystemVpnWrapper::GetInstance()->Update(stage);
+    int32_t ret = SystemVpnWrapper::GetInstance()->Update(stage, message);
     if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("ProcessVpnStage failed");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeService::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+{
+    NETNATIVE_LOGI("UpdateNetworkIpAddressMark netId %{public}d", netId);
+    int32_t result = netsysService_->UpdateNetworkIpAddressMark(netId, addr, add);
+    NETNATIVE_LOG_D("UpdateNetworkIpAddressMark out.");
+    return result;
 }
 #endif // SUPPORT_SYSVPN
 

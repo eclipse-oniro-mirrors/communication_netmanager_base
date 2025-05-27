@@ -41,10 +41,10 @@ public:
      * @param stage one of the SysVpnStageCode
      * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
-    int32_t Update(SysVpnStageCode stage);
+    int32_t Update(SysVpnStageCode stage, const std::string &message = "");
 
 private:
-    void ExecuteUpdate(SysVpnStageCode stage);
+    void ExecuteUpdate(SysVpnStageCode stage, const std::string &message = "");
 
 private:
     static constexpr const char *IPSEC_CMD_PATH = "/system/bin/ipsec";

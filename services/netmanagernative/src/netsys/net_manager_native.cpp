@@ -627,5 +627,11 @@ int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
 {
     return dnsManager_->SetUserDefinedServerFlag(netId, flag);
 }
+#ifdef SUPPORT_SYSVPN
+int32_t NetManagerNative::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+{
+    return connManager_->UpdateNetworkIpAddressMark(netId, addr, add);
+}
+#endif // SUPPORT_SYSVPN
 } // namespace nmd
 } // namespace OHOS

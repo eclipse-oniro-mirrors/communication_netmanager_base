@@ -35,7 +35,7 @@ SystemVpnWrapper::~SystemVpnWrapper()
     vpnFfrtQueue_.reset();
 }
 
-void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
+void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &message)
 {
     NETNATIVE_LOGI("run ExecuteUpdate stage %{public}d", stage);
     std::string param = std::string(IPSEC_CMD_PATH) + " ";
@@ -44,7 +44,7 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
             param.append(VPN_STAGE_RESTART);
             break;
         case SysVpnStageCode::VPN_STAGE_UP_HOME:
-            param.append(VPN_STAGE_UP_HOME);
+            param.append(VPN_STAGE_UP_HOME).append(message);
             break;
         case SysVpnStageCode::VPN_STAGE_SWANCTL_LOAD:
             param.append(VPN_STAGE_SWANCTL_LOAD).append(SWAN_CTL_FILE);
@@ -53,10 +53,10 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
             param.append(VPN_STAGE_L2TP_LOAD).append(L2TP_CFG).append(IPSEC_L2TP_CTL);
             break;
         case SysVpnStageCode::VPN_STAGE_L2TP_CTL:
-            param.append(VPN_STAGE_L2TP_CTL);
+            param.append(VPN_STAGE_L2TP_CTL).append(message);
             break;
         case SysVpnStageCode::VPN_STAGE_DOWN_HOME:
-            param.append(VPN_STAGE_DOWN_HOME);
+            param.append(VPN_STAGE_DOWN_HOME).append(message);
             break;
         case SysVpnStageCode::VPN_STAGE_STOP:
             param.append(VPN_STAGE_STOP);
@@ -76,7 +76,7 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage)
     }
 }
 
-int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
+int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
     if (!vpnFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
@@ -88,9 +88,9 @@ int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage)
         return NETMANAGER_ERROR;
     }
 #if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
-    ExecuteUpdate(stage);
+    ExecuteUpdate(stage, message);
 #else
-    std::function<void()> update = std::bind(&SystemVpnWrapper::ExecuteUpdate, shared_from_this(), stage);
+    std::function<void()> update = std::bind(&SystemVpnWrapper::ExecuteUpdate, shared_from_this(), stage, message);
     vpnFfrtQueue_->submit(update);
 #endif // UNITTEST_FORBID_FFRT
     return NetManagerStandard::NETMANAGER_SUCCESS;

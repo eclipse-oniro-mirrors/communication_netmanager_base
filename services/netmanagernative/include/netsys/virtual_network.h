@@ -50,6 +50,9 @@ public:
 
     int32_t AddUids(const std::vector<UidRange> &uidRanges);
     int32_t RemoveUids(const std::vector<UidRange> &uidRanges);
+#ifdef SUPPORT_SYSVPN
+    int32_t UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add);
+#endif // SUPPORT_SYSVPN
 
 private:
     std::string GetNetworkType() const override

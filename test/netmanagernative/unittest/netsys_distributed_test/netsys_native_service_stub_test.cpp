@@ -596,7 +596,12 @@ public:
     }
 
 #ifdef SUPPORT_SYSVPN
-    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message) override
+    {
+        return 0;
+    }
+
+    int32_t UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add) override
     {
         return 0;
     }

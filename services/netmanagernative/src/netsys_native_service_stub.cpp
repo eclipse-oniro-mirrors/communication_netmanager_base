@@ -215,6 +215,8 @@ void NetsysNativeServiceStub::InitVpnOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE)] =
         &NetsysNativeServiceStub::CmdProcessVpnStage;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RULE_IP_MARK)] =
+        &NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark;
 }
 #endif
 
@@ -2380,9 +2382,47 @@ int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, Message
     if (!data.ReadInt32(stage)) {
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t result = ProcessVpnStage(static_cast<NetsysNative::SysVpnStageCode>(stage));
+
+    std::string message;
+    if (!data.ReadString(message)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = ProcessVpnStage(static_cast<NetsysNative::SysVpnStageCode>(stage), message);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdProcessVpnStage result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    uint16_t netId = 0;
+    if (!data.ReadUint16(netId)) {
+        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read netId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string addr;
+    if (!data.ReadString(addr)) {
+        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read addr failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    bool add = false;
+    if (!data.ReadBool(add)) {
+        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read flag failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = UpdateNetworkIpAddressMark(netId, addr, add);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdUpdateNetworkIpAddressMark result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
