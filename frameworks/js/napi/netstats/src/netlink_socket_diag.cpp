@@ -80,6 +80,7 @@ bool NetLinkSocketDiag::CreateNetlinkSocket()
 
 void NetLinkSocketDiag::CloseNetlinkSocket()
 {
+    // avoid double close
     if (dumpSock_ >= 0) {
         close(dumpSock_);
     }

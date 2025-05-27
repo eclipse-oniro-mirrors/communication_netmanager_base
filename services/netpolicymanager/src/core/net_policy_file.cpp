@@ -360,7 +360,7 @@ uint32_t NetPolicyFile::ArbitrationWritePolicyToFile(uint32_t uid, uint32_t poli
 {
     uint32_t size = netPolicy_.uidPolicies.size();
     bool haveUidAndPolicy = false;
-    uint32_t oldPolicy;
+    uint32_t oldPolicy = NET_POLICY_NONE;
     for (uint32_t i = 0; i < size; i++) {
         auto uidTemp = CommonUtils::StrToUint(netPolicy_.uidPolicies[i].uid.c_str());
         if (uid == uidTemp) {
