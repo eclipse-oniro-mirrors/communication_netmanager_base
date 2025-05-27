@@ -45,6 +45,8 @@ config("net_native_manager_if_config") {
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
+  cflags += common_cflags
+  cflags_cc = common_cflags
 }
 
 ohos_source_set("net_native_parcel") {

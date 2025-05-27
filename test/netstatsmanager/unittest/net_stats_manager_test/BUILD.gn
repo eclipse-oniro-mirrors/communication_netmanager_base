@@ -131,7 +131,7 @@ ohos_unittest("net_stats_manager_test") {
   deps = [
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
@@ -217,7 +217,7 @@ ohos_unittest("net_stats_cached_service_test") {
   deps = [
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]

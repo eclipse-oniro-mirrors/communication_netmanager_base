@@ -144,22 +144,13 @@ ohos_shared_library("netsys_native_manager") {
 
   configs = [ ":netsys_native_manager_config" ]
 
-  cflags = [
+  cflags = common_cflags + [
     "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
-  cflags_cc = [
+  cflags_cc = common_cflags + [
+    "-fvisibility=hidden",
     "-fvisibility-inlines-hidden",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
   ldflags = [
@@ -329,17 +320,9 @@ ohos_shared_library("netsys_client") {
     "$FWMARK_CLIENT_DIR/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 
   deps = [ "$FWMARK_CLIENT_DIR:fwmark_client" ]
 

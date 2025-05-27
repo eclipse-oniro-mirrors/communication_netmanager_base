@@ -40,6 +40,8 @@ config("net_stats_manager_if_config") {
   if (defined(build_public_version) && build_public_version) {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
+  cflags += common_cflags
+  cflags_cc = common_cflags
 }
 
 ohos_source_set("net_stats_parcel") {

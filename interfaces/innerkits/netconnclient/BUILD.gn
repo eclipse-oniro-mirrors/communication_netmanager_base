@@ -38,6 +38,8 @@ config("net_conn_manager_if_config") {
   if (defined(build_public_version) && build_public_version) {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
+  cflags += common_cflags
+  cflags_cc = common_cflags
 }
 
 ohos_static_library("net_conn_parcel") {
