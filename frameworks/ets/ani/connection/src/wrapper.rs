@@ -281,42 +281,42 @@ impl ConnUnregisterHandle {
 impl ConnCallback {
     fn on_net_available(&self, handle: NetHandle) -> i32 {
         if let Some(callback) = self.on_net_available.as_ref() {
-            callback.execute_collective((handle.into(),));
+            callback.execute((handle.into(),));
         }
         0
     }
 
     fn on_net_block_status_change(&self, status: NetBlockStatusInfo) -> i32 {
         if let Some(callback) = self.on_net_block_status_change.as_ref() {
-            callback.execute_collective((status.into(),));
+            callback.execute((status.into(),));
         }
         0
     }
 
     fn on_net_capabilities_change(&self, cap: NetCapabilityInfo) -> i32 {
         if let Some(callback) = self.on_net_capabilities_change.as_ref() {
-            callback.execute_collective((cap.into(),));
+            callback.execute((cap.into(),));
         }
         0
     }
 
     fn on_net_connection_properties_change(&self, properties: NetConnectionPropertyInfo) -> i32 {
         if let Some(callback) = self.on_net_connection_properties_change.as_ref() {
-            callback.execute_collective((properties.into(),));
+            callback.execute((properties.into(),));
         }
         0
     }
 
     fn on_net_lost(&self, handle: NetHandle) -> i32 {
         if let Some(callback) = self.on_net_lost.as_ref() {
-            callback.execute_collective((handle.into(),));
+            callback.execute((handle.into(),));
         }
         0
     }
 
     fn on_net_unavailable(&self) -> i32 {
         if let Some(callback) = self.on_net_unavailable.as_ref() {
-            callback.execute_collective(());
+            callback.execute(());
         }
         0
     }
