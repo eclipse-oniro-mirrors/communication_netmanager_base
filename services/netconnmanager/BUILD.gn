@@ -162,13 +162,6 @@ ohos_shared_library("net_conn_manager") {
 
 ohos_static_library("net_conn_manager_static") {
   testonly = true
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
   use_exceptions = true
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
