@@ -127,7 +127,8 @@ void NetStatsService::OnStart()
 
 void NetStatsService::StartSysTimer()
 {
-    NETMGR_LOG_I("NetStatsService StartSysTimer()");
+    NETMGR_LOG_I("NetStatsService StartSysTimer");
+    std::lock_guard<std::mutex> lock(timerMutex_);
     if (netStatsSysTimerId_ != 0) {
         NETMGR_LOG_E("netStatsSysTimerId_ is not zero, value is %{public}" PRIu64, netStatsSysTimerId_);
         return;
@@ -146,11 +147,12 @@ void NetStatsService::StartSysTimer()
     netStatsSysTimerId_ = MiscServices::TimeServiceClient::GetInstance()->CreateTimer(netStatsSysTimer);
     uint64_t todayStartTime = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 55)) * 1000;
     MiscServices::TimeServiceClient::GetInstance()->StartTimer(netStatsSysTimerId_, todayStartTime);
-    NETMGR_LOG_I("start netStatsSysTimerId_ success. value is %{public}" PRIu64, netStatsSysTimerId_);
+    NETMGR_LOG_I("netStatsSysTimerId_ success. value is %{public}" PRIu64, netStatsSysTimerId_);
 }
 
 void NetStatsService::StopSysTimer()
 {
+    std::lock_guard<std::mutex> lock(timerMutex_);
     if (netStatsSysTimerId_ == 0) {
         NETMGR_LOG_W("netStatsSysTimerId_ is zero");
         return;
@@ -161,11 +163,24 @@ void NetStatsService::StopSysTimer()
     NETMGR_LOG_I("stop netStatsSysTimerId_ success");
 }
 
+int32_t NetStatsService::ModifySysTimer()
+{
+    std::lock_guard<std::mutex> lock(timerMutex_);
+    if (netStatsSysTimerId_ == 0) {
+        NETMGR_LOG_E("netStatsSysTimerId_ is zero");
+        return NETMANAGER_ERROR;
+    }
+    MiscServices::TimeServiceClient::GetInstance()->StopTimer(netStatsSysTimerId_);
+    uint64_t todayStartTime = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 55)) * 1000;
+    MiscServices::TimeServiceClient::GetInstance()->StartTimer(netStatsSysTimerId_, todayStartTime);
+    NETMGR_LOG_I("ModifySysTimer netStatsSysTimerId_ success. timer: %{public}" PRIu64, todayStartTime);
+    return NETMANAGER_SUCCESS;
+}
+
 void NetStatsService::OnStop()
 {
     state_ = STATE_STOPPED;
     registerToService_ = true;
-    StopSysTimer();
 }
 
 int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -217,6 +232,8 @@ void NetStatsService::RegisterCommonEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_CELLULAR_DATA_STATE_CHANGED);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     matchingSkills.AddEvent(COMMON_EVENT_STATUS);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
@@ -241,6 +258,13 @@ void NetStatsService::RegisterCommonEvent()
         }
         return true;
     });
+    RegisterCommonTelephonyEvent();
+    RegisterCommonTimeEvent();
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+}
+
+void NetStatsService::RegisterCommonTelephonyEvent()
+{
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     subscriber_->RegisterStatsCallback(
         EventFwk::CommonEventSupport::COMMON_EVENT_SIM_STATE_CHANGED, [this](const EventFwk::Want &want) {
@@ -255,7 +279,20 @@ void NetStatsService::RegisterCommonEvent()
             return CommonEventCellularDataStateChanged(slotId, dataState);
         });
 #endif // SUPPORT_TRAFFIC_STATISTIC
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+}
+
+void NetStatsService::RegisterCommonTimeEvent()
+{
+    subscriber_->RegisterStatsCallback(
+        EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED, [this](const EventFwk::Want &want) {
+            NETMGR_LOG_I("COMMON_EVENT_TIME_CHANGED");
+            return ModifySysTimer();
+        });
+    subscriber_->RegisterStatsCallback(
+        EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED, [this](const EventFwk::Want &want) -> bool {
+            NETMGR_LOG_I("COMMON_EVENT_TIMEZONE_CHANGED");
+            return ModifySysTimer();
+        });
 }
 
 void NetStatsService::InitPrivateUserId()

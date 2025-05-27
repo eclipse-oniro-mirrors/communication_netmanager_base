@@ -637,6 +637,20 @@ HWTEST_F(NetStatsServiceTest, StopSysTimerTest001, TestSize.Level1)
     EXPECT_EQ(DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_, 0);
 }
 
+/**
+ * @tc.name: ModifySysTimerTest001
+ * @tc.desc: Test NetStatsService StopSysTimer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, ModifySysTimerTest001, TestSize.Level1)
+{
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 0;
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->ModifySysTimer();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    DelayedSingleton<NetStatsService>::GetInstance()->netStatsSysTimerId_ = 1000;
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsServiceTest, OnAddSystemAbilityTest001, TestSize.Level1)
 {
     DelayedSingleton<NetStatsService>::GetInstance()->OnAddSystemAbility(TIME_SERVICE_ID, "10");
