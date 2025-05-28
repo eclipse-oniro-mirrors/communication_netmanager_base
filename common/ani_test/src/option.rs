@@ -19,7 +19,7 @@ pub fn option_bool(input: Option<bool>) -> Result<Option<bool>, BusinessError> {
 }
 
 #[ani_rs::native]
-pub fn option_byte(input: Option<u8>) -> Result<Option<u8>, BusinessError> {
+pub fn option_byte(input: Option<i8>) -> Result<Option<i8>, BusinessError> {
     Ok(input)
 }
 

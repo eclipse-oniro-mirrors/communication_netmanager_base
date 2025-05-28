@@ -13,7 +13,7 @@
 
 use ani_rs::business_error::BusinessError;
 
-#[ani_rs::ani(path = "Lani/rs/test/PrimitiveTest")]
+#[ani_rs::ani(path = "Lanirs/test/ani_test/PrimitiveTest")]
 struct PrimitiveTest {
     primitive_bool: bool,
     primitive_i8: i8,

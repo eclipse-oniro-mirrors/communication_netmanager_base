@@ -60,6 +60,20 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
     let mut input = quote! {};
     for i in item.sig.inputs.iter() {
         if let syn::FnArg::Typed(pat) = i {
+            let mut de = Option::<String>::None;
+            match &(*pat.ty) {
+                syn::Type::Path(p) => {
+                    let ident = p.path.segments.iter().next().unwrap().ident.to_string();
+                    match ident.as_str() {
+                        "i8" | "i16" | "i32" | "i64" | "f32" | "f64" | "bool" => {
+                            de = Some(ident);
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {}
+            };
+
             if let syn::Pat::Ident(pat) = &*pat.pat {
                 if pat.ident.to_string() == "this" {
                     block = quote! {
@@ -86,17 +100,69 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                 } else {
                     let pat = pat.ident.clone();
-                    block = quote! {
-                        #block
-                        let #pat = env.deserialize(#pat).unwrap();
-                    };
+                    if de.is_none() {
+                        block = quote! {
+                            #block
+                            let #pat = env.deserialize(#pat).unwrap();
+                        };
+                    }
                     input = quote! {
                         #input
                         #pat,
                     };
-                    sig = quote! {
-                        #sig
-                        #pat: ani_rs::objects::AniObject<'local>,
+
+                    match de {
+                        Some(de) => match de.as_str() {
+                            "i8" => {
+                                sig = quote! {
+                                    #sig
+                                    #pat: i8,
+                                };
+                            }
+                            "i16" => {
+                                sig = quote! {
+                                    #sig
+                                    #pat: i16,
+                                };
+                            }
+                            "i32" => {
+                                sig = quote! {
+                                    #sig
+                                    #pat: i32,
+                                };
+                            }
+                            "i64" => {
+                                sig = quote! {
+                                    #sig
+                                    #pat: i64,
+                                };
+                            }
+                            "f32" => {
+                                sig = quote! {
+                                    #sig,
+                                    #pat: f32,
+                                };
+                            }
+                            "f64" => {
+                                sig = quote! {
+                                    #sig,
+                                    #pat: f64,
+                                };
+                            }
+                            "bool" => {
+                                sig = quote! {
+                                    #sig,
+                                    #pat: bool,
+                                };
+                            }
+                            _ => unimplemented!(),
+                        },
+                        None => {
+                            sig = quote! {
+                                #sig
+                                #pat: ani_rs::objects::AniObject<'local>,
+                            }
+                        }
                     }
                 }
             }
@@ -112,8 +178,24 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
 
     let block = match out_arg {
         Some(out) => match out.as_str() {
-            "i32" | "i64" | "f32" | "f64" | "bool" | "AniRef" => {
+            "i8" | "i16" | "i32" | "i64" | "f32" | "f64" | "bool" | "AniRef" => {
                 let default = match out.as_str() {
+                    "i8" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> i8
+                        };
+                        quote! {
+                            i8::default()
+                        }
+                    }
+                    "i16" => {
+                        sig = quote! {
+                            fn #ident<'local>(#sig) -> i16
+                        };
+                        quote! {
+                            i16::default()
+                        }
+                    }
                     "i32" => {
                         sig = quote! {
                             fn #ident<'local>(#sig) -> i32
