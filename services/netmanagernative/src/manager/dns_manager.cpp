@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace nmd {
 using namespace OHOS::NetManagerStandard::CommonUtils;
-
+constexpr const char *IPV6_DEFAULT_GATEWAY = "::";
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
@@ -63,11 +63,9 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     if (pos != std::string::npos) {
         destination = destination.substr(0, pos);
     }
-    if (!(IsValidIPV6(destination) && (IsValidIPV6(nextHop) || nextHop.empty()))) {
-        NETNATIVE_LOGE("check IsValidIPV6 faild");
-        return;
+    if (destination == IPV6_DEFAULT_GATEWAY && (IsValidIPV6(nextHop) || nextHop.empty())) {
+        DnsParamCache::GetInstance().EnableIpv6(netId);
     }
-    DnsParamCache::GetInstance().EnableIpv6(netId);
 }
 
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
