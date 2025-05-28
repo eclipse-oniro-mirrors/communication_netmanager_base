@@ -65,17 +65,9 @@ ohos_shared_library("netsys_bpf_utils") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetSysBpf\"",

@@ -37,17 +37,8 @@ config("net_policy_manager_if_config") {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
 
-  cflags += [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags += common_cflags
+  cflags_cc = common_cflags
 }
 
 ohos_source_set("net_policy_parcel") {

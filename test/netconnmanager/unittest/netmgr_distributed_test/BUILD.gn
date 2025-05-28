@@ -102,6 +102,10 @@ ohos_unittest("netmgr_distributed_test") {
     defines += [ "SYS_FUNC" ]
   }
 
+  configs = [
+    "$NETMANAGER_BASE_ROOT/test/netconnmanager/mock:UNITTEST_MOCK",
+  ]
+
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

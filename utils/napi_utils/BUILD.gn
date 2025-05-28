@@ -31,17 +31,9 @@ config("napi_utils_public_config") {
     "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 }
 
 ohos_shared_library("napi_utils") {

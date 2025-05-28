@@ -75,17 +75,9 @@ config("net_service_common_config") {
   # header file path
   include_dirs = [ "$INNERKITS_ROOT/netconnclient/include/proxy" ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 }
 
 ohos_shared_library("net_service_common") {

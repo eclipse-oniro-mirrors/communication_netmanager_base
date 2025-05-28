@@ -58,7 +58,6 @@ ohos_unittest("networkshare_manager_test") {
     "$NETMANAGER_EXT_ROOT/services/networksharemanager/include/stub",
     "$NETMANAGER_EXT_ROOT/test/netmanager_ext_mock_test",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
-    "$THIRD_PARTY_ROOT/openssl/include",
     "$USB_MANAGER_ROOT/utils/native/include",
     "$USB_MANAGER_ROOT/services/zidl/include",
   ]
@@ -66,10 +65,6 @@ ohos_unittest("networkshare_manager_test") {
   defines = []
   if (communication_wifi_switch_enable) {
     defines += [ "WIFI_MODOULE" ]
-    include_dirs += [
-      "$WIFI_MANAGER_ROOT/interfaces/kits/c",
-      "$WIFI_MANAGER_ROOT/frameworks/native/interfaces",
-    ]
   }
   if (communication_bluetooth_switch_enable) {
     defines += [ "BLUETOOTH_MODOULE" ]
@@ -81,7 +76,7 @@ ohos_unittest("networkshare_manager_test") {
     "$NETMANAGER_EXT_ROOT/services/networksharemanager:net_tether_manager_static",
     "$NETMANAGER_EXT_ROOT/utils:net_event_report",
     "$NETMANAGER_EXT_ROOT/utils:net_manager_ext_common",
-    "$THIRD_PARTY_ROOT/googletest:gmock_main",
+    "googletest:gmock_main",
   ]
 
   external_deps = [
