@@ -15,6 +15,7 @@
 
 #include <pthread.h>
 #include <thread>
+#include <charconv>
 
 #include "dns_resolv_listen.h"
 #include "netmanager_base_common_utils.h"
@@ -60,10 +61,18 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)
 {
     auto pos = destination.find("/");
-    if (pos != std::string::npos) {
-        destination = destination.substr(0, pos);
+    if (pos == std::string::npos) {
+        return;
     }
-    if (destination == IPV6_DEFAULT_GATEWAY && (IsValidIPV6(nextHop) || nextHop.empty())) {
+    std::string ip = destination.substr(0, pos);
+    std::string prefixStr = destination.substr(pos + 1);
+    int prefix = -1;
+    auto result = std::from_chars(prefixStr.data(), prefixStr.data() + prefixStr.size(), prefix);
+    if (result.ec != std::errc()) {
+        return;
+    }
+
+    if ((IsValidIPV6(ip) && prefix == 0) && (IsValidIPV6(nextHop) || nextHop.empty())) {
         DnsParamCache::GetInstance().EnableIpv6(netId);
     }
 }
