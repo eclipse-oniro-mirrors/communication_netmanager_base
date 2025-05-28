@@ -26,12 +26,15 @@ pub mod objects;
 mod ani;
 pub use ani::AniDe;
 pub use ani::AniSer;
+
 mod iterator;
+
 pub mod signature;
 
 mod global;
 mod primitive;
-pub mod typed_array;
 
 pub mod business_error;
+pub mod typed_array;
+
 mod macros;

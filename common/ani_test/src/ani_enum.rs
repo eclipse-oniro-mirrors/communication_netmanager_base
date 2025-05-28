@@ -13,14 +13,14 @@
 
 use ani_rs::business_error::BusinessError;
 
-#[ani_rs::ani(path = "Lani/rs/test/EnumNumber")]
+#[ani_rs::ani(path = "Lanirs/test/ani_test/EnumNumber")]
 enum EnumNumber {
     One = 1,
     Two = 2,
     Three = 3,
 }
 
-#[ani_rs::ani(path = "Lani/rs/test/EnumString")]
+#[ani_rs::ani(path = "Lanirs/test/ani_test/EnumString")]
 enum EnumString {
     One = 1,
     Two = 2,
