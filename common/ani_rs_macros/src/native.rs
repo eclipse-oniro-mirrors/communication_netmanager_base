@@ -65,7 +65,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                 syn::Type::Path(p) => {
                     let ident = p.path.segments.iter().next().unwrap().ident.to_string();
                     match ident.as_str() {
-                        "i8" | "i16" | "i32" | "i64" | "f32" | "f64" | "bool" => {
+                        "i8" | "i16" | "i32" | "i64" | "f32" | "f64" | "bool" | "AniRef" => {
                             de = Some(ident);
                         }
                         _ => {}
@@ -139,20 +139,26 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                             }
                             "f32" => {
                                 sig = quote! {
-                                    #sig,
+                                    #sig
                                     #pat: f32,
                                 };
                             }
                             "f64" => {
                                 sig = quote! {
-                                    #sig,
+                                    #sig
                                     #pat: f64,
                                 };
                             }
                             "bool" => {
                                 sig = quote! {
-                                    #sig,
+                                    #sig
                                     #pat: bool,
+                                };
+                            }
+                            "AniRef" => {
+                                sig = quote! {
+                                    #sig
+                                    #pat: ani_rs::objects::AniRef<'local>,
                                 };
                             }
                             _ => unimplemented!(),
