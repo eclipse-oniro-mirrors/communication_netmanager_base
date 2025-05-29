@@ -23,7 +23,10 @@ namespace OHOS {
 namespace NetManagerStandard {
 
 #undef LOG_TAG
-#define LOG_TAG "NETMANAGER_BASE"
+#ifndef NETMGR_LOG_TAG
+#define LOG_TAG "NetMgrSubSystem"
+#else
+#define LOG_TAG NETMGR_LOG_TAG
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD0015B0
 
