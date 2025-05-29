@@ -271,25 +271,25 @@ private:
 
     void ClearBpfFirewallRules(NetFirewallRuleDirection direction);
 
-    void WriteSrcIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteSrcIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteSrcIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteSrcIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteDstIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteDstIpv4BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteDstIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteDstIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteDstPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteDstPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteAppUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteAppUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteUidBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
-    void WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
+    int32_t WriteActionBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     int32_t SetBpfFirewallRules(const std::vector<sptr<NetFirewallIpRule>> &ruleList,
         NetFirewallRuleDirection direction);
