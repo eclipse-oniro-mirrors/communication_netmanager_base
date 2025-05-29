@@ -83,5 +83,25 @@ HWTEST_F(VirtualNetWorkTest, RemoveInterface001, TestSize.Level1)
     auto result = instance_->RemoveInterface(iface);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+#ifdef SUPPORT_SYSVPN
+HWTEST_F(VirtualNetWorkTest, UpdateNetworkIpAddressMark001, TestSize.Level1)
+{
+    const std::string ipAddr = "172.0.0.1";
+    int32_t result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    result = instance_->UpdateNetworkIpAddressMark(ipAddr, false);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(VirtualNetWorkTest, UpdateNetworkIpAddressMark002, TestSize.Level1)
+{
+    const std::string ipAddr = "172.0.1";
+    int32_t result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+#endif // SUPPORT_SYSVPN
 } // namespace nmd
 } // namespace OHOS

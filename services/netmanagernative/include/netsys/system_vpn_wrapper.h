@@ -45,16 +45,17 @@ public:
 
 private:
     void ExecuteUpdate(SysVpnStageCode stage, const std::string &message = "");
+    bool PrepareUpdate(SysVpnStageCode stage, const std::string &message = "");
 
 private:
     static constexpr const char *IPSEC_CMD_PATH = "/system/bin/ipsec";
     const std::string VPN_STAGE_RESTART = "restart";
     const std::string VPN_STAGE_SWANCTL_LOAD = "swanctl --load-all --file ";
-    const std::string VPN_STAGE_UP_HOME = "up home";
-    const std::string VPN_STAGE_DOWN_HOME = "down home";
+    const std::string VPN_STAGE_UP_HOME = "up ";
+    const std::string VPN_STAGE_DOWN_HOME = "down ";
     const std::string VPN_STAGE_STOP = "stop";
     const std::string VPN_STAGE_L2TP_LOAD = "xl2tpd -c ";
-    const std::string VPN_STAGE_L2TP_CTL = "l2tpctl";
+    const std::string VPN_STAGE_L2TP_CTL = "l2tpctl ";
     const std::string IPSEC_L2TP_CTL = " -C " IPSEC_PIDDIR "/l2tp-control";
     const std::string SWAN_CTL_FILE = IPSEC_PIDDIR "/swanctl.conf";
     const std::string L2TP_CFG = IPSEC_PIDDIR "/xl2tpd.conf";
@@ -63,6 +64,8 @@ private:
     const std::string OPENVPN_CONFIG_FILE = IPSEC_PIDDIR "/config.ovpn";
     const std::string VPN_STAGE_OPENVPN_RESTART = "restartopenvpn --config ";
     const std::string VPN_STAGE_OPENVPN_STOP = "stopopenvpn";
+    const std::string VPN_STAGE_L2TP_STOP = "stopl2tp ";
+    const std::string VPN_STAGE_SET_L2TP_CONF = "setl2tp ";
 };
 } // namespace nmd
 } // namespace OHOS

@@ -74,6 +74,27 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
  * @return Returns 0, get route property successfully, otherwise it will fail
  */
 int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
+
+#ifdef SUPPORT_SYSVPN
+/**
+ * Create vpn Interface by netlink
+ *
+ * @param name ifname
+ * @param ifId ifid
+ * @param mtu mtu
+ * @param phys phy interface
+ * @return Returns 0, create vpn interface successfully, otherwise it will fail
+ */
+int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifId, const char *phys, uint32_t mtu);
+
+/**
+ * Delete Vpn Interface by netlink
+ *
+ * @param name ifname
+ * @return Returns 0, delete vpn interface successfully, otherwise it will fail
+ */
+int32_t DeleteVpnIfByNetlink(const char *name);
+#endif
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H

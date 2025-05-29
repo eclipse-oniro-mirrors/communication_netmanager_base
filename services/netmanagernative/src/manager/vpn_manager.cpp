@@ -44,7 +44,7 @@ constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t MAX_UNIX_SOCKET_CLIENT = 5;
 } // namespace
 
-int32_t VpnManager::CreateVpnInterface(const std::string &ifName)
+int32_t VpnManager::CreateVpnInterface()
 {
     if (tunFd_ != 0) {
         StartVpnInterfaceFdListen();
@@ -52,7 +52,7 @@ int32_t VpnManager::CreateVpnInterface(const std::string &ifName)
     }
 
     ifreq ifr = {};
-    if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
+    if (InitIfreq(ifr, TUN_CARD_NAME) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
 
@@ -85,14 +85,14 @@ int32_t VpnManager::CreateVpnInterface(const std::string &ifName)
 
     NETNATIVE_LOGI("open virtual device successfully, [%{public}d]", tunfd);
     tunFd_ = tunfd;
-    SetVpnUp(ifName);
+    SetVpnUp();
     StartVpnInterfaceFdListen();
     return NETMANAGER_SUCCESS;
 }
 
-void VpnManager::DestroyVpnInterface(const std::string &ifName)
+void VpnManager::DestroyVpnInterface()
 {
-    SetVpnDown(ifName);
+    SetVpnDown();
     if (net4Sock_ != 0) {
         close(net4Sock_);
         net4Sock_ = 0;
@@ -198,10 +198,10 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
     return NETMANAGER_SUCCESS;
 }
 
-int32_t VpnManager::SetVpnUp(const std::string &ifName)
+int32_t VpnManager::SetVpnUp()
 {
     ifreq ifr = {};
-    if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
+    if (InitIfreq(ifr, TUN_CARD_NAME) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
 
@@ -217,10 +217,10 @@ int32_t VpnManager::SetVpnUp(const std::string &ifName)
     }
 }
 
-int32_t VpnManager::SetVpnDown(const std::string &ifName)
+int32_t VpnManager::SetVpnDown()
 {
     ifreq ifr = {};
-    if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
+    if (InitIfreq(ifr, TUN_CARD_NAME) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
 
@@ -236,13 +236,13 @@ int32_t VpnManager::SetVpnDown(const std::string &ifName)
     }
 }
 
-int32_t VpnManager::InitIfreq(ifreq &ifr, const std::string &ifName)
+int32_t VpnManager::InitIfreq(ifreq &ifr, const std::string &cardName)
 {
     if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
         NETNATIVE_LOGE("memset_s ifr failed!");
         return NETMANAGER_ERROR;
     }
-    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), strlen(ifName.c_str())) != EOK) {
+    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, cardName.c_str(), strlen(cardName.c_str())) != EOK) {
         NETNATIVE_LOGE("strcpy_s ifr name fail");
         return NETMANAGER_ERROR;
     }

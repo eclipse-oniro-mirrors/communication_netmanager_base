@@ -19,6 +19,7 @@
 #include "netnative_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include "net_manager_constants.h"
+#include "multi_vpn_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -35,6 +36,25 @@ SystemVpnWrapper::~SystemVpnWrapper()
     vpnFfrtQueue_.reset();
 }
 
+bool SystemVpnWrapper::PrepareUpdate(SysVpnStageCode stage, const std::string &message)
+{
+    NETNATIVE_LOGI("run ExtUpdateMessage stage %{public}d", stage);
+    switch (stage) {
+        case SysVpnStageCode::VPN_STAGE_CREATE_PPP_FD:
+            MultiVpnManager::GetInstance().CreatePppFd(message);
+            break;
+        case SysVpnStageCode::VPN_STAGE_SET_XFRM_PHY_IFNAME:
+            MultiVpnManager::GetInstance().SetXfrmPhyIfName(message);
+            break;
+        case SysVpnStageCode::VPN_STAGE_SET_VPN_REMOTE_ADDRESS:
+            MultiVpnManager::GetInstance().SetVpnRemoteAddress(message);
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
 void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &message)
 {
     NETNATIVE_LOGI("run ExecuteUpdate stage %{public}d", stage);
@@ -44,7 +64,7 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &m
             param.append(VPN_STAGE_RESTART);
             break;
         case SysVpnStageCode::VPN_STAGE_UP_HOME:
-            param.append(VPN_STAGE_UP_HOME).append(message);
+            param.append(VPN_STAGE_UP_HOME).append(message.empty() ? "home" : message);
             break;
         case SysVpnStageCode::VPN_STAGE_SWANCTL_LOAD:
             param.append(VPN_STAGE_SWANCTL_LOAD).append(SWAN_CTL_FILE);
@@ -53,10 +73,10 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &m
             param.append(VPN_STAGE_L2TP_LOAD).append(L2TP_CFG).append(IPSEC_L2TP_CTL);
             break;
         case SysVpnStageCode::VPN_STAGE_L2TP_CTL:
-            param.append(VPN_STAGE_L2TP_CTL).append(message);
+            param.append(VPN_STAGE_L2TP_CTL).append(message.empty() ? "myVPN" : message);
             break;
         case SysVpnStageCode::VPN_STAGE_DOWN_HOME:
-            param.append(VPN_STAGE_DOWN_HOME).append(message);
+            param.append(VPN_STAGE_DOWN_HOME).append(message.empty() ? "home" : message);
             break;
         case SysVpnStageCode::VPN_STAGE_STOP:
             param.append(VPN_STAGE_STOP);
@@ -66,6 +86,12 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &m
             break;
         case SysVpnStageCode::VPN_STAGE_OPENVPN_STOP:
             param.append(VPN_STAGE_OPENVPN_STOP);
+            break;
+        case SysVpnStageCode::VPN_STAGE_L2TP_STOP:
+            param.append(VPN_STAGE_L2TP_STOP).append(message);
+            break;
+        case SysVpnStageCode::VPN_STAGE_SET_L2TP_CONF:
+            param.append(VPN_STAGE_SET_L2TP_CONF).append(message);
             break;
         default:
             NETNATIVE_LOGE("run ExecuteUpdate failed, unknown stage %{public}d", stage);
@@ -78,6 +104,9 @@ void SystemVpnWrapper::ExecuteUpdate(SysVpnStageCode stage, const std::string &m
 
 int32_t SystemVpnWrapper::Update(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
+    if (PrepareUpdate(stage, message)) {
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
     if (!vpnFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
         return NETMANAGER_ERROR;

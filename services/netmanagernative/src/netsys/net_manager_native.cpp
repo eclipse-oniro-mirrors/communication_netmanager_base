@@ -26,6 +26,9 @@
 #include "vpn_manager.h"
 #include "vnic_manager.h"
 #include "distributed_manager.h"
+#ifdef SUPPORT_SYSVPN
+#include "multi_vpn_manager.h"
+#endif
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -157,6 +160,12 @@ int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string inte
 
 int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
+#ifdef SUPPORT_SYSVPN
+    if ((strncmp(ifName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
+        (strncmp(ifName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        return MultiVpnManager::GetInstance().SetVpnAddress(ifName, addrString, prefixLength);
+    }
+#endif
     if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
         return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
     }
@@ -236,6 +245,12 @@ int32_t NetManagerNative::GetInterfaceMtu(std::string ifName)
 
 int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
 {
+#ifdef SUPPORT_SYSVPN
+    if ((strncmp(ifName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
+        (strncmp(ifName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        return MultiVpnManager::GetInstance().SetVpnMtu(ifName, mtuValue);
+    }
+#endif
     if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
         return InterfaceManager::SetMtu(ifName.c_str(), std::to_string(mtuValue).c_str());
     }

@@ -21,6 +21,9 @@
 #include <netinet/in.h>
 #include <cstdint>
 
+#ifdef SUPPORT_SYSVPN
+#include "iptables_wrapper.h"
+#endif // SUPPORT_SYSVPN
 #include "netlink_msg.h"
 #include "network_permission.h"
 #include "uid_range.h"
@@ -311,9 +314,24 @@ public:
      */
     static int32_t DisableDistributedNet(bool isServer);
 
+#ifdef SUPPORT_SYSVPN
+    /**
+     * update output package mark
+     *
+     * @param netId Network number
+     * @param addr Network src addr
+     * @param add true add, false remove
+     * @return Returns 0, add output package mark successfully, otherwise it will fail
+     */
+    static int32_t UpdateOutcomingPacketMark(uint16_t netId, const std::string &addr, bool add);
+#endif // SUPPORT_SYSVPN
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
+#ifdef SUPPORT_SYSVPN
+    static int32_t InitOutcomingPacketMark();
+#endif // SUPPORT_SYSVPN
     static int32_t Init();
     static int32_t ClearRules();
     static int32_t ClearRoutes(const std::string &interfaceName, int32_t netId = 0);

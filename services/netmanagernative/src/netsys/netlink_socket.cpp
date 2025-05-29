@@ -26,13 +26,19 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-
+#ifdef SUPPORT_SYSVPN
+#include <net/if.h>
+#endif
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
 #include "netlink_socket.h"
 namespace OHOS {
 namespace nmd {
+#ifdef SUPPORT_SYSVPN
+constexpr const char* XFRM_TYPE_NAME = "xfrm";
+#endif
+
 int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
 {
     if (msg == nullptr) {
@@ -81,6 +87,95 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
     close(kernelSocket);
     return msgState;
 }
+
+#ifdef SUPPORT_SYSVPN
+static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, size_t len) {
+    struct rtattr *attr = reinterpret_cast<struct rtattr*>(
+        reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
+    attr->rta_type = type;
+    attr->rta_len = RTA_LENGTH(len);
+    memcpy(RTA_DATA(attr), data, len);
+    msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(attr->rta_len);
+}
+
+static struct rtattr *AddNestedStart(struct nlmsghdr *msghdr, int type) {
+    struct rtattr *nested = reinterpret_cast<struct rtattr*>(
+        reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
+    nested->rta_type = type;
+    nested->rta_len = RTA_LENGTH(0);
+    msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(nested->rta_len);
+    return nested;
+}
+
+static void AddNestedEnd(struct nlmsghdr *msghdr, struct rtattr *nested) {
+    nested->rta_len = reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len) -
+                       reinterpret_cast<char*>(nested);
+}
+
+int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifId, const char *phys, uint32_t mtu = 0)
+{
+    NETNATIVE_LOGI("CreateVpnIfByNetlink %{public}s, %{public}d, %{public}d", name, ifId, mtu);
+    uint32_t ifindex = 0;
+    if (phys) {
+        ifindex = if_nametoindex(phys);
+        if (!ifindex) {
+            NETNATIVE_LOGE("physical interface '%{public}s' not found", phys);
+            return -1;
+        }
+    }
+    std::unique_ptr<char[]> msghdrBuf = std::make_unique<char[]>(NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    struct nlmsghdr *msghdr = reinterpret_cast<struct nlmsghdr *>(msghdrBuf.get());
+    errno_t result = memset_s(msghdr, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN), 0, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    if (result != 0) {
+        NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
+    }
+    rtmsg msg;
+    msg.rtm_family = AF_INET;
+    int32_t copeResult = memcpy_s(NLMSG_DATA(msghdr), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    if (copeResult != 0) {
+        NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
+    }
+    msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | NLM_F_CREATE | NLM_F_EXCL;
+    msghdr->nlmsg_type = RTM_NEWLINK;
+    msghdr->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ifinfomsg)));
+
+    AddAttribute(msghdr, IFLA_IFNAME, name, strlen(name) + 1);
+
+    if (mtu > 0) {
+        AddAttribute(msghdr, IFLA_MTU, &mtu, sizeof(mtu));
+    }
+    struct rtattr *linkinfo = AddNestedStart(msghdr, IFLA_LINKINFO);
+    AddAttribute(msghdr, IFLA_INFO_KIND, XFRM_TYPE_NAME, strlen(XFRM_TYPE_NAME) + 1);
+    struct rtattr *info_data = AddNestedStart(msghdr, IFLA_INFO_DATA);
+    AddAttribute(msghdr, IFLA_XFRM_IF_ID, &ifId, sizeof(ifId));
+    AddAttribute(msghdr, IFLA_XFRM_LINK, &ifindex, sizeof(ifindex));
+
+    AddNestedEnd(msghdr, info_data);
+    AddNestedEnd(msghdr, linkinfo);
+    return SendNetlinkMsgToKernel(msghdr);
+}
+
+int32_t DeleteVpnIfByNetlink(const char *name)
+{
+    std::unique_ptr<char[]> msghdrBuf = std::make_unique<char[]>(NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    struct nlmsghdr *msghdr = reinterpret_cast<struct nlmsghdr *>(msghdrBuf.get());
+    errno_t result = memset_s(msghdr, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN), 0, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    if (result != 0) {
+        NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
+    }
+    rtmsg msg;
+    msg.rtm_family = AF_INET;
+    int32_t copeResult = memcpy_s(NLMSG_DATA(msghdr), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    if (copeResult != 0) {
+        NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
+    }
+    msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
+    msghdr->nlmsg_type = RTM_DELLINK;
+    msghdr->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ifinfomsg)));
+    AddAttribute(msghdr, IFLA_IFNAME, name, strlen(name) + 1);
+    return SendNetlinkMsgToKernel(msghdr);
+}
+#endif
 
 int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
 {

@@ -494,7 +494,7 @@ int32_t ConnManager::UpdateNetworkIpAddressMark(uint16_t netId, const std::strin
         NETNATIVE_LOGE("cannot add uids to non-virtual network with netId:%{public}d", netId);
         return NETMANAGER_ERROR;
     }
-    return static_cast<VirtualNetwork *>(netsysNetwork.get())->UpdateNetworkIpAddressMark(netId, addr, add);
+    return static_cast<VirtualNetwork *>(netsysNetwork.get())->UpdateNetworkIpAddressMark(addr, add);
 }
 #endif  // SUPPORT_SYSVPN
 
