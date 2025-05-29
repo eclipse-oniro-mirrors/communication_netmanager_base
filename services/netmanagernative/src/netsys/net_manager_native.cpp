@@ -165,7 +165,7 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
         (strncmp(ifName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
         return MultiVpnManager::GetInstance().SetVpnAddress(ifName, addrString, prefixLength);
     }
-#endif
+#endif // SUPPORT_SYSVPN
     if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
         return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
     }

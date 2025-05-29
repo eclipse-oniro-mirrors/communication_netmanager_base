@@ -97,6 +97,7 @@ ohos_unittest("netsys_native_manager_test") {
 
   if (netmanager_base_enable_feature_sysvpn) {
     defines += [ "SUPPORT_SYSVPN" ]
+    sources += [ "multi_vpn_manager_test.cpp" ]
   }
 
   if (netmanager_base_enable_feature_wearable_distributed_net) {

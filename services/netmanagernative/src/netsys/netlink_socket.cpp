@@ -117,9 +117,9 @@ static void AddNestedEnd(struct nlmsghdr *msghdr, struct rtattr *nested)
                        reinterpret_cast<char*>(nested);
 }
 
-int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifId, const char *phys, uint32_t mtu = 0)
+int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifNameId, const char *phys, uint32_t mtu = 0)
 {
-    NETNATIVE_LOGI("CreateVpnIfByNetlink %{public}s, %{public}d, %{public}d", name, ifId, mtu);
+    NETNATIVE_LOGI("CreateVpnIfByNetlink %{public}s, %{public}d, %{public}d", name, ifNameId, mtu);
     uint32_t ifindex = 0;
     if (phys) {
         ifindex = if_nametoindex(phys);
@@ -152,7 +152,7 @@ int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifId, const char *phys, 
     struct rtattr *linkinfo = AddNestedStart(msghdr, IFLA_LINKINFO);
     AddAttribute(msghdr, IFLA_INFO_KIND, XFRM_TYPE_NAME, strlen(XFRM_TYPE_NAME) + 1);
     struct rtattr *info_data = AddNestedStart(msghdr, IFLA_INFO_DATA);
-    AddAttribute(msghdr, IFLA_XFRM_IF_ID, &ifId, sizeof(ifId));
+    AddAttribute(msghdr, IFLA_XFRM_IF_ID, &ifNameId, sizeof(ifNameId));
     AddAttribute(msghdr, IFLA_XFRM_LINK, &ifindex, sizeof(ifindex));
 
     AddNestedEnd(msghdr, info_data);

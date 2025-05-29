@@ -14,9 +14,9 @@
  */
 
 #include "multi_vpn_manager.h"
+
 #include <sys/ioctl.h>
 #include <thread>
-#include <regex>
 #include <linux/ppp_defs.h>
 #include <linux/if_ppp.h>
 #include "init_socket.h"
@@ -238,82 +238,42 @@ int32_t MultiVpnManager::SetVpnDown(const std::string &ifName)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t MultiVpnManager::ParseVpnIfNameString(const std::string &interfaceName, std::string &prefix, uint32_t &number)
+int32_t MultiVpnManager::CreateVpnInterface(const std::string &ifName)
 {
-    auto splitString = [](const std::string &str, std::string &prefix, uint32_t &number) {
-        std::regex re("([a-zA-Z-]+)([0-9]+)");
-        std::smatch match;
-        if (std::regex_search(str, match, re)) {
-            prefix = match[1].str();
-            number = (uint32_t)atoi(match[2].str().c_str());
-            NETNATIVE_LOGW("add interface %{public}s to number %{public}u", prefix.c_str(), number);
-            return true;
-        }
-        return false;
-    };
-    if (!splitString(interfaceName, prefix, number)) {
-        NETNATIVE_LOGE("split interfaceName %{public}s failed", interfaceName.c_str());
-        return NETMANAGER_ERROR;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t MultiVpnManager::CreateVpnInterface(const std::string &interfaceName)
-{
-    std::string prefix;
-    uint32_t number = 0;
-    int32_t ret = 0;
-    if (ParseVpnIfNameString(interfaceName, prefix, number) != NETMANAGER_SUCCESS) {
-        return NETMANAGER_ERROR;
-    }
-    if (prefix == XFRM_CARD_NAME) {
-        ret = CreateXfrmInterface(interfaceName, number, phyName_, DEFAULT_MTU);
-    } else if (prefix == PPP_CARD_NAME) {
-        ret = CreatePppInterface(interfaceName, number);
-    } else {
-        NETNATIVE_LOGE("Failed to add interface %{public}s", interfaceName.c_str());
-        return NETMANAGER_ERROR;
-    }
-    return ret;
-}
-
-int32_t MultiVpnManager::DestroyVpnInterface(const std::string &interfaceName)
-{
-    std::string prefix;
-    uint32_t number = 0;
     int32_t ret = NETMANAGER_SUCCESS;
-    if (ParseVpnIfNameString(interfaceName, prefix, number) != NETMANAGER_SUCCESS) {
-        return NETMANAGER_ERROR;
-    }
-    if (prefix == XFRM_CARD_NAME) {
-        ret = DestroyXfrmInterface(interfaceName);
-    } else if (prefix == PPP_CARD_NAME) {
-        ret = DestroyPppInterface(number);
+    if (ifName.find(XFRM_CARD_NAME) != std::string::npos) {
+        uint32_t ifNameId = static_cast<uint32_t>(std::stoul(ifName.substr(strlen(XFRM_CARD_NAME))));
+        ret = nmd::CreateVpnIfByNetlink(ifName.c_str(), ifNameId, phyName_.c_str(), DEFAULT_MTU);
+    } else if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
+        ret = CreatePppInterface(ifName);
     } else {
-        NETNATIVE_LOGE("Failed to del interface %{public}s", interfaceName.c_str());
+        NETNATIVE_LOGE("CreateVpnInterface failed, invalid ifName");
         return NETMANAGER_ERROR;
     }
     return ret;
 }
 
-int32_t MultiVpnManager::CreateXfrmInterface(const std::string &name, uint32_t ifId,
-    const std::string &phyName, uint32_t mtu)
+int32_t MultiVpnManager::DestroyVpnInterface(const std::string &ifName)
 {
-    return nmd::CreateVpnIfByNetlink(name.c_str(), ifId, phyName.c_str(), mtu);
-}
-
-int32_t MultiVpnManager::DestroyXfrmInterface(const std::string &ifName)
-{
+    bool isXfrm = ifName.find(XFRM_CARD_NAME) != std::string::npos;
+    bool isPpp = ifName.find(PPP_CARD_NAME) != std::string::npos;
+    if (!isXfrm && !isPpp) {
+        NETNATIVE_LOGE("DestroyVpnInterface failed, invalid ifName");
+        return NETMANAGER_ERROR;
+    }
     SetVpnDown(ifName);
     nmd::DeleteVpnIfByNetlink(ifName.c_str());
+    if (isPpp) {
+        DestroyPppFd(ifName);
+    }
     return NETMANAGER_SUCCESS;
 }
 
-int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName, uint32_t &ifunit)
+int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName)
 {
-    auto it = pppFdMap_.find(ifunit);
+    auto it = pppFdMap_.find(ifName);
     if (it == pppFdMap_.end()) {
-        NETNATIVE_LOGE("fdNum: %{public}d does not exist", ifunit);
+        NETNATIVE_LOGE("ifName not exist");
         return NETMANAGER_ERROR;
     }
     ifreq ifr = {};
@@ -322,7 +282,7 @@ int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName, uint32_t 
         return NETMANAGER_ERROR;
     }
     int32_t currentIfunit = -1;
-    if (ioctl(pppFdMap_[ifunit], PPPIOCGUNIT, &currentIfunit) < 0) {
+    if (ioctl(pppFdMap_[ifName], PPPIOCGUNIT, &currentIfunit) < 0) {
         NETNATIVE_LOGE("ioctl PPPIOCDISCONN failed errno: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
@@ -350,25 +310,23 @@ int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName, uint32_t 
         NETNATIVE_LOGE("ioctl failed errno: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
-    NETNATIVE_LOGI("Created PPP interface: ifunit: %{public}d\n", ifunit);
+    NETNATIVE_LOGI("Created PPP interface");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t MultiVpnManager::CreatePppFd(const std::string &ifName)
 {
-    std::string prefix;
-    uint32_t ifunit = 0;
-    if (ParseVpnIfNameString(ifName, prefix, ifunit) != NETMANAGER_SUCCESS) {
+    if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
+        NETNATIVE_LOGE("CreatePppFd faild, not ppp");
         return NETMANAGER_ERROR;
     }
-
     int32_t pppfd = open(PPP_DEVICE_PATH, O_RDWR | O_NONBLOCK);
     if (pppfd <= 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
-    pppFdMap_[ifunit] = pppfd;
-    StartPppInterfaceFdListen(ifunit);
+    pppFdMap_[ifName] = pppfd;
+    StartPppInterfaceFdListen(ifName);
     return NETMANAGER_SUCCESS;
 }
 
@@ -377,11 +335,15 @@ void MultiVpnManager::SetVpnRemoteAddress(const std::string &remoteIp)
     remoteIpv4Addr_ = remoteIp;
 }
 
-int32_t MultiVpnManager::DestroyPppFd(uint32_t &fdNum)
+int32_t MultiVpnManager::DestroyPppFd(const std::string &ifName)
 {
-    auto it = pppFdMap_.find(fdNum);
+    if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
+        NETNATIVE_LOGE("DestroyPppFd faild, not ppp");
+        return NETMANAGER_ERROR;
+    }
+    auto it = pppFdMap_.find(ifName);
     if (it == pppFdMap_.end()) {
-        NETNATIVE_LOGE("fdNum: %{public}d does not exist", fdNum);
+        NETNATIVE_LOGE("ifName not exist");
         return NETMANAGER_ERROR;
     }
     auto pppFd = it->second.load();
@@ -392,17 +354,12 @@ int32_t MultiVpnManager::DestroyPppFd(uint32_t &fdNum)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t MultiVpnManager::DestroyPppInterface(uint32_t &fdNum)
+void MultiVpnManager::StartPppSocketListen(const std::string &ifName)
 {
-    std::string ifName = PPP_CARD_NAME + std::to_string(fdNum);
-    SetVpnDown(ifName);
-    nmd::DeleteVpnIfByNetlink(ifName.c_str());
-    DestroyPppFd(fdNum);
-    return NETMANAGER_SUCCESS;
-}
-
-void MultiVpnManager::StartPppSocketListen(uint32_t ifunit)
-{
+    if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
+        NETNATIVE_LOGE("StartPppSocketListen failed, not ppp");
+        return;
+    }
     NETNATIVE_LOGI("StartPppSocketListen...");
     int32_t serverfd = GetControlSocket("pppfd");
     if (listen(serverfd, MAX_UNIX_SOCKET_CLIENT) < 0) {
@@ -419,21 +376,24 @@ void MultiVpnManager::StartPppSocketListen(uint32_t ifunit)
         pppListeningFlag_ = false;
         return;
     }
-    SendVpnInterfaceFdToClient(clientFd, pppFdMap_[ifunit]);
+    SendVpnInterfaceFdToClient(clientFd, pppFdMap_[ifName]);
     pppListeningFlag_ = false;
     close(clientFd);
 }
 
-void MultiVpnManager::StartPppInterfaceFdListen(uint32_t ifunit)
+void MultiVpnManager::StartPppInterfaceFdListen(const std::string &ifName)
 {
+    if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
+        NETNATIVE_LOGE("StartPppInterfaceFdListen failed, not ppp");
+        return;
+    }
     if (pppListeningFlag_) {
         NETNATIVE_LOGI("PppVpnInterface fd is listening...");
         return;
     }
-
     NETNATIVE_LOGI("StartPppInterfaceFdListen...");
     pppListeningFlag_ = true;
-    std::thread t([sp = shared_from_this(), ifunit]() { sp->StartPppSocketListen(ifunit); });
+    std::thread t([sp = shared_from_this(), ifName]() { sp->StartPppSocketListen(ifName); });
     t.detach();
     pthread_setname_np(t.native_handle(), "unix_socket_pppfd");
 }

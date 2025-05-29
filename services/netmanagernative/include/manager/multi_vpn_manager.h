@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MULTI_NET_VPN_MANAGER_H
-#define MULTI_NET_VPN_MANAGER_H
+#ifndef MULTI_VPN_MANAGER_H
+#define MULTI_VPN_MANAGER_H
 
 #include <cstdint>
 #include <linux/if.h>
@@ -41,12 +41,12 @@ public:
     }
 
 public:
-    int32_t CreateVpnInterface(const std::string &interfaceName);
-    int32_t DestroyVpnInterface(const std::string &interfaceName);
+    int32_t CreateVpnInterface(const std::string &ifName);
+    int32_t DestroyVpnInterface(const std::string &ifName);
     int32_t SetVpnAddress(const std::string &ifName, const std::string &vpnAddr, int32_t prefix);
     int32_t SetVpnMtu(const std::string &ifName, int32_t mtu);
-    void SetXfrmPhyIfName(const std::string &phyName);
     int32_t CreatePppFd(const std::string &ifName);
+    void SetXfrmPhyIfName(const std::string &phyName);
     void SetVpnRemoteAddress(const std::string &remoteIp);
 
 private:
@@ -56,22 +56,17 @@ private:
     int32_t SetVpnDown(const std::string &ifName);
     int32_t SetVpnUp(const std::string &ifName);
     int32_t AddVpnRemoteAddress(const std::string &ifName, std::atomic_int &net4Sock, ifreq &ifr);
-    int32_t CreateXfrmInterface(const std::string &ifName, uint32_t ifId,
-        const std::string &phyName, uint32_t mtu = 0);
-    int32_t DestroyXfrmInterface(const std::string &ifName);
-    int32_t CreatePppInterface(const std::string &ifName, uint32_t &ifunit);
-    int32_t DestroyPppInterface(uint32_t &fdNum);
-    int32_t DestroyPppFd(uint32_t &fdNum);
-    int32_t ParseVpnIfNameString(const std::string &interfaceName, std::string &prefix, uint32_t &number);
-    void StartPppSocketListen(uint32_t ifunit);
-    void StartPppInterfaceFdListen(uint32_t ifunit);
+    int32_t CreatePppInterface(const std::string &ifName);
+    int32_t DestroyPppFd(const std::string &ifName);
+    void StartPppSocketListen(const std::string &ifName);
+    void StartPppInterfaceFdListen(const std::string &ifName);
 
 private:
     std::atomic_bool pppListeningFlag_ = false;
-    std::unordered_map<uint32_t, std::atomic_int> pppFdMap_;
+    std::unordered_map<std::string, std::atomic_int> pppFdMap_;
     std::string phyName_;
     std::string remoteIpv4Addr_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // MULTI_NET_VPN_MANAGER_H
+#endif // MULTI_VPN_MANAGER_H
