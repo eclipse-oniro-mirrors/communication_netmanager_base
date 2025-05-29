@@ -40,8 +40,6 @@ config("net_stats_manager_if_config") {
   if (defined(build_public_version) && build_public_version) {
     cflags += [ "-DBUILD_PUBLIC_VERSION" ]
   }
-  cflags += common_cflags
-  cflags_cc = common_cflags
 }
 
 ohos_source_set("net_stats_parcel") {
@@ -129,18 +127,9 @@ ohos_shared_library("net_stats_manager_if") {
 
   public_configs = [ ":net_stats_manager_if_config" ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
+  cflags_cc = common_cflags
   deps = [
     ":net_stats_parcel",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",

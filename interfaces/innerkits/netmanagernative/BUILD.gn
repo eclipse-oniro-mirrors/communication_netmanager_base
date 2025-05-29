@@ -45,8 +45,6 @@ config("net_native_manager_if_config") {
   if (netmanager_base_enable_feature_wearable_distributed_net) {
     defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
   }
-  cflags += common_cflags
-  cflags_cc = common_cflags
 }
 
 ohos_source_set("net_native_parcel") {
@@ -86,17 +84,9 @@ ohos_shared_library("net_native_manager_if") {
 
   branch_protector_ret = "pac_ret"
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_diag_callback_stub.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
