@@ -27,6 +27,7 @@ namespace NetManagerStandard {
 #define LOG_TAG "NetMgrSubSystem"
 #else
 #define LOG_TAG NETMGR_LOG_TAG
+#endif
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD0015B0
 
@@ -43,9 +44,9 @@ namespace NetManagerStandard {
 #define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define NETMANAGER_BASE_LOGI(fmt, ...) NETMANAGER_LOG(INFO, fmt, ##__VA_ARGS__)
 #define NETMANAGER_BASE_LOGW(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)
-#define NETMANAGER_BASE_LOGD(fmt, ...) ((void)(0, ##__VA_ARGS__)) 
+#define NETMANAGER_BASE_LOGD(fmt, ...) ((void)(0, ##__VA_ARGS__))
 
-#define NETMGR_LOG_D(fmt, ...) ((void)(0, ##__VA_ARGS__)) 
+#define NETMGR_LOG_D(fmt, ...) ((void)(0, ##__VA_ARGS__))
 #define NETMGR_LOG_E(fmt, ...) NETMANAGER_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define NETMGR_LOG_W(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)
 #define NETMGR_LOG_I(fmt, ...) NETMANAGER_LOG(INFO, fmt, ##__VA_ARGS__)
