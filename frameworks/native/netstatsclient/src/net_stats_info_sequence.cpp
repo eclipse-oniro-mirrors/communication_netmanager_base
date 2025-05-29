@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <inttypes.h>
 #include "net_stats_info_sequence.h"
 #include "net_mgr_log_wrapper.h"
 #include "parcel.h"
