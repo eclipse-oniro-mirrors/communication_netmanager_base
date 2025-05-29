@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::business_error::BusinessError;
+use ani_rs::{business_error::BusinessError, objects::AniRef};
 
 #[ani_rs::native]
 pub fn option_bool(input: Option<bool>) -> Result<Option<bool>, BusinessError> {
