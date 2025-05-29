@@ -1096,6 +1096,42 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     return NETMANAGER_SUCCESS;
 }
 
+#ifdef SUPPORT_SYSVPN
+bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
+{
+    sptr<NetSupplier> supplier = FindNetSupplier(supplierId);
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("IsCallingUserSupplier FindNetSupplier error.");
+        return false;
+    }
+
+    int32_t supplierUid = supplier->GetSupplierUid();
+    if(supplierUid == ROOT_USER_ID) {
+        NETMGR_LOG_D("supplierUid is ROOT_USER_ID.");
+        return true;
+    }
+
+    int32_t callingUserId = INVALID_USER_ID;
+    int32_t supplierUserId = INVALID_USER_ID;
+
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(realCallingUid_, callingUserId) != ERR_OK) {
+        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, realCallingUid_: %{public}d.", realCallingUid_);
+        return false;
+    }
+
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(supplierUid, supplierUserId) != ERR_OK) {
+        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, supplierUid: %{public}d.", supplierUid);
+        return false;
+    }
+
+    if (callingUserId == supplierUserId) {
+        NETMGR_LOG_D("IsCallingUserSupplier is true, userId: %{public}d.", supplierUserId);
+        return true;
+    }
+    return false;
+}
+#endif // SUPPORT_SYSVPN
+
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
     NETMGR_LOG_I("Enter NetDetection, netId=[%{public}d]", netId);
@@ -1826,6 +1862,11 @@ int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
                 NETMGR_LOG_D("Network [%{public}d] is internal, uid [%{public}d] skips.", netId, currentUid);
                 continue;
             }
+#ifdef SUPPORT_SYSVPN
+            if (!IsCallingUserSupplier(curSupplier->GetSupplierId())) {
+                continue;
+            }
+#endif // SUPPORT_SYSVPN
             netIdList.push_back(netId);
         }
     }
@@ -1835,6 +1876,9 @@ int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
+#ifdef SUPPORT_SYSVPN
+    realCallingUid_ = IPCSkeleton::GetCallingUid();
+#endif // SUPPORT_SYSVPN
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, &netIdList, &result]() {
@@ -1871,6 +1915,9 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
+#ifdef SUPPORT_SYSVPN
+    realCallingUid_ = IPCSkeleton::GetCallingUid();
+#endif // SUPPORT_SYSVPN
     if (netConnEventHandler_ == nullptr) {
         NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -1882,6 +1929,12 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
             result = NET_CONN_ERR_INVALID_NETWORK;
             return;
         }
+#ifdef SUPPORT_SYSVPN
+        if(!IsCallingUserSupplier(iterNetwork->second->GetSupplierId())) {
+            result = NET_CONN_ERR_INVALID_NETWORK;
+            return;
+        }
+#endif // SUPPORT_SYSVPN
         info = iterNetwork->second->GetNetLinkInfo();
         if (info.mtu_ == 0) {
             info.mtu_ = DEFAULT_MTU;
@@ -1892,10 +1945,18 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
 
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
+#ifdef SUPPORT_SYSVPN
+    realCallingUid_ = IPCSkeleton::GetCallingUid();
+#endif // SUPPORT_SYSVPN
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if ((iterSupplier->second != nullptr) && (netId == iterSupplier->second->GetNetId())) {
+#ifdef SUPPORT_SYSVPN
+            if(!IsCallingUserSupplier(iterSupplier->second->GetSupplierId())) {
+                return NET_CONN_ERR_INVALID_NETWORK;
+            }
+#endif // SUPPORT_SYSVPN
             netAllCap = iterSupplier->second->GetNetCapabilities();
             return NETMANAGER_SUCCESS;
         }
