@@ -215,7 +215,7 @@ void NetsysNativeServiceStub::InitVpnOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE)] =
         &NetsysNativeServiceStub::CmdProcessVpnStage;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RULE_IP_MARK)] =
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IPADDRESS_MARK)] =
         &NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark;
 }
 #endif

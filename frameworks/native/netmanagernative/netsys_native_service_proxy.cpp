@@ -3580,7 +3580,7 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkIpAddressMark(uint16_t netId, con
     if (remote == nullptr) {
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RULE_IP_MARK),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IPADDRESS_MARK),
         data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("ModifyNetworkPackageMark proxy SendRequest failed, ret: [%{public}d]", ret);

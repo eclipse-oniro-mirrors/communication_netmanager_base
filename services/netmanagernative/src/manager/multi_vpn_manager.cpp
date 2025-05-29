@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,13 +125,32 @@ int32_t MultiVpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t MultiVpnManager::AddVpnRemoteAddress(const std::string &ifName, std::atomic_int &net4Sock, ifreq &ifr)
+{
+    /* ppp need set dst ip */
+    if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
+        in_addr remoteIpv4Addr = {};
+        if (inet_aton(remoteIpv4Addr_.c_str(), &remoteIpv4Addr) == 0) {
+            NETNATIVE_LOGE("addr inet_aton error");
+            return NETMANAGER_ERROR;
+        }
+        auto remoteAddr = reinterpret_cast<sockaddr_in *>(&ifr.ifr_dstaddr);
+        remoteAddr->sin_family = AF_INET;
+        remoteAddr->sin_addr = remoteIpv4Addr;
+        if (ioctl(net4Sock, SIOCSIFDSTADDR, &ifr) < 0) {
+            NETNATIVE_LOGE("ioctl set ipv4 address failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t MultiVpnManager::SetVpnAddress(const std::string &ifName, const std::string &vpnAddr, int32_t prefix)
 {
     ifreq ifr = {};
     if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
-
     std::atomic_int net4Sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (net4Sock < 0) {
         NETNATIVE_LOGE("create SOCK_DGRAM ipv4 failed: %{public}d", errno);
@@ -153,23 +172,10 @@ int32_t MultiVpnManager::SetVpnAddress(const std::string &ifName, const std::str
         return NETMANAGER_ERROR;
     }
     /* ppp need set dst ip */
-    if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
-        in_addr remoteIpv4Addr = {};
-        if (inet_aton(remoteIpv4Addr_.c_str(), &remoteIpv4Addr) == 0) {
-            NETNATIVE_LOGE("addr inet_aton error");
-            close(net4Sock);
-            return NETMANAGER_ERROR;
-        }
-        auto remoteAddr = reinterpret_cast<sockaddr_in *>(&ifr.ifr_dstaddr);
-        remoteAddr->sin_family = AF_INET;
-        remoteAddr->sin_addr = remoteIpv4Addr;
-        if (ioctl(net4Sock, SIOCSIFDSTADDR, &ifr) < 0) {
-            NETNATIVE_LOGE("ioctl set ipv4 address failed: %{public}d", errno);
-            close(net4Sock);
-            return NETMANAGER_ERROR;
-        }
+    if (AddVpnRemoteAddress(ifName, net4Sock, ifr) != NETMANAGER_SUCCESS) {
+        close(net4Sock);
+        return NETMANAGER_ERROR;
     }
-
     if (prefix <= 0 || prefix > NET_MASK_MAX_LENGTH) {
         NETNATIVE_LOGE("prefix: %{public}d error", prefix);
         close(net4Sock);
@@ -185,20 +191,24 @@ int32_t MultiVpnManager::SetVpnAddress(const std::string &ifName, const std::str
         return NETMANAGER_ERROR;
     }
 
-    SetVpnUp(ifName, net4Sock);
+    SetVpnUp(ifName);
     close(net4Sock);
     NETNATIVE_LOGI("set ip address success");
     return NETMANAGER_SUCCESS;
 }
 
-int32_t MultiVpnManager::SetVpnUp(const std::string &ifName, std::atomic_int &net4Sock)
+int32_t MultiVpnManager::SetVpnUp(const std::string &ifName)
 {
-
     ifreq ifr = {};
     if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERROR;
     }
     ifr.ifr_flags = IFF_UP | IFF_NOARP;
+    std::atomic_int net4Sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (net4Sock < 0) {
+        NETNATIVE_LOGE("create SOCK_DGRAM ipv4 failed: %{public}d", errno);
+        return NETMANAGER_ERROR;
+    }
     int32_t ret4 = SetVpnResult(net4Sock, SIOCSIFFLAGS, ifr);
     if (ret4 == NETMANAGER_ERROR) {
         NETNATIVE_LOGI("set iff up failed");
@@ -224,7 +234,7 @@ int32_t MultiVpnManager::SetVpnDown(const std::string &ifName)
     if (ret4 == NETMANAGER_ERROR) {
         NETNATIVE_LOGI("set iff down failed");
         return NETMANAGER_ERROR;
-    } 
+    }
     return NETMANAGER_SUCCESS;
 }
 

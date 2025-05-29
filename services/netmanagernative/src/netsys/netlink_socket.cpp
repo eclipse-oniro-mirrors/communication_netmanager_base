@@ -89,16 +89,20 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
 }
 
 #ifdef SUPPORT_SYSVPN
-static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, size_t len) {
+static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, size_t len)
+{
     struct rtattr *attr = reinterpret_cast<struct rtattr*>(
         reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
     attr->rta_type = type;
     attr->rta_len = RTA_LENGTH(len);
-    memcpy(RTA_DATA(attr), data, len);
+    if (memcpy_s(RTA_DATA(attr), len, data, len) != 0) {
+        NETNATIVE_LOGE("[AddRoute]: string copy failed");
+    }
     msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(attr->rta_len);
 }
 
-static struct rtattr *AddNestedStart(struct nlmsghdr *msghdr, int type) {
+static struct rtattr *AddNestedStart(struct nlmsghdr *msghdr, int type)
+{
     struct rtattr *nested = reinterpret_cast<struct rtattr*>(
         reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
     nested->rta_type = type;
@@ -107,7 +111,8 @@ static struct rtattr *AddNestedStart(struct nlmsghdr *msghdr, int type) {
     return nested;
 }
 
-static void AddNestedEnd(struct nlmsghdr *msghdr, struct rtattr *nested) {
+static void AddNestedEnd(struct nlmsghdr *msghdr, struct rtattr *nested)
+{
     nested->rta_len = reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len) -
                        reinterpret_cast<char*>(nested);
 }

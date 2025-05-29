@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,8 @@ private:
     int32_t SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
     int32_t InitIfreq(ifreq &ifr, const std::string &ifName);
     int32_t SetVpnDown(const std::string &ifName);
-    int32_t SetVpnUp(const std::string &ifName, std::atomic_int &net4Sock);
+    int32_t SetVpnUp(const std::string &ifName);
+    int32_t AddVpnRemoteAddress(const std::string &ifName, std::atomic_int &net4Sock, ifreq &ifr);
     int32_t CreateXfrmInterface(const std::string &ifName, uint32_t ifId,
         const std::string &phyName, uint32_t mtu = 0);
     int32_t DestroyXfrmInterface(const std::string &ifName);
