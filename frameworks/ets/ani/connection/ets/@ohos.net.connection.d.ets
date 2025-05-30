@@ -21,7 +21,7 @@ import { BusinessError }  from '@ohos.base';
 // import type socket from './@ohos.net.socket';
 
 export default namespace connection {
-  loadLibrary("connection_ani") 
+  loadLibrary("connection_ani")
 
   export class Cleaner {
     private ptr: long = 0
@@ -48,8 +48,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as NetHandle);
-    }, (err: BusinessError): void => {
-        callback(err, new NetHandleInner);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetHandleInner);
     });
   }
 
@@ -59,8 +59,8 @@ export default namespace connection {
               return getDefaultNetSync();
           }).then((content: NullishType) => {
               resolve(content as NetHandle);
-          }, (err: BusinessError): void => {
-              reject(err);
+          }, (err: Error): void => {
+              reject(err as BusinessError);
           });
       });
   }
@@ -73,8 +73,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as Array<NetHandle>);
-    }, (err: BusinessError): void => {
-        callback(err, new Array<NetHandle>());
+    }, (err: Error): void => {
+        callback(err as BusinessError, new Array<NetHandle>());
     });
   }
 
@@ -84,8 +84,8 @@ export default namespace connection {
             return getAllNetsSync();
         }).then((content: NullishType) => {
             resolve(content as Array<NetHandle>);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -98,8 +98,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as ConnectionProperties);
-    }, (err: BusinessError): void => {
-        callback(err, new ConnectionPropertiesInner());
+    }, (err: Error): void => {
+        callback(err as BusinessError, new ConnectionPropertiesInner());
     });
   }
 
@@ -109,8 +109,8 @@ export default namespace connection {
             return getConnectionPropertiesSync(netHandle);
         }).then((content: NullishType) => {
             resolve(content as ConnectionProperties);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -123,8 +123,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as NetCapabilities);
-    }, (err: BusinessError): void => {
-        callback(err, new NetCapabilitiesInner);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetCapabilitiesInner);
     });
   }
 
@@ -134,8 +134,8 @@ export default namespace connection {
             return getNetCapabilitiesSync(netHandle);
         }).then((content: NullishType) => {
             resolve(content as NetCapabilities);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -143,21 +143,21 @@ export default namespace connection {
   export native function getNetCapabilitiesSync(netHandle: NetHandle): NetCapabilities;
 
   // function setNetExtAttribute(netHandle: NetHandle, netExtAttribute: string): Promise<void>;
- 
+
   // function setNetExtAttributeSync(netHandle: NetHandle, netExtAttribute: string): void;
-     
+
   // function getNetExtAttribute(netHandle: NetHandle): Promise<string>;
-     
+
   // function getNetExtAttributeSync(netHandle: NetHandle): string;
-    
+
   export function isDefaultNetMetered(callback: AsyncCallback<boolean>): void {
     let p1 = taskpool.execute((): boolean => {
         return isDefaultNetMeteredSync();
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as boolean);
-    }, (err: BusinessError): void => {
-        callback(err, false);
+    }, (err: Error): void => {
+        callback(err as BusinessError, false);
     });
   }
 
@@ -167,8 +167,8 @@ export default namespace connection {
             return isDefaultNetMeteredSync();
         }).then((content: NullishType) => {
             resolve(content as boolean);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -181,10 +181,10 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as boolean);
-    }, (err: BusinessError): void => {
-        callback(err, false);
+    }, (err: Error): void => {
+        callback(err as BusinessError, false);
     });
-  } 
+  }
 
   export function hasDefaultNet(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
@@ -192,8 +192,8 @@ export default namespace connection {
             return hasDefaultNetSync();
         }).then((content: NullishType) => {
             resolve(content as boolean);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -208,8 +208,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -219,8 +219,8 @@ export default namespace connection {
           return enableAirplaneModeSync();
         }).then(() => {
             resolve(undefined);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -233,8 +233,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -244,8 +244,8 @@ export default namespace connection {
           return disableAirplaneModeSync();
         }).then((content: NullishType) => {
             resolve(undefined);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -256,8 +256,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -267,8 +267,8 @@ export default namespace connection {
             return reportNetConnectedSync(netHandle);
         }).then((content: NullishType) => {
             resolve(undefined);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -281,8 +281,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -292,8 +292,8 @@ export default namespace connection {
            return reportNetDisconnectedSync(netHandle);
         }).then((content: NullishType) => {
             resolve(undefined);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -306,8 +306,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as Array<NetAddress>);
-    }, (err: BusinessError): void => {
-        callback(err, new Array<NetAddress>);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new Array<NetAddress>);
     });
   }
 
@@ -317,8 +317,8 @@ export default namespace connection {
             return getAddressesByNameSync(host);
         }).then((content: NullishType) => {
             resolve(content as Array<NetAddress>);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -331,8 +331,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as NetHandle );
-    }, (err: BusinessError): void => {
-        callback(err, new NetHandleInner);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new NetHandleInner);
     });
   }
 
@@ -342,8 +342,8 @@ export default namespace connection {
           return getAppNetSync();
       }).then((content: NullishType) => {
           resolve(content as NetHandle);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -356,8 +356,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -367,8 +367,8 @@ export default namespace connection {
           return setAppNetSync(netHandle);
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -381,8 +381,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as HttpProxy);
-    }, (err: BusinessError): void => {
-        callback(err, new HttpProxyInner);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new HttpProxyInner);
     });
   }
 
@@ -392,8 +392,8 @@ export default namespace connection {
             return getDefaultHttpProxySync();
         }).then((content: NullishType) => {
             resolve(content as HttpProxy);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -406,8 +406,8 @@ export default namespace connection {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as HttpProxy);
-    }, (err: BusinessError): void => {
-        callback(err, new HttpProxyInner);
+    }, (err: Error): void => {
+        callback(err as BusinessError, new HttpProxyInner);
     });
   }
 
@@ -417,8 +417,8 @@ export default namespace connection {
             return getGlobalHttpProxySync();
         }).then((content: NullishType) => {
             resolve(content as HttpProxy);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
   }
@@ -433,8 +433,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -444,9 +444,9 @@ export default namespace connection {
           return setGlobalHttpProxySync(httpProxy);
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
-      }); 
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
     });
   }
 
@@ -462,8 +462,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -473,9 +473,9 @@ export default namespace connection {
           return addCustomDnsRuleSync(host, ip);
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
-      }); 
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
     });
   }
 
@@ -487,8 +487,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -498,9 +498,9 @@ export default namespace connection {
           return removeCustomDnsRuleSync(host)
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
-      }); 
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
     });
   }
 
@@ -512,8 +512,8 @@ export default namespace connection {
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
-    }, (err: BusinessError): void => {
-        callback(err, undefined);
+    }, (err: Error): void => {
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -523,9 +523,9 @@ export default namespace connection {
           return clearCustomDnsRulesSync();
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
-      }); 
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
     });
   }
 
@@ -539,9 +539,9 @@ export default namespace connection {
           return factoryResetSync();
       }).then(() => {
           resolve(undefined);
-      }, (err: BusinessError): void => {
-          reject(err);
-      }); 
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
     });
   }
 
@@ -602,8 +602,8 @@ export default namespace connection {
       })
       p1.then(() => {
           callback(new BusinessError(), undefined);
-      }, (err: BusinessError): void => {
-          callback(err, undefined);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
       });
     }
 
@@ -615,8 +615,8 @@ export default namespace connection {
       })
       p1.then(() => {
           callback(new BusinessError(), undefined);
-      }, (err: BusinessError): void => {
-          callback(err, undefined);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
       });
     }
   }
@@ -661,8 +661,8 @@ export default namespace connection {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as NetAddress);
-      }, (err: BusinessError): void => {
-          callback(err, new NetAddressInner);
+      }, (err: Error): void => {
+          callback(err as BusinessError, new NetAddressInner);
       });
     }
 
@@ -672,8 +672,8 @@ export default namespace connection {
             return this.getAddressByNameSync(host);
         }).then((content: NullishType) => {
             resolve(content as NetAddress);
-        }, (err: BusinessError): void => {
-            reject(err);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
         });
     });
     }
@@ -718,7 +718,7 @@ export default namespace connection {
     netHandle: NetHandle;
     blocked: boolean;
   }
-  
+
   export enum NetCap {
     NET_CAPABILITY_MMS = 0,
 
@@ -740,7 +740,7 @@ export default namespace connection {
     BEARER_WIFI = 1,
 
     BEARER_BLUETOOTH = 2,
- 
+
     BEARER_ETHERNET = 3,
 
     BEARER_VPN = 4,
@@ -807,17 +807,17 @@ export default namespace connection {
   export interface NetAddress {
     address: string;
 
-    family?: int; 
+    family?: int;
 
-    port?: int; 
+    port?: int;
   }
 
   class NetAddressInner implements NetAddress {
     address: string;
 
-    family?: int; 
+    family?: int;
 
-    port?: int; 
+    port?: int;
   }
 
   export interface HttpProxy {
