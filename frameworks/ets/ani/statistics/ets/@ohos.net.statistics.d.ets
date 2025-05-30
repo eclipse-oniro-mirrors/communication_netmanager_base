@@ -19,7 +19,7 @@ import type { AsyncCallback, Callback } from '@ohos.base';
 import { BusinessError }  from '@ohos.base';
 
 export default namespace statistics {
-  loadLibrary("statistics_ani") 
+  loadLibrary("statistics_ani")
 
   // type NetBearType = connection.NetBearType;
 
@@ -31,8 +31,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -42,12 +42,12 @@ export default namespace statistics {
           return getIfaceRxBytesSync(nic);
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
-  
+
   export native function getIfaceTxBytesSync(nic: string): long;
 
   function getIfaceTxBytes(nic: string, callback: AsyncCallback<long>): void {
@@ -56,8 +56,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -67,8 +67,8 @@ export default namespace statistics {
           return getIfaceTxBytesSync(nic);
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -81,8 +81,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -92,8 +92,8 @@ export default namespace statistics {
           return getCellularRxBytesSync();
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -106,8 +106,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -117,8 +117,8 @@ export default namespace statistics {
           return getCellularTxBytesSync();
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -131,8 +131,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -142,8 +142,8 @@ export default namespace statistics {
           return getAllRxBytesSync();
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -156,8 +156,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -167,8 +167,8 @@ export default namespace statistics {
           return getAllTxBytesSync();
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -181,8 +181,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -192,8 +192,8 @@ export default namespace statistics {
           return getUidRxBytesSync(uid);
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
   });
   }
@@ -206,8 +206,8 @@ export default namespace statistics {
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as long);
-      }, (err: BusinessError): void => {
-          callback(err, 0);
+      }, (err: Error): void => {
+          callback(err as BusinessError, 0);
       });
   }
 
@@ -217,8 +217,8 @@ export default namespace statistics {
         return getUidTxBytesSync(uid);
       }).then((content: NullishType) => {
         resolve(content as long);
-      }, (err: BusinessError): void => {
-        reject(err);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
       });
     });
   }
@@ -228,11 +228,11 @@ export default namespace statistics {
   // function off(type: 'netStatsChange', callback?: Callback<NetStatsChangeInfo>): void;
 
   // function getTrafficStatsByIface(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
-  
+
   // function getTrafficStatsByIface(ifaceInfo: IfaceInfo): Promise<NetStatsInfo>;
 
   // function getTrafficStatsByUid(uidInfo: UidInfo, callback: AsyncCallback<NetStatsInfo>): void;
-  
+
   // function getTrafficStatsByUid(uidInfo: UidInfo): Promise<NetStatsInfo>;
 
   export native function getSockfdRxBytesSync(sockfd: int): long;
@@ -243,8 +243,8 @@ export default namespace statistics {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as long);
-    }, (err: BusinessError): void => {
-        callback(err, 0);
+    }, (err: Error): void => {
+        callback(err as BusinessError, 0);
     });
   }
 
@@ -254,8 +254,8 @@ export default namespace statistics {
           return getSockfdRxBytesSync(sockfd);
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
@@ -268,8 +268,8 @@ export default namespace statistics {
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as long);
-    }, (err: BusinessError): void => {
-        callback(err, 0);
+    }, (err: Error): void => {
+        callback(err as BusinessError, 0);
     });
   }
 
@@ -279,8 +279,8 @@ export default namespace statistics {
           return getSockfdTxBytesSync(sockfd);
       }).then((content: NullishType) => {
           resolve(content as long);
-      }, (err: BusinessError): void => {
-          reject(err);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
       });
     });
   }
