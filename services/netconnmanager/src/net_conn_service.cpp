@@ -2003,7 +2003,6 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
@@ -2669,7 +2668,6 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         NETMGR_LOG_E("LoadGlobalHttpProxy userId is not exist. userId[%{public}d]", httpProxy.GetUserId());
         return;
     }
-    NETMGR_LOG_I("LoadGlobalHttpProxy userId = %{public}d", userId);
     if (globalHttpProxyCache_.Find(userId, httpProxy)) {
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database. userId=%{public}d", userId);
         return;

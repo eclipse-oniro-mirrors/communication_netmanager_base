@@ -868,7 +868,6 @@ void Network::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
     if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("netMonitor_ null");
         return;
     }
     netMonitor_->SetScreenState(isScreenOn);
