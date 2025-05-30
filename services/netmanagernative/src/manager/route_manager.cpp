@@ -40,6 +40,9 @@
 #include "distributed_manager.h"
 
 #include "route_manager.h"
+#ifdef SUPPORT_SYSVPN
+#include "iptables_wrapper.h"
+#endif // SUPPORT_SYSVPN
 
 using namespace OHOS::NetManagerStandard;
 using namespace OHOS::NetManagerStandard::CommonUtils;

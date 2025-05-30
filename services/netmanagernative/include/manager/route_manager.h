@@ -21,9 +21,6 @@
 #include <netinet/in.h>
 #include <cstdint>
 
-#ifdef SUPPORT_SYSVPN
-#include "iptables_wrapper.h"
-#endif // SUPPORT_SYSVPN
 #include "netlink_msg.h"
 #include "network_permission.h"
 #include "uid_range.h"

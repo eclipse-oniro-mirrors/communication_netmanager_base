@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <linux/if.h>
 #include <string>
+#include <mutex>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -66,6 +67,7 @@ private:
     std::unordered_map<std::string, std::atomic_int> pppFdMap_;
     std::string phyName_;
     std::string remoteIpv4Addr_;
+    std::mutex mutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -316,6 +316,7 @@ int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName)
 
 int32_t MultiVpnManager::CreatePppFd(const std::string &ifName)
 {
+    std::lock_guard<std::mutex> autoLock(mutex_);
     if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
         NETNATIVE_LOGE("CreatePppFd faild, not ppp");
         return NETMANAGER_ERROR;
@@ -337,6 +338,7 @@ void MultiVpnManager::SetVpnRemoteAddress(const std::string &remoteIp)
 
 int32_t MultiVpnManager::DestroyPppFd(const std::string &ifName)
 {
+    std::lock_guard<std::mutex> autoLock(mutex_);
     if (ifName.find(PPP_CARD_NAME) == std::string::npos) {
         NETNATIVE_LOGE("DestroyPppFd faild, not ppp");
         return NETMANAGER_ERROR;
