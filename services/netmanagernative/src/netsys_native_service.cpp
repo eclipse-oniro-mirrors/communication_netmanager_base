@@ -1163,11 +1163,11 @@ int32_t NetsysNativeService::ProcessVpnStage(NetsysNative::SysVpnStageCode stage
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeService::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+int32_t NetsysNativeService::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {
-    NETNATIVE_LOGI("UpdateNetworkIpAddressMark netId %{public}d", netId);
-    int32_t result = netsysService_->UpdateNetworkIpAddressMark(netId, addr, add);
-    NETNATIVE_LOG_D("UpdateNetworkIpAddressMark out.");
+    NETNATIVE_LOGI("UpdateVpnRules netId %{public}d", netId);
+    int32_t result = netsysService_->UpdateVpnRules(netId, extMessages, add);
+    NETNATIVE_LOG_D("UpdateVpnRules out.");
     return result;
 }
 #endif // SUPPORT_SYSVPN

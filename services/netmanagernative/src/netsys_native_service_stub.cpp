@@ -215,8 +215,8 @@ void NetsysNativeServiceStub::InitVpnOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_PROCESS_VPN_STAGE)] =
         &NetsysNativeServiceStub::CmdProcessVpnStage;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IPADDRESS_MARK)] =
-        &NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_VPN_RULES)] =
+        &NetsysNativeServiceStub::CmdUpdateVpnRules;
 }
 #endif
 
@@ -2395,7 +2395,7 @@ int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, Message
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdUpdateVpnRules(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
@@ -2405,24 +2405,34 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkIpAddressMark(MessageParcel &da
 
     uint16_t netId = 0;
     if (!data.ReadUint16(netId)) {
-        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read netId failed");
+        NETNATIVE_LOGE("CmdUpdateVpnRules read netId failed");
         return ERR_FLATTEN_OBJECT;
     }
 
-    std::string addr;
-    if (!data.ReadString(addr)) {
-        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read addr failed");
+    int32_t size = 0;
+    if (!data.ReadInt32(size)) {
+        NETNATIVE_LOGE("CmdUpdateVpnRules read size failed");
         return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<std::string> extMessages;
+    std::string extMessage;
+    for (int32_t index = 0; index < size; index++) {
+        data.ReadString(extMessage);
+        if (extMessage.empty()) {
+            NETNATIVE_LOGE("CmdUpdateVpnRules extMessage is empty, size mismatch");
+            return ERR_FLATTEN_OBJECT;
+        }
+        extMessages.push_back(extMessage);
     }
 
     bool add = false;
     if (!data.ReadBool(add)) {
-        NETNATIVE_LOGE("CmdUpdateNetworkIpAddressMark read flag failed");
+        NETNATIVE_LOGE("CmdUpdateVpnRules read flag failed");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t result = UpdateNetworkIpAddressMark(netId, addr, add);
+    int32_t result = UpdateVpnRules(netId, extMessages, add);
     if (!reply.WriteInt32(result)) {
-        NETNATIVE_LOGE("Write CmdUpdateNetworkIpAddressMark result failed");
+        NETNATIVE_LOGE("Write CmdUpdateVpnRules result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

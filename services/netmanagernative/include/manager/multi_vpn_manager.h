@@ -27,18 +27,15 @@ constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
 constexpr const char *PPP_CARD_NAME = "ppp";
 constexpr const char *PPP_DEVICE_PATH = "/dev/ppp";
 
-class MultiVpnManager : public std::enable_shared_from_this<MultiVpnManager> {
-private:
+class MultiVpnManager final : public std::enable_shared_from_this<MultiVpnManager> {
+public:
+    ~MultiVpnManager() = default;
     MultiVpnManager(const MultiVpnManager &) = delete;
     MultiVpnManager &operator=(const MultiVpnManager &) = delete;
-
-public:
-    MultiVpnManager() = default;
-    ~MultiVpnManager() = default;
     static MultiVpnManager &GetInstance()
     {
-        static std::shared_ptr<MultiVpnManager> instance = std::make_shared<MultiVpnManager>();
-        return *instance;
+        static MultiVpnManager instance;
+        return instance;
     }
 
 public:
@@ -51,6 +48,7 @@ public:
     void SetVpnRemoteAddress(const std::string &remoteIp);
 
 private:
+    MultiVpnManager() = default;
     int32_t SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd);
     int32_t SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
     int32_t InitIfreq(ifreq &ifr, const std::string &ifName);

@@ -51,7 +51,7 @@ public:
     int32_t AddUids(const std::vector<UidRange> &uidRanges);
     int32_t RemoveUids(const std::vector<UidRange> &uidRanges);
 #ifdef SUPPORT_SYSVPN
-    int32_t UpdateNetworkIpAddressMark(const std::string &addr, bool add);
+    int32_t UpdateVpnRules(const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
 
 private:

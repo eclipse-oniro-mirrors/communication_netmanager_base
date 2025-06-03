@@ -170,7 +170,7 @@ public:
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
 #ifdef SUPPORT_SYSVPN
     int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message = "") override;
-    int32_t UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add) override;
+    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) override;
 #endif // SUPPORT_SYSVPN
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;

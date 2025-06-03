@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,6 +224,7 @@ HWTEST_F(MultiVpnManagerTest, CreatePppInterface001, TestSize.Level1)
 HWTEST_F(MultiVpnManagerTest, CreatePppInterface002, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
+    multiVpnManager.pppFdMap_[TEST_PPP_CARD_NAME] = 1;
     std::string cardName = TEST_PPP_CARD_NAME;
     auto result = multiVpnManager.CreatePppInterface(cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);

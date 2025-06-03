@@ -85,21 +85,25 @@ HWTEST_F(VirtualNetWorkTest, RemoveInterface001, TestSize.Level1)
 }
 
 #ifdef SUPPORT_SYSVPN
-HWTEST_F(VirtualNetWorkTest, UpdateNetworkIpAddressMark001, TestSize.Level1)
+HWTEST_F(VirtualNetWorkTest, UpdateVpnRules001, TestSize.Level1)
 {
     const std::string ipAddr = "172.0.0.1";
-    int32_t result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-    result = instance_->UpdateNetworkIpAddressMark(ipAddr, false);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    std::vector<std::string> extMessages;
+    extMessages.emplace_back(ipAddr);
+    int32_t result = instance_->UpdateVpnRules(extMessages, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    result = instance_->UpdateVpnRules(extMessages, false);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
-HWTEST_F(VirtualNetWorkTest, UpdateNetworkIpAddressMark002, TestSize.Level1)
+HWTEST_F(VirtualNetWorkTest, UpdateVpnRules002, TestSize.Level1)
 {
     const std::string ipAddr = "172.0.1";
-    int32_t result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
+    std::vector<std::string> extMessages;
+    extMessages.emplace_back(ipAddr);
+    int32_t result = instance_->UpdateVpnRules(extMessages, true);
     EXPECT_EQ(result, NETMANAGER_ERROR);
-    result = instance_->UpdateNetworkIpAddressMark(ipAddr, true);
+    result = instance_->UpdateVpnRules(extMessages, true);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 #endif // SUPPORT_SYSVPN

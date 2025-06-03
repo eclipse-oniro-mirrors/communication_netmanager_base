@@ -487,14 +487,14 @@ int ConnManager::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t ConnManager::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+int32_t ConnManager::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {
     auto netsysNetwork = FindVirtualNetwork(netId);
     if (netsysNetwork == nullptr) {
         NETNATIVE_LOGE("cannot add uids to non-virtual network with netId:%{public}d", netId);
         return NETMANAGER_ERROR;
     }
-    return static_cast<VirtualNetwork *>(netsysNetwork.get())->UpdateNetworkIpAddressMark(addr, add);
+    return static_cast<VirtualNetwork *>(netsysNetwork.get())->UpdateVpnRules(extMessages, add);
 }
 #endif  // SUPPORT_SYSVPN
 

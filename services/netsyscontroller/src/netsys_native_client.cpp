@@ -1984,14 +1984,14 @@ int32_t NetsysNativeClient::ProcessVpnStage(NetsysNative::SysVpnStageCode stage,
     return proxy->ProcessVpnStage(stage, message);
 }
 
-int32_t NetsysNativeClient::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+int32_t NetsysNativeClient::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->UpdateNetworkIpAddressMark(netId, addr, add);
+    return proxy->UpdateVpnRules(netId, extMessages, add);
 }
 #endif // SUPPORT_SYSVPN
 

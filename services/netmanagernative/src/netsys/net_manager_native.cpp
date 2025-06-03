@@ -643,9 +643,9 @@ int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
     return dnsManager_->SetUserDefinedServerFlag(netId, flag);
 }
 #ifdef SUPPORT_SYSVPN
-int32_t NetManagerNative::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+int32_t NetManagerNative::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {
-    return connManager_->UpdateNetworkIpAddressMark(netId, addr, add);
+    return connManager_->UpdateVpnRules(netId, extMessages, add);
 }
 #endif // SUPPORT_SYSVPN
 } // namespace nmd

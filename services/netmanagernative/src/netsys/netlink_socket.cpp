@@ -95,7 +95,7 @@ static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, si
         reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
     attr->rta_type = type;
     attr->rta_len = RTA_LENGTH(len);
-    if (memcpy_s(RTA_DATA(attr), len, data, len) != 0) {
+    if (memcpy_s(RTA_DATA(attr), NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN), data, len) != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed");
     }
     msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(attr->rta_len);

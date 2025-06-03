@@ -130,15 +130,11 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t VirtualNetwork::UpdateNetworkIpAddressMark(const std::string &addr, bool add)
+int32_t VirtualNetwork::UpdateVpnRules(const std::vector<std::string> &extMessages, bool add)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    NETNATIVE_LOGI("VirtualNetwork::UpdateNetworkIpAddressMark add %{public}d", add);
-    if (!CommonUtils::IsValidIPV4(addr)) {
-        NETNATIVE_LOGE("failed to add ip mark on interface of netId_, %{public}u.", netId_);
-        return NETMANAGER_ERROR;
-    }
-    return RouteManager::UpdateOutcomingPacketMark(netId_, addr, add);
+    NETNATIVE_LOGI("VirtualNetwork::UpdateVpnRules netId %{public}d", netId_);
+    return RouteManager::UpdateVpnRules(netId_, *interfaces_.begin(), extMessages, add);
 }
 #endif // SUPPORT_SYSVPN
 } // namespace nmd

@@ -298,9 +298,28 @@ int32_t RouteManager::InitOutcomingPacketMark()
     return ROUTEMANAGER_SUCCESS;
 }
 
-int32_t RouteManager::UpdateOutcomingPacketMark(uint16_t netId, const std::string &srcIpAddress, bool add)
+int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string interface,
+                                    const std::vector<std::string> &extMessages, bool add)
 {
-    NETNATIVE_LOGI("UpdateOutcomingPacketMark,add===%{public}d", add);
+    int32_t ret = ROUTEMANAGER_SUCCESS;
+    if (interface.empty()) {
+        NETNATIVE_LOGE("UpdateVpnRules err, vpn name is empty");
+        return ROUTEMANAGER_ERROR;
+    }
+    NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
+    for (auto extMessage : extMessages) {
+        if (!CommonUtils::IsValidIPV4(extMessage)) {
+            NETNATIVE_LOGE("failed to add update vpn rules on interface of netId, %{public}u.", netId);
+            return ROUTEMANAGER_ERROR;
+        }
+        ret += UpdateOutcomingIpMark(netId, extMessage, add);
+    }
+    return ret;
+}
+
+int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add)
+{
+    NETNATIVE_LOGI("UpdateOutcomingIpMark,add===%{public}d", add);
     Fwmark fwmark;
     fwmark.netId = netId;
     NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
@@ -312,12 +331,12 @@ int32_t RouteManager::UpdateOutcomingPacketMark(uint16_t netId, const std::strin
         action = "-D ";
     }
     std::stringstream ss;
-    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -s " << srcIpAddress
-       << " -j MARK --set-mark 0x" << std::nouppercase
-       << std::hex << fwmark.intValue;
+    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -s " << addr
+    << " -j MARK --set-mark 0x" << std::nouppercase
+    << std::hex << fwmark.intValue;
     // need to call IptablesWrapper's RunCommand function.
     if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, ss.str()) == ROUTEMANAGER_ERROR) {
-        NETNATIVE_LOGE("UpdateOutcomingPacketMark error");
+        NETNATIVE_LOGE("UpdateOutcomingIpMark error");
         return ROUTEMANAGER_ERROR;
     }
     return ROUTEMANAGER_SUCCESS;

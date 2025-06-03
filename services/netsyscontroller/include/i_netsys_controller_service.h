@@ -1031,14 +1031,14 @@ public:
     virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message = "") = 0;
 
     /**
-     * update network ip mark
+     * update vpn interface rules
      *
      * @param netId Network number
-     * @param addr Network src addr
+     * @param extMessages ext message
      * @param add true add, false remove
      * @return Returns 0, add network ip mark successfully, otherwise it will fail
      */
-    virtual int32_t UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add) = 0;
+    virtual int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) = 0;
 #endif // SUPPORT_SYSVPN
 
     virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;

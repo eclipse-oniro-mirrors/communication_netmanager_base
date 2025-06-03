@@ -313,14 +313,15 @@ public:
 
 #ifdef SUPPORT_SYSVPN
     /**
-     * update output package mark
+     * update vpn interface rules
      *
      * @param netId Network number
-     * @param addr Network src addr
+     * @param extMessages ext message
      * @param add true add, false remove
-     * @return Returns 0, add output package mark successfully, otherwise it will fail
+     * @return Returns 0, add network ip mark successfully, otherwise it will fail
      */
-    static int32_t UpdateOutcomingPacketMark(uint16_t netId, const std::string &addr, bool add);
+    static int32_t UpdateVpnRules(uint16_t netId, const std::string interface,
+                                  const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
 
 private:
@@ -328,6 +329,7 @@ private:
     static std::map<std::string, uint32_t> interfaceToTable_;
 #ifdef SUPPORT_SYSVPN
     static int32_t InitOutcomingPacketMark();
+    static int32_t UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add);
 #endif // SUPPORT_SYSVPN
     static int32_t Init();
     static int32_t ClearRules();

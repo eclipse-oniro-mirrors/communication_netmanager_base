@@ -993,10 +993,11 @@ int32_t NetsysControllerServiceImpl::SetNicTrafficAllowed(const std::vector<std:
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetsysControllerServiceImpl::UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add)
+int32_t NetsysControllerServiceImpl::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages,
+    bool add)
 {
-    NETMGR_LOG_I("UpdateNetworkIpAddressMark netId=%{public}d", netId);
-    return netsysClient_->UpdateNetworkIpAddressMark(netId, addr, add);
+    NETMGR_LOG_I("UpdateVpnRules netId=%{public}d", netId);
+    return netsysClient_->UpdateVpnRules(netId, extMessages, add);
 }
 
 int32_t NetsysControllerServiceImpl::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)

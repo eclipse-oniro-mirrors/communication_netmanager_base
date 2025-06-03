@@ -626,7 +626,7 @@ public:
         return 0;
     }
 
-    int32_t UpdateNetworkIpAddressMark(uint16_t netId, const std::string &addr, bool add) override
+    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) override
     {
         return 0;
     }
