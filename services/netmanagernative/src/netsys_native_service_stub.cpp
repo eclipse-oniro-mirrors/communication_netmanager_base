@@ -35,7 +35,7 @@ namespace NetsysNative {
 namespace {
 constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr int32_t MAX_FLAG_NUM = 64;
-constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
 constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
 constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;

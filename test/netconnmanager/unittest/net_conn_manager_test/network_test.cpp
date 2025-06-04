@@ -52,6 +52,7 @@ const std::string HTML_TITLE_HTTP_EN = "http://";
 const std::string HTML_TITLE_HTTPS_EN = "https://";
 constexpr int32_t VALID_NETID_START = 100;
 constexpr int32_t PAC_URL_MAX_LEN = 1024;
+constexpr int32_t DNS_NUM_TEST = 5;
 } // namespace
 
 class NetworkTest : public testing::Test {
@@ -296,6 +297,20 @@ HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
     EXPECT_NE(network, nullptr);
     NetLinkInfo netLinkInfo;
     EXPECT_TRUE(netLinkInfo.dnsList_.empty());
+    network->UpdateDns(netLinkInfo);
+    NetManagerStandard::INetAddr dns;
+    dns.type_ = NetManagerStandard::INetAddr::IPV4;
+    NetManagerStandard::INetAddr ipv6Dns;
+    ipv6Dns.type_ = NetManagerStandard::INetAddr::IPV6;
+    for (int32_t i = 0 ; i < DNS_NUM_TEST; i++) {
+        dns.address_ = "99.99.99.99";
+        ipv6Dns.address_ = "fe80::99:99:99:99";
+        netLinkInfo.dnsList_.push_back(dns);
+        netLinkInfo.dnsList_.push_back(ipv6Dns);
+    }
+    network->UpdateDns(netLinkInfo);
+    dns.type_ = NetManagerStandard::INetAddr::UNKNOWN;
+    netLinkInfo.dnsList_.push_back(dns);
     network->UpdateDns(netLinkInfo);
 }
 

@@ -37,6 +37,7 @@ static constexpr const uint32_t NET_ID = 99999;
 std::shared_ptr<DnsResolvListen> instance_ = nullptr;
 
 typedef int32_t (*GetConfig)(uint16_t netId, struct ResolvConfig *config);
+typedef int32_t (*GetConfigExt)(uint16_t netId, struct ResolvConfigExt *config);
 typedef int32_t (*GetCache)(uint16_t netId, struct ParamWrapper param, struct AddrInfo addr_info[MAX_RESULTS],
                             uint32_t *num);
 
@@ -79,6 +80,25 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest001, TestSize.Level1)
     int ret = func(0, &config);
     dlclose(handle);
     EXPECT_EQ(ret, -ENOENT);
+}
+
+HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfExtTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetSysGetResolvConfExtTest001 enter");
+    void *handle = dlopen(DNS_SO_PATH, RTLD_LAZY);
+    if (handle == NULL) {
+        NETNATIVE_LOGI("StartListenTest002 dlopen err %{public}s", dlerror());
+        return;
+    }
+    GetConfigExt func = (GetConfigExt)dlsym(handle, "NetSysGetResolvConf");
+    if (func == NULL) {
+        NETNATIVE_LOGI("dlsym err %{public}s\n", dlerror());
+        return;
+    }
+    EXPECT_NE(func, NULL);
+    ResolvConfigExt config = {0};
+    int ret = func(0, &config);
+    dlclose(handle);
 }
 } // namespace NetsysNative
 } // namespace OHOS
