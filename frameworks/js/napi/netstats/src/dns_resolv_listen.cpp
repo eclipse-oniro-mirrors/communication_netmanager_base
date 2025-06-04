@@ -825,6 +825,9 @@ bool DnsResolvListenInternal::ProcGetKeyLengthForQueryAddr(uint8_t addrSize,
     PostDnsQueryParam &queryParam, const std::string &data, int index)
 {
     if (addrSize > 0) {
+        if (index + sizeof(AddrInfo) * queryParam.addrSize > data.size()) {
+            return false;
+        }
         auto size = std::min<uint8_t>(MAX_RESULTS, addrSize);
         queryParam.addrSize = size;
         AddrInfo addrInfo[MAX_RESULTS]{};
@@ -832,9 +835,9 @@ bool DnsResolvListenInternal::ProcGetKeyLengthForQueryAddr(uint8_t addrSize,
             sizeof(AddrInfo) * queryParam.addrSize) != EOK) {
             return false;
         }
-        DnsQualityDiag::GetInstance().ReportDnsQueryResult(queryParam, addrInfo);
+        DnsQualityDiag::GetInstance().ReportDnsQueryResult(queryParam, addrInfo, size);
     } else {
-        DnsQualityDiag::GetInstance().ReportDnsQueryResult(queryParam, nullptr);
+        DnsQualityDiag::GetInstance().ReportDnsQueryResult(queryParam, nullptr, 0);
     }
     return true;
 }
@@ -857,10 +860,16 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForAllQueryResult(uint16
             queryParam.netId = netId;
             queryParam.uid = uid;
             queryParam.pid = pid;
+            if (index + sizeof(uint8_t) > data.size()) {
+                return FixedLengthReceiverState::ONERROR;
+            }
             if (memcpy_s(&addrSize, sizeof(uint8_t), data.data() + index, sizeof(uint8_t)) != EOK) {
                 return FixedLengthReceiverState::ONERROR;
             }
             index += sizeof(uint8_t);
+            if (index + sizeof(DnsProcessInfoExt) > data.size()) {
+                return FixedLengthReceiverState::ONERROR;
+            }
             if (memcpy_s(&queryParam.processInfo, sizeof(DnsProcessInfoExt),  data.data() + index,
                 sizeof(DnsProcessInfoExt)) != EOK) {
                 return FixedLengthReceiverState::ONERROR;
