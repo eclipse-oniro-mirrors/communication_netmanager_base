@@ -829,5 +829,26 @@ HWTEST_F(RouteManagerTest, RemoveClatTunInterface001, TestSize.Level1)
     auto ret = RouteManager::RemoveClatTunInterface(interfaceName);
     EXPECT_NE(ret, 0);
 }
+
+HWTEST_F(RouteManagerTest, UpdateIncomingPacketMark001, TestSize.Level1)
+{
+    uint16_t netId = 123;
+    std::string interfaceName = "123";
+    NetworkPermission permission = PERMISSION_NONE;
+    bool add = true;
+    auto ret = RouteManager::UpdateIncomingPacketMark(netId, interfaceName, permission, add);
+    EXPECT_EQ(ret, 0);
+    add = false;
+    ret = RouteManager::UpdateIncomingPacketMark(netId, interfaceName, permission, add);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(RouteManagerTest, GetRouteTableFromType001, TestSize.Level1)
+{
+    RouteManager::TableType tableType = RouteManager::INTERNAL_DEFAULT;
+    std::string interfaceName = "123";
+    auto ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
+    EXPECT_EQ(ret, 1);
+}
 } // namespace nmd
 } // namespace OHOS
