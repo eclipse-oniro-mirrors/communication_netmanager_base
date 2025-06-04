@@ -177,7 +177,7 @@ HWTEST_F(DnsQualityDiagTest, ReportDnsQueryResult_ShouldReturnZero_WhenCalled_01
     AddrInfo addrinfo;
     queryParam.processInfo = processInfo;
     int32_t result =
-        dnsQualityDiag.ReportDnsQueryResult(queryParam, &addrinfo);
+        dnsQualityDiag.ReportDnsQueryResult(queryParam, &addrinfo, 0);
     EXPECT_EQ(result, 0);
 }
 
