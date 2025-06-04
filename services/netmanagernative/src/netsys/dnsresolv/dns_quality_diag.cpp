@@ -161,7 +161,7 @@ void DnsQualityDiag::FillDnsQueryResultReport(NetsysNative::NetDnsQueryResultRep
     GetDefaultDnsServerList(queryParam.uid, serverList);
     report.dnsServerSize_ = static_cast<uint8_t>(serverList.size());
     report.dnsServerList_ = serverList;
-    report.queryTime_ = processInfo.queryTime;
+    report.queryTime_ = static_cast<uint64_t>(processInfo.queryTime);
     report.host_ = processInfo.hostname;
     report.retCode_ = processInfo.retCode;
     report.firstQueryEndDuration_ = processInfo.firstQueryEndDuration;
@@ -210,14 +210,14 @@ int32_t DnsQualityDiag::ParseDnsQueryReportAddr(uint8_t size,
     return 0;
 }
 
-int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo)
+int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo, uint8_t addrSize)
 {
     bool reportSizeReachLimit = (dnsQueryReport_.size() >= MAX_RESULT_SIZE);
     if (!reportSizeReachLimit) {
         NetsysNative::NetDnsQueryResultReport report;
         FillDnsQueryResultReport(report, queryParam);
-        if (queryParam.addrSize > 0 && addrinfo != nullptr) {
-            ParseDnsQueryReportAddr(queryParam.addrSize, addrinfo, report);
+        if (addrSize > 0 && addrinfo != nullptr) {
+            ParseDnsQueryReportAddr(addrSize, addrinfo, report);
         }
         std::shared_ptr<NetsysNative::NetDnsQueryResultReport> rpt =
             std::make_shared<NetsysNative::NetDnsQueryResultReport>(report);
@@ -228,7 +228,8 @@ int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrI
     return 0;
 }
 
-int32_t DnsQualityDiag::ReportDnsQueryAbnormal(int32_t eventfailcause, PostDnsQueryParam queryParam, AddrInfo* addrinfo)
+int32_t DnsQualityDiag::ReportDnsQueryAbnormal(uint32_t eventfailcause, PostDnsQueryParam queryParam,
+    AddrInfo* addrinfo)
 {
     std::unique_lock<std::mutex> locker(dnsAbnormalTimeMutex_);
     uint32_t timeNow = static_cast<uint32_t>(time(NULL));
