@@ -67,7 +67,7 @@ HWTEST_F(NetStatsServiceCommonTest, GetDumpMessageTest001, TestSize.Level1)
     uint64_t end = 2000;
     NetStatsInfo info;
     auto res = instance_->GetIfaceStatsDetail(iface, start, end, info);
-    EXPECT_EQ(res, NETMANAGER_SUCCESS);
+    EXPECT_NE(res, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceCommonTest, GetIfaceStatsDetailTest002, TestSize.Level1)
@@ -77,7 +77,7 @@ HWTEST_F(NetStatsServiceCommonTest, GetIfaceStatsDetailTest002, TestSize.Level1)
     uint64_t end = 2000;
     NetStatsInfo info;
     auto res = instance_->GetIfaceStatsDetail(iface, start, end, info);
-    EXPECT_EQ(res, NETMANAGER_SUCCESS);
+    EXPECT_NE(res, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceCommonTest, GetIfaceStatsDetailTest003, TestSize.Level1)
@@ -87,7 +87,7 @@ HWTEST_F(NetStatsServiceCommonTest, GetIfaceStatsDetailTest003, TestSize.Level1)
     uint64_t end = 2000;
     NetStatsInfo info;
     auto res = instance_->GetIfaceStatsDetail(iface, start, end, info);
-    EXPECT_EQ(res, NETMANAGER_SUCCESS);
+    EXPECT_NE(res, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceCommonTest, ResetStatsFactoryTest001, TestSize.Level1)

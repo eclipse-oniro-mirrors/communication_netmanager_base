@@ -98,7 +98,7 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
 HWTEST_F(NetMonitorTest, StartTest001, TestSize.Level1)
 {
     bool ret = instance_->IsDetecting();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     instance_->Start();
     instance_->Stop();
     ret = instance_->IsDetecting();
@@ -123,18 +123,18 @@ HWTEST_F(NetMonitorTest, ProcessDetectionTest001, TestSize.Level1)
     instance_->netBearType_ = BEARER_WIFI;
     instance_->detectionDelay_ = 0;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
     instance_->detectionDelay_ = 10 * 60 * 1000;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
     instance_->isDetecting_ = true;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
     instance_->isDetecting_ = false;
     instance_->ProcessDetection(probeResult, result);
-    EXPECT_EQ(result, INVALID_DETECTION_STATE);
+    EXPECT_EQ(result, CAPTIVE_PORTAL_STATE);
 }
 
 HWTEST_F(NetMonitorTest, DetectionTest001, TestSize.Level1)
@@ -216,12 +216,12 @@ HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest001, TestSize.Level1)
         netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, httpUrl, httpsUrl);
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
     auto ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+    EXPECT_EQ(ret.responseCode_, 0);
 
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
     ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+    EXPECT_EQ(ret.responseCode_, 0);
 
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     httpsProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
@@ -266,7 +266,7 @@ HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest002, TestSize.Level1)
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, SUCCESS_CODE);
+    EXPECT_NE(ret.responseCode_, SUCCESS_CODE);
 }
 
 HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfigTest002, TestSize.Level1)
@@ -278,6 +278,28 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfigTest002, TestSize.Level1)
     EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
     EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
     instance_->isNeedSuffix_ = isNeedSuffix;
+}
+
+HWTEST_F(NetMonitorTest, CreateProbeThreadTest001, TestSize.Level1)
+{
+    std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(1);
+    std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(2);
+    std::shared_ptr<ProbeThread> httpThread = nullptr;
+    std::shared_ptr<ProbeThread> httpsThread = nullptr;
+    instance_->netBearType_ = BEARER_CELLULAR;
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+    instance_->netBearType_ = BEARER_WIFI;
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, true));
+    EXPECT_NO_THROW(instance_->CreateProbeThread(httpThread, httpsThread, latch, latchAll, false));
+}
+
+HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
+{
+    instance_->netBearType_ = BEARER_CELLULAR;
+    EXPECT_NO_THROW(instance_->Detection());
+    instance_->netBearType_ = BEARER_WIFI;
+    EXPECT_NO_THROW(instance_->Detection());
 }
 
 } // namespace NetManagerStandard

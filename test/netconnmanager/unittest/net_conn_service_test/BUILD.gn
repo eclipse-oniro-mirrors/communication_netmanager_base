@@ -16,13 +16,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("net_conn_service_test") {
   module_out_path = "netmanager_base/netmanager_base/net_conn_service_test"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
@@ -55,8 +48,6 @@ ohos_unittest("net_conn_service_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -104,6 +95,10 @@ ohos_unittest("net_conn_service_test") {
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]
   }
+
+  configs = [
+    "$NETMANAGER_BASE_ROOT/test/netconnmanager/mock:UNITTEST_MOCK",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

@@ -21,7 +21,7 @@
 #endif
 
 #include "common_net_conn_callback_test.h"
-#include "../net_conn_service_test/net_conn_service_stub_test.h"
+#include "net_conn_service_stub_test.h"
 #include "net_interface_callback_stub.h"
 #include "netmanager_base_test_security.h"
 #include "conn_ipc_interface_code.h"

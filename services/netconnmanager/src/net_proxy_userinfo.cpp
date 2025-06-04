@@ -119,8 +119,13 @@ void NetProxyUserinfo::GetHttpProxyHostPass(HttpProxy &httpProxy)
     NativeRdb::AbsRdbPredicates dirAbsPred(NETCONNPROXY_TABLE_NAME);
     dirAbsPred.EqualTo(NETCONNPROXY_PRIM_KEY_COL, NETCONNPROXY_PRIMARY_KEY);
     auto resultSet = rdbStore_->Query(dirAbsPred, columns);
-    if ((resultSet == nullptr) || (resultSet->GoToFirstRow() != NativeRdb::E_OK)) {
+    if (resultSet == nullptr) {
+        NETMGR_LOG_E("net_conn database rdb store query failed - null resultSet");
+        return;
+    }
+    if (resultSet->GoToFirstRow() != NativeRdb::E_OK) {
         NETMGR_LOG_E("net_conn database rdb store query failed");
+        resultSet->Close();
         return;
     }
 

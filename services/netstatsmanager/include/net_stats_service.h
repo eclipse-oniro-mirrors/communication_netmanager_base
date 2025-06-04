@@ -157,6 +157,9 @@ private:
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
+    int32_t ModifySysTimer();
+    void RegisterCommonTelephonyEvent();
+    void RegisterCommonTimeEvent();
     int32_t UpdateStatsDataInner();
     int32_t GetHistoryData(std::vector<NetStatsInfo> &infos, std::string ident,
                            uint32_t uid, uint32_t start, uint32_t end);
@@ -191,6 +194,7 @@ private:
     std::shared_ptr<TrafficLimitDialog> dialog_ = nullptr;
     std::shared_ptr<ffrt::queue> trafficPlanFfrtQueue_ = nullptr;
 #endif // SUPPORT_TRAFFIC_STATISTIC
+    std::mutex timerMutex_;
 };
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC

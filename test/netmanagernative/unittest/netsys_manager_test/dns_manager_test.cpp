@@ -95,7 +95,9 @@ HWTEST_F(DnsManagerTest, EnableIpv6Test001, TestSize.Level1)
     dnsManager.EnableIpv6(netId, destination, nextHop);
     destination = "2001:db8:85a3::8a2e:370:7334/64";
     dnsManager.EnableIpv6(netId, destination, nextHop);
-    EXPECT_NE(destination, "2001:db8:85a3::8a2e:370:7334/64");
+    destination = "::/0";
+    dnsManager.EnableIpv6(netId, destination, nextHop);
+    EXPECT_TRUE(DnsParamCache::GetInstance().IsIpv6Enable(netId));
 }
 
 HWTEST_F(DnsManagerTest, GetAddrInfoTest001, TestSize.Level1)

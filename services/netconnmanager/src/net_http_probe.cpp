@@ -551,6 +551,9 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
     }
 
     if (IsHttpDetect(probeType)) {
+        if (netBearType_ == BEARER_CELLULAR) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
         NETMGR_LOG_I("Get net[%{public}d] ip addr for HTTP probe url ", netId_);
         ipAddress = GetAddrInfo(httpDomain);
         return SetResolveOption(ProbeType::PROBE_HTTP, httpDomain, ipAddress, DEFAULT_HTTP_PORT);

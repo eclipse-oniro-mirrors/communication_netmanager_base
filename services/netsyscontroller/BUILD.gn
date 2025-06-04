@@ -20,17 +20,9 @@ config("netsys_controller_include") {
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 
   if (netmanager_base_enable_feature_sysvpn) {
     cflags += [ "-DSUPPORT_SYSVPN" ]

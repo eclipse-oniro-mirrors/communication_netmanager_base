@@ -200,5 +200,15 @@ HWTEST_F(NetlinkSocketDiagTest, InLookBack002, TestSize.Level1)
     bool result = netLinkSocketDiag.InLookBack(a);
     EXPECT_EQ(result, false);
 }
+
+HWTEST_F(NetlinkSocketDiagTest, CloseNetlinkSocket001, TestSize.Level1)
+{
+    NetLinkSocketDiag netLinkSocketDiag;
+    netLinkSocketDiag.dumpSock_ = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_INET_DIAG);
+    netLinkSocketDiag.destroySock_ = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_INET_DIAG);
+    netLinkSocketDiag.CloseNetlinkSocket();
+    EXPECT_EQ(netLinkSocketDiag.dumpSock_, -1);
+    EXPECT_EQ(netLinkSocketDiag.destroySock_, -1);
+}
 } // namespace nmd
 } // namespace OHOS

@@ -34,17 +34,9 @@ config("netmgr_common_config") {
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 }
 
 ohos_shared_library("net_manager_common") {
@@ -115,17 +107,9 @@ config("netmgr_datashare_config") {
     "$INNERKITS_ROOT/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 }
 
 ohos_shared_library("net_data_share") {
@@ -200,17 +184,9 @@ ohos_shared_library("net_bundle_utils") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

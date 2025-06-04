@@ -43,7 +43,7 @@ ohos_unittest("netsys_wrapper_test") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
   ]
 
   external_deps = [
@@ -91,7 +91,7 @@ ohos_unittest("netsys_wrapper_fault_through_test") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
   ]
 
   external_deps = [

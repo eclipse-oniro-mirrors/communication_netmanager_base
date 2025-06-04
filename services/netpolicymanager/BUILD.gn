@@ -72,22 +72,13 @@ ohos_shared_library("net_policy_manager") {
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
-  cflags = [
+  cflags = common_cflags + [
     "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
-  cflags_cc = [
+  cflags_cc = common_cflags + [
+    "-fvisibility=hidden",
     "-fvisibility-inlines-hidden",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
   ldflags = [
@@ -233,17 +224,9 @@ ohos_shared_library("net_access_policy_dialog") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags_cc = common_cflags
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

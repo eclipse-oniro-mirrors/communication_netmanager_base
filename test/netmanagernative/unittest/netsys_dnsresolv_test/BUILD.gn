@@ -87,14 +87,6 @@ ohos_unittest("netsys_dnsresolv_test") {
 ohos_unittest("netsys_dnsresolv_mock_test") {
   module_out_path = "netmanager_base/netmanager_base/dnsresolv_test"
 
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   sources = [
     "../mock/src/parcel.cpp",
     "netsys_net_dns_health_data_test.cpp",

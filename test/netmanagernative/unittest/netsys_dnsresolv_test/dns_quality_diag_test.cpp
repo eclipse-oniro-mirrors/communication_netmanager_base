@@ -22,8 +22,8 @@
 #define protected public
 #endif
 
+#include <netdb.h>
 #include "dns_quality_diag.h"
-#include "third_party/musl/include/netdb.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
 #include "common_notify_callback_test.h"
@@ -220,6 +220,12 @@ HWTEST_F(DnsQualityDiagTest, Handle_dns_abnormal_AddIPv4AndIPv6_WhenCalledWithVa
     NetsysNative::NetDnsQueryResultReport queryReport;
     abnormalInfo->eventfailcause = 1;
     abnormalInfo->report = queryReport;
+    EXPECT_EQ(dnsQualityDiag.handle_dns_abnormal(abnormalInfo), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, Handle_dns_abnormal_AddIPv4AndIPv6_WhenCalledWithNullptr, TestSize.Level0)
+{
+    std::shared_ptr<DnsAbnormalInfo> abnormalInfo = nullptr;
     EXPECT_EQ(dnsQualityDiag.handle_dns_abnormal(abnormalInfo), 0);
 }
 

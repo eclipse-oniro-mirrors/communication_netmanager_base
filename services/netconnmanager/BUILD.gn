@@ -84,22 +84,13 @@ ohos_shared_library("net_conn_manager") {
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
-  cflags = [
+  cflags = common_cflags + [
     "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
-  cflags_cc = [
+  cflags_cc = common_cflags + [
+    "-fvisibility=hidden",
     "-fvisibility-inlines-hidden",
-    "-Os",
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
   ]
 
   ldflags = [
@@ -162,13 +153,6 @@ ohos_shared_library("net_conn_manager") {
 
 ohos_static_library("net_conn_manager_static") {
   testonly = true
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
   use_exceptions = true
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",

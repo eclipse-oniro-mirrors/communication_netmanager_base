@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <atomic>
+#include <charconv>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -2002,7 +2003,6 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("GetGlobalHttpProxy userId[%{public}d]", httpProxy.GetUserId());
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
     }
@@ -2156,6 +2156,12 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
     return (ret < 0) ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED) : static_cast<int32_t>(NETMANAGER_SUCCESS);
 }
 
+static bool ConvertStrToLong(const std::string &str, int64_t &value)
+{
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
+}
+
 bool NetConnService::IsValidDecValue(const std::string &inputValue)
 {
     if (inputValue.length() > INPUT_VALUE_LENGTH) {
@@ -2164,8 +2170,9 @@ bool NetConnService::IsValidDecValue(const std::string &inputValue)
     }
     bool isValueNumber = regex_match(inputValue, std::regex("(-[\\d+]+)|(\\d+)"));
     if (isValueNumber) {
-        int64_t numberValue = std::stoll(inputValue);
-        if ((numberValue >= INT32_MIN) && (numberValue <= INT32_MAX)) {
+        int64_t numberValue = INT64_MAX;
+        bool isSuccess = ConvertStrToLong(inputValue, numberValue);
+        if (isSuccess && (numberValue >= INT32_MIN) && (numberValue <= INT32_MAX)) {
             return true;
         }
     }
@@ -2661,7 +2668,6 @@ void NetConnService::LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpP
         NETMGR_LOG_E("LoadGlobalHttpProxy userId is not exist. userId[%{public}d]", httpProxy.GetUserId());
         return;
     }
-    NETMGR_LOG_I("LoadGlobalHttpProxy userId = %{public}d", userId);
     if (globalHttpProxyCache_.Find(userId, httpProxy)) {
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database. userId=%{public}d", userId);
         return;

@@ -52,7 +52,6 @@ ohos_unittest("netsys_native_manager_test") {
   ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -126,7 +125,6 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
   ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -192,7 +190,6 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
   sources = [ "netsys_native_service_test.cpp" ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -254,7 +251,6 @@ ohos_unittest("netsys_controller_test") {
   ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -273,7 +269,7 @@ ohos_unittest("netsys_controller_test") {
   deps = [
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
@@ -323,7 +319,6 @@ ohos_unittest("netsys_native_client_test") {
   sources = [ "netsys_native_client_test.cpp" ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -339,7 +334,7 @@ ohos_unittest("netsys_native_client_test") {
   deps = [
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]
@@ -354,6 +349,7 @@ ohos_unittest("netsys_native_client_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "curl:curl_shared",
   ]
 
   defines = [
@@ -390,7 +386,6 @@ ohos_unittest("netsys_native_service_proxy_test") {
 
   include_dirs = [
     "$NETMANAGER_BASE_ROOT/test/security",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$INNERKITS_ROOT/netmanagernative/include",
@@ -457,7 +452,6 @@ ohos_unittest("resolver_config_test") {
   sources = [ "resolver_config_test.cpp" ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -516,7 +510,6 @@ ohos_unittest("conn_manager_test") {
   sources = [ "conn_manager_test.cpp" ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -578,7 +571,6 @@ ohos_unittest("nat464_clat_test") {
   ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",

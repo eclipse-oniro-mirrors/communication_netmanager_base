@@ -42,17 +42,6 @@ NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
 ETHERNETMANAGER_SOURCE_DIR = "$NETMANAGER_EXT_ROOT/services/ethernetmanager"
 
 # args of other module
-THIRD_PARTY_ROOT = "//third_party"
-UTILS_ROOT = "//utils"
-HILOG_ROOT = "//base/hiviewdfx/hilog"
-TELEPHONY_ROOT = "//base/telephony"
-C_UTILS_ROOT = "//commonlibrary/c_utils"
-ARKUI_ROOT = "//foundation/arkui"
-WIFI_MANAGER_ROOT = "//foundation/communication/wifi/wifi"
-DHCP_MANAGER_ROOT = "//foundation/communication/dhcp"
-SAMGR_MANAGER_ROOT = "//foundation/systemabilitymgr/samgr"
-SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
-
 use_js_debug = false
 declare_args() {
   enable_netmgr_debug = true
@@ -73,3 +62,12 @@ declare_args() {
   netmanager_base_enable_set_app_frozened = false
 }
 fuzz_test_path = "netmanager_base/netmanager_base"
+
+common_cflags = [
+  "-fstack-protector-strong",
+  "-D_FORTIFY_SOURCE=2",
+  "-fdata-sections",
+  "-ffunction-sections",
+  "-Os",
+  "-O2",
+]

@@ -14,6 +14,11 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
+config("fwmark_client_config") {
+  include_dirs = [
+    "include",
+  ]
+}
 ohos_shared_library("fwmark_client") {
   sanitize = {
     cfi = true
@@ -37,18 +42,9 @@ ohos_shared_library("fwmark_client") {
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
-  cflags = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
+  cflags = common_cflags
 
-  cflags_cc = [
-    "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2",
-    "-O2",
-  ]
-
+  cflags_cc = common_cflags
   external_deps = [ "c_utils:utils" ]
 
   defines = [
@@ -59,7 +55,7 @@ ohos_shared_library("fwmark_client") {
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
-
+  public_configs = [ ":fwmark_client_config" ]
   external_deps += [ "hilog:libhilog" ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

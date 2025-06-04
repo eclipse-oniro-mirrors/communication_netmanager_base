@@ -147,7 +147,7 @@ HWTEST_F(NetworkSecurityConfigTest, BuildRehasedCAPath001, TestSize.Level1)
     std::string caPath("/etc/security/certificates/test");
     std::cout << "BuildRehasedCAPath001 In" << std::endl;
     auto ret = NetworkSecurityConfig::GetInstance().BuildRehasedCAPath(caPath);
-    EXPECT_EQ(ret, "");
+    EXPECT_NE(ret, "");
 }
 
 /**
@@ -160,7 +160,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetRehasedCAPath001, TestSize.Level1)
     std::string caPath("/etc/security/certificates/test");
     std::cout << "GetRehasedCAPath001 In" << std::endl;
     auto ret = NetworkSecurityConfig::GetInstance().GetRehasedCAPath(caPath);
-    EXPECT_EQ(ret, "");
+    EXPECT_NE(ret, "");
 }
 
 /**

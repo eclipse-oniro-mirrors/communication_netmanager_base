@@ -31,11 +31,11 @@ constexpr const char *CELLULAR_IFACE = "rmnet0";
 constexpr const char *CELLULAR_IFACE_1 = "rmnet1";
 constexpr const char *CELLULAR_IFACE_2 = "rmnet2";
 constexpr const char *CELLULAR_IFACE_3 = "rmnet3";
-constexpr const char *VRINIC_IFACE = "vrinic";
+constexpr const char *VIRNIC_IFACE = "virnic";
 constexpr const char *WIFI_IFACE = "wlan0";
 constexpr const char *WIFI_IFACE_1 = "wlan1";
 std::set<std::string> IFACE_NAME_SET { CELLULAR_IFACE, CELLULAR_IFACE_1, CELLULAR_IFACE_2, CELLULAR_IFACE_3,
-    VRINIC_IFACE, WIFI_IFACE, WIFI_IFACE_1 };
+    VIRNIC_IFACE, WIFI_IFACE, WIFI_IFACE_1 };
 }
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
 {

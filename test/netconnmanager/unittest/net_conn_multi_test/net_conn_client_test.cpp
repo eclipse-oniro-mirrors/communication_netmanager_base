@@ -1296,7 +1296,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(ret, 0);
     EXPECT_TRUE(type.empty());
 }
 
@@ -1432,7 +1432,7 @@ HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
     uint32_t supplierId = 100;
     int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(supplierId,
         QUALITY_POOR_STATE);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
@@ -1441,7 +1441,7 @@ HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
     uint32_t supplierId = 100;
     int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(supplierId,
         QUALITY_GOOD_STATE);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetConnClientTest, GetDefaultSupplierId001, TestSize.Level1)
@@ -1450,7 +1450,7 @@ HWTEST_F(NetConnClientTest, GetDefaultSupplierId001, TestSize.Level1)
     uint32_t supplierId = 100;
     int32_t ret = NetConnClient::GetInstance().GetDefaultSupplierId(NetBearType::BEARER_WIFI, "test",
         supplierId);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
 HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)

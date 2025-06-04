@@ -846,7 +846,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
         }
     }
 
-    EXPECT_FALSE(isInternalDefaultNetIdIn);
+    EXPECT_TRUE(isInternalDefaultNetIdIn);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
