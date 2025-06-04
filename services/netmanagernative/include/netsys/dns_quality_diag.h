@@ -61,9 +61,9 @@ public:
     int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, char* name,
                             uint32_t size, int32_t failreason, QueryParam param, AddrInfo* addrinfo);
 
-    int32_t ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo);
+    int32_t ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo, uint8_t addrSize);
 
-    int32_t ReportDnsQueryAbnormal(int32_t eventfailcause, PostDnsQueryParam queryParam, AddrInfo* addrinfo);
+    int32_t ReportDnsQueryAbnormal(uint32_t eventfailcause, PostDnsQueryParam queryParam, AddrInfo* addrinfo);
 
     int32_t RegisterResultListener(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);
 
