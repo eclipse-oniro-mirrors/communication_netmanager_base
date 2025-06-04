@@ -299,7 +299,7 @@ int32_t RouteManager::InitOutcomingPacketMark()
 }
 
 int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string interface,
-                                    const std::vector<std::string> &extMessages, bool add)
+    const std::vector<std::string> &extMessages, bool add)
 {
     int32_t ret = ROUTEMANAGER_SUCCESS;
     if (interface.empty()) {
