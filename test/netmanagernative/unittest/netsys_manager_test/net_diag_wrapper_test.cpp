@@ -539,5 +539,184 @@ HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest005, TestSize.Level1)
     ret = protoSocketInfo.Unmarshalling(parcel, protoSocketInfo);
     EXPECT_TRUE(ret);
 }
+
+HWTEST_F(NetDiagWrapperTest, RunGetRouteTableCommandTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  RunGetRouteTableCommandTest003 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    NetDiagSocketsInfo socketInfo;
+    NetDiagProtocolType socketType = static_cast<NetDiagProtocolType>(5);
+    auto ret = netDiagWrapper->GetSocketsInfo(socketType, socketInfo);
+    ShowSocketInfo(socketInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExecuteCommandForResultTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExecuteCommandForResultTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::string command = "";
+    std::string result = "";
+    auto ret = netDiagWrapper->ExecuteCommandForResult(command, result);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetDiagWrapperTest, GeneratePingCommandTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  GeneratePingCommandTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    NetDiagPingOption pingOption;
+    pingOption.destination_ = "123";
+    pingOption.flood_ = true;
+    std::string command = "";
+    auto ret = netDiagWrapper->GeneratePingCommand(pingOption, command);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractPingResultTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractPingResultTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::string result = "";
+    sptr<INetDiagCallback> callback = nullptr;
+    netDiagWrapper->ExtractPingResult(result, callback);
+    EXPECT_EQ(callback, nullptr);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractPingHeaderTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractPingHeaderTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagPingResult pingResult;
+    netDiagWrapper->ExtractPingHeader(match, pingResult);
+    EXPECT_EQ(pingResult.host_, "");
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIcmpSeqInfoTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIcmpSeqInfoTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagPingResult pingResult;
+    netDiagWrapper->ExtractIcmpSeqInfo(match, pingResult);
+    EXPECT_EQ(pingResult.host_, "");
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractPingStatisticsTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractPingStatisticsTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagPingResult pingResult;
+    netDiagWrapper->ExtractPingStatistics(match, pingResult);
+    EXPECT_EQ(pingResult.host_, "");
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractRouteTableInfoTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractRouteTableInfoTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    std::list<NetDiagRouteTable> routeTables;
+    netDiagWrapper->ExtractRouteTableInfo(match, routeTables);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractNetProtoSocketsInfoTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractNetProtoSocketsInfoTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagSocketsInfo pingResult;
+    netDiagWrapper->ExtractNetProtoSocketsInfo(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractUnixSocketsInfoTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractUnixSocketsInfoTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagSocketsInfo pingResult;
+    netDiagWrapper->ExtractUnixSocketsInfo(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceNameTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceNameTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceName(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceInetTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceInetTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceInet(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceInetTest6001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceInet6Test001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceInet6(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceMtuTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceMtuTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceMtu(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceTxQueueLenTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceTxQueueLenTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceTxQueueLen(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
+
+HWTEST_F(NetDiagWrapperTest, ExtractIfaceTransDataBytesTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NetDiagWrapperTest  ExtractIfaceTransDataBytesTest001 enter");
+    auto netDiagWrapper = NetDiagWrapper::GetInstance();
+
+    std::smatch match;
+    NetDiagIfaceConfig pingResult;
+    netDiagWrapper->ExtractIfaceTransDataBytes(match, pingResult);
+    EXPECT_EQ(match.size(), 0);
+}
 } // namespace NetsysNative
 } // namespace OHOS
