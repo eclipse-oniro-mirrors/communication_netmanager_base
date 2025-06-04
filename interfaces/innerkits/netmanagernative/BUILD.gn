@@ -95,7 +95,7 @@ ohos_shared_library("net_native_manager_if") {
   ]
 
   include_dirs = [
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include/",
   ]
 

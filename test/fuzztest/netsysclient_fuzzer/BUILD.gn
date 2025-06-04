@@ -26,7 +26,7 @@ ohos_fuzztest("NetSysClientFuzzTest") {
   include_dirs = [
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",

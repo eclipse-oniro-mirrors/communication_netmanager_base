@@ -102,7 +102,6 @@ ohos_shared_library("net_conn_manager_if") {
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]

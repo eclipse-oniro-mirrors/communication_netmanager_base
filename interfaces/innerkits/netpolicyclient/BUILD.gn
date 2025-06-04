@@ -51,7 +51,7 @@ ohos_source_set("net_policy_parcel") {
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netconnclient/include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
@@ -82,7 +82,7 @@ ohos_shared_library("net_policy_manager_if") {
 
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [ "$NETMANAGER_BASE_ROOT/utils/log/include" ]
+  include_dirs = [ "$NETMANAGER_BASE_ROOT/utils/common_utils/include" ]
 
   sources = [
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_callback_stub.cpp",

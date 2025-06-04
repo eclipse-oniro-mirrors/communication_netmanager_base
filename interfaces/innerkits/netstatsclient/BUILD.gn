@@ -119,7 +119,7 @@ ohos_shared_library("net_stats_manager_if") {
   sources += filter_include(output_values, [ "*ice_proxy.cpp" ])
 
   include_dirs = [
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include/",
   ]
 

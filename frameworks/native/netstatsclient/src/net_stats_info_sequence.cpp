@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <cinttypes>
 #include "net_stats_info_sequence.h"
 #include "net_mgr_log_wrapper.h"
 #include "parcel.h"
@@ -23,11 +23,11 @@ static constexpr uint32_t STATS_INFO_MAX_SIZE = 5000;
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint64(startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}" PRIu64, startTime_);
         return false;
     }
     if (!parcel.WriteUint64(endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}" PRIu64, endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, info_);
@@ -36,11 +36,11 @@ bool NetStatsInfoSequence::Marshalling(Parcel &parcel) const
 bool NetStatsInfoSequence::Marshalling(Parcel &parcel, const NetStatsInfoSequence &statsSequence)
 {
     if (!parcel.WriteUint64(statsSequence.startTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}lu", statsSequence.startTime_);
+        NETMGR_LOG_E("Write statsInfoSequence startTime failed. time=%{public}" PRIu64, statsSequence.startTime_);
         return false;
     }
     if (!parcel.WriteUint64(statsSequence.endTime_)) {
-        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}lu", statsSequence.endTime_);
+        NETMGR_LOG_E("Write statsInfoSequence endTime failed. time=%{public}" PRIu64, statsSequence.endTime_);
         return false;
     }
     return NetStatsInfo::Marshalling(parcel, statsSequence.info_);

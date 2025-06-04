@@ -41,7 +41,6 @@ ohos_unittest("net_common_test") {
     "errorcode_convertor_test.cpp",
     "net_datashare_utils_test.cpp",
     "net_manager_center_test.cpp",
-    "net_mgr_log_wrapper_test.cpp",
     "net_setting_test.cpp",
     "netmanager_base_permission_test.cpp",
     "netmanager_hitrace_test.cpp",
