@@ -139,14 +139,14 @@ struct QueryParam {
 };
 
 struct FamilyQueryInfo {
-    uint32_t retCode;
+    int32_t retCode;
     char *serverAddr;
     uint8_t isNoAnswer;
     uint8_t cname;
 };
 
 struct FamilyQueryInfoExt {
-    uint32_t retCode;
+    int32_t retCode;
     char serverAddr[MAX_SERVER_LENGTH + 1];
     uint8_t isNoAnswer;
     uint8_t cname;
@@ -155,7 +155,7 @@ struct FamilyQueryInfoExt {
 struct DnsProcessInfo {
     long long queryTime;
     char *hostname;
-    uint32_t retCode;
+    int32_t retCode;
     uint32_t firstQueryEndDuration;
     uint32_t firstQueryEnd2AppDuration;
     uint16_t firstReturnType; /* a or aaaa */
@@ -169,7 +169,7 @@ struct DnsProcessInfoExt {
     long long queryTime;
     char hostname[MAX_HOST_NAME_LEN + 1];
     char srcAddr[MAX_SERVER_LENGTH + 1];
-    uint32_t retCode;
+    int32_t retCode;
     uint32_t firstQueryEndDuration;
     uint32_t firstQueryEnd2AppDuration;
     uint16_t firstReturnType; /* a or aaaa */

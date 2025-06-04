@@ -898,11 +898,11 @@ int32_t GetQueryFailCause(struct DnsProcessInfoExt *dnsProcessInfo,
         && IsFailCauseAllowedReport(FAIL_CAUSE_QUERY_FAIL)) {
         return FAIL_CAUSE_QUERY_FAIL;
     }
-    if (dnsProcessInfo->firstQueryEndDuration > QUERY_CALLBACK_RETURN_SLOW_THRESHOLD
+    if (dnsProcessInfo->firstQueryEndDuration > FIRST_RETURN_SLOW_THRESHOLD
         && IsFailCauseAllowedReport(FAIL_CAUSE_FIRST_RETURN_SLOW)) {
         return FAIL_CAUSE_FIRST_RETURN_SLOW;
     }
-    if (dnsProcessInfo->firstQueryEnd2AppDuration > FIRST_RETURN_SLOW_THRESHOLD
+    if (dnsProcessInfo->firstQueryEnd2AppDuration > QUERY_CALLBACK_RETURN_SLOW_THRESHOLD
         && IsFailCauseAllowedReport(FAIL_CAUSE_CALLBACK_RETURN_SLOW)) {
         return FAIL_CAUSE_CALLBACK_RETURN_SLOW;
     }
