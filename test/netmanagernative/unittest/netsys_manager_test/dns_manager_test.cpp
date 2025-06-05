@@ -15,6 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "dns_manager.h"
 #include "dns_config_client.h"
 
@@ -109,6 +114,24 @@ HWTEST_F(DnsManagerTest, GetAddrInfoTest001, TestSize.Level1)
     std::vector<AddrInfo> res;
     auto result = dnsManager.GetAddrInfo(hostName, serverName, hints, NET_ID, res);
     EXPECT_NE(result, -1);
+}
+
+HWTEST_F(DnsManagerTest, FillAddrInfoTest001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<AddrInfo> addrInfo;
+    addrinfo *res = nullptr;
+    auto result = dnsManager.FillAddrInfo(addrInfo, res);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DnsManagerTest, FillAddrInfoTest002, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<AddrInfo> addrInfo;
+    addrinfo *res = new addrinfo;
+    auto result = dnsManager.FillAddrInfo(addrInfo, res);
+    EXPECT_EQ(result, 0);
 }
 } // namespace nmd
 } // namespace OHOS

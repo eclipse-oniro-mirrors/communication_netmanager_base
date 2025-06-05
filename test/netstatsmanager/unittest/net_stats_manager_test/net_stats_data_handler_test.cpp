@@ -349,5 +349,31 @@ HWTEST_F(NetStatsDataHandlerTest, UpdateStatsUserIdByUserIdTest001, TestSize.Lev
     int32_t ret = handler.UpdateStatsUserIdByUserId(userId, newUserId);
     EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
 }
+
+HWTEST_F(NetStatsDataHandlerTest, DeleteSimStatsByUidTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    uint64_t uid = 100;
+    int32_t ret = handler.DeleteSimStatsByUid(uid);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    uint32_t flag = 100;
+    ret = handler.UpdateStatsFlag(uid, flag);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, UpdateSimTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    uint64_t uid = 100;
+    uint32_t flag = 100;
+    int32_t ret = handler.UpdateSimStatsFlag(uid, flag);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = handler.UpdateSimDataFlag(uid, flag);
+    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

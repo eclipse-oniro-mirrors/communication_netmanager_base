@@ -214,5 +214,25 @@ HWTEST_F(NetManagerNativeTest, DisableWearableDistributedNetForward, TestSize.Le
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetManagerNativeTest, AddStaticArpTest002, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, DelStaticArpTest002, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace nmd
 } // namespace OHOS
