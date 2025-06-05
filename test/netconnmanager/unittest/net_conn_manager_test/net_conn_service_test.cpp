@@ -443,6 +443,58 @@ HWTEST_F(NetConnServiceTest, UpdateNetStateForTestTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+#ifdef SUPPORT_SYSVPN
+HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest001, TestSize.Level1)
+{
+    uint32_t supplierId = 100400;
+    auto ret = NetConnService::GetInstance()->IsCallingUserSupplier(supplierId);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t regRet = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_VPN, TEST_IDENT,
+        netCaps, g_vpnSupplierId);
+    EXPECT_EQ(regRet, NETMANAGER_SUCCESS);
+    auto ret = NetConnService::GetInstance()->IsCallingUserSupplier(g_vpnSupplierId);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest003, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t regRet = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_VPN, TEST_IDENT,
+        netCaps, g_vpnSupplierId);
+    EXPECT_EQ(regRet, NETMANAGER_SUCCESS);
+    auto supplier = NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId);
+
+    sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
+    netSupplierInfo->uid_ = TEST_UID;
+    NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
+    auto ret = NetConnService::GetInstance()->IsCallingUserSupplier(g_vpnSupplierId);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest004, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t regRet = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_VPN, TEST_IDENT,
+        netCaps, g_vpnSupplierId);
+    EXPECT_EQ(regRet, NETMANAGER_SUCCESS);
+
+    std::list<int32_t> netIdList;
+    auto ret1 = NetConnService::GetInstance()->GetAllNets(netIdList);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+
+    auto ret2 = NetConnService::GetInstance()->IsCallingUserSupplier(g_vpnSupplierId);
+    EXPECT_TRUE(ret2);
+}
+#endif // SUPPORT_SYSVPN
+
 HWTEST_F(NetConnServiceTest, GetAllNetsTest001, TestSize.Level1)
 {
     std::list<int32_t> netIdList;

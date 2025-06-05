@@ -1099,15 +1099,16 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
 #ifdef SUPPORT_SYSVPN
 bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
 {
+    NETMGR_LOG_D("IsCallingUserSupplier, supplierId:%{public}d", supplierId);
     sptr<NetSupplier> supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
-        NETMGR_LOG_E("IsCallingUserSupplier FindNetSupplier error.");
+        NETMGR_LOG_E("IsCallingUserSupplier FindNetSupplier error");
         return false;
     }
 
     int32_t supplierUid = supplier->GetSupplierUid();
-    if(supplierUid == ROOT_USER_ID) {
-        NETMGR_LOG_D("supplierUid is ROOT_USER_ID.");
+    if (supplierUid == ROOT_USER_ID) {
+        NETMGR_LOG_D("supplierUid is ROOT_USER_ID");
         return true;
     }
 
@@ -1115,17 +1116,17 @@ bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
     int32_t supplierUserId = INVALID_USER_ID;
 
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(realCallingUid_, callingUserId) != ERR_OK) {
-        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, realCallingUid_: %{public}d.", realCallingUid_);
+        NETMGR_LOG_D("GetOsAccountLocalIdFromUid fail, realCallingUid_: %{public}d", realCallingUid_);
         return false;
     }
 
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(supplierUid, supplierUserId) != ERR_OK) {
-        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, supplierUid: %{public}d.", supplierUid);
+        NETMGR_LOG_D("GetOsAccountLocalIdFromUid fail, supplierUid: %{public}d", supplierUid);
         return false;
     }
 
     if (callingUserId == supplierUserId) {
-        NETMGR_LOG_D("IsCallingUserSupplier is true, userId: %{public}d.", supplierUserId);
+        NETMGR_LOG_D("IsCallingUserSupplier is true, userId: %{public}d", supplierUserId);
         return true;
     }
     return false;
@@ -1930,7 +1931,7 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
             return;
         }
 #ifdef SUPPORT_SYSVPN
-        if(!IsCallingUserSupplier(iterNetwork->second->GetSupplierId())) {
+        if (!IsCallingUserSupplier(iterNetwork->second->GetSupplierId())) {
             result = NET_CONN_ERR_INVALID_NETWORK;
             return;
         }
@@ -1953,7 +1954,7 @@ int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &ne
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if ((iterSupplier->second != nullptr) && (netId == iterSupplier->second->GetNetId())) {
 #ifdef SUPPORT_SYSVPN
-            if(!IsCallingUserSupplier(iterSupplier->second->GetSupplierId())) {
+            if (!IsCallingUserSupplier(iterSupplier->second->GetSupplierId())) {
                 return NET_CONN_ERR_INVALID_NETWORK;
             }
 #endif // SUPPORT_SYSVPN
