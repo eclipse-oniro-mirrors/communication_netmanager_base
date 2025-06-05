@@ -12,19 +12,54 @@
 // limitations under the License.
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
-use syn::{ItemFn, Result};
+use quote::{quote, ToTokens};
+use syn::{
+    parse::Parser, punctuated::Punctuated, spanned::Spanned, token::Comma, Error, ItemFn, LitStr,
+    MetaNameValue, Result,
+};
 
 pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+    let args = Punctuated::<MetaNameValue, Comma>::parse_terminated.parse2(args)?;
+
+    let mut is_class = false;
+
+    for arg in args {
+        let ident = arg
+            .path
+            .get_ident()
+            .ok_or(Error::new(arg.path.span(), "Invalid ident"))?;
+
+        let ident_string = ident.to_string();
+
+        match ident_string.as_str() {
+            "bind" => {
+                let s = arg.value.to_token_stream();
+                let s = syn::parse2::<LitStr>(s)
+                    .map_err(|item| Error::new(item.span(), "Invalid Attribute `path`"))?;
+                if s.value() == "class" {
+                    is_class = true;
+                } else if s.value() == "namespace" {
+                    is_class = false
+                } else {
+                    return Err(Error::new(
+                        s.span(),
+                        "Invalid Attribute `bind`, must be `class` or `namespace`",
+                    ));
+                }
+            }
+            name => {
+                return Err(Error::new(
+                    arg.path.span(),
+                    format!("Invalid Attribute `{name}`",),
+                ))
+            }
+        }
+    }
+
     let mut item = syn::parse2::<ItemFn>(item)?;
     let item_clone = item.clone();
 
     let mut block = quote! {};
-
-    let mut sig = quote! {
-        env: ani_rs::AniEnv<'local>,
-        this: ani_rs::objects::AniObject<'local>,
-    };
 
     let out = item.sig.output;
     let mut out_arg = None;
@@ -57,6 +92,17 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
         },
     }
 
+    let mut sig = if is_class {
+        quote! {
+            env: ani_rs::AniEnv<'local>,
+            this: ani_rs::objects::AniObject<'local>,
+        }
+    } else {
+        quote! {
+            env: ani_rs::AniEnv<'local>,
+        }
+    };
+
     let mut input = quote! {};
     for i in item.sig.inputs.iter() {
         if let syn::FnArg::Typed(pat) = i {
@@ -76,6 +122,11 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
 
             if let syn::Pat::Ident(pat) = &*pat.pat {
                 if pat.ident.to_string() == "this" {
+                    sig = quote! {
+                        env: ani_rs::AniEnv<'local>,
+                        this: ani_rs::objects::AniObject<'local>,
+                    };
+
                     block = quote! {
                         #block
                         let this = env.deserialize(this).unwrap();
