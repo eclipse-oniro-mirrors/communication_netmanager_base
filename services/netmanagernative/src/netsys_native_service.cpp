@@ -1215,5 +1215,15 @@ int32_t NetsysNativeService::SetUserDefinedServerFlag(uint16_t netId, bool flag)
     netsysService_->DnsSetUserDefinedServerFlag(netId, flag);
     return NetManagerStandard::NETSYS_SUCCESS;
 }
+
+int32_t NetsysNativeService::FlushDnsCache(uint16_t netId)
+{
+    NETNATIVE_LOG_D("FlushDnsCache");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->FlushDnsCache(netId);
+}
 } // namespace NetsysNative
 } // namespace OHOS

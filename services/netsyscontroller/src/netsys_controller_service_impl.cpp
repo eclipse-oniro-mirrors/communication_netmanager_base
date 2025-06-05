@@ -1026,5 +1026,11 @@ int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bo
     NETMGR_LOG_I("SetUserDefinedServerFlag isUserDefinedServer = %{public}d", isUserDefinedServer);
     return netsysClient_->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
+
+int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)
+{
+    NETMGR_LOG_I("FlushDnsCache Enter. netId[%{public}u]", netId);
+    return netsysClient_->FlushDnsCache(netId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

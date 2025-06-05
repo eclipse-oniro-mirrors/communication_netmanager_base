@@ -273,5 +273,11 @@ int32_t DnsManager::SetUserDefinedServerFlag(uint16_t netId, bool flag)
     NETNATIVE_LOGI("manager_SetUserDefinedServerFlag netId[%{public}d] flag[%{public}d]", netId, flag);
     return DnsParamCache::GetInstance().SetUserDefinedServerFlag(netId, flag);
 }
+
+int32_t DnsManager::FlushDnsCache(uint16_t netId)
+{
+    NETNATIVE_LOGI("manager_FlushDnsCache netId[%{public}d]", netId);
+    return DnsParamCache::GetInstance().FlushDnsCache(netId);
+}
 } // namespace nmd
 } // namespace OHOS

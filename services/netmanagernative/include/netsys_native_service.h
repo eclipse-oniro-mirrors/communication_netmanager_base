@@ -200,6 +200,7 @@ public:
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override;
+    int32_t FlushDnsCache(uint16_t netId) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

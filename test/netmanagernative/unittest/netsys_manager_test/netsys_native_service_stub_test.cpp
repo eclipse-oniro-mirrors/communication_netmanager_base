@@ -646,6 +646,11 @@ public:
     {
         return 0;
     }
+
+    int32_t FlushDnsCache(uint16_t netId) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -2174,5 +2179,18 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDisableWearableDistributedNetForward, T
     EXPECT_EQ(ret, ERR_NONE);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteUint32(TEST_UID_U32)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdFlushDnsCache(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

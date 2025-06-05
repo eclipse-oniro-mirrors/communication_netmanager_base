@@ -20,6 +20,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier.h"
+#include "netsys_controller.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -467,7 +468,11 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         if (HasNetCap(NET_CAPABILITY_PORTAL)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
             netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
-            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL, need to clear DNS cache");
+            int32_t ret = NetsysController::GetInstance().FlushDnsCache(network_->GetNetId());
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("FlushDnsCache failed, ret = %{public}d", ret);
+            }
         }
     } else if (netState == CAPTIVE_PORTAL_STATE) {
         if (!HasNetCap(NET_CAPABILITY_PORTAL)) {

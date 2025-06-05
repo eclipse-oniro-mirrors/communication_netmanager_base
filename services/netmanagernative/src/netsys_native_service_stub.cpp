@@ -274,6 +274,8 @@ void NetsysNativeServiceStub::InitDnsServerOpToInterfaceMap()
 {
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_USER_DEFINED_SERVER_FLAG)] =
         &NetsysNativeServiceStub::CmdSetUserDefinedServerFlag;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE)] =
+        &NetsysNativeServiceStub::CmdFlushDnsCache;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -2465,6 +2467,27 @@ int32_t NetsysNativeServiceStub::CmdSetUserDefinedServerFlag(MessageParcel &data
     int32_t result = SetUserDefinedServerFlag(netId, flag);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdSetUserDefinedServerFlag result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdFlushDnsCache(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdFlushDnsCache CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    uint16_t netId = 0;
+    if (!data.ReadUint16(netId)) {
+        NETNATIVE_LOGE("CmdFlushDnsCache read netId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = FlushDnsCache(netId);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdFlushDnsCache result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

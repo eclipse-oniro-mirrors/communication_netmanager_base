@@ -611,6 +611,11 @@ public:
     {
         return 0;
     }
+
+    int32_t FlushDnsCache(uint16_t netId) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

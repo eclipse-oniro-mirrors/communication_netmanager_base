@@ -1019,6 +1019,7 @@ public:
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps);
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid);
+    int32_t FlushDnsCache(uint16_t netId);
 
 private:
     NetsysController();
