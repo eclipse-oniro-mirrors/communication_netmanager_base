@@ -848,5 +848,49 @@ HWTEST_F(NetsysControllerServiceImplTest, DelInterfaceAddressTest001, TestSize.L
     int32_t ret = instance_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, SetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1;
+    int32_t ret = instance_->SetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, 300);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, GetNetStateTrafficMapTest001, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1;
+    int32_t ret = instance_->GetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, 3);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, ClearIncreaseTrafficMapTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, 3);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, UpdateIfIndexMapTest001, TestSize.Level1)
+{
+    int8_t key = 1;
+    uint64_t index = 1;
+    int32_t ret = instance_->UpdateIfIndexMap(key, index);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, RegisterNetsysTrafficCallbackTest001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback;
+    int32_t ret = instance_->RegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, UnRegisterNetsysTrafficCallbackTest001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback;
+    int32_t ret = instance_->UnRegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -40,6 +40,9 @@
 #include "distributed_manager.h"
 
 #include "route_manager.h"
+#ifdef SUPPORT_SYSVPN
+#include "iptables_wrapper.h"
+#endif // SUPPORT_SYSVPN
 
 using namespace OHOS::NetManagerStandard;
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -71,6 +74,9 @@ constexpr uint32_t THOUSAND_LEN = 100;
 constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
+#ifdef SUPPORT_SYSVPN
+const std::string LOCAL_MANGLE_OUTPUT = "routectrl_mangle_OUTPUT";
+#endif // SUPPORT_SYSVPN
 constexpr uid_t UID_ROOT = 0;
 constexpr std::pair<uid_t, uid_t> UID_ALLOW_INTERNAL = {7023, 7023};
 constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
@@ -99,6 +105,9 @@ std::map<std::string, uint32_t> RouteManager::interfaceToTable_;
 RouteManager::RouteManager()
 {
     Init();
+#ifdef SUPPORT_SYSVPN
+    InitOutcomingPacketMark();
+#endif // SUPPORT_SYSVPN
 }
 
 int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const std::string &destinationName,
@@ -264,6 +273,75 @@ int32_t RouteManager::ModifyPhysicalNetworkPermission(uint16_t netId, const std:
 
     return UpdatePhysicalNetwork(netId, interfaceName, newPermission, DEL_CONTROL);
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t RouteManager::InitOutcomingPacketMark()
+{
+    NETNATIVE_LOGI("InitOutcomingPacketMark");
+    // need to call IptablesWrapper's RunCommand function.
+    std::string commandNew;
+    commandNew.append("-t mangle -N ");
+    commandNew.append(LOCAL_MANGLE_OUTPUT);
+    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, commandNew) == ROUTEMANAGER_ERROR) {
+        NETNATIVE_LOGI("InitOutcomingPacketMark error");
+        return ROUTEMANAGER_ERROR;
+    }
+
+    std::string commandJump;
+    commandJump.append("-t mangle");
+    commandJump.append(" -A OUTPUT -j ");
+    commandJump.append(LOCAL_MANGLE_OUTPUT);
+    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, commandJump) == ROUTEMANAGER_ERROR) {
+        NETNATIVE_LOGE("InitOutcomingPacketMark error");
+        return ROUTEMANAGER_ERROR;
+    }
+    return ROUTEMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string interface,
+    const std::vector<std::string> &extMessages, bool add)
+{
+    int32_t ret = ROUTEMANAGER_SUCCESS;
+    if (interface.empty()) {
+        NETNATIVE_LOGE("UpdateVpnRules err, vpn name is empty");
+        return ROUTEMANAGER_ERROR;
+    }
+    NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
+    for (auto extMessage : extMessages) {
+        if (!CommonUtils::IsValidIPV4(extMessage)) {
+            NETNATIVE_LOGE("failed to add update vpn rules on interface of netId, %{public}u.", netId);
+            return ROUTEMANAGER_ERROR;
+        }
+        ret += UpdateOutcomingIpMark(netId, extMessage, add);
+    }
+    return ret;
+}
+
+int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add)
+{
+    NETNATIVE_LOGI("UpdateOutcomingIpMark,add===%{public}d", add);
+    Fwmark fwmark;
+    fwmark.netId = netId;
+    NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
+    fwmark.permission = permission;
+    std::string action = "";
+    if (add) {
+        action = "-A ";
+    } else {
+        action = "-D ";
+    }
+    std::stringstream ss;
+    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -s " << addr
+    << " -j MARK --set-mark 0x" << std::nouppercase
+    << std::hex << fwmark.intValue;
+    // need to call IptablesWrapper's RunCommand function.
+    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, ss.str()) == ROUTEMANAGER_ERROR) {
+        NETNATIVE_LOGE("UpdateOutcomingIpMark error");
+        return ROUTEMANAGER_ERROR;
+    }
+    return ROUTEMANAGER_SUCCESS;
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName)
 {

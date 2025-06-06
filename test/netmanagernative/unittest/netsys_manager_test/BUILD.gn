@@ -38,6 +38,7 @@ ohos_unittest("netsys_native_manager_test") {
     "net_conn_manager_test_util.cpp",
     "net_diag_wrapper_test.cpp",
     "netlink_msg_test.cpp",
+    "netsys_client_test.cpp",
     "netsys_controller_service_impl_test.cpp",
     "netsys_native_service_stub_test.cpp",
     "netsys_network_test.cpp",
@@ -96,6 +97,7 @@ ohos_unittest("netsys_native_manager_test") {
 
   if (netmanager_base_enable_feature_sysvpn) {
     defines += [ "SUPPORT_SYSVPN" ]
+    sources += [ "multi_vpn_manager_test.cpp" ]
   }
 
   if (netmanager_base_enable_feature_wearable_distributed_net) {

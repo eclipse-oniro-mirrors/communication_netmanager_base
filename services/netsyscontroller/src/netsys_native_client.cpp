@@ -1974,14 +1974,24 @@ int32_t NetsysNativeClient::SetNicTrafficAllowed(const std::vector<std::string> 
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetsysNativeClient::ProcessVpnStage(NetsysNative::SysVpnStageCode stage)
+int32_t NetsysNativeClient::ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->ProcessVpnStage(stage);
+    return proxy->ProcessVpnStage(stage, message);
+}
+
+int32_t NetsysNativeClient::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateVpnRules(netId, extMessages, add);
 }
 #endif // SUPPORT_SYSVPN
 

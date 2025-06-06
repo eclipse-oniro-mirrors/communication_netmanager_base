@@ -18,6 +18,7 @@
 #include "message_parcel.h"
 #ifdef GTEST_API_
 #define private public
+#define protected public
 #endif
 #include "common_net_conn_callback_test.h"
 #include "i_net_conn_callback.h"
@@ -30,6 +31,7 @@
 #include "net_manager_constants.h"
 #include "netmanager_base_test_security.h"
 #include "network.h"
+#include "network_security_config.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1651,6 +1653,30 @@ HWTEST_F(NetConnClientTest, SetReuseSupplierId001, TestSize.Level1)
     bool add = false;
     int32_t ret = NetConnClient::GetInstance().SetReuseSupplierId(supplierId, reuseSupplierId, add);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, IsPinOpenModeVerifyRootCaTest001, TestSize.Level1)
+{
+    std::string hostname("");
+    auto ret = NetConnClient::GetInstance().IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetConnClientTest, IsUserDnsCacheTest001, TestSize.Level1)
+{
+    bool isUserDnsCache = NetworkSecurityConfig::GetInstance().isUserDnsCache_;
+    NetworkSecurityConfig::GetInstance().isUserDnsCache_ = false;
+    auto ret = NetConnClient::GetInstance().IsUserDnsCache();
+    EXPECT_FALSE(ret);
+    NetworkSecurityConfig::GetInstance().isUserDnsCache_ = isUserDnsCache;
+}
+
+HWTEST_F(NetConnClientTest, GetSpecificNetTest001, TestSize.Level1)
+{
+    NetBearType bearerType = BEARER_CELLULAR;
+    std::list<int32_t> netIdList;
+    auto ret = NetConnClient::GetInstance().GetSpecificNet(bearerType, netIdList);
+    EXPECT_EQ(ret, 0);
 }
 
 } // namespace NetManagerStandard

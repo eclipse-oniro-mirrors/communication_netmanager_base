@@ -23,6 +23,9 @@
 #include "route_manager.h"
 #include "vpn_manager.h"
 #include "vnic_manager.h"
+#ifdef SUPPORT_SYSVPN
+#include "multi_vpn_manager.h"
+#endif
 
 namespace OHOS {
 namespace nmd {
@@ -73,8 +76,18 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
         NETNATIVE_LOGW("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
-
-    if (VpnManager::GetInstance().CreateVpnInterface()) {
+    int ret = NETMANAGER_SUCCESS;
+#ifdef SUPPORT_SYSVPN
+    if ((strncmp(interfaceName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
+        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        ret = MultiVpnManager::GetInstance().CreateVpnInterface(interfaceName);
+    } else {
+        ret = VpnManager::GetInstance().CreateVpnInterface();
+    }
+#else
+    ret = VpnManager::GetInstance().CreateVpnInterface();
+#endif // SUPPORT_SYSVPN
+    if (ret != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("create vpn interface error");
         return NETMANAGER_ERROR;
     }
@@ -101,12 +114,28 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         NETNATIVE_LOGE("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
     }
-
+#ifdef SUPPORT_SYSVPN
+    if ((strncmp(interfaceName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
+        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        MultiVpnManager::GetInstance().DestroyVpnInterface(interfaceName);
+    } else {
+        VpnManager::GetInstance().DestroyVpnInterface();
+    }
+#else
     VpnManager::GetInstance().DestroyVpnInterface();
-
+#endif // SUPPORT_SYSVPN
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t VirtualNetwork::UpdateVpnRules(const std::vector<std::string> &extMessages, bool add)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    NETNATIVE_LOGI("VirtualNetwork::UpdateVpnRules netId %{public}d", netId_);
+    return RouteManager::UpdateVpnRules(netId_, *interfaces_.begin(), extMessages, add);
+}
+#endif // SUPPORT_SYSVPN
 } // namespace nmd
 } // namespace OHOS

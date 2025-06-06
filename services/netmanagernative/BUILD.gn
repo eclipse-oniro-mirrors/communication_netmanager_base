@@ -162,7 +162,10 @@ ohos_shared_library("netsys_native_manager") {
   if (netmanager_base_enable_feature_sysvpn) {
     cflags += [ "-DSUPPORT_SYSVPN" ]
     cflags_cc += [ "-DSUPPORT_SYSVPN" ]
-    sources += [ "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/system_vpn_wrapper.cpp" ]
+    sources += [
+        "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/system_vpn_wrapper.cpp",
+        "src/manager/multi_vpn_manager.cpp",
+    ]
   }
   deps = netsys_native_manager_deps
 

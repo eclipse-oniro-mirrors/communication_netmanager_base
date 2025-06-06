@@ -244,6 +244,17 @@ public:
     int32_t DeleteNetworkAccessPolicy(uint32_t uid);
     int32_t NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes);
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
+#ifdef SUPPORT_SYSVPN
+    /**
+     * update vpn interface rules
+     *
+     * @param netId Network number
+     * @param extMessages ext message
+     * @param add true add, false remove
+     * @return Returns 0, add network ip mark successfully, otherwise it will fail
+     */
+    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add);
+#endif // SUPPORT_SYSVPN
 
 private:
     int32_t defaultNetId_;

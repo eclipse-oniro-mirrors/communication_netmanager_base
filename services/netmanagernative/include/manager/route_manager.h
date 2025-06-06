@@ -311,9 +311,26 @@ public:
      */
     static int32_t DisableDistributedNet(bool isServer);
 
+#ifdef SUPPORT_SYSVPN
+    /**
+     * update vpn interface rules
+     *
+     * @param netId Network number
+     * @param extMessages ext message
+     * @param add true add, false remove
+     * @return Returns 0, add network ip mark successfully, otherwise it will fail
+     */
+    static int32_t UpdateVpnRules(uint16_t netId, const std::string interface,
+                                  const std::vector<std::string> &extMessages, bool add);
+#endif // SUPPORT_SYSVPN
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
+#ifdef SUPPORT_SYSVPN
+    static int32_t InitOutcomingPacketMark();
+    static int32_t UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add);
+#endif // SUPPORT_SYSVPN
     static int32_t Init();
     static int32_t ClearRules();
     static int32_t ClearRoutes(const std::string &interfaceName, int32_t netId = 0);

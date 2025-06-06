@@ -58,6 +58,11 @@ enum SysVpnStageCode : int32_t {
     VPN_STAGE_L2TP_CTL, // l2tp vpn. control pppd running
     VPN_STAGE_OPENVPN_RESTART, // openvpn. restart openvpn
     VPN_STAGE_OPENVPN_STOP, // openvpn. stop openvpn
+    VPN_STAGE_L2TP_STOP, // close single l2tp connection
+    VPN_STAGE_CREATE_PPP_FD, // create ppp fd
+    VPN_STAGE_SET_XFRM_PHY_IFNAME, // set xfrm phy ifname
+    VPN_STAGE_SET_VPN_REMOTE_ADDRESS, // set vpn remote ip address
+    VPN_STAGE_SET_L2TP_CONF, // set l2tp config
 };
 class INetsysService : public IRemoteBroker {
 public:
@@ -205,7 +210,8 @@ public:
     virtual int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) = 0;
     virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
 #ifdef SUPPORT_SYSVPN
-    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
+    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message = "") = 0;
+    virtual int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) = 0;
 #endif // SUPPORT_SYSVPN
     virtual int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) = 0;
     virtual int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) = 0;

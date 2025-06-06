@@ -76,5 +76,36 @@ HWTEST_F(IptablesWrapperTest, RunCommandForResTest001, TestSize.Level1)
     auto ret = wrapper->RunCommandForRes(ipType, comdLine);
     EXPECT_EQ(ret, wrapper->result_);
 }
+
+HWTEST_F(IptablesWrapperTest, RunMutipleCommandsTest001, TestSize.Level1)
+{
+    std::shared_ptr<IptablesWrapper> wrapper = DelayedSingleton<IptablesWrapper>::GetInstance();
+    IpType ipType = IpType::IPTYPE_IPV4;
+    std::string comdLine = "-A INPUT -j LOG";
+    std::vector<std::string> commands = {comdLine};
+    auto ret = wrapper->RunMutipleCommands(ipType, commands);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(IptablesWrapperTest, RunCommandForResTest002, TestSize.Level1)
+{
+    std::shared_ptr<IptablesWrapper> wrapper = DelayedSingleton<IptablesWrapper>::GetInstance();
+    IpType ipType = IpType::IPTYPE_IPV4;
+    std::string comdLine = "-A INPUT -j LOG";
+    wrapper->iptablesWrapperFfrtQueue_ = 0;
+    auto ret = wrapper->RunCommandForRes(ipType, comdLine);
+    EXPECT_EQ(ret, wrapper->result_);
+}
+
+HWTEST_F(IptablesWrapperTest, RunMutipleCommandsTest002, TestSize.Level1)
+{
+    std::shared_ptr<IptablesWrapper> wrapper = DelayedSingleton<IptablesWrapper>::GetInstance();
+    IpType ipType = IpType::IPTYPE_IPV4;
+    std::string comdLine = "-A INPUT -j LOG";
+    std::vector<std::string> commands = {comdLine};
+    wrapper->iptablesWrapperFfrtQueue_ = 0;
+    auto ret = wrapper->RunMutipleCommands(ipType, commands);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
 } // namespace NetsysNative
 } // namespace OHOS

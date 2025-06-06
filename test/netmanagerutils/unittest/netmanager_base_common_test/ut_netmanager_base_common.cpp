@@ -1040,5 +1040,51 @@ HWTEST_F(UtNetmanagerBaseCommon, IpToString001, TestSize.Level2)
     std::string ipStrAddr; // "10.158.200.0"
     EXPECT_TRUE(CommonUtils::IpToString(178178048, ipStrAddr));
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, IsSim001, TestSize.Level2)
+{
+    std::string bundleName = "123";
+    EXPECT_FALSE(CommonUtils::IsSim(bundleName));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsInstallSourceFromSim001, TestSize.Level2)
+{
+    std::string installSource = "com.zhuoyi.appstore.lite";
+    EXPECT_TRUE(CommonUtils::IsInstallSourceFromSim(installSource));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsSim2001, TestSize.Level2)
+{
+    std::string bundleName = "123";
+    EXPECT_FALSE(CommonUtils::IsSim2(bundleName));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsInstallSourceFromSim2001, TestSize.Level2)
+{
+    std::string installSource = "com.easy.abroad";
+    EXPECT_TRUE(CommonUtils::IsInstallSourceFromSim2(installSource));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsSimAnco001, TestSize.Level2)
+{
+    std::string bundleName = "com.zhuoyi.appstore.lite";
+    EXPECT_TRUE(CommonUtils::IsSimAnco(bundleName));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsSim2Anco001, TestSize.Level2)
+{
+    std::string bundleName = "com.easy.abroad";
+    EXPECT_TRUE(CommonUtils::IsSim2Anco(bundleName));
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, GetTodayMidnightTimestamp001, TestSize.Level2)
+{
+    int hour = 12;
+    int min = 30;
+    int sec = 30;
+    std::string filePath = "";
+    CommonUtils::DeleteFile(filePath);
+    EXPECT_NE(CommonUtils::GetTodayMidnightTimestamp(hour, min, sec), 0);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

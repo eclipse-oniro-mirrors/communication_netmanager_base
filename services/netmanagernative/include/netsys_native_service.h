@@ -193,7 +193,8 @@ public:
     int32_t StopClat(const std::string &interfaceName) override;
     int32_t ClearFirewallAllRules() override;
 #ifdef SUPPORT_SYSVPN
-    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override;
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message = "") override;
+    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) override;
 #endif // SUPPORT_SYSVPN
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;

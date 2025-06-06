@@ -621,7 +621,12 @@ public:
     }
 
 #ifdef SUPPORT_SYSVPN
-    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) override
+    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message) override
+    {
+        return 0;
+    }
+
+    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) override
     {
         return 0;
     }

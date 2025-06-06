@@ -289,5 +289,30 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest009, TestSize.Level1)
     auto ret = fwmarkClient->ProtectFromVpn(socketFd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
+
+/**
+ * @tc.name: CloseSocketTest002
+ * @tc.desc: Test FwmarkNetwork CloseSocket.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, CloseSocketTest002, TestSize.Level1)
+{
+    int32_t socket = 32;
+    int32_t ret = -1;
+    CloseSocket(&socket, ret, ERROR_CODE_SOCKETFD_INVALID);
+    EXPECT_EQ(socket, -1);
+}
+
+/**
+ * @tc.name: RunForClientFdTest001
+ * @tc.desc: Test FwmarkNetwork RunForClientFd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, RunForClientFdTest001, TestSize.Level1)
+{
+    int32_t socket = 32;
+    RunForClientFd(socket);
+    EXPECT_EQ(socket, -1);
+}
 } // namespace NetsysNative
 } // namespace OHOS

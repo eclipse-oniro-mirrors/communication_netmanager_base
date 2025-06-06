@@ -1383,5 +1383,13 @@ HWTEST_F(NetsysControllerTest, SetNicTrafficAllowed001, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().SetNicTrafficAllowed(ifaceNames, status);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, UnRegisterNetsysTrafficCallback001, TestSize.Level1)
+{
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().UnRegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
