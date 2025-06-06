@@ -130,7 +130,7 @@ pub(crate) fn get_addresses_by_name(host: String) -> Result<Vec<NetAddress>, Bus
         .map_err(|e| BusinessError::new(e, format!("Failed to get addresses by name")))
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn get_address_by_name(
     this: NetHandle,
     host: String,
@@ -151,7 +151,7 @@ pub(crate) fn set_app_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> 
         .map_err(|e| BusinessError::new(e, format!("Failed to set app HTTP proxy")))
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn bind_socket(this: NetHandle, socket: i32) -> Result<(), BusinessError> {
     NetConnClient::bind_socket(socket, this.net_id)
         .map_err(|e| BusinessError::new(e, format!("Failed to bind socket")))
@@ -247,7 +247,7 @@ pub(crate) fn create_net_connection<'local>(
     obj.into()
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_available(
     env: &AniEnv,
     this: NetConnection,
@@ -258,7 +258,7 @@ pub(crate) fn on_net_available(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_block_status_change(
     env: &AniEnv,
     this: NetConnection,
@@ -270,7 +270,7 @@ pub(crate) fn on_net_block_status_change(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_capabilities_change(
     env: &AniEnv,
     this: NetConnection,
@@ -282,7 +282,7 @@ pub(crate) fn on_net_capabilities_change(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_connection_properties_change(
     env: &AniEnv,
     this: NetConnection,
@@ -294,7 +294,7 @@ pub(crate) fn on_net_connection_properties_change(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_lost(
     env: &AniEnv,
     this: NetConnection,
@@ -305,7 +305,7 @@ pub(crate) fn on_net_lost(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn on_net_unavailable(
     env: &AniEnv,
     this: NetConnection,
@@ -316,7 +316,7 @@ pub(crate) fn on_net_unavailable(
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn register_network_change(this: NetConnection) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
 
@@ -331,7 +331,7 @@ pub(crate) fn register_network_change(this: NetConnection) -> Result<(), Busines
     Ok(())
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
 
@@ -351,7 +351,7 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
     }
 }
 
-#[ani_rs::native(bind = "class")]
+#[ani_rs::native]
 pub(crate) fn connection_clean(this: Cleaner) -> Result<(), BusinessError> {
     let _ = unsafe { Box::from_raw(this.ptr as *mut Connection) };
     Ok(())
