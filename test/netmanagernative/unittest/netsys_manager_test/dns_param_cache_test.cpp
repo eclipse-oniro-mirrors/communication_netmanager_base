@@ -350,5 +350,14 @@ HWTEST_F(DNSParamCacheTest, SetUserDefinedServerFlagTest, TestSize.Level1)
     int32_t ret = dnsParCache.SetUserDefinedServerFlag(netId, true);
     EXPECT_EQ(ret, -2);
 }
+
+HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest, TestSize.Level1)
+{
+    NETNATIVE_LOGI("FlushDnsCacheTest enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    int32_t ret = dnsParCache.FlushDnsCache(netId);
+    EXPECT_EQ(ret, -2);
+}
 } // namespace NetsysNative
 } // namespace OHOS

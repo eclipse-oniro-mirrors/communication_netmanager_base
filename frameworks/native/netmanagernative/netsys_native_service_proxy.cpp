@@ -3708,5 +3708,38 @@ int32_t NetsysNativeServiceProxy::SetUserDefinedServerFlag(uint16_t netId, bool 
     NETNATIVE_LOG_D("SetUserDefinedServerFlag WriteParam func out");
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::FlushDnsCache(uint16_t netId)
+{
+    NETNATIVE_LOG_D("Begin to FlushDnsCache");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netId)) {
+        NETNATIVE_LOGE("FlushDnsCache WriteUint16 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in FlushDnsCache");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        NETNATIVE_LOGE("FlushDnsCache SendRequest failed, error code: [%{public}d]", err);
+        return IPC_INVOKER_ERR;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("FlushDnsCache ReadInt32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

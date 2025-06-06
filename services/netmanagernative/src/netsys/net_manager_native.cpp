@@ -642,6 +642,12 @@ int32_t NetManagerNative::DnsSetUserDefinedServerFlag(uint16_t netId, bool flag)
 {
     return dnsManager_->SetUserDefinedServerFlag(netId, flag);
 }
+
+int32_t NetManagerNative::FlushDnsCache(uint16_t netId)
+{
+    return dnsManager_->FlushDnsCache(netId);
+}
+
 #ifdef SUPPORT_SYSVPN
 int32_t NetManagerNative::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {

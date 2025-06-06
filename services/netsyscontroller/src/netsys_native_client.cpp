@@ -2035,6 +2035,15 @@ int32_t NetsysNativeClient::SetUserDefinedServerFlag(uint16_t netId, bool isUser
     return proxy->SetUserDefinedServerFlag(netId, isUserDefinedServer);
 }
 
+int32_t NetsysNativeClient::FlushDnsCache(uint16_t netId)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->FlushDnsCache(netId);
+}
 
 } // namespace NetManagerStandard
 } // namespace OHOS

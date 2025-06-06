@@ -119,6 +119,8 @@ public:
 
     bool IsUseVpnDns(uint32_t uid);
 
+    int32_t FlushDnsCache(uint16_t netId);
+
 private:
     DnsParamCache();
 

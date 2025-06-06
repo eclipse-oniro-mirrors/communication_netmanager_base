@@ -148,6 +148,7 @@ enum class NetsysInterfaceCode {
 	NETSYS_GET_TRAFFIC_AVAILABLE_MAP,
 	NETSYS_CLEAR_INCRE_TRAFFIC_MAP,
 	NETSYS_UPDATE_IFINDEX_MAP,
+    NETSYS_FLUSH_DNS_CACHE,
 };
 
 enum class NotifyInterfaceCode {

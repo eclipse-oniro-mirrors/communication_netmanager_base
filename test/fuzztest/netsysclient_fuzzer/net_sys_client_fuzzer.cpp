@@ -1605,6 +1605,19 @@ void CmdDelBrokerUidAccessPolicyMapFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdFlushDnsCacheFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+ 
+    uint16_t netId = NetSysGetData<int16_t>();
+    dataParcel.WriteUint16(netId);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE),
+                    dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1664,6 +1677,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdEnableDistributedClientNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdEnableDistributedServerNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDisableDistributedNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdFlushDnsCacheFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

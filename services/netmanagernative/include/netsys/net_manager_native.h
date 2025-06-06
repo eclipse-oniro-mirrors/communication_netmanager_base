@@ -161,6 +161,7 @@ public:
     int32_t ClearFirewallAllRules();
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     int32_t DnsSetUserDefinedServerFlag(uint16_t netId, bool flag);
+    int32_t FlushDnsCache(uint16_t netId);
 #ifdef SUPPORT_SYSVPN
     int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN

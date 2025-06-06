@@ -1056,6 +1056,8 @@ public:
 #endif // SUPPORT_SYSVPN
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps);
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid);
+    int32_t FlushDnsCache(uint16_t netId);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
