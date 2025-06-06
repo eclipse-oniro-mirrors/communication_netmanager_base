@@ -486,6 +486,34 @@ HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest004, TestSize.Level1)
         netCaps, g_vpnSupplierId);
     EXPECT_EQ(regRet, NETMANAGER_SUCCESS);
 
+    auto supplier = NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId);
+
+    sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
+    netSupplierInfo->uid_ = -1;
+    NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
+
+    std::list<int32_t> netIdList;
+    auto ret1 = NetConnService::GetInstance()->GetAllNets(netIdList);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
+
+    auto ret2 = NetConnService::GetInstance()->IsCallingUserSupplier(g_vpnSupplierId);
+    EXPECT_FALSE(ret2);
+}
+
+HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest005, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    int32_t regRet = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_VPN, TEST_IDENT,
+        netCaps, g_vpnSupplierId);
+    EXPECT_EQ(regRet, NETMANAGER_SUCCESS);
+
+    auto supplier = NetConnService::GetInstance()->FindNetSupplier(g_vpnSupplierId);
+
+    sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
+    netSupplierInfo->uid_ = TEST_UID;
+    NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
+
     std::list<int32_t> netIdList;
     auto ret1 = NetConnService::GetInstance()->GetAllNets(netIdList);
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
