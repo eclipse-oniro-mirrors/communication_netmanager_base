@@ -83,5 +83,29 @@ HWTEST_F(VirtualNetWorkTest, RemoveInterface001, TestSize.Level1)
     auto result = instance_->RemoveInterface(iface);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+#ifdef SUPPORT_SYSVPN
+HWTEST_F(VirtualNetWorkTest, UpdateVpnRules001, TestSize.Level1)
+{
+    const std::string ipAddr = "172.0.0.1";
+    std::vector<std::string> extMessages;
+    extMessages.emplace_back(ipAddr);
+    int32_t result = instance_->UpdateVpnRules(extMessages, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    result = instance_->UpdateVpnRules(extMessages, false);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VirtualNetWorkTest, UpdateVpnRules002, TestSize.Level1)
+{
+    const std::string ipAddr = "172.0.1";
+    std::vector<std::string> extMessages;
+    extMessages.emplace_back(ipAddr);
+    int32_t result = instance_->UpdateVpnRules(extMessages, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    result = instance_->UpdateVpnRules(extMessages, true);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+#endif // SUPPORT_SYSVPN
 } // namespace nmd
 } // namespace OHOS

@@ -1028,7 +1028,17 @@ public:
      * @param stage the next vpn stage code
      * @return Returns 0 success. Otherwise fail
      */
-    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage) = 0;
+    virtual int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message = "") = 0;
+
+    /**
+     * update vpn interface rules
+     *
+     * @param netId Network number
+     * @param extMessages ext message
+     * @param add true add, false remove
+     * @return Returns 0, add network ip mark successfully, otherwise it will fail
+     */
+    virtual int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) = 0;
 #endif // SUPPORT_SYSVPN
 
     virtual int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) = 0;
