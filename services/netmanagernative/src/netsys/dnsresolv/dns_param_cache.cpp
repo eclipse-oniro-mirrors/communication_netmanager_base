@@ -800,7 +800,7 @@ int32_t DnsParamCache::FlushDnsCache(uint16_t netId)
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
-        DNS_CONFIG_PRINT("FlushDnsCache failed: netid is not have netid:%{public}d,", netId);
+        DNS_CONFIG_PRINT("FlushDnsCache failed: netid is non-existent netid:%{public}d,", netId);
         return -ENOENT;
     }
     it->second.GetCache().Clear();
