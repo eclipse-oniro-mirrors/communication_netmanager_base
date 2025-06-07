@@ -496,5 +496,21 @@ HWTEST_F(NetsysBpfStatsTest, GetIfIndexMapTest001, TestSize.Level1)
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     EXPECT_EQ(bpfStats->GetIfIndexMap(), -1);
 }
+
+HWTEST_F(NetsysBpfStatsTest, SetNetStatusMapTest001, TestSize.Level1)
+{
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_NE(bpfStats->SetNetStatusMap(0, 0), -1);
+    EXPECT_NE(bpfStats->SetNetStatusMap(0, 1), -1);
+    EXPECT_NE(bpfStats->SetNetStatusMap(1, 0), -1);
+    EXPECT_NE(bpfStats->SetNetStatusMap(1, 1), -1);
+    EXPECT_EQ(bpfStats->SetNetStatusMap(2, 1), -1);
+}
+
+HWTEST_F(NetsysBpfStatsTest, SetNetWlan1MapTest001, TestSize.Level1)
+{
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    EXPECT_EQ(bpfStats->SetNetWlan1Map(47), -1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

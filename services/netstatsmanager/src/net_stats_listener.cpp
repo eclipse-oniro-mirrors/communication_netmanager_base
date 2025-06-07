@@ -48,16 +48,40 @@ void NetStatsListener::RegisterStatsCallback(const std::string &event, StatsCall
     NETMGR_LOG_I("NetStatsListener RegisterStatsCallback is successful");
 }
 
+void NetStatsListener::RegisterStatsCallbackData(const std::string &event, StatsCallbackData callback)
+{
+    if (callbackMapData_.find(event) != callbackMapData_.end()) {
+        NETMGR_LOG_W("Key %{public}s has been assigned and will be replaced", event.c_str());
+    }
+    callbackMapData_[event] = callback;
+    NETMGR_LOG_I("NetStatsListener RegisterStatsCallbackData is successful");
+}
+
 void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
 {
     NETMGR_LOG_I("NetStatsListener::OnReceiveEvent(), event:[%{public}s], data:[%{public}s], code:[%{public}d]",
                  data.GetWant().GetAction().c_str(), data.GetData().c_str(), data.GetCode());
 
     auto want = data.GetWant();
+
+    auto callbackData = callbackMapData_.find(want.GetAction());
+    if (callbackData != callbackMapData_.end()) {
+        if (callbackData->second == nullptr) {
+            callbackMapData_.erase(want.GetAction());
+            return;
+        }
+        auto ret = callbackData->second(data);
+        if (ret != 0) {
+            NETMGR_LOG_E("Callback run failed");
+        }
+        return;
+    }
+
     auto callback = callbackMap_.find(want.GetAction());
     if (callback == callbackMap_.end()) {
         return;
     }
+
     if (callback->second == nullptr) {
         callbackMap_.erase(want.GetAction());
         return;

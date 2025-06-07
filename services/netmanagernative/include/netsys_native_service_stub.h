@@ -189,6 +189,7 @@ private:
     int32_t CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply);
     int32_t CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetNetStatusMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdFlushDnsCache(MessageParcel &data, MessageParcel &reply);
 
 private:

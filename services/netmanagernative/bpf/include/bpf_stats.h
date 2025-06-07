@@ -19,6 +19,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <mutex>
 
 #include "bpf_def.h"
 #include "bpf_mapper.h"
@@ -101,9 +102,15 @@ public:
     int32_t GetIfIndexMap();
 
     int32_t GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie);
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value);
+    int32_t SetNetWlan1Map(uint64_t ifIndex);
 
 private:
     static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value);
+
+private:
+    std::mutex netStatusMapMutex_;
+    std::mutex netWlan1MapMutex_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_STATS_H

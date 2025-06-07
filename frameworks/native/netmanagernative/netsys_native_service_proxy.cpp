@@ -2260,6 +2260,44 @@ int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::SetNetStatusMap(uint8_t type, uint8_t value)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(value)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetNetStatusMap Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP),
+                                          data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to SetNetStatusMap ret= %{public}d", ret);
+        }
+        return ret;
+    }
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                                            IptablesType ipType)
 {

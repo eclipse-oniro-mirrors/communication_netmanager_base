@@ -1554,6 +1554,16 @@ int32_t NetsysNativeClient::UpdateIfIndexMap(int8_t key, uint64_t index)
     return proxy->UpdateIfIndexMap(key, index);
 }
 
+int32_t NetsysNativeClient::SetNetStatusMap(uint8_t type, uint8_t value)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNetStatusMap(type, value);
+}
+
 int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
     NetsysNative::IptablesType ipType)
 {

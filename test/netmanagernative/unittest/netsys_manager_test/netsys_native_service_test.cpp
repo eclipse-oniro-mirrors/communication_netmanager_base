@@ -876,5 +876,11 @@ HWTEST_F(NetsysNativeServiceTest, DisableWearableDistributedNetForward, TestSize
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceTest, SetNetStatusMapTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->SetNetStatusMap(0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

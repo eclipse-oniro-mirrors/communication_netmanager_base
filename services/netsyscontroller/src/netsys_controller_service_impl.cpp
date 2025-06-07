@@ -745,6 +745,12 @@ int32_t NetsysControllerServiceImpl::UpdateIfIndexMap(int8_t key, uint64_t index
     return netsysClient_->UpdateIfIndexMap(key, index);
 }
 
+int32_t NetsysControllerServiceImpl::SetNetStatusMap(uint8_t type, uint8_t value)
+{
+    NETMGR_LOG_D("SetNetStatusMap");
+    return netsysClient_->SetNetStatusMap(type, value);
+}
+
 int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
                                                               NetsysNative::IptablesType ipType)
 {

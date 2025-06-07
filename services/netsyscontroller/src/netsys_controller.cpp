@@ -1174,6 +1174,18 @@ int32_t NetsysController::SetNetStateTrafficMap(uint8_t flag, uint64_t available
     // LCOV_EXCL_STOP
     return netsysService_->SetNetStateTrafficMap(flag, availableTraffic);
 }
+
+int32_t NetsysController::SetNetStatusMap(uint8_t type, uint8_t value)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetNetStatusMap(type, value);
+}
+
 int32_t NetsysController::GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic)
 {
     // LCOV_EXCL_START This will never happen.

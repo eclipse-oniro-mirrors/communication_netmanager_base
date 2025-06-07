@@ -145,6 +145,26 @@ bpf_map_def SEC("maps") net_stats_ringbuf_map = {
     .max_entries = 256 * 1024 /* 256 KB */,
 };
 
+bpf_map_def SEC("maps") net_status_map = {
+    .type =BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(uint8_t),
+    .value_size = sizeof(uint8_t),
+    .max_entries = 3,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") net_wlan1_map = {
+    .type =BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(uint8_t),
+    .value_size = sizeof(uint64_t),
+    .max_entries = 1,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 static inline __u8 socket_ringbuf_net_stats_event_submit(__u8 flag)
 {
     uint8_t *e;
@@ -245,6 +265,45 @@ static traffic_notify_flag is_exceed_mothly_limit(traffic_value used_value)
     return UINT8_MAX;
 }
 
+static uint8_t is_exceed_limit(struct __sk_buff *skb, uint64_t ifindex)
+{
+    uint8_t id = 0; // current only support single card detect.
+    uint64_t *cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &id);
+    if (cur_rmnet_ifindex == NULL || *cur_rmnet_ifindex != ifindex) {
+        return 1;
+    }
+
+    traffic_value used_value = update_new_incre_value(ifindex, skb->len);
+    if (used_value == 0) {
+        return 1;
+    }
+    traffic_notify_flag flag = is_exceed_mothly_limit(used_value);
+    if (flag == UINT8_MAX) {
+        flag = is_exceed_mothly_mark(used_value);
+        if (flag == UINT8_MAX) {
+            flag = is_exceed_daily_mark(used_value);
+        }
+    }
+    if (flag != UINT8_MAX) {
+        socket_ringbuf_net_stats_event_submit(flag);
+    }
+    return 1;
+}
+
+static uint8_t is_need_discard(void)
+{
+    uint8_t wifi_type = 0;
+    uint8_t cellular_type = 1;
+    uint8_t *wifi_status = bpf_map_lookup_elem(&net_status_map, &wifi_type);
+    uint8_t *cellular_status = bpf_map_lookup_elem(&net_status_map, &cellular_type);
+
+    if (wifi_status != NULL && *wifi_status == 0 &&
+        cellular_status != NULL && *cellular_status == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 SEC("socket/iface/stats")
 int socket_iface_stats(struct __sk_buff *skb)
 {
@@ -253,6 +312,10 @@ int socket_iface_stats(struct __sk_buff *skb)
     }
 
     if (skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
+    }
+
+    if (is_need_discard() == 1) {
         return 1;
     }
 
@@ -275,27 +338,7 @@ int socket_iface_stats(struct __sk_buff *skb)
             __sync_fetch_and_add(&value_if->rxBytes, skb->len);
         }
     }
-
-    uint8_t id = 0; // current only support single card detect.
-    uint64_t *cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &id);
-    if (cur_rmnet_ifindex == NULL || *cur_rmnet_ifindex != ifindex) {
-        return 1;
-    }
-
-    traffic_value used_value = update_new_incre_value(ifindex, skb->len);
-    if (used_value == 0) {
-        return 1;
-    }
-    traffic_notify_flag flag = is_exceed_mothly_limit(used_value);
-    if (flag == UINT8_MAX) {
-        flag = is_exceed_mothly_mark(used_value);
-        if (flag == UINT8_MAX) {
-            flag = is_exceed_daily_mark(used_value);
-        }
-    }
-    if (flag != UINT8_MAX) {
-        socket_ringbuf_net_stats_event_submit(flag);
-    }
+    is_exceed_limit(skb, ifindex);
 
     return 1;
 }
