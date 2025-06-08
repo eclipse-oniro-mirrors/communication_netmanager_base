@@ -62,6 +62,7 @@ static constexpr const char *KEY_DESTINATION = "destination";
 static constexpr const char *KEY_GATE_WAY = "gateway";
 static constexpr const char *KEY_HAS_GET_WAY = "hasGateway";
 static constexpr const char *KEY_IS_DEFAULT_ROUE = "isDefaultRoute";
+static constexpr const char *KEY_IS_EXCLUDED_ROUTE = "isExcludedRoute";
 static constexpr const char *KEY_HOST = "host";
 static constexpr const char *KEY_PARSED_EXCLUSION_LIST = "parsedExclusionList";
 static constexpr const char *KEY_NET_HANDLE = "netHandle";
