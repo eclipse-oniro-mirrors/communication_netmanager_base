@@ -43,6 +43,7 @@ struct NET_SYMBOL_VISIBLE Route final : public Parcelable {
     bool isHost_ = false;
     bool hasGateway_ = true;
     bool isDefaultRoute_ = false;
+    bool isExcludedRoute_ = false;
 
     bool operator==(const Route &obj) const;
 

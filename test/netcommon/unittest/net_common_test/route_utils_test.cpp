@@ -38,6 +38,7 @@ Route GetRoute()
     route.rtnType_ = RTN_UNICAST;
     route.hasGateway_ = true;
     route.isDefaultRoute_ = false;
+    route.isExcludedRoute_ = false;
     route.destination_.type_ = INetAddr::IPV4;
     route.destination_.family_ = AF_INET;
     route.destination_.prefixlen_ = 0x18;
