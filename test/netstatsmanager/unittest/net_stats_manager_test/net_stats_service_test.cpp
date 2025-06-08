@@ -761,5 +761,18 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
     netStatsService->DeleteTrafficStatsByAccount(infos, 888);
     EXPECT_EQ(infos.size(), 4);
 }
+
+HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    int32_t simId = 1;
+    bool ret = netStatsService->CalculateTrafficAvailable(simId, UINT64_MAX, UINT64_MAX, UINT64_MAX);
+    EXPECT_EQ(ret, false);
+
+    netStatsService->settingsTrafficMap_.insert(
+                std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
+    netStatsService->CalculateTrafficAvailable(simId, UINT64_MAX, UINT64_MAX, UINT64_MAX);
+    EXPECT_EQ(ret, true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

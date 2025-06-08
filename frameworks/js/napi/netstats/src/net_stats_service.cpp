@@ -1463,7 +1463,7 @@ dailyMark:%{public}u",
     uint64_t dailyMarkAvailable = UINT64_MAX;
     bool ret = CalculateTrafficAvailable(simId, monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
     if (!ret) {
-        NETMGR_LOG_E("CalculateTrafficAvailable error or not set limit or open unlimit");
+        NETMGR_LOG_E("CalculateTrafficAvailable error or open unlimit");
         return;
     }
 
@@ -1500,6 +1500,10 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
         NETMGR_LOG_E("settingsTrafficMap not find simId, simId is %{public}d", simId);
         return false;
     }
+
+    if (settingsTrafficMap_[simId].second->monthlyLimit == UINT64_MAX) {
+        return true;
+    }
     sptr<NetStatsNetwork> network = (std::make_unique<NetStatsNetwork>()).release();
     network->startTime_ =
         static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(settingsTrafficMap_[simId].second->beginDate));
@@ -1515,14 +1519,11 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
     }
 
     NETMGR_LOG_I("GetAllUsedTrafficStatsByNetwork allUsedTraffic: %{public}" PRIu64, allUsedTraffic);
-    // 限额不是u64且没有打开无限开关
-    if (settingsTrafficMap_[simId].second->monthlyLimit != UINT64_MAX &&
-        settingsTrafficMap_[simId].second->unLimitedDataEnable != 1) {
-        // 设置值大于已用值时，才计算余额
+    if (settingsTrafficMap_[simId].second->unLimitedDataEnable != 1) {
         if (settingsTrafficMap_[simId].second->monthlyLimit > allUsedTraffic) {
             monthlyAvailable = settingsTrafficMap_[simId].second->monthlyLimit - allUsedTraffic;
         }
-        // (设置值*月限制比例)大于已用值
+
         uint64_t monthTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->monthlyMark;
         if (monthTmp > allUsedTraffic) {
@@ -1536,6 +1537,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
             NETMGR_LOG_E("GetAllUsedTrafficStatsByNetwork err. ret: %{public}d", ret);
             return false;
         }
+
         uint64_t dayTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->dailyMark;
         NETMGR_LOG_E("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);

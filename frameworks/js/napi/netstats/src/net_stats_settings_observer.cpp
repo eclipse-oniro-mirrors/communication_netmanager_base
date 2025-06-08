@@ -225,8 +225,8 @@ void TrafficMonthlyValueObserver::OnChange()
     std::string value = "";
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     dataShareHelperUtils->Query(uri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_LIMITED_TRAFFIC, value);
-    uint64_t trafficInt = 0;
-    if (!value.empty()) {
+    uint64_t trafficInt = UINT64_MAX;
+    if (!value.empty() && value != "-1") { // "-1": reset traffic limit
         NetStatsUtils::ConvertToUint64(value, trafficInt);
     }
     NETMGR_LOG_E("TrafficMonthlyValueObserver OnChanged. dataString: %{public}s, TrafficInt: %{public}lu",
