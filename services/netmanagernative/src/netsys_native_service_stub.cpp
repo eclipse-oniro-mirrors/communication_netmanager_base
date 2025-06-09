@@ -356,6 +356,8 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
         &NetsysNativeServiceStub::CmdClearIncreaseTrafficMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_IFINDEX_MAP)] =
         &NetsysNativeServiceStub::CmdUpdateIfIndexMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP)] =
+        &NetsysNativeServiceStub::CmdSetNetStatusMap;
 }
 
 int32_t NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply)
@@ -1610,6 +1612,24 @@ int32_t NetsysNativeServiceStub::CmdUpdateIfIndexMap(MessageParcel &data, Messag
         return ERR_FLATTEN_OBJECT;
     }
     int32_t result = UpdateIfIndexMap(key, index);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetStatusMap(MessageParcel &data, MessageParcel &reply)
+{
+    uint8_t type = 0;
+    uint8_t value = 0;
+    if (!data.ReadUint8(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.ReadUint8(value)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = SetNetStatusMap(type, value);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;

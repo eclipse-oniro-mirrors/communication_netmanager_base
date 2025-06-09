@@ -461,6 +461,12 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest019, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetsysControllerTest, SetNetStatusMap002, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().SetNetStatusMap(0, 1);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
 {
     std::vector<int32_t> beginUids;
@@ -1381,6 +1387,14 @@ HWTEST_F(NetsysControllerTest, SetNicTrafficAllowed001, TestSize.Level1)
     NetsysController::GetInstance().netsysService_ = nullptr;
 
     int32_t ret = NetsysController::GetInstance().SetNicTrafficAllowed(ifaceNames, status);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetNetStatusMap001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+
+    int32_t ret = NetsysController::GetInstance().SetNetStatusMap(0, 1);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 

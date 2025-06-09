@@ -605,7 +605,7 @@ HWTEST_F(NetsysNativeClientTest, OnRemoteDiedTest001, TestSize.Level1)
 HWTEST_F(NetsysNativeClientTest, UnRegisterNetsysTrafficCallback001, TestSize.Level1)
 {
     sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
-    int32_t ret = nativeClient_.UnRegisterNetsysTrafficCallback(callback);  
+    int32_t ret = nativeClient_.UnRegisterNetsysTrafficCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace NetManagerStandard

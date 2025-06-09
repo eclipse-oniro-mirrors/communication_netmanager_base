@@ -790,6 +790,7 @@ public:
     int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic);
     int32_t ClearIncreaseTrafficMap();
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index);
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value);
 
     /**
      * Set iptables for result

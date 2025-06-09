@@ -676,5 +676,23 @@ HWTEST_F(NetsysNativeServiceProxyTest, FlushDnsCache001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, SetNetStatusMap001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = netsysNativeService->SetNetStatusMap(1, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->SetNetStatusMap(1, 1);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->SetNetStatusMap(0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->SetNetStatusMap(0, 1);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->SetNetStatusMap(2, 1);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

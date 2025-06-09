@@ -119,6 +119,7 @@ public:
     int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t DeleteSimStatsInfo(uint32_t uid) override;
     int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override;
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value) override;
     int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override;
     int32_t ClearIncreaseTrafficMap() override;
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override;

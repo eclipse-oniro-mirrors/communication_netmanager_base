@@ -444,6 +444,11 @@ public:
         return 0;
     }
 
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value) override
+    {
+        return 0;
+    }
+
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;

@@ -404,4 +404,48 @@ int32_t NetsysBpfStats::GetIfIndexMap()
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetsysBpfStats::SetNetStatusMap(uint8_t type, uint8_t value)
+{
+    NETNATIVE_LOGI("SetNetStatusMap: %{public}u, %{public}u", type, value);
+    if (type != 0 && type != 1) {
+        return NETMANAGER_ERROR;
+    }
+    {
+        std::lock_guard<std::mutex> lock(netStatusMapMutex_);
+        BpfMapper<uint8_t, uint8_t> netStatusMap(NET_STATUS_MAP_PATH, BPF_F_WRONLY);
+        if (!netStatusMap.IsValid()) {
+            NETNATIVE_LOGE("netStatusMap not exist.");
+            return NETMANAGER_ERROR;
+        }
+        if (netStatusMap.Write(type, value, 0) != 0) {
+            NETNATIVE_LOGE("UpdatenetStatusMap Write netStatusMap err.");
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    std::string str = WIFI_IFACE_1;
+    uint64_t ifIndex = if_nametoindex(str.c_str());
+    NETNATIVE_LOGI("UpdatenetStatusMap ifIndex:%{public}" PRIu64, ifIndex);
+    if (ifIndex <= 0) {
+        ifIndex = 0;
+    }
+    SetNetWlan1Map(ifIndex);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysBpfStats::SetNetWlan1Map(uint64_t ifIndex)
+{
+    std::lock_guard<std::mutex> lock(netWlan1MapMutex_);
+    BpfMapper<uint8_t, uint64_t> netWlan1Map(NET_WLAN1_MAP_PATH, BPF_F_WRONLY);
+    if (!netWlan1Map.IsValid()) {
+        NETNATIVE_LOGE("SetNetWlan1Map not exist.");
+        return NETMANAGER_ERROR;
+    }
+    if (netWlan1Map.Write(0, ifIndex, 0) != 0) {
+        NETNATIVE_LOGE("SetNetWlan1Map Write err");
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace OHOS::NetManagerStandard

@@ -1034,6 +1034,7 @@ public:
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override;
     int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override;
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override;
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value) override;
     int32_t FlushDnsCache(uint16_t netId) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;

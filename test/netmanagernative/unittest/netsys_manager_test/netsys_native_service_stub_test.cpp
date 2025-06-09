@@ -467,6 +467,11 @@ public:
         return 0;
     }
 
+    int32_t SetNetStatusMap(uint8_t type, uint8_t value) override
+    {
+        return 0;
+    }
+
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
     {
         return 0;
@@ -2184,6 +2189,58 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDisableWearableDistributedNetForward, T
     EXPECT_EQ(ret, ERR_NONE);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetStatusMapTest001, TestSize.Level1)
+{
+    uint8_t type = 0;
+    uint8_t value = 0;
+    MessageParcel data1;
+    if (!data1.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data1.WriteUint8(type)) {
+        return;
+    }
+    if (!data1.WriteUint8(value)) {
+        return;
+    }
+
+    MessageParcel reply1;
+    int32_t ret1 = notifyStub_->CmdSetNetStatusMap(data1, reply1);
+    EXPECT_EQ(ret1, ERR_NONE);
+
+    MessageParcel data2;
+    uint32_t type2 = 1028;
+    if (!data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data2.WriteUint32(type2)) {
+        return;
+    }
+    if (!data2.WriteUint8(value)) {
+        return;
+    }
+
+    MessageParcel reply2;
+    int32_t ret2 = notifyStub_->CmdSetNetStatusMap(data2, reply2);
+    EXPECT_EQ(ret2, ERR_FLATTEN_OBJECT);
+
+    MessageParcel data3;
+    uint32_t value2 = 1028;
+    if (!data3.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data3.WriteUint32(type)) {
+        return;
+    }
+    if (!data3.WriteUint8(value2)) {
+        return;
+    }
+
+    MessageParcel reply3;
+    int32_t ret3 = notifyStub_->CmdSetNetStatusMap(data3, reply3);
+    EXPECT_EQ(ret3, ERR_FLATTEN_OBJECT);
+}
 
 HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
 {

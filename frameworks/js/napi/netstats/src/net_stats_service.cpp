@@ -81,6 +81,16 @@ constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
 constexpr const char* COMMON_EVENT_STATUS = "usual.event.RGM_STATUS_CHANGED";
 constexpr const char* STATUS_FIELD = "rgmStatus";
 const std::string STATUS_UNLOCKED = "rgm_user_unlocked";
+
+enum NetStatusType : uint8_t {
+    WIFI_TYPE = 0,
+    CELLULAR_TYPE = 1,
+};
+
+enum NetStatusConn : uint8_t {
+    NON_CONNECTED = 0,
+    CONNECTED = 1,
+};
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -234,6 +244,7 @@ void NetStatsService::RegisterCommonEvent()
     matchingSkills.AddEvent(COMMON_EVENT_STATUS);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
@@ -260,7 +271,23 @@ void NetStatsService::RegisterCommonEvent()
     });
     RegisterCommonTelephonyEvent();
     RegisterCommonTimeEvent();
+    RegisterCommonNetStatusEvent();
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+}
+
+void NetStatsService::RegisterCommonNetStatusEvent()
+{
+    subscriber_->RegisterStatsCallbackData(
+        EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE, [this](const EventFwk::CommonEventData& eventData) {
+            int32_t state = eventData.GetCode();
+            NETMGR_LOG_I("COMMON_EVENT_WIFI_CONN_STATE: %{public}d", state);
+            if (state == 4) { // 4:OHOS::Wifi::ConnState::CONNECTED
+                return UpdateNetStatusMap(0, 1);
+            } else {
+                return UpdateNetStatusMap(0, 0);
+            }
+            return false;
+        });
 }
 
 void NetStatsService::RegisterCommonTelephonyEvent()
@@ -293,6 +320,15 @@ void NetStatsService::RegisterCommonTimeEvent()
             NETMGR_LOG_I("COMMON_EVENT_TIMEZONE_CHANGED");
             return ModifySysTimer();
         });
+}
+
+bool NetStatsService::UpdateNetStatusMap(uint8_t type, uint8_t value)
+{
+    int32_t ret = NetsysController::GetInstance().SetNetStatusMap(type, value);
+    if (ret != NETMANAGER_SUCCESS) {
+        return false;
+    }
+    return true;
 }
 
 void NetStatsService::InitPrivateUserId()
@@ -1243,6 +1279,7 @@ bool NetStatsService::CommonEventSimStateChangedFfrt(int32_t slotId, int32_t sim
 
 bool NetStatsService::CommonEventCellularDataStateChanged(int32_t slotId, int32_t dataState)
 {
+    UpdateNetStatusMapCellular(dataState);
     if (!trafficPlanFfrtQueue_) {
         NETMGR_LOG_E("FFRT Init Fail");
         return false;
@@ -1255,6 +1292,15 @@ bool NetStatsService::CommonEventCellularDataStateChanged(int32_t slotId, int32_
     });
 #endif
     return true;
+}
+
+void NetStatsService::UpdateNetStatusMapCellular(int32_t dataState)
+{
+    if (dataState == static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
+        UpdateNetStatusMap(NetStatusType::CELLULAR_TYPE, NetStatusConn::CONNECTED);
+    } else {
+        UpdateNetStatusMap(NetStatusType::CELLULAR_TYPE, NetStatusConn::NON_CONNECTED);
+    }
 }
 
 bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataState)

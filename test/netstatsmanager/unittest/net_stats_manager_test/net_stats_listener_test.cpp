@@ -120,5 +120,20 @@ HWTEST_F(NetStatsListenerTest, RegisterStatsCallback001, TestSize.Level1)
     instance_->OnReceiveEvent(data);
     ASSERT_NE(instance_, nullptr);
 }
+
+HWTEST_F(NetStatsListenerTest, RegisterStatsCallbackData001, TestSize.Level1)
+{
+    instance_->RegisterStatsCallbackData(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE,
+                                     [this](const EventFwk::CommonEventData &data) { return 0; });
+    instance_->RegisterStatsCallbackData(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE,
+                                     [this](const EventFwk::CommonEventData &data) { return 0; });
+    EventFwk::Want wantErr;
+    wantErr.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE);
+    EventFwk::CommonEventData eventData;
+    eventData.SetCode(4); //  // 4:WifiConnected
+    eventData.SetWant(wantErr);
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnReceiveEvent(eventData);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

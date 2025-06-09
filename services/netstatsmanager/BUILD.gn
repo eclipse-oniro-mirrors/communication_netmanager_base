@@ -101,7 +101,7 @@ ohos_shared_library("net_stats_manager") {
     "samgr:samgr_proxy",
     "sqlite:sqlite",
     "time_service:time_client",
-    "os_account:os_account_innerkits"
+    "os_account:os_account_innerkits",
   ]
 
   defines = [

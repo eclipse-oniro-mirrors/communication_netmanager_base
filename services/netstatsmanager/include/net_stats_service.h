@@ -160,11 +160,14 @@ private:
     int32_t ModifySysTimer();
     void RegisterCommonTelephonyEvent();
     void RegisterCommonTimeEvent();
+    void RegisterCommonNetStatusEvent();
     int32_t UpdateStatsDataInner();
     int32_t GetHistoryData(std::vector<NetStatsInfo> &infos, std::string ident,
                            uint32_t uid, uint32_t start, uint32_t end);
     void DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequence> &infos, uint32_t uid);
     void InitPrivateUserId();
+    bool UpdateNetStatusMap(uint8_t type, uint8_t value);
+    void UpdateNetStatusMapCellular(int32_t dataState);
 
 private:
     enum ServiceRunningState {

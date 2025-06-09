@@ -24,14 +24,20 @@ namespace NetManagerStandard {
 class NetStatsListener : public EventFwk::CommonEventSubscriber {
 public:
     using StatsCallback = std::function<int32_t(const EventFwk::Want &want)>;
+
+    using StatsCallbackData = std::function<int32_t(const EventFwk::CommonEventData& eventData)>;
+
     explicit NetStatsListener(const EventFwk::CommonEventSubscribeInfo &sp);
 
     void RegisterStatsCallback(const std::string &event, StatsCallback callback);
+
+    void RegisterStatsCallbackData(const std::string &event, StatsCallbackData callback);
 
     void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
 
 private:
     std::map<std::string, StatsCallback> callbackMap_;
+    std::map<std::string, StatsCallbackData> callbackMapData_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
