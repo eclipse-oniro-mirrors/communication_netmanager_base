@@ -385,6 +385,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute) override
+    {
+        return 0;
+    }
+
+    int32_t GetNetExtAttribute(int32_t netId, std::string &netExtAttribute) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

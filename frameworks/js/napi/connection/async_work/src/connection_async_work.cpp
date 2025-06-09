@@ -399,4 +399,28 @@ void ConnectionAsyncWork::NetInterfaceAsyncWork::IfaceUnregisterCallback(napi_en
     BaseAsyncWork::AsyncWorkCallback<IfaceUnregisterContext,
         ConnectionExec::NetInterfaceExec::IfaceUnregisterCallback>(env, status, data);
 }
+
+void ConnectionAsyncWork::ExecGetNetExtAttribute(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetNetExtAttributeContext,
+        ConnectionExec::ExecGetNetExtAttribute>(env, data);
+}
+
+void ConnectionAsyncWork::GetNetExtAttributeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetNetExtAttributeContext, ConnectionExec::GetNetExtAttributeCallback>(env,
+        status, data);
+}
+
+void ConnectionAsyncWork::ExecSetNetExtAttribute(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetNetExtAttributeContext,
+        ConnectionExec::ExecSetNetExtAttribute>(env, data);
+}
+
+void ConnectionAsyncWork::SetNetExtAttributeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetNetExtAttributeContext, ConnectionExec::SetNetExtAttributeCallback>(env,
+        status, data);
+}
 } // namespace OHOS::NetManagerStandard

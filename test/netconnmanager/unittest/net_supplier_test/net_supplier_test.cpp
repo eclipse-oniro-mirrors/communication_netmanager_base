@@ -252,5 +252,11 @@ HWTEST_F(NetSupplierTest, TechToTypeTest001, TestSize.Level1)
     result = supplier->TechToType(techType);
     EXPECT_EQ(result, "4G");
 }
+
+HWTEST_F(NetSupplierTest, NetExtAttributeTest001, TestSize.Level1)
+{
+    supplier->SetNetExtAttribute(TEST_IDENT);
+    EXPECT_EQ(supplier->GetNetExtAttribute(), TEST_IDENT);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -116,6 +116,8 @@ private:
     int32_t OnSetAppIsFrozened(MessageParcel &data, MessageParcel &reply);
     int32_t OnEnableAppFrozenedCallbackLimitation(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetNetExtAttribute(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetNetExtAttribute(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };

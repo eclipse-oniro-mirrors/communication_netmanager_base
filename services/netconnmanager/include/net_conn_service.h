@@ -403,6 +403,8 @@ public:
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     bool IsAppFrozenedCallbackLimitation();
+    int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute) override;
+    int32_t GetNetExtAttribute(int32_t netId, std::string &netExtAttribute) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -586,6 +588,7 @@ private:
 #endif
     void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
     void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
+    sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,

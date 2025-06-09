@@ -195,9 +195,8 @@ static void AddCleanupHook(napi_env env)
     napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
 }
 
-napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
+std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
-    g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),
@@ -238,7 +237,18 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_INTERFACE_CONFIG, GetNetInterfaceConfiguration),
         DECLARE_NAPI_FUNCTION(FUNCTION_REGISTER_NET_SUPPLIER, RegisterNetSupplier),
         DECLARE_NAPI_FUNCTION(FUNCTION_UNREGISTER_NET_SUPPLIER, UnregisterNetSupplier),
+        DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE, SetNetExtAttribute),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE, GetNetExtAttribute),
+        DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync),
     };
+    return functions;
+}
+
+napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
+{
+    g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
+    std::initializer_list<napi_property_descriptor> functions = ConnectionModule::createPropertyList();
     NapiUtils::DefineProperties(env, exports, functions);
     InitClasses(env, exports);
     InitProperties(env, exports);
@@ -573,6 +583,36 @@ napi_value ConnectionModule::GetPacUrl(napi_env env, napi_callback_info info)
     return ModuleTemplate::InterfaceSync<GetPacUrlContext>(env, info, FUNCTION_GET_PAC_URL, nullptr,
                                                                      ConnectionExec::ExecGetPacUrl,
                                                                      ConnectionExec::GetPacUrlCallback);
+}
+
+napi_value ConnectionModule::GetNetExtAttributeSync(napi_env env, napi_callback_info info)
+{
+    NETMANAGER_BASE_LOGI("js invoke getNetExtAttributeSync");
+    return ModuleTemplate::InterfaceSync<GetNetExtAttributeContext>(env, info, FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC,
+        nullptr, ConnectionExec::ExecGetNetExtAttribute, ConnectionExec::GetNetExtAttributeCallback);
+}
+
+napi_value ConnectionModule::SetNetExtAttributeSync(napi_env env, napi_callback_info info)
+{
+    NETMANAGER_BASE_LOGI("js invoke setNetExtAttributeSync");
+    return ModuleTemplate::InterfaceSync<SetNetExtAttributeContext>(env, info, FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC,
+        nullptr, ConnectionExec::ExecSetNetExtAttribute, ConnectionExec::SetNetExtAttributeCallback);
+}
+
+napi_value ConnectionModule::GetNetExtAttribute(napi_env env, napi_callback_info info)
+{
+    NETMANAGER_BASE_LOGI("js invoke getNetExtAttribute");
+    return ModuleTemplate::Interface<GetNetExtAttributeContext>(env, info, FUNCTION_GET_NET_EXT_ATTRIBUTE, nullptr,
+                                                                 ConnectionAsyncWork::ExecGetNetExtAttribute,
+                                                                 ConnectionAsyncWork::GetNetExtAttributeCallback);
+}
+
+napi_value ConnectionModule::SetNetExtAttribute(napi_env env, napi_callback_info info)
+{
+    NETMANAGER_BASE_LOGI("js invoke setNetExtAttribute");
+    return ModuleTemplate::Interface<SetNetExtAttributeContext>(env, info, FUNCTION_SET_NET_EXT_ATTRIBUTE, nullptr,
+                                                                 ConnectionAsyncWork::ExecSetNetExtAttribute,
+                                                                 ConnectionAsyncWork::SetNetExtAttributeCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)

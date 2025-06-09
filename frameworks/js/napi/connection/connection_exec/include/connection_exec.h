@@ -42,6 +42,7 @@
 #include "getinterfaceconfig_context.h"
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
+#include "netextattribute_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -174,6 +175,14 @@ public:
     static bool ExecGetPacUrl(GetPacUrlContext *context);
 
     static napi_value GetPacUrlCallback(GetPacUrlContext *context);
+
+    static bool ExecGetNetExtAttribute(GetNetExtAttributeContext *context);
+
+    static napi_value GetNetExtAttributeCallback(GetNetExtAttributeContext *context);
+
+    static bool ExecSetNetExtAttribute(SetNetExtAttributeContext *context);
+
+    static napi_value SetNetExtAttributeCallback(SetNetExtAttributeContext *context);
 
     class NetHandleExec final {
     public:

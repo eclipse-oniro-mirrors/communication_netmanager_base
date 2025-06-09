@@ -1252,5 +1252,27 @@ int32_t NetConnClient::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSup
     return proxy->SetReuseSupplierId(supplierId, reuseSupplierId, isReused);
 }
 
+int32_t NetConnClient::GetNetExtAttribute(const NetHandle &netHandle, std::string &netExtAttribute)
+{
+    NETMGR_LOG_D("GetNetExtAttribute client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("GetNetExtAttribute proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
+}
+
+int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std::string &netExtAttribute)
+{
+    NETMGR_LOG_D("SetNetExtAttribute client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("GetSpecificNetByIdent proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

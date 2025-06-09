@@ -479,6 +479,34 @@ HWTEST_F(NetConnServiceProxyTest, GetConnectionPropertiesTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: SetNetExtAttributeTest001
+ * @tc.desc: Test NetConnServiceProxy SetNetExtAttribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, SetNetExtAttributeTest001, TestSize.Level1)
+{
+    instance_->SetNetExtAttribute(TEST_NETID, "test");
+    std::string str;
+    int32_t ret = instance_->GetNetExtAttribute(TEST_NETID, str);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+/**
+ * @tc.name: GetNetExtAttributeTest001
+ * @tc.desc: Test NetConnServiceProxy GetNetExtAttribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, GetNetExtAttributeTest001, TestSize.Level1)
+{
+    int32_t defaultNetId = 0;
+    instance_->GetDefaultNet(defaultNetId);
+    instance_->SetNetExtAttribute(defaultNetId, "test");
+    std::string str;
+    instance_->GetNetExtAttribute(defaultNetId, str);
+    EXPECT_EQ(str, "test");
+}
+
+/**
  * @tc.name: GetNetCapabilitiesTest001
  * @tc.desc: Test NetConnServiceProxy GetNetCapabilities.
  * @tc.type: FUNC

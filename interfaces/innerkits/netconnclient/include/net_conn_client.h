@@ -525,6 +525,9 @@ public:
     int32_t EnableAppFrozenedCallbackLimitation(bool flag);
 
     void UnsubscribeSystemAbility();
+
+    int32_t GetNetExtAttribute(const NetHandle &netHandle, std::string &netExtAttribute);
+    int32_t SetNetExtAttribute(const NetHandle &netHandle, const std::string &netExtAttribute);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

@@ -2102,5 +2102,63 @@ int32_t NetConnServiceProxy::SetReuseSupplierId(uint32_t supplierId, uint32_t re
     return reply.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::GetNetExtAttribute(int32_t netId, std::string &netExtAttribute)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteString(netExtAttribute)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE),
+        data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadString(netExtAttribute)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteString(netExtAttribute)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE),
+        data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -149,6 +149,8 @@ public:
     bool IsNetQualityPoor();
     bool IsNetAcceptUnavalidate();
     bool IsInFirstTimeDetecting() const;
+    std::string GetNetExtAttribute();
+    void SetNetExtAttribute(const std::string &netExtAttribute);
 
 private:
     NetBearType netSupplierType_;
@@ -171,6 +173,7 @@ private:
     bool isFirstTimeDetectionDone = false;
     bool isAcceptUnvaliad = false;
     int32_t uid_ = 0;
+    std::string netExtAttribute_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

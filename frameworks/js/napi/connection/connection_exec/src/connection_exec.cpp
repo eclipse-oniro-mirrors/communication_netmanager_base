@@ -438,6 +438,44 @@ napi_value ConnectionExec::SetPacUrlCallback(SetPacUrlContext *context)
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecSetNetExtAttribute(SetNetExtAttributeContext *context)
+{
+    if (!context->IsParseOK()) {
+        return false;
+    }
+    int32_t errorCode = NetConnClient::GetInstance().SetNetExtAttribute(context->netHandle_, context->netExtAttribute_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetNetExtAttribute failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetNetExtAttributeCallback(SetNetExtAttributeContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecGetNetExtAttribute(GetNetExtAttributeContext *context)
+{
+    if (!context->IsParseOK()) {
+        return false;
+    }
+    int32_t errorCode = NetConnClient::GetInstance().GetNetExtAttribute(context->netHandle_, context->netExtAttribute_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetNetExtAttribute failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetNetExtAttributeCallback(GetNetExtAttributeContext *context)
+{
+    return NapiUtils::CreateStringUtf8(context->GetEnv(), context->netExtAttribute_);
+}
+
 bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
 {
     if (context == nullptr) {

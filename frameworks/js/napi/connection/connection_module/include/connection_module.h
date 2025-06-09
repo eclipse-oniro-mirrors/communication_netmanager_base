@@ -17,6 +17,7 @@
 #define COMMUNICATIONNETMANAGERBASE_CONNECTION_MODULE_H
 
 #include <napi/native_api.h>
+#include <initializer_list>
 
 namespace OHOS::NetManagerStandard {
 enum NetConnectionType {
@@ -71,8 +72,13 @@ public:
     static constexpr const char *FUNCTION_GET_INTERFACE_CONFIG = "getNetInterfaceConfiguration";
     static constexpr const char *FUNCTION_REGISTER_NET_SUPPLIER = "registerNetSupplier";
     static constexpr const char *FUNCTION_UNREGISTER_NET_SUPPLIER = "unregisterNetSupplier";
+    static constexpr const char *FUNCTION_SET_NET_EXT_ATTRIBUTE = "setNetExtAttribute";
+    static constexpr const char *FUNCTION_GET_NET_EXT_ATTRIBUTE = "getNetExtAttribute";
+    static constexpr const char *FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC = "setNetExtAttributeSync";
+    static constexpr const char *FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC = "getNetExtAttributeSync";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
+    static std::initializer_list<napi_property_descriptor> createPropertyList();
 
     class NetConnectionInterface final {
     public:
@@ -139,6 +145,10 @@ private:
     static napi_value GetNetInterfaceConfiguration(napi_env env, napi_callback_info info);
     static napi_value RegisterNetSupplier(napi_env env, napi_callback_info info);
     static napi_value UnregisterNetSupplier(napi_env env, napi_callback_info info);
+    static napi_value GetNetExtAttribute(napi_env env, napi_callback_info info);
+    static napi_value SetNetExtAttribute(napi_env env, napi_callback_info info);
+    static napi_value GetNetExtAttributeSync(napi_env env, napi_callback_info info);
+    static napi_value SetNetExtAttributeSync(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

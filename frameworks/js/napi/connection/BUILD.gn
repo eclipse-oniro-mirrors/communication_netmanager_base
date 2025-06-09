@@ -115,6 +115,7 @@ ohos_shared_library("connection_if") {
     "async_context/src/setinterfaceipaddr_context.cpp",
     "async_context/src/setinterfaceup_context.cpp",
     "async_context/src/unregisternetsupplier_context.cpp",
+    "async_context/src/netextattribute_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
     "net_handle_interface/src/net_handle_interface.cpp",

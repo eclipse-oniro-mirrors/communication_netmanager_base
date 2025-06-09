@@ -130,6 +130,14 @@ public:
 
     static void FactoryResetNetworkCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetNetExtAttribute(napi_env env, void *data);
+
+    static void GetNetExtAttributeCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecSetNetExtAttribute(napi_env env, void *data);
+
+    static void SetNetExtAttributeCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;
