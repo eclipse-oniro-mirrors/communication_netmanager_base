@@ -3625,7 +3625,7 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
         return NETMANAGER_SUCCESS;
     }
     std::vector<std::shared_ptr<NetActivate>> activates = it->second;
-    NETMGR_LOG_I("SetAppIsFrozenedAsync uid[%{public}d], isFrozened=[%{public}d].", uid, isFrozened);
+    NETMGR_LOG_D("SetAppIsFrozenedAsync uid[%{public}d], isFrozened=[%{public}d].", uid, isFrozened);
     for (auto iter = activates.begin(); iter != activates.end();++iter) {
         auto curNetAct = (*iter);
         if (curNetAct->IsAppFrozened() == isFrozened) {
