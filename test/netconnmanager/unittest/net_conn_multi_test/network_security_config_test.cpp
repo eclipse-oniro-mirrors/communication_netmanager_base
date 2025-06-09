@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "cJSON.h"
 
 #ifdef GTEST_API_
 #define private public
@@ -476,6 +477,14 @@ HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeVerifyRootCaTest003, TestSize.L
     EXPECT_NE(ret, true);
 }
 
+HWTEST_F(NetworkSecurityConfigTest, IsPinOpenModeVerifyRootCaTest004, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    std::string hostname("");
+    auto ret = networksecurityconfig.IsPinOpenModeVerifyRootCa(hostname);
+    EXPECT_FALSE(ret);
+}
+
 /**
  * @tc.name: GetPinSetForHostNameTest001
  * @tc.desc: Test NetworkSecurityConfig::GetPinSetForHostName
@@ -560,6 +569,24 @@ HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostNameTest003, TestSize.Level1
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostNameTest004, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    std::string hostname("www.example.com");
+    std::string pins;
+    auto ret = networksecurityconfig.GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkSecurityConfigTest, GetTrustAnchorsForHostName001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    std::string hostname("www.example.com");
+    std::vector<std::string> certs;
+    auto ret = networksecurityconfig.GetTrustAnchorsForHostName(hostname, certs);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 /**
  * @tc.name: IsCleartextPermittedTest001
  * @tc.desc: Test NetworkSecurityConfig::IsCleartextPermitted
@@ -582,6 +609,32 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest001, TestSize.Level1
     hostname = "example.com2";
     ret = networksecurityconfig.IsCleartextPermitted(hostname, cleartextPermitted);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest002, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    bool isclearpermitted;
+    auto ret = networksecurityconfig.IsCleartextPermitted(isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest003, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    bool isclearpermitted;
+    auto ret = networksecurityconfig.IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkSecurityConfigTest, IsUserDnsCacheTest001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    bool isUserDnsCache = networksecurityconfig.isUserDnsCache_;
+    networksecurityconfig.isUserDnsCache_ = false;
+    auto ret = networksecurityconfig.IsUserDnsCache();
+    EXPECT_FALSE(ret);
+    networksecurityconfig.isUserDnsCache_ = isUserDnsCache;
 }
 }
 }

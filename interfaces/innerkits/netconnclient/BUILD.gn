@@ -90,7 +90,6 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_conn_client.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_handle.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_callback_base.cpp",
-    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/network_security_config.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
@@ -117,11 +116,8 @@ ohos_shared_library("net_conn_manager_if") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
-    "cJSON:cjson",
     "c_utils:utils",
     "ipc:ipc_core",
-    "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
     "samgr:samgr_proxy",
   ]
 
@@ -162,11 +158,59 @@ ohos_shared_library("socket_permission") {
   deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
   public_configs = [ ":socket_permission_config" ]
   external_deps = [
-    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+config("net_security_config_if_config") {
+  include_dirs = [
+    "include",
+  ]
+}
+
+ohos_shared_library("net_security_config_if") {
+  cflags = common_cflags
+  cflags_cc = common_cflags
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/network_security_config.cpp",
+  ]
+
+  public_configs = [
+    ":net_security_config_if_config",
+  ]
+
+  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "hilog:libhilog",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetConnManager\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

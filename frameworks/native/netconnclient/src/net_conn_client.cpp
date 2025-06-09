@@ -27,7 +27,6 @@
 #include "net_bundle.h"
 #include "net_supplier_callback_stub.h"
 #include "netsys_sock_client.h"
-#include "network_security_config.h"
 #include "system_ability_status_change_stub.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
@@ -993,51 +992,6 @@ int32_t NetConnClient::GetSlotType(std::string &type)
     }
 
     return proxy->GetSlotType(type);
-}
-
-int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::string &pins)
-{
-    return NetworkSecurityConfig::GetInstance().GetPinSetForHostName(hostname, pins);
-}
-
-bool NetConnClient::TrustUser0Ca()
-{
-    return NetworkSecurityConfig::GetInstance().TrustUser0Ca();
-}
-
-bool NetConnClient::TrustUserCa()
-{
-    return NetworkSecurityConfig::GetInstance().TrustUserCa();
-}
-
-bool NetConnClient::IsUserDnsCache()
-{
-    return NetworkSecurityConfig::GetInstance().IsUserDnsCache();
-}
-
-bool NetConnClient::IsPinOpenMode(const std::string &hostname)
-{
-    return NetworkSecurityConfig::GetInstance().IsPinOpenMode(hostname);
-}
-
-bool NetConnClient::IsPinOpenModeVerifyRootCa(const std::string &hostname)
-{
-    return NetworkSecurityConfig::GetInstance().IsPinOpenModeVerifyRootCa(hostname);
-}
-
-int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
-{
-    return NetworkSecurityConfig::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
-}
-
-int32_t NetConnClient::IsCleartextPermitted(bool &cleartextPermitted)
-{
-    return NetworkSecurityConfig::GetInstance().IsCleartextPermitted(cleartextPermitted);
-}
-
-int32_t NetConnClient::IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted)
-{
-    return NetworkSecurityConfig::GetInstance().IsCleartextPermitted(hostname, cleartextPermitted);
 }
 
 int32_t NetConnClient::FactoryResetNetwork()
