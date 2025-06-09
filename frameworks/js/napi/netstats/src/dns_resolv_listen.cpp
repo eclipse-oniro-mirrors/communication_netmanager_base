@@ -825,7 +825,8 @@ bool DnsResolvListenInternal::ProcGetKeyLengthForQueryAddr(uint8_t addrSize,
     PostDnsQueryParam &queryParam, const std::string &data, int index)
 {
     if (addrSize > 0) {
-        if (index + sizeof(AddrInfo) * queryParam.addrSize > data.size()) {
+        uint32_t allSize = static_cast<uint32_t>(index + sizeof(AddrInfo) * queryParam.addrSize);
+        if (allSize > data.size()) {
             return false;
         }
         auto size = std::min<uint8_t>(MAX_RESULTS, addrSize);
@@ -860,14 +861,14 @@ ReceiverRunner DnsResolvListenInternal::ProcGetKeyLengthForAllQueryResult(uint16
             queryParam.netId = netId;
             queryParam.uid = uid;
             queryParam.pid = pid;
-            if (index + sizeof(uint8_t) > data.size()) {
+            if (static_cast<uint32_t>(index + sizeof(uint8_t)) > data.size()) {
                 return FixedLengthReceiverState::ONERROR;
             }
             if (memcpy_s(&addrSize, sizeof(uint8_t), data.data() + index, sizeof(uint8_t)) != EOK) {
                 return FixedLengthReceiverState::ONERROR;
             }
             index += sizeof(uint8_t);
-            if (index + sizeof(DnsProcessInfoExt) > data.size()) {
+            if (static_cast<uint32_t>(index + sizeof(DnsProcessInfoExt)) > data.size()) {
                 return FixedLengthReceiverState::ONERROR;
             }
             if (memcpy_s(&queryParam.processInfo, sizeof(DnsProcessInfoExt),  data.data() + index,

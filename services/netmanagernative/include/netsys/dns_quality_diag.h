@@ -92,7 +92,7 @@ private:
 
     uint32_t report_delay;
 
-    uint32_t last_dns_abnormal_report_time;
+    uint32_t last_dns_abnormal_report_time = 0;
 
     std::atomic_bool handler_started;
 
