@@ -15,7 +15,7 @@ use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
-    objects::{AniFnObject, AniObject, AniRef, GlobalRefCallback},
+    objects::{AniFnObject, AniRef, GlobalRefCallback},
     AniEnv,
 };
 
@@ -24,110 +24,96 @@ use crate::{
         Cleaner, ConnectionProperties, HttpProxy, NetAddress, NetBlockStatusInfo, NetCapabilities,
         NetCapabilityInfo, NetConnection, NetConnectionPropertyInfo, NetHandle, NetSpecifier,
     },
+    error_code::convert_to_business_error,
     wrapper::{ConnUnregisterHandle, NetConnClient},
 };
 
 #[ani_rs::native]
 pub(crate) fn get_default_net() -> Result<NetHandle, BusinessError> {
-    NetConnClient::get_default_net_handle()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get default net handle")))
+    NetConnClient::get_default_net_handle().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_all_nets() -> Result<Vec<NetHandle>, BusinessError> {
-    NetConnClient::get_all_nets()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get all nets")))
+    NetConnClient::get_all_nets().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn has_default_net() -> Result<bool, BusinessError> {
-    NetConnClient::has_default_net()
-        .map_err(|e| BusinessError::new(e, format!("Failed to check default net")))
+    NetConnClient::has_default_net().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_net_capabilities(
     net_handle: NetHandle,
 ) -> Result<NetCapabilities, BusinessError> {
-    NetConnClient::get_net_capabilities(net_handle)
-        .map_err(|e| BusinessError::new(e, format!("Failed to get net capabilities")))
+    NetConnClient::get_net_capabilities(net_handle).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_default_http_proxy() -> Result<HttpProxy, BusinessError> {
-    NetConnClient::get_default_http_proxy()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get default http proxy")))
+    NetConnClient::get_default_http_proxy().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_global_http_proxy() -> Result<HttpProxy, BusinessError> {
-    NetConnClient::get_global_http_proxy()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get global http proxy")))
+    NetConnClient::get_global_http_proxy().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn enable_airplane_mode() -> Result<(), BusinessError> {
-    NetConnClient::set_airplane_mode(true)
-        .map_err(|e| BusinessError::new(e, format!("Failed to enable airplane mode")))
+    NetConnClient::set_airplane_mode(true).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn disable_airplane_mode() -> Result<(), BusinessError> {
-    NetConnClient::set_airplane_mode(false)
-        .map_err(|e| BusinessError::new(e, format!("Failed to disable airplane mode")))
+    NetConnClient::set_airplane_mode(false).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_app_net() -> Result<NetHandle, BusinessError> {
     NetConnClient::get_app_net()
         .map(|net_id| NetHandle { net_id })
-        .map_err(|e| BusinessError::new(e, format!("Failed to get app net")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_app_net(net_handle: NetHandle) -> Result<(), BusinessError> {
-    NetConnClient::set_app_net(net_handle.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to set app net")))
+    NetConnClient::set_app_net(net_handle.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_pac_url() -> Result<String, BusinessError> {
-    NetConnClient::get_pac_url()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get PAC URL")))
+    NetConnClient::get_pac_url().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_pac_url(pac_url: String) -> Result<(), BusinessError> {
-    NetConnClient::set_pac_url(&pac_url)
-        .map_err(|e| BusinessError::new(e, format!("Failed to set PAC URL")))
+    NetConnClient::set_pac_url(&pac_url).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn factory_reset_network() -> Result<(), BusinessError> {
-    NetConnClient::factory_reset_network()
-        .map_err(|e| BusinessError::new(e, format!("Failed to factory reset network")))
+    NetConnClient::factory_reset_network().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn is_default_net_metered() -> Result<bool, BusinessError> {
-    NetConnClient::is_default_net_metered()
-        .map_err(|e| BusinessError::new(e, format!("Failed to check if default net is metered")))
+    NetConnClient::is_default_net_metered().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_connection_properties(
     net_handle: NetHandle,
 ) -> Result<ConnectionProperties, BusinessError> {
-    NetConnClient::get_connection_properties(net_handle.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to get connection properties")))
+    NetConnClient::get_connection_properties(net_handle.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn get_addresses_by_name(host: String) -> Result<Vec<NetAddress>, BusinessError> {
-    let net_handle = NetConnClient::get_default_net_handle()
-        .map_err(|e| BusinessError::new(e, format!("Failed to get default net handle")))?;
+    let net_handle = NetConnClient::get_default_net_handle().map_err(convert_to_business_error)?;
     NetConnClient::get_addresses_by_name(&host, net_handle.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to get addresses by name")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
@@ -135,50 +121,42 @@ pub(crate) fn get_address_by_name(
     this: NetHandle,
     host: String,
 ) -> Result<NetAddress, BusinessError> {
-    NetConnClient::get_address_by_name(&host, this.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to get address by name")))
+    NetConnClient::get_address_by_name(&host, this.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_global_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> {
-    NetConnClient::set_global_http_proxy(proxy)
-        .map_err(|e| BusinessError::new(e, format!("Failed to set HTTP proxy")))
+    NetConnClient::set_global_http_proxy(proxy).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_app_http_proxy(proxy: HttpProxy) -> Result<(), BusinessError> {
-    NetConnClient::set_app_http_proxy(proxy)
-        .map_err(|e| BusinessError::new(e, format!("Failed to set app HTTP proxy")))
+    NetConnClient::set_app_http_proxy(proxy).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn bind_socket(this: NetHandle, socket: i32) -> Result<(), BusinessError> {
-    NetConnClient::bind_socket(socket, this.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to bind socket")))
+    NetConnClient::bind_socket(socket, this.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn net_detection(net_handle: NetHandle) -> Result<(), BusinessError> {
-    NetConnClient::net_detection(net_handle.net_id)
-        .map_err(|e| BusinessError::new(e, format!("Failed to detect network")))
+    NetConnClient::net_detection(net_handle.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn clear_custom_dns_rules() -> Result<(), BusinessError> {
-    NetConnClient::clear_custom_dns_rules()
-        .map_err(|e| BusinessError::new(e, format!("Failed to clear custom DNS rules")))
+    NetConnClient::clear_custom_dns_rules().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_custom_dns_rule(host: String, ips: Vec<String>) -> Result<(), BusinessError> {
-    NetConnClient::set_custom_dns_rules(host, ips)
-        .map_err(|e| BusinessError::new(e, format!("Failed to set custom DNS rules")))
+    NetConnClient::set_custom_dns_rules(host, ips).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> {
-    NetConnClient::remove_custom_dns_rule(host)
-        .map_err(|e| BusinessError::new(e, format!("Failed to remove custom DNS rules")))
+    NetConnClient::remove_custom_dns_rule(host).map_err(convert_to_business_error)
 }
 
 pub struct Connection {
@@ -222,12 +200,12 @@ impl Connection {
     }
 }
 
+#[ani_rs::native]
 pub(crate) fn create_net_connection<'local>(
-    env: AniEnv<'local>,
-    this_: AniRef<'local>,
-    net_specifier: AniObject<'local>,
-    timeout: AniObject<'local>,
-) -> AniRef<'local> {
+    env: &AniEnv<'local>,
+    net_specifier: Option<NetSpecifier>,
+    timeout: Option<i32>,
+) -> Result<AniRef<'local>, BusinessError> {
     static CONNECTION_CLASS: &CStr = unsafe {
         CStr::from_bytes_with_nul_unchecked(
             b"L@ohos/net/connection/connection/NetConnectionInner;\0",
@@ -235,8 +213,6 @@ pub(crate) fn create_net_connection<'local>(
     };
     static CTOR_SIGNATURE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"J:V\0") };
 
-    let net_specifier: Option<NetSpecifier> = env.deserialize(net_specifier).unwrap();
-    let timeout: Option<i32> = env.deserialize(timeout).unwrap();
     let connection = Box::new(Connection::new(None, None));
 
     let ptr = Box::into_raw(connection);
@@ -244,7 +220,7 @@ pub(crate) fn create_net_connection<'local>(
     let obj = env
         .new_object_with_signature(&class, CTOR_SIGNATURE, (ptr as i64,))
         .unwrap();
-    obj.into()
+    Ok(obj.into())
 }
 
 #[ani_rs::native]
