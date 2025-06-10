@@ -199,6 +199,10 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT)] = {
         &NetConnServiceStub::OnGetSpecificNetByIdent, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE)] = {
+        &NetConnServiceStub::OnSetNetExtAttribute, {Permission::SET_NET_EXT_ATTRIBUTE}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE)] = {
+        &NetConnServiceStub::OnGetNetExtAttribute, {Permission::GET_NETWORK_INFO}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -1946,5 +1950,48 @@ int32_t NetConnServiceStub::OnSetReuseSupplierId(MessageParcel &data, MessagePar
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnServiceStub::OnGetNetExtAttribute(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("Enter OnGetNetExtAttribute");
+    int32_t netId = 0;
+    std::string netExtAttribute = "";
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadString(netExtAttribute)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = GetNetExtAttribute(netId, netExtAttribute);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("get netExtAttribute: [%{private}s]", netExtAttribute.c_str());
+        if (!reply.WriteString(netExtAttribute)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetNetExtAttribute(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("Enter OnSetNetExtAttribute");
+    int32_t netId = 0;
+    std::string netExtAttribute = "";
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadString(netExtAttribute)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = SetNetExtAttribute(netId, netExtAttribute);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -92,6 +92,8 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_SPECIFIC_SUPPLIER_ID,
     CMD_NM_SET_REUSE_SUPPLIER_ID,
     CMD_NM_END,
+    CMD_NM_GET_NET_EXT_ATTRIBUTE,
+    CMD_NM_SET_NET_EXT_ATTRIBUTE,
 };
 
 enum class AdjCallbackInterfaceCode {

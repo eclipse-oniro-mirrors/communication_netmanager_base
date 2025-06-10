@@ -529,6 +529,66 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES), dataParcelNoNetId);
 }
 
+void SetNetExtAttributeFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    int32_t netId = NetConnGetData<int32_t>();
+    std::string netExtAttr = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(netExtAttr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE), dataParcel);
+
+    MessageParcel dataParcelNoNetId;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
+        return;
+    }
+    dataParcelNoNetId.WriteString(netExtAttr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE), dataParcelNoNetId);
+
+    MessageParcel dataParcelNoNetExtAttr;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetExtAttr)) {
+        return;
+    }
+    dataParcelNoNetExtAttr.WriteInt32(netId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE), dataParcelNoNetExtAttr);
+}
+
+void GetNetExtAttributeFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    int32_t netId = NetConnGetData<int32_t>();
+    std::string netExtAttr = NetConnGetString(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(netExtAttr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE), dataParcel);
+
+    MessageParcel dataParcelNoNetId;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
+        return;
+    }
+    dataParcelNoNetId.WriteString(netExtAttr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE), dataParcelNoNetId);
+
+    MessageParcel dataParcelNoNetExtAttr;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetExtAttr)) {
+        return;
+    }
+    dataParcelNoNetExtAttr.WriteInt32(netId);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE), dataParcelNoNetExtAttr);
+}
+
 void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;

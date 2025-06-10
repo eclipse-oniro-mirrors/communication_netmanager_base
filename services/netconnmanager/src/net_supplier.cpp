@@ -84,6 +84,8 @@ void NetSupplier::ResetNetSupplier()
     SetNetValid(VERIFICATION_STATE);
     // Reset checking connectivity flag.
     netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    // Reset network extAttribute.
+    netExtAttribute_ = "";
     NETMGR_LOG_I("Reset net supplier %{public}u", supplierId_);
 }
 
@@ -654,5 +656,22 @@ void NetSupplier::SetReuseCap(NetCap reuseCap, bool add)
     }
 }
 
+std::string NetSupplier::GetNetExtAttribute()
+{
+    if (netExtAttribute_.empty() && netHandle_ != nullptr) {
+        NETMGR_LOG_E("supplier %{public}u, netId: %{public}d, get netExtAttribute is empty",
+            supplierId_, netHandle_->GetNetId());
+    }
+    return netExtAttribute_;
+}
+
+void NetSupplier::SetNetExtAttribute(const std::string &netExtAttribute)
+{
+    if (netHandle_ != nullptr) {
+        NETMGR_LOG_I("supplier %{public}u, netId: %{public}d, set netExtAtt: [length: %{public}d, value: %{private}s]",
+            supplierId_, netHandle_->GetNetId(), (int)netExtAttribute.size(), netExtAttribute.c_str());
+    }
+    netExtAttribute_ = netExtAttribute;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

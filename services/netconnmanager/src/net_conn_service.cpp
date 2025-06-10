@@ -78,6 +78,7 @@ constexpr uint16_t DEFAULT_MTU = 1500;
 constexpr int32_t SUCCESS_CODE = 204;
 constexpr int32_t RETRY_TIMES = 3;
 constexpr long AUTH_TIME_OUT = 5L;
+constexpr uint32_t MAX_NET_EXT_ATTRIBUTE = 10240;
 constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager.ready";
 constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
 constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
@@ -3774,6 +3775,43 @@ int32_t NetConnService::SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSu
     if (isReused) {
         FindBestNetworkForAllRequest();
     }
+    return NETMANAGER_SUCCESS;
+}
+
+sptr<NetSupplier> NetConnService::GetSupplierByNetId(int32_t netId)
+{
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+        NETMGR_LOG_E("Could not find the corresponding network.");
+        return nullptr;
+    }
+    uint32_t supplierId = iterNetwork->second->GetSupplierId();
+    return FindNetSupplier(supplierId);
+}
+
+int32_t NetConnService::SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute)
+{
+    sptr<NetSupplier> supplier = GetSupplierByNetId(netId);
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (netExtAttribute.length() > MAX_NET_EXT_ATTRIBUTE) {
+        NETMGR_LOG_E("set netExtAttribute fail: exceed length limit");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    supplier->SetNetExtAttribute(netExtAttribute);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetNetExtAttribute(int32_t netId, std::string &netExtAttribute)
+{
+    sptr<NetSupplier> supplier = GetSupplierByNetId(netId);
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("supplier doesn't exist.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    netExtAttribute = supplier->GetNetExtAttribute();
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

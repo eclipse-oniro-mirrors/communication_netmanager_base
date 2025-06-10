@@ -1296,6 +1296,51 @@ HWTEST_F(NetConnServiceStubTest, OnGetPacUrlTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+/**
+ * @tc.name: OnSetNetExtAttribute
+ * @tc.desc: Test NetConnServiceStub.OnSetNetExtAttribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetNetExtAttributeTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(TEST_INT32_VALUE)) {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnGetNetExtAttribute
+ * @tc.desc: Test NetConnServiceStub.OnGetNetExtAttribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetNetExtAttributeTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(TEST_INT32_VALUE)) {
+        return;
+    }
+    std::string str;
+    if (!data.WriteString(str)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceStubTest, OnSetAppIsFrozenedTest001, TestSize.Level1)
 {
     MessageParcel data;

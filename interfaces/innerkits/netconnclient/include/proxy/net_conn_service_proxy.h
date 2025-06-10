@@ -106,6 +106,8 @@ public:
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
+    int32_t GetNetExtAttribute(int32_t netId, std::string &netExtAttribute) override;
+    int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);

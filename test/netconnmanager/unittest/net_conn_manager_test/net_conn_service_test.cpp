@@ -563,6 +563,46 @@ HWTEST_F(NetConnServiceTest, GetConnectionPropertiesTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, SetNetExtAttributeTest001, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->SetNetExtAttribute(TEST_NETID, "text");
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, SetNetExtAttributeTest002, TestSize.Level1)
+{
+    std::string str(10241, 'c');
+    int32_t defaultNetId = 0;
+    NetConnService::GetInstance()->GetDefaultNet(defaultNetId);
+    auto ret = NetConnService::GetInstance()->SetNetExtAttribute(defaultNetId, str);
+    ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetConnServiceTest, SetNetExtAttributeTest003, TestSize.Level1)
+{
+    int32_t defaultNetId = 0;
+    NetConnService::GetInstance()->GetDefaultNet(defaultNetId);
+    auto ret = NetConnService::GetInstance()->SetNetExtAttribute(defaultNetId, "test");
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, GetNetExtAttributeTest001, TestSize.Level1)
+{
+    std::string str;
+    auto ret = NetConnService::GetInstance()->GetNetExtAttribute(TEST_NETID, str);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetConnServiceTest, GetNetExtAttributeTest002, TestSize.Level1)
+{
+    int32_t defaultNetId = 0;
+    NetConnService::GetInstance()->GetDefaultNet(defaultNetId);
+    NetConnService::GetInstance()->SetNetExtAttribute(defaultNetId, "test");
+    std::string str;
+    auto ret = NetConnService::GetInstance()->GetNetExtAttribute(defaultNetId, str);
+    ASSERT_EQ(str, "test");
+}
+
 HWTEST_F(NetConnServiceTest, GetAddressesByNameTest001, TestSize.Level1)
 {
     std::vector<INetAddr> addrList;
@@ -1904,7 +1944,6 @@ HWTEST_F(NetConnServiceTest, GetPacUrlTest001, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->GetPacUrl(pacUrl);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
-
 
 HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest001, TestSize.Level1)
 {
