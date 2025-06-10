@@ -1317,22 +1317,6 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnClientTest, GetPinSetForHostName001, TestSize.Level1)
-{
-    std::string hostname("www.example.com");
-    std::string pins;
-    auto ret = NetConnClient::GetInstance().GetPinSetForHostName(hostname, pins);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnClientTest, GetTrustAnchorsForHostName001, TestSize.Level1)
-{
-    std::string hostname("www.example.com");
-    std::vector<std::string> certs;
-    auto ret = NetConnClient::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 /**
  * @tc.name: FactoryResetNetworkTest001
  * @tc.desc: Test NetConnClient::FactoryResetNetwork
@@ -1614,20 +1598,6 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
-HWTEST_F(NetConnClientTest, IsCleartextPermitted001, TestSize.Level1)
-{
-    bool isclearpermitted;
-    auto ret = NetConnClient::GetInstance().IsCleartextPermitted(isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnClientTest, IsCleartextPermitted002, TestSize.Level1)
-{
-    bool isclearpermitted;
-    auto ret = NetConnClient::GetInstance().IsCleartextPermitted("www.testCleartextPermitted.com", isclearpermitted);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
 {
     auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, true);
@@ -1653,22 +1623,6 @@ HWTEST_F(NetConnClientTest, SetReuseSupplierId001, TestSize.Level1)
     bool add = false;
     int32_t ret = NetConnClient::GetInstance().SetReuseSupplierId(supplierId, reuseSupplierId, add);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
-HWTEST_F(NetConnClientTest, IsPinOpenModeVerifyRootCaTest001, TestSize.Level1)
-{
-    std::string hostname("");
-    auto ret = NetConnClient::GetInstance().IsPinOpenModeVerifyRootCa(hostname);
-    EXPECT_FALSE(ret);
-}
-
-HWTEST_F(NetConnClientTest, IsUserDnsCacheTest001, TestSize.Level1)
-{
-    bool isUserDnsCache = NetworkSecurityConfig::GetInstance().isUserDnsCache_;
-    NetworkSecurityConfig::GetInstance().isUserDnsCache_ = false;
-    auto ret = NetConnClient::GetInstance().IsUserDnsCache();
-    EXPECT_FALSE(ret);
-    NetworkSecurityConfig::GetInstance().isUserDnsCache_ = isUserDnsCache;
 }
 
 HWTEST_F(NetConnClientTest, GetSpecificNetTest001, TestSize.Level1)

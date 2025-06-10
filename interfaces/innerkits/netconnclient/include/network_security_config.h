@@ -20,12 +20,11 @@
 #include <set>
 #include <vector>
 
-#include "cJSON.h"
-#include "openssl/ssl.h"
-
+struct cJSON;
+struct x509_st;
+typedef struct x509_st X509;
 namespace OHOS {
 namespace NetManagerStandard {
-
 struct Domain {
     std::string domainName_;
     bool includeSubDomains_;

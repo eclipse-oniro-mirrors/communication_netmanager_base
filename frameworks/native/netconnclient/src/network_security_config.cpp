@@ -24,7 +24,9 @@
 #include <sstream>
 #include <securec.h>
 
+#include "cJSON.h"
 #include "openssl/evp.h"
+#include "openssl/ssl.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
