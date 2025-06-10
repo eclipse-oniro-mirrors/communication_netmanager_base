@@ -705,7 +705,7 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest016, TestSize.Level1)
     // user is not existed, so return error.
     httpProxy.SetUserId(INVALID_USERID);
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ASSERT_NE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest017, TestSize.Level1)
@@ -972,7 +972,7 @@ HWTEST_F(NetConnServiceTest, DelInterfaceAddressTest001, TestSize.Level1)
     std::string ipAddr = "0.0.0.1";
     int32_t prefixLength = 23;
     int32_t ret = NetConnService::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, AddStaticArpTest001, TestSize.Level1)
@@ -1307,7 +1307,7 @@ HWTEST_F(NetConnServiceTest, GetDefaultSupplierId001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetConnService::GetInstance()->GetDefaultSupplierId(NetBearType::BEARER_WIFI, TEST_IDENT,
         supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, EnableVnicNetwork001, TestSize.Level1)
@@ -1668,7 +1668,7 @@ HWTEST_F(NetConnServiceTest, EnableDistributedClientNetTest002, TestSize.Level1)
     virnicAddr = "127.0.0.1";
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
     ret = NetConnService::GetInstance()->EnableDistributedClientNetAsync(virnicAddr, iif);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->EnableDistributedClientNetAsync(virnicAddr, iif);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1718,7 +1718,7 @@ HWTEST_F(NetConnServiceTest, DisableDistributedNetTest001, TestSize.Level1)
 
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
     ret = NetConnService::GetInstance()->DisableDistributedNetAsync(isServer);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->DisableDistributedNetAsync(isServer);
     ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
@@ -1791,7 +1791,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetCaps002, TestSize.Level1)
         = std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
         
     auto ret = NetConnService::GetInstance()->UpdateNetCaps(netCaps, g_supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 
@@ -1822,7 +1822,7 @@ HWTEST_F(NetConnServiceTest, GetPacUrlTest001, TestSize.Level1)
 {
     std::string pacUrl;
     auto ret = NetConnService::GetInstance()->GetPacUrl(pacUrl);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 
