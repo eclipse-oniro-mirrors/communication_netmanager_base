@@ -683,6 +683,7 @@ private:
     void HandleFindBestNetworkForDelay();
     void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr &supplier);
     void RemoveDelayNetwork();
+    void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
