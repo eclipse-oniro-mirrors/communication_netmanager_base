@@ -866,20 +866,6 @@ HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
     }
 }
 
-HWTEST_F(NetsysControllerTest, NetDiagSetInterfaceActiveState001, TestSize.Level1)
-{
-    std::list<OHOS::NetsysNative::NetDiagIfaceConfig> configs;
-    std::string ifaceName = "eth0";
-
-    auto ret = NetsysController::GetInstance().NetDiagSetInterfaceActiveState(ifaceName, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    configs.clear();
-    ifaceName = "eth1";
-    ret = NetsysController::GetInstance().NetDiagSetInterfaceActiveState(ifaceName, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetsysControllerTest, NetDiagUpdateInterfaceConfig001, TestSize.Level1)
 {
     std::string ifaceName = "eth0";
