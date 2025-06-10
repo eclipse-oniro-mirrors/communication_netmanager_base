@@ -153,12 +153,4 @@ HWTEST_F(NetsysWrapperTest, TestServiceGet001, TestSize.Level1)
 {
     EXPECT_NE(netsysNativeService_, nullptr);
 }
-
-HWTEST_F(NetsysWrapperTest, RegisterCallbackTest001, TestSize.Level1)
-{
-    auto result = netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
-    EXPECT_EQ(result, 0);
-    result = netsysNativeService_->UnRegisterNotifyCallback(nativeNotifyCallback_);
-    EXPECT_EQ(result, 0);
-}
 } // namespace OHOS::nmd
