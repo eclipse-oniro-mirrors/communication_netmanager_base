@@ -546,7 +546,7 @@ export default namespace connection {
   }
 
   export interface NetConnection {
-      on(type: 'netAvailable' | 'netBlockStatusChange' | 'netCapabilitiesChange' | 'netConnectionPropertiesChange' | 'netLost' | 'netUnavailable' , callback: Object): void;
+      on(type: string, callback: Object): void;
 
       register(callback: AsyncCallback<void>): void;
 
@@ -572,7 +572,7 @@ export default namespace connection {
         destroyRegister.unregister(unregisterToken);
     }
 
-    on(type: 'netAvailable' | 'netBlockStatusChange' | 'netCapabilitiesChange' | 'netConnectionPropertiesChange' | 'netLost' | 'netUnavailable' , callback: Object): void {
+    on(type: string, callback: Object): void {
       if (type == 'netAvailable') {
         this.onNetAvailable(callback as Callback<NetHandle>);
       } else if (type == 'netBlockStatusChange') {

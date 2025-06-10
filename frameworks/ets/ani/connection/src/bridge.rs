@@ -21,7 +21,7 @@ pub struct Cleaner {
     pub ptr: i64,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetSpecifier")]
+#[ani_rs::ani]
 pub struct NetSpecifier {
     pub net_capabilities: NetCapabilities,
 

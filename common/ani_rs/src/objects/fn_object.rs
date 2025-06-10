@@ -15,7 +15,7 @@ use ani_sys::{ani_fn_object, ani_object};
 use serde::Serialize;
 use std::{
     ops::Deref,
-    sync::{mpsc::Sender, Arc, OnceLock},
+    sync::{Arc, Once},
 };
 
 use crate::{
@@ -93,13 +93,6 @@ impl<'local> AniFnObject<'local> {
     }
 }
 
-static SENDER: OnceLock<
-    Sender<(
-        Arc<GlobalRef<AniFnObject<'static>>>,
-        Box<dyn InputVec + Send>,
-    )>,
-> = OnceLock::new();
-
 impl<'local> AniFnObject<'local> {
     pub fn execute_local<const N: usize, T>(
         &self,
@@ -144,24 +137,21 @@ impl GlobalRef<AniFnObject<'static>> {
         Self: 'static,
         T: InputVec + Send + 'static,
     {
-        let tx = SENDER.get_or_init(|| {
-            let (tx, rx) = std::sync::mpsc::channel::<(
-                Arc<GlobalRef<AniFnObject<'static>>>,
-                Box<dyn InputVec + Send>,
-            )>();
-            std::thread::spawn(move || {
-                let env = AniVm::get_instance().attach_current_thread().unwrap();
-                while let Ok(fn_obj) = rx.recv() {
-                    let input = fn_obj.1.input(&env);
-                    let res = env.function_object_call(&fn_obj.0 .0, &input);
-                    if let Err(err) = res {
-                        eprintln!("Error executing callback: {:?}", err);
-                    }
-                }
+        thread_local! {
+            pub static ONCE:Once = Once::new();
+        }
+        let me = self.clone();
+        ylong_runtime::spawn_blocking(move || {
+            ONCE.with(|a| {
+                a.call_once(|| {
+                    AniVm::get_instance().attach_current_thread().unwrap();
+                });
             });
-            tx
+            if let Ok(env) = AniVm::get_instance().get_env() {
+                let input = input.input(&env);
+                let _ = env.function_object_call(&me.0, &input);
+            }
         });
-        tx.send((self.clone(), Box::new(input))).unwrap();
     }
 }
 
