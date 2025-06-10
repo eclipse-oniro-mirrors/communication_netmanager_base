@@ -46,6 +46,9 @@ bool SystemVpnWrapper::PrepareUpdate(SysVpnStageCode stage, const std::string &m
         case SysVpnStageCode::VPN_STAGE_SET_XFRM_PHY_IFNAME:
             MultiVpnManager::GetInstance().SetXfrmPhyIfName(message);
             break;
+        case SysVpnStageCode::VPN_STAGE_SET_VPN_CALL_MODE:
+            MultiVpnManager::GetInstance().SetVpnCallMode(message);
+            break;
         case SysVpnStageCode::VPN_STAGE_SET_VPN_REMOTE_ADDRESS:
             MultiVpnManager::GetInstance().SetVpnRemoteAddress(message);
             break;

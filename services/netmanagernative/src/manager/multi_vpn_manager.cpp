@@ -286,7 +286,7 @@ int32_t MultiVpnManager::CreatePppInterface(const std::string &ifName)
         NETNATIVE_LOGE("ioctl PPPIOCDISCONN failed errno: %{public}d", errno);
     }
     NETNATIVE_LOGI("Created PPP interface: currentIfunit:%{public}d\n", currentIfunit);
-    std::string oldName = PPP_CARD_NAME + std::to_string(currentIfunit);
+    std::string oldName = "ppp" + std::to_string(currentIfunit);
     SetVpnDown(oldName);
     if (strncpy_s(ifr.ifr_name, IFNAMSIZ, oldName.c_str(), strlen(oldName.c_str())) != EOK) {
         NETNATIVE_LOGE("strcpy_s ifr name fail");
@@ -403,5 +403,15 @@ void MultiVpnManager::SetXfrmPhyIfName(const std::string &phyName)
 {
     phyName_ = phyName;
 }
+
+int32_t MultiVpnManager::SetVpnCallMode(const std::string &message)
+{
+    if (message.empty()) {
+        NETNATIVE_LOGE("message is empty");
+        return NETMANAGER_ERROR;
+    }
+    return nmd::RouteManager::SetVpnCallMode(message);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

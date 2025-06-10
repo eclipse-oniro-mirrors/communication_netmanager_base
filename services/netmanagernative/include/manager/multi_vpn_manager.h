@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
-constexpr const char *PPP_CARD_NAME = "ppp";
+constexpr const char *PPP_CARD_NAME = "ppp-vpn";
 constexpr const char *PPP_DEVICE_PATH = "/dev/ppp";
 
 class MultiVpnManager : public std::enable_shared_from_this<MultiVpnManager> {
@@ -46,6 +46,7 @@ public:
     int32_t DestroyVpnInterface(const std::string &ifName);
     int32_t SetVpnAddress(const std::string &ifName, const std::string &vpnAddr, int32_t prefix);
     int32_t SetVpnMtu(const std::string &ifName, int32_t mtu);
+    int32_t SetVpnCallMode(const std::string &message);
     int32_t CreatePppFd(const std::string &ifName);
     void SetXfrmPhyIfName(const std::string &phyName);
     void SetVpnRemoteAddress(const std::string &remoteIp);
