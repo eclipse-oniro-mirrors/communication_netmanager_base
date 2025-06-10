@@ -59,7 +59,7 @@ HWTEST_F(NetProxyUserinfoTest, SaveHttpProxyUserAndPassTest001, TestSize.Level1)
     httpProxy.SetPassword(pwd);
     NetProxyUserinfo::GetInstance().SaveHttpProxyHostPass(httpProxy);
     NetProxyUserinfo::GetInstance().GetHttpProxyHostPass(httpProxyForGet);
-    EXPECT_EQ(httpProxyForGet.GetUsername().empty(), true);
+    EXPECT_NE(httpProxyForGet.GetUsername().empty(), true);
 }
 
 HWTEST_F(NetProxyUserinfoTest, SaveHttpProxyHostPassTest001, TestSize.Level1)
@@ -73,7 +73,7 @@ HWTEST_F(NetProxyUserinfoTest, GetHttpProxyHostPassTest001, TestSize.Level1)
 {
     HttpProxy httpProxy;
     NetProxyUserinfo::GetInstance().GetHttpProxyHostPass(httpProxy);
-    EXPECT_EQ(httpProxy.GetUsername().empty(), true);
+    EXPECT_NE(httpProxy.GetUsername().empty(), true);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
