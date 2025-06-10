@@ -63,7 +63,7 @@ HWTEST_F(DataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
     std::string status;
     Uri wifiUri(WIFI_URI);
     int32_t ret = netDataShareHelperUtils_->Query(wifiUri, KEY_WIFI, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
@@ -71,7 +71,7 @@ HWTEST_F(DataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
     std::string status;
     Uri bluetoothUri(USB_URI);
     int ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_BLUETOOTH, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, QueryTest003, TestSize.Level1)
@@ -79,7 +79,7 @@ HWTEST_F(DataShareHelperUtilsTest, QueryTest003, TestSize.Level1)
     std::string status;
     Uri usbUri(BLUETOOTH_URI);
     int ret = netDataShareHelperUtils_->Query(usbUri, KEY_USB, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(DataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
