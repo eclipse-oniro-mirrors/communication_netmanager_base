@@ -13,74 +13,74 @@
 
 use ani_rs::business_error::BusinessError;
 
-use crate::wrapper::NetStatsClient;
+use crate::{error_code::convert_to_business_error, wrapper::NetStatsClient};
 
 #[ani_rs::native]
-pub(crate) fn get_all_rx_bytes() -> Result<i64, BusinessError> {
+pub fn get_all_rx_bytes() -> Result<i64, BusinessError> {
     NetStatsClient::get_all_rx_bytes()
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get all rx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_all_tx_bytes() -> Result<i64, BusinessError> {
+pub fn get_all_tx_bytes() -> Result<i64, BusinessError> {
     NetStatsClient::get_all_tx_bytes()
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get all tx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_cellular_rx_bytes() -> Result<i64, BusinessError> {
+pub fn get_cellular_rx_bytes() -> Result<i64, BusinessError> {
     NetStatsClient::get_cellular_rx_bytes()
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get cellular rx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_cellular_tx_bytes() -> Result<i64, BusinessError> {
+pub fn get_cellular_tx_bytes() -> Result<i64, BusinessError> {
     NetStatsClient::get_cellular_tx_bytes()
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get cellular tx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_iface_rx_bytes(iface: String) -> Result<i64, BusinessError> {
+pub fn get_iface_rx_bytes(iface: String) -> Result<i64, BusinessError> {
     NetStatsClient::get_iface_rx_bytes(&iface)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get iface rx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_iface_tx_bytes(iface: String) -> Result<i64, BusinessError> {
+pub fn get_iface_tx_bytes(iface: String) -> Result<i64, BusinessError> {
     NetStatsClient::get_iface_tx_bytes(&iface)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get iface tx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_uid_rx_bytes(uid: i64) -> Result<i64, BusinessError> {
+pub fn get_uid_rx_bytes(uid: i64) -> Result<i64, BusinessError> {
     NetStatsClient::get_uid_rx_bytes(uid as u32)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get uid rx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_uid_tx_bytes(uid: i64) -> Result<i64, BusinessError> {
+pub fn get_uid_tx_bytes(uid: i64) -> Result<i64, BusinessError> {
     NetStatsClient::get_uid_tx_bytes(uid as u32)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get uid tx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_sockfd_rx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
+pub fn get_sockfd_rx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
     NetStatsClient::get_sockfd_rx_bytes(sockfd)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get sockfd rx bytes")))
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_sockfd_tx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
+pub fn get_sockfd_tx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
     NetStatsClient::get_sockfd_tx_bytes(sockfd)
         .map(|v| v as i64)
-        .map_err(|e| BusinessError::new(e, format!("failed to get sockfd tx bytes")))
+        .map_err(convert_to_business_error)
 }

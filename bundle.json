@@ -87,7 +87,8 @@
                 "qos_manager",
                 "runtime_core",
                 "time_service",
-                "faultloggerd"
+                "faultloggerd",
+                "ylong_runtime"
             ]
         },
         "build": {

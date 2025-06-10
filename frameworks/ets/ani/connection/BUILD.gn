@@ -85,7 +85,7 @@ ohos_rust_shared_library("connection_ani") {
 
 generate_static_abc("connection") {
   base_url = "./ets"
-  files = [ "ets/@ohos.net.connection.d.ets" ]
+  files = [ "ets/@ohos.net.connection.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/connection.abc"
 }
