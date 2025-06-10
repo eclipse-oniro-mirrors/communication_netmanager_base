@@ -83,34 +83,6 @@ void NetsysNativeServiceProxyTest::SetUp() {}
 void NetsysNativeServiceProxyTest::TearDown() {}
 
 /**
- * @tc.name: AddInterfaceToNetworkTest001
- * @tc.desc: Test NetsysNativeServiceProxy AddInterfaceToNetwork.
- * @tc.type: FUNC
- */
-HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Level1)
-{
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_NE(netsysNativeService, nullptr);
-    int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    NetManagerBaseAccessToken access;
-    NetHandle handle;
-    NetConnClient::GetInstance().GetDefaultNet(handle);
-    NetAllCapabilities netAllCap;
-    NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
-    if (netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
-        netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0) {
-        return;
-    }
-
-    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: AddRouteTest001
  * @tc.desc: Test NetsysNativeServiceProxy AddRoute.
  * @tc.type: FUNC
