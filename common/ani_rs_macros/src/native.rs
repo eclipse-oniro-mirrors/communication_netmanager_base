@@ -15,7 +15,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{ItemFn, Result};
 
-pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+pub(crate) fn entry(_: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item = syn::parse2::<ItemFn>(item)?;
     let item_clone = item.clone();
 

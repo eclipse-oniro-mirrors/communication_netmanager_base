@@ -92,7 +92,8 @@
                 "time_service",
                 "faultloggerd",
                 "hiappevent",
-                "config_policy"
+                "config_policy",
+                "ylong_runtime"
             ]
         },
         "build": {
