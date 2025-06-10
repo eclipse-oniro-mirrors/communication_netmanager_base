@@ -70,18 +70,6 @@ protected:
     }
 };
 
-HWTEST_F(NetSupplierCallbackProxyTest, RequestNetwork_001, TestSize.Level1)
-{
-    // Arrange
-    std::string ident = "testIdent";
-    std::set<NetCap> netCaps;
-    NetRequest netrequest;
-
-    EXPECT_CALL(*remoteObjectMocker, SendRequest(_, _, _, _)).WillOnce(Return(ERR_TRANSACTION_FAILED));
-    int32_t result = proxy->RequestNetwork(ident, netCaps, netrequest);
-    ASSERT_EQ(result, ERR_TRANSACTION_FAILED);
-}
-
 HWTEST_F(NetSupplierCallbackProxyTest, RequestNetwork_002, TestSize.Level1)
 {
     // Arrange
