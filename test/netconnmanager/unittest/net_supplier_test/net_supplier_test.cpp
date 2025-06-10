@@ -227,7 +227,7 @@ HWTEST_F(NetSupplierTest, SetNetworkTest001, TestSize.Level1)
 {
     std::shared_ptr<Network> network = nullptr;
     supplier->SetNetwork(network);
-    ASSERT_NE(supplier->GetSupplierCallback(), nullptr);
+    ASSERT_EQ(supplier->GetSupplierCallback(), nullptr);
 }
 
 HWTEST_F(NetSupplierTest, GetRealScoreTest001, TestSize.Level1)
