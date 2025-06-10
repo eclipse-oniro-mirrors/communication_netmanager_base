@@ -125,6 +125,10 @@ ohos_shared_library("net_conn_manager") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
+  if (netmanager_base_enable_feature_sysvpn) {
+    defines += [ "SUPPORT_SYSVPN" ]
+  }
+
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
@@ -220,6 +224,10 @@ ohos_static_library("net_conn_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETMANAGER_TEST",
   ]
+
+  if (netmanager_base_enable_feature_sysvpn) {
+    defines += [ "SUPPORT_SYSVPN" ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
