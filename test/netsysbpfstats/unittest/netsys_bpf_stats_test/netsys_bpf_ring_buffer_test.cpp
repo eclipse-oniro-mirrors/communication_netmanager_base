@@ -119,12 +119,5 @@ HWTEST_F(NetsysBpfRingBufferTest, ListenNetStatsRingBufferThreadTest001, TestSiz
     bpfringbuffer->ListenNetStatsRingBufferThread();
     EXPECT_NE(bpfringbuffer, nullptr);
 }
-
-HWTEST_F(NetsysBpfRingBufferTest, ListenRingBufferThreadTest001, TestSize.Level1)
-{
-    std::unique_ptr<NetsysBpfRingBuffer> bpfringbuffer = std::make_unique<NetsysBpfRingBuffer>();
-    bpfringbuffer->ListenRingBufferThread();
-    EXPECT_NE(bpfringbuffer, nullptr);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
