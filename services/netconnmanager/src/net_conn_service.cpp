@@ -82,6 +82,7 @@ constexpr uint32_t MAX_NET_EXT_ATTRIBUTE = 10240;
 constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager.ready";
 constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
 constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
+constexpr const char *PERSIST_EDM_AIRPLANE_MODE_DISABLE = "persist.edm.airplane_mode_disable";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -2297,6 +2298,10 @@ int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCal
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
+    if (state && system::GetBoolParameter(PERSIST_EDM_AIRPLANE_MODE_DISABLE, false)) {
+        NETMGR_LOG_E("SetAirplaneMode policy is disallowed");
+        return NET_CONN_ERR_POLICY_DISABLED;
+    }
     if (state) {
         std::lock_guard guard(preAirplaneCbsMutex_);
         for (const auto& mem : preAirplaneCallbacks_) {
