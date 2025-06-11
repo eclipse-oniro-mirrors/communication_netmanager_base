@@ -1031,9 +1031,9 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
-       if (supplierId == delaySupplierId_) {
-           RemoveDelayNetwork();
-       }
+        if (supplierId == delaySupplierId_) {
+            RemoveDelayNetwork();
+        }
         std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
         locker.unlock();
@@ -1067,11 +1067,11 @@ void NetConnService::HandleFindBestNetworkForDelay()
     auto supplier = FindNetSupplier(delaySupplierId_);
     delaySupplierId_ = 0;
     if (supplier == nullptr) {
-       return;
+        return;
     }
     if (supplier->IsNetValidated()) {
-       NETMGR_LOG_I("HandleFindBestNetworkForDelay.");
-       HandleDetectionResult(delaySupplierId_, VERIFICATION_STATE);
+        NETMGR_LOG_I("HandleFindBestNetworkForDelay.");
+        HandleDetectionResult(delaySupplierId_, VERIFICATION_STATE);
     }
 }
 
@@ -1148,21 +1148,21 @@ void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const
         return;
     }
     if (isDelayHandleFindBestNetwork_) {
-       return;
+        return;
     }
     bool isNeedDelay = (system::GetBoolParameter(PERSIST_WIFI_DELAY_ELEVATOR_ENABLE, false) ||
         system::GetBoolParameter(PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE, false));
     if (supplier->GetNetSupplierType() == BEARER_WIFI && !supplier->IsNetValidated() &&
-       defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR &&
-       isNeedDelay) {
-       int64_t delayTime = 2000;
-       if (netConnEventHandler_) {
-           NETMGR_LOG_I("HandlePreFindBestNetworkForDelay action");
-           isDelayHandleFindBestNetwork_ = true;
-           delaySupplierId_ = supplierId;
-           netConnEventHandler_->PostAsyncTask([this]() { HandleFindBestNetworkForDelay(); },
-           "HandleFindBestNetworkForDelay", delayTime);
-       }
+        defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR &&
+        isNeedDelay) {
+        int64_t delayTime = 2000;
+        if (netConnEventHandler_) {
+            NETMGR_LOG_I("HandlePreFindBestNetworkForDelay action");
+            isDelayHandleFindBestNetwork_ = true;
+            delaySupplierId_ = supplierId;
+            netConnEventHandler_->PostAsyncTask([this]() { HandleFindBestNetworkForDelay(); },
+                "HandleFindBestNetworkForDelay", delayTime);
+        }
     }
 }
 
