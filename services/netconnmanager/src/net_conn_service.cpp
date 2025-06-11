@@ -1141,7 +1141,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr &supplier)
+void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is nullptr");
