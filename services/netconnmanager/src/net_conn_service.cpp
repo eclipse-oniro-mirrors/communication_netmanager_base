@@ -1823,8 +1823,16 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     supplier->SetDetectionDone();
     locker.unlock();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
-    FindBestNetworkForAllRequest();
     bool ifValid = netState == VERIFICATION_STATE;
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetNetSupplierType() != BEARER_CELLULAR) {
+        RemoveDelayNetwork();
+    }
+    if (delaySupplierId_ == supplierId &&
+        isDelayHandleFindBestNetwork_ && supplier->GetNetSupplierType() == BEARER_WIFI && ifValid) {
+        NETMGR_LOG_I("Enter HandleDetectionResult delay");
+    } else {
+        FindBestNetworkForAllRequest();
+    }
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
@@ -3518,6 +3526,7 @@ int32_t NetConnService::UpdateSupplierScoreAsync(uint32_t supplierId, uint32_t d
         NETMGR_LOG_E("supplier doesn't exist.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    RemoveDelayNetwork();
     supplier->SetNetValid(state);
     locker.unlock();
     // Find best network because supplier score changed.
