@@ -839,6 +839,7 @@ impl<'local> AniEnv<'local> {
                 local.as_raw(),
                 &mut ani_ref as *mut _,
             )
+            
         };
         if res != 0 {
             let msg = String::from("Failed to create global ref");

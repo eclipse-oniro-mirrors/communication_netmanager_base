@@ -65,6 +65,8 @@ NetAddress GetAddressByName(const std::string &host, int32_t netId, int32_t &ret
 
 void NetDetection(int32_t net_id, int32_t &ret);
 
+bool CheckPermission(uint64_t tokenId, rust::str permission);
+
 class NetCoonCallback : public NetManagerStandard::NetConnCallbackStub {
 public:
     NetCoonCallback(rust::Box<ConnCallback> callback);
