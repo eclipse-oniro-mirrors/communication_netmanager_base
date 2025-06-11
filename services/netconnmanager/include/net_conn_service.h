@@ -640,6 +640,8 @@ private:
     bool isFallbackProbeWithProxy_ = false;
     AppStateAwareCallback appStateAwareCallback_;
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
+    std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
+    uint32_t delaySupplierId_ = 0;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -678,6 +680,10 @@ private:
     void SubscribeCommonEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
+    void HandleFindBestNetworkForDelay();
+    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
+    void RemoveDelayNetwork();
+    void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
