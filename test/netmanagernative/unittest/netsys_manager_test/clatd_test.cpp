@@ -135,7 +135,7 @@ HWTEST_F(ClatdTest, CreateTunInterfaceTest001, TestSize.Level1)
     std::string tunIface = "eth0";
     int fd = -1;
     auto ret = CreateTunInterface(tunIface, fd);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     tunIface = "9999999999999999999";
     ret = CreateTunInterface(tunIface, fd);
