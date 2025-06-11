@@ -1336,7 +1336,7 @@ HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
     std::string netSupplierIdent;
-    std::set netCaps;
+    std::set<NetCap> netCaps;
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
     EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
     uint32_t supplierId = 1;
@@ -1347,7 +1347,7 @@ HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
     std::string netWifiSupplierIdent;
-    sptr supplier = new NetSupplier(BEARER_WIFI, netWifiSupplierIdent, netCaps);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netWifiSupplierIdent, netCaps);
     supplier->supplierId_ = supplierId;
     netConnService->isDelayHandleFindBestNetwork_ = true;
     netConnService->netSuppliers_[1] = supplier;
@@ -1362,9 +1362,9 @@ HWTEST_F(NetConnServiceExtTest, HandlePreFindBestNetworkForDelay001, TestSize.Le
     netConnService->HandlePreFindBestNetworkForDelay(1, nullptr);
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
-    std::set netCaps;
+    std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_CHECKING_CONNECTIVITY);
-    sptr supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
     supplier->supplierId_ = supplierId;
     netConnService->isDelayHandleFindBestNetwork_ = true;
     netConnService->HandlePreFindBestNetworkForDelay(supplierId, supplier);
@@ -1383,9 +1383,9 @@ HWTEST_F(NetConnServiceExtTest, HandleFindBestNetworkForDelay001, TestSize.Level
     netConnService->HandleFindBestNetworkForDelay();
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
-    std::set netCaps;
+    std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
-    sptr supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
     supplier->supplierId_ = supplierId;
     netConnService->delaySupplierId_ = supplierId;
     netConnService->netSuppliers_[1] = supplier;
