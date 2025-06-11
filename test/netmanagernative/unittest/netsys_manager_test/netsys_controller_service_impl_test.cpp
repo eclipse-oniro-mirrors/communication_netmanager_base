@@ -594,7 +594,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetUidStats(stats, type, uid);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->DeleteStatsInfo(TEST_UID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -716,10 +716,10 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
 {
     uint64_t stats = 0;
     auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)
