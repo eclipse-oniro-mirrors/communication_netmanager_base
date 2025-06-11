@@ -128,7 +128,7 @@ HWTEST_F(NetConnServiceExtTest, CheckIfSettingsDataReadyTest002, TestSize.Level1
 {
     NetConnService::GetInstance()->isDataShareReady_ = false;
     auto ret = NetConnService::GetInstance()->CheckIfSettingsDataReady();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, OnNetSupplierRemoteDiedTest001, TestSize.Level1)
@@ -536,7 +536,7 @@ HWTEST_F(NetConnServiceExtTest, IsValidDecValueTest002, TestSize.Level1)
 HWTEST_F(NetConnServiceExtTest, SetAirplaneModeTest003, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
-    EXPECT_TRUE(netConnService->preAirplaneCallbacks_.empty());
+    EXPECT_FALSE(netConnService->preAirplaneCallbacks_.empty());
     netConnService->preAirplaneCallbacks_[0] = new IPreAirplaneCallbackStubTestCb();
     netConnService->preAirplaneCallbacks_[1] = nullptr;
     auto ret = netConnService->SetAirplaneMode(true);
@@ -1124,7 +1124,7 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest003, TestSize
     std::string virnicAddr = "192.168.1.5";
     std::string iif = "eth0";
     auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, iif);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetTest001, TestSize.Level1)

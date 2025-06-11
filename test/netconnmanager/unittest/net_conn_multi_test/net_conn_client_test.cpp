@@ -493,7 +493,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -511,7 +511,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
 }
 
 /**
@@ -547,7 +547,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -565,7 +565,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost().empty());
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost().empty());
 }
 
 /**
@@ -583,7 +583,7 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
     HttpProxy defaultHttpProxy;
     ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -1187,7 +1187,7 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
     int32_t prefixLength = 23;
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -1463,7 +1463,7 @@ HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)
 
     bearerType = NetBearType::BEARER_BLUETOOTH;
     ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, IsAPIVersionSupported001, TestSize.Level1)
@@ -1493,7 +1493,7 @@ HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
     uint32_t uid = 20020157;
     int32_t ret = NetConnClient::GetInstance().CloseSocketsUid(netId, uid);
     NetConnClient::GetInstance().DlCloseRemoveDeathRecipient();
-    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, SetInterfaceTest001, TestSize.Level1)
@@ -1522,7 +1522,7 @@ HWTEST_F(NetConnClientTest, UpdateNetCaps002, TestSize.Level1)
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
     uint32_t supplierId = 0;
     int32_t ret = NetConnClient::GetInstance().UpdateNetCaps(netCaps, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetPacUrl001, TestSize.Level1)

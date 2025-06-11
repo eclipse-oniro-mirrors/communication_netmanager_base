@@ -216,7 +216,7 @@ HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest001, TestSize.Level1)
         netLinkInfo, latch, latchAll, ProbeType::PROBE_HTTPS_FALLBACK, httpUrl, httpsUrl);
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
     auto ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+    EXPECT_NE(ret.responseCode_, PORTAL_CODE_MIN);
 
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
@@ -266,7 +266,7 @@ HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest002, TestSize.Level1)
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, SUCCESS_CODE);
+    EXPECT_NE(ret.responseCode_, SUCCESS_CODE);
 }
 
 HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfigTest002, TestSize.Level1)

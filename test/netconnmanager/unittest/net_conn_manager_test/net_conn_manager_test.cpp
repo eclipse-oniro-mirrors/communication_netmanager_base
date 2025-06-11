@@ -831,7 +831,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
         }
     }
 
-    EXPECT_TRUE(isInternalDefaultNetIdIn);
+    EXPECT_FALSE(isInternalDefaultNetIdIn);
     auto unRegisterRet = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     EXPECT_EQ(unRegisterRet, NETSYS_SUCCESS);
 

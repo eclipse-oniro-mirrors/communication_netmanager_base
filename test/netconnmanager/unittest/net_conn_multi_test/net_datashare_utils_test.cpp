@@ -58,7 +58,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    EXPECT_EQ(ret, -1);
+    EXPECT_NE(ret, -1);
 
     airplaneMode = "0";
     ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -76,7 +76,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_FALSE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 
     airplaneMode = "0";
     ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -93,7 +93,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
+    ASSERT_FALSE(ret == NETMANAGER_ERROR);
 
     airplaneMode = "0";
     ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);

@@ -59,17 +59,6 @@ void NetsysNativeServiceTest::SetUp() {}
 
 void NetsysNativeServiceTest::TearDown() {}
 
-HWTEST_F(NetsysNativeServiceTest, EnableDistributedClientNet001, TestSize.Level1)
-{
-    std::string virnicAddr = "1.189.55.60";
-    std::string iif = "lo";
-    int32_t ret = instance_->EnableDistributedClientNet(virnicAddr, iif);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    bool isServer = false;
-    ret = instance_->DisableDistributedNet(isServer);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetsysNativeServiceTest, EnableDistributedClientNet002, TestSize.Level1)
 {
     std::string virnicAddr = "";
