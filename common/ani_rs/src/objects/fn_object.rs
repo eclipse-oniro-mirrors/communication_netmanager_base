@@ -150,6 +150,11 @@ impl GlobalRef<AniFnObject<'static>> {
             if let Ok(env) = AniVm::get_instance().get_env() {
                 let input = input.input(&env);
                 let _ = env.function_object_call(&me.0, &input);
+            } else {
+                if let Ok(env) = AniVm::get_instance().attach_current_thread() {
+                    let input = input.input(&env);
+                    let _ = env.function_object_call(&me.0, &input);
+                }
             }
         });
     }

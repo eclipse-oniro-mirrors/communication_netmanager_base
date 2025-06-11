@@ -25,8 +25,10 @@ use crate::{
         NetCapabilityInfo, NetConnection, NetConnectionPropertyInfo, NetHandle, NetSpecifier,
     },
     error_code::convert_to_business_error,
-    wrapper::{ConnUnregisterHandle, NetConnClient},
+    wrapper::{check_permission, ConnUnregisterHandle, NetConnClient},
 };
+
+const INTERNET_PERMISSION: &str = "ohos.permission.INTERNET";
 
 #[ani_rs::native]
 pub(crate) fn get_default_net() -> Result<NetHandle, BusinessError> {
@@ -146,16 +148,25 @@ pub(crate) fn net_detection(net_handle: NetHandle) -> Result<(), BusinessError> 
 
 #[ani_rs::native]
 pub(crate) fn clear_custom_dns_rules() -> Result<(), BusinessError> {
+    if !check_permission(INTERNET_PERMISSION) {
+        return Err(BusinessError::PERMISSION);
+    }
     NetConnClient::clear_custom_dns_rules().map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn set_custom_dns_rule(host: String, ips: Vec<String>) -> Result<(), BusinessError> {
+    if !check_permission(INTERNET_PERMISSION) {
+        return Err(BusinessError::PERMISSION);
+    }
     NetConnClient::set_custom_dns_rules(host, ips).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> {
+    if !check_permission(INTERNET_PERMISSION) {
+        return Err(BusinessError::PERMISSION);
+    }
     NetConnClient::remove_custom_dns_rule(host).map_err(convert_to_business_error)
 }
 

@@ -17,8 +17,13 @@ use crate::{objects::AniRef, AniVm};
 
 impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalRef<T> {
     fn drop(&mut self) {
-        let env = AniVm::get_instance().get_env().unwrap();
-        env.delete_global_ref(self.0.clone().into()).unwrap();
+        if let Ok(env) = AniVm::get_instance().get_env() {
+            let _ = env.delete_global_ref(self.0.clone().into());
+        } else {
+            if let Ok(env) = AniVm::get_instance().attach_current_thread() {
+                let _ = env.delete_global_ref(self.0.clone().into());
+            }
+        }
     }
 }
 
