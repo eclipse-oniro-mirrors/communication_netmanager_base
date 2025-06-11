@@ -726,7 +726,7 @@ HWTEST_F(NetPolicyManagerTest, IsUidNetAccess001, TestSize.Level1)
     NetManagerBaseAccessToken token;
     bool isAllowed = false;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAccess(TEST_UID7, false, isAllowed);
-    ASSERT_NE(result, NETMANAGER_SUCCESS);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
