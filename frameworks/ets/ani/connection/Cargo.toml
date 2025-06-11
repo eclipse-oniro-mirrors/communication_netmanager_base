@@ -22,3 +22,4 @@ ani_sys = { path = "../../../../common/ani_sys" }
 cxx = "1.0.115"
 serde = { version = "1.0", features = ["derive"] }
 hilog_rust = { git = "https://gitee.com/openharmony/hiviewdfx_hilog" }
+ipc = { git = "https://gitee.com/openharmony/communication_ipc" }

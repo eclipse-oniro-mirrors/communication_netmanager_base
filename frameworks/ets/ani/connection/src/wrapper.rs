@@ -21,6 +21,11 @@ use crate::bridge;
 
 pub struct NetConnClient;
 
+pub fn check_permission(permission: &str) -> bool {
+    let token_id = ipc::Skeleton::calling_full_token_id();
+    ffi::CheckPermission(token_id, permission)
+}
+
 impl NetConnClient {
     pub fn get_default_net_handle() -> Result<bridge::NetHandle, i32> {
         let mut ret = 0;
@@ -650,6 +655,8 @@ mod ffi {
         fn BindSocket(self: Pin<&mut NetConnClient>, fd: i32, net_id: i32) -> i32;
 
         fn NetDetection(net_id: i32, ret: &mut i32);
+
+        fn CheckPermission(token_id: u64, permission: &str) -> bool;
 
         fn RegisterNetConnCallback(
             connection: Box<ConnCallback>,
