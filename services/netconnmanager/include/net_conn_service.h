@@ -681,7 +681,7 @@ private:
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     void HandleFindBestNetworkForDelay();
-    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr &supplier);
+    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
     void RemoveDelayNetwork();
     void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
     std::mutex remoteMutex_;
