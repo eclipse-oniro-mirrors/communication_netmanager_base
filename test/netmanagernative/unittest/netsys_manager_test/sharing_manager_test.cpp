@@ -191,5 +191,32 @@ HWTEST_F(SharingManagerTest, IpfwdRemoveInterfaceForward003, TestSize.Level1)
     auto result = sharingManager->IpfwdRemoveInterfaceForward(fromIface, toIface);
     EXPECT_EQ(result, 0);
 }
+
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
+{
+    NetworkSharingTraffic traffic;
+    std::string ifaceName = "";
+    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all rmnet0 wlan1 ::/0 ::/0 \n 1 1 RETURN all wlan1 rmnet0 ::/0 ::/0";
+    auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
+    EXPECT_EQ(res, 0);
+}
+
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic002, TestSize.Level1)
+{
+    NetworkSharingTraffic traffic;
+    std::string ifaceName = "";
+    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all wlan0 wlan1 ::/0 ::/0 \n 1 1 RETURN all wlan1 wlan0 ::/0 ::/0";
+    auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
+    EXPECT_EQ(res, 0);
+}
+
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic003, TestSize.Level1)
+{
+    NetworkSharingTraffic traffic;
+    std::string ifaceName = "";
+    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all wifi0 wifi1 ::/0 ::/0 \n 1 1 RETURN all wifi1 wifi0 ::/0 ::/0";
+    auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
+    EXPECT_EQ(res, -1);
+}
 } // namespace NetsysNative
 } // namespace OHOS
