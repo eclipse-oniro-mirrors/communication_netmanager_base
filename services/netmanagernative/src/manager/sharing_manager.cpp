@@ -487,6 +487,23 @@ int32_t SharingManager::QueryCellularSharingTraffic(NetworkSharingTraffic &traff
                 isFindRx = true;
                 traffic.receive = receive;
                 traffic.all += receive;
+            } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+                && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)
+                && ifaceName == "") {
+                int64_t send =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
+                isFindTx = true;
+                traffic.send = send;
+                traffic.all += send;
+                ifaceName = matchTemp;
+            } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+                && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)
+                && ifaceName.find(WLAN_IFACE_NAME) != std::string::npos) {
+                int64_t receive =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
+                isFindRx = true;
+                traffic.receive = receive;
+                traffic.all += receive;
             }
             if (isFindTx && isFindRx) {
                 NETNATIVE_LOG_D("GetNetworkSharingTraffic success total");
