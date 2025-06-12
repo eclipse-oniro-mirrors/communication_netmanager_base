@@ -137,5 +137,20 @@ HWTEST_F(UtNetQuotaPolicy, Marshalling003, TestSize.Level1)
         EXPECT_EQ(cv.networkmatchrule.ident, GetQuota().networkmatchrule.ident);
     });
 }
+
+/**
+ * @tc.name: GetPeriodStart002
+ * @tc.desc: Test NetPolicyQuota GetPeriodStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetQuotaPolicy, GetPeriodStart002, TestSize.Level1)
+{
+    NetQuotaPolicy netQuotaPolicy1;
+    netQuotaPolicy1.quotapolicy.periodDuration = "";
+    auto result = netQuotaPolicy1.GetPeriodStart();
+    std::cout << "result1:" << result << std::endl;
+    ASSERT_TRUE(result > 0);
+    EXPECT_EQ(netQuotaPolicy1.quotapolicy.periodDuration, "M");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
