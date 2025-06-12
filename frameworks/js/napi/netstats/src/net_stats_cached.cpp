@@ -205,6 +205,7 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
 {
+    NETMGR_LOG_I("GetKernelStats");
     std::lock_guard<ffrt::mutex> lock(lock_);
     GetKernelUidStats(statsInfo);
     GetKernelUidSimStats(statsInfo);
@@ -295,6 +296,7 @@ void NetStatsCached::CacheAppStats()
 
 void NetStatsCached::CacheUidSimStats()
 {
+    NETMGR_LOG_I("CacheUidSimStats");
     std::vector<NetStatsInfo> statsInfos;
     NetsysController::GetInstance().GetAllSimStatsInfo(statsInfos);
     if (statsInfos.empty()) {
@@ -496,6 +498,7 @@ void NetStatsCached::ForceUpdateStats()
 
 void NetStatsCached::ForceUpdateStatsAndBackupDB(const std::string &sourceDb, const std::string &backupDb)
 {
+    NETMGR_LOG_I("ForceUpdateStatsAndBackupDB");
     isForce_ = true;
     std::function<void()> netCachedStats = [this, sourceDb, backupDb] () {
         isExecBackUp_ = true;
@@ -517,6 +520,7 @@ void NetStatsCached::ForceUpdateStatsAndBackupDB(const std::string &sourceDb, co
 
 ffrt::task_handle NetStatsCached::ForceArchiveStats(uint32_t uid)
 {
+    NETMGR_LOG_I("ForceArchiveStats");
     std::function<void()> netCachedStats = [this, uid]() {
         CacheStats();
         {
@@ -543,6 +547,7 @@ void NetStatsCached::Reset() {}
 
 void NetStatsCached::ForceCachedStats()
 {
+    NETMGR_LOG_E("ForceCachedStats");
     std::lock_guard<ffrt::mutex> lock(lock_);
     CacheUidSimStats();
     WriteUidSimStats();
