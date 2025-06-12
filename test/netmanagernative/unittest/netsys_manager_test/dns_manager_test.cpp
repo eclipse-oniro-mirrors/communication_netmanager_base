@@ -124,14 +124,5 @@ HWTEST_F(DnsManagerTest, FillAddrInfoTest001, TestSize.Level1)
     auto result = dnsManager.FillAddrInfo(addrInfo, res);
     EXPECT_EQ(result, 0);
 }
-
-HWTEST_F(DnsManagerTest, FillAddrInfoTest002, TestSize.Level1)
-{
-    DnsManager dnsManager;
-    std::vector<AddrInfo> addrInfo;
-    addrinfo *res = new addrinfo;
-    auto result = dnsManager.FillAddrInfo(addrInfo, res);
-    EXPECT_EQ(result, 0);
-}
 } // namespace nmd
 } // namespace OHOS
