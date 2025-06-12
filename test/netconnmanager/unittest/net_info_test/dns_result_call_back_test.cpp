@@ -74,6 +74,14 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
     int32_t ret = instance_->OnDnsResultReport(netDnsResultReport.size(), netDnsResultReport);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(TestDnsResultCallback, RequestNetDetectionTest001, TestSize.Level1)
+{
+    uint32_t failValue_ = 123;
+    uint32_t netid = 123;
+    instance_->RequestNetDetection(failValue_, netid);
+    EXPECT_NE(failValue_, 123);
+}
 } // namespace
 } // namespace NetManagerStandard
 } // namespace OHOS
