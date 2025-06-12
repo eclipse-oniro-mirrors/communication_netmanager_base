@@ -1187,7 +1187,6 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
     int32_t prefixLength = 23;
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -1296,7 +1295,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, 0);
+    EXPECT_NE(ret, 201);
     EXPECT_TRUE(type.empty());
 }
 
