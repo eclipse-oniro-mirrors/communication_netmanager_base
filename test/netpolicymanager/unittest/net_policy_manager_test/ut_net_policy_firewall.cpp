@@ -228,5 +228,17 @@ HWTEST_F(UtNetPolicyFirewall, HandleEvent001, TestSize.Level1)
     netPolicyFirewall_->HandleEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED, policyEvent);
     ASSERT_FALSE(std::find(allowedList.begin(), allowedList.end(), uid) == allowedList.end());
 }
+
+HWTEST_F(UtNetPolicyFirewall, SetPowerSaveTrustlist001, TestSize.Level1)
+{
+    std::vector<uint32_t> uids(1001);
+    bool isAllowed = true;
+    for (uint32_t i = 0; i < 1001; ++i) {
+        netPolicyFirewall_->powerSaveAllowedList_.insert(i);
+    }
+    int32_t ret = netPolicyFirewall_->SetPowerSaveTrustlist(uids, isAllowed);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    netPolicyFirewall_->powerSaveAllowedList_.clear();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
