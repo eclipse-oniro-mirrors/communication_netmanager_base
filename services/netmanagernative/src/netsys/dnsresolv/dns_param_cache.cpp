@@ -12,11 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-
 #include <algorithm>
-
 #include "netmanager_base_common_utils.h"
 #include "dns_param_cache.h"
 #include "netnative_log_wrapper.h"
