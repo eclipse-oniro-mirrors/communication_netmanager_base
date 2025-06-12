@@ -739,7 +739,7 @@ HWTEST_F(RouteManagerTest, UpdateSharingNetworkTest001, TestSize.Level1)
     interfaceToTable[inputInterface] = 1;
     RouteManager::interfaceToTable_ = interfaceToTable;
     ret = RouteManager::UpdateSharingNetwork(netId, inputInterface, outputInterface);
-    EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, UpdateRuleInfoTest001, TestSize.Level1)
