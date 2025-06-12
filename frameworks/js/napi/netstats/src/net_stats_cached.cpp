@@ -972,11 +972,6 @@ void NetStatsCached::SaveSharingTraffic(const NetStatsInfo &infos)
 {
     NETMGR_LOG_I("SaveSharingTraffic enter");
 #ifdef SUPPORT_NETWORK_SHARE
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    if (infos.iface_ == "" || infos.iface_.find(CELLULAR_IFACE_NAME) == std::string::npos) {
-        NETMGR_LOG_D("ifaceName not cellular [%{public}s]", infos.iface_.c_str());
-        return;
-    }
     nmd::NetworkSharingTraffic traffic;
     traffic.receive = infos.rxBytes_;
     traffic.send = infos.txBytes_;
