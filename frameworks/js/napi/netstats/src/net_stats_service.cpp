@@ -1486,7 +1486,6 @@ int32_t NetStatsService::GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetw
 void NetStatsService::UpdateBpfMap(int32_t simId)
 {
     NETMGR_LOG_I("UpdateBpfMap start");
-
     if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
         NETMGR_LOG_E("simId: %{public}d error", simId);
         return;
@@ -1494,7 +1493,6 @@ void NetStatsService::UpdateBpfMap(int32_t simId)
 
     NetsysController::GetInstance().ClearIncreaseTrafficMap();
     NetsysController::GetInstance().UpdateIfIndexMap(0, curIfIndex_);
-
     SettingsInfoPtr info = settingsTrafficMap_[simId].second;
     if (info != nullptr) {
         NETMGR_LOG_I("settingsInfo-> simId:%{public}d, beginDate:%{public}d, unLimitedDataEnable:%{public}d,\
@@ -1503,7 +1501,7 @@ dailyMark:%{public}u",
             simId, info->beginDate, info->unLimitedDataEnable, info->monthlyLimitdNotifyType,
             info->monthlyLimit, info->monthlyMark, info->dailyMark);
     }
-    
+
     uint64_t monthlyAvailable = UINT64_MAX;
     uint64_t monthlyMarkAvailable = UINT64_MAX;
     uint64_t dailyMarkAvailable = UINT64_MAX;
@@ -1512,23 +1510,25 @@ dailyMark:%{public}u",
         NETMGR_LOG_E("CalculateTrafficAvailable error or open unlimit");
         return;
     }
-
-    NETMGR_LOG_E("GetTrafficMap before write. monthlyAvailable:%{public}" PRIu64", \
+    NETMGR_LOG_I("GetTrafficMap before write. monthlyAvailable:%{public}" PRIu64", \
 monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
         monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, monthlyAvailable);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, monthlyMarkAvailable);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_DAILY_MARK, dailyMarkAvailable);
-
     uint64_t monthlyAvailableMap = UINT64_MAX;
     uint64_t monthlyMarkAvailableMap = UINT64_MAX;
     uint64_t dailyMarkAvailableMap = UINT64_MAX;
     NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, monthlyAvailableMap);
     NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, monthlyMarkAvailableMap);
     NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_DAILY_MARK, dailyMarkAvailableMap);
-    NETMGR_LOG_E("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
+    NETMGR_LOG_I("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
 monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
         monthlyAvailableMap, monthlyMarkAvailableMap, dailyMarkAvailableMap);
+
+    if (info->monthlyLimit == UINT64_MAX) {
+        return;
+    }
 
     if (monthlyAvailable == UINT64_MAX) {
         NotifyTrafficAlert(simId, NET_STATS_MONTHLY_LIMIT);

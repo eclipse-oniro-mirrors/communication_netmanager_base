@@ -313,14 +313,23 @@ public:
 
 #ifdef SUPPORT_SYSVPN
     /**
+     * Set Vpn call mode
+     *
+     * @param message 1 is sysvpn, other extvpn
+     * @return Returns 0, disable successfully, otherwise it will fail
+     */
+    static int32_t SetVpnCallMode(const std::string &message);
+
+    /**
      * update vpn interface rules
      *
      * @param netId Network number
+     * @param interface interface name
      * @param extMessages ext message
      * @param add true add, false remove
      * @return Returns 0, add network ip mark successfully, otherwise it will fail
      */
-    static int32_t UpdateVpnRules(uint16_t netId, const std::string interface,
+    static int32_t UpdateVpnRules(uint16_t netId, const std::string &interface,
                                   const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
 
@@ -328,9 +337,29 @@ private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
 #ifdef SUPPORT_SYSVPN
+    enum VpnRuleIdType {
+        VPN_OUTPUT_TO_LOCAL,
+        VPN_SECURE,
+        VPN_EXPLICIT_NETWORK,
+        VPN_OUTPUT_IFACE,
+        VPN_NETWORK_TABLE,
+    };
+
+    static bool vpnSysCall_;
+    static std::string defauleNetWorkName_;
+
+    static bool CheckSysVpnCall();
+    static bool CheckTunVpnCall(const std::string &vpnName);
+
     static int32_t InitOutcomingPacketMark();
-    static int32_t UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add);
+    static int32_t UpdateOutcomingIpMark(uint16_t netId, const std::string &addr, bool add);
+    static int32_t UpdateOutcomingUidMark(uint16_t netId, uid_t startUid, uid_t endUid, bool add);
+    static int32_t UpdateVpnOutPutPenetrationRule(int32_t netId, const std::string &interfaceName,
+                                                  const std::string &ruleDstIp, bool add);
+    static uint32_t FindVpnIdByInterfacename(VpnRuleIdType type, const std::string &interfaceName);
+    static uint32_t GetVpnInterffaceToId(const std::string &ifName);
 #endif // SUPPORT_SYSVPN
+    static uint16_t GetRuleFlag(uint32_t action);
     static int32_t Init();
     static int32_t ClearRules();
     static int32_t ClearRoutes(const std::string &interfaceName, int32_t netId = 0);
@@ -350,11 +379,13 @@ private:
     static int32_t UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
                                         const std::string &outputInterface);
     static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
-    static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
-
-    static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
+    static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add,
+                                                 const std::string &interfaceName = "");
+    static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add,
+                                         const std::string &interfaceName = "");
     static int32_t UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
-                                                    uid_t uidStart, uid_t uidEnd, bool add);
+                                                    uid_t uidStart, uid_t uidEnd, bool add,
+                                                    const std::string &interfaceName = "");
     static int32_t UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
                                                      NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
                                                      bool add);

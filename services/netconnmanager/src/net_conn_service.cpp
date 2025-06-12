@@ -55,6 +55,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr uint32_t MAX_ALLOW_UID_NUM = 2000;
 constexpr uint32_t INVALID_SUPPLIER_ID = 0;
+constexpr char SIGNAL_LEVEL_3 = 3;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
@@ -83,6 +84,8 @@ constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager
 constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
 constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
 constexpr const char *PERSIST_EDM_AIRPLANE_MODE_DISABLE = "persist.edm.airplane_mode_disable";
+constexpr const char *PERSIST_WIFI_DELAY_ELEVATOR_ENABLE = "persist.booster.enable_wifi_delay_elevator";
+constexpr const char *PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE = "persist.booster.enable_wifi_delay_weak_signal";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -117,6 +120,8 @@ void NetConnService::OnStart()
         system::SetParameter(BOOTEVENT_NETMANAGER_SERVICE_READY, "true");
         NETMGR_LOG_I("set netmanager service start true");
     }
+    system::SetParameter(PERSIST_WIFI_DELAY_ELEVATOR_ENABLE, "false");
+    system::SetParameter(PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE, "false");
     NETMGR_LOG_D("OnStart end");
 }
 
@@ -429,6 +434,11 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
 int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
     int32_t result = NETMANAGER_ERROR;
+#ifdef SUPPORT_SYSVPN
+    if (netLinkInfo != nullptr && CheckAndCompareIpAddress(netLinkInfo) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+#endif // SUPPORT_SYSVPN
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     httpProxyThreadCv_.notify_all();
     if (netConnEventHandler_) {
@@ -980,16 +990,22 @@ int32_t NetConnService::UpdateNetStateForTestAsync(const sptr<NetSpecifier> &net
     return NETMANAGER_SUCCESS;
 }
 
+void NetConnService::UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId)
+{
+    struct EventInfo eventInfo = {.updateSupplierId = supplierId};
+    NETMGR_LOG_E("UpdateNetSupplierInfoAsync netSupplierInfo is nullptr");
+    eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_SUPPLIERINFO_INV_PARAM);
+    eventInfo.errorMsg = ERROR_MSG_NULL_SUPPLIER_INFO;
+    EventReport::SendSupplierFaultEvent(eventInfo);
+}
+
 int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo,
                                                    int32_t callingUid)
 {
     NETMGR_LOG_I("UpdateNetSupplierInfo service in. supplierId[%{public}d]", supplierId);
     struct EventInfo eventInfo = {.updateSupplierId = supplierId};
     if (netSupplierInfo == nullptr) {
-        NETMGR_LOG_E("netSupplierInfo is nullptr");
-        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_SUPPLIERINFO_INV_PARAM);
-        eventInfo.errorMsg = ERROR_MSG_NULL_SUPPLIER_INFO;
-        EventReport::SendSupplierFaultEvent(eventInfo);
+        UpdateNetSupplierInfoAsyncInvalid(supplierId);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     eventInfo.supplierInfo = netSupplierInfo->ToString("\"");
@@ -1016,6 +1032,9 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
+        if (supplierId == delaySupplierId_) {
+            RemoveDelayNetwork();
+        }
         std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
         locker.unlock();
@@ -1032,6 +1051,29 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::RemoveDelayNetwork()
+{
+    if (netConnEventHandler_) {
+        netConnEventHandler_->RemoveTask("HandleFindBestNetworkForDelay");
+    }
+    isDelayHandleFindBestNetwork_ = false;
+    delaySupplierId_ = 0;
+}
+
+void NetConnService::HandleFindBestNetworkForDelay()
+{
+    isDelayHandleFindBestNetwork_ = false;
+    auto supplier = FindNetSupplier(delaySupplierId_);
+    delaySupplierId_ = 0;
+    if (supplier == nullptr) {
+        return;
+    }
+    if (supplier->IsNetValidated()) {
+        NETMGR_LOG_I("HandleFindBestNetworkForDelay.");
+        HandleDetectionResult(delaySupplierId_, VERIFICATION_STATE);
+    }
 }
 
 void NetConnService::ProcessHttpProxyCancel(const sptr<NetSupplier> &supplier)
@@ -1089,8 +1131,10 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     }
     locker.unlock();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
-    FindBestNetworkForAllRequest();
-    
+    HandlePreFindBestNetworkForDelay(supplierId, supplier);
+    if (!isDelayHandleFindBestNetwork_) {
+        FindBestNetworkForAllRequest();
+    }
     if (oldHttpProxy != netLinkInfo->httpProxy_) {
         SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
     }
@@ -1098,7 +1142,58 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     return NETMANAGER_SUCCESS;
 }
 
+void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier)
+{
+    if (supplier == nullptr) {
+        NETMGR_LOG_E("supplier is nullptr");
+        return;
+    }
+    if (isDelayHandleFindBestNetwork_) {
+        return;
+    }
+    bool isNeedDelay = (system::GetBoolParameter(PERSIST_WIFI_DELAY_ELEVATOR_ENABLE, false) ||
+        system::GetBoolParameter(PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE, false));
+    if (supplier->GetNetSupplierType() == BEARER_WIFI && !supplier->IsNetValidated() &&
+        defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR &&
+        isNeedDelay) {
+        int64_t delayTime = 2000;
+        if (netConnEventHandler_) {
+            NETMGR_LOG_I("HandlePreFindBestNetworkForDelay action");
+            isDelayHandleFindBestNetwork_ = true;
+            delaySupplierId_ = supplierId;
+            netConnEventHandler_->PostAsyncTask([this]() { HandleFindBestNetworkForDelay(); },
+                "HandleFindBestNetworkForDelay", delayTime);
+        }
+    }
+}
+
 #ifdef SUPPORT_SYSVPN
+int32_t NetConnService::CheckAndCompareIpAddress(const sptr<NetLinkInfo> &netLinkInfo)
+{
+    NETMGR_LOG_I("CheckAndCompareIpAddress");
+    for (auto it = netSuppliers_.begin(); it != netSuppliers_.end(); ++it) {
+        if (it->second == nullptr) {
+            continue;
+        }
+        auto supplier = it->second;
+        std::shared_ptr<Network> network = supplier->GetNetwork();
+        if (network == nullptr) {
+            continue;
+        }
+        NetLinkInfo netLinkInfoOld = network->GetNetLinkInfo();
+        for (const auto &inetAddr : netLinkInfoOld.netAddrList_) {
+            NETMGR_LOG_D("CheckAndCompareIpAddress old ip address:[%{public}s]",
+                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            if (netLinkInfo->HasNetAddr(inetAddr)) {
+                NETMGR_LOG_E("Same ip address:[%{public}s], there is not create vpn",
+                    CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+                return NETMANAGER_ERR_INVALID_PARAMETER;
+            }
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
 {
     NETMGR_LOG_D("IsCallingUserSupplier, supplierId:%{public}d", supplierId);
@@ -1729,8 +1824,16 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     supplier->SetDetectionDone();
     locker.unlock();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
-    FindBestNetworkForAllRequest();
     bool ifValid = netState == VERIFICATION_STATE;
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetNetSupplierType() != BEARER_CELLULAR) {
+        RemoveDelayNetwork();
+    }
+    if (delaySupplierId_ == supplierId &&
+        isDelayHandleFindBestNetwork_ && supplier->GetNetSupplierType() == BEARER_WIFI && ifValid) {
+        NETMGR_LOG_I("Enter HandleDetectionResult delay");
+    } else {
+        FindBestNetworkForAllRequest();
+    }
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
@@ -3428,6 +3531,7 @@ int32_t NetConnService::UpdateSupplierScoreAsync(uint32_t supplierId, uint32_t d
         NETMGR_LOG_E("supplier doesn't exist.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
+    RemoveDelayNetwork();
     supplier->SetNetValid(state);
     locker.unlock();
     // Find best network because supplier score changed.

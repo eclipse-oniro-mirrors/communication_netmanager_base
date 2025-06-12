@@ -38,11 +38,10 @@
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 #include "distributed_manager.h"
-
-#include "route_manager.h"
 #ifdef SUPPORT_SYSVPN
 #include "iptables_wrapper.h"
 #endif // SUPPORT_SYSVPN
+#include "route_manager.h"
 
 using namespace OHOS::NetManagerStandard;
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -75,6 +74,9 @@ constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
 #ifdef SUPPORT_SYSVPN
+constexpr uint32_t DEFAULT_ROUTE_VPN_NETWORK_BASE_TABLE = 1000;
+constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
+constexpr const char *PPP_CARD_NAME = "ppp-vpn";
 const std::string LOCAL_MANGLE_OUTPUT = "routectrl_mangle_OUTPUT";
 #endif // SUPPORT_SYSVPN
 constexpr uid_t UID_ROOT = 0;
@@ -101,6 +103,11 @@ struct FibRuleUidRange {
 
 std::mutex RouteManager::interfaceToTableLock_;
 std::map<std::string, uint32_t> RouteManager::interfaceToTable_;
+
+#ifdef SUPPORT_SYSVPN
+bool RouteManager::vpnSysCall_ = true;
+std::string RouteManager::defauleNetWorkName_ = "";
+#endif // SUPPORT_SYSVPN
 
 RouteManager::RouteManager()
 {
@@ -179,6 +186,9 @@ int32_t RouteManager::AddInterfaceToDefaultNetwork(const std::string &interfaceN
 {
     NETNATIVE_LOGI("AddInterfaceToDefaultNetwork, %{public}s;permission:%{public}d;", interfaceName.c_str(),
                    permission);
+#ifdef SUPPORT_SYSVPN
+    defauleNetWorkName_ = interfaceName;
+#endif // SUPPORT_SYSVPN
     uint32_t table = FindTableByInterfacename(interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
@@ -298,7 +308,7 @@ int32_t RouteManager::InitOutcomingPacketMark()
     return ROUTEMANAGER_SUCCESS;
 }
 
-int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string interface,
+int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string &interface,
     const std::vector<std::string> &extMessages, bool add)
 {
     int32_t ret = ROUTEMANAGER_SUCCESS;
@@ -307,17 +317,28 @@ int32_t RouteManager::UpdateVpnRules(uint16_t netId, const std::string interface
         return ROUTEMANAGER_ERROR;
     }
     NETNATIVE_LOG_D("update vpn rules on interface, %{public}s.", interface.c_str());
-    for (auto extMessage : extMessages) {
-        if (!CommonUtils::IsValidIPV4(extMessage)) {
+    bool isSysVpn = CheckSysVpnCall();
+    bool isTunVpn = CheckTunVpnCall(interface);
+
+    for (const auto& msg : extMessages) {
+        if (!CommonUtils::IsValidIPV4(msg)) {
             NETNATIVE_LOGE("failed to add update vpn rules on interface of netId, %{public}u.", netId);
             return ROUTEMANAGER_ERROR;
         }
-        ret += UpdateOutcomingIpMark(netId, extMessage, add);
+
+        if (isSysVpn && !isTunVpn) {
+            ret += UpdateVpnOutPutPenetrationRule(netId, defauleNetWorkName_, msg, add);
+        } else if (!isSysVpn) {
+            ret += UpdateOutcomingIpMark(netId, msg, add);
+        } else {
+            NETNATIVE_LOGI("update vpn rules on interface, %{public}s is not sys vpn or ext vpn.", interface.c_str());
+        }
     }
+
     return ret;
 }
 
-int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, std::string addr, bool add)
+int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, const std::string &addr, bool add)
 {
     NETNATIVE_LOGI("UpdateOutcomingIpMark,add===%{public}d", add);
     Fwmark fwmark;
@@ -341,6 +362,99 @@ int32_t RouteManager::UpdateOutcomingIpMark(uint16_t netId, std::string addr, bo
     }
     return ROUTEMANAGER_SUCCESS;
 }
+
+int32_t RouteManager::UpdateOutcomingUidMark(uint16_t netId, uid_t startUid, uid_t endUid, bool add)
+{
+    NETNATIVE_LOGI("UpdateOutcomingUidMark,add===%{public}d", add);
+    Fwmark fwmark;
+    fwmark.netId = netId;
+    NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
+    fwmark.permission = permission;
+    std::string action = "";
+    if (add) {
+        action = "-A ";
+    } else {
+        action = "-D ";
+    }
+    std::stringstream ss;
+    ss << "-t mangle " << action << LOCAL_MANGLE_OUTPUT << " -m owner --uid-owner " << startUid << "-" << endUid
+       << " -j MARK --set-mark 0x" << std::nouppercase
+       << std::hex << fwmark.intValue;
+    // need to call IptablesWrapper's RunCommand function.
+    if (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, ss.str()) == ROUTEMANAGER_ERROR) {
+        NETNATIVE_LOGE("UpdateOutcomingUidMark error");
+        return ROUTEMANAGER_ERROR;
+    }
+    return ROUTEMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::SetVpnCallMode(const std::string &message)
+{
+    std::lock_guard lock(interfaceToTableLock_);
+    if (message.find("0") == std::string::npos) {
+        vpnSysCall_ = true;
+    } else {
+        vpnSysCall_ = false;
+    }
+    NETNATIVE_LOG_D("vpnSysCall_ %{public}d", vpnSysCall_);
+    return ROUTEMANAGER_SUCCESS;
+}
+
+bool RouteManager::CheckTunVpnCall(const std::string &vpnName)
+{
+    if (vpnName.empty()) {
+        NETNATIVE_LOGE("CheckTunVpnCall err, vpn name is empty");
+        return false;
+    }
+    NETNATIVE_LOG_D("vpnName %{public}s, vpnSysCall_ %{public}d", vpnName.c_str(), vpnSysCall_);
+    if (vpnName.find("tun") != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
+bool RouteManager::CheckSysVpnCall()
+{
+    return vpnSysCall_;
+}
+
+uint32_t RouteManager::GetVpnInterffaceToId(const std::string &ifName)
+{
+    if (ifName.find(XFRM_CARD_NAME) != std::string::npos) {
+        return static_cast<uint32_t>(std::stoul(ifName.substr(strlen(XFRM_CARD_NAME))));
+    } else if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
+        return static_cast<uint32_t>(std::stoul(ifName.substr(strlen(PPP_CARD_NAME))));
+    }
+    return 0;
+}
+
+uint32_t RouteManager::FindVpnIdByInterfacename(VpnRuleIdType type, const std::string &interfaceName)
+{
+    std::lock_guard lock(interfaceToTableLock_);
+    NETNATIVE_LOG_D("type %{public}d, interface %{public}s", type, interfaceName.c_str());
+    uint32_t id = GetVpnInterffaceToId(interfaceName.c_str());
+    switch (type) {
+        case VpnRuleIdType::VPN_OUTPUT_TO_LOCAL:
+            id = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL - id;
+            break;
+        case VpnRuleIdType::VPN_SECURE:
+            id = RULE_LEVEL_SECURE_VPN - id;
+            break;
+        case VpnRuleIdType::VPN_EXPLICIT_NETWORK:
+            id = RULE_LEVEL_EXPLICIT_NETWORK - id;
+            break;
+        case VpnRuleIdType::VPN_OUTPUT_IFACE:
+            id = RULE_LEVEL_OUTPUT_IFACE_VPN - id;
+            break;
+        case VpnRuleIdType::VPN_NETWORK_TABLE:
+            id = DEFAULT_ROUTE_VPN_NETWORK_BASE_TABLE + id;
+            break;
+        default :
+            NETNATIVE_LOGI("unkonw type %{public}d, interface %{public}s", type, interfaceName.c_str());
+            break;
+    }
+    return id;
+}
 #endif // SUPPORT_SYSVPN
 
 int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName)
@@ -353,7 +467,17 @@ int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std
     if (ModifyVirtualNetBasedRules(netId, interfaceName, false) != ROUTEMANAGER_SUCCESS) {
         return ROUTEMANAGER_ERROR;
     }
+#ifdef SUPPORT_SYSVPN
+    if (!CheckSysVpnCall()) {
+        uint32_t tableId = FindVpnIdByInterfacename(VpnRuleIdType::VPN_NETWORK_TABLE, interfaceName);
+        NETNATIVE_LOG_D("RemoveInterfaceFromVirtualNetwork, clear table %{public}d", tableId);
+        return ClearRouteInfo(RTM_GETROUTE, tableId);
+    } else {
+        return ClearRouteInfo(RTM_GETROUTE, ROUTE_VPN_NETWORK_TABLE);
+    }
+#else
     return ClearRouteInfo(RTM_GETROUTE, ROUTE_VPN_NETWORK_TABLE);
+#endif // SUPPORT_SYSVPN
 }
 
 int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
@@ -367,16 +491,48 @@ int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::strin
 
     // If the rule fails to be added, continue to execute the next rule
     int32_t ret = UpdateVpnOutputToLocalRule(ifaceName, add);
+#ifdef SUPPORT_SYSVPN
+    ret += UpdateVpnSystemPermissionRule(netId, table, add, ifaceName);
+    ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add, ifaceName);
+#else
     ret += UpdateVpnSystemPermissionRule(netId, table, add);
     ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add);
+#endif // SUPPORT_SYSVPN
     return ret;
 }
+
+#ifdef SUPPORT_SYSVPN
+int32_t RouteManager::UpdateVpnOutPutPenetrationRule(int32_t netId, const std::string &interfaceName,
+                                                     const std::string &ruleDstIp, bool add)
+{
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = FindTableByInterfacename(interfaceName);
+    ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
+    ruleInfo.ruleFwmark = MARK_UNSET;
+    ruleInfo.ruleMask = MARK_UNSET;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+    ruleInfo.ruleDstIp = ruleDstIp;
+
+    NETNATIVE_LOG_D("rule ruleDstIp %{public}s", ToAnonymousIp(ruleDstIp).c_str());
+    return UpdateDistributedRule(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
+}
+#endif // SUPPORT_SYSVPN
 
 int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add)
 {
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = ROUTE_LOCAL_NETWORK_TABLE;
+#ifdef SUPPORT_SYSVPN
+    if (CheckSysVpnCall()) {
+        ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
+    } else {
+        ruleInfo.rulePriority = FindVpnIdByInterfacename(VpnRuleIdType::VPN_OUTPUT_TO_LOCAL, interfaceName);
+    }
+    NETNATIVE_LOG_D("rule priority %{public}d", ruleInfo.rulePriority);
+#else
     ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
+#endif // SUPPORT_SYSVPN
+
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
     if (interfaceName.find("vpn") == std::string::npos) {
@@ -387,7 +543,8 @@ int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceNam
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
 }
 
-int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add)
+int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add,
+    const std::string &interfaceName)
 {
     Fwmark fwmark;
     fwmark.netId = netId;
@@ -400,9 +557,23 @@ int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t tabl
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = table;
+#ifdef SUPPORT_SYSVPN
+    if (CheckSysVpnCall()) {
+        ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
+    } else {
+        ruleInfo.rulePriority = FindVpnIdByInterfacename(VpnRuleIdType::VPN_SECURE, interfaceName);
+    }
+    NETNATIVE_LOG_D("rule priority %{public}d", ruleInfo.rulePriority);
+    if (!CheckSysVpnCall() || CheckTunVpnCall(interfaceName)) {
+        NETNATIVE_LOGI("is ext vpn, add fwmark");
+        ruleInfo.ruleFwmark = fwmark.intValue;
+        ruleInfo.ruleMask = mask.intValue;
+    }
+#else
     ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
     ruleInfo.ruleFwmark = fwmark.intValue;
     ruleInfo.ruleMask = mask.intValue;
+#endif // SUPPORT_SYSVPN
     ruleInfo.ruleIif = RULEIIF_NULL;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
@@ -433,9 +604,24 @@ int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &int
     int32_t ret = ROUTEMANAGER_SUCCESS;
     for (auto range : uidRanges) {
         // If the rule fails to be added, continue to execute the next rule
+#ifdef SUPPORT_SYSVPN
+        ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add, interfaceName);
+        ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add,
+                                                interfaceName);
+        ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
+
+        if (!CheckSysVpnCall()) {
+            NETNATIVE_LOGI("is ext vpn, add uid mark");
+            ret += UpdateOutcomingUidMark(netId, range.begin_, range.end_, add);
+            if (ret != ROUTEMANAGER_SUCCESS) {
+                NETNATIVE_LOGE("add uid mark error.");
+            }
+        }
+#else
         ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add);
         ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add);
         ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
+#endif // SUPPORT_SYSVPN
     }
     return ret;
 }
@@ -636,7 +822,8 @@ int32_t RouteManager::DisableDistributedNet(bool isServer)
     return ret;
 }
 
-int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
+int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add,
+    const std::string &interfaceName)
 {
     Fwmark fwmark;
     Fwmark mask;
@@ -645,7 +832,17 @@ int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = table;
+#ifdef SUPPORT_SYSVPN
+    if (CheckSysVpnCall()) {
+        ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
+    } else {
+        ruleInfo.rulePriority = FindVpnIdByInterfacename(VpnRuleIdType::VPN_SECURE, interfaceName);
+    }
+    NETNATIVE_LOG_D("rule priority %{public}d", ruleInfo.rulePriority);
+#else
     ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
+#endif // SUPPORT_SYSVPN
+
     ruleInfo.ruleFwmark = fwmark.intValue;
     ruleInfo.ruleMask = mask.intValue;
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
@@ -654,7 +851,8 @@ int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_
 }
 
 int32_t RouteManager::UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
-                                                       uid_t uidStart, uid_t uidEnd, bool add)
+                                                       uid_t uidStart, uid_t uidEnd, bool add,
+                                                       const std::string &interfaceName)
 {
     NETNATIVE_LOGI("UpdateExplicitNetworkRuleWithUid");
     Fwmark fwmark;
@@ -669,7 +867,16 @@ int32_t RouteManager::UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t t
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = table;
+#ifdef SUPPORT_SYSVPN
+    if (CheckSysVpnCall()) {
+        ruleInfo.rulePriority = RULE_LEVEL_EXPLICIT_NETWORK;
+    } else {
+        ruleInfo.rulePriority = FindVpnIdByInterfacename(VpnRuleIdType::VPN_EXPLICIT_NETWORK, interfaceName);
+    }
+    NETNATIVE_LOG_D("rule priority %{public}d", ruleInfo.rulePriority);
+#else
     ruleInfo.rulePriority = RULE_LEVEL_EXPLICIT_NETWORK;
+#endif // SUPPORT_SYSVPN
     ruleInfo.ruleFwmark = fwmark.intValue;
     ruleInfo.ruleMask = mask.intValue;
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
@@ -691,7 +898,16 @@ int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &inter
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = table;
+#ifdef SUPPORT_SYSVPN
+    if (CheckSysVpnCall()) {
+        ruleInfo.rulePriority = RULE_LEVEL_OUTPUT_IFACE_VPN;
+    } else {
+        ruleInfo.rulePriority = FindVpnIdByInterfacename(VpnRuleIdType::VPN_OUTPUT_IFACE, interface);
+    }
+    NETNATIVE_LOG_D("UpdateOutputInterfaceRulesWithUid rule priority %{public}d", ruleInfo.rulePriority);
+#else
     ruleInfo.rulePriority = RULE_LEVEL_OUTPUT_IFACE_VPN;
+#endif // SUPPORT_SYSVPN
     ruleInfo.ruleFwmark = fwmark.intValue;
     ruleInfo.ruleMask = mask.intValue;
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
@@ -1124,13 +1340,22 @@ int32_t RouteManager::UpdateDistributedRule(uint32_t action, uint8_t ruleType, R
     return NETMANAGER_SUCCESS;
 }
 
+uint16_t RouteManager::GetRuleFlag(uint32_t action)
+{
+#ifdef SUPPORT_SYSVPN
+    return (action == RTM_NEWRULE) ? NLM_F_CREATE : 0;
+#else
+    return (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
+#endif // SUPPORT_SYSVPN
+}
+
 int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
                                        uid_t uidStart, uid_t uidEnd)
 {
     struct fib_rule_hdr msg = {0};
     msg.action = ruleType;
     msg.family = family;
-    uint16_t ruleFlag = (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
+    uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {
@@ -1183,7 +1408,7 @@ int32_t RouteManager::SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_
     if (ruleInfo.ruleDstIp != RULEIP_NULL && family == AF_INET) {
         msg.dst_len = BIT_32_LEN;
     }
-    uint16_t ruleFlag = (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
+    uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {
@@ -1334,7 +1559,15 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
         case RouteManager::LOCAL_NETWORK:
             return ROUTE_LOCAL_NETWORK_TABLE;
         case RouteManager::VPN_NETWORK:
+#ifdef SUPPORT_SYSVPN
+            if (CheckSysVpnCall()) {
+                return ROUTE_VPN_NETWORK_TABLE;
+            } else {
+                return FindVpnIdByInterfacename(VpnRuleIdType::VPN_NETWORK_TABLE, interfaceName);
+            }
+#else
             return ROUTE_VPN_NETWORK_TABLE;
+#endif // SUPPORT_SYSVPN
         case RouteManager::INTERNAL_DEFAULT:
             return FindTableByInterfacename(interfaceName) % ROUTE_INTERNAL_DEFAULT_TABLE + 1;
         default:

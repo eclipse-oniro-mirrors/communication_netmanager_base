@@ -774,5 +774,15 @@ HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
     netStatsService->CalculateTrafficAvailable(simId, UINT64_MAX, UINT64_MAX, UINT64_MAX);
     EXPECT_EQ(ret, true);
 }
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    int32_t simId = 1;
+    netStatsService->settingsTrafficMap_.insert(
+                std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
+    netStatsService->UpdateBpfMap(simId);
+    EXPECT_EQ(ret, true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

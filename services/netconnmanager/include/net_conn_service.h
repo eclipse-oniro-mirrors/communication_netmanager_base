@@ -579,6 +579,7 @@ private:
     bool IsInRequestNetUids(int32_t uid);
     int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
 #ifdef SUPPORT_SYSVPN
+    int32_t CheckAndCompareIpAddress(const sptr<NetLinkInfo> &netLinkInfo);
     int32_t realCallingUid_ = -1;
     bool IsCallingUserSupplier(uint32_t supplierId);
 #endif // SUPPORT_SYSVPN
@@ -639,6 +640,8 @@ private:
     bool isFallbackProbeWithProxy_ = false;
     AppStateAwareCallback appStateAwareCallback_;
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
+    std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
+    uint32_t delaySupplierId_ = 0;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -677,6 +680,10 @@ private:
     void SubscribeCommonEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
+    void HandleFindBestNetworkForDelay();
+    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
+    void RemoveDelayNetwork();
+    void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;

@@ -61,6 +61,7 @@ enum SysVpnStageCode : int32_t {
     VPN_STAGE_L2TP_STOP, // close single l2tp connection
     VPN_STAGE_CREATE_PPP_FD, // create ppp fd
     VPN_STAGE_SET_XFRM_PHY_IFNAME, // set xfrm phy ifname
+    VPN_STAGE_SET_VPN_CALL_MODE, // set vpn call mode
     VPN_STAGE_SET_VPN_REMOTE_ADDRESS, // set vpn remote ip address
     VPN_STAGE_SET_L2TP_CONF, // set l2tp config
 };

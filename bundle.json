@@ -153,6 +153,16 @@
                 },
                 {
                     "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_security_config_if",
+                    "header": {
+                        "header_files": [
+                            "network_security_config.h"
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
+                    }
+                },
+                {
+                    "type": "so",
                     "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:socket_permission",
                     "header": {
                         "header_files": [

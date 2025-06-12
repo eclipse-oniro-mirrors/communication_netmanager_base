@@ -39,6 +39,8 @@
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
 #include "common_mock_net_remote_object_test.h"
+#include "parameter.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1329,5 +1331,107 @@ HWTEST_F(NetConnServiceExtTest, SetReuseSupplierIdTest003, TestSize.Level1)
     ret = netConnService->SetReuseSupplierId(supplierId, reuseSupplierId, false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
+    uint32_t supplierId = 1;
+    netConnService->defaultNetSupplier_->supplierId_ = supplierId;
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->netSuppliers_[0] = netConnService->defaultNetSupplier_;
+    NetConnService::GetInstance()->HandleDetectionResult(supplierId, VERIFICATION_STATE);
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+    netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    std::string netWifiSupplierIdent;
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netWifiSupplierIdent, netCaps);
+    supplier->supplierId_ = supplierId;
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->netSuppliers_[1] = supplier;
+    NetConnService::GetInstance()->HandleDetectionResult(supplierId, VERIFICATION_STATE);
+    EXPECT_TRUE(netConnService->isDelayHandleFindBestNetwork_);
+    netConnService->netSuppliers_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, HandlePreFindBestNetworkForDelay001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    netConnService->HandlePreFindBestNetworkForDelay(1, nullptr);
+    uint32_t supplierId = 1;
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_CHECKING_CONNECTIVITY);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    supplier->supplierId_ = supplierId;
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->HandlePreFindBestNetworkForDelay(supplierId, supplier);
+    netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    netConnService->netSuppliers_[1] = supplier;
+    netConnService->isDelayHandleFindBestNetwork_ = false;
+    OHOS::system::SetParameter("persist.booster.enable_wifi_delay_weak_signal", "false");
+    netConnService->HandlePreFindBestNetworkForDelay(supplierId, supplier);
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+    netConnService->netSuppliers_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, HandleFindBestNetworkForDelay001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    netConnService->HandleFindBestNetworkForDelay();
+    uint32_t supplierId = 1;
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    supplier->supplierId_ = supplierId;
+    netConnService->delaySupplierId_ = supplierId;
+    netConnService->netSuppliers_[1] = supplier;
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->HandleFindBestNetworkForDelay();
+    EXPECT_EQ(netConnService->delaySupplierId_, 0);
+    netConnService->netSuppliers_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsyncInvalid001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    uint32_t supplierId = 1;
+    netConnService->isDelayHandleFindBestNetwork_ = false;
+    netConnService->UpdateNetSupplierInfoAsyncInvalid(supplierId);
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+}
+
+HWTEST_F(NetConnServiceExtTest, RemoveDelayNetwork001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    netConnService->isDelayHandleFindBestNetwork_ = true;
+    netConnService->RemoveDelayNetwork();
+    EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+}
+
+#ifdef SUPPORT_SYSVPN
+HWTEST_F(NetConnServiceExtTest, CheckAndCompareIpAddress001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    sptr<NetLinkInfo> netLinkInfo = new NetLinkInfo();
+
+    NetManagerStandard::INetAddr inetAddr;
+    inetAddr.type_ = NetManagerStandard::INetAddr::IpType::IPV4;
+    inetAddr.family_ = 0x01;
+    inetAddr.address_ = "10.0.0.2.1";
+    inetAddr.netMask_ = "255.255.255.0";
+    inetAddr.hostName_ = "localhost";
+    inetAddr.port_ = 80;
+    inetAddr.prefixlen_ = 24;
+    netLinkInfo->ifaceName_ = "tun-vpn";
+    netLinkInfo->netAddrList_.push_back(inetAddr);
+    netLinkInfo->mtu_ = 1500;
+    auto result = netConnService->CheckAndCompareIpAddress(netLinkInfo);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+#endif // SUPPORT_SYSVPN
 } // namespace NetManagerStandard
 } // namespace OHOS
