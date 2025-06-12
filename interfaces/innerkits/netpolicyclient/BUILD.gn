@@ -47,13 +47,6 @@ ohos_source_set("net_policy_parcel") {
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_quota_policy.cpp",
   ]
 
-  include_dirs = [
-    "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netpolicyclient/include",
-    "$INNERKITS_ROOT/netconnclient/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
-  ]
-
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   sanitize = {

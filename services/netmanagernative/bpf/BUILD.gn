@@ -69,7 +69,7 @@ ohos_shared_library("netsys_bpf_utils") {
   cflags_cc = common_cflags
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetSysBpf\"",
+    "NETMGR_LOG_TAG = \"NetSysBpf\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
 

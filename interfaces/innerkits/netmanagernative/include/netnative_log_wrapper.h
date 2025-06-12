@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,33 @@
 #ifndef NETNATIVE_LOG_WRAPPER_H
 #define NETNATIVE_LOG_WRAPPER_H
 
-#include <string>
-#include <memory>
-#include "hilog/log.h"
+#include "netmanager_base_log.h"
 
-#undef LOG_TAG
-#ifndef NETMGRNATIVE_LOG_TAG
-#define LOG_TAG "NetsysNativeService"
-#else
-#define LOG_TAG NETMGRNATIVE_LOG_TAG
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#undef LOG_TAG
+#ifndef NETMGR_LOG_TAG
+#define LOG_TAG "NetsysNativeService"
+#else
+#define LOG_TAG NETMGR_LOG_TAG
+#endif
 
-#define PRINT_NATIVE_LOG(op, fmt, ...)                                                                               \
-    (void)HILOG_##op(LOG_CORE, "[%{public}s:%{public}d]" fmt,  \
-                                    FILENAME, __LINE__, ##__VA_ARGS__)
+#define NETNATIVE_LOG_D(fmt, ...) NETMANAGER_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGE(fmt, ...) NETMANAGER_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGW(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGI(fmt, ...) NETMANAGER_LOG(INFO, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGF(fmt, ...) NETMANAGER_LOG(FATAL, fmt, ##__VA_ARGS__)
 
-#define NETNATIVE_LOG_D(fmt, ...) PRINT_NATIVE_LOG(DEBUG, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGE(fmt, ...) PRINT_NATIVE_LOG(ERROR, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGW(fmt, ...) PRINT_NATIVE_LOG(WARN, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGI(fmt, ...) PRINT_NATIVE_LOG(INFO, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGF(fmt, ...) PRINT_NATIVE_LOG(FATAL, fmt, ##__VA_ARGS__)
+#if DNS_CONFIG_DEBUG
+#define DNS_CONFIG_PRINT(fmt, ...) NETMANAGER_LOG(INFO, fmt, ##__VA_ARGS__)
+#else
+#define DNS_CONFIG_PRINT(fmt, ...) ((void)(0, ##__VA_ARGS__))
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // NETNATIVE_LOG_WRAPPER_H

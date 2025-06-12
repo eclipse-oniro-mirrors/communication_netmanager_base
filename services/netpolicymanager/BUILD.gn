@@ -16,13 +16,8 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("net_policy_manager_config") {
   include_dirs = [
-    "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
-    "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
-    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "include",
     "include/stub",
     "$NETSYSCONTROLLER_ROOT_DIR/include",

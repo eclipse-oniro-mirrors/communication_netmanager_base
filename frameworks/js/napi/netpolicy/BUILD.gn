@@ -19,8 +19,6 @@ config("policy_config") {
 
   include_dirs = [
     "include",
-    "$INNERKITS_ROOT/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   cflags = [
