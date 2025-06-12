@@ -1086,5 +1086,34 @@ HWTEST_F(UtNetmanagerBaseCommon, GetTodayMidnightTimestamp001, TestSize.Level2)
     CommonUtils::DeleteFile(filePath);
     EXPECT_NE(CommonUtils::GetTodayMidnightTimestamp(hour, min, sec), 0);
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, Strip001, TestSize.Level2)
+{
+    std::string str = "abca";
+    char ch = 'a';
+    EXPECT_EQ(CommonUtils::Strip(str, ch), "bc");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest009, TestSize.Level1)
+{
+    std::string domain = "";
+    auto result = CommonUtils::IsValidDomain(domain);
+    ASSERT_FALSE(result);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, TrimTest001, TestSize.Level2)
+{
+    std::string str = "";
+    auto result = CommonUtils::Trim(str);
+    EXPECT_EQ(result, "");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse005, TestSize.Level2)
+{
+    std::string str = "abc!";
+    std::string patternStr = "abc!";
+    auto result = CommonUtils::UrlRegexParse(str, patternStr);
+    EXPECT_EQ(result, true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
