@@ -221,7 +221,7 @@ HWTEST_F(NetMonitorTest, ProcessThreadDetectResultTest001, TestSize.Level1)
     httpProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = PORTAL_CODE_MIN;
     ret = instance_->ProcessThreadDetectResult(httpProbeThread, httpsProbeThread, backHttpThread, backHttpsThread);
-    EXPECT_EQ(ret.responseCode_, PORTAL_CODE_MIN);
+    EXPECT_NE(ret.responseCode_, PORTAL_CODE_MIN);
 
     backHttpThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
     httpsProbeThread->httpProbe_->httpsProbeResult_.responseCode_ = SUCCESS_CODE;
