@@ -646,5 +646,17 @@ HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed006, TestSize.Level1)
     std::cout << "NetPolicyClient027 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: OnRemoteDied001
+ * @tc.desc: Test NetPolicyClient OnRemoteDied.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, OnRemoteDied001, TestSize.Level1)
+{
+    const wptr<IRemoteObject> remote = nullptr;
+    g_netPolicyClient->OnRemoteDied(remote);
+    EXPECT_EQ(remote, nullptr);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
