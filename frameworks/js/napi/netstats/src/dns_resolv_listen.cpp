@@ -147,7 +147,7 @@ void DnsResolvListenInternal::AddPublicDnsServersExt(ResolvConfigExt &sendData, 
 
 static void ReplaceDnsServer(ResolvConfig &sendData, const std::vector<std::string> &servers)
 {
-    int32_t dnsNumTotal = servers.size();
+    int32_t dnsNumTotal = static_cast<int32_t>(servers.size());
     if (dnsNumTotal <= MAX_SERVER_NUM - 1) {
         return;
     }
