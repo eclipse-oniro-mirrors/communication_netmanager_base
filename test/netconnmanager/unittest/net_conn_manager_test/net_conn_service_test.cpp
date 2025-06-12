@@ -1975,5 +1975,13 @@ HWTEST_F(NetConnServiceTest, SetReuseSupplierIdTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, ReplaceUserIdForUriTest001, TestSize.Level1)
+{
+    NetHttpProxyTracker httpProxyTracker;
+    const char *uri = "";
+    int32_t userId = 123;
+    auto ret = httpProxyTracker.ReplaceUserIdForUri(uri, userId);
+    EXPECT_EQ(ret, "");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
