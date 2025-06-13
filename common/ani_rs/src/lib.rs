@@ -14,6 +14,7 @@
 pub use ani_rs_macros::ani;
 pub use ani_rs_macros::native;
 
+pub mod box_type;
 mod env;
 mod vm;
 
