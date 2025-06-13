@@ -17,12 +17,14 @@
 #define NETMANAGER_CONSTANTS_H
 
 #include <errors.h>
+#include <stdint.h>
 
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr int NETMANAGER_ERROR = -1;
 constexpr int NETSYS_SUCCESS = 0;
 constexpr const char* CREATE_TABLE_IF_NOT_EXISTS = "CREATE TABLE IF NOT EXISTS ";
+constexpr int32_t DEFAULT_GATEWAY_MASK_MAX_LENGTH = 24;
 
 enum {
     NETMANAGER_COMMON = 0x00,

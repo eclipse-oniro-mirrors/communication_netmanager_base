@@ -311,8 +311,9 @@ int32_t DistributedManager::ConfigVirnicAndVeth(const std::string &virNicAddr, c
         NETNATIVE_LOGE("add virnic ip failed, output %{public}s.", out.c_str());
         return NETMANAGER_ERROR;
     }
- 
-    std::string virNicVethAddr = CommonUtils::GetGatewayAddr(virNicAddr, "255.255.255.0");
+
+    std::string maskAddr = CommonUtils::GetMaskByLength(DEFAULT_GATEWAY_MASK_MAX_LENGTH);
+    std::string virNicVethAddr = CommonUtils::GetGatewayAddr(virNicAddr, maskAddr);
     if (virNicVethAddr.empty()) {
         NETNATIVE_LOGE("get gateway addr is empty");
         return NETMANAGER_ERROR;
