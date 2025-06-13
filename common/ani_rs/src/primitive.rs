@@ -302,7 +302,7 @@ impl AniExt for i8 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type: i8", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -482,7 +482,7 @@ impl AniExt for i16 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type i16", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -662,7 +662,7 @@ impl AniExt for i32 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type i32", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -841,7 +841,7 @@ impl AniExt for i64 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type i64", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -1020,7 +1020,7 @@ impl AniExt for f32 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type f32", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -1199,7 +1199,7 @@ impl AniExt for f64 {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type f64", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -1601,7 +1601,7 @@ impl AniExt for AniRef<'_> {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type AniRef", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
@@ -1745,7 +1745,7 @@ impl AniExt for String {
             )
         };
         if res != 0 {
-            let msg = format!("Failed to set property {}", name.to_string_lossy());
+            let msg = format!("Failed to set property {} type", name.to_string_lossy());
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
