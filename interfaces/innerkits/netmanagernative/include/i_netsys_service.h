@@ -162,6 +162,7 @@ public:
     virtual int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) = 0;
     virtual int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) = 0;
     virtual int32_t ClearIncreaseTrafficMap() = 0;
+    virtual int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex) = 0;
     virtual int32_t UpdateIfIndexMap(int8_t key, uint64_t index) = 0;
     virtual int32_t SetNetStatusMap(uint8_t type, uint8_t value) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,

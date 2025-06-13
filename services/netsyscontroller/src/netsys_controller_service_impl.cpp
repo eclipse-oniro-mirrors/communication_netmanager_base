@@ -739,6 +739,12 @@ int32_t NetsysControllerServiceImpl::ClearIncreaseTrafficMap()
     return netsysClient_->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysControllerServiceImpl::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    NETMGR_LOG_D("DeleteIncreaseTrafficMap");
+    return netsysClient_->DeleteIncreaseTrafficMap(ifIndex);
+}
+
 int32_t NetsysControllerServiceImpl::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     NETMGR_LOG_D("UpdateIfIndexMap");

@@ -780,6 +780,16 @@ int32_t NetsysNativeService::SetNetStatusMap(uint8_t type, uint8_t value)
     return bpfStats_->SetNetStatusMap(type, value);
 }
 
+int32_t NetsysNativeService::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+ 
+    return bpfStats_->DeleteIncreaseTrafficMap(ifIndex);
+}
+
 int32_t NetsysNativeService::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {

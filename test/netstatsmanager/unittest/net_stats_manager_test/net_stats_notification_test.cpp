@@ -408,5 +408,20 @@ HWTEST_F(NetStatsNotificationTest, QueryBySimIdTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsNotificationTest, BackUpNetStatsFreqDBTest002, TestSize.Level1)
+{
+    NetStatsRDB rdb;
+    auto ret = rdb.BackUpNetStatsFreqDB("", "");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = rdb.BackUpNetStatsFreqDB("./xxx.db", "");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = rdb.BackUpNetStatsFreqDB("", "./xxx.db");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = rdb.BackUpNetStatsFreqDB("./xxx.db", "./xxx.db");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

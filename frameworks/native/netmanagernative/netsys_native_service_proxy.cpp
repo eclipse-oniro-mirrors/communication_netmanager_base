@@ -2224,6 +2224,40 @@ int32_t NetsysNativeServiceProxy::ClearIncreaseTrafficMap()
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint64(ifIndex)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("DeleteIncreaseTrafficMap Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DELETE_INCRE_TRAFFIC_MAP),
+                                        data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to DeleteIncreaseTrafficMap ret= %{public}d", ret);
+        return ret;
+    }
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     MessageParcel data;

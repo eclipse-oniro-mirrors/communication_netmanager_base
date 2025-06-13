@@ -81,6 +81,19 @@ HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsDatabaseHelperTest, ExecTableUpgradeTest005, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    const std::string tableInfo = UID_SIM_TABLE_CREATE_PARAM;
+    int32_t ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_1);
+    ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_2);
+    ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_3);
+    ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_4);
+    ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_5);
+    ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_6);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
@@ -285,6 +298,34 @@ HWTEST_F(NetStatsDatabaseHelperTest, UpgradeTest001, TestSize.Level1)
 HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest001, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::string tableName;
+    auto oldVersion = NetStatsDatabaseHelper::Version_5;
+    auto newVersion = NetStatsDatabaseHelper::Version_0;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    oldVersion = NetStatsDatabaseHelper::Version_0;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    newVersion = NetStatsDatabaseHelper::Version_5;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+    EXPECT_NE(oldVersion, NetStatsDatabaseHelper::Version_0);
+
+    oldVersion = NetStatsDatabaseHelper::Version_5;
+    newVersion = NetStatsDatabaseHelper::Version_6;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+    EXPECT_EQ(oldVersion, NetStatsDatabaseHelper::Version_6);
+
+    oldVersion = NetStatsDatabaseHelper::Version_6;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+
+    newVersion = NetStatsDatabaseHelper::Version_5;
+    helper->ExecUpgradeSql(tableName, oldVersion, newVersion);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest002, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    helper->isDisplayTrafficAncoList_ = false;
     std::string tableName;
     auto oldVersion = NetStatsDatabaseHelper::Version_5;
     auto newVersion = NetStatsDatabaseHelper::Version_0;

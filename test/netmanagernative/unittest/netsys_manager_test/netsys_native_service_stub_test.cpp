@@ -462,6 +462,11 @@ public:
         return 0;
     }
 
+    int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex) override
+    {
+        return 0;
+    }
+
     int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override
     {
         return 0;
@@ -2254,5 +2259,29 @@ HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint64(0)) {
+        return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDeleteIncreaseTrafficMap(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    MessageParcel data2;
+    if (!data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data2.WriteUint8(0)) {
+        return;
+    }
+    MessageParcel reply2;
+    int32_t ret2 = notifyStub_->CmdDeleteIncreaseTrafficMap(data2, reply2);
+    EXPECT_NE(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

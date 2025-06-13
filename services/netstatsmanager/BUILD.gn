@@ -124,7 +124,6 @@ ohos_shared_library("net_stats_manager") {
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_info_observer.cpp",
       "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_settings_observer.cpp",
       "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_base.cpp",
@@ -223,7 +222,6 @@ ohos_static_library("net_stats_manager_static") {
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
-      "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_info_observer.cpp",
       "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_settings_observer.cpp",
       "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_stats_trafficLimit_dialog.cpp",
       "src/net_stats_base.cpp",

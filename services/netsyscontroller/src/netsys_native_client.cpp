@@ -1544,6 +1544,16 @@ int32_t NetsysNativeClient::ClearIncreaseTrafficMap()
     return proxy->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysNativeClient::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DeleteIncreaseTrafficMap(ifIndex);
+}
+
 int32_t NetsysNativeClient::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     auto proxy = GetProxy();

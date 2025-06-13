@@ -93,6 +93,7 @@ private:
     std::mutex mutex_;
     std::atomic<bool> isNeedUpdate_ = false;
     std::string path_ = "";
+    bool isDisplayTrafficAncoList_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

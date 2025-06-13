@@ -23,6 +23,7 @@
 #define protected public
 #endif
 
+#include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
@@ -826,6 +827,18 @@ HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, Te
 {
     int32_t ret = instance_->DelBrokerUidAccessPolicyMap(TEST_UID);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DeleteIncreaseTrafficMapTest002, TestSize.Level1)
+{
+    SafeMap<std::string, std::string> ifaceNameIdentMap_;
+    NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
+    int32_t ret = instance_->DeleteIncreaseTrafficMap(12);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->DeleteIncreaseTrafficMap(10);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = instance_->DeleteIncreaseTrafficMap(13);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE

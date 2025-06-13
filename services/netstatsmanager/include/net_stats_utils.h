@@ -34,10 +34,11 @@ public:
     static bool IsLeapYear(int32_t year);
     static int32_t GetDaysInMonth(int32_t year, int32_t month);
     static bool IsMobileDataEnabled();
-    static int32_t IsDaulCardEnabled();
+    static int32_t IsDualCardEnabled();
+    static int32_t GetPrimarySlotId();
     static bool ConvertToUint64(const std::string &str, uint64_t &value);
     static bool ConvertToInt32(const std::string &str, int32_t &value);
 };
 }
 }
-#endif
+#endif

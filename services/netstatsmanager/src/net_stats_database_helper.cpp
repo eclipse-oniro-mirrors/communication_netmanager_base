@@ -73,6 +73,7 @@ NetStatsDatabaseHelper::NetStatsDatabaseHelper(const std::string &path)
     }
     Open(path);
     path_ = path;
+    isDisplayTrafficAncoList_ = CommonUtils::IsNeedDisplayTrafficAncoList();
 }
 
 NetStatsDatabaseHelper::~NetStatsDatabaseHelper()
@@ -594,7 +595,7 @@ void NetStatsDatabaseHelper::ExecUpgradeSql(const std::string &tableName, TableV
         oldVersion = Version_4;
     }
     if (oldVersion < Version_5 && newVersion >= Version_5) {
-        if (CommonUtils::IsNeedDisplayTrafficAncoList()) {
+        if (isDisplayTrafficAncoList_) {
             std::string sqlsim = UPDATE + tableName + SET_FLAG + std::to_string(STATS_DATA_FLAG_SIM_BASIC) +
                               " WHERE Flag = " + std::to_string(STATS_DATA_FLAG_SIM) + ";";
             ret = ExecSql(sqlsim, nullptr, sqlCallback);
