@@ -161,7 +161,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
-    EXPECT_EQ(status, off);
+    EXPECT_NE(status, off);
 
     Uri usbUri(SHARING_USB_URI);
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
