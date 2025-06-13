@@ -77,10 +77,10 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
 
 HWTEST_F(TestDnsResultCallback, RequestNetDetectionTest001, TestSize.Level1)
 {
-    uint32_t failValue_ = 123;
+    uint32_t temp = 123;
     uint32_t netid = 123;
-    instance_->RequestNetDetection(failValue_, netid);
-    EXPECT_NE(failValue_, 123);
+    instance_->RequestNetDetection(temp, netid);
+    EXPECT_NE(temp, 123);
 }
 } // namespace
 } // namespace NetManagerStandard
