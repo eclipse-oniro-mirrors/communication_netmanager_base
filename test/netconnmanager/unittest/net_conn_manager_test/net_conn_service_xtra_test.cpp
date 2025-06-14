@@ -1379,7 +1379,7 @@ HWTEST_F(NetConnServiceExtTest, HandlePreFindBestNetworkForDelay001, TestSize.Le
     netConnService->HandlePreFindBestNetworkForDelay(supplierId, supplier);
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
     OHOS::system::SetParameter("persist.booster.enable_wifi_delay_weak_signal", "true");
-    netConnService->netConnEventHandler_ = std::make_shared(netConnService->netConnEventRunner_);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     netConnService->HandlePreFindBestNetworkForDelay(supplierId, supplier);
     EXPECT_TRUE(netConnService->isDelayHandleFindBestNetwork_);
     netConnService->netSuppliers_.clear();
@@ -1416,7 +1416,7 @@ HWTEST_F(NetConnServiceExtTest, RemoveDelayNetwork001, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
     netConnService->isDelayHandleFindBestNetwork_ = true;
-    netConnService->netConnEventHandler_ = std::make_shared(netConnService->netConnEventRunner_);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     netConnService->RemoveDelayNetwork();
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
 }
