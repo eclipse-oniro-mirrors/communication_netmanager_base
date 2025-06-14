@@ -882,5 +882,73 @@ HWTEST_F(NetsysNativeServiceTest, SetNetStatusMapTest001, TestSize.Level1)
     int32_t ret = instance_->SetNetStatusMap(0, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest004, TestSize.Level1)
+{
+    std::string iptableCmd = "-Sabbbb";
+    std::string iptableOutput = "";
+    IptablesType ipType = IptablesType::IPTYPE_IPV6;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest005, TestSize.Level1)
+{
+    std::string iptableCmd = "-Sabbbb";
+    std::string iptableOutput = "";
+    IptablesType ipType = IptablesType::IPTYPE_IPV4V6;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest006, TestSize.Level1)
+{
+    std::string iptableCmd = "-Sabbbb";
+    std::string iptableOutput = "";
+    IptablesType ipType = IptablesType::IPTYPE_NONE;
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput, ipType);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowedTest001, TestSize.Level1)
+{
+    const std::vector<std::string> ifaceNames;
+    bool allowed = true;
+    auto ret = instance_->SetNicTrafficAllowed(ifaceNames, allowed);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowedTest002, TestSize.Level1)
+{
+    NetsysNativeService temp;
+    const std::vector<std::string> ifaceNames;
+    bool allowed = true;
+    temp.iptablesWrapper_ = nullptr;
+    auto ret = temp.SetNicTrafficAllowed(ifaceNames, allowed);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowedTest003, TestSize.Level1)
+{
+    const std::vector<std::string> ifaceNames;
+    bool allowed = false;
+    auto ret = instance_->SetNicTrafficAllowed(ifaceNames, allowed);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, ProcessVpnStageTest001, TestSize.Level1)
+{
+    NetsysNative::SysVpnStageCode stage = VPN_STAGE_RESTART;
+    auto ret = instance_->ProcessVpnStage(stage);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest003, TestSize.Level1)
+{
+    NetsysNativeService temp;
+    std::unordered_map<uint32_t, uint32_t> uidMaps = {};
+    auto ret = temp.SetBrokerUidAccessPolicyMap(uidMaps);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
