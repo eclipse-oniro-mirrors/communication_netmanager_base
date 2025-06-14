@@ -196,25 +196,46 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
-    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all rmnet0 wlan1 ::/0 ::/0 \n 1 1 RETURN all wlan1 rmnet0 ::/0 ::/0";
+    std::string result = "Chain tetherctrl_counters (2 references) \n"
+        "pkts  bytes target     prot opt in     out     source               destination \n"
+        "        0        0 RETURN     all  --  wlan0  wlan1   0.0.0.0/0            0.0.0.0/0 \n"
+        "        0        0 RETURN     all  --  wlan1  wlan0   0.0.0.0/0            0.0.0.0/0 \n";
     auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
     EXPECT_EQ(res, 0);
 }
 
-HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic002, TestSize.Level1)
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
-    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all wlan0 wlan1 ::/0 ::/0 \n 1 1 RETURN all wlan1 wlan0 ::/0 ::/0";
+    std::string result = "Chain tetherctrl_counters (2 references) \n"
+        "pkts  bytes target     prot opt in     out     source               destination \n"
+        "        0        0 RETURN     all  --  rmnet0  wlan1   0.0.0.0/0            0.0.0.0/0 \n"
+        "        0        0 RETURN     all  --  wlan1  rmnet0   0.0.0.0/0            0.0.0.0/0 \n";
     auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
     EXPECT_EQ(res, 0);
 }
 
-HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic003, TestSize.Level1)
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
-    std::string result = "Chain tetherctrl_counters \n pkts bytes target prot opt in out source destination \n 0 0 RETURN all wifi0 wifi1 ::/0 ::/0 \n 1 1 RETURN all wifi1 wifi0 ::/0 ::/0";
+    std::string result = "Chain tetherctrl_counters (2 references) \n"
+        "pkts  bytes target     prot opt in     out     source               destination \n"
+        "        0        0 RETURN     all  --  wifi0  wifi1   0.0.0.0/0            0.0.0.0/0 \n"
+        "        0        0 RETURN     all  --  wifi1  wifi0   0.0.0.0/0            0.0.0.0/0 \n";
+    auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
+    EXPECT_EQ(res, -1);
+}
+
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
+{
+    NetworkSharingTraffic traffic;
+    std::string ifaceName = "";
+    std::string result = "Chain tetherctrl_counters (2 references) \n"
+        "pkts  bytes target     prot opt in     out     source               destination \n"
+        "        0        0 RETURN     all  --  wifi0   0.0.0.0/0            0.0.0.0/0 \n"
+        "        0        0 RETURN     all  --  wifi1   0.0.0.0/0            0.0.0.0/0 \n";
     auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
     EXPECT_EQ(res, -1);
 }
