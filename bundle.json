@@ -85,6 +85,7 @@
                 "netmanager_ext",
                 "jsoncpp",
                 "qos_manager",
+                "config_policy",
                 "runtime_core",
                 "time_service"
             ]
