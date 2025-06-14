@@ -1633,5 +1633,16 @@ HWTEST_F(NetConnClientTest, GetSpecificNetTest001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(NetConnClientTest, NetExtAttributeTest001, TestSize.Level1)
+{
+    std::cout << "SetNetExtAttributeTest001 In" << std::endl;
+    NetHandle handle;
+    auto ret = NetConnClient::GetInstance().SetNetExtAttribute(handle, "test");
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    std::string str;
+    ret = NetConnClient::GetInstance().GetNetExtAttribute(handle, str);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
