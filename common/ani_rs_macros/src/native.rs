@@ -102,6 +102,15 @@ pub(crate) fn entry(_: TokenStream2, item: TokenStream2) -> Result<TokenStream2>
                         #sig
                         #pat: ani_rs::objects::AniFnObject<'local>,
                     }
+                } else if pat.ident.to_string() == "async_callback" {
+                    input = quote! {
+                        #input
+                        async_callback,
+                    };
+                    sig = quote! {
+                        #sig
+                        #pat: ani_rs::objects::AniAsyncCallback<'local>,
+                    }
                 } else {
                     let pat = pat.ident.clone();
                     if de.is_none() {
