@@ -464,7 +464,7 @@ bool ConnectionExec::ExecGetNetExtAttribute(GetNetExtAttributeContext *context)
     }
     int32_t errorCode = NetConnClient::GetInstance().GetNetExtAttribute(context->netHandle_, context->netExtAttribute_);
     if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("exec SetNetExtAttribute failed errorCode: %{public}d", errorCode);
+        NETMANAGER_BASE_LOGE("exec GetNetExtAttribute failed errorCode: %{public}d", errorCode);
         context->SetErrorCode(errorCode);
         return false;
     }
