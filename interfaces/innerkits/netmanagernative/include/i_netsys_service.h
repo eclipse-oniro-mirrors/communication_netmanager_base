@@ -44,6 +44,7 @@ namespace NetsysNative {
 using namespace nmd;
 using namespace OHOS::NetManagerStandard;
 enum IptablesType {
+    IPTYPE_NONE = 0,
     IPTYPE_IPV4 = 1,
     IPTYPE_IPV6 = 2,
     IPTYPE_IPV4V6 = 3,
