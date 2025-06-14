@@ -292,5 +292,21 @@ HWTEST_F(UtNetPolicyCore, SendAppStatusMessage003, TestSize.Level1)
     g_netPolicyCore->SendAppStatusMessage(appProcessData);
 }
 
+/**
+ * @tc.name: OnReceiveEvent009
+ * @tc.desc: Test NetPolicyCore OnReceiveEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyCore, OnReceiveEvent009, TestSize.Level1)
+{
+    EventFwk::CommonEventData eventData;
+    eventData.SetCode(NORMAL_MODE);
+    EventFwk::Want want;
+    want.SetAction(COMMON_EVENT_PACKAGE_REMOVED);
+    eventData.SetWant(want);
+    ASSERT_NE(g_netPolicyCore, nullptr);
+    g_netPolicyCore->subscriber_->receiveMessage_ = nullptr;
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

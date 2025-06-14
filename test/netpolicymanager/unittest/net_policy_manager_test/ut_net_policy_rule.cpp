@@ -479,5 +479,19 @@ HWTEST_F(UtNetPolicyRule, HandleEvent001, TestSize.Level1)
     netpolicyrule.HandleEvent(eventId, policyEvent);
     EXPECT_TRUE(netpolicyrule.deviceIdleMode_);
 }
+
+/**
+ * @tc.name: NetsysCtrl002
+ * @tc.desc: Test NetPolicyRule NetsysCtrl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyRule, NetsysCtrl002, TestSize.Level1)
+{
+    uint32_t uid = 2;
+    uint32_t netsysCtrl = 3;
+    NetPolicyRule netpolicyrule;
+    netpolicyrule.NetsysCtrl(uid, netsysCtrl);
+    EXPECT_EQ(netpolicyrule.powerSaveMode_, false);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

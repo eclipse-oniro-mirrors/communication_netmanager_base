@@ -294,5 +294,90 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
     ASSERT_TRUE(g_callbackBackgroundPolicy == true);
     g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
+
+/**
+ * @tc.name: RegisterNetPolicyCallbackAsync001
+ * @tc.desc: Test RegisterNetPolicyCallbackAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, RegisterNetPolicyCallbackAsync001, TestSize.Level1)
+{
+    sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
+    g_netPolicyCallback->netPolicyCallbackFfrtQueue_ = nullptr;
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
+    std::thread setBackgroundPolicy(SetBackgroundPolicy);
+
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
+    setBackgroundPolicy.join();
+
+    std::cout << "g_callbackBackgroundPolicy:" << g_callbackBackgroundPolicy << std::endl;
+    ASSERT_TRUE(g_callbackBackgroundPolicy == true);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
+}
+
+/**
+ * @tc.name: NotifyNetUidPolicyChangeAsync001
+ * @tc.desc: Test NotifyNetUidPolicyChangeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, NotifyNetUidPolicyChangeAsync001, TestSize.Level1)
+{
+    uint32_t uid = 123;
+    uint32_t policy = 123;
+    auto result = g_netPolicyCallback->NotifyNetUidPolicyChangeAsync(uid, policy);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetUidRuleChangeAsync001
+ * @tc.desc: Test NotifyNetUidRuleChangeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, NotifyNetUidRuleChangeAsync001, TestSize.Level1)
+{
+    uint32_t uid = 123;
+    uint32_t rule = 123;
+    auto result = g_netPolicyCallback->NotifyNetUidRuleChangeAsync(uid, rule);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetBackgroundPolicyChangeAsync001
+ * @tc.desc: Test NotifyNetBackgroundPolicyChangeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, NotifyNetBackgroundPolicyChangeAsync001, TestSize.Level1)
+{
+    bool isAllowed = true;
+    auto result = g_netPolicyCallback->NotifyNetBackgroundPolicyChangeAsync(isAllowed);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetQuotaPolicyChangeAsync001
+ * @tc.desc: Test NotifyNetQuotaPolicyChangeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, NotifyNetQuotaPolicyChangeAsync001, TestSize.Level1)
+{
+    NetQuotaPolicy netquotapolicy;
+    std::vector<NetQuotaPolicy> quotaPolicies = {netquotapolicy};
+    auto result = g_netPolicyCallback->NotifyNetQuotaPolicyChangeAsync(quotaPolicies);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetMeteredIfacesChangeAsync001
+ * @tc.desc: Test NotifyNetMeteredIfacesChangeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyCallbackUTest, NotifyNetMeteredIfacesChangeAsync001, TestSize.Level1)
+{
+    std::vector<std::string> ifaces = {"123"};
+    auto result = g_netPolicyCallback->NotifyNetMeteredIfacesChangeAsync(ifaces);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    g_netPolicyCallback->netPolicyCallbackFfrtQueue_ = std::make_shared<ffrt::queue>("NetPolicyCallback");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -95,6 +95,7 @@ ohos_unittest("net_policy_manager_test") {
   defines = [
     "NETMGR_LOG_TAG = \"NetPolicyUT\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "private = public",
   ]
 
   if (enable_netmgr_debug) {
