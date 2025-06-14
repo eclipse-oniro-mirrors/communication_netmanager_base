@@ -1267,9 +1267,7 @@ bool NetStatsService::CommonEventSimStateChangedFfrt(int32_t slotId, int32_t sim
             trafficDataObserver->RegisterTrafficDataSettingObserver();
         }
     } else if (simState != static_cast<int32_t>(Telephony::SimState::SIM_STATE_READY)) {
-        // 卡异常，取消监听
         if (settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
-            // 去注册
             settingsTrafficMap_[simId].first->UnRegisterTrafficDataSettingObserver();
             NETMGR_LOG_I("settingsTrafficMap_.erase(simId). simId:%{public}d", simId);
             settingsTrafficMap_.erase(simId);
@@ -1353,7 +1351,6 @@ void NetStatsService::StartTrafficOvserver()
         NETMGR_LOG_E("StartTrafficOvserver fail, ret = %{public}d", ret);
         return;
     }
-    NETMGR_LOG_I("StartTrafficOvserver end");
 }
 
 void NetStatsService::StopTrafficOvserver()
@@ -1370,7 +1367,6 @@ void NetStatsService::StopTrafficOvserver()
         NETMGR_LOG_E("StopTrafficOvserver fail, ret = %{public}d", ret);
         return;
     }
-    NETMGR_LOG_I("StopTrafficOvserver end");
 }
 
 
@@ -1388,12 +1384,14 @@ void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifInde
 
 bool NetStatsService::IsSameStateInTwoMap(int32_t simId)
 {
-    if (simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end() &&
-        settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
+    auto ifIndexItem = simIdToIfIndexMap_.find(simId);
+    auto settingsItem = settingsTrafficMap_.find(simId);
+    if (ifIndexItem == simIdToIfIndexMap_.end() &&
+        settingsItem == settingsTrafficMap_.end()) {
         return true;
     }
-    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end() &&
-        settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
+    if (ifIndexItem != simIdToIfIndexMap_.end() &&
+        settingsItem != settingsTrafficMap_.end()) {
         return true;
     }
     return false;
@@ -1410,7 +1408,7 @@ void NetStatsService::DeleteSimIdInTwoMap(int32_t simId)
 
 void NetStatsService::AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex)
 {
-    NETMGR_LOG_E("AddSimIdInTwoMap. simId:%{public}d, ifIndex:%{public}" PRIu64, simId, ifIndex);
+    NETMGR_LOG_I("AddSimIdInTwoMap. simId:%{public}d, ifIndex:%{public}" PRIu64, simId, ifIndex);
     if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
         int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
         if (slotId != 0 && slotId != 1) {
@@ -1542,7 +1540,7 @@ void NetStatsService::PrintTrafficBpfMapInfo(int32_t slotId)
         slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_MARK, monthlyMarkAvailableMap);
     NetsysController::GetInstance().GetNetStateTrafficMap(
         slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_DAILY_MARK, dailyMarkAvailableMap);
-    NETMGR_LOG_E("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
+    NETMGR_LOG_I("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
 monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
         monthlyAvailableMap, monthlyMarkAvailableMap, dailyMarkAvailableMap);
 }
@@ -1594,7 +1592,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
 
         uint64_t dayTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->dailyMark;
-        NETMGR_LOG_E("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);
+        NETMGR_LOG_I("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);
         if (dayTmp > allTodayUsedTraffix) {
             dailyMarkAvailable = dayTmp - allTodayUsedTraffix;
         }
@@ -1615,7 +1613,7 @@ void NetStatsService::SetTrafficMapMaxValue(int32_t slotId)
 {
     NETMGR_LOG_I("SetTrafficMapMaxValue");
     if (slotId != 0 && slotId != 1) {
-        NETMGR_LOG_I("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
+        NETMGR_LOG_E("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
         return;
     }
     NetsysController::GetInstance().SetNetStateTrafficMap(
@@ -1745,7 +1743,7 @@ void NetStatsService::UpdateNetStatsToMapFromDB(int32_t simId)
 int32_t NetStatsService::NotifyTrafficAlert(int32_t simId, uint8_t flag)
 {
     if (simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end()) {
-        NETMGR_LOG_I("simIdToIfIndexMap not find simId: %{public}d", simId);
+        NETMGR_LOG_E("simIdToIfIndexMap not find simId: %{public}d", simId);
         return -1;
     }
 
@@ -1776,7 +1774,7 @@ bool NetStatsService::GetNotifyStats(int32_t simId, uint8_t flag)
         case NET_STATS_DAILY_MARK:
             return GetDayNotifyStatus(simId);
         default:
-            NETMGR_LOG_I("unknown notification type");
+            NETMGR_LOG_E("unknown notification type");
             return false;
     }
     return false;
@@ -1787,7 +1785,7 @@ bool NetStatsService::GetMonNotifyStatus(int32_t simId)
     NETMGR_LOG_I("Enter GetMonNotifyStatus.");
     auto iter = settingsTrafficMap_.find(simId);
     if (iter == settingsTrafficMap_.end() || iter->second.second == nullptr) {
-        NETMGR_LOG_I("iter is nullptr.");
+        NETMGR_LOG_E("iter is nullptr.");
         return false;
     }
     if (iter->second.second->isCanNotifyMonthlyMark) {
@@ -1853,7 +1851,6 @@ bool NetStatsService::GetMonAlertStatus(int32_t simId)
     return false;
 }
 
-// 拉起弹窗
 void NetStatsService::DealNotificaiton(int32_t simId, uint8_t flag)
 {
     NETMGR_LOG_I("Enter DealDayNotification.");
