@@ -36,13 +36,13 @@ const char *ITEM_DISABLE_CELLULAR_SWITCH = "disableCellularSwitch";
 bool CheckFilePath(const std::string &fileName, std::string &realPath)
 {
     char buf[MAX_PATH_LEN];
-    char* PATH = =GetOneCfgFile(NET_ACCESS_POLICY_CONFIG_PATH,buf,MAX_PATH_LEN);
+    char* Path = GetOneCfgFile(NET_ACCESS_POLICY_CONFIG_PATH, buf, MAX_PATH_LEN);
     char tmpPath[PATH_MAX] = {0};
     if (!realpath(fileName.c_str(), tmpPath)) {
         NETMGR_LOG_E("file name is illegal");
         return false;
     }
-    if (strcmp(tmpPath, PATH) != 0) {
+    if (strcmp(tmpPath, Path) != 0) {
         NETMGR_LOG_E("file path is illegal");
         return false;
     }
@@ -75,9 +75,9 @@ void NetAccessPolicyConfigUtils::Init()
 void NetAccessPolicyConfigUtils::ParseNetAccessPolicyConfigs()
 {
     char buf[MAX_PATH_LEN];
-    char* PATH = =GetOneCfgFile(NET_ACCESS_POLICY_CONFIG_PATH,buf,MAX_PATH_LEN);
+    char* Path = GetOneCfgFile(NET_ACCESS_POLICY_CONFIG_PATH, buf, MAX_PATH_LEN);
     std::string content;
-    if (!ReadFile(content, PATH)) {
+    if (!ReadFile(content, Path)) {
         NETMGR_LOG_E("read json file failed.");
         return;
     }
