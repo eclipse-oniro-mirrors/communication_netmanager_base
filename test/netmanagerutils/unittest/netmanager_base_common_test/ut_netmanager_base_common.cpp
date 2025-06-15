@@ -1115,5 +1115,17 @@ HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse005, TestSize.Level2)
     auto result = CommonUtils::UrlRegexParse(str, patternStr);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: AnonymizeIptablesCommandTest001
+ * @tc.desc: Test UtNetmanagerBaseCommon AnonymizeIptablesCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, AnonymizeIptablesCommandTest001, TestSize.Level1)
+{
+    std::string command = "iptables -t filter -A ohfw_dozable -m owner --uid-owner 0-9999 -j RETURN -w 5";
+    auto result = CommonUtils::AnonymizeIptablesCommand(command);
+    ASSERT_FALSE(result.empty());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
