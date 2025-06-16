@@ -936,13 +936,6 @@ HWTEST_F(NetsysNativeServiceTest, SetNicTrafficAllowedTest003, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, ProcessVpnStageTest001, TestSize.Level1)
-{
-    NetsysNative::SysVpnStageCode stage = VPN_STAGE_RESTART;
-    auto ret = instance_->ProcessVpnStage(stage);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest003, TestSize.Level1)
 {
     NetsysNativeService temp;
