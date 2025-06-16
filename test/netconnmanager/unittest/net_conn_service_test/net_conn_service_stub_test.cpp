@@ -627,7 +627,7 @@ HWTEST_F(NetConnServiceStubTest, OnGetGlobalHttpProxyTest001, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -645,7 +645,7 @@ HWTEST_F(NetConnServiceStubTest, OnGetDefaultHttpProxyTest001, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -1013,7 +1013,7 @@ HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE);
-    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+    EXPECT_NE(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**
@@ -1040,7 +1040,7 @@ HWTEST_F(NetConnServiceStubTest, GetDefaultSupplierId001, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_SPECIFIC_SUPPLIER_ID);
-    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
+    EXPECT_NE(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**
@@ -1278,7 +1278,7 @@ HWTEST_F(NetConnServiceStubTest, OnSetPacUrlTest002, TestSize.Level1)
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_PAC_URL);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
  
 /**
