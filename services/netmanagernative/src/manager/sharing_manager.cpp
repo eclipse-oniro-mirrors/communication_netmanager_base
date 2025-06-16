@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <regex>
 #include <unistd.h>
+#include <charconv>
 
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
