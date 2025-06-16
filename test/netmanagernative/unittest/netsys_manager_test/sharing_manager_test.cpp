@@ -204,7 +204,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
     EXPECT_EQ(res, 0);
 }
 
-HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic002, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
@@ -216,7 +216,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
     EXPECT_EQ(res, 0);
 }
 
-HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic003, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
@@ -228,7 +228,7 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
     EXPECT_EQ(res, -1);
 }
 
-HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic001, TestSize.Level1)
+HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic004, TestSize.Level1)
 {
     NetworkSharingTraffic traffic;
     std::string ifaceName = "";
