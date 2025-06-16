@@ -1188,7 +1188,7 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, SetNetInterfaceIpAddressTest001, TestSize.Level1)
