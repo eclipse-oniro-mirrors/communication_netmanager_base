@@ -31,13 +31,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <sys/time.h>
-
-#undef LOG_TAG
-#ifndef NETMGRNATIVE_LOG_TAG
-#define LOG_TAG "NetsysNativeService"
-#else
-#define LOG_TAG NETMGRNATIVE_LOG_TAG
-#endif
+#include "netnative_log_wrapper.h"
 
 #ifdef __cplusplus
 extern "C" {

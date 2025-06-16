@@ -26,14 +26,6 @@
 extern "C" {
 #endif
 
-#if DNS_CONFIG_DEBUG
-#ifndef DNS_CONFIG_PRINT
-#define DNS_CONFIG_PRINT(fmt, ...) printf("DNS" fmt "\n", ##__VA_ARGS__)
-#endif
-#else
-#define DNS_CONFIG_PRINT(fmt, ...)
-#endif
-
 #define MAX_SERVER_NUM 5
 #define MAX_SERVER_NUM_EXT 8
 #define MAX_SERVER_LENGTH 50

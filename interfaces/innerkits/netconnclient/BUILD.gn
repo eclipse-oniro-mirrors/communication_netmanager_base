@@ -60,8 +60,6 @@ ohos_static_library("net_conn_parcel") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-    "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]

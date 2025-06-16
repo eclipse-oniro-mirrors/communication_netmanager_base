@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "dns_param_cache.h"
-
 #include <algorithm>
-
 #include "netmanager_base_common_utils.h"
+#include "dns_param_cache.h"
+#include "netnative_log_wrapper.h"
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
 #include "bpf_netfirewall.h"
 #include "netfirewall_parcel.h"

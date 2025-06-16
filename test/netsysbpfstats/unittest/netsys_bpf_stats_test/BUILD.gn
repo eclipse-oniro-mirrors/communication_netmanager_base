@@ -35,6 +35,7 @@ ohos_unittest("netsys_bpf_stats_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include/",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
 

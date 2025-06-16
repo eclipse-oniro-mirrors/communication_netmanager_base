@@ -28,15 +28,6 @@
 #include "netsys_net_dns_result_data.h"
 #include "dns_config_client.h"
 
-#if DNS_CONFIG_DEBUG
-#ifdef DNS_CONFIG_PRINT
-#undef DNS_CONFIG_PRINT
-#endif
-#define DNS_CONFIG_PRINT(fmt, ...) NETNATIVE_LOGI("DNS" fmt, ##__VA_ARGS__)
-#else
-#define DNS_CONFIG_PRINT(fmt, ...)
-#endif
-
 #define FROM_CACHE_FLAG         (1 << 0)
 #define VPN_NET_FLAG            (1 << 1)
 #define IPV4_NO_ANSWER_FLAG     (1 << 2)

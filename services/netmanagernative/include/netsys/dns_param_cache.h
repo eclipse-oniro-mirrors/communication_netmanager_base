@@ -29,14 +29,6 @@
 #include "suffix_match_trie.h"
 #include <unordered_map>
 #endif
-#if DNS_CONFIG_DEBUG
-#ifdef DNS_CONFIG_PRINT
-#undef DNS_CONFIG_PRINT
-#endif
-#define DNS_CONFIG_PRINT(fmt, ...) NETNATIVE_LOGI("DNS" fmt, ##__VA_ARGS__)
-#else
-#define DNS_CONFIG_PRINT(fmt, ...)
-#endif
 
 namespace OHOS::nmd {
 #ifdef FEATURE_NET_FIREWALL_ENABLE

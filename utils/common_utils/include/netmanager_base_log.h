@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 
 #ifndef COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG
-#include <cstring>
-#include <string>
+#include <string.h>
 #include "hilog/log.h"
 
-namespace OHOS {
-namespace NetManagerStandard {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #undef LOG_TAG
 #ifndef NETMGR_LOG_TAG
@@ -51,7 +51,8 @@ namespace NetManagerStandard {
 #define NETMGR_LOG_W(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)
 #define NETMGR_LOG_I(fmt, ...) NETMANAGER_LOG(INFO, fmt, ##__VA_ARGS__)
 
-} // namespace NetManagerStandard
-} // namespace OHOS
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG */

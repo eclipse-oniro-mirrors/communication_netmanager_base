@@ -18,7 +18,6 @@ config("netsys_native_manager_config") {
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "include",
     "include/manager",
@@ -170,7 +169,7 @@ ohos_shared_library("netsys_native_manager") {
   deps = netsys_native_manager_deps
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "NETMGR_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
@@ -252,7 +251,7 @@ ohos_static_library("netsys_native_manager_static") {
   ]
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "NETMGR_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
@@ -319,6 +318,8 @@ ohos_shared_library("netsys_client") {
   ]
 
   include_dirs = [
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys",
     "$FWMARK_CLIENT_DIR/include",
   ]
@@ -338,7 +339,7 @@ ohos_shared_library("netsys_client") {
   defines = [
     "NETSYS_CONFIG_DEBUG=0",
     "NETSYS_CLIENT_DEBUG=0",
-    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
+    "NETMGR_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
 

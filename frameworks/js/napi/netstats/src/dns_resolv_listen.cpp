@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include <arpa/inet.h>
-
+#include "netnative_log_wrapper.h"
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "init_socket.h"
@@ -121,7 +122,7 @@ void DnsResolvListenInternal::AddPublicDnsServers(ResolvConfig &sendData, size_t
         DNS_CONFIG_PRINT("mem copy failed");
         return;
     }
-    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
+    DNS_CONFIG_PRINT("i = %{public}zu sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 
 void DnsResolvListenInternal::AddPublicDnsServersExt(ResolvConfigExt &sendData, size_t serverSize)
@@ -142,7 +143,7 @@ void DnsResolvListenInternal::AddPublicDnsServersExt(ResolvConfigExt &sendData, 
         DNS_CONFIG_PRINT("mem copy failed");
         return;
     }
-    DNS_CONFIG_PRINT("i = %{public}d sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
+    DNS_CONFIG_PRINT("i = %{public}zu sendData.nameservers: %{public}s", i, sendData.nameservers[i]);
 }
 
 static void ReplaceDnsServer(ResolvConfig &sendData, const std::vector<std::string> &servers)
