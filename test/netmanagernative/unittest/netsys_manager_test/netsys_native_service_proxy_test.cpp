@@ -241,6 +241,13 @@ HWTEST_F(NetsysNativeServiceProxyTest, ClearIncreaseTrafficMapTest001, TestSize.
     EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, DeleteIncreaseTrafficMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    int32_t ret = netsysNativeService->DeleteIncreaseTrafficMap(12); // 12:ifindex
+    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+}
+
 HWTEST_F(NetsysNativeServiceProxyTest, UpdateIfIndexMapTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();

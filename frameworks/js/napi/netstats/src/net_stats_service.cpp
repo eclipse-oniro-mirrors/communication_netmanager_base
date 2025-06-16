@@ -51,7 +51,6 @@
 #include "core_service_client.h"
 #include "net_conn_client.h"
 #include "cellular_data_types.h"
-#include "net_info_observer.h"
 #include "net_stats_utils.h"
 #include "net_stats_notification.h"
 #include "net_stats_rdb.h"
@@ -75,6 +74,7 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
 constexpr uint32_t DEFAULT_UPDATE_TRAFFIC_INFO_CYCLE_MS = 30 * 60 * 1000;
 constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
+constexpr int32_t TRAFFIC_NOTIFY_TYPE = 3;
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
@@ -101,7 +101,6 @@ NetStatsService::NetStatsService()
     netStatsCallback_ = std::make_shared<NetStatsCallback>();
     netStatsCached_ = std::make_unique<NetStatsCached>();
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    netconnCallback_ = std::make_unique<NetInfoObserver>().release();
     trafficObserver_ = std::make_unique<TrafficObserver>().release();
     trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
 #endif // SUPPORT_TRAFFIC_STATISTIC
@@ -122,7 +121,6 @@ void NetStatsService::OnStart()
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     AddSystemAbilityListener(TIME_SERVICE_ID);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
@@ -206,10 +204,7 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
 {
     NETMGR_LOG_I("OnAddSystemAbility: systemAbilityId:%{public}d", systemAbilityId);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
-        StartNetObserver();
-        return;
-    } else if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
+    if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         StartTrafficOvserver();
         return;
     }
@@ -1215,6 +1210,7 @@ void NetStatsService::StartAccountObserver()
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 void NetStatsService::UpdateBpfMapTimer()
 {
+    NETMGR_LOG_I("UpdateBpfMapTimer start");
     if (!trafficPlanFfrtQueue_) {
         NETMGR_LOG_E("FFRT Init Fail");
         return;
@@ -1222,7 +1218,12 @@ void NetStatsService::UpdateBpfMapTimer()
 #ifndef UNITTEST_FORBID_FFRT
     trafficPlanFfrtQueue_->submit([this]() {
 #endif
-        UpdateBpfMap(curActiviteSimId_);
+        int32_t primarySlotId = NetStatsUtils::GetPrimarySlotId();
+        int32_t primarySimId = Telephony::CoreServiceClient::GetInstance().GetSimId(primarySlotId);
+        int slaveSlotId = primarySlotId == 0 ? 1 : 0;
+        int32_t slaveSimId = Telephony::CoreServiceClient::GetInstance().GetSimId(slaveSlotId);
+        UpdateBpfMap(primarySimId);
+        UpdateBpfMap(slaveSimId);
 #ifndef UNITTEST_FORBID_FFRT
     });
 #endif
@@ -1266,9 +1267,7 @@ bool NetStatsService::CommonEventSimStateChangedFfrt(int32_t slotId, int32_t sim
             trafficDataObserver->RegisterTrafficDataSettingObserver();
         }
     } else if (simState != static_cast<int32_t>(Telephony::SimState::SIM_STATE_READY)) {
-        // 卡异常，取消监听
         if (settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
-            // 去注册
             settingsTrafficMap_[simId].first->UnRegisterTrafficDataSettingObserver();
             NETMGR_LOG_I("settingsTrafficMap_.erase(simId). simId:%{public}d", simId);
             settingsTrafficMap_.erase(simId);
@@ -1305,65 +1304,37 @@ void NetStatsService::UpdateNetStatusMapCellular(int32_t dataState)
 
 bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataState)
 {
-    NETMGR_LOG_I("CommonEventCellularDataStateChanged slotId:%{public}d, dateState:%{public}d", slotId, dataState);
-    if (!isWifiConnected_) {
-        NETMGR_LOG_I("CommonEventCellularDataStateChanged. but wifi is not connected");
-        return false;
-    }
-    int32_t defaultSlotId = Telephony::CellularDataClient::GetInstance().GetDefaultCellularDataSlotId();
-    if (defaultSlotId < 0 || (defaultSlotId >= 0 && defaultSlotId != slotId)) { // 后续支持拉副卡的话，这里需要修改
-        NETMGR_LOG_E(" defaultSlotId err or not default");
-        return false;
-    }
-
+    NETMGR_LOG_I("slotId:%{public}d, dateState:%{public}d", slotId, dataState);
     int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
-    NETMGR_LOG_I("CommonEventCellularDataStateChanged simId: %{public}d, curActiviteSimId_: %{public}d",
-        simId, curActiviteSimId_);
-    if (simId < 0 || simId == curActiviteSimId_ ||
-        dataState != static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
+
+    if (dataState != static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
+        if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
+            NETMGR_LOG_E("simIdToIfIndexMap erase, simId: %{public}d", simId);
+            simIdToIfIndexMap_.erase(simId);
+        }
+        return true;
+    }
+    int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(
+        NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
+    if (ret != NETMANAGER_SUCCESS || ifaceNameIdentMap_.IsEmpty()) {
+        NETMGR_LOG_E("error or empty.ret: %{public}d, ifaceNameIdentMap size: %{public}u",
+            ret, ifaceNameIdentMap_.Size());
         return false;
     }
-
-    curActiviteSimId_ = simId;
-    int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("CommonEventCellularDataStateChanged error. ret=%{public}d", ret);
-    }
-    NETMGR_LOG_I("CommonEventCellularDataStateChanged ifaceNameIdentMap size: %{public}d", ifaceNameIdentMap_.Size());
-    ifaceNameIdentMap_.Iterate([this](const std::string &k, const std::string &v) {
-        NETMGR_LOG_E("CommonEventCellularDataStateChanged K:%{public}s, V:%{public}s", k.c_str(), v.c_str());
-        if (v == std::to_string(curActiviteSimId_)) {
-            curIfIndex_ = if_nametoindex(k.c_str());
-            NETMGR_LOG_E("CommonEventCellularDataStateChanged curIfIndex_:%{public}" PRIu64, curIfIndex_);
+    NETMGR_LOG_I("ifaceNameIdentMap size: %{public}d", ifaceNameIdentMap_.Size());
+    uint64_t ifIndex = UINT64_MAX;
+    ifaceNameIdentMap_.Iterate([this, simId, &ifIndex](const std::string &k, const std::string &v) {
+        if (v == std::to_string(simId)) {
+            ifIndex = if_nametoindex(k.c_str());
+            NETMGR_LOG_E("curIfIndex_:%{public}" PRIu64, ifIndex);
         }
     });
-
-    UpdateCurActiviteSimChanged(curActiviteSimId_);
+    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end() && simIdToIfIndexMap_[simId] == ifIndex) {
+        NETMGR_LOG_E("not need process");
+        return true;
+    }
+    UpdateCurActiviteSimChanged(simId, ifIndex);
     return true;
-}
-
-void NetStatsService::StartNetObserver()
-{
-    NETMGR_LOG_I("StartNetObserver start");
-    if (netconnCallback_ == nullptr) {
-        netconnCallback_ = std::make_unique<NetInfoObserver>().release();
-    }
-    if (netconnCallback_ == nullptr) {
-        return;
-    }
-    NetManagerStandard::NetSpecifier netSpecifier;
-    NetManagerStandard::NetAllCapabilities netAllCapabilities;
-    netAllCapabilities.netCaps_.insert(NetManagerStandard::NetCap::NET_CAPABILITY_INTERNET);
-    netSpecifier.ident_ = "";
-    netSpecifier.netCapabilities_ = netAllCapabilities;
-    sptr<NetManagerStandard::NetSpecifier> specifier =
-        new (std::nothrow) NetManagerStandard::NetSpecifier(netSpecifier);
-    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, netconnCallback_, 0);
-    if (ret != 0) {
-        NETMGR_LOG_E("StartNetObserver fail, ret = %{public}d", ret);
-        return;
-    }
-    NETMGR_LOG_I("StartNetObserver end");
 }
 
 void NetStatsService::StartTrafficOvserver()
@@ -1380,7 +1351,6 @@ void NetStatsService::StartTrafficOvserver()
         NETMGR_LOG_E("StartTrafficOvserver fail, ret = %{public}d", ret);
         return;
     }
-    NETMGR_LOG_I("StartTrafficOvserver end");
 }
 
 void NetStatsService::StopTrafficOvserver()
@@ -1397,75 +1367,85 @@ void NetStatsService::StopTrafficOvserver()
         NETMGR_LOG_E("StopTrafficOvserver fail, ret = %{public}d", ret);
         return;
     }
-    NETMGR_LOG_I("StopTrafficOvserver end");
 }
 
-// 网络信息变化
-bool NetStatsService::ProcessNetConnectionPropertiesChange(int32_t simId, uint64_t ifIndex)
+
+void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifIndex)
 {
-    if (!trafficPlanFfrtQueue_) {
-        NETMGR_LOG_E("FFRT Init Fail");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+    AddSimIdInTwoMap(simId, ifIndex);
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    if (settingsTrafficMap_[simId].second->monthlyLimit == UINT64_MAX ||
+        settingsTrafficMap_[simId].second->unLimitedDataEnable == 1) {
+        SetTrafficMapMaxValue(slotId);
+    } else {
+        UpdateBpfMap(simId);
     }
-#ifndef UNITTEST_FORBID_FFRT
-    trafficPlanFfrtQueue_->submit([this, simId, ifIndex]() {
-#endif
-        ProcessNetConnectionPropertiesChangeFfrt(simId, ifIndex);
-#ifndef UNITTEST_FORBID_FFRT
-    });
-#endif
-    return NETMANAGER_SUCCESS;
 }
 
-int32_t NetStatsService::ProcessNetConnectionPropertiesChangeFfrt(int32_t simId, uint64_t ifIndex)
+bool NetStatsService::IsSameStateInTwoMap(int32_t simId)
 {
-    NETMGR_LOG_I("ProcessNetConnectionPropertiesChange. update simId: %{public}d, curIfIndex_:%{public}lu",
-        simId, ifIndex);
-    if (simId == INT32_MAX) {
-        isWifiConnected_ = true;
+    auto ifIndexItem = simIdToIfIndexMap_.find(simId);
+    auto settingsItem = settingsTrafficMap_.find(simId);
+    if (ifIndexItem == simIdToIfIndexMap_.end() &&
+        settingsItem == settingsTrafficMap_.end()) {
         return true;
     }
-
-    isWifiConnected_ = false;
-    if (simId < 0) {
-        return false;
+    if (ifIndexItem != simIdToIfIndexMap_.end() &&
+        settingsItem != settingsTrafficMap_.end()) {
+        return true;
     }
-    curActiviteSimId_ = simId;
-    curIfIndex_ = ifIndex;
-
-    UpdateCurActiviteSimChanged(curActiviteSimId_);
-    return NETMANAGER_SUCCESS;
+    return false;
 }
 
-void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId)
+void NetStatsService::DeleteSimIdInTwoMap(int32_t simId)
 {
+    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end() &&
+        settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
+        simIdToIfIndexMap_.erase(simId);
+        settingsTrafficMap_.erase(simId);
+    }
+}
+
+void NetStatsService::AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex)
+{
+    NETMGR_LOG_I("AddSimIdInTwoMap. simId:%{public}d, ifIndex:%{public}" PRIu64, simId, ifIndex);
+    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
+        int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+        if (slotId != 0 && slotId != 1) {
+            NETMGR_LOG_I("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
+            return;
+        }
+        ClearTrafficMapBySlotId(slotId, simIdToIfIndexMap_[simId]);
+    }
+    simIdToIfIndexMap_[simId] = ifIndex;
+
     if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
-        NETMGR_LOG_E("UpdateCurActiviteSimChanged settingsTrafficMap_ not find simId: %{public}d", simId);
+        NETMGR_LOG_E("settingsTrafficMap_ not find simId: %{public}d", simId);
         std::shared_ptr<TrafficDataObserver> observer = std::make_shared<TrafficDataObserver>(simId);
-        // 1. 读simId_数据库
+
         std::shared_ptr<TrafficSettingsInfo> settingsInfo = std::make_shared<TrafficSettingsInfo>();
         observer->ReadTrafficDataSettings(settingsInfo);
-        // 2. 注册监听
+
         observer->RegisterTrafficDataSettingObserver();
         settingsTrafficMap_.insert(std::make_pair(simId, std::make_pair(observer, settingsInfo)));
         UpdateNetStatsToMapFromDB(simId);
-        NETMGR_LOG_I("ProcessNetConnectionPropertiesChange insert settingsInfo beginDate:%{public}d,\
+        NETMGR_LOG_I("AddSimIdInTwoMap insert settingsInfo beginDate:%{public}d,\
 unLimitedDataEnable:%{public}d, monthlyLimitdNotifyType:%{public}d,\
 monthlyLimit:%{public}" PRIu64 ", monthlyMark:%{public}u, dailyMark:%{public}u",
             settingsInfo->beginDate, settingsInfo->unLimitedDataEnable, settingsInfo->monthlyLimitdNotifyType,
             settingsInfo->monthlyLimit, settingsInfo->monthlyMark, settingsInfo->dailyMark);
     }
-    // 3. 判断是否设置余额，如果设置了 就计算已用流量，更新bpfMap
-    // （1）表示没有设置余额或打开了无限流量开关，这种情况将余额map都改为最大值，因为不需要弹窗
-    if (settingsTrafficMap_[simId].second->monthlyLimit == UINT64_MAX ||
-        settingsTrafficMap_[simId].second->unLimitedDataEnable == 1) {
-        SetTrafficMapMaxValue();
-    } else {  // (2)有设置余额，这种情况需要计算可用余额map、增量map
-        UpdateBpfMap(simId);
-    }
 }
 
-// 查询某段时间用到的总流量
+void NetStatsService::ClearTrafficMapBySlotId(int32_t slotId, uint64_t ifIndex)
+{
+    NETMGR_LOG_I("ClearTrafficMapBySlotId slotId:%{public}d, ifIndex: %{public}lu", slotId, ifIndex);
+    NetsysController::GetInstance().DeleteIncreaseTrafficMap(ifIndex);
+    NetsysController::GetInstance().UpdateIfIndexMap(slotId, UINT64_MAX);
+    SetTrafficMapMaxValue(slotId);
+}
+
+
 int32_t NetStatsService::GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic)
 {
     std::unordered_map<uint32_t, NetStatsInfo> infos;
@@ -1485,22 +1465,23 @@ int32_t NetStatsService::GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetw
 
 void NetStatsService::UpdateBpfMap(int32_t simId)
 {
-    NETMGR_LOG_I("UpdateBpfMap start");
-    if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
+    NETMGR_LOG_I("UpdateBpfMap start. simId:%{public}d", simId);
+    if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end() ||
+        simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end()) {
         NETMGR_LOG_E("simId: %{public}d error", simId);
         return;
     }
 
-    NetsysController::GetInstance().ClearIncreaseTrafficMap();
-    NetsysController::GetInstance().UpdateIfIndexMap(0, curIfIndex_);
-    SettingsInfoPtr info = settingsTrafficMap_[simId].second;
-    if (info != nullptr) {
-        NETMGR_LOG_I("settingsInfo-> simId:%{public}d, beginDate:%{public}d, unLimitedDataEnable:%{public}d,\
-monthlyLimitdNotifyType:%{public}d, monthlyLimit:%{public}" PRIu64 ", monthlyMark:%{public}u,\
-dailyMark:%{public}u",
-            simId, info->beginDate, info->unLimitedDataEnable, info->monthlyLimitdNotifyType,
-            info->monthlyLimit, info->monthlyMark, info->dailyMark);
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    if (slotId != 0 && slotId != 1) {
+        NETMGR_LOG_I("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
+        return;
     }
+
+    NetsysController::GetInstance().DeleteIncreaseTrafficMap(simIdToIfIndexMap_[simId]);
+    NetsysController::GetInstance().UpdateIfIndexMap(slotId, simIdToIfIndexMap_[simId]);
+
+    PrintTrafficSettingsMapInfo(simId);
 
     uint64_t monthlyAvailable = UINT64_MAX;
     uint64_t monthlyMarkAvailable = UINT64_MAX;
@@ -1510,23 +1491,20 @@ dailyMark:%{public}u",
         NETMGR_LOG_E("CalculateTrafficAvailable error or open unlimit");
         return;
     }
+
     NETMGR_LOG_I("GetTrafficMap before write. monthlyAvailable:%{public}" PRIu64", \
 monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
         monthlyAvailable, monthlyMarkAvailable, dailyMarkAvailable);
-    NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, monthlyAvailable);
-    NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, monthlyMarkAvailable);
-    NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_DAILY_MARK, dailyMarkAvailable);
-    uint64_t monthlyAvailableMap = UINT64_MAX;
-    uint64_t monthlyMarkAvailableMap = UINT64_MAX;
-    uint64_t dailyMarkAvailableMap = UINT64_MAX;
-    NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, monthlyAvailableMap);
-    NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, monthlyMarkAvailableMap);
-    NetsysController::GetInstance().GetNetStateTrafficMap(NET_STATS_DAILY_MARK, dailyMarkAvailableMap);
-    NETMGR_LOG_I("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
-monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
-        monthlyAvailableMap, monthlyMarkAvailableMap, dailyMarkAvailableMap);
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_LIMIT, monthlyAvailable);
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_MARK, monthlyMarkAvailable);
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_DAILY_MARK, dailyMarkAvailable);
 
-    if (info->monthlyLimit == UINT64_MAX) {
+    PrintTrafficBpfMapInfo(slotId);
+
+    if (settingsTrafficMap_[simId].second->monthlyLimit == UINT64_MAX) {
         return;
     }
 
@@ -1537,6 +1515,34 @@ monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
     } else if (dailyMarkAvailable == UINT64_MAX) {
         NotifyTrafficAlert(simId, NET_STATS_DAILY_MARK);
     }
+}
+
+void NetStatsService::PrintTrafficSettingsMapInfo(int32_t simId)
+{
+    SettingsInfoPtr info = settingsTrafficMap_[simId].second;
+    if (info != nullptr) {
+        NETMGR_LOG_I("settingsInfo-> simId:%{public}d, beginDate:%{public}d, unLimitedDataEnable:%{public}d,\
+monthlyLimitdNotifyType:%{public}d, monthlyLimit:%{public}" PRIu64 ", monthlyMark:%{public}u,\
+dailyMark:%{public}u",
+            simId, info->beginDate, info->unLimitedDataEnable, info->monthlyLimitdNotifyType,
+            info->monthlyLimit, info->monthlyMark, info->dailyMark);
+    }
+}
+
+void NetStatsService::PrintTrafficBpfMapInfo(int32_t slotId)
+{
+    uint64_t monthlyAvailableMap = UINT64_MAX;
+    uint64_t monthlyMarkAvailableMap = UINT64_MAX;
+    uint64_t dailyMarkAvailableMap = UINT64_MAX;
+    NetsysController::GetInstance().GetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_LIMIT, monthlyAvailableMap);
+    NetsysController::GetInstance().GetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_MARK, monthlyMarkAvailableMap);
+    NetsysController::GetInstance().GetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_DAILY_MARK, dailyMarkAvailableMap);
+    NETMGR_LOG_I("GetTrafficMap after write. monthlyAvailable:%{public}" PRIu64", \
+monthlyMarkAvailable:%{public}" PRIu64", dailyMarkAvailable:%{public}" PRIu64,
+        monthlyAvailableMap, monthlyMarkAvailableMap, dailyMarkAvailableMap);
 }
 
 bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
@@ -1586,7 +1592,7 @@ bool NetStatsService::CalculateTrafficAvailable(int32_t simId, uint64_t &monthly
 
         uint64_t dayTmp = (settingsTrafficMap_[simId].second->monthlyLimit / 100.0) *
             settingsTrafficMap_[simId].second->dailyMark;
-        NETMGR_LOG_E("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);
+        NETMGR_LOG_I("dayTmp:%{public}" PRIu64 ", allTodayUsedTraffix:%{public}" PRIu64, dayTmp, allTodayUsedTraffix);
         if (dayTmp > allTodayUsedTraffix) {
             dailyMarkAvailable = dayTmp - allTodayUsedTraffix;
         }
@@ -1601,6 +1607,21 @@ void NetStatsService::SetTrafficMapMaxValue()
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_LIMIT, UINT64_MAX);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_MONTHLY_MARK, UINT64_MAX);
     NetsysController::GetInstance().SetNetStateTrafficMap(NET_STATS_DAILY_MARK, UINT64_MAX);
+}
+
+void NetStatsService::SetTrafficMapMaxValue(int32_t slotId)
+{
+    NETMGR_LOG_I("SetTrafficMapMaxValue");
+    if (slotId != 0 && slotId != 1) {
+        NETMGR_LOG_E("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
+        return;
+    }
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_LIMIT, UINT64_MAX);
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_MONTHLY_MARK, UINT64_MAX);
+    NetsysController::GetInstance().SetNetStateTrafficMap(
+        slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_DAILY_MARK, UINT64_MAX);
 }
 
 void NetStatsService::UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t value)
@@ -1665,7 +1686,7 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
             break;
     }
 
-    if (simId == curActiviteSimId_) {
+    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
         UpdateBpfMap(simId);
     }
     return NETMANAGER_SUCCESS;
@@ -1677,20 +1698,30 @@ TrafficObserver::~TrafficObserver() {}
 int32_t TrafficObserver::OnExceedTrafficLimits(int8_t &flag)
 {
     NETMGR_LOG_I("OnExceedTrafficLimits flag: %{public}d", flag);
-    if (flag < NET_STATS_MONTHLY_LIMIT || flag > NET_STATS_DAILY_MARK) {
+    if (flag < NET_STATS_MONTHLY_LIMIT || flag > NET_STATS_DAILY_MARK + TRAFFIC_NOTIFY_TYPE * 1) {
         NETMGR_LOG_E("OnExceedTrafficLimits flag error. value: %{public}d", flag);
         return -1;
     }
 
-    // 触发弹窗检测
-    DelayedSingleton<NetStatsService>::GetInstance()->NotifyTrafficAlert(-1, flag); // 后续支持副卡检测后，传对应的simId
+    int8_t slotId = -1;
+    if (flag == 0) {
+        slotId = 0;
+    } else {
+        slotId = flag / TRAFFIC_NOTIFY_TYPE;
+    }
+    int8_t trafficFlag = flag - TRAFFIC_NOTIFY_TYPE * slotId;
+    int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+    if (simId < 0) {
+        NETMGR_LOG_E("get simId error");
+        return -1;
+    }
+
+    DelayedSingleton<NetStatsService>::GetInstance()->NotifyTrafficAlert(simId, trafficFlag);
     return 0;
 }
 
-// 从DB中读simId上次弹窗对应的时间戳
 void NetStatsService::UpdateNetStatsToMapFromDB(int32_t simId)
 {
-    /* 获取用Query */
     NETMGR_LOG_I("UpdateNetStatsToMapFromDB enter.");
     NetStatsRDB netStats;
     
@@ -1711,9 +1742,11 @@ void NetStatsService::UpdateNetStatsToMapFromDB(int32_t simId)
 
 int32_t NetStatsService::NotifyTrafficAlert(int32_t simId, uint8_t flag)
 {
-    if (simId == -1) {
-        simId = curActiviteSimId_; // 后续支持副卡检测后，传对应的simId
+    if (simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end()) {
+        NETMGR_LOG_E("simIdToIfIndexMap not find simId: %{public}d", simId);
+        return -1;
     }
+
     if (NetStatsUtils::IsMobileDataEnabled() && GetNotifyStats(simId, flag)) {
         DealNotificaiton(simId, flag);
     } else {
@@ -1722,7 +1755,6 @@ int32_t NetStatsService::NotifyTrafficAlert(int32_t simId, uint8_t flag)
     return NETMANAGER_SUCCESS;
 }
 
-// 判断是否满足弹窗条件 flag：表示弹窗类型
 bool NetStatsService::GetNotifyStats(int32_t simId, uint8_t flag)
 {
     NETMGR_LOG_I("Enter GetNotifyStats.");
@@ -1742,7 +1774,7 @@ bool NetStatsService::GetNotifyStats(int32_t simId, uint8_t flag)
         case NET_STATS_DAILY_MARK:
             return GetDayNotifyStatus(simId);
         default:
-            NETMGR_LOG_I("unknown notification type");
+            NETMGR_LOG_E("unknown notification type");
             return false;
     }
     return false;
@@ -1753,7 +1785,7 @@ bool NetStatsService::GetMonNotifyStatus(int32_t simId)
     NETMGR_LOG_I("Enter GetMonNotifyStatus.");
     auto iter = settingsTrafficMap_.find(simId);
     if (iter == settingsTrafficMap_.end() || iter->second.second == nullptr) {
-        NETMGR_LOG_I("iter is nullptr.");
+        NETMGR_LOG_E("iter is nullptr.");
         return false;
     }
     if (iter->second.second->isCanNotifyMonthlyMark) {
@@ -1819,11 +1851,10 @@ bool NetStatsService::GetMonAlertStatus(int32_t simId)
     return false;
 }
 
-// 拉起弹窗
 void NetStatsService::DealNotificaiton(int32_t simId, uint8_t flag)
 {
     NETMGR_LOG_I("Enter DealDayNotification.");
-    int simNum = NetStatsUtils::isDualCardEnabled();
+    int simNum = NetStatsUtils::IsDualCardEnabled();
     bool isDualCard = false;
     if (simNum == 0) {
         return;
@@ -1894,11 +1925,6 @@ void NetStatsService::DealMonAlert(int32_t simId, bool isDualCard)
     iter->second.second->lastMonAlertTime = NetStatsUtils::GetNowTimestamp();
     UpdateTrafficLimitDate(simId);
     NETMGR_LOG_I("update MonAlert time:%{public}d", iter->second.second->lastMonAlertTime);
-}
-
-int32_t NetStatsService::GetCurActiviteSimId()
-{
-    return curActiviteSimId_ ;
 }
  
 std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> NetStatsService::GetSettingsObserverMap()

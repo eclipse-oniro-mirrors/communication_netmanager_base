@@ -775,6 +775,7 @@ HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 }
 
+#ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTest001, TestSize.Level1)
 {
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
@@ -784,5 +785,66 @@ HWTEST_F(NetStatsServiceTest, UpdateBpfMapTest001, TestSize.Level1)
     netStatsService->UpdateBpfMap(simId);
     EXPECT_EQ(ret, true);
 }
+
+HWTEST_F(NetStatsServiceTest, UpdateBpfMapTimerTest001, TestSize.Level1)
+{
+    auto netStatsService1 = DelayedSingleton<NetStatsService>::GetInstance();
+    netStatsService1->trafficPlanFfrtQueue_ = nullptr;
+    netStatsService1->UpdateBpfMapTimer();
+
+    auto netStatsService2 = DelayedSingleton<NetStatsService>::GetInstance();
+    netStatsService2->trafficPlanFfrtQueue_ = nullptr;
+    netStatsService2->UpdateBpfMapTimer();
+    EXPECT_EQ(netStatsService2->settingsTrafficMap_.size(), 0);
+}
+
+HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest001, TestSize.Level1)
+{
+    auto netStatsService1 = DelayedSingleton<NetStatsService>::GetInstance();
+    netStatsService1->CellularDataStateChangedFfrt(0,
+        static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED));
+    netStatsService1->CellularDataStateChangedFfrt(0,
+        static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTING));
+
+    netStatsService1->simIdToIfIndexMap_.insert(1, 12);
+    netStatsService1->CellularDataStateChangedFfrt(0,
+        static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED));
+    auto ret = netStatsService1->CellularDataStateChangedFfrt(0,
+        static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTING));
+
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsServiceTest, UpdateCurActiviteSimChangedTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+    netStatsService->settingsTrafficMap_.insert(
+        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
+    netStatsService->UpdateCurActiviteSimChanged(simId, 12);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsServiceTest, AddSimIdInTwoMapTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+    netStatsService->settingsTrafficMap_.insert(
+        std::make_pair(simId, std::make_pair(trafficDataObserver, trafficSettingsInfo)));
+    netStatsService->AddSimIdInTwoMap(simId, 12);
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(NetStatsServiceTest, SetTrafficMapMaxValueTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    netStatsService->SetTrafficMapMaxValue(0);
+    netStatsService->SetTrafficMapMaxValue(1);
+    netStatsService->SetTrafficMapMaxValue(2);
+    EXPECT_NE(netStatsService, nullptr);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

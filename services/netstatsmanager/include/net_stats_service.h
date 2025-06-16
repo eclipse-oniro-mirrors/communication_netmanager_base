@@ -33,7 +33,6 @@
 #include "ffrt_timer.h"
 #include "net_stats_settings_observer.h"
 #include "netsys_traffic_callback_stub.h"
-#include "net_info_observer.h"
 #include "netsys_controller_callback.h"
 #include "net_stats_trafficLimit_dialog.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
@@ -94,8 +93,6 @@ public:
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     void UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
-    bool ProcessNetConnectionPropertiesChange(int32_t simId, uint64_t ifIndex);
-    int32_t GetCurActiviteSimId();
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> GetSettingsObserverMap();
     int32_t NotifyTrafficAlert(int32_t simId, uint8_t flag);
     bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
@@ -135,7 +132,7 @@ private:
     int32_t GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetwork> &network, uint64_t &allUsedTraffic);
     void UpdateBpfMap(int32_t simId);
     void SetTrafficMapMaxValue();
-    void StartNetObserver();
+    void SetTrafficMapMaxValue(int32_t slotId);
     void StartTrafficOvserver();
     void StopTrafficOvserver();
     bool GetNotifyStats(int32_t simId, uint8_t flag);
@@ -149,11 +146,16 @@ private:
     bool IsMobileDataEnabled();
     void UpdateTrafficLimitDate(int32_t simId);
     void UpdateNetStatsToMapFromDB(int32_t simId);
-    void UpdateCurActiviteSimChanged(int32_t simId);
     bool CalculateTrafficAvailable(int32_t simId, uint64_t &monthlyAvailable,
                                    uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
-    int32_t ProcessNetConnectionPropertiesChangeFfrt(int32_t simId, uint64_t ifIndex);
     int32_t UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value);
+    void ClearTrafficMapBySlotId(int32_t slotId, uint64_t ifIndex);
+    bool IsSameStateInTwoMap(int32_t simId);
+    void DeleteSimIdInTwoMap(int32_t simId);
+    void AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex);
+    void PrintTrafficBpfMapInfo(int32_t slotId);
+    void PrintTrafficSettingsMapInfo(int32_t simId);
+    void UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifIndex);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -185,12 +187,11 @@ private:
     int32_t defaultUserId_ = 0;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    int32_t curActiviteSimId_ = -1;
     uint64_t curIfIndex_ = UINT64_MAX;
     std::atomic_bool isWifiConnected_ = false;
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> settingsTrafficMap_;
+    std::map<int32_t, uint64_t> simIdToIfIndexMap_;
     std::unique_ptr<FfrtTimer> trafficTimer_ = nullptr;
-    sptr<NetInfoObserver> netconnCallback_ = nullptr;
     sptr<TrafficObserver> trafficObserver_ = nullptr;
     sptr<NetsysControllerCallback> netsysControllerObserver_ = nullptr;
     SafeMap<std::string, std::string> ifaceNameIdentMap_;

@@ -534,6 +534,8 @@ HWTEST_F(NetsysNativeClientTest, SetGetClearNetStateTrafficMap001, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = nativeClient_.ClearIncreaseTrafficMap();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.DeleteIncreaseTrafficMap(12);  // 12:ifIndex
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeClientTest, UpdateIfIndexMap001, TestSize.Level1)

@@ -1340,6 +1340,21 @@ HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap001, TestSize.Level1
     uint8_t flag = 1;
     uint64_t availableTraffic = 1000000;
 
+    int32_t ret = NetsysController::GetInstance().SetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().GetNetStateTrafficMap(flag, availableTraffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().DeleteIncreaseTrafficMap(12);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap002, TestSize.Level1)
+{
+    uint8_t flag = 1;
+    uint64_t availableTraffic = 1000000;
+
     NetsysController::GetInstance().netsysService_ = nullptr;
 
     int32_t ret = NetsysController::GetInstance().SetNetStateTrafficMap(flag, availableTraffic);
@@ -1347,6 +1362,8 @@ HWTEST_F(NetsysControllerTest, SetGetClearNetStateTrafficMap001, TestSize.Level1
     ret = NetsysController::GetInstance().GetNetStateTrafficMap(flag, availableTraffic);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().ClearIncreaseTrafficMap();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    ret = NetsysController::GetInstance().DeleteIncreaseTrafficMap(12);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -1395,6 +1412,13 @@ HWTEST_F(NetsysControllerTest, SetNetStatusMap001, TestSize.Level1)
     NetsysController::GetInstance().netsysService_ = nullptr;
 
     int32_t ret = NetsysController::GetInstance().SetNetStatusMap(0, 1);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DeleteIncreaseTrafficMap001, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().DeleteIncreaseTrafficMap(12); // 12:ifindex
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 

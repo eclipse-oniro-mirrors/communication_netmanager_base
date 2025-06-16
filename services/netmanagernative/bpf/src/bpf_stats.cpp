@@ -362,13 +362,39 @@ int32_t NetsysBpfStats::ClearIncreaseTrafficMap()
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetsysBpfStats::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    NETNATIVE_LOGI("NetsysBpfStats::DeleteIncreaseTrafficMap start, ifIndex: %{public}" PRIu64, ifIndex);
+    std::vector<uint64_t> keys;
+    if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+    BpfMapper<uint64_t, traffic_value> increaseTrafficMap(INCREMENT_STATS_MAP_PATH, BPF_F_WRONLY);
+    if (!increaseTrafficMap.IsValid()) {
+        NETNATIVE_LOGE("DeleteIncreaseTrafficMap increamentTrafficMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    if (increaseTrafficMap.Delete(static_cast<uint64_t>(ifIndex)) != 0) {
+        NETNATIVE_LOGE("DeleteIncreaseTrafficMap Delete increamentTrafficMap err");
+        return NETMANAGER_ERROR;
+    }
+
+    keys = {};
+    if (GetNetStateIncreTrafficMap(keys) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
-    NETNATIVE_LOGE("NetsysBpfStats::UpdateIfIndexMap start.");
+    NETNATIVE_LOGI("UpdateIfIndexMap start. key:%{public}d, index:%{public}" PRIu64, key, index);
     if (index == UINT64_MAX) {
         return -1;
     }
-    NETNATIVE_LOGE("UpdateIfIndexMap ifindex: %{public}" PRIu64, index);
+
     BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
     if (!netStatsIfIndexMap.IsValid()) {
         NETNATIVE_LOGE("UpdateIfIndexMap netStatsTrafficMap not exist.");
@@ -385,7 +411,7 @@ int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 
 int32_t NetsysBpfStats::GetIfIndexMap()
 {
-    NETNATIVE_LOGE("NetsysBpfStats::GetIfIndexMap start");
+    NETNATIVE_LOGI("GetIfIndexMap start");
     BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_RDONLY);
     if (!netStatsIfIndexMap.IsValid()) {
         NETNATIVE_LOGE("GetIfIndexMap netStatsTrafficMap not exist.");
@@ -400,7 +426,7 @@ int32_t NetsysBpfStats::GetIfIndexMap()
             NETNATIVE_LOGE("GetIfIndexMap read err");
             return NETMANAGER_ERROR;
         }
-        NETNATIVE_LOGI("NetsysBpfStats::GetIfIndexMap keys: %{public}u, value: %{public}" PRIu64, key, value);
+        NETNATIVE_LOGI("GetIfIndexMap keys: %{public}u, value: %{public}" PRIu64, key, value);
     }
     return NETMANAGER_SUCCESS;
 }

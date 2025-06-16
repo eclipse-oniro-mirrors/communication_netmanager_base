@@ -45,6 +45,8 @@ static const int32_t BROKER_SOCK_PERMISSION_MAP_SIZE = 1000;
 static const int32_t UID_ACCESS_POLICY_ARRAY_SIZE = 65535;
 static const int32_t NET_NS_MAP_SIZE = 5000;
 #endif
+static const int32_t TRAFFIC_INCREASE_MAP_SIZE = 9;
+static const uint32_t TRAFFIC_NOTIFY_TYPE = 3;
 
 // network stats begin
 bpf_map_def SEC("maps") iface_stats_map = {
@@ -112,7 +114,7 @@ bpf_map_def SEC("maps") limits_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(traffic_notify_flag),
     .value_size = sizeof(traffic_value),
-    .max_entries = 3, // 3:   0-monthly limit 1-monthly mark 2-daily mark
+    .max_entries = TRAFFIC_INCREASE_MAP_SIZE, // slot0:0-monthly limit 1-monthly mark 2-daily mark;slot1: 3 4 5
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -123,7 +125,7 @@ bpf_map_def SEC("maps") increment_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uint64_t),
     .value_size = sizeof(traffic_value),
-    .max_entries = 1, // current only support single card detect
+    .max_entries = TRAFFIC_INCREASE_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
     .numa_node = 0,
@@ -214,9 +216,9 @@ static traffic_value update_new_incre_value(uint64_t ifindex, __u32 len)
     return 0;
 }
 
-static traffic_notify_flag is_exceed_daily_mark(traffic_value used_value)
+static traffic_notify_flag is_exceed_daily_mark(uint32_t slotId, traffic_value used_value)
 {
-    traffic_notify_flag daily_mark = 2; // 2: DAILY_MARK
+    traffic_notify_flag daily_mark = slotId * TRAFFIC_NOTIFY_TYPE + 2; // 2: DAILY_MARK
     traffic_value *day_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &daily_mark);
 
     traffic_value max_value = UINT64_MAX;
@@ -231,9 +233,9 @@ static traffic_notify_flag is_exceed_daily_mark(traffic_value used_value)
     return UINT8_MAX;
 }
 
-static traffic_notify_flag is_exceed_mothly_mark(traffic_value used_value)
+static traffic_notify_flag is_exceed_mothly_mark(uint32_t slotId, traffic_value used_value)
 {
-    traffic_notify_flag monthly_mark = 1; // 1: MONTHLY_MARK
+    traffic_notify_flag monthly_mark = slotId * TRAFFIC_NOTIFY_TYPE + 1; // 1: MONTHLY_MARK
     traffic_value *monthly_mark_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_mark);
 
     traffic_value max_value = UINT64_MAX;
@@ -248,9 +250,9 @@ static traffic_notify_flag is_exceed_mothly_mark(traffic_value used_value)
     return UINT8_MAX;
 }
 
-static traffic_notify_flag is_exceed_mothly_limit(traffic_value used_value)
+static traffic_notify_flag is_exceed_mothly_limit(uint32_t slotId, traffic_value used_value)
 {
-    traffic_notify_flag monthly_limit = 0; // 0: MONTHLY_LIMIT
+    traffic_notify_flag monthly_limit = slotId * TRAFFIC_NOTIFY_TYPE + 0; // 0: MONTHLY_LIMIT
     traffic_value *monthly_limit_avai = bpf_map_lookup_elem(&limits_stats_map, &monthly_limit);
 
     traffic_value max_value = UINT64_MAX;
@@ -265,29 +267,37 @@ static traffic_notify_flag is_exceed_mothly_limit(traffic_value used_value)
     return UINT8_MAX;
 }
 
-static uint8_t is_exceed_limit(struct __sk_buff *skb, uint64_t ifindex)
+static void process_traffic_notify(struct __sk_buff *skb, uint64_t ifindex)
 {
-    uint8_t id = 0; // current only support single card detect.
-    uint64_t *cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &id);
+    uint8_t slot0 = 0;
+    uint8_t slot1 = 1;
+    uint8_t curSlotId = UINT8_MAX;
+    uint64_t *cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &slot0);
     if (cur_rmnet_ifindex == NULL || *cur_rmnet_ifindex != ifindex) {
-        return 1;
+        cur_rmnet_ifindex = bpf_map_lookup_elem(&ifindex_map, &slot1);
+        if (cur_rmnet_ifindex == NULL || *cur_rmnet_ifindex != ifindex) {
+            return;
+        } else {
+            curSlotId = slot1;
+        }
+    } else {
+        curSlotId = slot0;
     }
-
+ 
     traffic_value used_value = update_new_incre_value(ifindex, skb->len);
     if (used_value == 0) {
-        return 1;
+        return;
     }
-    traffic_notify_flag flag = is_exceed_mothly_limit(used_value);
+    traffic_notify_flag flag = is_exceed_mothly_limit(curSlotId, used_value);
     if (flag == UINT8_MAX) {
-        flag = is_exceed_mothly_mark(used_value);
+        flag = is_exceed_mothly_mark(curSlotId, used_value);
         if (flag == UINT8_MAX) {
-            flag = is_exceed_daily_mark(used_value);
+            flag = is_exceed_daily_mark(curSlotId, used_value);
         }
     }
     if (flag != UINT8_MAX) {
         socket_ringbuf_net_stats_event_submit(flag);
     }
-    return 1;
 }
 
 static uint8_t is_need_discard(void)
@@ -338,8 +348,8 @@ int socket_iface_stats(struct __sk_buff *skb)
             __sync_fetch_and_add(&value_if->rxBytes, skb->len);
         }
     }
-    is_exceed_limit(skb, ifindex);
 
+    process_traffic_notify(skb, ifindex);
     return 1;
 }
 

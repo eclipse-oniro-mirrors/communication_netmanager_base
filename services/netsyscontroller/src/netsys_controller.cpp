@@ -1208,6 +1208,16 @@ int32_t NetsysController::ClearIncreaseTrafficMap()
     return netsysService_->ClearIncreaseTrafficMap();
 }
 
+int32_t NetsysController::DeleteIncreaseTrafficMap(uint64_t ifIndex)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+
+    return netsysService_->DeleteIncreaseTrafficMap(ifIndex);
+}
+
 int32_t NetsysController::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     // LCOV_EXCL_START This will never happen.

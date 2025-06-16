@@ -138,7 +138,7 @@ bool NetStatsUtils::IsMobileDataEnabled()
     return dataEnabled;
 }
 
-int32_t NetStatsUtils::IsDaulCardEnabled()
+int32_t NetStatsUtils::IsDualCardEnabled()
 {
     int32_t actualSimNum = 0;
     int32_t simNum = Telephony::CoreServiceClient::GetInstance().GetMaxSimCount();
@@ -151,6 +151,16 @@ int32_t NetStatsUtils::IsDaulCardEnabled()
     }
     NETMGR_LOG_I("actualSimNum == %{public}d.", actualSimNum);
     return actualSimNum;
+}
+
+int32_t NetStatsUtils::GetPrimarySlotId()
+{
+    int primarySlotId = -1;
+    int ret = Telephony::CoreServiceClient::GetInstance().GetPrimarySlotId(primarySlotId);
+    if (primarySlotId == -1) {
+        NETMGR_LOG_E("GetPrimarySlotId error, ret: %{public}d", ret);
+    }
+    return primarySlotId;
 }
 
 bool NetStatsUtils::ConvertToUint64(const std::string &str, uint64_t &value)
