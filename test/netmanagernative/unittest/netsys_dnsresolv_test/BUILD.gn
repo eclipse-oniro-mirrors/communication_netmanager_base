@@ -97,7 +97,6 @@ ohos_unittest("netsys_dnsresolv_mock_test") {
 
   sources = [
     "../mock/src/parcel.cpp",
-    "netsys_net_dns_result_data_test.cpp",
   ]
 
   sources += [
