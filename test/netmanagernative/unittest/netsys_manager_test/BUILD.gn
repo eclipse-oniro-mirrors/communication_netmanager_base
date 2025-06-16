@@ -385,7 +385,6 @@ ohos_unittest("netsys_native_service_proxy_test") {
       "netmanager_base/netmanager_base/netsys_native_service_proxy_test"
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
-    "netsys_native_service_proxy_test.cpp",
   ]
 
   include_dirs = [
