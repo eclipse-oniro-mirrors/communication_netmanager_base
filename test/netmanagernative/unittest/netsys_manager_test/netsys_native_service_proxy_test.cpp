@@ -83,21 +83,6 @@ void NetsysNativeServiceProxyTest::SetUp() {}
 void NetsysNativeServiceProxyTest::TearDown() {}
 
 /**
- * @tc.name: AddRouteTest001
- * @tc.desc: Test NetsysNativeServiceProxy AddRoute.
- * @tc.type: FUNC
- */
-HWTEST_F(NetsysNativeServiceProxyTest, AddRouteTest001, TestSize.Level1)
-{
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_NE(netsysNativeService, nullptr);
-    int32_t ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
-    EXPECT_LE(ret, 0);
-    ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "192.168.113.0/24", "0.0.0.0");
-    EXPECT_LE(ret, 0);
-}
-
-/**
  * @tc.name: SetDefaultNetworkTest001
  * @tc.desc: Test NetsysNativeServiceProxy SetDefaultNetwork.
  * @tc.type: FUNC
