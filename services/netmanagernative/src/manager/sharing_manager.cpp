@@ -501,8 +501,7 @@ void SharingManager::GetTraffic(std::smatch &matches, std::string &ifaceName, Ne
             traffic.all += send;
             ifaceName = matchTemp;
         } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
-            && matchNext.find(CELLULAR_IFACE_NAME) != std::string::npos
-            && ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
+            && matchNext.find(CELLULAR_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
             int64_t receive = 0;
             if (!ConvertStrToLong(matches[i - TWO_LIST_CORRECT_DATA].str(), receive)) {
                 return;
