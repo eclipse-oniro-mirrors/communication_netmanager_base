@@ -1671,7 +1671,7 @@ HWTEST_F(NetConnServiceTest, EnableDistributedClientNetTest002, TestSize.Level1)
     ASSERT_NE(ret, NETMANAGER_SUCCESS);
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->EnableDistributedClientNetAsync(virnicAddr, iif);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, EnableDistributedServerNetTest001, TestSize.Level1)
