@@ -506,7 +506,7 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
 
 bool NetSupplier::IsNetValidated() const
 {
-    return HasNetCap(NET_CAPABILITY_VALIDATED);
+    return HasNetCap(NET_CAPABILITY_VALIDATED) && !HasNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
 }
 
 /**
