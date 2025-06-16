@@ -701,6 +701,20 @@ HWTEST_F(NetConnServiceTest, SetAirplaneModeTest002, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, SetAirplaneModeTest004, TestSize.Level1)
+{
+    system::SetParameter("persist.edm.airplane_mode_disable", "true");
+    auto ret = NetConnService::GetInstance()->SetAirplaneMode(true);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->SetAirplaneMode(false);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    system::SetParameter("persist.edm.airplane_mode_disable", "false");
+    ret = NetConnService::GetInstance()->SetAirplaneMode(true);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->SetAirplaneMode(false);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
 {
     bool bRes = false;
