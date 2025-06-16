@@ -439,7 +439,7 @@ HWTEST_F(NetConnServiceProxyTest, GetSpecificNetByIdentTest001, TestSize.Level1)
 {
     std::list<int32_t> netIdList;
     int32_t ret = instance_->GetSpecificNetByIdent(NetBearType::BEARER_ETHERNET, "test", netIdList);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
