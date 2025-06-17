@@ -110,6 +110,7 @@ void NetsysControllerServiceImplTest::AddExtMockApi()
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETBLOCKING_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_SHAREDNSSET_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACECLEARADDRS_API);
+        instance_->mockNetsysClient_.mockApi_.insert(MOCK_FLUSHDNSCACHE_API);
     }
 }
 
@@ -710,6 +711,10 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
 
     result = instance_->SetBlocking(socketFd, false);
+    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    uint16_t netId = 0;
+    result = instance_->FlushDnsCache(netId);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

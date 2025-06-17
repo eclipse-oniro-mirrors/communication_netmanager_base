@@ -610,5 +610,20 @@ HWTEST_F(NetsysNativeClientTest, UnRegisterNetsysTrafficCallback001, TestSize.Le
     int32_t ret = nativeClient_.UnRegisterNetsysTrafficCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetsysNativeClientTest, FlushDnsCache001, TestSize.Level1)
+{
+    uint16_t netId = NET_ID;
+    int32_t ret = nativeClient_.FlushDnsCache(netId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, FlushDnsCache002, TestSize.Level1)
+{
+    uint16_t netId = 0;
+    int32_t ret = nativeClient_.FlushDnsCache(netId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

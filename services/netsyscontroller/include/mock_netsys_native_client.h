@@ -75,6 +75,7 @@ constexpr const char *MOCK_REGISTERNOTIFYCALLBACK_API = "RegisterNotifyCallback"
 constexpr const char *MOCK_STARTDHCPSERVICE_API = "StartDhcpService";
 constexpr const char *MOCK_STOPDHCPSERVICE_API = "StopDhcpService";
 constexpr const char *MOCK_CLOSESOCKETSUID_API = "CloseSocketsUid";
+constexpr const char *MOCK_FLUSHDNSCACHE_API = "FlushDnsCache";
 
 class MockNetsysNativeClient {
 public:
@@ -472,6 +473,15 @@ public:
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
+    /**
+     * @brief Flush DNS cache.
+     *
+     * @param netId Network ID
+     * @note This function is used to flush the DNS cache for a specific network ID.
+     *       It is typically called when the DNS configuration changes or when the network is reset.
+     * @return Return the return value of the netsys interface call.
+     */
+    int32_t FlushDnsCache(uint16_t netId);
 private:
     int64_t GetIfaceBytes(const std::string &interfaceName, const std::string &filename);
     int64_t GetAllBytes(const std::string &filename);

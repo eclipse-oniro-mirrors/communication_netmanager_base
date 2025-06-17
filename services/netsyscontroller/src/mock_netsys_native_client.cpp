@@ -618,5 +618,11 @@ int32_t MockNetsysNativeClient::CloseSocketsUid(const std::string &ipAddr, uint3
 {
     return 0;
 }
+
+int32_t MockNetsysNativeClient::FlushDnsCache(uint16_t netId)
+{
+    NETMGR_LOG_D("FlushDnsCache: netId[%{public}d]", netId);
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

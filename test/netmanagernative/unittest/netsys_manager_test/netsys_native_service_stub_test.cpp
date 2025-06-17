@@ -2256,7 +2256,7 @@ HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFlushDnsCache(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.Level1)

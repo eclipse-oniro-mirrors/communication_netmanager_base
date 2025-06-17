@@ -1438,5 +1438,14 @@ HWTEST_F(NetsysControllerTest, SetUserDefinedServerFlag001, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().SetUserDefinedServerFlag(netId, isUserDefinedServer);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, FlushDnsCache001, TestSize.Level1)
+{
+    uint16_t netId = 123;
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().FlushDnsCache(netId);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

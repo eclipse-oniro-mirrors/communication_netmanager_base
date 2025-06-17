@@ -1048,6 +1048,9 @@ int32_t NetsysControllerServiceImpl::SetUserDefinedServerFlag(uint16_t netId, bo
 
 int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)
 {
+    if (mockNetsysClient_.CheckMockApi(MOCK_FLUSHDNSCACHE_API)) {
+        return mockNetsysClient_.FlushDnsCache(netId);
+    }
     NETMGR_LOG_I("FlushDnsCache Enter. netId[%{public}u]", netId);
     return netsysClient_->FlushDnsCache(netId);
 }
