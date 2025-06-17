@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <regex>
 #include <unistd.h>
+#include <charconv>
 
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
@@ -467,35 +468,71 @@ int32_t SharingManager::QueryCellularSharingTraffic(NetworkSharingTraffic &traff
         if (matches.size() < MAX_MATCH_SIZE) {
             continue;
         }
-        for (uint32_t i = 0; i < matches.size() - 1; i++) {
-            std::string matchTemp = matches[i];
-            NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic matche[%{public}s]", matchTemp.c_str());
-            std::string matchNext = matches[i + NEXT_LIST_CORRECT_DATA];
-            if (matchTemp.find(CELLULAR_IFACE_NAME) != std::string::npos
-                && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
-                int64_t send =
-                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
-                isFindTx = true;
-                traffic.send = send;
-                traffic.all += send;
-                ifaceName = matchTemp;
-            } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
-                && matchNext.find(CELLULAR_IFACE_NAME) != std::string::npos
-                && ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
-                int64_t receive =
-                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
-                isFindRx = true;
-                traffic.receive = receive;
-                traffic.all += receive;
-            }
-            if (isFindTx && isFindRx) {
-                NETNATIVE_LOG_D("GetNetworkSharingTraffic success total");
-                return NETMANAGER_SUCCESS;
-            }
+        GetTraffic(matches, ifaceName, traffic, isFindTx, isFindRx);
+        if (isFindTx && isFindRx) {
+            NETNATIVE_LOG_D("GetNetworkSharingTraffic success total");
+            return NETMANAGER_SUCCESS;
         }
     }
     NETNATIVE_LOGE("GetNetworkSharingTraffic failed");
     return NETMANAGER_ERROR;
+}
+
+static bool ConvertStrToLong(const std::string &str, int64_t &value)
+{
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
+}
+
+void SharingManager::GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,
+    bool &isFindTx, bool &isFindRx)
+{
+    for (uint32_t i = 0; i < matches.size() - 1; i++) {
+        std::string matchTemp = matches[i];
+        NETNATIVE_LOG_D("GetNetworkCellularSharingTraffic matche[%{public}s]", matchTemp.c_str());
+        std::string matchNext = matches[i + NEXT_LIST_CORRECT_DATA];
+        if (matchTemp.find(CELLULAR_IFACE_NAME) != std::string::npos
+            && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
+            int64_t send = 0;
+            if (!ConvertStrToLong(matches[i - TWO_LIST_CORRECT_DATA].str(), send)) {
+                return;
+            }
+            isFindTx = true;
+            traffic.send = send;
+            traffic.all += send;
+            ifaceName = matchTemp;
+        } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+            && matchNext.find(CELLULAR_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
+            int64_t receive = 0;
+            if (!ConvertStrToLong(matches[i - TWO_LIST_CORRECT_DATA].str(), receive)) {
+                return;
+            }
+            isFindRx = true;
+            traffic.receive = receive;
+            traffic.all += receive;
+        } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+            && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)
+            && ifaceName == "") {
+            int64_t send = 0;
+            if (!ConvertStrToLong(matches[i - TWO_LIST_CORRECT_DATA].str(), send)) {
+                return;
+            }
+            isFindTx = true;
+            traffic.send = send;
+            traffic.all += send;
+            ifaceName = matchTemp;
+        } else if (matchTemp.find(WLAN_IFACE_NAME) != std::string::npos
+            && matchNext.find(WLAN_IFACE_NAME) != std::string::npos && ((i - TWO_LIST_CORRECT_DATA) >= 0)
+            && ifaceName.find(WLAN_IFACE_NAME) != std::string::npos) {
+            int64_t receive = 0;
+            if (!ConvertStrToLong(matches[i - TWO_LIST_CORRECT_DATA].str(), receive)) {
+                return;
+            }
+            isFindRx = true;
+            traffic.receive = receive;
+            traffic.all += receive;
+        }
+    }
 }
 
 void SharingManager::CheckInited()

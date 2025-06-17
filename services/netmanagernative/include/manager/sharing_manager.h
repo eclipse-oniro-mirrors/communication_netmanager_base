@@ -21,7 +21,7 @@
 #include <set>
 #include <string>
 #include <vector>
-
+#include <regex>
 #include "iptables_wrapper.h"
 #include "network_sharing.h"
 
@@ -120,6 +120,8 @@ private:
     int32_t SetForwardRules(bool set, const std::string &cmds);
     int32_t QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,
         const std::string &result, std::string &ifaceName);
+    void GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,
+        bool &isFindTx, bool &isFindRx);
 };
 } // namespace nmd
 } // namespace OHOS
