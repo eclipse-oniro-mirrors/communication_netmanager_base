@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static const size_t MAX_EXCLUSION_SIZE = 500;
+static const size_t MAX_EXCLUSION_SIZE = 3000;
 static const size_t MAX_URL_SIZE = 2048;
 static const size_t BASE_DEC = 10;
 
