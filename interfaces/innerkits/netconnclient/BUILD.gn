@@ -117,7 +117,7 @@ ohos_shared_library("net_conn_manager_if") {
     "c_utils:utils",
     "samgr:samgr_proxy",
   ]
-  public_external_deps = ["ipc:ipc_core"]
+  public_external_deps = [ "ipc:ipc_core" ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetConnManager\"",
