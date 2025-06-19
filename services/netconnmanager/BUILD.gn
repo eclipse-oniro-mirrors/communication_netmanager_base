@@ -41,6 +41,7 @@ ohos_shared_library("net_conn_manager") {
 
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/net_conn_service.cpp",
     "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_factoryreset_callback.cpp",
     "src/dns_result_call_back.cpp",
     "src/nat464_service.cpp",
@@ -48,7 +49,6 @@ ohos_shared_library("net_conn_manager") {
     "src/net_caps.cpp",
     "src/net_conn_callback_proxy_wrapper.cpp",
     "src/net_conn_event_handler.cpp",
-    "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
     "src/net_http_probe.cpp",
@@ -156,6 +156,7 @@ ohos_static_library("net_conn_manager_static") {
   use_exceptions = true
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/net_conn_service.cpp",
     "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_factoryreset_callback.cpp",
     "src/dns_result_call_back.cpp",
     "src/nat464_service.cpp",
@@ -163,7 +164,6 @@ ohos_static_library("net_conn_manager_static") {
     "src/net_caps.cpp",
     "src/net_conn_callback_proxy_wrapper.cpp",
     "src/net_conn_event_handler.cpp",
-    "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
     "src/net_http_probe.cpp",

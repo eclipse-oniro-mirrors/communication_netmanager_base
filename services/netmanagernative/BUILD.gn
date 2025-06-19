@@ -51,6 +51,8 @@ config("netsys_native_manager_config") {
 }
 
 netsys_native_manager_sources = [
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/dns_proxy_listen.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/route_manager.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/clatd.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/data_receiver.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/dns_resolv_listen.cpp",
@@ -69,7 +71,6 @@ netsys_native_manager_sources = [
   "src/manager/dns_manager.cpp",
   "src/manager/firewall_manager.cpp",
   "src/manager/interface_manager.cpp",
-  "src/manager/route_manager.cpp",
   "src/manager/sharing_manager.cpp",
   "src/manager/traffic_manager.cpp",
   "src/manager/vnic_manager.cpp",
@@ -78,7 +79,6 @@ netsys_native_manager_sources = [
   "src/netsys/clat_utils.cpp",
   "src/netsys/clatd_packet_converter.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
-  "src/netsys/dnsresolv/dns_proxy_listen.cpp",
   "src/netsys/dnsresolv/dns_proxy_request_socket.cpp",
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
   "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
@@ -313,7 +313,7 @@ ohos_shared_library("netsys_client") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "src/netsys/netsys_client.c",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/netsys_client.c",
     "src/netsys/netsys_tcp_client.c",
   ]
 
