@@ -1227,7 +1227,7 @@ bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
         return false;
     }
 
-    NETMGR_LOG_D("IsCallingUserSupplier callingUserId: %{public}d  supplierUserId: %{public}d", callingUserId, supplierUserId);
+    NETMGR_LOG_D("callingUserId: %{public}d  supplierUserId: %{public}d", callingUserId, supplierUserId);
     if (callingUserId == supplierUserId) {
         NETMGR_LOG_D("IsCallingUserSupplier is true, userId: %{public}d", supplierUserId);
         return true;
