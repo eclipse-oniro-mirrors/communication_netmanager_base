@@ -48,10 +48,10 @@ ohos_shared_library("netsys_bpf_utils") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/bpf_stats.cpp",
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/net_stats_info.cpp",
     "src/bpf_loader.cpp",
     "src/bpf_ring_buffer.cpp",
-    "src/bpf_stats.cpp",
   ]
 
   include_dirs = [
