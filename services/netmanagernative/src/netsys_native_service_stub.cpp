@@ -2412,7 +2412,7 @@ int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, Message
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
-        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
+        NETNATIVE_LOGE("CmdUpdateVpnRules CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2455,7 +2455,9 @@ int32_t NetsysNativeServiceStub::CmdUpdateVpnRules(MessageParcel &data, MessageP
     std::vector<std::string> extMessages;
     std::string extMessage;
     for (int32_t index = 0; index < size; index++) {
-        data.ReadString(extMessage);
+        if (!data.ReadString(extMessage)) {
+            return ERR_FLATTEN_OBJECT;
+        }
         if (extMessage.empty()) {
             NETNATIVE_LOGE("CmdUpdateVpnRules extMessage is empty, size mismatch");
             return ERR_FLATTEN_OBJECT;

@@ -238,6 +238,15 @@ ohos_static_library("netsys_native_manager_static") {
 
   deps = netsys_native_manager_deps
 
+  if (netmanager_base_enable_feature_sysvpn) {
+    cflags = [ "-DSUPPORT_SYSVPN" ]
+    cflags_cc = [ "-DSUPPORT_SYSVPN" ]
+    sources += [
+        "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/system_vpn_wrapper.cpp",
+        "src/manager/multi_vpn_manager.cpp",
+    ]
+  }
+
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",

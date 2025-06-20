@@ -80,7 +80,7 @@ int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
  * Create vpn Interface by netlink
  *
  * @param name ifname
- * @param ifNameId ifid
+ * @param ifNameId interface name id
  * @param mtu mtu
  * @param phys phy interface
  * @return Returns 0, create vpn interface successfully, otherwise it will fail
