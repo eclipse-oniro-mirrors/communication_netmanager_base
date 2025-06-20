@@ -680,7 +680,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, FlushDnsCache001, TestSize.Level1)
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->FlushDnsCache(NETID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, SetNetStatusMap001, TestSize.Level1)

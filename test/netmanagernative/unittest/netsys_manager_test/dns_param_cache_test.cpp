@@ -359,5 +359,27 @@ HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest, TestSize.Level1)
     int32_t ret = dnsParCache.FlushDnsCache(netId);
     EXPECT_EQ(ret, -2);
 }
+
+HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("FlushDnsCacheTest enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.defaultNetId_ = netId;
+    dnsParCache.CreateCacheForNet(netId);
+    int32_t ret = dnsParCache.FlushDnsCache(netId);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest003, TestSize.Level1)
+{
+    NETNATIVE_LOGI("FlushDnsCacheTest enter");
+    DnsParamCache dnsParCache;
+    uint16_t netId = 0;
+    dnsParCache.defaultNetId_ = 1;
+    dnsParCache.CreateCacheForNet(dnsParCache.defaultNetId_);
+    int32_t ret = dnsParCache.FlushDnsCache(netId);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace NetsysNative
 } // namespace OHOS
