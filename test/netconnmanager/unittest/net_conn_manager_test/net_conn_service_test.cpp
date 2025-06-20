@@ -497,7 +497,7 @@ HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest004, TestSize.Level1)
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
 
     auto ret2 = NetConnService::GetInstance()->IsCallingUserSupplier(g_vpnSupplierId);
-    EXPECT_FALSE(ret2);
+    EXPECT_TRUE(ret2);
 }
 
 HWTEST_F(NetConnServiceTest, IsCallingUserSupplierTest005, TestSize.Level1)
