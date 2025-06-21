@@ -65,6 +65,10 @@ void SetStringPropertyUtf8(napi_env env, napi_value object, const std::string &n
 
 /* array buffer */
 bool ValueIsArrayBuffer(napi_env env, napi_value value);
+napi_status SetVectorUint8Property(napi_env env, napi_value object, const std::string &name,
+    const std::vector<uint8_t> &value);
+bool GetVectorUint8Property(napi_env env, napi_value object, const std::string &propertyName,
+    std::vector<uint8_t> &vec);
 void *GetInfoFromArrayBufferValue(napi_env env, napi_value value, size_t *length);
 napi_value CreateArrayBuffer(napi_env env, size_t length, void **data);
 

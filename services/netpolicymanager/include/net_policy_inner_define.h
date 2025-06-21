@@ -109,7 +109,7 @@ struct NetPolicyCellular {
     std::string possessor;
 };
 
-struct NetFirewallRule {
+struct NetFirewallRuleList {
     std::set<uint32_t> deniedList;
     std::set<uint32_t> allowedList;
 };
@@ -119,7 +119,7 @@ struct NetPolicy {
     std::vector<UidPolicy> uidPolicies;
     std::string backgroundPolicyStatus;
     std::vector<NetPolicyQuota> netQuotaPolicies;
-    std::map<uint32_t, NetFirewallRule> netFirewallRules;
+    std::map<uint32_t, NetFirewallRuleList> netFirewallRules;
 };
 
 // link power_mode_module.h
