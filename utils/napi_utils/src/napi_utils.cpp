@@ -445,6 +445,61 @@ void SetStringPropertyUtf8(napi_env env, napi_value object, const std::string &n
     napi_set_named_property(env, object, name.c_str(), jsValue);
 }
 
+napi_status SetVectorUint8Property(napi_env env, napi_value object, const std::string &name,
+    const std::vector<uint8_t> &value)
+{
+    napi_value array;
+    napi_status status = napi_create_array_with_length(env, value.size(), &array);
+    if (status != napi_ok) {
+        NETMANAGER_BASE_LOGE("failed to create array! field: %{public}s", name.c_str());
+        return status;
+    }
+
+    for (size_t i = 0; i < value.size(); ++i) {
+        napi_value ele;
+        napi_status status = napi_create_int32(env, value[i], &ele);
+        if (status != napi_ok) {
+            NETMANAGER_BASE_LOGE("failed to create int32!");
+            return status;
+        }
+        status = napi_set_element(env, array, i, ele);
+        if (status != napi_ok) {
+            NETMANAGER_BASE_LOGE("failed to set element, status: %{public}d!", status);
+            return status;
+        }
+    }
+    if (napi_set_named_property(env, object, name.c_str(), array) != napi_ok) {
+        NETMANAGER_BASE_LOGE("failed to set %{public}s named property!", name.c_str());
+    }
+    return status;
+}
+ 
+bool GetVectorUint8Property(napi_env env, napi_value object, const std::string &propertyName,
+    std::vector<uint8_t> &vec)
+{
+    bool hasProperty = false;
+    uint32_t length = 0;
+    NAPI_CALL_BASE(env, napi_has_named_property(env, object, propertyName.c_str(), &hasProperty), {});
+    napi_value fieldvalue;
+    if (!hasProperty || napi_get_named_property(env, object, propertyName.c_str(), &fieldvalue) != napi_ok) {
+        NETMANAGER_BASE_LOGE("GetVectorUint8Property, no property: %{public}s", propertyName.c_str());
+        return false;
+    }
+    NAPI_CALL_BASE(env, napi_get_array_length(env, fieldvalue &length), false);
+    vec.reserve(length);
+    for (size_t i = 0; i < length; ++i) {
+        napi_value element;
+        NAPI_CALL_BASE(env, napi_get_element(env, fieldvalue, i, element), false);
+        int32_t result = 0;
+        NAPI_CALL_BASE(env, napi_get_value_int32(env, element, &result), false);
+        if (result > 0xFF || result < 0) {
+            return napi_invalid_arg;
+        }
+        vec.emplace_back(static_cast<uint8_t>(result));
+    }
+    return true;
+}
+
 /* array buffer */
 bool ValueIsArrayBuffer(napi_env env, napi_value value)
 {
