@@ -510,6 +510,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
             std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
+    network->SetScreenState(isScreenOn_);
     network->SetNetCaps(netCaps);
     supplier->SetNetwork(network);
     supplier->SetUid(callingUid);
@@ -793,6 +794,7 @@ void NetConnService::HandlePowerMgrEvent(int code)
 void NetConnService::HandleScreenEvent(bool isScreenOn)
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    isScreenOn_ = isScreenOn;
     for (const auto& pNetSupplier : netSuppliers_) {
         if (pNetSupplier.second == nullptr) {
             continue;

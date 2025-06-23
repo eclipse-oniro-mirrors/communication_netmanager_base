@@ -692,6 +692,7 @@ private:
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
     std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
+    bool isScreenOn_ = true;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
