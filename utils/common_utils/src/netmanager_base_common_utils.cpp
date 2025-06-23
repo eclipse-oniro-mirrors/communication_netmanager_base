@@ -34,6 +34,8 @@
 #include <fstream>
 #include <random>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <poll.h>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -41,6 +43,8 @@
 #include "parameters.h"
 #endif
 #include "securec.h"
+#include "datetime_ex.h"
+#include "dfx_kernel_stack.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
@@ -68,6 +72,7 @@ constexpr int32_t NET_MASK_GROUP_COUNT = 4;
 constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 constexpr int32_t WAIT_FOR_PID_TIME_MS = 20;
 constexpr int32_t MAX_WAIT_PID_COUNT = 500;
+constexpr int32_t IPTABLES_READ_TIME_OUT = 10000; // 10s
 const std::string IPADDR_DELIMITER = ".";
 constexpr const char *CMD_SEP = " ";
 constexpr const char *DOMAIN_DELIMITER = ".";
@@ -520,31 +525,71 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 
 int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
 {
-    NETMGR_LOG_D("Fork OK");
     if (count != PIPE_FD_NUM) {
-        NETMGR_LOG_E("fork exec parent process failed");
         _exit(-1);
     }
-    NETMGR_LOG_D("Fork done and ready to close");
     if (close(pipeFd[PIPE_OUT]) != 0) {
-        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
-    NETMGR_LOG_D("Close done and ready for dup2");
     if (dup2(pipeFd[PIPE_IN], STDOUT_FILENO) == -1) {
-        NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         _exit(-1);
     }
-    NETMGR_LOG_D("ready for execv");
+    if (close(pipeFd[PIPE_IN]) != 0) {
+        _exit(-1);
+    }
     if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
         NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     NETMGR_LOG_D("execv done");
-    if (close(pipeFd[PIPE_IN]) != 0) {
-        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
-        _exit(-1);
-    }
     _exit(-1);
+}
+
+int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string *out)
+{
+    char buf[CHAR_ARRAY_SIZE_MAX] = {0};
+    out->clear();
+    NETMGR_LOG_D("ready for read");
+
+    int fd = pipeFd[PIPE_OUT];
+    int64_t start = GetTickCount();
+    int ret;
+    while (true) {
+        struct pollfd fds[1];
+        fds[0].fd = fd;
+        fds[0].events = POLLIN;
+
+        int64_t now = GetTickCount();
+        int64_t elapsed = now - start;
+        if (elapsed < 0 || elapsed > IPTABLES_READ_TIME_OUT) {
+            ret = 0;
+            break;
+        }
+        int64_t timeout = IPTABLES_READ_TIME_OUT - elapsed;
+        ret = poll(fds, 1, timeout);
+        if (ret == -1 && errno == EINTR) {
+            continue;
+        } else {
+            break;
+        }
+    }
+
+    int result = NETMANAGER_SUCCESS;
+    if (ret <= 0) {
+        NETMGR_LOG_E("iptables select fail, ret %{public}d, pid %{public}d", ret, childPid);
+        int stat = 0;
+        std::string childStack;
+        HiviewDFX::DfxGetKernelStack(childPid, childStack);
+        NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
+        kill(childPid, SIGKILL);
+        waitpid(childPid, &stat, 0);
+        result = NETMANAGER_ERROR;
+    } else {
+        while (fd, buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
+            out->append(buf);
+            (void)memset_s(buf, sizeof(buf), 0, sizeof(buf));
+        }
+    }
+    return result;
 }
 
 int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childPid, std::string *out)
@@ -557,15 +602,11 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
     if (out != nullptr) {
-        char buf[CHAR_ARRAY_SIZE_MAX] = {0};
-        out->clear();
-        NETMGR_LOG_D("ready for read");
-        while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
-            out->append(buf);
-            if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
-                NETMGR_LOG_E("memset is false");
-            }
-        }
+        int32_t res = ReadFromChildProcess(pipeFd, childPid, out);
+        if (res != NETMANAGER_SUCCESS) {
+            close(pipeFd[PIPE_OUT]);
+            return res;
+        }        
     }
     NETMGR_LOG_D("read done");
     if (close(pipeFd[PIPE_OUT]) != 0) {
@@ -583,7 +624,12 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         }
     }
     if (waitCount == MAX_WAIT_PID_COUNT) {
-        NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
+        NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);        
+        std::string childStack;
+        HiviewDFX::DfxGetKernelStack(childPid, childStack);
+        NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
+        kill(childPid, SIGKILL);
+        waitpid(childPid, &status, 0);
         return NETMANAGER_ERROR;
     }
     if (pidRet != childPid) {
@@ -609,15 +655,14 @@ int32_t ForkExec(const std::string &command, std::string *out)
     }
     NETMGR_LOG_D("ForkExec");
     pid_t pid = fork();
-    NETMGR_LOG_D("ForkDone %{public}d", pid);
     if (pid < 0) {
-        NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
         return NETMANAGER_ERROR;
     }
     if (pid == 0) {
         ForkExecChildProcess(pipeFd, PIPE_FD_NUM, args);
         return NETMANAGER_SUCCESS;
     } else {
+        NETMGR_LOG_I("ForkDone %{public}d", pid);
         return ForkExecParentProcess(pipeFd, PIPE_FD_NUM, pid, out);
     }
 }

@@ -93,6 +93,7 @@ ohos_shared_library("net_manager_common") {
     "ipc:ipc_single",
     "ability_runtime:wantagent_innerkits",
     "time_service:time_client",
+    "faultloggerd:libbacktrace_local"
   ]
 
   innerapi_tags = [ "platformsdk" ]

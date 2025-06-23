@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <fstream>
+#include <sys/stat.h>
 
 #include "netmanager_base_common_utils.h"
 
@@ -102,6 +104,28 @@ HWTEST_F(UtNetmanagerBaseCommon, UtNetmanagerBaseCommon003, TestSize.Level1)
     CommonUtils::ForkExec("/system/bin/ls -a", &out);
     ASSERT_TRUE(out.find("uttest") != std::string::npos);
     CommonUtils::ForkExec("/system/bin/rm -rf uttest");
+}
+
+/**
+ * @tc.name: UtNetmanagerBaseCommon004
+ * @tc.desc: Test UtNetmanagerBaseCommon ForkExec.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, UtNetmanagerBaseCommon004, TestSize.Level1)
+{
+    std::ofstream file;
+    std::string filePath = "./run.sh";
+    file.open(filePath, std::ios::out);
+    if (file.is_open()) {
+        file << "#!/bin/sh" << std::endl;
+        file << "sleep 15" << std::endl;
+        file.close();
+    }
+    chmod(filePath.c_str(), 0777);
+    CommonUtils::ForkExec("./run.sh");
+    std::string out;
+    CommonUtils::ForkExec("./run.sh", &out);
+    ASSERT_TRUE(out.empty());
 }
 
 /**
