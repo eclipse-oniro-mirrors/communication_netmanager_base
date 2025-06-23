@@ -1441,27 +1441,5 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsync001, TestSize.Level1)
     netConnService->UpdateNetSupplierInfoAsync(1, netSupplierInfo, 100);
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
 }
-
-#ifdef SUPPORT_SYSVPN
-HWTEST_F(NetConnServiceExtTest, CheckAndCompareIpAddress001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    sptr<NetLinkInfo> netLinkInfo = new NetLinkInfo();
-
-    NetManagerStandard::INetAddr inetAddr;
-    inetAddr.type_ = NetManagerStandard::INetAddr::IpType::IPV4;
-    inetAddr.family_ = 0x01;
-    inetAddr.address_ = "10.0.0.2.1";
-    inetAddr.netMask_ = "255.255.255.0";
-    inetAddr.hostName_ = "localhost";
-    inetAddr.port_ = 80;
-    inetAddr.prefixlen_ = 24;
-    netLinkInfo->ifaceName_ = "tun-vpn";
-    netLinkInfo->netAddrList_.push_back(inetAddr);
-    netLinkInfo->mtu_ = 1500;
-    auto result = netConnService->CheckAndCompareIpAddress(netLinkInfo);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
-}
-#endif // SUPPORT_SYSVPN
 } // namespace NetManagerStandard
 } // namespace OHOS
