@@ -434,11 +434,6 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
 int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
     int32_t result = NETMANAGER_ERROR;
-#ifdef SUPPORT_SYSVPN
-    if (netLinkInfo != nullptr && CheckAndCompareIpAddress(netLinkInfo) != NETMANAGER_SUCCESS) {
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
-#endif // SUPPORT_SYSVPN
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     httpProxyThreadCv_.notify_all();
     if (netConnEventHandler_) {
@@ -1170,32 +1165,6 @@ void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const
 }
 
 #ifdef SUPPORT_SYSVPN
-int32_t NetConnService::CheckAndCompareIpAddress(const sptr<NetLinkInfo> &netLinkInfo)
-{
-    NETMGR_LOG_I("CheckAndCompareIpAddress");
-    for (auto it = netSuppliers_.begin(); it != netSuppliers_.end(); ++it) {
-        if (it->second == nullptr) {
-            continue;
-        }
-        auto supplier = it->second;
-        std::shared_ptr<Network> network = supplier->GetNetwork();
-        if (network == nullptr) {
-            continue;
-        }
-        NetLinkInfo netLinkInfoOld = network->GetNetLinkInfo();
-        for (const auto &inetAddr : netLinkInfoOld.netAddrList_) {
-            NETMGR_LOG_D("CheckAndCompareIpAddress old ip address:[%{public}s]",
-                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
-            if (netLinkInfo->HasNetAddr(inetAddr)) {
-                NETMGR_LOG_E("Same ip address:[%{public}s], there is not create vpn",
-                    CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
-                return NETMANAGER_ERR_INVALID_PARAMETER;
-            }
-        }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
 bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
 {
     NETMGR_LOG_D("IsCallingUserSupplier, supplierId:%{public}d", supplierId);
