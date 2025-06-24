@@ -575,7 +575,6 @@ int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string 
     int result = NETMANAGER_SUCCESS;
     if (ret <= 0) {
         NETMGR_LOG_E("iptables select fail, ret %{public}d, pid %{public}d", ret, childPid);
-        int stat = 0;
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
