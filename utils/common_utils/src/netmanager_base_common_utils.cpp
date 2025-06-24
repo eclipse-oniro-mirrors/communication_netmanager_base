@@ -34,7 +34,6 @@
 #include <fstream>
 #include <random>
 #include <arpa/inet.h>
-#include <sys/types.h>
 #include <poll.h>
 
 #include "net_manager_constants.h"
@@ -580,8 +579,6 @@ int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string 
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
-        kill(childPid, SIGKILL);
-        waitpid(childPid, &stat, 0);
         result = NETMANAGER_ERROR;
     } else {
         while (read(fd, buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
@@ -628,8 +625,6 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
-        kill(childPid, SIGKILL);
-        waitpid(childPid, &status, 0);
         return NETMANAGER_ERROR;
     }
     if (pidRet != childPid) {
