@@ -584,7 +584,7 @@ int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string 
         waitpid(childPid, &stat, 0);
         result = NETMANAGER_ERROR;
     } else {
-        while (fd, buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
+        while (read(fd, buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
             (void)memset_s(buf, sizeof(buf), 0, sizeof(buf));
         }
@@ -606,7 +606,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         if (res != NETMANAGER_SUCCESS) {
             close(pipeFd[PIPE_OUT]);
             return res;
-        }        
+        }
     }
     NETMGR_LOG_D("read done");
     if (close(pipeFd[PIPE_OUT]) != 0) {
@@ -624,7 +624,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         }
     }
     if (waitCount == MAX_WAIT_PID_COUNT) {
-        NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);        
+        NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
