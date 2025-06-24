@@ -30,7 +30,6 @@ ohos_unittest("netsys_distributed_test") {
     "distributed_manager_test.cpp",
     "net_manager_native_test.cpp",
     "netsys_native_service_stub_test.cpp",
-    "netsys_native_service_test.cpp",
     "route_manager_test.cpp",
   ]
 
