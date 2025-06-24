@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class UpdateRemindPolicyContext final : public BaseContext {
 public:
     UpdateRemindPolicyContext() = delete;
-    explicit UpdateRemindPolicyContext(napi_env env, EventManager *manager);
+    explicit UpdateRemindPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

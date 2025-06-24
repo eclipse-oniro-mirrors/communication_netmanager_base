@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class AddNetworkRouteContext : public BaseContext {
 public:
     AddNetworkRouteContext() = delete;
-    AddNetworkRouteContext(napi_env env, EventManager *manager);
+    AddNetworkRouteContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class DeleteCustomDNSRulesContext : public BaseContext {
 public:
     DeleteCustomDNSRulesContext() = delete;
-    DeleteCustomDNSRulesContext(napi_env env, EventManager *manager);
+    DeleteCustomDNSRulesContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class SetDeviceIdleTrustlistContext final : public BaseContext {
 public:
     SetDeviceIdleTrustlistContext() = delete;
-    explicit SetDeviceIdleTrustlistContext(napi_env env, EventManager *manager);
+    explicit SetDeviceIdleTrustlistContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

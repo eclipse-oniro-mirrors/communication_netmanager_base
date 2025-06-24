@@ -23,7 +23,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-IsUidNetAllowedContext::IsUidNetAllowedContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+IsUidNetAllowedContext::IsUidNetAllowedContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void IsUidNetAllowedContext::ParseParams(napi_value *params, size_t paramsCount)
 {

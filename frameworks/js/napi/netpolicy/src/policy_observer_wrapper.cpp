@@ -26,16 +26,11 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr const int DELETE_SIZE = 1;
 PolicyObserverWrapper::PolicyObserverWrapper()
-    : observer_(new NetPolicyCallbackObserver()), manager_(new EventManager()), registed_(false)
+    : observer_(new NetPolicyCallbackObserver()), manager_(std::make_shared<EventManager>()), registed_(false)
 {
 }
 
-PolicyObserverWrapper::~PolicyObserverWrapper()
-{
-    if (manager_ != nullptr) {
-        delete manager_;
-    }
-}
+PolicyObserverWrapper::~PolicyObserverWrapper() = default;
 
 napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
                                      const std::initializer_list<std::string> &events, bool asyncCallback)

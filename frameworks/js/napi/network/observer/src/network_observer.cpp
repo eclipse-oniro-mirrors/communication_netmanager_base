@@ -27,7 +27,7 @@ static constexpr const char *NETWORK_WIFI = "WiFi";
 static std::mutex OBSERVER_MUTEX;
 
 namespace OHOS::NetManagerStandard {
-std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
+std::map<std::shared_ptr<EventManager>, sptr<NetworkObserver>> g_observerMap;
 std::shared_mutex g_observerMapMtx;
 
 static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
@@ -116,7 +116,7 @@ int32_t NetworkObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool b
     return 0;
 }
 
-void NetworkObserver::SetManager(EventManager *manager)
+void NetworkObserver::SetManager(std::shared_ptr<EventManager>& manager)
 {
     manager_ = manager;
 }

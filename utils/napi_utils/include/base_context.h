@@ -37,7 +37,7 @@ public:
     DISALLOW_COPY_AND_MOVE(BaseContext);
 
     BaseContext() = delete;
-    explicit BaseContext(napi_env env, EventManager *manager);
+    explicit BaseContext(napi_env env, std::shared_ptr<EventManager>& manager);
     virtual ~BaseContext();
 
     void SetParseOK(bool parseOK);
@@ -60,7 +60,7 @@ public:
     [[nodiscard]] napi_value GetCallback() const;
     [[nodiscard]] napi_deferred GetDeferred() const;
     [[nodiscard]] const std::string &GetAsyncWorkName() const;
-    [[nodiscard]] EventManager *GetManager() const;
+    [[nodiscard]] std::shared_ptr<EventManager> GetManager() const;
     [[nodiscard]] bool IsNeedPromise() const;
     [[nodiscard]] bool IsNeedThrowException() const;
 
@@ -72,7 +72,7 @@ public:
     uint32_t magic_ = BASE_CONTEXT_MAGIC_NUMBER;
 
 protected:
-    EventManager *manager_ = nullptr;
+    std::shared_ptr<EventManager> manager_ = nullptr;
 
 private:
     napi_env env_ = nullptr;

@@ -37,18 +37,18 @@ public:
 
     [[nodiscard]] sptr<NetConnCallbackObserver> GetObserver() const;
 
-    [[nodiscard]] EventManager *GetEventManager() const;
+    [[nodiscard]] std::shared_ptr<EventManager> GetEventManager() const;
 
-    static NetConnection *MakeNetConnection(EventManager *eventManager);
+    static NetConnection *MakeNetConnection(std::shared_ptr<EventManager>& eventManager);
 
     static void DeleteNetConnection(NetConnection *netConnection);
 
 private:
     sptr<NetConnCallbackObserver> observer_;
 
-    EventManager *manager_{nullptr};
+    std::shared_ptr<EventManager> manager_{nullptr};
 
-    explicit NetConnection(EventManager *eventManager);
+    explicit NetConnection(std::shared_ptr<EventManager>& eventManager);
 };
 
 extern std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;

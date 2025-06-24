@@ -32,7 +32,7 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION(FUNCTION_UNSUBSCRIBE, Unsubscribe),
     };
     NapiUtils::DefineProperties(env, exports, properties);
-    auto manager = new EventManager;
+    auto manager = std::make_shared<EventManager>();
     auto observer = new NetworkObserver;
     observer->SetManager(manager);
     {
@@ -41,10 +41,17 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     }
 
     auto finalizer = [](napi_env, void *data, void *) {
-        auto manager = reinterpret_cast<EventManager *>(data);
-        manager->SetInvalid();
+        auto sharedManager = reinterpret_cast<std::shared_ptr<EventManager> *>(data);
+        if (sharedManager != nullptr) {
+            delete sharedManager;
+        }
     };
-    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+    auto sharedManager = new (std::nothrow) std::shared_ptr<EventManager>();
+    if (sharedManager == nullptr) {
+        return exports;
+    }
+    *sharedManager = manager;
+    napi_wrap(env, exports, reinterpret_cast<void *>(sharedManager), finalizer, nullptr, nullptr);
     NapiUtils::SetEnvValid(env);
     auto envWrapper = new (std::nothrow) napi_env;
     if (envWrapper == nullptr) {

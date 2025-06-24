@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class IsUidNetAllowedContext final : public BaseContext {
 public:
     IsUidNetAllowedContext() = delete;
-    explicit IsUidNetAllowedContext(napi_env env, EventManager *manager);
+    explicit IsUidNetAllowedContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

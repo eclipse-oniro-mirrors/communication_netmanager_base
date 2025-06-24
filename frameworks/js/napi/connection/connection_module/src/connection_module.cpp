@@ -133,7 +133,8 @@ static NetConnectionType GetNetConnectionType(napi_env env, size_t argc, napi_va
     return NetConnectionType::PARAMETER_ERROR;
 }
 
-static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *argv, EventManager *manager)
+static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *argv,
+    std::shared_ptr<EventManager>& manager)
 {
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
@@ -170,7 +171,8 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
     }
 }
 
-static void *ParseNetInterfaceParams(napi_env env, size_t argc, napi_value *argv, EventManager *manager)
+static void *ParseNetInterfaceParams(napi_env env, size_t argc, napi_value *argv,
+    std::shared_ptr<EventManager>& manager)
 {
     std::unique_ptr<NetInterface, decltype(&NetInterface::DeleteNetInterface)> netInterface(
         NetInterface::MakeNetInterface(manager), NetInterface::DeleteNetInterface);
@@ -365,25 +367,33 @@ napi_value ConnectionModule::GetConnectionPropertiesSync(napi_env env, napi_call
 napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::NewInstance(env, info, INTERFACE_NET_CONNECTION, ParseNetConnectionParams,
-                                       [](napi_env, void *data, void *) {
-                                           NETMANAGER_BASE_LOGI("finalize netConnection");
-                                           auto manager = static_cast<EventManager *>(data);
-                                           auto netConnection = static_cast<NetConnection *>(manager->GetData());
-                                           delete manager;
-                                           NetConnection::DeleteNetConnection(netConnection);
-                                       });
+        [](napi_env, void *data, void *) {
+            NETMANAGER_BASE_LOGI("finalize netConnection");
+            auto sharedManager = static_cast<std::shared_ptr<EventManager> *>(data);
+            if (sharedManager == nullptr || *sharedManager == nullptr) {
+                return;
+            }
+            auto manager = *sharedManager;
+            auto netConnection = static_cast<NetConnection *>(manager->GetData());
+            delete sharedManager;
+            NetConnection::DeleteNetConnection(netConnection);
+        });
 }
 
 napi_value ConnectionModule::CreateNetInterface(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::NewInstance(env, info, INTERFACE_NET_INTERFACE, ParseNetInterfaceParams,
-                                       [](napi_env, void *data, void *) {
-                                           NETMANAGER_BASE_LOGI("finalize netInterface");
-                                           auto manager = static_cast<EventManager *>(data);
-                                           auto netInterface = static_cast<NetInterface *>(manager->GetData());
-                                           delete manager;
-                                           NetInterface::DeleteNetInterface(netInterface);
-                                       });
+        [](napi_env, void *data, void *) {
+            NETMANAGER_BASE_LOGI("finalize netInterface");
+            auto sharedManager = static_cast<std::shared_ptr<EventManager> *>(data);
+            if (sharedManager == nullptr || *sharedManager == nullptr) {
+                return;
+            }
+            auto manager = *sharedManager;
+            auto netInterface = static_cast<NetInterface *>(manager->GetData());
+            delete sharedManager;
+            NetInterface::DeleteNetInterface(netInterface);
+        });
 }
 
 napi_value ConnectionModule::GetDefaultNet(napi_env env, napi_callback_info info)

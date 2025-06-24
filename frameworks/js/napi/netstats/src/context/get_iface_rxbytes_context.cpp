@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-GetIfaceRxBytesContext::GetIfaceRxBytesContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetIfaceRxBytesContext::GetIfaceRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void GetIfaceRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 {

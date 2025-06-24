@@ -27,7 +27,7 @@ class ParseNetHandleContext final : public BaseContext {
 public:
     ParseNetHandleContext() = delete;
 
-    explicit ParseNetHandleContext(napi_env env, EventManager *manager);
+    explicit ParseNetHandleContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

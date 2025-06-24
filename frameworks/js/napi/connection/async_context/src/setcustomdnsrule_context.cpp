@@ -21,7 +21,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetCustomDNSRuleContext::SetCustomDNSRuleContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+SetCustomDNSRuleContext::SetCustomDNSRuleContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 bool SetCustomDNSRuleContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {

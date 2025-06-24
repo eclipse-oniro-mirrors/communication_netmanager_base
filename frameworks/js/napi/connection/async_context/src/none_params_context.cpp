@@ -19,7 +19,8 @@
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-NoneParamsContext::NoneParamsContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+NoneParamsContext::NoneParamsContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void NoneParamsContext::ParseParams(napi_value *params, size_t paramsCount)
 {

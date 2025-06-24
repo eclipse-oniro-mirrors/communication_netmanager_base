@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 class SetInterfaceUpContext : public BaseContext {
 public:
     SetInterfaceUpContext() = delete;
-    SetInterfaceUpContext(napi_env env, EventManager *manager);
+    SetInterfaceUpContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

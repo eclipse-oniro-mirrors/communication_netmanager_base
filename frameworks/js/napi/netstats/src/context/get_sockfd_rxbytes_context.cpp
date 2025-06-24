@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-GetSockfdRxBytesContext::GetSockfdRxBytesContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetSockfdRxBytesContext::GetSockfdRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void GetSockfdRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 {

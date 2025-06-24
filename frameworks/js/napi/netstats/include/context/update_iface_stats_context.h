@@ -30,7 +30,7 @@ namespace NetManagerStandard {
 class UpdateIfacesStatsContext final : public BaseContext {
 public:
     UpdateIfacesStatsContext() = delete;
-    explicit UpdateIfacesStatsContext(napi_env env, EventManager *manager);
+    explicit UpdateIfacesStatsContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void SetUid(int32_t uid);
     void SetInterfaceName(std::string interfaceName);

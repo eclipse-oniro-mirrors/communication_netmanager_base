@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class GetIfaceUidStatsContext final : public BaseContext {
 public:
     GetIfaceUidStatsContext() = delete;
-    explicit GetIfaceUidStatsContext(napi_env env, EventManager *manager);
+    explicit GetIfaceUidStatsContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void SetUid(int32_t uid);
     void SetInterfaceName(std::string interfaceName);

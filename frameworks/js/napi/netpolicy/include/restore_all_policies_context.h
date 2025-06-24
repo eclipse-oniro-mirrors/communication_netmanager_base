@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class RestoreAllPoliciesContext final : public BaseContext {
 public:
     RestoreAllPoliciesContext() = delete;
-    explicit RestoreAllPoliciesContext(napi_env env, EventManager *manager);
+    explicit RestoreAllPoliciesContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

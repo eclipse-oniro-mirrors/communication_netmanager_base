@@ -39,14 +39,14 @@ public:
     napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                    bool asyncCallback);
 
-    EventManager *GetEventManager() const
+    std::shared_ptr<EventManager> GetEventManager() const
     {
         return manager_;
     }
 
 private:
     sptr<StatisticsCallbackObserver> observer_ = nullptr;
-    EventManager *manager_ = nullptr;
+    std::shared_ptr<EventManager> manager_ = nullptr;
     bool registered_ = false;
 };
 } // namespace NetManagerStandard

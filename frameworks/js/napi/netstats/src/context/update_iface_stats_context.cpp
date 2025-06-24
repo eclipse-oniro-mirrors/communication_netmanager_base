@@ -28,7 +28,8 @@ const std::string RX_PACKETS = "rxPackets";
 const std::string TX_PACKETS = "txPackets";
 } // namespace
 
-UpdateIfacesStatsContext::UpdateIfacesStatsContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+UpdateIfacesStatsContext::UpdateIfacesStatsContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void UpdateIfacesStatsContext::ParseParams(napi_value *params, size_t paramsCount)
 {

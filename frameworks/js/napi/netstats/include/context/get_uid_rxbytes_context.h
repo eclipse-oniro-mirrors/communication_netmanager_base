@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class GetUidRxBytesContext final : public BaseContext {
 public:
     GetUidRxBytesContext() = delete;
-    explicit GetUidRxBytesContext(napi_env env, EventManager *manager);
+    explicit GetUidRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
 
     uint32_t uid_ = 0;

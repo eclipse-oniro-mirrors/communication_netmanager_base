@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-GetNetQuotaPoliciesContext::GetNetQuotaPoliciesContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
+GetNetQuotaPoliciesContext::GetNetQuotaPoliciesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager)
 {
 }
 

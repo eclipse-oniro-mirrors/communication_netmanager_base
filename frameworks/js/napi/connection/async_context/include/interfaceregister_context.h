@@ -29,7 +29,7 @@ class IfaceRegisterContext final : public BaseContext {
 public:
     IfaceRegisterContext() = delete;
 
-    explicit IfaceRegisterContext(napi_env env, EventManager *manager);
+    explicit IfaceRegisterContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

@@ -18,7 +18,8 @@
 static constexpr const int PARAM_NO_OPTIONS = 0;
 
 namespace OHOS::NetManagerStandard {
-UnsubscribeContext::UnsubscribeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+UnsubscribeContext::UnsubscribeContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void UnsubscribeContext::ParseParams(napi_value *params, size_t paramsCount)
 {

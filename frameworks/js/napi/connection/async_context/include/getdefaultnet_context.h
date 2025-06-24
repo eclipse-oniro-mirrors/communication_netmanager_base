@@ -30,7 +30,7 @@ class GetConnNapiContext final : public BaseContext {
 public:
     GetConnNapiContext() = delete;
 
-    explicit GetConnNapiContext(napi_env env, EventManager *manager);
+    explicit GetConnNapiContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

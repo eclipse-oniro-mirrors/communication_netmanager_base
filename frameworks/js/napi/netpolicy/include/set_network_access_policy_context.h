@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class SetNetworkAccessPolicyContext : public BaseContext {
 public:
     SetNetworkAccessPolicyContext() = delete;
-    SetNetworkAccessPolicyContext(napi_env env, EventManager *manager);
+    SetNetworkAccessPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class GetCellularRxBytesContext final : public BaseContext {
 public:
     GetCellularRxBytesContext() = delete;
-    explicit GetCellularRxBytesContext(napi_env env, EventManager *manager);
+    explicit GetCellularRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
     uint64_t bytes64_ = 0;
 

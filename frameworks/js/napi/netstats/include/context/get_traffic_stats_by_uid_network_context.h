@@ -31,7 +31,7 @@ namespace NetManagerStandard {
 class GetTrafficStatsByUidNetworkContext final : public BaseContext {
 public:
     GetTrafficStatsByUidNetworkContext() = delete;
-    explicit GetTrafficStatsByUidNetworkContext(napi_env env, EventManager *manager);
+    explicit GetTrafficStatsByUidNetworkContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void SetUid(uint32_t uid);
     void SetNetBearType(uint32_t bearerType);

@@ -20,7 +20,8 @@
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-ParseNetHandleContext::ParseNetHandleContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+ParseNetHandleContext::ParseNetHandleContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
 {

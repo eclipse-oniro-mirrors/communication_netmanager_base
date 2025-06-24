@@ -30,7 +30,7 @@ namespace NetManagerStandard {
 class GetTrafficStatsByNetworkContext final : public BaseContext {
 public:
     GetTrafficStatsByNetworkContext() = delete;
-    explicit GetTrafficStatsByNetworkContext(napi_env env, EventManager *manager);
+    explicit GetTrafficStatsByNetworkContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void SetNetBearType(uint32_t bearerType);
     void SetStartTime(uint32_t startTime);

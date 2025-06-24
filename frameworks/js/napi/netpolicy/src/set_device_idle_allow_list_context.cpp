@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetDeviceIdleTrustlistContext::SetDeviceIdleTrustlistContext(napi_env env, EventManager *manager)
+SetDeviceIdleTrustlistContext::SetDeviceIdleTrustlistContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager)
 {
 }

@@ -44,7 +44,8 @@ napi_value InterfaceWithoutManager(napi_env env, napi_callback_info info, const 
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
-    auto context = new Context(env, nullptr);
+    std::shared_ptr<EventManager> manager = nullptr;
+    auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
         napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
@@ -77,8 +78,12 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    std::shared_ptr<EventManager> manager = nullptr;
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        manager = *sharedManager;
+    }
 
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
@@ -112,8 +117,12 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    std::shared_ptr<EventManager> manager = nullptr;
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        manager = *sharedManager;
+    }
 
     auto deleter = [](Context *context) { delete context; };
     auto text = new Context(env, manager);
@@ -157,8 +166,12 @@ napi_value InterfaceWithOutAsyncWork(napi_env env, napi_callback_info info,
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    std::shared_ptr<EventManager> manager = nullptr;
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        manager = *sharedManager;
+    }
 
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
@@ -186,7 +199,7 @@ void DefineClass(napi_env env, napi_value exports, const std::initializer_list<n
                  const std::string &className);
 
 napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
-                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *), Finalizer finalizer);
+    void *(*MakeData)(napi_env, size_t, napi_value *, std::shared_ptr<EventManager>&), Finalizer finalizer);
 } // namespace ModuleTemplate
 } // namespace NetManagerStandard
 } // namespace OHOS

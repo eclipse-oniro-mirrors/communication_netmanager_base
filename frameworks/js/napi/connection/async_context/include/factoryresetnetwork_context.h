@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class FactoryResetNetworkContext : public BaseContext {
 public:
     FactoryResetNetworkContext() = delete;
-    FactoryResetNetworkContext(napi_env env, EventManager *manager);
+    FactoryResetNetworkContext(napi_env env, std::shared_ptr<EventManager>& manager);
     
 public:
     void ParseParams(napi_value *params, size_t paramsCount);

@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetPowerSaveTrustlistContext::SetPowerSaveTrustlistContext(napi_env env, EventManager *manager)
+SetPowerSaveTrustlistContext::SetPowerSaveTrustlistContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager)
 {
 }

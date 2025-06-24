@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class GetIfaceRxBytesContext final : public BaseContext {
 public:
     GetIfaceRxBytesContext() = delete;
-    explicit GetIfaceRxBytesContext(napi_env env, EventManager *manager);
+    explicit GetIfaceRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
     void SetNic(std::string nic);
     void SetBytes64(int64_t bytes64);

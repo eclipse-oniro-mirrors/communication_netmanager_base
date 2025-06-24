@@ -22,7 +22,8 @@
  
 namespace OHOS {
 namespace NetManagerStandard {
-SetNetExtAttributeContext::SetNetExtAttributeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+SetNetExtAttributeContext::SetNetExtAttributeContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
  
 bool SetNetExtAttributeContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 {
@@ -53,7 +54,8 @@ void SetNetExtAttributeContext::ParseParams(napi_value *params, size_t paramsCou
     SetParseOK(true);
 }
  
-GetNetExtAttributeContext::GetNetExtAttributeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetNetExtAttributeContext::GetNetExtAttributeContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
  
 void GetNetExtAttributeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
@@ -75,4 +77,4 @@ void GetNetExtAttributeContext::ParseParams(napi_value *params, size_t paramsCou
     SetParseOK(true);
 }
 } // namespace NetManagerStandard
-} // namespace OHOS
+} // namespace OHOS

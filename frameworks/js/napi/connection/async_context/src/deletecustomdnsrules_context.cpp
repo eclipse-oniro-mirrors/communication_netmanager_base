@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-DeleteCustomDNSRulesContext::DeleteCustomDNSRulesContext(napi_env env, EventManager *manager)
+DeleteCustomDNSRulesContext::DeleteCustomDNSRulesContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager) {}
 
 bool DeleteCustomDNSRulesContext::CheckParamsType(napi_value *params, size_t paramsCount)

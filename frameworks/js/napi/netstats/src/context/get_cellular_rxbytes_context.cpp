@@ -21,7 +21,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-GetCellularRxBytesContext::GetCellularRxBytesContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
+GetCellularRxBytesContext::GetCellularRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager)
 {
 }
 
