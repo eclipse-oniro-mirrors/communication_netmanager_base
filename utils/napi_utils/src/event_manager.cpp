@@ -25,17 +25,7 @@ static constexpr const int CALLBACK_PARAM_NUM = 1;
 static constexpr const int ASYNC_CALLBACK_PARAM_NUM = 2;
 } // namespace
 
-EventManager::EventManager() : data_(nullptr), isValid_(true) {}
-
-void EventManager::SetInvalid()
-{
-    isValid_ = false;
-}
-
-bool EventManager::IsValid() const
-{
-    return isValid_;
-}
+EventManager::EventManager() : data_(nullptr) {}
 
 void EventManager::AddListener(napi_env env, const std::string &type, napi_value callback, bool once,
                                bool asyncCallback)
@@ -99,9 +89,6 @@ void EventManager::EmitByUvWithModuleId(const std::string &type, const NapiUtils
 {
     std::shared_lock<std::shared_mutex> lock1(mutexForListenersAndEmitByUv_);
     std::lock_guard lock2(mutexForEmitAndEmitByUv_);
-    if (!IsValid()) {
-        return;
-    }
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, handler, moduleId](const EventListener &listener) {
         listener.EmitByUvByModuleId(type, handler, moduleId);
@@ -112,12 +99,9 @@ void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(u
 {
     std::shared_lock<std::shared_mutex> lock1(mutexForListenersAndEmitByUv_);
     std::lock_guard lock2(mutexForEmitAndEmitByUv_);
-    if (!IsValid()) {
-        return;
-    }
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, data, handler, this](const EventListener &listener) {
-        auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), type, this);
+        auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), type, shared_from_this());
         listener.EmitByUv(type, workWrapper, handler);
     });
 }
@@ -154,7 +138,8 @@ void EventManager::SetRef(napi_ref ref)
     ref_ = ref;
 }
 
-UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType, EventManager *eventManager)
+UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType,
+    std::shared_ptr<EventManager> eventManager)
     : data(theData), env(theEnv), type(std::move(eventType)), manager(eventManager)
 {
 }

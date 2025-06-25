@@ -22,7 +22,7 @@
 #include "net_conn_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
-RegisterContext::RegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
+RegisterContext::RegisterContext(napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager)
 {
     if (manager) {
         auto conn = static_cast<NetConnection *>(manager->GetData());

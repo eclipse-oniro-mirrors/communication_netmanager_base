@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class EventManager {
+class EventManager : public std::enable_shared_from_this<EventManager> {
 public:
     EventManager();
 
@@ -51,8 +51,6 @@ public:
     {
         return listeners_.size();
     }
-    bool IsValid() const;
-    void SetInvalid();
 
     napi_ref GetRef() const;
     void SetRef(napi_ref ref);
@@ -62,17 +60,17 @@ private:
     std::mutex mutexForEmitAndEmitByUv_;
     std::list<EventListener> listeners_;
     void *data_ = nullptr;
-    std::atomic_bool isValid_;
     napi_ref ref_ = nullptr;
 };
 
 struct UvWorkWrapper {
     UvWorkWrapper() = delete;
-    explicit UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType, EventManager *eventManager);
+    explicit UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType,
+        std::shared_ptr<EventManager> eventManager);
     void *data;
     napi_env env;
     std::string type;
-    EventManager *manager;
+    std::shared_ptr<EventManager> manager{ nullptr };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

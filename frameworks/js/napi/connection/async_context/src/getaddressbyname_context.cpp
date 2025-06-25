@@ -20,7 +20,7 @@
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-GetAddressByNameContext::GetAddressByNameContext(napi_env env, EventManager *manager)
+GetAddressByNameContext::GetAddressByNameContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager)
 {
     netId_ = 0;

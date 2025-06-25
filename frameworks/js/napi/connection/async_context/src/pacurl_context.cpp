@@ -21,7 +21,7 @@
  
 namespace OHOS {
 namespace NetManagerStandard {
-SetPacUrlContext::SetPacUrlContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+SetPacUrlContext::SetPacUrlContext(napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager) {}
  
 bool SetPacUrlContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 {
@@ -43,7 +43,7 @@ void SetPacUrlContext::ParseParams(napi_value *params, size_t paramsCount)
     SetParseOK(true);
 }
  
-GetPacUrlContext::GetPacUrlContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetPacUrlContext::GetPacUrlContext(napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager) {}
  
 void GetPacUrlContext::ParseParams(napi_value *params, size_t paramsCount)
 {

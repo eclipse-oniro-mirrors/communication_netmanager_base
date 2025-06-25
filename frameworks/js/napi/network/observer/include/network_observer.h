@@ -40,7 +40,7 @@ public:
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
-    void SetManager(EventManager *manager);
+    void SetManager(std::shared_ptr<EventManager>& manager);
 
 private:
     template <napi_value (*MakeJsValue)(napi_env, NetworkType *)>
@@ -62,10 +62,10 @@ private:
         delete work;
     }
 
-    EventManager *manager_;
+    std::shared_ptr<EventManager> manager_{nullptr};
 };
 
-extern std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
+extern std::map<std::shared_ptr<EventManager>, sptr<NetworkObserver>> g_observerMap;
 extern std::shared_mutex g_observerMapMtx;
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_BASE_NETWORK_OBSERVER_H */

@@ -44,9 +44,10 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
         return NapiUtils::GetUndefined(env);
     }
 
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
-    if (manager != nullptr) {
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        auto manager = *sharedManager;
         manager->AddListener(env, event, params[1], false, asyncCallback);
     }
 
@@ -72,9 +73,10 @@ napi_value Once(napi_env env, napi_callback_info info, const std::initializer_li
         return NapiUtils::GetUndefined(env);
     }
 
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
-    if (manager != nullptr) {
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        auto manager = *sharedManager;
         manager->AddListener(env, event, params[1], true, asyncCallback);
     }
 
@@ -104,9 +106,10 @@ napi_value Off(napi_env env, napi_callback_info info, const std::initializer_lis
         return NapiUtils::GetUndefined(env);
     }
 
-    EventManager *manager = nullptr;
-    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
-    if (manager != nullptr) {
+    std::shared_ptr<EventManager> *sharedManager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&sharedManager));
+    if (sharedManager != nullptr && *sharedManager != nullptr) {
+        auto manager = *sharedManager;
         if (paramsCount == EVENT_PARAM_NUM) {
             manager->DeleteListener(event, params[1]);
         } else {
@@ -139,7 +142,7 @@ void DefineClass(napi_env env, napi_value exports, const std::initializer_list<n
 }
 
 napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
-                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *), Finalizer finalizer)
+    void *(*MakeData)(napi_env, size_t, napi_value *, std::shared_ptr<EventManager>&), Finalizer finalizer)
 {
     napi_value thisVal = nullptr;
     std::size_t argc = MAX_PARAM_NUM;
@@ -154,7 +157,7 @@ napi_value NewInstance(napi_env env, napi_callback_info info, const std::string 
     napi_value result = nullptr;
     NAPI_CALL(env, napi_new_instance(env, jsConstructor, 0, nullptr, &result));
 
-    auto manager = new EventManager();
+    auto manager = std::make_shared<EventManager>();
     if (MakeData != nullptr) {
         auto data = MakeData(env, argc, argv, manager);
         if (data == nullptr) {
@@ -162,7 +165,12 @@ napi_value NewInstance(napi_env env, napi_callback_info info, const std::string 
         }
         manager->SetData(data);
     }
-    napi_wrap(env, result, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+    auto sharedManager = new (std::nothrow) std::shared_ptr<EventManager>();
+    if (sharedManager == nullptr) {
+        return nullptr;
+    }
+    *sharedManager = manager;
+    napi_wrap(env, result, reinterpret_cast<void *>(sharedManager), finalizer, nullptr, nullptr);
 
     return result;
 }

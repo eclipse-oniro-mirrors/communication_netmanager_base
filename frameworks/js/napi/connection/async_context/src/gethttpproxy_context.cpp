@@ -38,7 +38,8 @@ bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 }
 } // namespace
 
-GetHttpProxyContext::GetHttpProxyContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetHttpProxyContext::GetHttpProxyContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void GetHttpProxyContext::ParseParams(napi_value *params, size_t paramsCount)
 {

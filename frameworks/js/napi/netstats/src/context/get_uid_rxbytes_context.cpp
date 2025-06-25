@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-GetUidRxBytesContext::GetUidRxBytesContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetUidRxBytesContext::GetUidRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void GetUidRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 {

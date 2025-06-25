@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class SetNetQuotaPoliciesContext final : public BaseContext {
 public:
     SetNetQuotaPoliciesContext() = delete;
-    explicit SetNetQuotaPoliciesContext(napi_env env, EventManager *manager);
+    explicit SetNetQuotaPoliciesContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

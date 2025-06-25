@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 class SetBackgroundPolicyContext final : public BaseContext {
 public:
     SetBackgroundPolicyContext() = delete;
-    explicit SetBackgroundPolicyContext(napi_env env, EventManager *manager);
+    explicit SetBackgroundPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

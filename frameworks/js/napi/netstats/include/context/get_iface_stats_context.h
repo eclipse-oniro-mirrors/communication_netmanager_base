@@ -30,7 +30,7 @@ namespace NetManagerStandard {
 class GetIfaceStatsContext final : public BaseContext {
 public:
     GetIfaceStatsContext() = delete;
-    explicit GetIfaceStatsContext(napi_env env, EventManager *manager);
+    explicit GetIfaceStatsContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void SetInterfaceName(std::string interfaceName);
     void SetStatsInfo(NetStatsInfo statsInfo);

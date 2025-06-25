@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class SetCustomDNSRuleContext : public BaseContext {
 public:
     SetCustomDNSRuleContext() = delete;
-    SetCustomDNSRuleContext(napi_env env, EventManager *manager);
+    SetCustomDNSRuleContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

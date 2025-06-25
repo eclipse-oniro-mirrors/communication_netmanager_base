@@ -114,7 +114,7 @@ napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
 bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("ExecSubscribe");
-    EventManager *manager = context->GetManager();
+    auto manager = context->GetManager();
 
     std::shared_lock<std::shared_mutex> lock(g_observerMapMtx);
     auto iter = g_observerMap.find(manager);
@@ -153,7 +153,7 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("ExecUnsubscribe");
-    EventManager *manager = context->GetManager();
+    auto manager = context->GetManager();
     std::shared_lock<std::shared_mutex> lock(g_observerMapMtx);
     auto iter = g_observerMap.find(manager);
     if (iter == g_observerMap.end() || iter->second == nullptr) {

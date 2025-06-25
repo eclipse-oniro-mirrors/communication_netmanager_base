@@ -27,7 +27,7 @@ namespace OHOS::NetManagerStandard {
 class NoneParamsContext final : public BaseContext {
 public:
     NoneParamsContext() = delete;
-    explicit NoneParamsContext(napi_env env, EventManager *manager);
+    explicit NoneParamsContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
 public:
     void ParseParams(napi_value *params, size_t paramsCount);

@@ -22,7 +22,7 @@ namespace OHOS::NetManagerStandard {
 std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
 std::shared_mutex g_netConnectionsMutex;
 
-NetConnection::NetConnection(EventManager *eventManager)
+NetConnection::NetConnection(std::shared_ptr<EventManager>& eventManager)
     : hasNetSpecifier_(false),
       hasTimeout_(false),
       timeout_(0),
@@ -31,7 +31,7 @@ NetConnection::NetConnection(EventManager *eventManager)
 {
 }
 
-NetConnection *NetConnection::MakeNetConnection(EventManager *eventManager)
+NetConnection *NetConnection::MakeNetConnection(std::shared_ptr<EventManager>& eventManager)
 {
     std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     auto netConnection = new NetConnection(eventManager);
@@ -51,7 +51,7 @@ sptr<NetConnCallbackObserver> NetConnection::GetObserver() const
     return observer_;
 }
 
-EventManager *NetConnection::GetEventManager() const
+std::shared_ptr<EventManager> NetConnection::GetEventManager() const
 {
     return manager_;
 }

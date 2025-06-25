@@ -28,7 +28,8 @@ constexpr const char *END_TIME = "endTime";
 constexpr const char *SIM_ID = "simId";
 } // namespace
 
-GetTrafficStatsByUidNetworkContext::GetTrafficStatsByUidNetworkContext(napi_env env, EventManager *manager)
+GetTrafficStatsByUidNetworkContext::GetTrafficStatsByUidNetworkContext(napi_env env,
+    std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager) {}
 
 void GetTrafficStatsByUidNetworkContext::ParseParams(napi_value *params, size_t paramsCount)

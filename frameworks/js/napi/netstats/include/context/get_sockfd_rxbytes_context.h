@@ -26,7 +26,7 @@ namespace NetManagerStandard {
 class GetSockfdRxBytesContext final : public BaseContext {
 public:
     GetSockfdRxBytesContext() = delete;
-    explicit GetSockfdRxBytesContext(napi_env env, EventManager *manager);
+    explicit GetSockfdRxBytesContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
 
     int32_t sockfd_ = 0;

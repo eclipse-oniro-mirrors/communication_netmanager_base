@@ -31,7 +31,8 @@ constexpr const char *START_TIME = "startTime";
 constexpr const char *END_TIME = "endTime";
 } // namespace
 
-GetIfaceUidStatsContext::GetIfaceUidStatsContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetIfaceUidStatsContext::GetIfaceUidStatsContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount)
 {

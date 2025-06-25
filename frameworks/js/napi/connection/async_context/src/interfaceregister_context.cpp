@@ -22,7 +22,8 @@
 #include "net_interface_callback_observer.h"
 
 namespace OHOS::NetManagerStandard {
-IfaceRegisterContext::IfaceRegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager)
+IfaceRegisterContext::IfaceRegisterContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager)
 {
     if (manager) {
         auto iface = static_cast<NetInterface *>(manager->GetData());

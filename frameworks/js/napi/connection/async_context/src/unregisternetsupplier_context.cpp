@@ -38,7 +38,7 @@ bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 } // namespace
 
 UnregisterNetSupplierContext::UnregisterNetSupplierContext(
-    napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+    napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager) {}
 
 void UnregisterNetSupplierContext::ParseParams(napi_value *params, size_t paramsCount)
 {

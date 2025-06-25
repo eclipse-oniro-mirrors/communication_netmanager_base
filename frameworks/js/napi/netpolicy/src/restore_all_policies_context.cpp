@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-RestoreAllPoliciesContext::RestoreAllPoliciesContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+RestoreAllPoliciesContext::RestoreAllPoliciesContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void RestoreAllPoliciesContext::ParseParams(napi_value *params, size_t paramsCount)
 {

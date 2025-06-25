@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 class SetPowerSaveTrustlistContext final : public BaseContext {
 public:
     SetPowerSaveTrustlistContext() = delete;
-    SetPowerSaveTrustlistContext(napi_env env, EventManager *manager);
+    SetPowerSaveTrustlistContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

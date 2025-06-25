@@ -26,7 +26,7 @@ namespace OHOS::NetManagerStandard {
 class SetNetExtAttributeContext : public BaseContext {
 public:
     SetNetExtAttributeContext() = delete;
-    SetNetExtAttributeContext(napi_env env, EventManager *manager);
+    SetNetExtAttributeContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
     bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount);
 public:
@@ -37,11 +37,11 @@ public:
 class GetNetExtAttributeContext : public BaseContext {
 public:
     GetNetExtAttributeContext() = delete;
-    GetNetExtAttributeContext(napi_env env, EventManager *manager);
+    GetNetExtAttributeContext(napi_env env, std::shared_ptr<EventManager>& manager);
     void ParseParams(napi_value *params, size_t paramsCount);
 public:
     std::string netExtAttribute_;
     NetHandle netHandle_;
 };
 } // namespace OHOS::NetManagerStandard
-#endif // NETMANAGER_BASE_NAPI_SET_OR_GET_NET_EXT_ATTRIBUTE_H
+#endif // NETMANAGER_BASE_NAPI_SET_OR_GET_NET_EXT_ATTRIBUTE_H

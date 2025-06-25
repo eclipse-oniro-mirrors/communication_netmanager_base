@@ -30,7 +30,7 @@ namespace NetManagerStandard {
 class GetUidsByPolicyContext final : public BaseContext {
 public:
     GetUidsByPolicyContext() = delete;
-    explicit GetUidsByPolicyContext(napi_env env, EventManager *manager);
+    explicit GetUidsByPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

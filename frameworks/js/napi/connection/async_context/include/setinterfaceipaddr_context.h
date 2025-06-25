@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 class SetInterfaceIpAddrContext : public BaseContext {
 public:
     SetInterfaceIpAddrContext() = delete;
-    SetInterfaceIpAddrContext(napi_env env, EventManager *manager);
+    SetInterfaceIpAddrContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

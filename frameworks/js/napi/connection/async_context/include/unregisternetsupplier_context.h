@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 class UnregisterNetSupplierContext : public BaseContext {
 public:
     UnregisterNetSupplierContext() = delete;
-    UnregisterNetSupplierContext(napi_env env, EventManager *manager);
+    UnregisterNetSupplierContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

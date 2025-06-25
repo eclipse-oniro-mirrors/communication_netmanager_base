@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-UpdateRemindPolicyContext::UpdateRemindPolicyContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+UpdateRemindPolicyContext::UpdateRemindPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager)
+    : BaseContext(env, manager) {}
 
 void UpdateRemindPolicyContext::ParseParams(napi_value *params, size_t paramsCount)
 {

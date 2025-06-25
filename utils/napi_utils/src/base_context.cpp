@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-BaseContext::BaseContext(napi_env env, EventManager *manager)
+BaseContext::BaseContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : manager_(manager),
       env_(env),
       parseOK_(false),
@@ -163,7 +163,7 @@ void BaseContext::Emit(const std::string &type, const std::pair<napi_value, napi
     }
 }
 
-EventManager *BaseContext::GetManager() const
+std::shared_ptr<EventManager> BaseContext::GetManager() const
 {
     return manager_;
 }

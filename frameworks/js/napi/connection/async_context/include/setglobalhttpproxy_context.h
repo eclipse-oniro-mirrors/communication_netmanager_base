@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class SetGlobalHttpProxyContext : public BaseContext {
 public:
     SetGlobalHttpProxyContext() = delete;
-    SetGlobalHttpProxyContext(napi_env env, EventManager *manager);
+    SetGlobalHttpProxyContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetNetworkAccessPolicyContext::SetNetworkAccessPolicyContext(napi_env env, EventManager *manager)
+SetNetworkAccessPolicyContext::SetNetworkAccessPolicyContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager)
 {
 }

@@ -25,14 +25,11 @@
 namespace OHOS {
 namespace NetManagerStandard {
 StatisticsObserverWrapper::StatisticsObserverWrapper()
-    : observer_(new StatisticsCallbackObserver()), manager_(new EventManager()), registered_(false)
+    : observer_(new StatisticsCallbackObserver()), manager_(std::make_shared<EventManager>()), registered_(false)
 {
 }
 
-StatisticsObserverWrapper::~StatisticsObserverWrapper()
-{
-    delete manager_;
-}
+StatisticsObserverWrapper::~StatisticsObserverWrapper() = default;
 
 napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
                                          const std::initializer_list<std::string> &events, bool asyncCallback)

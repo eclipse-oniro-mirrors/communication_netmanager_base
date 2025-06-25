@@ -32,18 +32,18 @@ public:
 
     [[nodiscard]] sptr<NetInterfaceCallbackObserver> GetObserver() const;
 
-    [[nodiscard]] EventManager *GetEventManager() const;
+    [[nodiscard]] std::shared_ptr<EventManager> GetEventManager() const;
 
-    static NetInterface *MakeNetInterface(EventManager *eventManager);
+    static NetInterface *MakeNetInterface(std::shared_ptr<EventManager>& eventManager);
 
     static void DeleteNetInterface(NetInterface *netInterface);
 
 private:
     sptr<NetInterfaceCallbackObserver> observer_;
 
-    EventManager *manager_{nullptr};
+    std::shared_ptr<EventManager> manager_{nullptr};
 
-    explicit NetInterface(EventManager *eventManager);
+    explicit NetInterface(std::shared_ptr<EventManager>& eventManager);
 };
 
 extern std::map<NetInterfaceCallbackObserver *, NetInterface *> NET_INTERFACES;

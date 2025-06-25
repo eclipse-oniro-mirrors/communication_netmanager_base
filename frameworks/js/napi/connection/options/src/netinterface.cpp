@@ -22,13 +22,13 @@ namespace OHOS::NetManagerStandard {
 std::map<NetInterfaceCallbackObserver *, NetInterface *> NET_INTERFACES;
 std::shared_mutex g_netInterfacesMutex;
 
-NetInterface::NetInterface(EventManager *eventManager)
+NetInterface::NetInterface(std::shared_ptr<EventManager>& eventManager)
     : observer_(new NetInterfaceCallbackObserver),
       manager_(eventManager)
 {
 }
 
-NetInterface *NetInterface::MakeNetInterface(EventManager *eventManager)
+NetInterface *NetInterface::MakeNetInterface(std::shared_ptr<EventManager>& eventManager)
 {
     std::unique_lock<std::shared_mutex> lock(g_netInterfacesMutex);
     auto netInterface = new NetInterface(eventManager);
@@ -48,7 +48,7 @@ sptr<NetInterfaceCallbackObserver> NetInterface::GetObserver() const
     return observer_;
 }
 
-EventManager *NetInterface::GetEventManager() const
+std::shared_ptr<EventManager> NetInterface::GetEventManager() const
 {
     return manager_;
 }

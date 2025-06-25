@@ -23,7 +23,8 @@ namespace NetManagerStandard {
 class SetAppHttpProxyContext : public SetGlobalHttpProxyContext {
 public:
     SetAppHttpProxyContext() = delete;
-    SetAppHttpProxyContext(napi_env env, EventManager *manager):SetGlobalHttpProxyContext(env, manager) {}
+    SetAppHttpProxyContext(napi_env env, std::shared_ptr<EventManager>& manager)
+        : SetGlobalHttpProxyContext(env, manager) {}
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,7 +21,7 @@
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-BindSocketContext::BindSocketContext(napi_env env, EventManager *manager)
+BindSocketContext::BindSocketContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager), netId_(0), socketFd_(0)
 {
 }
