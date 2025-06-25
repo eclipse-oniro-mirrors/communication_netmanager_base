@@ -40,10 +40,10 @@
 #include "net_mgr_log_wrapper.h"
 #ifndef CROSS_PLATFORM
 #include "parameters.h"
+#include "dfx_kernel_stack.h"
 #endif
 #include "securec.h"
 #include "datetime_ex.h"
-#include "dfx_kernel_stack.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
@@ -574,10 +574,12 @@ int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string 
 
     int result = NETMANAGER_SUCCESS;
     if (ret <= 0) {
-        NETMGR_LOG_E("iptables select fail, ret %{public}d, pid %{public}d", ret, childPid);
+        NETMGR_LOG_E("iptables select fail, ret %{public}d, pid %{public}d", ret, childPid);        
+#ifndef CROSS_PLATFORM
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
+#endif
         result = NETMANAGER_ERROR;
     } else {
         while (read(fd, buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
@@ -621,9 +623,11 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
     }
     if (waitCount == MAX_WAIT_PID_COUNT) {
         NETMGR_LOG_E("waitpid[%{public}d] timeout", childPid);
+#ifndef CROSS_PLATFORM
         std::string childStack;
         HiviewDFX::DfxGetKernelStack(childPid, childStack);
         NETMGR_LOG_E("child process stack %{public}s", childStack.c_str());
+#endif
         return NETMANAGER_ERROR;
     }
     if (pidRet != childPid) {
