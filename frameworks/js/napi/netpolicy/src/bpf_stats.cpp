@@ -62,6 +62,7 @@ int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType stats
 int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
 {
     stats = 0;
+    std::lock_guard<std::mutex> lock(ifaceStatsMapMutext_);
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
         NETNATIVE_LOGE("ifaceStatsMap IsValid");
@@ -230,6 +231,7 @@ int32_t NetsysBpfStats::DeleteStatsInfo(const std::string &path, uint32_t uid)
 int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName)
 {
     stats = 0;
+    std::lock_guard<std::mutex> lock(ifaceStatsMapMutext_);
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
         return STATS_ERR_INVALID_IFACE_NAME_MAP;

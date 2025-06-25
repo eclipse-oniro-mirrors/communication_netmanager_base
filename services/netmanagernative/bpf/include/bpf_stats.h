@@ -112,6 +112,7 @@ private:
 private:
     std::mutex netStatusMapMutex_;
     std::mutex netWlan1MapMutex_;
+    std::mutex ifaceStatsMapMutext_;
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_STATS_H
