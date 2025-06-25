@@ -86,7 +86,8 @@
                 "jsoncpp",
                 "qos_manager",
                 "runtime_core",
-                "time_service"
+                "time_service",
+                "faultloggerd"
             ]
         },
         "build": {
