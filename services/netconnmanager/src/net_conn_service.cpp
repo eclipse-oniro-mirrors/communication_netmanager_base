@@ -1065,14 +1065,15 @@ void NetConnService::HandleFindBestNetworkForDelay()
 {
     isDelayHandleFindBestNetwork_ = false;
     auto supplier = FindNetSupplier(delaySupplierId_);
-    delaySupplierId_ = 0;
     if (supplier == nullptr) {
+        delaySupplierId_ = 0;
         return;
     }
     if (supplier->IsNetValidated()) {
         NETMGR_LOG_I("HandleFindBestNetworkForDelay.");
         HandleDetectionResult(delaySupplierId_, VERIFICATION_STATE);
     }
+    delaySupplierId_ = 0;
 }
 
 void NetConnService::ProcessHttpProxyCancel(const sptr<NetSupplier> &supplier)
