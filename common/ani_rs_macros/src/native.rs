@@ -15,16 +15,11 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{ItemFn, Result};
 
-pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+pub(crate) fn entry(_: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item = syn::parse2::<ItemFn>(item)?;
     let item_clone = item.clone();
 
     let mut block = quote! {};
-
-    let mut sig = quote! {
-        env: ani_rs::AniEnv<'local>,
-        this: ani_rs::objects::AniObject<'local>,
-    };
 
     let out = item.sig.output;
     let mut out_arg = None;
@@ -57,6 +52,10 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
         },
     }
 
+    let mut sig = quote! {
+        env: ani_rs::AniEnv<'local>,
+    };
+
     let mut input = quote! {};
     for i in item.sig.inputs.iter() {
         if let syn::FnArg::Typed(pat) = i {
@@ -76,6 +75,11 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
 
             if let syn::Pat::Ident(pat) = &*pat.pat {
                 if pat.ident.to_string() == "this" {
+                    sig = quote! {
+                        env: ani_rs::AniEnv<'local>,
+                        this: ani_rs::objects::AniObject<'local>,
+                    };
+
                     block = quote! {
                         #block
                         let this = env.deserialize(this).unwrap();
@@ -97,6 +101,15 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     sig = quote! {
                         #sig
                         #pat: ani_rs::objects::AniFnObject<'local>,
+                    }
+                } else if pat.ident.to_string() == "async_callback" {
+                    input = quote! {
+                        #input
+                        async_callback,
+                    };
+                    sig = quote! {
+                        #sig
+                        #pat: ani_rs::objects::AniAsyncCallback<'local>,
                     }
                 } else {
                     let pat = pat.ident.clone();
@@ -188,7 +201,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                 let default = match out.as_str() {
                     "i8" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> i8
+                            extern "C" fn #ident<'local>(#sig) -> i8
                         };
                         quote! {
                             i8::default()
@@ -196,7 +209,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "i16" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> i16
+                            extern "C" fn #ident<'local>(#sig) -> i16
                         };
                         quote! {
                             i16::default()
@@ -204,7 +217,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "i32" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> i32
+                            extern "C" fn #ident<'local>(#sig) -> i32
                         };
                         quote! {
                             i32::default()
@@ -212,7 +225,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "i64" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> i64
+                            extern "C" fn #ident<'local>(#sig) -> i64
                         };
                         quote! {
                             i64::default()
@@ -220,7 +233,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "f32" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> f32
+                            extern "C" fn #ident<'local>(#sig) -> f32
                         };
                         quote! {
                             f32::default()
@@ -228,7 +241,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "f64" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> f64
+                            extern "C" fn #ident<'local>(#sig) -> f64
                         };
                         quote! {
                             f64::default()
@@ -236,7 +249,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "bool" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> bool
+                            extern "C" fn #ident<'local>(#sig) -> bool
                         };
                         quote! {
                             false
@@ -244,7 +257,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
                     }
                     "AniRef" => {
                         sig = quote! {
-                            fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
+                            extern "C" fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
                         };
                         quote! {
                             env.undefined().unwrap()
@@ -273,7 +286,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
             }
             _ => {
                 sig = quote! {
-                    fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
+                    extern "C" fn #ident<'local>(#sig) -> ani_rs::objects::AniRef<'local>
                 };
                 quote! {
                 {
@@ -294,7 +307,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
             }
         },
         None => {
-            sig = quote! {fn #ident<'local>(#sig)};
+            sig = quote! {extern "C" fn #ident<'local>(#sig)};
             quote! {
                 {
                     #block
@@ -311,6 +324,7 @@ pub(crate) fn entry(args: TokenStream2, item: TokenStream2) -> Result<TokenStrea
     item.sig = sig;
 
     item.block = syn::parse2(block).unwrap();
+
     Ok(quote! {
         #item
     })

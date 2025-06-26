@@ -85,7 +85,8 @@
                 "netmanager_ext",
                 "jsoncpp",
                 "qos_manager",
-                "runtime_core"
+                "runtime_core",
+                "ylong_runtime"
             ]
         },
         "build": {

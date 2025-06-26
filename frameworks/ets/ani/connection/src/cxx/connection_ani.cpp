@@ -14,6 +14,8 @@
  */
 
 #include "connection_ani.h"
+#include "access_token.h"
+#include "accesstoken_kit.h"
 #include "cxx.h"
 #include "http_proxy.h"
 #include "inet_addr.h"
@@ -22,13 +24,13 @@
 #include "net_link_info.h"
 #include "netmanager_secure_data.h"
 #include "refbase.h"
+#include "tokenid_kit.h"
 #include "wrapper.rs.h"
 #include <memory>
 #include <string>
-
 namespace OHOS {
 namespace NetManagerAni {
-using namespace OHOS;
+using namespace Security::AccessToken;
 
 NetHandle GetDefaultNetHandle(int32_t &ret)
 {
@@ -277,6 +279,20 @@ void NetDetection(int32_t netId, int32_t &ret)
     NetManagerStandard::NetHandle netHandle;
     netHandle.SetNetId(netId);
     ret = NetManagerStandard::NetConnClient::GetInstance().NetDetection(netHandle);
+}
+
+bool CheckPermission(uint64_t tokenId, rust::str permission)
+{
+    auto perm = std::string(permission);
+    TypeATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(static_cast<AccessTokenID>(tokenId));
+    if (tokenType == TOKEN_INVALID) {
+        return false;
+    }
+    int result = AccessTokenKit::VerifyAccessToken(tokenId, perm);
+    if (result != PERMISSION_GRANTED) {
+        return false;
+    }
+    return true;
 }
 
 NetCoonCallback::NetCoonCallback(rust::Box<ConnCallback> callback) : inner_(std::move(callback)) {}

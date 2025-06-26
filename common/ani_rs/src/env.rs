@@ -168,7 +168,29 @@ impl<'local> AniEnv<'local> {
         namespace: AniNamespace,
         functions: &[(&'static CStr, *const c_void); N],
     ) -> Result<(), AniError> {
-        self.bind_inner(namespace.into(), functions)
+        let ani_functions: [AniNativeFunction<'static>; N] =
+            std::array::from_fn(|i| AniNativeFunction::new(functions[i].0, functions[i].1));
+        unsafe {
+            let res = (**self.inner).Namespace_BindNativeFunctions.unwrap()(
+                self.inner,
+                namespace.into_raw(),
+                ani_functions.as_ptr() as _,
+                ani_functions.len() as _,
+            );
+            if res != 0 {
+                let msg = format!(
+                    "Failed to bind functions {}",
+                    functions
+                        .iter()
+                        .map(|(name, _)| name.to_string_lossy())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                );
+                Err(AniError::from_code(msg, res))
+            } else {
+                Ok(())
+            }
+        }
     }
 
     pub fn bind_class_methods<const N: usize>(
@@ -176,20 +198,12 @@ impl<'local> AniEnv<'local> {
         class: AniClass,
         methods: &[(&'static CStr, *const c_void); N],
     ) -> Result<(), AniError> {
-        self.bind_inner(AniRef::from_raw(class.into_raw()), methods)
-    }
-
-    fn bind_inner<const N: usize>(
-        &self,
-        ani_ref: AniRef<'local>,
-        methods: &[(&'static CStr, *const c_void); N],
-    ) -> Result<(), AniError> {
         let ani_methods: [AniNativeFunction<'static>; N] =
             std::array::from_fn(|i| AniNativeFunction::new(methods[i].0, methods[i].1));
         unsafe {
             let res = (**self.inner).Class_BindNativeMethods.unwrap()(
                 self.inner,
-                ani_ref.into_raw(),
+                class.into_raw(),
                 ani_methods.as_ptr() as _,
                 ani_methods.len() as _,
             );
@@ -825,6 +839,7 @@ impl<'local> AniEnv<'local> {
                 local.as_raw(),
                 &mut ani_ref as *mut _,
             )
+            
         };
         if res != 0 {
             let msg = String::from("Failed to create global ref");

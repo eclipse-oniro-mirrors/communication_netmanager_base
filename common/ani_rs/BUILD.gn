@@ -33,6 +33,7 @@ ohos_rust_shared_library("ani_rs") {
 
   external_deps = [
     "runtime_core:ani",
+    "ylong_runtime:ylong_runtime",
   ]
 
   clippy_lints = "none"

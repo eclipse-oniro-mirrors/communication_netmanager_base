@@ -31,7 +31,7 @@ use crate::{
 
 use super::error_msg;
 
-pub struct ClassNameSer;
+pub struct NoSer;
 
 pub trait AniSerExt {
     fn recur(&mut self, value: AniRef) -> Result<(), AniError>;
@@ -271,11 +271,11 @@ macro_rules! common_impl {
         type Error = AniError;
 
         type SerializeMap = MapSer<'a, 'local>;
-        type SerializeTuple = ClassNameSer;
-        type SerializeTupleStruct = ClassNameSer;
-        type SerializeTupleVariant = ClassNameSer;
+        type SerializeTuple = NoSer;
+        type SerializeTupleStruct = NoSer;
+        type SerializeTupleVariant = NoSer;
         type SerializeStruct = StructSer<'a, 'local>;
-        type SerializeStructVariant = ClassNameSer;
+        type SerializeStructVariant = NoSer;
         type SerializeSeq = ArraySer<'a, 'local>;
 
         fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
@@ -428,7 +428,10 @@ macro_rules! common_impl {
         where
             T: serde::Serialize,
         {
-            value.serialize(self)
+            let mut se = AniSer::new(&self.env)?;
+            value.serialize(&mut se)?;
+            let ani_ref = se.finish();
+            self.set_value(ani_ref)
         }
     };
 }
@@ -642,7 +645,7 @@ impl serde::ser::SerializeSeq for ArraySer<'_, '_> {
     }
 }
 
-impl serde::ser::SerializeTuple for ClassNameSer {
+impl serde::ser::SerializeTuple for NoSer {
     type Ok = ();
     type Error = AniError;
 
@@ -658,7 +661,7 @@ impl serde::ser::SerializeTuple for ClassNameSer {
     }
 }
 
-impl serde::ser::SerializeTupleStruct for ClassNameSer {
+impl serde::ser::SerializeTupleStruct for NoSer {
     type Ok = ();
     type Error = AniError;
 
@@ -674,7 +677,7 @@ impl serde::ser::SerializeTupleStruct for ClassNameSer {
     }
 }
 
-impl<'e> serde::ser::SerializeTupleVariant for ClassNameSer {
+impl<'e> serde::ser::SerializeTupleVariant for NoSer {
     type Ok = ();
     type Error = AniError;
 
@@ -690,7 +693,7 @@ impl<'e> serde::ser::SerializeTupleVariant for ClassNameSer {
     }
 }
 
-impl serde::ser::SerializeStructVariant for ClassNameSer {
+impl serde::ser::SerializeStructVariant for NoSer {
     type Ok = ();
     type Error = AniError;
 
@@ -710,7 +713,7 @@ impl serde::ser::SerializeStructVariant for ClassNameSer {
     }
 }
 
-impl serde::ser::SerializeMap for ClassNameSer {
+impl serde::ser::SerializeMap for NoSer {
     type Ok = ();
     type Error = AniError;
     fn serialize_key<T: ?Sized>(&mut self, _key: &T) -> Result<Self::Ok, Self::Error>

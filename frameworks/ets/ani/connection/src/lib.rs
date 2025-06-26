@@ -15,6 +15,7 @@
 
 mod bridge;
 mod connection;
+mod error_code;
 pub mod wrapper;
 
 use ani_rs::ani_constructor;

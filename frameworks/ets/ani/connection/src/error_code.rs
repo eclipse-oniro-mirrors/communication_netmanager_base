@@ -11,31 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use ani_rs_macros::ani;
-pub use ani_rs_macros::native;
+use ani_rs::business_error::BusinessError;
 
-pub mod box_type;
-mod env;
-mod vm;
-
-pub use env::AniEnv;
-pub use vm::AniVm;
-
-pub mod error;
-pub mod objects;
-
-mod ani;
-pub use ani::AniDe;
-pub use ani::AniSer;
-
-mod iterator;
-
-pub mod signature;
-
-mod global;
-mod primitive;
-
-pub mod business_error;
-pub mod typed_array;
-
-mod macros;
+pub const fn convert_to_business_error(code: i32) -> BusinessError {
+    match code {
+        201 => BusinessError::PERMISSION,
+        401 => BusinessError::PARAMETER,
+        2100001 => BusinessError::new_static(2100001, "Invalid parameter value."),
+        2100002 => BusinessError::new_static(2100002, "Failed to connect to the service."),
+        2100003 => BusinessError::new_static(2100003, "System internal error."),
+        _ => BusinessError::new_static(code, "Unknown error"),
+    }
+}

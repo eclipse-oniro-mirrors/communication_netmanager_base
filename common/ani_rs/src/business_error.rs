@@ -13,12 +13,37 @@
 
 pub struct BusinessError {
     code: i32,
-    message: String,
+    message: Message,
+}
+
+enum Message {
+    S(String),
+    Str(&'static str),
 }
 
 impl BusinessError {
+    pub const PERMISSION: Self = BusinessError {
+        code: 201,
+        message: Message::Str("Permission denied"),
+    };
+
+    pub const PARAMETER: Self = BusinessError {
+        code: 401,
+        message: Message::Str("Parameter error"),
+    };
+
     pub fn new(code: i32, message: String) -> Self {
-        BusinessError { code, message }
+        BusinessError {
+            code,
+            message: Message::S(message),
+        }
+    }
+
+    pub const fn new_static(code: i32, message: &'static str) -> Self {
+        BusinessError {
+            code,
+            message: Message::Str(message),
+        }
     }
 
     pub fn code(&self) -> i32 {
@@ -26,6 +51,9 @@ impl BusinessError {
     }
 
     pub fn message(&self) -> &str {
-        &self.message
+        match &self.message {
+            Message::S(s) => s,
+            Message::Str(s) => s,
+        }
     }
 }
