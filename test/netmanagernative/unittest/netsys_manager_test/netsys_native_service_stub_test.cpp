@@ -2291,7 +2291,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.L
 
 HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
 {
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     MessageParcel data;

@@ -1449,7 +1449,7 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache001, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest01, TestSize.Level1)
 {
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     int32_t ret = NetsysController::GetInstance().SetDnsCache(netId, testHost, info);
@@ -1458,7 +1458,7 @@ HWTEST_F(NetsysControllerTest, SetDnsCacheTest01, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)
 {
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     NetsysController::GetInstance().netsysService_ = nullptr;

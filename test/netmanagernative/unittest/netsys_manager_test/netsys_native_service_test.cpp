@@ -946,7 +946,7 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest003, TestSize.L
 
 HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest001, TestSize.Level1)
 {
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     auto ret = instance_->SetDnsCache(netId, testHost, info);
@@ -955,7 +955,7 @@ HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest002, TestSize.Level1)
 {
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     auto backup = std::move(instance_->netsysService_);

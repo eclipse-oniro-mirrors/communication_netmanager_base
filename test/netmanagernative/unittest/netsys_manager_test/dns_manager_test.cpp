@@ -128,7 +128,7 @@ HWTEST_F(DnsManagerTest, FillAddrInfoTest001, TestSize.Level1)
 HWTEST_F(DnsManagerTest, SetDnsCacheTest001, TestSize.Level1)
 {
     DnsManager dnsManager;
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     auto result = dnsManager.SetDnsCache(netId, testHost, info);

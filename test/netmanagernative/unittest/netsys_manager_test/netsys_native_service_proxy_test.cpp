@@ -705,7 +705,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetDnsCache001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
-    uint16_t netId = 101
+    uint16_t netId = 101;
     std::string testHost = "test";
     AddrInfo info;
     int32_t ret = netsysNativeService->SetDnsCache(netId, testHost, info);
