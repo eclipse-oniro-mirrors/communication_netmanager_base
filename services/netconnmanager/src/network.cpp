@@ -66,6 +66,11 @@ Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &
 {
 }
 
+Network::~Network()
+{
+    StopNetDetection();
+}
+
 int32_t Network::GetNetId() const
 {
     return netId_;

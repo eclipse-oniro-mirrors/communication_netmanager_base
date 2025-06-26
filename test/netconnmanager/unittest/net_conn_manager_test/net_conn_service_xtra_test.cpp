@@ -1257,14 +1257,13 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
-    EXPECT_EQ(activates[0]->GetLastServiceSupply(), nullptr);
     ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
-    activates[0]->SetLastServiceSupply(supplier);
+    activates[0]->SetLastNetid(1);
     EXPECT_EQ(activates[0]->GetNetCallback(), nullptr);
     ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1280,8 +1279,9 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest004, TestSize.Level1)
     uint32_t uid = 1;
     bool isFrozened = false;
     auto &activates = netConnService->netUidActivates_[uid];
-    activates[0]->SetServiceSupply(activates[0]->GetLastServiceSupply());
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    activates[0]->SetServiceSupply(supplier);
     EXPECT_NE(activates[0]->GetServiceSupply(), nullptr);
     auto ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

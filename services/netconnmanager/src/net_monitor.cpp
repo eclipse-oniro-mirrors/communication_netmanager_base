@@ -148,9 +148,12 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         result = INVALID_DETECTION_STATE;
     }
     auto monitorCallback = netMonitorCallback_.lock();
-    if (monitorCallback) {
-        monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
+    if (monitorCallback == nullptr) {
+        Stop();
+        return;
     }
+    monitorCallback->OnHandleNetMonitorResult(result, probeResult.GetRedirectUrl());
+
     struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
     EventReport::SendMonitorBehaviorEvent(eventInfo);
     if (isDetecting_) {

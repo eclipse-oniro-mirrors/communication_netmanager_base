@@ -267,16 +267,14 @@ void NetActivate::SetLastCallbackType(CallbackType callbackType)
 }
 
 
-sptr<NetSupplier> NetActivate::GetLastServiceSupply()
+int32_t NetActivate::GetLastNetid()
 {
-    std::lock_guard<std::mutex> lock(lastNetServiceSuppliedMutex_);
-    return lastNetServiceSupplied_;
+    return lastNetId_;
 }
 
-void NetActivate::SetLastServiceSupply(sptr<NetSupplier> lastNetServiceSupplied)
+void NetActivate::SetLastNetid(const int32_t netid)
 {
-    std::lock_guard<std::mutex> lock(lastNetServiceSuppliedMutex_);
-    lastNetServiceSupplied_ = lastNetServiceSupplied;
+    lastNetId_ = netid;
 }
 
 bool NetActivate::IsAllowCallback(CallbackType callbackType)
@@ -288,8 +286,9 @@ bool NetActivate::IsAllowCallback(CallbackType callbackType)
     bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
     if (isAppFrozened && !isForegroundApp) {
         if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST
-            && GetLastServiceSupply() == nullptr) {
-            SetLastServiceSupply(netServiceSupplied_);
+            && lastNetId_ == 0 && netServiceSupplied_ != nullptr
+            && netServiceSupplied_->GetNetHandle() != nullptr) {
+                lastNetId_ = netServiceSupplied_->GetNetHandle()->GetNetId();
         }
         SetLastCallbackType(callbackType);
     
