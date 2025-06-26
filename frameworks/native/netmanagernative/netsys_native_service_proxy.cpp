@@ -3813,5 +3813,46 @@ int32_t NetsysNativeServiceProxy::FlushDnsCache(uint16_t netId)
     }
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    NETNATIVE_LOG_D("Begin to SetDnsCache");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("SetDnsCache WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netId)) {
+        NETNATIVE_LOGE("SetDnsCache WriteUint16 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(hostName)) {
+        NETNATIVE_LOGE("SetDnsCache WriteString failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRawData(&addrInfo, sizeof(AddrInfo))) {
+        NETNATIVE_LOGE("SetDnsCache WriteRawData failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in SetDnsCache");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DNS_CACHE),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        NETNATIVE_LOGE("SetDnsCache SendRequest failed, error code: [%{public}d]", err);
+        return IPC_INVOKER_ERR;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetDnsCache ReadInt32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

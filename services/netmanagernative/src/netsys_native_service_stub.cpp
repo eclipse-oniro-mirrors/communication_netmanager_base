@@ -278,6 +278,8 @@ void NetsysNativeServiceStub::InitDnsServerOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdSetUserDefinedServerFlag;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FLUSH_DNS_CACHE)] =
         &NetsysNativeServiceStub::CmdFlushDnsCache;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_DNS_CACHE)] =
+        &NetsysNativeServiceStub::CmdSetDnsCache;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
@@ -2576,6 +2578,43 @@ int32_t NetsysNativeServiceStub::CmdFlushDnsCache(MessageParcel &data, MessagePa
     int32_t result = FlushDnsCache(netId);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write CmdFlushDnsCache result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetDnsCache(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetDnsCache CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    uint16_t netId = 0;
+    if (!data.ReadUint16(netId)) {
+        NETNATIVE_LOGE("CmdSetDnsCache read netId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    
+    std::string hostName;
+    if (!data.ReadString(hostName)) {
+        NETNATIVE_LOGE("CmdSetDnsCache read hostName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    AddrInfo addrInfo = {};
+    auto p = data.ReadRawData(sizeof(AddrInfo));
+    if (p == nullptr) {
+        NETNATIVE_LOGE("CmdSetDnsCache read addrInfo failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (memcpy_s(&addrInfo, sizeof(AddrInfo), p, sizeof(AddrInfo)) != EOK) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = SetDnsCache(netId, hostName, addrInfo);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetDnsCache result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;

@@ -631,6 +631,11 @@ public:
     {
         return 0;
     }
+    
+    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

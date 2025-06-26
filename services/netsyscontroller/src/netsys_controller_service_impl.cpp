@@ -1054,5 +1054,11 @@ int32_t NetsysControllerServiceImpl::FlushDnsCache(uint16_t netId)
     NETMGR_LOG_I("FlushDnsCache Enter. netId[%{public}u]", netId);
     return netsysClient_->FlushDnsCache(netId);
 }
+
+int32_t NetsysControllerServiceImpl::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    NETMGR_LOG_I("SetDnsCache Enter. netId[%{public}u]", netId);
+    return netsysClient_->SetDnsCache(netId, hostName, addrInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

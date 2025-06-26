@@ -165,6 +165,7 @@ public:
 #ifdef SUPPORT_SYSVPN
     int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
+    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

@@ -1618,6 +1618,35 @@ void CmdFlushDnsCacheFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdSetDnsCacheFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+ 
+    uint16_t netId = NetSysGetData<uint16_t>();
+    std::string hostName = NetSysGetString(STR_LEN);
+
+    AddrInfo hints;
+    hints.aiFlags = NetSysGetData<uint32_t>();
+    hints.aiFamily = NetSysGetData<uint32_t>();
+    hints.aiSockType = NetSysGetData<uint32_t>();
+    hints.aiProtocol = NetSysGetData<uint32_t>();
+    hints.aiAddrLen = NetSysGetData<uint32_t>();
+
+    std::string aiCanName = NetSysGetString(STR_LEN);
+    if (memcpy_s(hints.aiCanonName, sizeof(hints.aiCanonName), aiCanName.c_str(), aiCanName.length()) != 0) {
+        return;
+    }
+
+    dataParcel.WriteUint16(netId);
+    dataParcel.WriteString(hostName);
+    dataParcel.WriteRawData(&hints, sizeof(AddrInfo));
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_DNS_CACHE),
+                    dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1678,6 +1707,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdEnableDistributedServerNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdFlushDnsCacheFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetDnsCacheFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

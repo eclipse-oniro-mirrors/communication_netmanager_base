@@ -943,5 +943,14 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest003, TestSize.L
     auto ret = temp.SetBrokerUidAccessPolicyMap(uidMaps);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest001, TestSize.Level1)
+{
+    uint16_t netId = 101
+    std::string testHost = "test";
+    AddrInfo info;
+    auto ret = instance_->SetDnsCache(netId, testHost, info);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

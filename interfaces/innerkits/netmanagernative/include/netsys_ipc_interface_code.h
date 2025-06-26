@@ -151,6 +151,7 @@ enum class NetsysInterfaceCode {
 	NETSYS_UPDATE_IFINDEX_MAP,
     NETSYS_SET_NET_STATUS_MAP,
     NETSYS_FLUSH_DNS_CACHE,
+    NETSYS_SET_DNS_CACHE,
 };
 
 enum class NotifyInterfaceCode {

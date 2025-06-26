@@ -1746,5 +1746,14 @@ int32_t NetsysController::FlushDnsCache(uint16_t netId)
     }
     return netsysService_->FlushDnsCache(netId);
 }
+
+int32_t NetsysController::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetDnsCache(netId, hostName, addrInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

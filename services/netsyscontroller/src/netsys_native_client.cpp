@@ -2065,5 +2065,15 @@ int32_t NetsysNativeClient::FlushDnsCache(uint16_t netId)
     return proxy->FlushDnsCache(netId);
 }
 
+int32_t NetsysNativeClient::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetDnsCache(netId, hostName, addrInfo);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

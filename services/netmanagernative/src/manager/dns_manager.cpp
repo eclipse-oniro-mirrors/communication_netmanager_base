@@ -279,5 +279,11 @@ int32_t DnsManager::FlushDnsCache(uint16_t netId)
     NETNATIVE_LOGI("manager_FlushDnsCache netId[%{public}d]", netId);
     return DnsParamCache::GetInstance().FlushDnsCache(netId);
 }
+
+int32_t DnsManager::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    DnsParamCache::GetInstance().SetDnsCache(netId, hostName, addrInfo);
+    return 0;
+}
 } // namespace nmd
 } // namespace OHOS
