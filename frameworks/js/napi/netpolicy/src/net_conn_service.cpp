@@ -3795,9 +3795,10 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
             if (callbackType != CALL_TYPE_LOST) {
                 continue;
             }
-            netSupplier = curNetAct->GetLastServiceSupply();
-            if (netSupplier && callback) {
-                sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
+            int32_t lastNetid = curNetAct->GetLastNetid();
+            if (callback) {
+                sptr<NetHandle> netHandle = new (std::nothrow) NetHandle();
+                netHandle->SetNetId(lastNetid);
                 callback->NetLost(netHandle);
             }
         } else if (callbackType == CALL_TYPE_AVAILABLE) {
@@ -3806,7 +3807,7 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
             sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
             HandleCallback(netSupplier, netHandle, callback, callbackType);
         }
-        curNetAct->SetLastServiceSupply(nullptr);
+        curNetAct->SetLastNetid(0);
         curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
     }
     return NETMANAGER_SUCCESS;

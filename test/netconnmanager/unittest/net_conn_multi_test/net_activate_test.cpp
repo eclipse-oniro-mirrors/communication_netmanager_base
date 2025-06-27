@@ -297,11 +297,11 @@ HWTEST_F(NetActivateTest, LastCallbackTypeTest001, TestSize.Level1)
     EXPECT_TRUE(ret == CALL_TYPE_AVAILABLE);
 }
 
-HWTEST_F(NetActivateTest, GetLastServiceSupplyTest001, TestSize.Level1)
+HWTEST_F(NetActivateTest, GetLastNetidTest001, TestSize.Level1)
 {
-    instance_->SetLastServiceSupply(nullptr);
-    auto ret = instance_->GetLastServiceSupply();
-    EXPECT_TRUE(ret == nullptr);
+    instance_->SetLastNetid(0);
+    auto ret = instance_->GetLastNetid();
+    EXPECT_TRUE(ret == 0);
 }
 
 HWTEST_F(NetActivateTest, IsAllowCallbackTest001, TestSize.Level1)
@@ -428,11 +428,11 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
     callbackType = CALL_TYPE_LOST;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
-    instance_->lastNetServiceSupplied_ = supplier;
+    instance_->lastNetId_ = 1;
     ret = instance_->IsAllowCallback(callbackType);
     EXPECT_FALSE(ret);
 
-    instance_->lastNetServiceSupplied_ = nullptr;
+    instance_->lastNetId_ = 0;
     ret = instance_->IsAllowCallback(callbackType);
     EXPECT_FALSE(ret);
 }

@@ -37,7 +37,7 @@ class Network : public virtual RefBase, public INetMonitorCallback, public std::
 public:
     Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
             const std::shared_ptr<NetConnEventHandler> &eventHandler);
-    ~Network() = default;
+    ~Network();
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
     uint32_t GetSupplierId() const;
