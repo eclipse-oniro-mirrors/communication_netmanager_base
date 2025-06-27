@@ -910,5 +910,14 @@ HWTEST_F(NetsysControllerServiceImplTest, UnRegisterNetsysTrafficCallbackTest001
     int32_t ret = instance_->UnRegisterNetsysTrafficCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, SetDnsCacheTest001, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    int32_t ret = instance_->SetDnsCache(netId, testHost, info);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

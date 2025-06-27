@@ -1253,5 +1253,15 @@ int32_t NetsysNativeService::FlushDnsCache(uint16_t netId)
     }
     return netsysService_->FlushDnsCache(netId);
 }
+
+int32_t NetsysNativeService::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    NETNATIVE_LOG_D("SetDnsCache");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->SetDnsCache(netId, hostName, addrInfo);
+}
 } // namespace NetsysNative
 } // namespace OHOS

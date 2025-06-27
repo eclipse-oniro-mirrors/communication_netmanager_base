@@ -654,5 +654,10 @@ int32_t NetManagerNative::UpdateVpnRules(uint16_t netId, const std::vector<std::
     return connManager_->UpdateVpnRules(netId, extMessages, add);
 }
 #endif // SUPPORT_SYSVPN
+
+int32_t NetManagerNative::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+{
+    return dnsManager_->SetDnsCache(netId, hostName, addrInfo);
+}
 } // namespace nmd
 } // namespace OHOS

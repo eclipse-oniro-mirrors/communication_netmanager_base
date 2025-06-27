@@ -192,6 +192,7 @@ private:
     int32_t CmdUnRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNetStatusMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdFlushDnsCache(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetDnsCache(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

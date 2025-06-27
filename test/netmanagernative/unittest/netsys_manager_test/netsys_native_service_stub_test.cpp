@@ -666,6 +666,11 @@ public:
     {
         return 0;
     }
+    
+    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -2283,5 +2288,29 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.L
     int32_t ret2 = notifyStub_->CmdDeleteIncreaseTrafficMap(data2, reply2);
     EXPECT_NE(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    MessageParcel data;
+    if (!data.WriteUint32(netId)) {
+        return;
+    }
+
+    if (!data.WriteString(testHost)) {
+        return;
+    }
+
+    if (!data.WriteRawData(&info, sizeof(AddrInfo))) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS
