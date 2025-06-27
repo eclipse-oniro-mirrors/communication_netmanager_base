@@ -350,6 +350,7 @@ private:
 
     static bool CheckSysVpnCall();
     static bool CheckTunVpnCall(const std::string &vpnName);
+    static bool CheckMultiVpnCall(const std::string &vpnName);
 
     static int32_t InitOutcomingPacketMark();
     static int32_t UpdateOutcomingIpMark(uint16_t netId, const std::string &addr, bool add);
