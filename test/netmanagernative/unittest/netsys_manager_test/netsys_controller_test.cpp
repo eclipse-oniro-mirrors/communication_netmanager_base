@@ -1084,6 +1084,15 @@ HWTEST_F(NetsysControllerTest, SetEnableIpv6Test001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerTest, SetDnsCacheTest001, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    int32_t ret = NetsysController::GetInstance().SetDnsCache(netId, testHost, info);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
 {
     NetsysController::GetInstance().netsysService_ = nullptr;
@@ -1445,15 +1454,6 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache001, TestSize.Level1)
     NetsysController::GetInstance().netsysService_ = nullptr;
     int32_t ret = NetsysController::GetInstance().FlushDnsCache(netId);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
-}
-
-HWTEST_F(NetsysControllerTest, SetDnsCacheTest01, TestSize.Level1)
-{
-    uint16_t netId = 101;
-    std::string testHost = "test";
-    AddrInfo info;
-    int32_t ret = NetsysController::GetInstance().SetDnsCache(netId, testHost, info);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)

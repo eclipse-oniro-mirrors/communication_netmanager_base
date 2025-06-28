@@ -2414,7 +2414,7 @@ int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, Message
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
-        NETNATIVE_LOGE("CmdUpdateVpnRules CheckNetSysInternalPermission failed");
+        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2439,7 +2439,7 @@ int32_t NetsysNativeServiceStub::CmdUpdateVpnRules(MessageParcel &data, MessageP
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
-        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
+        NETNATIVE_LOGE("CmdUpdateVpnRules CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
