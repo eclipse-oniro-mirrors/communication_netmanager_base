@@ -776,7 +776,7 @@ int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, Mess
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    HandleStoreNetworkPolicy(uid, policy, IPCSkeleton::GetCallingUid());
     return NETMANAGER_SUCCESS;
 }
 
