@@ -609,6 +609,12 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetNetworkAccessPolicyTest001, TestSize.Lev
     std::cout << TEST_UID << std::endl;
     int32_t ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY), data, reply, option);
+    uint32_t callingUid = 1099;
+    uint32_t setUID = 20020024;
+    NetworkAccessPolicy policy;
+    policy.wifiAllow = 0;
+    policy.cellularAllow = 1;
+    instance_->HandleStoreNetworkPolicy(setUID, policy, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
