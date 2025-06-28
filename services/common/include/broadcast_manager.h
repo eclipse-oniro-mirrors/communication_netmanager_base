@@ -25,6 +25,7 @@ struct BroadcastInfo {
     std::string     action;
     std::string     data;
     std::string     permission;
+    int32_t         subscriberUid {0};
     int32_t         code;
     bool            ordered;
     BroadcastInfo() : code(0), ordered(true) {}
