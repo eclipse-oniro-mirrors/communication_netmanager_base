@@ -98,6 +98,8 @@ private:
 
 std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret);
 
+rust::String GetErrorCodeAndMessage(int32_t &errorCode);
+
 } // namespace NetManagerAni
 } // namespace OHOS
 #endif

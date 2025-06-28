@@ -53,7 +53,7 @@ pub const UNBOX: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"unboxed\
 
 
 pub const TYPED_ARRAY_CTOR: &CStr =
-    cstr(b"Lescompat/Buffer;Lstd/core/Double;Lstd/core/Double;:V\0");
+    cstr(b"C{escompat.ArrayBuffer}d:\0");
 pub const BYTE_LENGTH: &CStr = cstr(b"byteLength\0");
 pub const BYTE_OFFSET: &CStr = cstr(b"byteOffset\0");
 pub const BUFFER: &CStr = cstr(b"buffer\0");
