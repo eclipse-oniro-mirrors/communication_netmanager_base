@@ -70,6 +70,10 @@ bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map
         publishInfo.SetSubscriberPermissions({info.permission});
     }
 
+    if (info.subscriberUid > 0) {
+        publishInfo.SetSubscriberUid({info.subscriberUid});
+    }
+
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(eventData, publishInfo, nullptr);
     if (publishResult) {
         NETMGR_LOG_D("Send broadcast is successfull");
