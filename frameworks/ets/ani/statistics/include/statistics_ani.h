@@ -16,12 +16,15 @@
 #ifndef NET_STATISTICS_ANI_H
 #define NET_STATISTICS_ANI_H
 
+#include "cxx.h"
 #include "net_stats_client.h"
 
 namespace OHOS {
 namespace NetManagerAni {
 
 NetManagerStandard::NetStatsClient &GetNetStatsClient(int32_t &nouse);
+
+rust::String GetErrorCodeAndMessage(int32_t &errorCode);
 
 }
 } // namespace OHOS

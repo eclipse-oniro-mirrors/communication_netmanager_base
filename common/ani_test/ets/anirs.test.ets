@@ -79,7 +79,7 @@ function main():void{
     enum_test();
     record_test();
     union_test();
-    // array_buffer_test();
+    array_buffer_test();
 }
 
 function primitive_test():void {
