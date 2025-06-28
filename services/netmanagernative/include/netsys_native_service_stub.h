@@ -62,7 +62,6 @@ private:
     void InitNetVirnicInterfaceMap();
     void InitStaticArpToInterfaceMap();
     void InitNetStatsInterfaceMap();
-    bool CheckNetSysInternalPermission();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);

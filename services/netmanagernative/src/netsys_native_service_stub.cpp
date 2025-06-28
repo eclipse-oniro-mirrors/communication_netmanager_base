@@ -461,16 +461,6 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
     return (this->*(interfaceIndex->second))(data, reply);
 }
 
-bool NetsysNativeServiceStub::CheckNetSysInternalPermission()
-{
-    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
-        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
-        NETNATIVE_LOGE("CheckNetSysInternalPermission failed");
-        return false;
-    }
-    return true;
-}
-
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
     uint16_t netId = 0;
@@ -1667,7 +1657,9 @@ int32_t NetsysNativeServiceStub::CmdSetNetStatusMap(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetIptablesCommandForRes CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string cmd = data.ReadString();
@@ -1687,7 +1679,9 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
 
 int32_t NetsysNativeServiceStub::CmdSetIpCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetIpCommandForRes CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string cmd = data.ReadString();
@@ -2317,7 +2311,9 @@ int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &dat
 
 int32_t NetsysNativeServiceStub::CmdStartClat(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStartClat CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2349,7 +2345,9 @@ int32_t NetsysNativeServiceStub::CmdStartClat(MessageParcel &data, MessageParcel
 
 int32_t NetsysNativeServiceStub::CmdStopClat(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdStopClat CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2377,7 +2375,9 @@ int32_t NetsysNativeServiceStub::CmdClearFirewallAllRules(MessageParcel &data, M
 
 int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetNicTrafficAllowed CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2412,7 +2412,9 @@ int32_t NetsysNativeServiceStub::CmdSetNicTrafficAllowed(MessageParcel &data, Me
 #ifdef SUPPORT_SYSVPN
 int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdProcessVpnStage CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2435,7 +2437,9 @@ int32_t NetsysNativeServiceStub::CmdProcessVpnStage(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdUpdateVpnRules(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdUpdateVpnRules CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2534,7 +2538,9 @@ int32_t NetsysNativeServiceStub::CmdDelBrokerUidAccessPolicyMap(MessageParcel &d
 
 int32_t NetsysNativeServiceStub::CmdSetUserDefinedServerFlag(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetUserDefinedServerFlag CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
@@ -2558,7 +2564,9 @@ int32_t NetsysNativeServiceStub::CmdSetUserDefinedServerFlag(MessageParcel &data
 
 int32_t NetsysNativeServiceStub::CmdFlushDnsCache(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdFlushDnsCache CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     uint16_t netId = 0;
@@ -2577,7 +2585,9 @@ int32_t NetsysNativeServiceStub::CmdFlushDnsCache(MessageParcel &data, MessagePa
 
 int32_t NetsysNativeServiceStub::CmdSetDnsCache(MessageParcel &data, MessageParcel &reply)
 {
-    if (!CheckNetSysInternalPermission()) {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetDnsCache CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     uint16_t netId = 0;

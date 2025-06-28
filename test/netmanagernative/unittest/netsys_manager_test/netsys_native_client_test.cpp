@@ -81,18 +81,6 @@ void NetsysNativeClientTest::SetUp() {}
 
 void NetsysNativeClientTest::TearDown() {}
 
-class NetsysNativeClientMock : NetsysNativeClient {
-public:
-    sptr<OHOS::NetsysNative::INetsysService> GetProxy()
-    {
-        return nullptr;
-    }
-    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
-    {
-        return 0;
-    }
-}
-
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
 {
     int32_t ret = nativeClient_.NetworkCreatePhysical(NET_ID, PERMISSION);
@@ -644,16 +632,6 @@ HWTEST_F(NetsysNativeClientTest, SetDnsCacheTest001, TestSize.Level1)
     AddrInfo info;
     int32_t ret = nativeClient_.SetDnsCache(netId, testHost, info);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeClientTest, SetDnsCacheTest002, TestSize.Level1)
-{
-    NetsysNativeClientMock clientStub;
-    uint16_t netId = 101;
-    std::string testHost = "test";
-    AddrInfo info;
-    int32_t ret = clientStub.SetDnsCache(netId, testHost, info);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 } // namespace NetManagerStandard
