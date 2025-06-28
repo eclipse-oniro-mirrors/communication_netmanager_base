@@ -671,6 +671,11 @@ public:
     {
         return 0;
     }
+
+    bool CheckNetSysInternalPermission()
+    {
+        return true;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -2309,7 +2314,76 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache002, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    MessageParcel data;
+    if (!data.WriteString(testHost)) {
+        return;
+    }
+
+    if (!data.WriteUint32(netId)) {
+        return;
+    }
+
+    if (!data.WriteRawData(&info, sizeof(AddrInfo))) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache003, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    MessageParcel data;
+    if (!data.WriteUint32(netId)) {
+        return;
+    }
+
+    if (!data.WriteRawData(&info, sizeof(AddrInfo))) {
+        return;
+    }
+
+    if (!data.WriteString(testHost)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache004, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    std::string testHost = "test";
+    AddrInfo info;
+    MessageParcel data;
+    if (!data.WriteUint32(netId)) {
+        return;
+    }
+
+    if (!data.WriteString(testHost)) {
+        return;
+    }
+
+    if (!data.WriteString(testHost)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 } // namespace NetsysNative

@@ -124,13 +124,17 @@ HWTEST_F(DnsProxyRequestSocketTest, MakeAddrInfo001, TestSize.Level0)
 {
     DnsProxyListen dnsproxylisten;
     std::vector<std::string> servers = {"1"};
-    size_t serverIdx = 2;
+    size_t serverIdx = 0;
     AlignedSockAddr addrParse;
     AlignedSockAddr clientSock;
     clientSock.sa.sa_family = AF_INET;
     EXPECT_FALSE(dnsproxylisten.MakeAddrInfo(servers, serverIdx, addrParse, clientSock));
     servers = {"1", ".", "2"};
+    serverIdx = 1;
     EXPECT_FALSE(dnsproxylisten.MakeAddrInfo(servers, serverIdx, addrParse, clientSock));
+    servers = {"1", "127.0.0.1", "2"};
+    serverIdx = 1;
+    EXPECT_TRUE(dnsproxylisten.MakeAddrInfo(servers, serverIdx, addrParse, clientSock));
 }
 
 HWTEST_F(DnsProxyRequestSocketTest, MakeAddrInfo002, TestSize.Level0)
@@ -143,6 +147,7 @@ HWTEST_F(DnsProxyRequestSocketTest, MakeAddrInfo002, TestSize.Level0)
     clientSock.sa.sa_family = AF_INET6;
     EXPECT_FALSE(dnsproxylisten.MakeAddrInfo(servers, serverIdx, addrParse, clientSock));
     servers = {"1"};
+    serverIdx = 0;
     EXPECT_FALSE(dnsproxylisten.MakeAddrInfo(servers, serverIdx, addrParse, clientSock));
 }
 
@@ -150,7 +155,7 @@ HWTEST_F(DnsProxyRequestSocketTest, MakeAddrInfo003, TestSize.Level0)
 {
     DnsProxyListen dnsproxylisten;
     std::vector<std::string> servers = {"1"};
-    size_t serverIdx = 2;
+    size_t serverIdx = 0;
     AlignedSockAddr addrParse;
     AlignedSockAddr clientSock;
     clientSock.sa.sa_family = 3;
