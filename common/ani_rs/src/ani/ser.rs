@@ -636,7 +636,7 @@ impl serde::ser::SerializeSeq for ArraySer<'_, '_> {
             let obj = self.env.new_object_with_signature(
                 &class,
                 signature::TYPED_ARRAY_CTOR,
-                (array.as_raw(), undefined.clone(), undefined),
+                (array.as_raw(), 0),
             )?;
             self.recur.recur(obj.into())
         } else {

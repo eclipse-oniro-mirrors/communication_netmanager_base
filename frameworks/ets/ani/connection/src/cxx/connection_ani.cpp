@@ -26,11 +26,19 @@
 #include "refbase.h"
 #include "tokenid_kit.h"
 #include "wrapper.rs.h"
+#include "net_manager_constants.h"
+#include "errorcode_convertor.h"
 #include <memory>
 #include <string>
 namespace OHOS {
 namespace NetManagerAni {
 using namespace Security::AccessToken;
+
+rust::String GetErrorCodeAndMessage(int32_t &errorCode)
+{
+    NetManagerStandard::NetBaseErrorCodeConvertor convertor;
+    return rust::string(convertor.ConvertErrorCode(errorCode));
+}
 
 NetHandle GetDefaultNetHandle(int32_t &ret)
 {

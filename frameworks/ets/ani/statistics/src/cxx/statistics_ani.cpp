@@ -14,9 +14,17 @@
  */
 
 #include "statistics_ani.h"
+#include "net_manager_constants.h"
+#include "errorcode_convertor.h"
 
 namespace OHOS {
 namespace NetManagerAni {
+
+rust::String GetErrorCodeAndMessage(int32_t &errorCode)
+{
+    NetManagerStandard::NetBaseErrorCodeConvertor convertor;
+    return rust::string(convertor.ConvertErrorCode(errorCode));
+}
 
 NetManagerStandard::NetStatsClient &GetNetStatsClient(int32_t &nouse)
 {
