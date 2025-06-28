@@ -17,6 +17,7 @@
 #define NET_POLICY_SERVICE_STUB_H
 
 #include <map>
+#include <mutex>
 
 #include "ffrt.h"
 #include "iremote_stub.h"
@@ -26,6 +27,12 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr const char *NET_POLICY_STUB_QUEUE = "NET_POLICY_STUB_QUEUE";
+constexpr const int32_t NETWORK_POLICY_REPORT_DELAY = 10 * 1000 * 1000;
+constexpr const int32_t HIVIEW_UID = 1201;
+constexpr const char *NETWORK_POLICY_CHANGED_EVENT = "custom.event.NETWORK_POLICY_CHANGED";
+constexpr const char *NETWORK_POLICY_INFO_KEY = "POLICY_INFO";
+constexpr const int32_t NET_POLICY_WIFI_ALLOW = (1 << 0);
+constexpr const int32_t NET_POLICY_CELLULAR_ALLOW = (1 << 1);
 
 class NetPolicyServiceStub : public IRemoteStub<INetPolicyService> {
 public:
@@ -75,8 +82,16 @@ private:
     int32_t OnSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
 
 private:
+    void HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessPolicy &policy,
+        uint32_t callingUid);
+    void HandleReportNetworkPolicy();
+
+private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;
     std::once_flag onceFlag;
+    std::mutex setNetworkPolicyMutex_;
+    bool isPostDelaySetNetworkPolicy_ = false;
+    std::map<uint32_t, std::map<uint32_t, uint32_t>> appNetworkPolicyMap_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
