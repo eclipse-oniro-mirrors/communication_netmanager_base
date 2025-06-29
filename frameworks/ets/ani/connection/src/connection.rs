@@ -15,7 +15,7 @@ use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
-    objects::{AniFnObject, AniRef, GlobalRefCallback},
+    objects::{AniAsyncCallback, AniFnObject, AniRef, GlobalRefCallback},
     AniEnv,
 };
 
@@ -163,7 +163,10 @@ pub(crate) fn set_custom_dns_rule(host: String, ips: Vec<String>) -> Result<(), 
 }
 
 #[ani_rs::native]
-pub(crate) fn remove_custom_dns_rule(host: String) -> Result<(), BusinessError> {
+pub(crate) fn remove_custom_dns_rule(
+    host: String,
+    async_callback: AniAsyncCallback,
+) -> Result<(), BusinessError> {
     if !check_permission(INTERNET_PERMISSION) {
         return Err(BusinessError::PERMISSION);
     }
@@ -214,6 +217,7 @@ impl Connection {
 #[ani_rs::native]
 pub(crate) fn create_net_connection<'local>(
     env: &AniEnv<'local>,
+    this: NetConnection,
     net_specifier: Option<NetSpecifier>,
     timeout: Option<i32>,
 ) -> Result<AniRef<'local>, BusinessError> {
