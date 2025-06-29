@@ -27,6 +27,7 @@ use crate::{
     error::AniError,
     global::GlobalRef,
     objects::{AniObject, AniRef},
+    wrapper::RustClosure,
     AniEnv, AniVm,
 };
 
@@ -246,7 +247,7 @@ impl GlobalRef<AniFnObject<'static>> {
         T: InputVec + Send + 'static,
     {
         let me = self.clone();
-        ylong_runtime::spawn_blocking(move || {
+        RustClosure::new(move || {
             ONCE.with(|a| {
                 a.call_once(|| {
                     let _ = AniVm::get_instance().attach_current_thread();
@@ -256,12 +257,10 @@ impl GlobalRef<AniFnObject<'static>> {
                 .get_env()
                 .or_else(|_| AniVm::get_instance().attach_current_thread())
             {
-                let input = input.input(&env);
-                env.function_object_call(&me.0, &input).unwrap();
-            } else {
-                panic!("Failed to execute");
+                let _ = env.function_object_call(&me.0, &input.input(&env));
             }
-        });
+        })
+        .send_event("async callback execute global");
     }
 }
 
@@ -272,7 +271,7 @@ impl GlobalRef<AniAsyncCallback<'static>> {
         T: InputVec + Send + 'static,
     {
         let me = self.clone();
-        ylong_runtime::spawn_blocking(move || {
+        RustClosure::new(move || {
             ONCE.with(|a| {
                 a.call_once(|| {
                     let _ = AniVm::get_instance().attach_current_thread();
@@ -284,7 +283,8 @@ impl GlobalRef<AniAsyncCallback<'static>> {
             {
                 me.0.execute_local(&env, business_error, input).unwrap();
             }
-        });
+        })
+        .send_event("async callback execute global");
     }
 }
 
