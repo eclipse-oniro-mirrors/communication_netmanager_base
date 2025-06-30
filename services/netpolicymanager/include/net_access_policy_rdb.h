@@ -42,6 +42,8 @@ namespace NetAccessPolicyRdbFiledConst {
 
 constexpr const char* DATABASE_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy.db";
 constexpr const char* DATABASE_BACK_NAME = "/data/service/el1/public/netmanager/net_uid_access_policy_back.db";
+constexpr const char* POLICY_DATABASE_BACKUP_FILE =
+    "/data/service/el1/public/netmanager/net_uid_access_policy_backup.txt";
 
 typedef struct NetAccessPolicyData {
     int32_t uid;

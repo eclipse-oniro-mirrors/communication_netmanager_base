@@ -129,7 +129,7 @@ int32_t NetsysPolicyWrapper::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessP
 {
     auto netsysReturnValue =
         NetsysController::GetInstance().SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
-    NETMGR_LOG_D(
+    NETMGR_LOG_I(
         "SetNetworkAccessPolicy uid[%{public}u] policy wifi_enable[%{public}d] and cellular_enable[%{public}d] "
         "netsys return[%{public}d]",
         uid, policy.wifiAllow, policy.cellularAllow, netsysReturnValue);
