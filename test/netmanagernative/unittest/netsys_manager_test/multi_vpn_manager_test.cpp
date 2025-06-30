@@ -29,7 +29,8 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr const char *TEST_XFRM_CARD_NAME = "xfrm-vpn1";
-constexpr const char *TEST_PPP_CARD_NAME = "ppp-vpn";
+constexpr const char *TEST_PPP_CARD_NAME = "ppp-vpn2";
+constexpr const char *TEST_MULTI_TUN_CARD_NAME = "multitun-vpn3";
 } // namespace
 
 class MultiVpnManagerTest : public testing::Test {
@@ -50,15 +51,11 @@ void MultiVpnManagerTest::TearDown() {}
 
 HWTEST_F(MultiVpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
 {
-    MultiVpnManager::GetInstance().StartPppInterfaceFdListen(TEST_XFRM_CARD_NAME);
-    MultiVpnManager::GetInstance().pppListeningFlag_ = false;
-    MultiVpnManager::GetInstance().StartPppInterfaceFdListen(TEST_PPP_CARD_NAME);
-
-    MultiVpnManager::GetInstance().StartPppInterfaceFdListen(TEST_PPP_CARD_NAME);
-
-    MultiVpnManager::GetInstance().StartPppSocketListen(TEST_XFRM_CARD_NAME);
-    MultiVpnManager::GetInstance().StartPppSocketListen(TEST_PPP_CARD_NAME);
-
+    MultiVpnManager::GetInstance().CreatePppFd(TEST_XFRM_CARD_NAME);
+    MultiVpnManager::GetInstance().multiVpnListeningFlag_ = false;
+    MultiVpnManager::GetInstance().CreatePppFd(TEST_PPP_CARD_NAME);
+    MultiVpnManager::GetInstance().CreatePppFd(TEST_PPP_CARD_NAME);
+    MultiVpnManager::GetInstance().StartMultiVpnSocketListen();
     MultiVpnManager::GetInstance().SetXfrmPhyIfName("eth0");
     MultiVpnManager::GetInstance().DestroyVpnInterface(TEST_XFRM_CARD_NAME);
 
@@ -66,6 +63,10 @@ HWTEST_F(MultiVpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
     result = MultiVpnManager::GetInstance().CreateVpnInterface(TEST_PPP_CARD_NAME);
     EXPECT_EQ(result, NETMANAGER_ERROR);
+
+    result = MultiVpnManager::GetInstance().CreateVpnInterface(TEST_MULTI_TUN_CARD_NAME);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
     result = MultiVpnManager::GetInstance().CreateVpnInterface("eth0");
     EXPECT_EQ(result, NETMANAGER_ERROR);
 
@@ -239,21 +240,30 @@ HWTEST_F(MultiVpnManagerTest, CreatePppInterface001, TestSize.Level1)
 HWTEST_F(MultiVpnManagerTest, CreatePppInterface002, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
-    multiVpnManager.pppFdMap_[TEST_PPP_CARD_NAME] = 1;
+    multiVpnManager.multiVpnFdMap_[TEST_PPP_CARD_NAME] = 1;
     std::string cardName = TEST_PPP_CARD_NAME;
     auto result = multiVpnManager.CreatePppInterface(cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
-HWTEST_F(MultiVpnManagerTest, CreatePppFd001, TestSize.Level1)
+HWTEST_F(MultiVpnManagerTest, GetMultiVpnFd001, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
     std::string cardName = "12345678901234567890";
-    auto result = multiVpnManager.CreatePppFd(cardName);
+    int32_t multiVpnFd = -1;
+    auto result = multiVpnManager.GetMultiVpnFd(cardName, multiVpnFd);
     EXPECT_EQ(result, NETMANAGER_ERROR);
-    result = multiVpnManager.CreatePppFd(TEST_XFRM_CARD_NAME);
-    EXPECT_EQ(result, NETMANAGER_ERROR);
-    result = MultiVpnManager::GetInstance().CreatePppFd(TEST_PPP_CARD_NAME);
+    result = multiVpnManager.GetMultiVpnFd(TEST_MULTI_TUN_CARD_NAME, multiVpnFd);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    result = MultiVpnManager::GetInstance().GetMultiVpnFd(TEST_PPP_CARD_NAME, multiVpnFd);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(MultiVpnManagerTest, GetMultiVpnFd002, TestSize.Level1)
+{
+    MultiVpnManager multiVpnManager;
+    int32_t multiVpnFd = -1;
+    auto result = MultiVpnManager::GetInstance().GetMultiVpnFd(TEST_MULTI_TUN_CARD_NAME, multiVpnFd);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -261,7 +271,7 @@ HWTEST_F(MultiVpnManagerTest, DestroyPppFd001, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
     std::string cardName = "12345678901234567890";
-    auto result = multiVpnManager.DestroyPppFd(cardName);
+    auto result = multiVpnManager.DestroyMultiVpnFd(cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
@@ -269,7 +279,7 @@ HWTEST_F(MultiVpnManagerTest, DestroyPppFd002, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
     std::string cardName = TEST_PPP_CARD_NAME;
-    auto result = multiVpnManager.DestroyPppFd(cardName);
+    auto result = multiVpnManager.DestroyMultiVpnFd(cardName);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
@@ -277,8 +287,8 @@ HWTEST_F(MultiVpnManagerTest, DestroyPppFd003, TestSize.Level1)
 {
     MultiVpnManager multiVpnManager;
     std::string cardName = TEST_PPP_CARD_NAME;
-    multiVpnManager.pppFdMap_[TEST_PPP_CARD_NAME] = 2;
-    auto result = multiVpnManager.DestroyPppFd(cardName);
+    multiVpnManager.multiVpnFdMap_[TEST_PPP_CARD_NAME] = 2;
+    auto result = multiVpnManager.DestroyMultiVpnFd(cardName);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -335,6 +345,16 @@ HWTEST_F(MultiVpnManagerTest, SetVpnCallMode001, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
     message = "2";
     result = multiVpnManager.SetVpnCallMode(message);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(MultiVpnManagerTest, CreateMultiTunInterface001, TestSize.Level1)
+{
+    std::string cardName = "12345678901234567890";
+    auto result = MultiVpnManager::GetInstance().CreateMultiTunInterface(cardName);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+    cardName = "multitun-vpn1";
+    result = MultiVpnManager::GetInstance().CreateMultiTunInterface(cardName);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 

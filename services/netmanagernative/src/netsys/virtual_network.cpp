@@ -79,7 +79,8 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
     int ret = NETMANAGER_SUCCESS;
 #ifdef SUPPORT_SYSVPN
     if ((strncmp(interfaceName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
-        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0) ||
+        (strncmp(interfaceName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0)) {
         ret = MultiVpnManager::GetInstance().CreateVpnInterface(interfaceName);
     } else {
         ret = VpnManager::GetInstance().CreateVpnInterface();
@@ -116,7 +117,8 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
     }
 #ifdef SUPPORT_SYSVPN
     if ((strncmp(interfaceName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
-        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0)) {
+        (strncmp(interfaceName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0) ||
+        (strncmp(interfaceName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0)) {
         MultiVpnManager::GetInstance().DestroyVpnInterface(interfaceName);
     } else {
         VpnManager::GetInstance().DestroyVpnInterface();
