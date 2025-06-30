@@ -1326,46 +1326,6 @@ pub struct __ani_interaction_api {
         ) -> c_uint,
     >,
 
-    pub Class_FindSetter: ::std::option::Option<
-        unsafe extern "C" fn(
-            env: *mut ani_env,
-            cls: ani_class,
-            name: *const ::std::os::raw::c_char,
-            result: *mut ani_method,
-        ) -> c_uint,
-    >,
-
-    pub Class_FindGetter: ::std::option::Option<
-        unsafe extern "C" fn(
-            env: *mut ani_env,
-            cls: ani_class,
-            name: *const ::std::os::raw::c_char,
-            result: *mut ani_method,
-        ) -> c_uint,
-    >,
-
-    pub Class_FindIndexableGetter: ::std::option::Option<
-        unsafe extern "C" fn(
-            env: *mut ani_env,
-            cls: ani_class,
-            signature: *const ::std::os::raw::c_char,
-            result: *mut ani_method,
-        ) -> c_uint,
-    >,
-
-    pub Class_FindIndexableSetter: ::std::option::Option<
-        unsafe extern "C" fn(
-            env: *mut ani_env,
-            cls: ani_class,
-            signature: *const ::std::os::raw::c_char,
-            result: *mut ani_method,
-        ) -> c_uint,
-    >,
-
-    pub Class_FindIterator: ::std::option::Option<
-        unsafe extern "C" fn(env: *mut ani_env, cls: ani_class, result: *mut ani_method) -> c_uint,
-    >,
-
     pub Class_GetStaticField_Boolean: ::std::option::Option<
         unsafe extern "C" fn(
             env: *mut ani_env,
