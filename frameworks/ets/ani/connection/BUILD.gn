@@ -40,6 +40,7 @@ ohos_static_library("connection_ani_static") {
     ":connection_ani_cxx",
     "//third_party/rust/crates/cxx:cxx_cppdeps",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
   external_deps = [

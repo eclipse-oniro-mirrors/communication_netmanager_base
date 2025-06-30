@@ -500,7 +500,7 @@ impl From<ffi::NetConnectionPropertyInfo> for bridge::NetConnectionPropertyInfo 
 }
 
 #[cxx::bridge(namespace = "OHOS::NetManagerAni")]
-mod ffi {
+pub mod ffi {
 
     #[namespace = "OHOS::NetManagerStandard"]
     #[repr(i32)]
@@ -662,6 +662,8 @@ mod ffi {
             connection: Box<ConnCallback>,
             ret: &mut i32,
         ) -> UniquePtr<UnregisterHandle>;
+
+        fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
     }
 }
 

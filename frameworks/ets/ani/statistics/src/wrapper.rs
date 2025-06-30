@@ -120,7 +120,7 @@ impl NetStatsClient {
 }
 
 #[cxx::bridge(namespace = "OHOS::NetManagerAni")]
-mod ffi {
+pub mod ffi {
     unsafe extern "C++" {
         include!("net_stats_client.h");
         include!("statistics_ani.h");
@@ -161,5 +161,6 @@ mod ffi {
             sockfd: i32,
         ) -> i32;
 
+        fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
     }
 }

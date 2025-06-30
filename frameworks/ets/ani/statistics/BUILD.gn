@@ -40,6 +40,7 @@ ohos_static_library("statistics_ani_static") {
     ":statistics_ani_cxx",
     "//third_party/rust/crates/cxx:cxx_cppdeps",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
   external_deps = [
     "c_utils:utils",
