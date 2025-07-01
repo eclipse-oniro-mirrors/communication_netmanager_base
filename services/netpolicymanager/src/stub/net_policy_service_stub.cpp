@@ -701,16 +701,14 @@ void NetPolicyServiceStub::HandleReportNetworkPolicy()
         cJSON_AddItemToObject(networkPolicyJson, std::to_string(callingPolicy.first).c_str(), appPolicyJson);
     }
     char *pParamJson = cJSON_PrintUnformatted(networkPolicyJson);
+    cJSON_Delete(networkPolicyJson);
     if (!pParamJson) {
-        cJSON_Delete(networkPolicyJson);
-        cJSON_free(pParamJson);
         return;
     }
     std::string paramStr(pParamJson);
     NETMGR_LOG_I("HandleReportNetworkPolicy, %{public}s", paramStr.c_str());
     std::map<std::string, std::string> param = {{NETWORK_POLICY_INFO_KEY, paramStr}};
     BroadcastManager::GetInstance().SendBroadcast(info, param);
-    cJSON_Delete(networkPolicyJson);
     cJSON_free(pParamJson);
     isPostDelaySetNetworkPolicy_ = false;
     appNetworkPolicyMap_.clear();
@@ -727,9 +725,8 @@ void NetPolicyServiceStub::HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessP
     uint32_t policyInfo = 0;
     policyInfo |= policy.wifiAllow ? NET_POLICY_WIFI_ALLOW : 0;
     policyInfo |= policy.cellularAllow ? NET_POLICY_CELLULAR_ALLOW : 0;
-    auto allNetworkPolicy = appNetworkPolicyMap_.at(callingUid);
+    auto& allNetworkPolicy = appNetworkPolicyMap_.at(callingUid);
     allNetworkPolicy[uid] = policyInfo;
-    appNetworkPolicyMap_[callingUid] = allNetworkPolicy;
     if (!isPostDelaySetNetworkPolicy_) {
         isPostDelaySetNetworkPolicy_ = true;
 #ifndef UNITTEST_FORBID_FFRT
