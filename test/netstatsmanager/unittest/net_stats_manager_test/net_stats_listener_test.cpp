@@ -23,6 +23,7 @@
 #include "common_event_support.h"
 #include "net_stats_listener.h"
 #include "net_stats_constants.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -134,6 +135,26 @@ HWTEST_F(NetStatsListenerTest, RegisterStatsCallbackData001, TestSize.Level1)
     eventData.SetWant(wantErr);
     ASSERT_NE(instance_, nullptr);
     instance_->OnReceiveEvent(eventData);
+}
+
+HWTEST_F(NetStatsListenerTest, RegisterStatsCallbackData002, TestSize.Level1)
+{
+    instance_->RegisterStatsCallbackData(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE,
+                                     [this](const EventFwk::CommonEventData &data) { return 0; });
+    instance_->RegisterStatsCallbackData(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE,
+                                     [this](const EventFwk::CommonEventData &data) { return 0; });
+    EventFwk::Want wantErr;
+    wantErr.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE);
+    EventFwk::CommonEventData eventData;
+    eventData.SetCode(2); // 2:WifiConnecting
+    eventData.SetWant(wantErr);
+    ASSERT_NE(instance_, nullptr);
+    instance_->OnReceiveEvent(eventData);
+
+    bool ret = CommonUtils::IsSameNaturalDay(1751357844, 1518743913);
+    ASSERT_EQ(ret, false);
+    ret = CommonUtils::IsSameNaturalDay(1751357844, 1751357850);
+    ASSERT_EQ(ret, true);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

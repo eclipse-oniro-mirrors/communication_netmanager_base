@@ -103,25 +103,7 @@ inline uint64_t GetCurrentSecond()
         .count();
 }
 
-inline bool IsSameNaturalDay(uint32_t current, uint32_t another)
-{
-    std::time_t tt1 =
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(current)));
-    std::time_t tt2 =
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(another)));
-    struct std::tm tempTm1, tempTm2;
-    std::tm *tm1 = std::localtime(&tt1);
-    if (tm1) {
-        tempTm1 = *tm1;
-    }
-    std::tm *tm2 = std::localtime(&tt2);
-    if (tm2) {
-        tempTm2 = *tm2;
-    }
-    return tempTm1.tm_year == tempTm2.tm_year &&
-        tempTm1.tm_mon == tempTm2.tm_mon && tempTm1.tm_mday == tempTm2.tm_mday;
-}
-
+bool IsSameNaturalDay(uint32_t current, uint32_t another);
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
 std::string GetHostnameFromURL(const std::string &url);
 int32_t GetTodayMidnightTimestamp(int hour, int min, int sec);
