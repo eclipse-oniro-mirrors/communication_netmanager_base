@@ -109,12 +109,17 @@ inline bool IsSameNaturalDay(uint32_t current, uint32_t another)
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(current)));
     std::time_t tt2 =
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::time_point(std::chrono::seconds(another)));
+    struct std::tm tempTm1, tempTm2;
     std::tm *tm1 = std::localtime(&tt1);
-    std::tm *tm2 = std::localtime(&tt2);
-    if (tm1 == nullptr || tm2 == nullptr) {
-        return false;
+    if (tm1) {
+        tempTm1 = *tm1;
     }
-    return tm1->tm_year == tm2->tm_year && tm1->tm_mon == tm2->tm_mon && tm1->tm_mday == tm2->tm_mday;
+    std::tm *tm2 = std::localtime(&tt2);
+    if (tm2) {
+        tempTm2 = *tm2;
+    }
+    return tempTm1.tm_year == tempTm2.tm_year &&
+        tempTm1.tm_mon == tempTm2.tm_mon && tempTm1.tm_mday == tempTm2.tm_mday;
 }
 
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
