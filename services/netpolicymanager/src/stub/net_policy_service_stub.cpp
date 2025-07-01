@@ -734,10 +734,7 @@ void NetPolicyServiceStub::HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessP
 #endif
             HandleReportNetworkPolicy();
 #ifndef UNITTEST_FORBID_FFRT
-        }, 
-        ffrt::task_attr()
-            .name("HandleReportNetworkPolicy")
-            .delay(NETWORK_POLICY_REPORT_DELAY));
+            }, ffrt::task_attr().name("HandleReportNetworkPolicy").delay(NETWORK_POLICY_REPORT_DELAY));
 #endif
     }
 }
