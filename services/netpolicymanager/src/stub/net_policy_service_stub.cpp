@@ -20,6 +20,8 @@
 #include "net_quota_policy.h"
 #include "netmanager_base_permission.h"
 #include "ipc_skeleton.h"
+#include "broadcast_manager.h"
+#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -681,6 +683,62 @@ int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, Messag
     return NETMANAGER_SUCCESS;
 }
 
+void NetPolicyServiceStub::HandleReportNetworkPolicy()
+{
+    std::lock_guard<std::mutex> lock(setNetworkPolicyMutex_);
+    if (appNetworkPolicyMap_.empty()) {
+        return;
+    }
+    BroadcastInfo info;
+    info.action = NETWORK_POLICY_CHANGED_EVENT;
+    info.subscriberUid = HIVIEW_UID;
+    cJSON* networkPolicyJson = cJSON_CreateObject();
+    for (auto &callingPolicy : appNetworkPolicyMap_) {
+        cJSON* appPolicyJson = cJSON_CreateObject();
+        for (auto &appPolicy : callingPolicy.second) {
+            cJSON_AddNumberToObject(appPolicyJson, std::to_string(appPolicy.first).c_str(), appPolicy.second);
+        }
+        cJSON_AddItemToObject(networkPolicyJson, std::to_string(callingPolicy.first).c_str(), appPolicyJson);
+    }
+    char *pParamJson = cJSON_PrintUnformatted(networkPolicyJson);
+    cJSON_Delete(networkPolicyJson);
+    if (!pParamJson) {
+        return;
+    }
+    std::string paramStr(pParamJson);
+    NETMGR_LOG_I("HandleReportNetworkPolicy, %{public}s", paramStr.c_str());
+    std::map<std::string, std::string> param = {{NETWORK_POLICY_INFO_KEY, paramStr}};
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
+    cJSON_free(pParamJson);
+    isPostDelaySetNetworkPolicy_ = false;
+    appNetworkPolicyMap_.clear();
+}
+ 
+void NetPolicyServiceStub::HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessPolicy &policy,
+    uint32_t callingUid)
+{
+    std::lock_guard<std::mutex> lock(setNetworkPolicyMutex_);
+    if (appNetworkPolicyMap_.find(callingUid) == appNetworkPolicyMap_.end()) {
+        std::map<uint32_t, uint32_t> policyMap;
+        appNetworkPolicyMap_.emplace(callingUid, std::move(policyMap));
+    }
+    uint32_t policyInfo = 0;
+    policyInfo |= policy.wifiAllow ? NET_POLICY_WIFI_ALLOW : 0;
+    policyInfo |= policy.cellularAllow ? NET_POLICY_CELLULAR_ALLOW : 0;
+    auto& allNetworkPolicy = appNetworkPolicyMap_.at(callingUid);
+    allNetworkPolicy[uid] = policyInfo;
+    if (!isPostDelaySetNetworkPolicy_) {
+        isPostDelaySetNetworkPolicy_ = true;
+#ifndef UNITTEST_FORBID_FFRT
+        ffrtQueue_.submit([this]() {
+#endif
+            HandleReportNetworkPolicy();
+#ifndef UNITTEST_FORBID_FFRT
+            }, ffrt::task_attr().name("HandleReportNetworkPolicy").delay(NETWORK_POLICY_REPORT_DELAY));
+#endif
+    }
+}
+
 int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_I("SetNetworkAccessPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
@@ -715,7 +773,7 @@ int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, Mess
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    HandleStoreNetworkPolicy(uid, policy, IPCSkeleton::GetCallingUid());
     return NETMANAGER_SUCCESS;
 }
 
