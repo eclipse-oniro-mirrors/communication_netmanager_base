@@ -18,6 +18,9 @@ ohos_bpf("netsys") {
   sources = [ "src/netsys.c" ]
 
   include_dirs = [ "include" ]
+  if(ohos_indep_compiler_enable){
+    include_dirs += [ "//binarys/third_party/libbpf/innerapis/libbpf/includes" ]
+  }
   defines = []
 
   if (netmanager_base_enable_feature_net_firewall) {

@@ -103,7 +103,6 @@ ohos_unittest("netsys_wrapper_fault_through_test") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "wifi:wifi_sdk",
   ]
 
   defines = [

@@ -91,7 +91,6 @@ ohos_unittest("networkshare_manager_test") {
 
   if (communication_wifi_switch_enable) {
     defines += [ "WIFI_MODOULE" ]
-    external_deps += [ "wifi:wifi_sdk" ]
   }
 
   if (usb_manager_enable) {

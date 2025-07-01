@@ -23,15 +23,11 @@
 #include <queue>
 #include <thread>
 
-#include "event_runner.h"
-#include "event_handler.h"
 #include "singleton.h"
 #include "ffrt.h"
 
 namespace OHOS {
 namespace nmd {
-using EventRunner = OHOS::AppExecFwk::EventRunner;
-using EventHandler = OHOS::AppExecFwk::EventHandler;
 enum IpType {
     IPTYPE_IPV4 = 1,
     IPTYPE_IPV6 = 2,

@@ -16,7 +16,6 @@
 #ifndef NETMANAGER_CONSTANTS_H
 #define NETMANAGER_CONSTANTS_H
 
-#include <errors.h>
 #include <stdint.h>
 
 namespace OHOS {
@@ -32,9 +31,6 @@ enum {
     NETMANAGER_NET_CONN_MANAGER = 0x03,
     NETMANAGER_NET_POLICY_MANAGER = 0x04,
 };
-
-// Error code for common
-constexpr ErrCode COMMON_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_COMMON);
 
 enum {
     NETMANAGER_ERR_PERMISSION_DENIED = 201,
@@ -180,12 +176,6 @@ enum RegisterType {
     REGISTER,
     REQUEST
 };
-// Error code for netmanager dns resolver
-constexpr ErrCode DNS_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_DNS_RESOLVER_MANAGER);
-// Error code for netmanager conn manager
-constexpr ErrCode CONN_MANAGER_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_NET_CONN_MANAGER);
-// Error code for netmanager policy manager
-constexpr ErrCode POLICY_MANAGER_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_NET_POLICY_MANAGER);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NETMANAGER_CONSTANTS_H

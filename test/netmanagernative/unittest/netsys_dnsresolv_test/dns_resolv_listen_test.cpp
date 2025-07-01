@@ -25,7 +25,6 @@
 #ifdef USE_SELINUX
 #include "selinux/selinux.h"
 #endif
-#include "dns_quality_diag.h"
 #include "dns_resolv_listen.h"
 
 namespace OHOS::nmd {
