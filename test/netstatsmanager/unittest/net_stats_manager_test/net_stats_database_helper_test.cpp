@@ -400,7 +400,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionNormalTest001, TestSize.Leve
 HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionErrorHandlingTest001, TestSize.Level1)
 {
     NETMGR_LOG_I("GetTableVersionErrorHandlingTest001");
-    auto helper = std::make_unique<NetStatsDatabaseHelper>("");// 无效路径
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
 
     NetStatsDatabaseHelper::TableVersion version;
     int32_t ret = helper->GetTableVersion(version, VERSION_TABLE);
