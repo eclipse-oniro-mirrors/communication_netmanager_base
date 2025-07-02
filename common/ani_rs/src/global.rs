@@ -13,7 +13,7 @@
 
 use std::ops::Deref;
 
-use crate::{objects::AniRef, AniVm};
+use crate::{ani_rs_error, objects::AniRef, AniVm};
 
 impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalRef<T> {
     fn drop(&mut self) {
@@ -22,6 +22,9 @@ impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalRef<T> {
         } else {
             if let Ok(env) = AniVm::get_instance().attach_current_thread() {
                 let _ = env.delete_global_ref(self.0.clone().into());
+                let _ = AniVm::get_instance().detach_current_thread();
+            } else {
+                ani_rs_error!("Failed to attach_current_thread in drop");
             }
         }
     }
