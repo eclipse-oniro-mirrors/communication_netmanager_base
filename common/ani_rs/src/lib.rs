@@ -37,3 +37,10 @@ mod iterator;
 mod macros;
 mod primitive;
 mod wrapper;
+mod log;
+
+const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
+    log_type: hilog_rust::LogType::LogCore,
+    domain: 0xD0015B0,
+    tag: "AniRs",
+};
