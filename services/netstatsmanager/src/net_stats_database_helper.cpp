@@ -38,7 +38,6 @@ constexpr const char* INSERT_OR_REPLACE_INTO = "INSERT OR REPLACE INTO ";
 constexpr const char* SET_FLAG = " SET Flag = ";
 constexpr const char* SET_USERID = " SET UserId = ";
 namespace {
-const int32_t MAX_LOOP_COUNT = 10;
 NetStatsDatabaseHelper::SqlCallback sqlCallback = [](void *notUsed, int argc, char **argv, char **colName) {
     std::string data;
     for (int i = 0; i < argc; i++) {
@@ -647,15 +646,10 @@ int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std
     }
     int32_t rc = statement_.Step();
     auto v = static_cast<uint32_t>(Version_0);
-    int32_t loopCount = 0;
-    while (rc != SQLITE_DONE && loopCount < MAX_LOOP_COUNT) {
-        loopCount++;
+    while (rc != SQLITE_DONE) {
         if (rc == SQLITE_ROW) {
             int32_t i = 1;
             statement_.GetColumnInt(i, v);
-            rc = statement_.Step();
-        } else if (rc == SQLITE_BUSY) {
-            ffrt::this_task::sleep_for(std::chrono::seconds(1));
             rc = statement_.Step();
         } else {
             NETMGR_LOG_E("Step failed with rc:%{public}d", rc);
