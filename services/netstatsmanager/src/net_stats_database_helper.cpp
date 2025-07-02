@@ -647,9 +647,14 @@ int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std
     int32_t rc = statement_.Step();
     auto v = static_cast<uint32_t>(Version_0);
     while (rc != SQLITE_DONE) {
-        int32_t i = 1;
-        statement_.GetColumnInt(i, v);
-        rc = statement_.Step();
+        if (rc == SQLITE_ROW) {
+            int32_t i = 1;
+            statement_.GetColumnInt(i, v);
+            rc = statement_.Step();
+        } else {
+            NETMGR_LOG_E("Step failed with rc:%{public}d", rc);
+            break;
+        }
     }
     statement_.ResetStatementAndClearBindings();
     version = static_cast<TableVersion>(v);

@@ -81,6 +81,14 @@ HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest005, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    const std::string tableInfo = VERSION_TABLE_CREATE_PARAM;
+    int32_t ret = helper->CreateTable(VERSION_TABLE, tableInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsDatabaseHelperTest, ExecTableUpgradeTest005, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
@@ -376,6 +384,27 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
     
     auto helper2 = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
     ret = helper2->DeleteAndBackup(SQLITE_NOTADB);
+}
+HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionNormalTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("GetTableVersionNormalTest001");
+
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    int32_t ret = helper->UpdateTableVersion(NetStatsDatabaseHelper::Version_1, VERSION_TABLE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    NetStatsDatabaseHelper::TableVersion version;
+    ret = helper->GetTableVersion(version, VERSION_TABLE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(version, NetStatsDatabaseHelper::Version_1);
+}
+HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionErrorHandlingTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("GetTableVersionErrorHandlingTest001");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
+
+    NetStatsDatabaseHelper::TableVersion version;
+    int32_t ret = helper->GetTableVersion(version, VERSION_TABLE);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
