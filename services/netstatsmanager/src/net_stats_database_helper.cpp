@@ -661,6 +661,7 @@ int32_t NetStatsDatabaseHelper::GetTableVersion(TableVersion &version, const std
             NETMGR_LOG_E("Step failed with rc:%{public}d", rc);
             break;
         }
+    }
     statement_.ResetStatementAndClearBindings();
     version = static_cast<TableVersion>(v);
     return NETMANAGER_SUCCESS;
