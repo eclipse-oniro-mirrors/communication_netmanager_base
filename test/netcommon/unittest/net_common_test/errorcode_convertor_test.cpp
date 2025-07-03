@@ -21,6 +21,7 @@
 #include "event_report.h"
 #include "net_manager_constants.h"
 #include "netmanager_hitrace.h"
+#include "ipc_types.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -78,6 +79,12 @@ HWTEST_F(ErrorCodeConvertorTest, ConvertErrorCodeTest001, TestSize.Level1)
     int32_t errorCode = NETMANAGER_ERR_INTERNAL;
     auto ret = instance->ConvertErrorCode(errorCode);
     ASSERT_FALSE(ret.empty());
+    ret = instance->ConvertErrorCode(testErrorCode);
+    ASSERT_TRUE(ret.empty());
+    testErrorCode = IPC_PROXY_ERR;
+    ret = instance->ConvertErrorCode(testErrorCode);
+    ASSERT_TRUE(ret.empty());
+    testErrorCode = 1000; // 1000:ERROR_DIVISOR
     ret = instance->ConvertErrorCode(testErrorCode);
     ASSERT_TRUE(ret.empty());
 }
