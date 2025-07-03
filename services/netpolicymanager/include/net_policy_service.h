@@ -50,6 +50,7 @@ public:
     void OnStart() override;
     void OnStop() override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
+    int32_t OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply) override;
 
     /**
      * Set the network policy for the specified UID.
@@ -265,6 +266,9 @@ public:
 
     void SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid);
     void DelBrokerUidAccessPolicyMap(uint32_t uid);
+
+    int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
+    int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

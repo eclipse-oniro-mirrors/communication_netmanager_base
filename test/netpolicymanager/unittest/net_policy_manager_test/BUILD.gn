@@ -48,6 +48,7 @@ ohos_unittest("net_policy_manager_test") {
     "ut_net_quota_policy.cpp",
     "ut_netsys_policy_wrapper.cpp",
     "net_access_policy_test.cpp",
+    "net_policy_db_clone_test.cpp",
   ]
 
   include_dirs = [
@@ -59,6 +60,7 @@ ohos_unittest("net_policy_manager_test") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
+    "$NETMANAGER_BASE_ROOT/test/netpolicymanager/mock",
   ]
 
   deps = [

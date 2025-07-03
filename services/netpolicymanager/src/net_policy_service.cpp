@@ -39,9 +39,11 @@
 #include "netmanager_base_permission.h"
 #include "system_ability_definition.h"
 #include "net_policy_listener.h"
+#include "net_policy_db_clone.h"
 #include "net_access_policy_dialog.h"
 #include "os_account_manager.h"
 #include "system_timer.h"
+#include "unique_fd.h"
 
 #ifdef __LP64__
 const std::string LIB_LOAD_PATH = "/system/lib64/libnet_access_policy_dialog.z.so";
@@ -55,8 +57,13 @@ namespace NetManagerStandard {
 namespace {
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr const char *INSTALL_SOURCE_DEFAULT = "default";
+constexpr const char *EXTENSION_BACKUP = "backup";
+constexpr const char *EXTENSION_RESTORE = "restore";
+constexpr const char *EXTENSION_SUCCESS = "netpolicy extension success";
+constexpr const char *EXTENSION_FAIL = "netpolicy extension fail";
 constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
 constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
+
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -857,6 +864,62 @@ void NetPolicyService::UpdateNetworkAccessPolicyFromConfig(const std::string &bu
     }
     policy.wifiSwitchDisable = policyConfig->disableWlanSwitch;
     policy.cellularSwitchDisable = policyConfig->disableCellularSwitch;
+}
+
+int32_t NetPolicyService::OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply)
+{
+    NETMGR_LOG_E("extension is %{public}s.", extension.c_str());
+    if (extension == EXTENSION_BACKUP) {
+        return OnBackup(data, reply);
+    } else if (extension == EXTENSION_RESTORE) {
+        return OnRestore(data, reply);
+    }
+    return 0;
+}
+
+int32_t NetPolicyService::OnBackup(MessageParcel& data, MessageParcel& reply)
+{
+    NETMGR_LOG_I("OnBackup start");
+    UniqueFd fd(-1);
+    std::string replyCode = EXTENSION_SUCCESS;
+    std::string tmp = "";
+    int ret = NetPolicyDBClone::GetInstance().OnBackup(fd, tmp);
+    if (ret < 0) {
+        NETMGR_LOG_E("OnBackup fail: backup data fail!");
+        replyCode = EXTENSION_FAIL;
+    }
+    if (reply.WriteFileDescriptor(fd) == false || reply.WriteString(replyCode) == false) {
+        close(fd.Release());
+        CommonUtils::DeleteFile(POLICY_DATABASE_BACKUP_FILE);
+        NETMGR_LOG_E("OnBackup fail: reply write fail!");
+        return -1;
+    }
+    close(fd.Release());
+    CommonUtils::DeleteFile(POLICY_DATABASE_BACKUP_FILE);
+    return 0;
+}
+
+int32_t NetPolicyService::OnRestore(MessageParcel& data, MessageParcel& reply)
+{
+    UniqueFd fd(data.ReadFileDescriptor());
+
+    std::string replyCode = EXTENSION_SUCCESS;
+    std::string tmp = "";
+    int ret = NetPolicyDBClone::GetInstance().OnRestore(fd, tmp);
+    if (ret < 0) {
+        NETMGR_LOG_E("OnRestore fail: restore data fail! ret:%{public}d", ret);
+        replyCode = EXTENSION_FAIL;
+        return -1;
+    }
+    if (reply.WriteString(replyCode) == false) {
+        close(fd.Release());
+        CommonUtils::DeleteFile(POLICY_DATABASE_BACKUP_FILE);
+        NETMGR_LOG_E("OnRestore fail: reply write fail!");
+        return -1;
+    }
+    close(fd.Release());
+    CommonUtils::DeleteFile(POLICY_DATABASE_BACKUP_FILE);
+    return 0;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
