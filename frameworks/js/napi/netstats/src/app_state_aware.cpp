@@ -58,7 +58,7 @@ bool AppStateAwareManager::SubscribeAppState()
     if (!appMgrProxy) {
         return false;
     }
-    appStateObserver_ = new (std::nothrow)AppStateObserver();
+    appStateObserver_ = sptr<AppStateObserver>::MakeSptr();
     auto err = appMgrProxy->RegisterApplicationStateObserver(appStateObserver_);
     if (err != 0) {
         NETMGR_LOG_I("SubscribeAppState error, code = %{public}d", err);
