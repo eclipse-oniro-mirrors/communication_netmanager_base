@@ -3797,10 +3797,7 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
             }
             int32_t lastNetid = curNetAct->GetLastNetid();
             if (callback) {
-                sptr<NetHandle> netHandle = new (std::nothrow) NetHandle();
-                if (netHandle == nullptr) {
-                    continue;
-                }
+                sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
                 netHandle->SetNetId(lastNetid);
                 callback->NetLost(netHandle);
             }
