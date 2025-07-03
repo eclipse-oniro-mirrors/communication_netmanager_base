@@ -254,12 +254,11 @@ int32_t NetsysNativeService::UnRegisterNetsysTrafficCallback(const sptr<INetsysT
 }
 
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
-                                             const std::string &destination, const std::string &nextHop)
+    const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {
-    NETNATIVE_LOG_D("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
-                    interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
-
-    int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
+    NETNATIVE_LOG_D("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s %{public}d", netId,
+        interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
+    int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop, isExcludedRoute);
     NETNATIVE_LOG_D("NetworkAddRoute %{public}d", result);
     return result;
 }

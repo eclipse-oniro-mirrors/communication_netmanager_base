@@ -184,10 +184,15 @@ int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string ad
 }
 
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
-                                          std::string nextHop)
+                                          std::string nextHop, bool isExcludedRoute)
 {
     bool routeRepeat = false;
-    auto ret = connManager_->AddRoute(netId, interfaceName, destination, nextHop, routeRepeat);
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.ifName = interfaceName;
+    networkRouteInfo.destination = destination;
+    networkRouteInfo.nextHop = nextHop;
+    networkRouteInfo.isExcludedRoute = isExcludedRoute;
+    auto ret = connManager_->AddRoute(netId, networkRouteInfo, routeRepeat);
     if (!ret || routeRepeat) {
         dnsManager_->EnableIpv6(netId, destination, nextHop);
     }
@@ -300,7 +305,12 @@ nmd::MarkMaskParcel NetManagerNative::GetFwmarkForNetwork(int32_t netId)
 int32_t NetManagerNative::NetworkAddRouteParcel(int32_t netId, RouteInfoParcel parcel)
 {
     bool routeRepeat = false;
-    return connManager_->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop, routeRepeat);
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.ifName = parcel.ifName;
+    networkRouteInfo.destination = parcel.destination;
+    networkRouteInfo.nextHop = parcel.nextHop;
+    networkRouteInfo.isExcludedRoute = false;
+    return connManager_->AddRoute(netId, networkRouteInfo, routeRepeat);
 }
 
 int32_t NetManagerNative::NetworkRemoveRouteParcel(int32_t netId, RouteInfoParcel parcel)

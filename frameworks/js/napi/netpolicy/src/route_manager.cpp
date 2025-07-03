@@ -136,15 +136,19 @@ int32_t RouteManager::UpdateVnicRoute(const std::string &interfaceName, const st
     return UpdateRouteRule(action, flags, routeInfo);
 }
 
-int32_t RouteManager::AddRoute(TableType tableType, const std::string &interfaceName,
-                               const std::string &destinationName, const std::string &nextHop, bool& routeRepeat)
+int32_t RouteManager::AddRoute(TableType tableType, NetworkRouteInfo networkRouteInfo, bool& routeRepeat)
 {
-    NETNATIVE_LOGI("AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
-                   interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
+    std::string interfaceName = networkRouteInfo.ifName;
+    std::string destinationName = networkRouteInfo.destination;
+    std::string nextHop = networkRouteInfo.nextHop;
+    bool isExcludedRoute = networkRouteInfo.isExcludedRoute;
+    NETNATIVE_LOGI("AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s, \
+        isExcludedRoute:%{public}d", interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
 
     // This is a user-defined structure used to integrate the information required for setting up routes.
     RouteInfo routeInfo;
-    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+    if (SetRouteInfo(tableType, networkRouteInfo, routeInfo) != 0) {
         return -1;
     }
 
@@ -163,8 +167,12 @@ int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interf
     NETNATIVE_LOGI("RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
 
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.ifName = interfaceName;
+    networkRouteInfo.destination = destinationName;
+    networkRouteInfo.nextHop = nextHop;
     RouteInfo routeInfo;
-    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+    if (SetRouteInfo(tableType, networkRouteInfo, routeInfo) != 0) {
         return -1;
     }
     return UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
@@ -175,9 +183,12 @@ int32_t RouteManager::UpdateRoute(TableType tableType, const std::string &interf
 {
     NETNATIVE_LOGI("UpdateRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
-
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.ifName = interfaceName;
+    networkRouteInfo.destination = destinationName;
+    networkRouteInfo.nextHop = nextHop;
     RouteInfo routeInfo;
-    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+    if (SetRouteInfo(tableType, networkRouteInfo, routeInfo) != 0) {
         return -1;
     }
     return UpdateRouteRule(RTM_NEWROUTE, NLM_F_REPLACE, routeInfo);
@@ -1027,7 +1038,12 @@ int32_t RouteManager::AddClatTunInterface(const std::string &interfaceName, cons
     NETNATIVE_LOGI("AddClatTunInterface, interfaceName:%{public}s; dstAddr:%{public}s; nxtHop:%{public}s;",
                    interfaceName.c_str(), dstAddr.c_str(), nxtHop.c_str());
     bool routeRepeat = false;
-    if (int32_t ret = AddRoute(RouteManager::INTERFACE, interfaceName, dstAddr, nxtHop, routeRepeat)) {
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.ifName = interfaceName;
+    networkRouteInfo.destination = dstAddr;
+    networkRouteInfo.nextHop = nxtHop;
+    networkRouteInfo.isExcludedRoute = false;
+    if (int32_t ret = AddRoute(RouteManager::INTERFACE, networkRouteInfo, routeRepeat)) {
         NETNATIVE_LOGE("AddRoute err, error is %{public}d", ret);
         return ret;
     }
@@ -1482,7 +1498,8 @@ int32_t RouteManager::UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo
         msg.rtm_type = RTN_UNREACHABLE;
         routeInfoModify.routeInterfaceName = "";
         routeInfoModify.routeNextHop = "";
-    } else if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "throw")) {
+    } else if ((!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "throw")) ||
+        routeInfo.isExcludedRoute == true) {
         msg.rtm_type = RTN_THROW;
         routeInfoModify.routeInterfaceName = "";
         routeInfoModify.routeNextHop = "";
@@ -1592,18 +1609,18 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
     }
 }
 
-int32_t RouteManager::SetRouteInfo(TableType tableType, const std::string &interfaceName,
-                                   const std::string &destinationName, const std::string &nextHop, RouteInfo &routeInfo)
+int32_t RouteManager::SetRouteInfo(TableType tableType, NetworkRouteInfo networkRouteInfo, RouteInfo &routeInfo)
 {
-    uint32_t table = GetRouteTableFromType(tableType, interfaceName);
+    uint32_t table = GetRouteTableFromType(tableType, networkRouteInfo.ifName);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
     }
 
     routeInfo.routeTable = table;
-    routeInfo.routeInterfaceName = interfaceName;
-    routeInfo.routeDestinationName = destinationName;
-    routeInfo.routeNextHop = nextHop;
+    routeInfo.routeInterfaceName = networkRouteInfo.ifName;
+    routeInfo.routeDestinationName = networkRouteInfo.destination;
+    routeInfo.routeNextHop = networkRouteInfo.nextHop;
+    routeInfo.isExcludedRoute = networkRouteInfo.isExcludedRoute;
     return 0;
 }
 } // namespace nmd
