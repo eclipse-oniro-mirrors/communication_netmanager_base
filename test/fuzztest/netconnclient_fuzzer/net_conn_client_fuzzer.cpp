@@ -29,6 +29,7 @@
 #include "net_conn_service_stub.h"
 #include "net_interface_callback_stub.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_factoryreset_callback_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1721,6 +1722,37 @@ void SetReuseSupplierIdFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID), dataParcel);
 }
 
+void RegisterNetFactoryResetCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    auto callback = sptr<NetFactoryResetCallbackStub>::MakeSptr();
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK), dataParcel);
+}
+
+void FactoryResetNetworkFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK), dataParcel);
+}
+
+void GetIfaceNameIdentMapsFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint32_t netType = NetConnGetData<uint32_t>();
+    dataParcel.WriteUint32(netType);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
@@ -1788,5 +1820,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CloseSocketsUidTest(data, size);
     OHOS::NetManagerStandard::SetReuseSupplierIdFuzzTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
+    OHOS::NetManagerStandard::UpdateSupplierScoreFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNetExtAttributeFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetNetExtAttributeFuzzTest(data, size);
+    OHOS::NetManagerStandard::UnregisterPreAirplaneCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterPreAirplaneCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetDefaultSupplierIdFuzzTest(data, size);
+    OHOS::NetManagerStandard::IsPreferCellularUrlFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetSlotTypeFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterSlotTypeFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNetFactoryResetCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::FactoryResetNetworkFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceNameIdentMapsFuzzTest(data, size);
     return 0;
 }
