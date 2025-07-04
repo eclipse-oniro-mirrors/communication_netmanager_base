@@ -25,7 +25,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
 constexpr const char *PPP_CARD_NAME = "ppp-vpn";
+constexpr const char *MULTI_TUN_CARD_NAME = "multitun-vpn";
 constexpr const char *PPP_DEVICE_PATH = "/dev/ppp";
+constexpr const char *TUN_DEVICE_PATH = "/dev/tun";
 
 class MultiVpnManager : public std::enable_shared_from_this<MultiVpnManager> {
 private:
@@ -47,7 +49,7 @@ public:
     int32_t SetVpnAddress(const std::string &ifName, const std::string &vpnAddr, int32_t prefix);
     int32_t SetVpnMtu(const std::string &ifName, int32_t mtu);
     int32_t SetVpnCallMode(const std::string &message);
-    int32_t CreatePppFd(const std::string &ifName);
+    void CreatePppFd(const std::string &ifName);
     void SetXfrmPhyIfName(const std::string &phyName);
     void SetVpnRemoteAddress(const std::string &remoteIp);
 
@@ -59,14 +61,17 @@ private:
     int32_t SetVpnUp(const std::string &ifName);
     int32_t AddVpnRemoteAddress(const std::string &ifName, std::atomic_int &net4Sock, ifreq &ifr);
     int32_t CreatePppInterface(const std::string &ifName);
-    int32_t DestroyPppFd(const std::string &ifName);
-    void StartPppSocketListen(const std::string &ifName);
-    void StartPppInterfaceFdListen(const std::string &ifName);
+    int32_t GetMultiVpnFd(const std::string &ifName, int32_t &multiVpnFd);
+    int32_t DestroyMultiVpnFd(const std::string &ifName);
+    int32_t CreateMultiTunInterface(const std::string &ifName);
+    void StartMultiVpnSocketListen();
+    void StartMultiVpnInterfaceFdListen();
 
 private:
-    std::atomic_bool pppListeningFlag_ = false;
-    std::unordered_map<std::string, std::atomic_int> pppFdMap_;
+    std::atomic_bool multiVpnListeningFlag_ = false;
+    std::unordered_map<std::string, std::atomic_int> multiVpnFdMap_;
     std::string phyName_;
+    std::string multiVpnListeningName_;
     std::string remoteIpv4Addr_;
     std::mutex mutex_;
 };
