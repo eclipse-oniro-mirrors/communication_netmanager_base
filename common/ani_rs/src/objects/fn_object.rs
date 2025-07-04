@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_sys::{ani_fn_object, ani_object};
-use serde::Serialize;
-use std::{
-    ops::Deref,
-    sync::{Arc, Once},
-};
-use ylong_runtime::builder::RuntimeBuilder;
 use crate::{
     ani_rs_error,
     business_error::BusinessError,
@@ -27,6 +20,13 @@ use crate::{
     wrapper::RustClosure,
     AniEnv, AniVm,
 };
+use ani_sys::{ani_fn_object, ani_object};
+use serde::Serialize;
+use std::{
+    ops::Deref,
+    sync::{Arc, Once},
+};
+use ylong_runtime::builder::RuntimeBuilder;
 
 static INIT_RUNTIME: Once = Once::new();
 const MAX_BLOCKING_POOL_SIZE: u8 = 1;
@@ -290,13 +290,10 @@ impl GlobalRef<AniFnObject<'static>> {
                         let input = input.input(&env);
                         env.function_object_call(&me.0, &input).unwrap();
                         AniVm::get_instance().detach_current_thread().unwrap();
-                    },
+                    }
                     Err(err) => {
-                        ani_rs_error!(
-                            "Failed to attach_current_thread in thread, err = {:?}",
-                            err
-                        );
-                    },
+                        ani_rs_error!("Failed to attach_current_thread in thread, err = {:?}", err);
+                    }
                 }
             }
         });
@@ -316,7 +313,6 @@ impl GlobalRef<AniAsyncCallback<'static>> {
             } else {
                 ani_rs_error!("Failed to get_env in thread");
             }
-            
         })
         .send_event("async callback execute global");
     }
@@ -349,10 +345,7 @@ impl GlobalRef<AniAsyncCallback<'static>> {
                         AniVm::get_instance().detach_current_thread().unwrap();
                     }
                     Err(err) => {
-                        ani_rs_error!(
-                            "Failed to attach_current_thread in thread, err = {:?}",
-                            err
-                        );
+                        ani_rs_error!("Failed to attach_current_thread in thread, err = {:?}", err);
                     }
                 }
             }
