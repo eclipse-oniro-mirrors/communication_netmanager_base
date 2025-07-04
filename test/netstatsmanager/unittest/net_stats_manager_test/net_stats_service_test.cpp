@@ -269,6 +269,15 @@ HWTEST_F(NetStatsServiceTest, GetUidStatsDetail001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsServiceTest, GetUidStatsDetail002, TestSize.Level1)
+{
+    NetStatsInfo info;
+    std::string iface = "wlan0";
+    uint32_t uid = 2132132;
+    int32_t ret =
+        DelayedSingleton<NetStatsService>::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 /**
  * @tc.name: UpdateIfacesStats
  * @tc.desc: Test NetStatsService UpdateIfacesStats.
