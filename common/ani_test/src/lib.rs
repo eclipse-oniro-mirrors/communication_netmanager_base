@@ -18,6 +18,8 @@ mod array_buffer;
 mod option;
 mod primitive;
 mod record;
+mod ani_struct;
+mod ani_callback;
 
 ani_rs::ani_constructor!(
     namespace "Lanirs/test/ani_test"
@@ -43,5 +45,15 @@ ani_rs::ani_constructor!(
         "unionTest" : ani_union::union_test,
         "arrayBufferTest": array_buffer::array_buffer_test,
         "uint8ArrayTest": array_buffer::uint8_array_test,
+        "structEnum": ani_struct::struct_enum,
+        "enumTestStruct": ani_enum::enum_test_struct,
+        "executeCallback1": ani_callback::execute_callback1,
+        "executeCallback2": ani_callback::execute_callback2,
+        "executeCallback3": ani_callback::execute_callback3,
+        "executeCallback4": ani_callback::execute_callback4,
+        "executeAsyncCallback1": ani_callback::execute_async_callback1,
+        "executeAsyncCallback2": ani_callback::execute_async_callback2,
+        "executeAsyncCallback3": ani_callback::execute_async_callback3,
+        "executeAsyncCallback4": ani_callback::execute_async_callback4,
     ]
 );
