@@ -1,0 +1,67 @@
+{
+    "string": [
+        {
+            "name": "netstats_excess_daymark_notofication_title",
+            "value": "Dépassement de marque quotidienne",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_month_limit_message",
+            "value": "Données mobiles : limite mensuelle atteinte (%s)",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_excess_monthmark_notofication_title",
+            "value": "Dépassement de limite mensuelle",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_daily_notify_message",
+            "value": "Limite d'utilisation des données atteinte aujourd'hui (%s)",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_excess_monthmark_notofication_title_sub",
+            "value": "Alerte consommation de données carte SIM %d",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_excess_monthlimit_notofication_title_sub",
+            "value": "Alerte consommation de données carte SIM %d",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_excess_daymark_notofication_title_sub",
+            "value": "Alerte consommation de données carte SIM %d",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_month_notify_message",
+            "value": "Données mobiles : %s avant d'atteindre la limite mensuelle",
+            "attr": {
+                "priority": "translate"
+            }
+        },
+        {
+            "name": "netstats_excess_monthlimit_notofication_title",
+            "value": "Dépassement de la limite mensuelle",
+            "attr": {
+                "priority": "translate"
+            }
+        }
+    ]
+}
