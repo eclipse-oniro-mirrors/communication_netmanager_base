@@ -33,6 +33,13 @@ typedef struct MarkMaskParcel {
     int mark;
     int mask;
 } MarkMaskParcel;
+
+struct NetworkRouteInfo {
+    std::string destination;
+    std::string ifName;
+    std::string nextHop;
+    bool isExcludedRoute = false;
+};
 } // namespace nmd
 } // namespace OHOS
 #endif // INCLUDE_ROUTE_TYPE_H

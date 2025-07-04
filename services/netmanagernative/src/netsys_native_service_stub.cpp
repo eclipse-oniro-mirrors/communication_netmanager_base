@@ -705,10 +705,12 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, Message
     std::string ifName = data.ReadString();
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
+    bool isExcludedRoute = data.ReadBool();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]", netId,
-                   ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
-    int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s], \
+        isExcludedRoute[%{public}d]", netId, ifName.c_str(), ToAnonymousIp(destination).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
+    int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop, isExcludedRoute);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddRoute has recved result %{public}d", result);
     return result;

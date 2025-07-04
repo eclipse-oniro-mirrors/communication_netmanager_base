@@ -376,7 +376,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNotifyCallback(sptr<INotifyCallback>
 }
 
 int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
-                                                  const std::string &destination, const std::string &nextHop)
+    const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {
     NETNATIVE_LOGI("Begin to NetworkAddRoute");
     MessageParcel data;
@@ -393,6 +393,9 @@ int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::stri
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(nextHop)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isExcludedRoute)) {
         return ERR_FLATTEN_OBJECT;
     }
 

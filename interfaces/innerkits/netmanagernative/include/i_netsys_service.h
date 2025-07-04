@@ -87,7 +87,7 @@ public:
     virtual int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
 
     virtual int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                                    const std::string &nextHop) = 0;
+                                    const std::string &nextHop, bool isExcludedRoute = false) = 0;
     virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
                                        const std::string &nextHop) = 0;
     virtual int32_t NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) = 0;

@@ -150,8 +150,7 @@ public:
      *
      * @return Returns 0, successfully add a route for specific network, otherwise it will fail
      */
-    int32_t AddRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop,
-                     bool& routeRepeat);
+    int32_t AddRoute(int32_t netId, NetworkRouteInfo networkRouteInfo, bool& routeRepeat);
 
     /**
      * Remove a route for specific network

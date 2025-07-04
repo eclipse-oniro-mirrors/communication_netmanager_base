@@ -25,6 +25,7 @@ bool Route::operator==(const Route &obj) const
     out = out && (iface_ == obj.iface_);
     out = out && (destination_ == obj.destination_);
     out = out && (gateway_ == obj.gateway_);
+    out = out && (isExcludedRoute_ == obj.isExcludedRoute_);
     return out;
 }
 
@@ -54,6 +55,9 @@ bool Route::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteBool(isDefaultRoute_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isExcludedRoute_)) {
         return false;
     }
     return true;
@@ -96,6 +100,9 @@ sptr<Route> Route::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadBool(ptr->isDefaultRoute_)) {
         return nullptr;
     }
+    if (!parcel.ReadBool(ptr->isExcludedRoute_)) {
+        return nullptr;
+    }
     return ptr;
 }
 
@@ -129,6 +136,9 @@ bool Route::Marshalling(Parcel &parcel, const sptr<Route> &object)
         return false;
     }
     if (!parcel.WriteBool(object->isDefaultRoute_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(object->isExcludedRoute_)) {
         return false;
     }
     return true;

@@ -24,6 +24,7 @@
 #include "netlink_msg.h"
 #include "network_permission.h"
 #include "uid_range.h"
+#include "route_type.h"
 
 namespace OHOS {
 namespace nmd {
@@ -44,6 +45,7 @@ typedef struct RouteInfo {
     std::string routeInterfaceName;
     std::string routeDestinationName;
     std::string routeNextHop;
+    bool isExcludedRoute = false;
 } RouteInfo;
 
 typedef struct InetAddr {
@@ -73,13 +75,10 @@ public:
      * The interface is add route table
      *
      * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
-     * @param interfaceName Output network device name of the route item
-     * @param destinationName Destination address of route item
-     * @param nextHop Gateway address of the route item
+     * @param networkRouteInfo Route info
      * @return Returns 0, add route table successfully, otherwise it will fail
      */
-    static int32_t AddRoute(TableType tableType, const std::string &interfaceName, const std::string &destinationName,
-                            const std::string &nextHop, bool& routeRepeat);
+    static int32_t AddRoute(TableType tableType, NetworkRouteInfo networkRouteInfo, bool& routeRepeat);
 
     /**
      * The interface is remove route table
@@ -404,9 +403,7 @@ private:
                                      uint32_t index);
     static uint32_t FindTableByInterfacename(const std::string &interfaceName, int32_t netId = 0);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
-    static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,
-                                const std::string &destinationName, const std::string &nextHop,
-                                RouteInfo &routeInfo);
+    static int32_t SetRouteInfo(TableType tableType, NetworkRouteInfo networkRouteInfo, RouteInfo &routeInfo);
     static int32_t UpdateClatTunInterface(const std::string &interfaceName,
                                             NetworkPermission permission, bool add);
     static int32_t AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface);

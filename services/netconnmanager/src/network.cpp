@@ -441,8 +441,8 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
         }
 
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        auto ret =
-            NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
+        auto ret = NetsysController::GetInstance().NetworkAddRoute(
+            netId_, route.iface_, destAddress, route.gateway_.address_, route.isExcludedRoute_);
         int32_t res = NETMANAGER_SUCCESS;
         if (netSupplierType_ != BEARER_VPN && route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
             route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {

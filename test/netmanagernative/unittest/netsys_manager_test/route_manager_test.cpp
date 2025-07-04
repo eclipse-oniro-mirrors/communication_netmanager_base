@@ -50,28 +50,32 @@ HWTEST_F(RouteManagerTest, AddRouteTest001, TestSize.Level1)
 {
     uint32_t testRouteType = 6;
     bool flag = false;
-    auto ret = RouteManager::AddRoute(static_cast<RouteManager::TableType>(testRouteType), {}, {}, {}, flag);
+    NetworkRouteInfo networkRouteInfo;
+    auto ret = RouteManager::AddRoute(static_cast<RouteManager::TableType>(testRouteType), networkRouteInfo, flag);
     EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(RouteManagerTest, AddRouteTest002, TestSize.Level1)
 {
     bool flag = false;
-    auto ret = RouteManager::AddRoute(RouteManager::TableType::INTERFACE, {}, {}, {}, flag);
+    NetworkRouteInfo networkRouteInfo;
+    auto ret = RouteManager::AddRoute(RouteManager::TableType::INTERFACE, networkRouteInfo, flag);
     EXPECT_LE(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, AddRouteTest003, TestSize.Level1)
 {
     bool flag = false;
-    auto ret = RouteManager::AddRoute(RouteManager::TableType::LOCAL_NETWORK, {}, {}, {}, flag);
+    NetworkRouteInfo networkRouteInfo;
+    auto ret = RouteManager::AddRoute(RouteManager::TableType::LOCAL_NETWORK, networkRouteInfo, flag);
     EXPECT_LE(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, AddRouteTest004, TestSize.Level1)
 {
     bool flag = false;
-    auto ret = RouteManager::AddRoute(RouteManager::TableType::VPN_NETWORK, {}, {}, {}, flag);
+    NetworkRouteInfo networkRouteInfo;
+    auto ret = RouteManager::AddRoute(RouteManager::TableType::VPN_NETWORK, networkRouteInfo, flag);
     EXPECT_LE(ret, 0);
 }
 

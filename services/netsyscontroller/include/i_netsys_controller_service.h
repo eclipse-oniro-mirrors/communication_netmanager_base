@@ -120,7 +120,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                                    const std::string &nextHop) = 0;
+                                    const std::string &nextHop, bool isExcludedRoute = false) = 0;
 
     /**
      * Remove route
