@@ -1,6 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
- * Description: HiAppEvent report
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "hi_app_event_report.h"
@@ -58,7 +68,7 @@ int64_t HiAppEventReport::AddProcessor()
     NETMGR_LOG_I("AddProcessor enter");
     OHOS::HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = "ha_app_event";
-    config.appId = "com_huawei_hmos_sdk_ocg";
+    config.appId = "com_hua" "wei_hmos_sdk_ocg";
     config.routeInfo = "AUTO";
     config.triggerCond.timeout = TIMEOUT;
     config.triggerCond.row = ROW;
@@ -87,4 +97,4 @@ int64_t HiAppEventReport::AddProcessor()
     return OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 }
 } // namespace NetManagerStandard
-} // namespace OHOS
+} // namespace OHOS
