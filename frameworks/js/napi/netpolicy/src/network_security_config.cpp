@@ -38,6 +38,7 @@ namespace NetManagerStandard {
 const std::string TAG_NETWORK_SECURITY_CONFIG("network-security-config");
 const std::string TAG_BASE_CONFIG("base-config");
 const std::string TAG_DOMAIN_CONFIG("domain-config");
+const std::string TAG_COMPONENT_CONFIG("component-config");
 const std::string TAG_TRUST_ANCHORS("trust-anchors");
 const std::string TAG_CERTIFICATES("certificates");
 const std::string TAG_DOMAINS("domains");
@@ -49,6 +50,7 @@ const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
 const std::string TAG_CLEARTEXT_TRAFFIC_PERMITTED("cleartextTrafficPermitted");
+const std::vector<std::string> SUPPORTED_COMPONENTS({"Network Kit", "ArkWeb"});
 
 const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
 #ifdef WINDOWS_PLATFORM
@@ -517,6 +519,27 @@ void NetworkSecurityConfig::ParseJsonDomainConfigs(const cJSON* const root, std:
     return;
 }
 
+void NetworkSecurityConfig::ParseJsonComponentCfg(const cJSON *const root, ComponentCfg &componentConfigs)
+{
+    if (root == nullptr) {
+        return;
+    }
+    for (auto item : SUPPORTED_COMPONENTS) {
+        cJSON *componentCfg = cJSON_GetObjectItem(root, item.c_str());
+        ParseJsonComponentCfg(componentCfg, componentConfigs, item);
+    }
+}
+
+void NetworkSecurityConfig::ParseJsonComponentCfg(const cJSON *const root, ComponentCfg &componentConfigs,
+    const std::string &component)
+{
+    if (root == nullptr || !cJSON_IsBool(root)) {
+        return;
+    }
+    componentConfigs[component] = cJSON_IsTrue(root);
+    NETMGR_LOG_D("Component Cfg: %{public}d", componentConfigs[component]);
+}
+
 int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 {
     if (content.empty()) {
@@ -552,9 +575,11 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
     }
     cJSON *baseConfig = cJSON_GetObjectItem(networkSecurityConfig, TAG_BASE_CONFIG.c_str());
     cJSON *domainConfig = cJSON_GetObjectItem(networkSecurityConfig, TAG_DOMAIN_CONFIG.c_str());
+    cJSON *componentConfig = cJSON_GetObjectItem(networkSecurityConfig, TAG_COMPONENT_CONFIG.c_str());
 
     ParseJsonBaseConfig(baseConfig, baseConfig_);
     ParseJsonDomainConfigs(domainConfig, domainConfigs_);
+    ParseJsonComponentCfg(componentConfig, componentConfig_);
 
     cJSON_Delete(root);
     return NETMANAGER_SUCCESS;
@@ -799,6 +824,16 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname,
         }
     }
     cleartextPermitted = pCtTrafficPermitted == nullptr ? baseCleartextPermitted : *pCtTrafficPermitted;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetworkSecurityConfig::IsCleartextCfgByComponent(const std::string &component, bool &componentCfg)
+{
+    if (componentConfig_.find(component) == componentConfig_.end()) {
+        NETMGR_LOG_E("Component Not Cfg.");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    componentCfg = componentConfig_[component];
     return NETMANAGER_SUCCESS;
 }
 

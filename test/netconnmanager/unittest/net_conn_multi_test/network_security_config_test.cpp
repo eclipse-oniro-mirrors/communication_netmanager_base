@@ -36,6 +36,9 @@ namespace {
     const std::string TEST_DOMAINS(R"([{"include-subdomains": false, "name": "baidu.com"},
                                        {"include-subdomains": true, "name": "taobao.com"}])");
 
+    const std::string TEST_COMPONENT_Network(R"({"NetworkKit": true})");
+    const std::string TEST_COMPONENT_ArkWeb(R"({"ArkWeb": false})");
+
     const std::string TEST_PINSET(R"({
                     "expiration": "2024-8-6",
                     "pin": [
@@ -635,6 +638,66 @@ HWTEST_F(NetworkSecurityConfigTest, IsUserDnsCacheTest001, TestSize.Level1)
     auto ret = networksecurityconfig.IsUserDnsCache();
     EXPECT_FALSE(ret);
     networksecurityconfig.isUserDnsCache_ = isUserDnsCache;
+}
+
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextCfgByComponentTest001, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    bool isCleartextCfg;
+    EXPECT_EQ(networksecurityconfig.IsCleartextCfgByComponent("Network Kit", isCleartextCfg), NETMANAGER_SUCCESS);
+    EXPECT_TRUE(isCleartextCfg);
+    EXPECT_EQ(networksecurityconfig.IsCleartextCfgByComponent("ArkWeb", isCleartextCfg), NETMANAGER_SUCCESS);
+    EXPECT_FALSE(isCleartextCfg);
+    EXPECT_EQ(networksecurityconfig.IsCleartextCfgByComponent("RCP", isCleartextCfg), NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+/**
+* @tc.name: HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg001, TestSize.Level1)
+* @tc.desc: Test NetworkSecurityConfig::ParseJsonComponentCfg, not applying for
+* @tc.type: FUNC
+*/
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg001, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    ComponentCfg componentCfg;
+    std::string jsonTxt(TEST_COMPONENT_Network);
+    BuildTestJsonObject(jsonTxt, root);
+    std::cout << "ParseJsonComponentCfg001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonComponentCfg(root, componentCfg);
+    EXPECT_TRUE(componentCfg["NetworkKit"]);
+}
+
+/**
+* @tc.name: HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg002, TestSize.Level1)
+* @tc.desc: Test NetworkSecurityConfig::ParseJsonComponentCfg, not applying for
+* @tc.type: FUNC
+*/
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg002, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    ComponentCfg componentCfg;
+    std::string jsonTxt(TEST_COMPONENT_ArkWeb);
+    BuildTestJsonObject(jsonTxt, root);
+    std::cout << "ParseJsonComponentCfg002 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonComponentCfg(root, componentCfg, "ArkWeb");
+    EXPECT_FALSE(componentCfg["ArkWeb"]);
+}
+
+/**
+* @tc.name: HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg003, TestSize.Level1)
+* @tc.desc: Test NetworkSecurityConfig::ParseJsonComponentCfg, not applying for
+* @tc.type: FUNC
+*/
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg003, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    ComponentCfg componentCfg;
+    NetworkSecurityConfig::GetInstance().ParseJsonComponentCfg(root, componentCfg);
+    std::string jsonTxt(TEST_COMPONENT_ArkWeb);
+    BuildTestJsonObject(jsonTxt, root);
+    std::cout << "ParseJsonComponentCfg003 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonComponentCfg(root, componentCfg);
+    EXPECT_FALSE(componentCfg["ArkWeb"]);
 }
 }
 }
