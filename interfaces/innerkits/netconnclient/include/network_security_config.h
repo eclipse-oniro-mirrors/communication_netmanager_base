@@ -23,6 +23,7 @@
 struct cJSON;
 struct x509_st;
 typedef struct x509_st X509;
+using ComponentCfg = std::unordered_map<std::string, bool>;
 namespace OHOS {
 namespace NetManagerStandard {
 struct Domain {
@@ -70,6 +71,7 @@ public:
     bool IsUserDnsCache();
     int32_t IsCleartextPermitted(bool &baseCleartextPermitted);
     int32_t IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted);
+    int32_t IsCleartextCfgByComponent(const std::string &component, bool &componentCfg);
 
 private:
     int32_t GetConfig();
@@ -94,6 +96,8 @@ private:
     void DumpConfigs();
     std::string GetJsonProfile();
     void ParseJsonCleartextPermitted(const cJSON* const root, bool &cleartextPermitted);
+    void ParseJsonComponentCfg(const cJSON* const root, ComponentCfg &componentConfigs);
+    void ParseJsonComponentCfg(const cJSON* const root, ComponentCfg &componentConfigs, const std::string &component);
 
 private:
     NetworkSecurityConfig();
@@ -104,6 +108,13 @@ private:
     bool trustUserCa_ = true;
     bool isUserDnsCache_ = true;
     bool hasBaseConfig_ = false;
+    ComponentCfg componentConfig_ = {
+        {"Network Kit", true},
+        {"Request", true},
+        {"Remote Communication Kit", false},
+        {"Media Kit", false},
+        {"ArkWeb", false}
+    };
 };
 
 }
