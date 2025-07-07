@@ -448,11 +448,11 @@ bool RouteManager::CheckMultiVpnCall(const std::string &vpnName)
 uint32_t RouteManager::GetVpnInterffaceToId(const std::string &ifName)
 {
     if (ifName.find(XFRM_CARD_NAME) != std::string::npos) {
-        return static_cast<uint32_t>(std::stoul(ifName.substr(strlen(XFRM_CARD_NAME))));
+        return CommonUtils::StrToUint(ifName.substr(strlen(XFRM_CARD_NAME)));
     } else if (ifName.find(PPP_CARD_NAME) != std::string::npos) {
-        return static_cast<uint32_t>(std::stoul(ifName.substr(strlen(PPP_CARD_NAME))));
+        return CommonUtils::StrToUint(ifName.substr(strlen(PPP_CARD_NAME)));
     } else if (ifName.find(MULTI_TUN_CARD_NAME) != std::string::npos) {
-        return static_cast<uint32_t>(std::stoul(ifName.substr(strlen(MULTI_TUN_CARD_NAME))));
+        return CommonUtils::StrToUint(ifName.substr(strlen(MULTI_TUN_CARD_NAME)));
     }
     return 0;
 }

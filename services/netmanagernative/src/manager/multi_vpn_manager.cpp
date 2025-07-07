@@ -22,6 +22,7 @@
 #include <linux/if_tun.h>
 #include "init_socket.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 #include "netlink_socket.h"
@@ -243,7 +244,7 @@ int32_t MultiVpnManager::CreateVpnInterface(const std::string &ifName)
 {
     int32_t ret = NETMANAGER_SUCCESS;
     if (strstr(ifName.c_str(), XFRM_CARD_NAME) != NULL) {
-        uint32_t ifNameId = static_cast<uint32_t>(std::stoul(ifName.substr(strlen(XFRM_CARD_NAME))));
+        uint32_t ifNameId = CommonUtils::StrToUint(ifName.substr(strlen(XFRM_CARD_NAME)));
         ret = nmd::CreateVpnIfByNetlink(ifName.c_str(), ifNameId, phyName_.c_str(), DEFAULT_MTU);
     } else if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
         ret = CreatePppInterface(ifName);
@@ -452,6 +453,5 @@ int32_t MultiVpnManager::SetVpnCallMode(const std::string &message)
     }
     return nmd::RouteManager::SetVpnCallMode(message);
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS
