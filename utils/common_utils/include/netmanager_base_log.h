@@ -15,8 +15,8 @@
 
 #ifndef COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG
-#include <string.h>
 #include "hilog/log.h"
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,14 +31,24 @@ extern "C" {
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD0015B0
 
+// 日志宏主体,不额外输出源代码位置和函数名
+#define NETMANAGER_LOG(Level, fmt, ...)                                                  \
+    (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, fmt, ##__VA_ARGS__) 
+
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
-// 日志宏主体
-#define NETMANAGER_LOG(Level, fmt, ...)                                         \
-    do {                                                                        \
-        (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, "[%{public}s:%{public}d]" fmt,     \
-                                    MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__); \
+
+// 日志宏函数，添加日志所在的源代码文件名和行号
+#define NETMANAGER_LOG_CODELINE(Level, fmt, ...)                                                                    \
+    do {                                                                                                            \
+        (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, "[%{public}s:%{public}d]" fmt, MAKE_FILE_NAME, \
+                         __LINE__, ##__VA_ARGS__);                                                                  \
     } while (0)
 
+// 日志宏函数，添加日志所在的函数名
+#define NETMANAGER_LOG_FUNC(Level, fmt, ...)                                                                           \
+    do {                                                                                                               \
+        (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, "[%{public}s]" fmt, __FUNCTION__, ##__VA_ARGS__); \
+    } while (0)
 
 // 简化接口（DEBUG级别对应空宏）
 #define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_LOG(ERROR, fmt, ##__VA_ARGS__)
