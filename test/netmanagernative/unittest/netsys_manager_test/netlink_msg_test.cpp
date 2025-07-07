@@ -64,6 +64,18 @@ HWTEST_F(NetlinkMsgTest, AddRouteTest001, TestSize.Level1)
     };
     netLinkMsg.AddRule(action, hdr);
     netLinkMsg.AddAddress(action, addrmsg);
+
+    uint16_t action1 = 28;
+    uint32_t index = 1;
+    struct ndmsg ndm = {};
+    ndm.ndm_family = AF_INET6;
+    ndm.ndm_ifindex = index;
+    ndm.ndm_pad1 = 0;
+    ndm.ndm_pad2 = 0;
+    ndm.ndm_state = NUD_PERMANENT;
+    ndm.ndm_flags = 0;
+    ndm.ndm_type = RTN_UNICAST;
+    netLinkMsg.AddNeighbor(action1, ndm);
     size_t dataLength100 = 100;
     size_t dataLength10 = 10;
     int32_t ret = netLinkMsg.AddAttr(action, nullptr, dataLength100);

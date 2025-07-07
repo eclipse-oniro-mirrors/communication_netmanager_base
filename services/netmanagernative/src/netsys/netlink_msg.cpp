@@ -116,5 +116,16 @@ nlmsghdr *NetlinkMsg::GetNetLinkMessage()
 {
     return netlinkMessage_;
 }
+
+void NetlinkMsg::AddNeighbor(uint16_t action, struct ndmsg msg)
+{
+    netlinkMessage_->nlmsg_type = action;
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ndmsg), &msg, sizeof(struct ndmsg));
+    if (result != 0) {
+        NETNATIVE_LOGE("[AddNeighbor]: string copy failed result %{public}d", result);
+        return;
+    }
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ndmsg)));
+}
 } // namespace nmd
 } // namespace OHOS

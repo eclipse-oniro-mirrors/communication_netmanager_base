@@ -1682,6 +1682,30 @@ int32_t NetsysNativeClient::DelStaticArp(const std::string &ipAddr, const std::s
     return proxy->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
+int32_t NetsysNativeClient::AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETMGR_LOG_E("wd::NetsysNativeClient AddStaticIpv6Addr");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysNativeClient::DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETMGR_LOG_E("wd::NetsysNativeClient DelStaticIpv6Addr");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
 int32_t NetsysNativeClient::RegisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
 {

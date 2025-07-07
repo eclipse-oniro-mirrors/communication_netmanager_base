@@ -96,6 +96,14 @@ public:
      */
     struct nlmsghdr *GetNetLinkMessage();
 
+    /**
+     * Add ndmsg message to nlmsghdr
+     *
+     * @param action Action name
+     * @param msg Added message
+     */
+    void AddNeighbor(uint16_t action, struct ndmsg msg);
+
 private:
     std::unique_ptr<char[]> msghdrBuf_;
     struct nlmsghdr *netlinkMessage_;

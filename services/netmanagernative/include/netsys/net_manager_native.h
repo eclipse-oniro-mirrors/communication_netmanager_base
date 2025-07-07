@@ -137,6 +137,8 @@ public:
                            uint16_t netId, std::vector<AddrInfo> &res);
     int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
+    int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr, const std::string &ifName);
+    int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr, const std::string &ifName);
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep);
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback);
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);

@@ -2746,6 +2746,66 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipv6Addr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("AddStaticIpv6Addr Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_STATIC_IPV6),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("AddStaticIpv6Addr proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("AddStaticIpv6Addr proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipv6Addr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("DelStaticIpv6Addr Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_IPV6),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("DelStaticIpv6Addr proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("DelStaticIpv6Addr proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(
     const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
 {

@@ -344,6 +344,28 @@ HWTEST_F(NetsysNativeServiceProxyTest, DelStaticArp001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, AddStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DelStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceProxyTest, GetFwmarkForNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();

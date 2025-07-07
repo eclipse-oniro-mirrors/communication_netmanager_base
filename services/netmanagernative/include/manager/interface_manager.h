@@ -21,10 +21,12 @@
 #include <string>
 #include <vector>
 #include "net/if_arp.h"
+#include "netlink_msg.h"
 
 namespace OHOS {
 namespace nmd {
 static const uint32_t INTERFACE_ERR_MAX_LEN = 256;
+constexpr int32_t MAC_ADDRESS_INT_LEN = 6;
 
 class InterfaceManager {
 public:
@@ -122,12 +124,19 @@ public:
                                 const std::string &ifName);
     static int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                 const std::string &ifName);
+    static int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName);
+    static int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName);
 
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
     static int32_t AssembleArp(const std::string &ipAddr, const std::string &macAddr,
                                const std::string &ifName, arpreq &req);
+    static int32_t AssembleIPv6Neighbor(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName, nmd::NetlinkMsg &nlmsg, uint16_t action);
     static int32_t MacStringToArray(const std::string &macAddr, sockaddr &macSock);
+    static int32_t MacStringToBinary(const std::string &macAddr, uint8_t (&macBin)[MAC_ADDRESS_INT_LEN]);
 };
 } // namespace nmd
 } // namespace OHOS

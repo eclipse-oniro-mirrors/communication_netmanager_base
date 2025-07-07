@@ -280,6 +280,46 @@ HWTEST_F(NetsysNativeServiceTest, DelStaticArp002, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
+HWTEST_F(NetsysNativeServiceTest, AddStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddr = "123";
+    std::string macAddr = "123";
+    std::string ifName = "123";
+    instance_->netsysService_ = nullptr;
+    int32_t ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, AddStaticIpv6Addr002, TestSize.Level1)
+{
+    std::string ipAddr = "123";
+    std::string macAddr = "123";
+    std::string ifName = "123";
+    instance_->netsysService_ = std::make_unique<OHOS::nmd::NetManagerNative>();
+    int32_t ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DelStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddr = "123";
+    std::string macAddr = "123";
+    std::string ifName = "123";
+    instance_->netsysService_ = nullptr;
+    int32_t ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DelStaticIpv6Addr002, TestSize.Level1)
+{
+    std::string ipAddr = "123";
+    std::string macAddr = "123";
+    std::string ifName = "123";
+    instance_->netsysService_ = std::make_unique<OHOS::nmd::NetManagerNative>();
+    int32_t ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMap001, TestSize.Level1)
 {
     std::unordered_map<uint32_t, uint32_t> uidMaps;

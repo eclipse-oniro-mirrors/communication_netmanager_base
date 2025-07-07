@@ -605,6 +605,30 @@ int32_t NetManagerNative::DelStaticArp(const std::string &ipAddr, const std::str
     return interfaceManager_->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
+int32_t NetManagerNative::AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOGI("AddStaticIpv6Addr");
+    if (interfaceManager_ == nullptr) {
+        NETNATIVE_LOGE("interfaceManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return interfaceManager_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
+int32_t NetManagerNative::DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOGI("DelStaticIpv6Addr");
+    if (interfaceManager_ == nullptr) {
+        NETNATIVE_LOGE("interfaceManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return interfaceManager_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
 int32_t NetManagerNative::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return dnsManager_->RegisterDnsResultCallback(callback, timeStep);

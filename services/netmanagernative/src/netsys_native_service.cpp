@@ -944,6 +944,28 @@ int32_t NetsysNativeService::DelStaticArp(const std::string &ipAddr, const std::
     return netsysService_->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
+int32_t NetsysNativeService::AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOG_D("AddStaticIpv6Addr");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysNativeService::DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOG_D("DelStaticIpv6Addr");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+}
+
 int32_t NetsysNativeService::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return netsysService_->RegisterDnsResultCallback(callback, timeStep);

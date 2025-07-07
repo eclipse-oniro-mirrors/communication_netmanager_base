@@ -528,6 +528,16 @@ public:
         return 0;
     }
 
+    int32_t AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
+
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override
     {
         return 0;
@@ -1849,6 +1859,50 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDelStaticArp001, TestSize.Level1)
 
     MessageParcel reply;
     auto ret = notifyStub_->CmdDelStaticArp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdAddStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+
+    MessageParcel data;
+    if (!data.WriteString(ipAddr)) {
+        return;
+    }
+    if (!data.WriteString(macAddr)) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdAddStaticIpv6Addr(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDelStaticIpv6Addr001, TestSize.Level1)
+{
+    std::string ipAddrTest = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddrTest = "aa:bb:cc:dd:ee:ff";
+    std::string ifNameTest = "chba0";
+
+    MessageParcel data;
+    if (!data.WriteString(ipAddrTest)) {
+        return;
+    }
+    if (!data.WriteString(macAddrTest)) {
+        return;
+    }
+    if (!data.WriteString(ifNameTest)) {
+        return;
+    }
+
+    MessageParcel reply;
+    auto ret = notifyStub_->CmdDelStaticIpv6Addr(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

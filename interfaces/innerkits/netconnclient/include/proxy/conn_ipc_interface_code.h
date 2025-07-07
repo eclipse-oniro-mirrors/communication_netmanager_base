@@ -94,6 +94,8 @@ enum class ConnInterfaceCode {
     CMD_NM_END,
     CMD_NM_GET_NET_EXT_ATTRIBUTE,
     CMD_NM_SET_NET_EXT_ATTRIBUTE,
+    CMD_NM_ADD_STATIC_IPV6,
+    CMD_NM_DEL_STATIC_IPV6,
 };
 
 enum class AdjCallbackInterfaceCode {

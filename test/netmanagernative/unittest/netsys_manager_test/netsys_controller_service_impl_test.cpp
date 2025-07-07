@@ -303,6 +303,28 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, AddStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DelStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest001, TestSize.Level1)
 {
     instance_->mockNetsysClient_.mockApi_.clear();

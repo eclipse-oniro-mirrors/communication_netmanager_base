@@ -897,6 +897,56 @@ HWTEST_F(NetConnServiceStubTest, OnDelStaticArpTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAddStaticIpv6Test001
+ * @tc.desc: Test NetConnServiceStub OnAddStaticIpv6.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnAddStaticIpv6Test001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    int32_t ret = instance_->OnAddStaticIpv6Addr(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDelStaticIpv6Test001
+ * @tc.desc: Test NetConnServiceStub OnDelStaticIpv6.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDelStaticIpv6Test001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+
+    if (!data.WriteString(TEST_STRING_VALUE)) {
+        return;
+    }
+    int32_t ret = instance_->OnDelStaticIpv6Addr(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnRegisterSlotTypeTest001
  * @tc.desc: Test NetConnServiceStub OnRegisterSlotType.
  * @tc.type: FUNC

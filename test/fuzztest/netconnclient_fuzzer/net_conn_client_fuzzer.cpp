@@ -1387,6 +1387,95 @@ void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcelNoIfName);
 }
 
+void StaticIpv6Process(const uint8_t *data, size_t size, MessageParcel &dataParcel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetConnGetString(STR_LEN);
+    std::string macAddr = NetConnGetString(STR_LEN);
+    std::string ifName = NetConnGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+}
+
+void StaticIpv6ProcessNoIpAddr(const uint8_t *data, size_t size, MessageParcel &dataParcel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string macAddr = NetConnGetString(STR_LEN);
+    std::string ifName = NetConnGetString(STR_LEN);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+}
+
+void StaticIpv6ProcessNoMacAddr(const uint8_t *data, size_t size, MessageParcel &dataParcel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetConnGetString(STR_LEN);
+    std::string ifName = NetConnGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteString(ifName);
+}
+
+void StaticIpv6ProcessNoIfName(const uint8_t *data, size_t size, MessageParcel &dataParcel)
+{
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetConnGetString(STR_LEN);
+    std::string macAddr = NetConnGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteString(macAddr);
+}
+
+void AddStaticIpv6FuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    StaticIpv6Process(data, size, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_IPV6), dataParcel);
+
+    MessageParcel dataParcelNoIpAddr;
+    StaticIpv6ProcessNoIpAddr(data, size, dataParcelNoIpAddr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_IPV6), dataParcelNoIpAddr);
+
+    MessageParcel dataParcelNoMacAddr;
+    StaticIpv6ProcessNoMacAddr(data, size, dataParcelNoMacAddr);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_IPV6), dataParcelNoMacAddr);
+
+    MessageParcel dataParcelNoIfName;
+    StaticIpv6ProcessNoIfName(data, size, dataParcelNoIfName);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_IPV6), dataParcelNoIfName);
+}
+
+void DelStaticIpv6FuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    StaticIpv6Process(data, size, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcel);
+
+    MessageParcel dataParcelNoIpAddr;
+    StaticIpv6ProcessNoIpAddr(data, size, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoIpAddr);
+
+    MessageParcel dataParcelNoMacAddr;
+    StaticIpv6ProcessNoMacAddr(data, size, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoMacAddr);
+
+    MessageParcel dataParcelNoIfName;
+    StaticIpv6ProcessNoIfName(data, size, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoIfName);
+}
+
+
 void RegisterSlotTypeFuzzTest(const uint8_t *data, size_t size)
 {
     int32_t supplierId = NetConnGetData<int32_t>();
@@ -1832,5 +1921,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::RegisterNetFactoryResetCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::FactoryResetNetworkFuzzTest(data, size);
     OHOS::NetManagerStandard::GetIfaceNameIdentMapsFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddStaticIpv6FuzzTest(data, size);
+    OHOS::NetManagerStandard::DelStaticIpv6FuzzTest(data, size);
     return 0;
 }

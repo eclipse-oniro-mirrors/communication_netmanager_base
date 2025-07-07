@@ -505,6 +505,18 @@ public:
         return 0;
     }
 
+    int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override
+    {
+        return 0;
+    }
+
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override
     {
         return 0;

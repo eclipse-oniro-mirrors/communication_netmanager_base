@@ -366,6 +366,18 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest016, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = nativeClient_.AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = nativeClient_.DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
