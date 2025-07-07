@@ -840,6 +840,10 @@ public:
     int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up);
     int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
+    int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName);
+    int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName);
 
     /**
      * Register Dns Result Callback Listener.

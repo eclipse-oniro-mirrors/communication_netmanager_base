@@ -152,6 +152,8 @@ enum class NetsysInterfaceCode {
     NETSYS_SET_NET_STATUS_MAP,
     NETSYS_FLUSH_DNS_CACHE,
     NETSYS_SET_DNS_CACHE,
+    NETSYS_ADD_STATIC_IPV6,
+    NETSYS_DEL_STATIC_IPV6,
 };
 
 enum class NotifyInterfaceCode {

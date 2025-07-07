@@ -1127,6 +1127,24 @@ HWTEST_F(NetConnServiceTest, DelStaticArpTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, AddStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    int32_t ret = NetConnService::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DelStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    int32_t ret = NetConnService::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
 {
     NetConnService::GetInstance()->OnStart();

@@ -270,6 +270,16 @@ public:
         return 0;
     }
 
+    int32_t AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
+
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type) override
     {
         return 0;

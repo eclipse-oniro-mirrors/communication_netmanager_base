@@ -929,11 +929,21 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr007, TestSize.Level1)
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
 
+    std::string ipAddr1 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr1 = "aa:bb:cc:dd:ee:ff";
+    std::string ifName1 = "chba0";
+
     auto ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    auto ret1 = instance_->AddStaticIpv6Addr(ipAddr1, macAddr1, ifName1);
+    EXPECT_EQ(ret1, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret1 = instance_->DelStaticIpv6Addr(ipAddr1, macAddr1, ifName1);
+    EXPECT_EQ(ret1, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkCreatePhysical(NET_ID, PERMISSION);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -1004,10 +1014,20 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest002, TestSize.Level1)
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
+
+    std::string ipAddr1 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr1 = "aa:bb:cc:dd:ee:ff";
+    std::string ifName1 = "chba0";
     ret = NetsysController::GetInstance().AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().AddStaticIpv6Addr(ipAddr1, macAddr1, ifName1);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().DelStaticIpv6Addr(ipAddr1, macAddr1, ifName1);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     NetsysNotifyCallback callback;

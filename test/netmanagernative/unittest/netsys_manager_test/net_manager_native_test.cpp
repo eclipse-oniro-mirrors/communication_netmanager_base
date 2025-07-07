@@ -188,6 +188,24 @@ HWTEST_F(NetManagerNativeTest, DelStaticArpTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetManagerNativeTest, AddStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerNativeTest, DelStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetManagerNativeTest, CreateVnic001, TestSize.Level1)
 {
     uint16_t mtu = 1500;
@@ -232,6 +250,26 @@ HWTEST_F(NetManagerNativeTest, DelStaticArpTest002, TestSize.Level1)
     std::string ifName = "wlan0";
     instance_->interfaceManager_ = nullptr;
     auto ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, AddStaticIpv6AddrTest002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, DelStaticIpv6AddrTest002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace nmd

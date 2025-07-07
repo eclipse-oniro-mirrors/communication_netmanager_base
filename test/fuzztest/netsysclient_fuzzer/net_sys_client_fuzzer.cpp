@@ -1330,6 +1330,36 @@ void CmdDelStaticArpFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP), dataParcel);
 }
 
+void CmdAddStaticIpv6FuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string ipAddr = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    std::string macAddr = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(macAddr);
+    std::string ifName = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(ifName);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ADD_STATIC_IPV6), dataParcel);
+}
+
+void CmdDelStaticIpv6FuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string ifName = NetSysGetString(STR_LEN);
+    std::string macAddr = NetSysGetString(STR_LEN);
+    std::string ipAddr = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DEL_STATIC_IPV6), dataParcel);
+}
+
 void CmdRegisterDnsResultListenerFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1708,6 +1738,8 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdDisableDistributedNetFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdFlushDnsCacheFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdSetDnsCacheFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdAddStaticIpv6FuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

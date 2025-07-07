@@ -405,6 +405,10 @@ public:
     bool IsAppFrozenedCallbackLimitation();
     int32_t SetNetExtAttribute(int32_t netId, const std::string &netExtAttribute) override;
     int32_t GetNetExtAttribute(int32_t netId, std::string &netExtAttribute) override;
+    int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override;
+    int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

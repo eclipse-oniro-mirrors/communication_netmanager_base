@@ -56,6 +56,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetVnicInterfaceMap();
     InitNetVirnicInterfaceMap();
     InitNetStatsInterfaceMap();
+    InitStaticIpv6ToInterfaceMap();
 #ifdef SUPPORT_SYSVPN
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
@@ -306,6 +307,14 @@ void NetsysNativeServiceStub::InitStaticArpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddStaticArp;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP)] =
         &NetsysNativeServiceStub::CmdDelStaticArp;
+}
+
+void NetsysNativeServiceStub::InitStaticIpv6ToInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_STATIC_IPV6)] =
+        &NetsysNativeServiceStub::CmdAddStaticIpv6Addr;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_IPV6)] =
+        &NetsysNativeServiceStub::CmdDelStaticIpv6Addr;
 }
 
 void NetsysNativeServiceStub::InitNetDnsDiagOpToInterfaceMap()
@@ -1914,6 +1923,66 @@ int32_t NetsysNativeServiceStub::CmdDelStaticArp(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     NETNATIVE_LOG_D("CmdDelStaticArp has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("CmdAddStaticIpv6Addr has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("CmdDelStaticIpv6Addr has recved result %{public}d", result);
 
     return result;
 }

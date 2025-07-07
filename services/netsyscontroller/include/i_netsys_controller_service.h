@@ -856,6 +856,10 @@ public:
                                  const std::string &ifName) = 0;
     virtual int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                  const std::string &ifName) = 0;
+    virtual int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) = 0;
+    virtual int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) = 0;
 
     /**
      * Register Dns Result Callback Listener.

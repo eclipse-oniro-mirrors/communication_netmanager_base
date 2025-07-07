@@ -181,6 +181,10 @@ public:
     int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override;
     int32_t FlushDnsCache(uint16_t netId) override;
     int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override;
+    int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override;
+    int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+        const std::string &ifName) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

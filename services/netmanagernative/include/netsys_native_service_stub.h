@@ -61,6 +61,7 @@ private:
     void InitNetVnicInterfaceMap();
     void InitNetVirnicInterfaceMap();
     void InitStaticArpToInterfaceMap();
+    void InitStaticIpv6ToInterfaceMap();
     void InitNetStatsInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
@@ -193,6 +194,8 @@ private:
     int32_t CmdSetNetStatusMap(MessageParcel &data, MessageParcel &reply);
     int32_t CmdFlushDnsCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetDnsCache(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

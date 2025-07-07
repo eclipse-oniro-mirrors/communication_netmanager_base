@@ -32,7 +32,6 @@
 #include <regex>
 
 #include "netlink_manager.h"
-#include "netlink_msg.h"
 #include "netlink_socket.h"
 #include "netlink_socket_diag.h"
 #include "net_manager_constants.h"
@@ -59,7 +58,6 @@ constexpr uint32_t BIT_MAX = 32;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 constexpr int32_t MAX_MTU_LEN = 11;
 constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
-constexpr int32_t MAC_ADDRESS_INT_LEN = 6;
 constexpr int32_t MAC_SSCANF_SPACE = 3;
 const std::regex REGEX_CMD_MAC_ADDRESS("^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$");
 
@@ -512,6 +510,78 @@ int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::stri
     return NETMANAGER_SUCCESS;
 }
 
+int32_t InterfaceManager::AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOGI("AddStaticIpv6Addr");
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    int32_t res = AssembleIPv6Neighbor(ipv6Addr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+    if (res != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("AssembleIPv6Neighbor error");
+        return res;
+    }
+    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+}
+
+int32_t InterfaceManager::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETNATIVE_LOGI("DelStaticIpv6Addr");
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    int32_t res = AssembleIPv6Neighbor(ipv6Addr, macAddr, ifName, nlmsg, RTM_DELNEIGH);
+    if (res != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("AssembleIPv6Neighbor error");
+        return res;
+    }
+    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+}
+
+int32_t InterfaceManager::AssembleIPv6Neighbor(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName, nmd::NetlinkMsg &nlmsg, uint16_t action)
+{
+    if (!IsValidIPV6(ipv6Addr)) {
+        NETNATIVE_LOGE("ipv6Addr error");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    if (!regex_match(macAddr, REGEX_CMD_MAC_ADDRESS)) {
+        NETNATIVE_LOGE("macAddr error");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    uint8_t macBin[MAC_ADDRESS_INT_LEN];
+    if (MacStringToBinary(macAddr, macBin) != 0) {
+        NETNATIVE_LOGE("MacStringToArray error");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    uint32_t index = if_nametoindex(ifName.c_str());
+    if (index == 0) {
+        NETNATIVE_LOGE("AssembleIPv6Neighbor, ifName error %{public}d", errno);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    struct in6_addr in6Addr;
+    if (inet_pton(AF_INET6, ipv6Addr.c_str(), reinterpret_cast<void *>(&in6Addr)) == -1) {
+        NETNATIVE_LOGE("addr inet_pton error %{public}d", errno);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    struct ndmsg ndm = {};
+    ndm.ndm_family = AF_INET6;
+    ndm.ndm_ifindex = index;
+    ndm.ndm_pad1 = 0;
+    ndm.ndm_pad2 = 0;
+    ndm.ndm_state = NUD_PERMANENT;
+    ndm.ndm_flags = 0;
+    ndm.ndm_type = RTN_UNICAST;
+
+    nlmsg.AddNeighbor(action, ndm);
+    nlmsg.AddAttr(NDA_DST, &in6Addr, sizeof(in6Addr));
+    nlmsg.AddAttr(NDA_LLADDR, macBin, sizeof(macBin));
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr &macSock)
 {
     char strMac[MAC_ADDRESS_INT_LEN] = {};
@@ -536,6 +606,31 @@ int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr 
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t InterfaceManager::MacStringToBinary(const std::string &macAddr, uint8_t (&macBin)[MAC_ADDRESS_INT_LEN])
+{
+    char strMac[MAC_ADDRESS_INT_LEN] = {};
+    char strAddr[MAC_ADDRESS_STR_LEN] = {};
+    uint32_t v = 0;
+    if (memcpy_s(strAddr, MAC_ADDRESS_STR_LEN, macAddr.c_str(), macAddr.size()) != 0) {
+        NETNATIVE_LOGE("memcpy_s is false");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    for (int i = 0; i < MAC_ADDRESS_INT_LEN; i++) {
+        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v) <= 0) {
+            NETNATIVE_LOGE("sscanf_s is false");
+            return NETMANAGER_ERR_OPERATION_FAILED;
+        }
+        strMac[i] = (char)v;
+    }
+
+    if (memcpy_s(macBin, MAC_ADDRESS_INT_LEN, strMac, MAC_ADDRESS_INT_LEN) != 0) {
+        NETNATIVE_LOGE("memcpy_s failed for binary copy");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace nmd

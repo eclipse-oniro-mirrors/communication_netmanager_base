@@ -971,6 +971,32 @@ int32_t NetConnClient::DelStaticArp(const std::string &ipAddr, const std::string
     return proxy->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
+int32_t NetConnClient::AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETMGR_LOG_I("AddStaticIpv6Addr client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->AddStaticIpv6Addr(ipv6Addr, macAddr, ifName);
+}
+
+int32_t NetConnClient::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
+    const std::string &ifName)
+{
+    NETMGR_LOG_I("DelStaticIpv6Addr client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->DelStaticIpv6Addr(ipv6Addr, macAddr, ifName);
+}
+
 int32_t NetConnClient::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
     NETMGR_LOG_I("RegisterSlotType client in.supplierId[%{public}d] type[%{public}d]", supplierId, type);

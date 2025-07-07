@@ -103,6 +103,7 @@ void NetConnServiceStub::InitAll()
     InitQueryFuncToInterfaceMapExt();
     InitVnicFuncToInterfaceMap();
     InitVirnicFuncToInterfaceMap();
+    InitStaticIpv6ToInterfaceMap();
 }
 
 void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
@@ -141,6 +142,14 @@ void NetConnServiceStub::InitStaticArpToInterfaceMap()
         &NetConnServiceStub::OnAddStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP)] = {
         &NetConnServiceStub::OnDelStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
+}
+
+void NetConnServiceStub::InitStaticIpv6ToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_IPV6)] = {
+        &NetConnServiceStub::OnAddStaticIpv6Addr, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6)] = {
+        &NetConnServiceStub::OnDelStaticIpv6Addr, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitQueryFuncToInterfaceMap()
@@ -1671,6 +1680,56 @@ int32_t NetConnServiceStub::OnDelStaticArp(MessageParcel &data, MessageParcel &r
     }
 
     int32_t ret = DelStaticArp(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

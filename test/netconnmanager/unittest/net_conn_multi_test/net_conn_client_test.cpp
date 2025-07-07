@@ -1255,6 +1255,57 @@ HWTEST_F(NetConnClientTest, StaticArpTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
+HWTEST_F(NetConnClientTest, StaticIpv6AddrTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string ifName = "chba0";
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "12:23:34:12:12:11";
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+
+    ipAddr = "1234";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    macAddr = "12:234:34";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetConnClientTest, StaticIpv6AddrTest002, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "12:23:34:12:12:11";
+    std::string ifName = "chba0";
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334677";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    macAddr = "12:23:34:12:12";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    macAddr = "12:23:34:12:12:11";
+    ifName = "";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
 HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
 {
     int32_t uid = 0;

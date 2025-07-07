@@ -224,6 +224,24 @@ HWTEST_F(InterfaceManagerTest, DelStaticArpTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(InterfaceManagerTest, AddStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    auto ret = InterfaceManager::AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, DelStaticIpv6AddrTest001, TestSize.Level1)
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    auto ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
 HWTEST_F(InterfaceManagerTest, AssembleArpTest001, TestSize.Level1)
 {
     std::string ipAddr;
@@ -250,6 +268,31 @@ HWTEST_F(InterfaceManagerTest, AssembleArpTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(InterfaceManagerTest, AssembleIPv6NeighborTest001, TestSize.Level1)///这个有问题写的
+{
+    std::string ipAddr;
+    std::string macAddr;
+    std::string ifName;
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, 0);
+    auto ret = InterfaceManager::AssembleIPv6Neighbor(ipAddr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    ret = InterfaceManager::AssembleIPv6Neighbor(ipAddr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(InterfaceManagerTest, AssembleIPv6NeighborTest002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "08:00:20:0A:8C:6D";
+    std::string ifName;
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, 0);
+    auto ret = InterfaceManager::AssembleIPv6Neighbor(ipAddr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(InterfaceManagerTest, MacStringToArrayTest001, TestSize.Level1)
 {
     std::string macAddr;
@@ -260,6 +303,22 @@ HWTEST_F(InterfaceManagerTest, MacStringToArrayTest001, TestSize.Level1)
     macAddr = "08:00:20:0A:8C:6D";
     ret = InterfaceManager::MacStringToArray(macAddr, macSock);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(InterfaceManagerTest, MacStringToBinaryTest001, TestSize.Level1)
+{
+    std::string macAddr;
+    uint8_t macBin[MAC_ADDRESS_INT_LEN];
+    auto ret = InterfaceManager::MacStringToBinary(macAddr, macBin);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+
+    macAddr = "08:00:20:0A:8C:6D";
+    ret = InterfaceManager::MacStringToBinary(macAddr, macBin);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string invalidMacStr = "08:00:20:0A:8C";
+    ret = InterfaceManager::MacStringToBinary(macAddr, macBin);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
@@ -418,6 +477,26 @@ HWTEST_F(InterfaceManagerTest, AssembleArp001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(InterfaceManagerTest, AssembleIPv6Neighbor001, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, 0);
+    auto ret = InterfaceManager::AssembleIPv6Neighbor(ipAddr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, AssembleIPv6Neighbor002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334:1111";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, 0);
+    auto ret = InterfaceManager::AssembleIPv6Neighbor(ipAddr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(InterfaceManagerTest, AddStaticArpTest001, TestSize.Level1)
 {
     std::string ipAddr = "192.168.1.100";
@@ -445,6 +524,36 @@ HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "wlan0";
     ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, AddStaticIpv6AddrTest002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = InterfaceManager::AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7335";
+    macAddr = "aa:bb:cc:dd:00:ff";
+    ifName = "chba0";
+    ret = InterfaceManager::AddStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, DelStaticIpv6AddrTest002, TestSize.Level1)
+{
+    std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "chba0";
+    auto ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+
+    ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7335";
+    macAddr = "aa:bb:cc:dd:00:ff";
+    ifName = "chba0";
+    ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, 0);
 }
 

@@ -41,6 +41,7 @@ private:
     void InitVnicFuncToInterfaceMap();
     void InitVirnicFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
+    void InitStaticIpv6ToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
     void InitAll();
@@ -118,6 +119,8 @@ private:
     int32_t OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetExtAttribute(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNetExtAttribute(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };
