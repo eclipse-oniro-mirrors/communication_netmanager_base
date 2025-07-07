@@ -31,8 +31,8 @@ constexpr const int32_t NETWORK_POLICY_REPORT_DELAY = 10 * 1000 * 1000;
 constexpr const int32_t HIVIEW_UID = 1201;
 constexpr const char *NETWORK_POLICY_CHANGED_EVENT = "custom.event.NETWORK_POLICY_CHANGED";
 constexpr const char *NETWORK_POLICY_INFO_KEY = "POLICY_INFO";
-constexpr const int32_t NET_POLICY_WIFI_ALLOW = (1 << 0);
-constexpr const int32_t NET_POLICY_CELLULAR_ALLOW = (1 << 1);
+constexpr const uint32_t NET_POLICY_WIFI_ALLOW = (1 << 0);
+constexpr const uint32_t NET_POLICY_CELLULAR_ALLOW = (1 << 1);
 
 class NetPolicyServiceStub : public IRemoteStub<INetPolicyService> {
 public:
