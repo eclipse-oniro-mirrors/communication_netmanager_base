@@ -75,7 +75,7 @@ HWTEST_F(NetlinkMsgTest, AddRouteTest001, TestSize.Level1)
     ndm.ndm_state = NUD_PERMANENT;
     ndm.ndm_flags = 0;
     ndm.ndm_type = RTN_UNICAST;
-    netlinkMsg.AddNeighbor(action1, ndm);
+    netLinkMsg.AddNeighbor(action1, ndm);
     size_t dataLength100 = 100;
     size_t dataLength10 = 10;
     int32_t ret = netLinkMsg.AddAttr(action, nullptr, dataLength100);
