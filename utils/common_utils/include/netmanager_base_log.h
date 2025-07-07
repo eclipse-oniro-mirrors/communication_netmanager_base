@@ -33,7 +33,7 @@ extern "C" {
 
 // 日志宏主体,不额外输出源代码位置和函数名
 #define NETMANAGER_LOG(Level, fmt, ...)                                                  \
-    (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, fmt, ##__VA_ARGS__) 
+    (void)HILOG_IMPL(LOG_CORE, LOG_##Level, LOG_DOMAIN, LOG_TAG, fmt, ##__VA_ARGS__)
 
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 
