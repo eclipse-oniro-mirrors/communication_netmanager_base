@@ -119,7 +119,7 @@ private:
     int32_t SetIfaceQuotaDetail(const std::string &ifName, int64_t bytes);
 
 private:
-    bool chainInitFlag_ = false;
+    std::atomic<bool> chainInitFlag_ = false;
     bool dataSaverEnable_ = false;
     int64_t globalAlertBytes_ = 0;
     std::mutex bandwidthMutex_;
