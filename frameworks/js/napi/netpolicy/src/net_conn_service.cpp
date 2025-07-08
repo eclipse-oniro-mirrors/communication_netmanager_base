@@ -3133,14 +3133,12 @@ int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::strin
 int32_t NetConnService::AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_E("wd::NetConnService AddStaticIpv6Addr");
     return NetsysController::GetInstance().AddStaticIpv6Addr(ipv6Addr, macAddr, ifName);
 }
 
 int32_t NetConnService::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_E("wd::NetConnService DelStaticIpv6Addr");
     return NetsysController::GetInstance().DelStaticIpv6Addr(ipv6Addr, macAddr, ifName);
 }
 
