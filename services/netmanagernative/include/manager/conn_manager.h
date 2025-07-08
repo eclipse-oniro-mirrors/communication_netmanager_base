@@ -24,6 +24,7 @@
 #include <vector>
 #include <thread>
 
+#include "bpf_def.h"
 #include "netsys_network.h"
 #include "network_permission.h"
 #include "route_manager.h"
@@ -264,6 +265,9 @@ private:
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
     int32_t GetNetworkForInterface(int32_t netId, std::string &interfaceName);
     RouteManager::TableType GetTableType(int32_t netId);
+    net_interface_name_id GetInterfaceNameId(NetManagerStandard::NetBearType netBearerType);
+    void AddNetIdAndIfaceToMap(int32_t netId, net_interface_name_id nameId);
+    void AddIfindexAndNetTypeToMap(const std::string &interfaceName, net_interface_name_id nameId);
 };
 } // namespace nmd
 } // namespace OHOS

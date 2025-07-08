@@ -36,5 +36,6 @@ static constexpr const char *INCREMENT_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps
 static constexpr const char *IFINDEX_MAP_PATH = "/sys/fs/bpf/netsys/maps/ifindex_map";
 static constexpr const char *NET_STATUS_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_status_map";
 static constexpr const char *NET_WLAN1_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_wlan1_map";
+static constexpr const char *IFINDEX_AND_NET_TYPE_MAP_PATH = "/sys/fs/bpf/netsys/maps/ifindex_and_net_type_map";
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_BASE_BPF_PATH_H */

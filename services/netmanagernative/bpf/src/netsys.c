@@ -383,6 +383,16 @@ bpf_map_def SEC("maps") net_index_and_iface_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") ifindex_and_net_type_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(if_index),
+    .value_size = sizeof(net_interface_name_id),
+    .max_entries = 5,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 static inline net_bear_type_map_value check_socket_fwmark(__u32 mark)
 {
     __u8 explicitlySelected = (mark >> 16) & (0x1);
@@ -396,6 +406,31 @@ static inline net_bear_type_map_value check_socket_fwmark(__u32 mark)
         if (ifaceC != NULL) {
             net_bear_mark_type = *ifaceC;
         }
+    }
+    return net_bear_mark_type;
+}
+
+static inline net_bear_type_map_value check_socket_bound_dev_if(__u32 ifIndex)
+{
+    net_bear_type_map_value net_bear_mark_type = NETWORK_BEARER_TYPE_INITIAL;
+    void *ifnet_map_ptr = &ifindex_and_net_type_map;
+    net_interface_name_id *ifaceC = bpf_map_lookup_elem(ifnet_map_ptr, &ifIndex);
+    if (ifaceC != NULL) {
+        net_bear_mark_type = *ifaceC;
+    }
+    return net_bear_mark_type;
+}
+
+static inline net_bear_type_map_value check_socket_select_net(struct bpf_sock *sk)
+{
+    net_bear_type_map_value net_bear_mark_type = NETWORK_BEARER_TYPE_INITIAL;
+    if (sk == NULL) {
+        return net_bear_mark_type;
+    }
+    net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_bound_type = check_socket_bound_dev_if(sk->bound_dev_if);
+    if (net_bear_bound_type != NETWORK_BEARER_TYPE_INITIAL) {
+        net_bear_mark_type = net_bear_bound_type;
     }
     return net_bear_mark_type;
 }
@@ -514,6 +549,10 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
         net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(skb->mark);
+        net_bear_type_map_value net_bear_bound_type = check_socket_bound_dev_if(skb->ifindex);
+        if (net_bear_bound_type != NETWORK_BEARER_TYPE_INITIAL) {
+            net_bear_mark_type = net_bear_bound_type;
+        }
         if (check_network_policy(net_bear_mark_type, netAccessPolicyValue) == 0) {
             return 0;
         }
@@ -603,6 +642,10 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         bpf_map_lookup_elem(&app_uid_access_policy_map, &network_access_uid);
     if (netAccessPolicyValue != NULL) {
         net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(skb->mark);
+        net_bear_type_map_value net_bear_bound_type = check_socket_bound_dev_if(skb->ifindex);
+        if (net_bear_bound_type != NETWORK_BEARER_TYPE_INITIAL) {
+            net_bear_mark_type = net_bear_bound_type;
+        }
         if (check_network_policy(net_bear_mark_type, netAccessPolicyValue) == 0) {
             return 0;
         }
@@ -776,7 +819,7 @@ static int inet_check_bind4(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
@@ -822,7 +865,7 @@ static int inet_check_bind6(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
@@ -868,7 +911,7 @@ static int inet_check_connect4(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
@@ -915,7 +958,7 @@ static int inet_check_connect6(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
@@ -961,7 +1004,7 @@ static int inet_check_sendmsg4(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;
@@ -1007,7 +1050,7 @@ static int inet_check_sendmsg6(struct bpf_sock_addr *ctx)
     }
 
     struct bpf_sock *sk = ctx->sk;
-    net_bear_type_map_value net_bear_mark_type = check_socket_fwmark(sk->mark);
+    net_bear_type_map_value net_bear_mark_type = check_socket_select_net(sk);
     if (socket_check_network_policy(net_bear_mark_type, net_bear_type, value) == 0) {
         if (value->diagAckFlag) {
             return 0;

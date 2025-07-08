@@ -756,5 +756,17 @@ HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
     ret = instance_->SetInternetPermission(uid, allow, isBroker);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(ConnManagerTest, GetInterfaceNameId001, TestSize.Level1)
+{
+    NetManagerStandard::NetBearType netBearerType = BEARER_WIFI;
+    EXPECT_EQ(instance_->GetInterfaceNameId(netBearerType), NETWORK_BEARER_TYPE_WIFI);
+    
+    netBearerType = BEARER_CELLULAR;
+    EXPECT_EQ(instance_->GetInterfaceNameId(netBearerType), NETWORK_BEARER_TYPE_CELLULAR);
+    
+    netBearerType = BEARER_BLUETOOTH;
+    EXPECT_EQ(instance_->GetInterfaceNameId(netBearerType), NETWORK_BEARER_TYPE_INITIAL);
+}
 } // namespace NetsysNative
 } // namespace OHOS
