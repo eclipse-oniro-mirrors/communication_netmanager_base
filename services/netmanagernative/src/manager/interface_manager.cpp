@@ -611,7 +611,6 @@ int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr 
 
 int32_t InterfaceManager::MacStringToBinary(const std::string &macAddr, uint8_t (&macBin)[MAC_ADDRESS_INT_LEN])
 {
-    char strMac[MAC_ADDRESS_INT_LEN] = {};
     char strAddr[MAC_ADDRESS_STR_LEN] = {};
     uint32_t v = 0;
     if (memcpy_s(strAddr, MAC_ADDRESS_STR_LEN, macAddr.c_str(), macAddr.size()) != 0) {
@@ -624,13 +623,9 @@ int32_t InterfaceManager::MacStringToBinary(const std::string &macAddr, uint8_t 
             NETNATIVE_LOGE("sscanf_s is false");
             return NETMANAGER_ERR_OPERATION_FAILED;
         }
-        strMac[i] = (char)v;
+        macBin[i] = static_cast<uint8_t>(v);
     }
 
-    if (memcpy_s(macBin, MAC_ADDRESS_INT_LEN, strMac, MAC_ADDRESS_INT_LEN) != 0) {
-        NETNATIVE_LOGE("memcpy_s failed for binary copy");
-        return NETMANAGER_ERR_OPERATION_FAILED;
-    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace nmd

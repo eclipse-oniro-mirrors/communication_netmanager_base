@@ -1810,7 +1810,11 @@ int32_t NetConnServiceProxy::AddStaticIpv6Addr(const std::string &ipv6Addr, cons
         return error;
     }
 
-    return reply.ReadInt32();
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetConnServiceProxy::DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
@@ -1841,7 +1845,11 @@ int32_t NetConnServiceProxy::DelStaticIpv6Addr(const std::string &ipv6Addr, cons
         return error;
     }
 
-    return reply.ReadInt32();
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, int32_t type)

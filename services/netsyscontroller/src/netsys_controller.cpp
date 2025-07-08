@@ -1360,7 +1360,6 @@ int32_t NetsysController::DelStaticArp(const std::string &ipAddr, const std::str
 int32_t NetsysController::AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_E("wd::NetsysController AddStaticIpv6Addr");
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("AddStaticIpv6Addr netsysService is null");
@@ -1373,7 +1372,6 @@ int32_t NetsysController::AddStaticIpv6Addr(const std::string &ipAddr, const std
 int32_t NetsysController::DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_E("wd::NetsysController DelStaticIpv6Addr");
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("DelStaticIpv6Addr netsysService is null");

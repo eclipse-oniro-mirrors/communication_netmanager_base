@@ -117,7 +117,7 @@ nlmsghdr *NetlinkMsg::GetNetLinkMessage()
     return netlinkMessage_;
 }
 
-void NetlinkMsg::AddNeighbor(uint16_t action, struct ndmsg msg)
+void NetlinkMsg::AddNeighbor(uint16_t action, const struct ndmsg& msg)
 {
     netlinkMessage_->nlmsg_type = action;
     int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ndmsg), &msg, sizeof(struct ndmsg));

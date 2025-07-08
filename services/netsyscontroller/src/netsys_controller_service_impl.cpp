@@ -826,7 +826,6 @@ int32_t NetsysControllerServiceImpl::DelStaticArp(const std::string &ipAddr, con
 int32_t NetsysControllerServiceImpl::AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_I("wd::NetsysControllerServiceImpl AddStaticIpv6Addr");
     NETMGR_LOG_D("AddStaticIpv6Addr");
     return netsysClient_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
 }
@@ -834,7 +833,6 @@ int32_t NetsysControllerServiceImpl::AddStaticIpv6Addr(const std::string &ipAddr
 int32_t NetsysControllerServiceImpl::DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr,
     const std::string &ifName)
 {
-    NETMGR_LOG_I("wd::NetsysControllerServiceImpl DelStaticIpv6Addr");
     NETMGR_LOG_D("DelStaticIpv6Addr");
     return netsysClient_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
 }
