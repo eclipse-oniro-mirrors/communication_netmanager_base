@@ -252,7 +252,7 @@ void ConnManager::AddNetIdAndIfaceToMap(int32_t netId, net_interface_name_id nam
 
 void ConnManager::AddIfindexAndNetTypeToMap(const std::string &interfaceName, net_interface_name_id nameId)
 {
-    BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NETTYPE_MAP_PATH, BPF_ANY);
+    BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
     if (ifIndexAndNetTypeMap.IsValid()) {
         uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
         if (ifIndexAndNetTypeMap.Write(ifIndex, nameId, 0) != 0) {
@@ -310,7 +310,7 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
                 NETNATIVE_LOGE("netIdAndIfaceMap remove error: netId:%{public}d, interfaceName:%{public}s", netId,
                                interfaceName.c_str());
             }
-            BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NETTYPE_MAP_PATH, BPF_ANY);
+            BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
             uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
             if (ifIndexAndNetTypeMap.IsValid() && ifIndexAndNetTypeMap.Delete(ifIndex) != 0) {
                 NETNATIVE_LOGE("ifIndexAndNetTypeMap remove error: ifIndex:%{public}d, interfaceName:%{public}s",
