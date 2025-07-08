@@ -81,7 +81,7 @@ private:
 
     std::mutex proxyMtx_;
     bool isCurlInit_ = false;
-    bool defaultUseGlobalHttpProxy_ = true;
+    std::atomic<bool> defaultUseGlobalHttpProxy_ = true;
     uint32_t netId_ = 0;
     NetBearType netBearType_ = BEARER_DEFAULT;
     NetLinkInfo netLinkInfo_;
