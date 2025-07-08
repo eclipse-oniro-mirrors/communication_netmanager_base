@@ -11,10 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(
-    non_snake_case,
-    non_camel_case_types,
-    non_upper_case_globals
-)]
+use ani_rs::business_error::BusinessError;
 
-include!(env!("ANI_BINDGEN_RS_FILE"));
+#[ani_rs::ani(path = "Lanirs/test/ani_test/Action")]
+#[derive(Debug)]
+pub enum Action {
+    Download,
+    Upload,
+}
+
+#[ani_rs::ani(path = "Lanirs/test/ani_test/Config")]
+#[derive(Debug)]
+pub struct Config {
+    pub action: Action,
+    pub url: String,
+}
+
+#[ani_rs::native]
+pub fn struct_enum(input: Config) -> Result<Config, BusinessError> {
+    Ok(input)
+}

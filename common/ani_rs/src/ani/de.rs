@@ -13,7 +13,7 @@
 
 #![allow(unused)]
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 
 use serde::{
     de::{self, EnumAccess, MapAccess, SeqAccess, VariantAccess},
@@ -256,7 +256,7 @@ impl<'local> EnumDe<'local> {
                         continue;
                     }
                 }
-
+                let variant_cstring = CString::new(*variant).unwrap();
                 let class_name = match *variant {
                     "Boolean" => signature::BOOLEAN,
                     "I8" => signature::BYTE,
@@ -274,7 +274,7 @@ impl<'local> EnumDe<'local> {
                     "Uint8Array" => signature::UINT8_ARRAY,
                     "Uint16Array" => signature::UINT16_ARRAY,
                     "Uint32Array" => signature::UINT32_ARRAY,
-                    _ => CStr::from_bytes_with_nul(variant.as_bytes())?,
+                    _ => variant_cstring.as_c_str(),
                 };
 
                 let class = self.env.find_class(&class_name)?;
