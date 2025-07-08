@@ -196,7 +196,8 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
         NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
     }
-    outText = outText.replace(outText.find("%s"), TWO_CHAR, std::to_string(monUsedPercent) + "%");
+    std::string percent = "‪" + std::to_string(monUsedPercent) + "%" + "‬";
+    outText = outText.replace(outText.find("%s"), TWO_CHAR, percent);
     NETMGR_LOG_I("GetMonthNotificationText outText [%{public}s]", outText.c_str());
     return outText;
 }
