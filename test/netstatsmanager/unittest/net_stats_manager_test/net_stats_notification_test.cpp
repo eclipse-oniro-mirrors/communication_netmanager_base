@@ -122,6 +122,8 @@ HWTEST_F(NetStatsNotificationTest, GetMonthNotificationTextTest001, TestSize.Lev
     ret = notification.GetMonthNotificationText();
     EXPECT_TRUE(ret.empty());
     notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = temp;
+    ret = notification.GetMonthNotificationText();
+    EXPECT_TRUE(ret.empty());
 }
 
 HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)

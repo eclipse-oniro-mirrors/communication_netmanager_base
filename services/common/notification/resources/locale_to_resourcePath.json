@@ -1,32 +1,60 @@
 {
-    "string":[
+    "string": [
         {
-            "name":"zh-Hans-CN",
-            "value":"zh_CN"
+            "name": "zh-Hans-CN",
+            "value": "zh_CN"
         },
         {
-            "name":"en-Latn-US",
-            "value":"base"
+            "name": "en-Latn-US",
+            "value": "base"
         },
         {
-            "name":"zh-Hant-HK",
-            "value":"zh_HK"
+            "name": "zh-Hant-HK",
+            "value": "zh_HK"
         },
         {
-            "name":"zh-Hant-TW",
-            "value":"zh_TW"
+            "name": "zh-Hant-TW",
+            "value": "zh_TW"
         },
         {
-            "name":"ug-CN",
-            "value":"ug"
+            "name": "ug-CN",
+            "value": "ug"
         },
         {
-            "name":"bo-CN",
-            "value":"bo_CN"
+            "name": "bo-CN",
+            "value": "bo_CN"
         },
         {
-            "name":"zz-ZX",
-            "value":"zz_ZX"
+            "name": "zz-ZX",
+            "value": "zz_ZX"
+        },
+        {
+            "name": "ar-CN",
+            "value": "ar"
+        },
+        {
+            "name": "es-CN",
+            "value": "es"
+        },
+        {
+            "name": "fr-CN",
+            "value": "fr"
+        },
+        {
+            "name": "ja-CN",
+            "value": "ja"
+        },
+        {
+            "name": "ko-CN",
+            "value": "ko"
+        },
+        {
+            "name": "ru-CN",
+            "value": "ru"
+        },
+        {
+            "name": "vi-CN",
+            "value": "vi"
         }
     ]
-}
+}

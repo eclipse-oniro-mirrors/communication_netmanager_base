@@ -56,6 +56,48 @@ ohos_prebuilt_etc("netstats_notification_zz_ZX") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+ohos_prebuilt_etc("netstats_notification_ar") {
+source = "notification/resources/ar/element/string.json"
+relative_install_dir = "netmanager_base/resources/ar/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_es") {
+source = "notification/resources/es/element/string.json"
+relative_install_dir = "netmanager_base/resources/es/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_fr") {
+source = "notification/resources/fr/element/string.json"
+relative_install_dir = "netmanager_base/resources/fr/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_ja") {
+source = "notification/resources/ja/element/string.json"
+relative_install_dir = "netmanager_base/resources/ja/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_ko") {
+source = "notification/resources/ko/element/string.json"
+relative_install_dir = "netmanager_base/resources/ko/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_ru") {
+source = "notification/resources/ru/element/string.json"
+relative_install_dir = "netmanager_base/resources/ru/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_vi") {
+source = "notification/resources/vi/element/string.json"
+relative_install_dir = "netmanager_base/resources/vi/element"
+part_name = "netmanager_base"
+subsystem_name = "communication"
+}
 
 ohos_prebuilt_etc("netstats_notification_icon") {
   source = "notification/resources/network_ic.png"
@@ -126,6 +168,13 @@ ohos_shared_library("net_service_common") {
     ":netstats_notification_zh_HK",
     ":netstats_notification_zh_TW",
     ":netstats_notification_zz_ZX",
+    ":netstats_notification_ar",
+    ":netstats_notification_es",
+    ":netstats_notification_fr",
+    ":netstats_notification_ja",
+    ":netstats_notification_ko",
+    ":netstats_notification_ru",
+    ":netstats_notification_vi",
     "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
