@@ -53,17 +53,23 @@ static thread_local uint64_t g_moduleId;
 
 namespace OHOS::NetManagerStandard {
 
-template <typename T> static bool ParseTypesArray(napi_env env, napi_value obj, std::set<T> &typeArray)
+template <typename T> static bool ParseTypesArray(napi_env env, napi_value obj, std::set<T> &typeArray,
+    std::function<bool(uint32_t)> isValid)
 {
     if (!NapiUtils::IsArray(env, obj)) {
         return false;
     }
-    uint32_t arrayLenght =
+    uint32_t arrayLength =
         NapiUtils::GetArrayLength(env, obj) > MAX_ARRAY_LENGTH ? MAX_ARRAY_LENGTH : NapiUtils::GetArrayLength(env, obj);
-    for (uint32_t i = 0; i < arrayLenght; ++i) {
+    for (uint32_t i = 0; i < arrayLength; ++i) {
         napi_value val = NapiUtils::GetArrayElement(env, obj, i);
         if (NapiUtils::GetValueType(env, val) == napi_number) {
-            typeArray.insert(static_cast<T>(NapiUtils::GetUint32FromValue(env, val)));
+            uint32_t value = NapiUtils::GetUint32FromValue(env, val);
+            if (!isValid(value)) {
+                NETMANAGER_BASE_LOGE("Invalid parameter value of array element!");
+                return false;
+            }
+            typeArray.insert(static_cast<T>(value));
         } else {
             NETMANAGER_BASE_LOGE("Invalid parameter type of array element!");
             return false;
@@ -82,14 +88,15 @@ static bool ParseCapabilities(napi_env env, napi_value obj, NetAllCapabilities &
     capabilities.linkDownBandwidthKbps_ = NapiUtils::GetUint32Property(env, obj, KEY_LINK_DOWN_BAND_WIDTH_KPS);
 
     napi_value networkCap = NapiUtils::GetNamedProperty(env, obj, KEY_NETWORK_CAP);
-    (void)ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_);
+    (void)ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_, [](uint32_t value) {
+        return value >= 0 && value <= static_cast<uint32_t>(NetCap::NET_CAPABILITY_END);
+    });
 
     napi_value bearerTypes = NapiUtils::GetNamedProperty(env, obj, KEY_BEARER_TYPE);
-    if (!ParseTypesArray<NetBearType>(env, bearerTypes, capabilities.bearerTypes_)) {
-        return false;
-    }
-
-    return true;
+    bool ret = ParseTypesArray<NetBearType>(env, bearerTypes, capabilities.bearerTypes_, [](uint32_t value) {
+        return value >= 0 && value <= static_cast<uint32_t>(NetBearType::BEARER_DEFAULT);
+    });
+    return ret;
 }
 
 static bool ParseNetSpecifier(napi_env env, napi_value obj, NetSpecifier &specifier)
