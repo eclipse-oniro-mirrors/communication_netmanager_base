@@ -685,7 +685,9 @@ int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, Messag
 
 void NetPolicyServiceStub::HandleReportNetworkPolicy()
 {
+#ifndef UNITTEST_FORBID_FFRT
     std::lock_guard<std::mutex> lock(setNetworkPolicyMutex_);
+#endif
     if (appNetworkPolicyMap_.empty()) {
         return;
     }
