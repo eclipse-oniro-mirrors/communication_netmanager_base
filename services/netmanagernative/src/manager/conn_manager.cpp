@@ -245,7 +245,7 @@ void ConnManager::AddNetIdAndIfaceToMap(int32_t netId, net_interface_name_id nam
     BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
     if (netIdAndIfaceMap.IsValid()) {
         if (netIdAndIfaceMap.Write(netId, nameId, 0) != 0) {
-            NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, nameId:%{public}s", netId, nameId);
+            NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, nameId:%{public}d", netId, nameId);
         }
     }
 }
