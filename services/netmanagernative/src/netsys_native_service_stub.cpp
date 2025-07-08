@@ -2525,6 +2525,12 @@ int32_t NetsysNativeServiceStub::CmdUpdateVpnRules(MessageParcel &data, MessageP
         NETNATIVE_LOGE("CmdUpdateVpnRules read size failed");
         return ERR_FLATTEN_OBJECT;
     }
+
+    if (size < 0 || size > MAX_VNIC_UID_ARRAY_SIZE) {
+        NETNATIVE_LOGE("CmdUpdateVpnRules size is invalid");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     std::vector<std::string> extMessages;
     std::string extMessage;
     for (int32_t index = 0; index < size; index++) {
