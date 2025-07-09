@@ -27,6 +27,7 @@ void AniSendEvent(rust::box<RustClosure> closure, const rust::str name)
     auto handler = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     auto closureWrapper = std::make_shared<rust::Box<RustClosure>>(std::move(closure));
 
-    auto callback = [closureWrapper = std::move(closureWrapper), name]() mutable { (*closureWrapper)->execute(); };
-    handler->PostTask(callback);
+    auto callback = [closureWrapper = std::move(closureWrapper),
+        main_handle = handler]() mutable { (*closureWrapper)->execute(); };
+    handler->PostTask(callback, std::string(name));
 }
