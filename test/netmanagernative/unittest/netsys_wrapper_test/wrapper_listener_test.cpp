@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <sys/socket.h>
 
 #include "netlink_define.h"
 #include "wrapper_listener.h"
@@ -55,9 +56,11 @@ HWTEST_F(WrapperListenerTest, StartTest001, TestSize.Level1)
 
 HWTEST_F(WrapperListenerTest, StartTest002, TestSize.Level1)
 {
-    auto ret = instance_->Start();
+    int32_t testSocket = socket(AF_INET, SOCK_STREAM, 0);
+    std::unique_ptr<WrapperListener> listener = std::make_unique<WrapperListener>(testSocket, g_func);
+    auto ret = listener->Start();
     EXPECT_EQ(ret, NetlinkResult::OK);
-    ret = instance_->Stop();
+    ret = listener->Stop();
     EXPECT_EQ(ret, NetlinkResult::OK);
 }
 } // namespace nmd
