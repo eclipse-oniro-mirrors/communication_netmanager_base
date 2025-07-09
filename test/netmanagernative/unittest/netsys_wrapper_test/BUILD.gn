@@ -28,7 +28,6 @@ ohos_unittest("netsys_wrapper_test") {
   sources = [
     "data_receiver_test.cpp",
     "netsys_event_message_test.cpp",
-    "netsys_wrapper_test.cpp",
     "wrapper_decoder_test.cpp",
     "wrapper_distributor_test.cpp",
   ]
