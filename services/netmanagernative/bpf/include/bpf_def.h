@@ -101,6 +101,7 @@ typedef __u8 sock_permission_value;
 typedef __u32 net_bear_id_key;
 typedef __u32 net_bear_type_map_value;
 
+typedef __u32 if_index;
 typedef __u16 net_index;
 typedef __u8 net_interface_name_id;
 

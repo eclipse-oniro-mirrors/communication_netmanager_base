@@ -20,7 +20,6 @@
 #include <ifaddrs.h>
 #include <string>
 
-#include "bpf_def.h"
 #include "bpf_mapper.h"
 #include "bpf_path.h"
 #include "local_network.h"
@@ -227,6 +226,42 @@ int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfac
     return InterfaceId;
 }
 
+net_interface_name_id ConnManager::GetInterfaceNameId(NetManagerStandard::NetBearType netBearerType)
+{
+    net_interface_name_id v = {0};
+    if (netBearerType == BEARER_WIFI) {
+        v = NETWORK_BEARER_TYPE_WIFI;
+    } else if (netBearerType == BEARER_CELLULAR) {
+        v = NETWORK_BEARER_TYPE_CELLULAR;
+    } else {
+        v = NETWORK_BEARER_TYPE_INITIAL;
+    }
+    return v;
+}
+
+void ConnManager::AddNetIdAndIfaceToMap(int32_t netId, net_interface_name_id nameId)
+{
+    // Create Map Table to establish the relationship betweet netId and the id about interfaceName.
+    BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
+    if (netIdAndIfaceMap.IsValid()) {
+        if (netIdAndIfaceMap.Write(netId, nameId, 0) != 0) {
+            NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, nameId:%{public}d", netId, nameId);
+        }
+    }
+}
+
+void ConnManager::AddIfindexAndNetTypeToMap(const std::string &interfaceName, net_interface_name_id nameId)
+{
+    BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
+    if (ifIndexAndNetTypeMap.IsValid()) {
+        uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
+        if (ifIndexAndNetTypeMap.Write(ifIndex, nameId, 0) != 0) {
+            NETNATIVE_LOGE("ifIndexAndNetTypeMap add error: interfaceName:%{public}s, ifIndex:%{public}d",
+                interfaceName.c_str(), ifIndex);
+        }
+    }
+}
+
 int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName,
                                            NetManagerStandard::NetBearType netBearerType)
 {
@@ -242,23 +277,9 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
-        // Create Map Table to establish the relationship betweet netId and the id about interfaceName.
-        BpfMapper<net_index, net_interface_name_id> netIdAndIfaceMap(NET_INDEX_AND_IFACE_MAP_PATH, BPF_ANY);
-        if (netIdAndIfaceMap.IsValid()) {
-            net_interface_name_id v = {0};
-            if (netBearerType == BEARER_WIFI) {
-                v = NETWORK_BEARER_TYPE_WIFI;
-            } else if (netBearerType == BEARER_CELLULAR) {
-                v = NETWORK_BEARER_TYPE_CELLULAR;
-            } else {
-                v = NETWORK_BEARER_TYPE_INITIAL;
-            }
-
-            if (netIdAndIfaceMap.Write(netId, v, 0) != 0) {
-                NETNATIVE_LOGE("netIdAndIfaceMap add error: netId:%{public}d, interfaceName:%{public}s", netId,
-                    interfaceName.c_str());
-            }
-        }
+        net_interface_name_id nameId = GetInterfaceNameId(netBearerType);
+        AddNetIdAndIfaceToMap(netId, nameId);
+        AddIfindexAndNetTypeToMap(interfaceName, nameId);
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (nw->IsPhysical()) {
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
@@ -288,6 +309,12 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
             if (netIdAndIfaceMap.IsValid() && netIdAndIfaceMap.Delete(netId) != 0) {
                 NETNATIVE_LOGE("netIdAndIfaceMap remove error: netId:%{public}d, interfaceName:%{public}s", netId,
                                interfaceName.c_str());
+            }
+            BpfMapper<if_index, net_interface_name_id> ifIndexAndNetTypeMap(IFINDEX_AND_NET_TYPE_MAP_PATH, BPF_ANY);
+            uint32_t ifIndex = if_nametoindex(interfaceName.c_str());
+            if (ifIndexAndNetTypeMap.IsValid() && ifIndexAndNetTypeMap.Delete(ifIndex) != 0) {
+                NETNATIVE_LOGE("ifIndexAndNetTypeMap remove error: ifIndex:%{public}d, interfaceName:%{public}s",
+                    ifIndex, interfaceName.c_str());
             }
             return ret;
         }
