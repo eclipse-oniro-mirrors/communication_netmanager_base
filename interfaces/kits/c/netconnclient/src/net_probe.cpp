@@ -30,6 +30,7 @@
 #include <netinet/ip_icmp.h>
 #include <poll.h>
 
+#include "netmanager_base_common_utils.h"
 #include "net_manager_constants.h"
 #include "net_probe.h"
 
@@ -177,23 +178,23 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, int32_t duration, NetConn_
         timesTake[totalRecv++] = currentDelay;
         sumDelay += currentDelay;
 
-        result.rttMax = std::max(result.rttMax, static_cast<int32_t>(currentDelay));
-        result.rttMin = std::min(result.rttMin, static_cast<int32_t>(currentDelay));
+        result.rtt[NETCONN_RTT_MAX] = std::max(result.rtt[NETCONN_RTT_MAX], static_cast<int32_t>(currentDelay));
+        result.rtt[NETCONN_RTT_MIN]  = std::min(result.rtt[NETCONN_RTT_MIN] , static_cast<int32_t>(currentDelay));
     }
 
     if (totalRecv == 0) {
-        result.rttMin = 0;
+        result.rtt[NETCONN_RTT_MIN]  = 0;
     }
 
-    result.rttAvg = (totalRecv > 0) ? (sumDelay / totalRecv) : 0;
+    result.rtt[NETCONN_RTT_AVG] = (totalRecv > 0) ? (sumDelay / totalRecv) : 0;
     result.lossRate = (totalSend > 0) ? ((totalSend - totalRecv) * PERCENTAGE / totalSend) : 0;
 
     sumDelay = 0;
     for (uint32_t i = 0; i < totalRecv; ++i) {
-        sumDelay += pow(result.rttAvg - timesTake[i], SQUARE);
+        sumDelay += pow(result.rtt[NETCONN_RTT_AVG] - timesTake[i], SQUARE);
     }
 
-    result.rttStd = (totalRecv > 0) ? static_cast<uint32_t>(sqrt(sumDelay / totalRecv)) : 0;
+    result.rtt[NETCONN_RTT_STD] = (totalRecv > 0) ? static_cast<uint32_t>(sqrt(sumDelay / totalRecv)) : 0;
 
     return rc;
 }
@@ -215,10 +216,10 @@ int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_
         return NETMANAGER_ERR_INTERNAL;
     }
 
-    result.rttMin = INT_MAX;
-    result.rttMax = 0;
-    result.rttAvg = 0;
-    result.rttStd = 0;
+    result.rtt[NETCONN_RTT_MIN] = INT_MAX;
+    result.rtt[NETCONN_RTT_MAX] = 0;
+    result.rtt[NETCONN_RTT_AVG] = 0;
+    result.rtt[NETCONN_RTT_STD] = 0;
     result.lossRate = 0;
 
     int32_t fd = socket(ai->ai_family, SOCK_DGRAM, (ai->ai_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6);
