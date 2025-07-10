@@ -179,7 +179,7 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, int32_t duration, NetConn_
         sumDelay += currentDelay;
 
         result.rtt[NETCONN_RTT_MAX] = std::max(result.rtt[NETCONN_RTT_MAX], static_cast<int32_t>(currentDelay));
-        result.rtt[NETCONN_RTT_MIN]  = std::min(result.rtt[NETCONN_RTT_MIN] , static_cast<int32_t>(currentDelay));
+        result.rtt[NETCONN_RTT_MIN] = std::min(result.rtt[NETCONN_RTT_MIN], static_cast<int32_t>(currentDelay));
     }
 
     if (totalRecv == 0) {
