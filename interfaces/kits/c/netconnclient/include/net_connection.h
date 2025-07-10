@@ -268,6 +268,20 @@ int32_t OH_NetConn_SetPacUrl(const char *pacUrl);
 
 int32_t OH_NetConn_GetPacUrl(char *pacUrl);
 
+/**
+ * @brief Ping destination with duration seconds
+ *
+ * @param destination The domain name or ip address to ping, should not be nullptr.
+ * @param duration How long will ping take, must great than 0 and less equal than 1000.
+ * @return 0 - Success.
+ *	   401 - Parameter error.
+ * 	   2100003 - Internal error.
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 20
+ * @version 1.0
+ */
+int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration, struct NetConn_ProbeResultInfo *result);
+
 #ifdef __cplusplus
 }
 #endif

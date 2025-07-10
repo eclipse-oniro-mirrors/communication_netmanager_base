@@ -15,6 +15,7 @@
 
 #include <netdb.h>
 
+#include "net_probe.h"
 #include "net_connection.h"
 #include "net_conn_client.h"
 #include "net_connection_adapter.h"
@@ -394,5 +395,23 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
         NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }
+    return ret;
+}
+
+int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration,
+                                    struct NetConn_ProbeResultInfo *result)
+{
+    if (destination == nullptr || result == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_QueryProbeResult received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    std::string dest(destination);
+    NetProbe np;
+    int ret = np.QueryProbeResult(dest, duration, *result);
+    if (ret != 0) {
+        NETMGR_LOG_E("Query probe result failed.");
+    }
+
     return ret;
 }
