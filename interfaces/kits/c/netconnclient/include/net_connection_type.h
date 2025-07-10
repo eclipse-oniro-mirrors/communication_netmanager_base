@@ -276,6 +276,7 @@ typedef struct NetConn_NetConnCallback {
     OH_NetConn_NetBlockStatusChange onNetBlockStatusChange;
 } NetConn_NetConnCallback;
 
+constexpr int32_t NETCONN_MAX_RTT_NUM = 4;
 typedef struct NetConn_ProbeResultInfo {
     int32_t lossRate;
 
