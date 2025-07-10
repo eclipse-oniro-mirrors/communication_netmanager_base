@@ -23,6 +23,13 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
+enum {
+    NETCONN_RTT_MIN = 0,
+    NETCONN_RTT_MAX = 1,
+    NETCONN_RTT_AVG = 2,
+    NETCONN_RTT_STD = 3
+};
+
 class NetProbe {
 public:
 	int32_t QueryProbeResult(std::string &dest, int32_t duration, NetConn_ProbeResultInfo &result);
