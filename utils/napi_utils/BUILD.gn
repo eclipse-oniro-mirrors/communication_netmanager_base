@@ -42,7 +42,6 @@ ohos_shared_library("napi_utils") {
     "src/event_manager.cpp",
     "src/module_template.cpp",
     "src/napi_utils.cpp",
-    "src/hi_app_event_report.cpp",
   ]
 
   branch_protector_ret = "pac_ret"
@@ -57,9 +56,6 @@ ohos_shared_library("napi_utils") {
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
-    "hiappevent:hiappevent_innerapi",
-    "time_service:time_client",
-    "ability_runtime:wantagent_innerkits",
   ]
 
   innerapi_tags = [ "platformsdk" ]
