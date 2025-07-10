@@ -87,8 +87,7 @@
                 "qos_manager",
                 "runtime_core",
                 "time_service",
-                "faultloggerd",
-                "hiappevent"
+                "faultloggerd"
             ]
         },
         "build": {
