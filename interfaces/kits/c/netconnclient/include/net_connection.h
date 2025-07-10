@@ -268,6 +268,8 @@ int32_t OH_NetConn_SetPacUrl(const char *pacUrl);
 
 int32_t OH_NetConn_GetPacUrl(char *pacUrl);
 
+int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration, struct NetConn_ProbeResultInfo *result);
+
 #ifdef __cplusplus
 }
 #endif

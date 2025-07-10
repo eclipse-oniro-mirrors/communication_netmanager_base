@@ -86,5 +86,9 @@
     {
         "first_introduced": "15",
         "name": "OH_NetConn_GetPacUrl"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NetConn_QueryProbeResult"
     }
 ]

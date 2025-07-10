@@ -1241,6 +1241,28 @@ HWTEST_F(NetworkTest, OH_NetConn_GetPacUrlTest001, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(NetworkTest, OH_NetConn_QueryProbeResult001, TestSize.Level1)
+{
+    struct NetConn_ProbeResultInfo result;
+    auto ret = OH_NetConn_QueryProbeResult("www.baidu.com", 10, &result);
+    EXPECT_EQ(ret, 0);
+
+    ret = OH_NetConn_QueryProbeResult(nullptr, 10, &result);
+    EXPECT_NE(ret, 0);
+
+    ret = OH_NetConn_QueryProbeResult("www.baidu.com", 0, &result);
+    EXPECT_NE(ret, 0);
+
+    ret = OH_NetConn_QueryProbeResult("www.baidu.com", -1, &result);
+    EXPECT_NE(ret, 0);
+
+    ret = OH_NetConn_QueryProbeResult("www.baidu.com", 1001, &result);
+    EXPECT_NE(ret, 0);
+
+    ret = OH_NetConn_QueryProbeResult("8.8.8.8", 10, &result);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest003, TestSize.Level1)
 {
     char host[] = "192.168.1.1";
