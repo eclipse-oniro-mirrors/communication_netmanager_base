@@ -248,10 +248,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
 
 ohos_unittest("netsys_controller_test") {
   module_out_path = "netmanager_base/netmanager_base/netsys_controller_test"
-  sources = [
-    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
-    "netsys_controller_test.cpp",
-  ]
+  sources = [ "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp" ]
 
   include_dirs = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",

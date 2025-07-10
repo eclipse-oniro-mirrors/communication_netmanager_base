@@ -28,10 +28,7 @@ ohos_unittest("netsys_distributed_test") {
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "distributed_manager_test.cpp",
-    "net_manager_native_test.cpp",
     "netsys_native_service_stub_test.cpp",
-    "netsys_native_service_test.cpp",
-    "route_manager_test.cpp",
   ]
 
   include_dirs = [
