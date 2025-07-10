@@ -514,7 +514,7 @@ int32_t InterfaceManager::AddStaticIpv6Addr(const std::string &ipv6Addr, const s
     const std::string &ifName)
 {
     NETNATIVE_LOGI("AddStaticIpv6Addr");
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_REPLACE, nmd::NETLINK_MAX_LEN, getpid());
     int32_t res = AssembleIPv6Neighbor(ipv6Addr, macAddr, ifName, nlmsg, RTM_NEWNEIGH);
     if (res != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("AssembleIPv6Neighbor error");
@@ -527,7 +527,7 @@ int32_t InterfaceManager::DelStaticIpv6Addr(const std::string &ipv6Addr, const s
     const std::string &ifName)
 {
     NETNATIVE_LOGI("DelStaticIpv6Addr");
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    nmd::NetlinkMsg nlmsg(NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
     int32_t res = AssembleIPv6Neighbor(ipv6Addr, macAddr, ifName, nlmsg, RTM_DELNEIGH);
     if (res != NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("AssembleIPv6Neighbor error");
@@ -572,7 +572,9 @@ int32_t InterfaceManager::AssembleIPv6Neighbor(const std::string &ipv6Addr, cons
     ndm.ndm_ifindex = index;
     ndm.ndm_pad1 = 0;
     ndm.ndm_pad2 = 0;
-    ndm.ndm_state = NUD_PERMANENT;
+    if (action == RTM_NEWNEIGH) {
+        ndm.ndm_state = NUD_PERMANENT;
+    }
     ndm.ndm_flags = 0;
     ndm.ndm_type = RTN_UNICAST;
 
