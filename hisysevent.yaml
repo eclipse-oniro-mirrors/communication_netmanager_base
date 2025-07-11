@@ -172,3 +172,17 @@ NET_FIREWALL_REQ_BEHAVIOR:
 NET_FIREWALL_LOG_REQ_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: net firewall interception log query behavior management}
   FIREWALL_USER_ID: {type: INT32, desc: user id}
+
+NET_VPN_OPERATE_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send vpn operation behavior event}
+  VPN_USER_ID: {type: INT32, desc: user id}
+  VPN_BUNDLE_NAME: {type: STRING, desc: the app bundle name}
+  VPN_OPERATION_TYPE: {type: INT32, desc: the vpn operation type}
+
+NET_VPN_OPERATE_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: send vpn operation fault event}
+  VPN_USER_ID: {type: INT32, desc: user id}
+  VPN_BUNDLE_NAME: {type: STRING, desc: the app bundle name}
+  VPN_OPERATION_TYPE: {type: INT32, desc: the vpn operation type}
+  VPN_ERROR_TYPE: {type: INT32, desc: the error code}
+  VPN_ERROR_MSG: {type: STRING, desc: the error message}
