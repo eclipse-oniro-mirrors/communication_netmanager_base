@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Callback, BusinessError} from "@ohos.base";
+import {Callback, BusinessError, AsyncCallback} from "@ohos.base";
 
 export default namespace ani_test {
     loadLibrary("ani_test")
@@ -44,6 +44,27 @@ export default namespace ani_test {
         arrayBool: boolean[] = []
     }
 
+    export enum Action {
+      DOWNLOAD,
+      UPLOAD
+    }
+
+    export class Config {
+      action: Action;
+      url: string;
+    }
+
+    export class ResponseCode {
+        code: int;
+        url: string;
+    }
+
+    export enum HttpProtocol {
+        HTTP1_1,
+        HTTP2,
+        HTTP3
+    }
+
     export native function primitiveTest(input:PrimitiveTest): PrimitiveTest;
     export native function optionBool(input?:boolean): boolean | undefined;
     export native function optionByte(input?:byte): byte | undefined;
@@ -62,6 +83,7 @@ export default namespace ani_test {
 
     export native function enumTestNumber ( input: EnumNumber): EnumNumber
     export native function enumTestString ( input: EnumString): EnumString
+    export native function enumTestStruct(input: ResponseCode | HttpProtocol | int): ResponseCode | HttpProtocol | int
 
     export native function recordString(input:Record<String,String>) : Record<String, String>
     export native function recordLong(input:Record<Long, Long>) : Record<Long, Long>
@@ -70,6 +92,23 @@ export default namespace ani_test {
 
     export native function arrayBufferTest(input: Uint8Array): Uint8Array;
     export native function uint8ArrayTest(input: Uint8Array): Uint8Array;
+    export native function structEnum(input: Config): Config;
+
+    export native function executeCallback1(callback: Callback<int>): void;
+    export native function executeCallback2(callback: Callback<int>): void;
+    export native function executeCallback3(callback: Callback<int>): void;
+    export native function executeCallback4(callback: Callback<int>): void;
+    export native function executeAsyncCallback1(callback: AsyncCallback<int>): void;
+    export native function executeAsyncCallback2(callback: AsyncCallback<int>): void;
+    export native function executeAsyncCallback3(callback: AsyncCallback<int>): void;
+    export native function executeAsyncCallback4(callback: AsyncCallback<int>): void;
+}
+
+function assertEQ<T, U>(expected: T, actual: U, message?: string): void {
+  if (expected !== actual) {
+    const errorMessage = message || `Assertion failed: expected ${expected}, but got ${actual}`;
+    throw new Error(errorMessage);
+  }
 }
 
 function main():void{
@@ -79,7 +118,9 @@ function main():void{
     enum_test();
     record_test();
     union_test();
-    // array_buffer_test();
+    array_buffer_test();
+    struct_test();
+    callback_test();
 }
 
 function primitive_test():void {
@@ -89,11 +130,12 @@ function primitive_test():void {
         primitiveI16: 32767,
         primitiveI32: -2147483648,
         primitiveI64: 9223372036854775807,
-        primitiveF32: 3.13,
+        primitiveF32: 3.13f,
         primitiveF64: 3.14159,
     }
     let output = ani_test.primitiveTest(input);
-    assertEQ(input.primitiveBool, output.primitiveBool);
+    
+    assertEQ(input.primitiveBool,  output.primitiveBool);
     assertEQ(input.primitiveI8, output.primitiveI8);
     assertEQ(input.primitiveI16, output.primitiveI16);
     assertEQ(input.primitiveI32, output.primitiveI32);
@@ -168,7 +210,7 @@ function array_test (): void
     let output4 = ani_test.arrayLong( input4 );
     assertEQ( JSON.stringify(input4), JSON.stringify(output4) );
 
-    let input41: float[] = [ 1.0, 2.0, 3.0 ];
+    let input41: float[] = [ 1.0f, 2.0f, 3.0f ];
     let output41 = ani_test.arrayFloat( input41 );
     assertEQ( JSON.stringify( input41 ), JSON.stringify( output41 ) );
 
@@ -226,6 +268,16 @@ function enum_test(): void
     let input5 = ani_test.EnumString.THREE;
     let output5 = ani_test.enumTestString( input5 );
     assertEQ( input5, output5 );
+
+    let intput6: ani_test.ResponseCode = {code: 10, url: "www.baidu.com"};
+    let output6 = ani_test.enumTestStruct(intput6)
+    assertEQ(JSON.stringify(intput6), JSON.stringify(output6) );
+    let intput7 = 666;
+    let output7 = ani_test.enumTestStruct(intput7)
+    assertEQ(JSON.stringify(intput7), JSON.stringify(output7) );
+    let intput8 = ani_test.HttpProtocol.HTTP2;
+    let output8 = ani_test.enumTestStruct(intput8)
+    assertEQ(intput8, output8 );
 }
 
 function record_test (): void
@@ -298,3 +350,89 @@ function array_buffer_test (): void
     assertEQ(JSON.stringify(uint8View), JSON.stringify(output));
 }
 
+function struct_test():void
+{
+    let input1: ani_test.Config = {action: ani_test.Action.UPLOAD, url: "www.huawei.com"};
+    let output1 = ani_test.structEnum(input1);
+    assertEQ(JSON.stringify(input1), JSON.stringify(output1));
+}
+
+function callback_test():void
+{
+    let input1: int = 0;
+    ani_test.executeCallback1((data: int) => {
+        input1 += data;
+    })
+    assertEQ(input1, 1);
+
+    let input2: int = 0;
+    ani_test.executeCallback2((data: int) => {
+        input2 += data;
+    })
+    assertEQ(input2, 2);
+
+    let input3: int = 0;
+    ani_test.executeCallback3((data: int) => {
+        input3 += data;
+    })
+    
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input3, 3);
+
+    // 在devecho上测试，将callback抛到主线程执行
+    // let input4: int = 0;
+    // ani_test.executeCallback4((data: int) => {
+    //     input4 += data;
+    // })
+
+    let input5: int = 0;
+    ani_test.executeAsyncCallback1((err: BusinessError|null, data: int|undefined) => {
+        assertEQ(err?.code, 401);
+        if (data) {
+            input5 += data;
+        }
+        
+    })
+    assertEQ(input5, 1);
+
+    let input6: int = 0;
+    ani_test.executeAsyncCallback2((err: BusinessError|null, data: int|undefined) => {
+        assertEQ(err?.code, 402);
+
+        if (data) {
+            input6 += data;
+        }
+        
+    })
+    assertEQ(input6, 2);
+
+    let input7: int = 0;
+    ani_test.executeAsyncCallback3((err: BusinessError|null, data: int|undefined) => {
+        assertEQ(err?.code, 403);
+
+        if (data) {
+            input7 += data;
+        }
+        
+    })
+    
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input7, 3);
+
+
+    // 在devecho上测试，将callback抛到主线程执行
+    // let input8: int = 0;
+    // ani_test.executeAsyncCallback4((err: BusinessError, data: int) => {
+    //     console.log("[ani_test] executeCallback4 data = %{public}d", data);
+    //     assertEQ(err.code, 404);
+    //     input8 += data;
+    // })
+}

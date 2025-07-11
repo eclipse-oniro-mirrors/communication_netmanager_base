@@ -15,27 +15,32 @@ pub use ani_rs_macros::ani;
 pub use ani_rs_macros::native;
 
 pub mod box_type;
+
 mod env;
-mod vm;
-
 pub use env::AniEnv;
-pub use vm::AniVm;
 
-pub mod error;
-pub mod objects;
+mod vm;
+pub use vm::AniVm;
 
 mod ani;
 pub use ani::AniDe;
 pub use ani::AniSer;
 
-mod iterator;
-
-pub mod signature;
-
-mod global;
-mod primitive;
-
 pub mod business_error;
+pub mod error;
+pub mod objects;
+pub mod signature;
 pub mod typed_array;
 
+mod global;
+mod iterator;
 mod macros;
+mod primitive;
+mod wrapper;
+mod log;
+
+const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
+    log_type: hilog_rust::LogType::LogCore,
+    domain: 0xD0015B0,
+    tag: "AniRs",
+};

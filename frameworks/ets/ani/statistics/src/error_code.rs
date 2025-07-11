@@ -13,16 +13,7 @@
 
 use ani_rs::business_error::BusinessError;
 
-pub const fn convert_to_business_error(code: i32) -> BusinessError {
-    match code {
-        201 => BusinessError::PERMISSION,
-        401 => BusinessError::PARAMETER,
-        2100001 => BusinessError::new_static(2100001, "Invalid parameter value."),
-        2100002 => BusinessError::new_static(2100002, "Failed to connect to the service."),
-        2100003 => BusinessError::new_static(2100003, "System internal error."),
-        2103005 => BusinessError::new_static(2100005, "Failed to read the system map."),
-        2103011 => BusinessError::new_static(2100011, "Failed to create a system map."),
-        2103012 => BusinessError::new_static(2100012, "Failed to obtain the NIC name."),
-        _ => BusinessError::new_static(code, "Unknown error"),
-    }
+pub fn convert_to_business_error(mut code: i32) -> BusinessError {
+    let error_msg = crate::wrapper::ffi::GetErrorCodeAndMessage(&mut code);
+    BusinessError::new(code, error_msg)
 }

@@ -13,23 +13,13 @@
  * limitations under the License.
  */
 
-#include "statistics_ani.h"
-#include "net_manager_constants.h"
-#include "errorcode_convertor.h"
+#pragma once
 
-namespace OHOS {
-namespace NetManagerAni {
+#include "cxx.h"
+#include "event_handler.h"
+#include "event_runner.h"
+#include <memory>
 
-rust::String GetErrorCodeAndMessage(int32_t &errorCode)
-{
-    NetManagerStandard::NetBaseErrorCodeConvertor convertor;
-    return rust::string(convertor.ConvertErrorCode(errorCode));
-}
+struct RustClosure;
 
-NetManagerStandard::NetStatsClient &GetNetStatsClient(int32_t &nouse)
-{
-    return NetManagerStandard::NetStatsClient::GetInstance();
-}
-
-} // namespace NetManagerAni
-} // namespace OHOS
+void AniSendEvent(rust::box<RustClosure> closure, const rust::str name);
