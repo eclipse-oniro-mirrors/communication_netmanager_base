@@ -1097,7 +1097,7 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        sptr<NetLinkInfo> netLinkInfo_ptr = new (std::nothrow) NetLinkInfo(info);
+        sptr<NetLinkInfo> netLinkInfo_ptr = sptr<NetLinkInfo>::MakeSptr(info);
         if (!NetLinkInfo::Marshalling(reply, netLinkInfo_ptr)) {
             NETMGR_LOG_E("proxy Marshalling failed");
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
