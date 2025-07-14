@@ -71,6 +71,10 @@
 #include "ffrt.h"
 
 #define TRACE_ROUTE_DATA_SIZE 1024
+#define TIME_BASE_MS 1000
+#define TIME_BASE_US 1000000
+#define PING_NUM 5
+#define PING_TIMEOUT_NUM 3
 
 #define ICMP_ECHO_REQUEST 8
 #define ICMPV6_ECHO_REQUEST 128
@@ -86,22 +90,24 @@ typedef struct IpInfo {
     std::string rtt;
 } IpInfo;
 
-static long long now(void)
+static long long Now(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec*1000 + ts.tv_nsec/1000000;
+    return ts.tv_sec * TIME_BASE_MS + ts.tv_nsec / TIME_BASE_US;
 }
 
-unsigned short traceRoute_cksum(uint16_t *data, int len)
+unsigned short TraceRouteCkSum(uint16_t *data, int len)
 {
     uint32_t sum = 0;
     uint16_t answer = 0;
+    uint8_t lenSize = 2;
+    uint8_t twoBytes = 16;
 
     // 累加所有 16-bit 字
     while (len > 1) {
         sum += *data++;
-        len -= 2;
+        len -= lenSize;
     }
 
     // 如果剩余 1 字节（奇数长度），补零并累加
@@ -111,21 +117,21 @@ unsigned short traceRoute_cksum(uint16_t *data, int len)
     }
 
     // 回卷溢出位（carry-around）
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
+    sum = (sum >> twoBytes) + (sum & 0xFFFF);
+    sum += (sum >> twoBytes);
 
     // 取反码
     answer = ~sum;
     return answer;
 }
 
-static int wait_response(int fd, int flag)
+static int WaitResponse(int fd, int flag)
 {
     struct pollfd pfd;
-
+    int32_t timeout = 1000;
     pfd.fd = fd;
     pfd.events = POLLIN;
-    if (poll(&pfd, 1, 1000) <= 0) {
+    if (poll(&pfd, 1, timeout) <= 0) {
         return -1;
     }
     return 0;
@@ -134,35 +140,35 @@ static int wait_response(int fd, int flag)
 void ComputeRtt(struct IpInfo &ipinfo)
 {
     // 初始化变量
-    int max_value = ipinfo.delay[0];
-    int min_value = ipinfo.delay[0];
+    int maxValue = ipinfo.delay[0];
+    int minValue = ipinfo.delay[0];
     int sum = 0.0;
 
     // 遍历数组，计算最大值、最小值和总和
-    for (int i = 0; i < 5; ++i) {
-        if (ipinfo.delay[i] > max_value) {
-            max_value = ipinfo.delay[i];
+    for (int i = 0; i < PING_NUM; ++i) {
+        if (ipinfo.delay[i] > maxValue) {
+            maxValue = ipinfo.delay[i];
         }
-        if (ipinfo.delay[i] < min_value) {
-            min_value = ipinfo.delay[i];
+        if (ipinfo.delay[i] < minValue) {
+            minValue = ipinfo.delay[i];
         }
         sum += ipinfo.delay[i];
     }
 
-    int avg = sum / 5; // 计算平均值
+    int avg = sum / PING_NUM; // 计算平均值
      
     // 计算标准差
-    int variance_sum = 0.0;
-    for (int i = 0; i < 5; ++i) {
-        variance_sum += (ipinfo.delay[i] - avg) * (ipinfo.delay[i] - avg);
+    int varianceSum = 0.0;
+    for (int i = 0; i < PING_NUM; ++i) {
+        varianceSum += (ipinfo.delay[i] - avg) * (ipinfo.delay[i] - avg);
     }
-    int variance = variance_sum / 5;
-    int standard_deviation = sqrt(variance);
-    ipinfo.rtt = std::to_string(max_value) + ";" + std::to_string(min_value) + ";" + std::to_string(avg)
-        + ";" + std::to_string(standard_deviation) + " ";
+    int variance = varianceSum / PING_NUM;
+    int standardDeviation = sqrt(variance);
+    ipinfo.rtt = std::to_string(maxValue) + ";" + std::to_string(minValue) + ";" + std::to_string(avg) +
+        ";" + std::to_string(standardDeviation) + " ";
 }
 
-std::string getIPAddress(struct addrinfo *ai)
+std::string GetIPAddress(struct addrinfo *ai)
 {
     std::string host;
     if (ai->ai_family == AF_INET) {
@@ -181,14 +187,14 @@ std::string getIPAddress(struct addrinfo *ai)
 
 void TimeOutHandle(struct IpInfo &ipinfo, struct addrinfo *ai, int count)
 {
-    if (ipinfo.ip == "" ) {
+    if (ipinfo.ip == "") {
         ipinfo.ip = "*.*.*.*";
-        for (int i = 0; i < 5; i++) {
-            ipinfo.delay[i] = 1000;
+        for (int i = 0; i < PING_NUM; i++) {
+            ipinfo.delay[i] = TIME_BASE_MS;
         }
         return;
     }
-    ipinfo.delay[count] = 1000;
+    ipinfo.delay[count] = TIME_BASE_MS;
 }
 
 void ReSend(struct IpInfo &ipinfo, int i)
@@ -198,12 +204,12 @@ void ReSend(struct IpInfo &ipinfo, int i)
     int family = AF_UNSPEC;
     info.ai_family = family;
     const char *dest = ipinfo.ip.c_str();
-    if (getaddrinfo(dest, nullptr, &info, &ai) < 0){
+    if (getaddrinfo(dest, nullptr, &info, &ai) < 0) {
         return;
     }
-	if (ai == nullptr) {
-		return;
-	}
+    if (ai == nullptr) {
+        return;
+    }
     int sockfd = socket(ai->ai_family, SOCK_DGRAM, (ai->ai_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6);
     if (sockfd < 0) {
         return;
@@ -215,40 +221,40 @@ void ReSend(struct IpInfo &ipinfo, int i)
     ih->un.echo.id = getpid();
     ih->un.echo.sequence = ipinfo.ttl;
     ih->checksum = 0;
-    ih->checksum = traceRoute_cksum(reinterpret_cast<uint16_t *>(ih), sizeof(ih));
-    long long time_send = now();
+    ih->checksum = TraceRouteCkSum(reinterpret_cast<uint16_t *>(ih), sizeof(*ih));
+    long long timeSend = Now();
     if (sendto(sockfd, buffer, sizeof(buffer), 0, ai->ai_addr, sizeof(*(ai->ai_addr))) < 0) {
         close(sockfd);
         return;
     }
-    if (wait_response(sockfd, 0) < 0) {
-        TimeOutHandle(ipinfo, ai, i+1); // 超时处理
+    if (WaitResponse(sockfd, 0) < 0) {
+        TimeOutHandle(ipinfo, ai, i + 1); // 超时处理
         close(sockfd);
         return;
     }
-    struct sockaddr_in src_addr;
-    socklen_t addr_len = sizeof(src_addr);
-    char recv_buffer[1024];
-    if (recvfrom(sockfd, recv_buffer, sizeof(recv_buffer), 0,
-        reinterpret_cast<struct sockaddr *>(&src_addr), &addr_len) <= 0) {
+    struct sockaddr_in srcAddr;
+    socklen_t addrLen = sizeof(srcAddr);
+    char recvBuffer[1024];
+    if (recvfrom(sockfd, recvBuffer, sizeof(recvBuffer), 0,
+        reinterpret_cast<struct sockaddr *>(&srcAddr), &addrLen) <= 0) {
         close(sockfd);
         return;
     }
-    long long time_recv = now() - time_send;
-    ipinfo.rtt[i] = time_recv; // 记录rtt
+    long long timeRecv = Now() - timeSend;
+    ipinfo.rtt[i] = timeRecv; // 记录rtt
     close(sockfd);
     return;
 }
 
 void Send(struct IpInfo &ipinfo)
 {
-    std::vector<ffrt::task_handle> tasks(4);  // 创建ffrt数组
-    
+    std::vector<ffrt::task_handle> tasks(PING_NUM - 1);  // 创建ffrt数组
+
     // 循环创建ffrt
-    for (uint i = 0; i < 4; ++i) {
-        auto task = ffrt::submit_h([ &, i]() {  
-            ReSend(ipinfo, i); 
-            }, {}, {}, {ffrt::task_attr().name(("ReSend" + std::to_string(i)).c_str())});
+    for (uint i = 0; i < PING_NUM - 1; ++i) {
+        auto task = ffrt::submit_h([ &, i ]() {
+            ReSend(ipinfo, i);
+        }, {}, {}, {ffrt::task_attr().name(("ReSend" + std::to_string(i)).c_str())});
         tasks[i] = std::move(task);
     }
 
@@ -268,8 +274,8 @@ void CreateTasks(std::vector<struct IpInfo> &ipinfo)
             continue;
         }
         struct IpInfo &info = ipinfo[i];
-        auto task = ffrt::submit_h([ & ]() { Send(info); 
-            }, {}, {}, {ffrt::task_attr().name(("Send" + std::to_string(i)).c_str())});
+        auto task = ffrt::submit_h([ & ]() { Send(info); },
+            {}, {}, {ffrt::task_attr().name(("Send" + std::to_string(i)).c_str())});
         tasks[i] = std::move(task);
     }
     for (auto& task : tasks) {
@@ -277,28 +283,28 @@ void CreateTasks(std::vector<struct IpInfo> &ipinfo)
     }
 }
 
-void recv(struct IpInfo &info, std::vector<struct IpInfo> &ipinfo, int sockfd, long long time_send, int family)
+void recv(struct IpInfo &info, std::vector<struct IpInfo> &ipinfo, int sockfd, long long timeSend, int family)
 {
-    char recv_buffer[1024];
+    char recvBuffer[1024];
     if (family == AF_INET) {
-        struct sockaddr_in src_addr;
-        socklen_t addr_len = sizeof(src_addr);
-        ssize_t received = recvfrom(sockfd, recv_buffer, sizeof(recv_buffer), 0,
-            reinterpret_cast<struct sockaddr *>(&src_addr), &addr_len);
-        char src_ip[INET_ADDRSTRLEN]; 
-        inet_ntop(AF_INET, &(src_addr.sin_addr), src_ip, INET_ADDRSTRLEN);
-        info.ip = std::string(src_ip); // 记录IP地址
+        struct sockaddr_in srcAddr;
+        socklen_t addrLen = sizeof(srcAddr);
+        ssize_t received = recvfrom(sockfd, recvBuffer, sizeof(recvBuffer), 0,
+            reinterpret_cast<struct sockaddr*>(&srcAddr), &addrLen);
+        char srcIp[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(srcAddr.sin_addr), srcIp, INET_ADDRSTRLEN);
+        info.ip = std::string(srcIp); // 记录IP地址
     } else if (family == AF_INET6) {
-        struct sockaddr_in6 src_addr;
-        socklen_t addr_len = sizeof(src_addr);
-        ssize_t received = recvfrom(sockfd, recv_buffer, sizeof(recv_buffer), 0,
-            reinterpret_cast<struct sockaddr *>(&src_addr), &addr_len);
-        char src_ip[INET6_ADDRSTRLEN]; 
-        inet_ntop(AF_INET6, &(src_addr.sin6_addr), src_ip, INET6_ADDRSTRLEN);
-        info.ip = std::string(src_ip); // 记录IPV6地址 
+        struct sockaddr_in6 srcAddr;
+        socklen_t addrLen = sizeof(srcAddr);
+        ssize_t received = recvfrom(sockfd, recvBuffer, sizeof(recvBuffer), 0,
+            reinterpret_cast<struct sockaddr*>(&srcAddr), &addrLen);
+        char srcIp[INET6_ADDRSTRLEN];
+        inet_ntop(AF_INET6, &(srcAddr.sin6_addr), srcIp, INET6_ADDRSTRLEN);
+        info.ip = std::string(srcIp); // 记录IPV6地址
     }
-    long long time_recv = now() - time_send;
-    info.delay[0] = time_recv;
+    long long timeRecv = Now() - timeSend;
+    info.delay[0] = timeRecv;
     ipinfo.push_back(info); // 将info对象添加到vector中
 }
 
@@ -322,26 +328,26 @@ static int doTraceRoute(struct addrinfo *ai, int32_t maxJumpNumber, int32_t pack
         setsockopt(sockfd, (ai->ai_family == AF_INET) ? SOL_IP : SOL_IPV6,
             (ai->ai_family == AF_INET) ? IP_TTL : IPV6_UNICAST_HOPS, &ttl, sizeof(ttl));
         ih->checksum = 0;
-        ih->checksum = traceRoute_cksum(reinterpret_cast<uint16_t*>(buffer), sizeof(buffer));
-        long long time_send = now();
+        ih->checksum = TraceRouteCkSum(reinterpret_cast<uint16_t*>(buffer), sizeof(buffer));
+        long long timeSend = Now();
         ssize_t sent = sendto(sockfd, buffer, sizeof(buffer), 0,
             ai->ai_addr, ai->ai_addrlen);
         if (sent < 0) {
             continue;
         }
-        int rc = wait_response(sockfd, 0);
-		if (rc < 0) {
+        int rc = WaitResponse(sockfd, 0);
+        if (rc < 0) {
             count++;
             TimeOutHandle(info, ai, 0); // 超时处理
             ComputeRtt(info);
             ipinfo.push_back(info); // 将info对象添加到vector中
-            if (count >= 3) { // 5跳超时，直接break
+            if (count >= PING_TIMEOUT_NUM) { // 3跳超时，直接break
                 break;
             }
             continue;
         }
-        recv(info, ipinfo, sockfd, time_send, ai->ai_family);
-        if (info.ip == getIPAddress(ai)) {
+        recv(info, ipinfo, sockfd, timeSend, ai->ai_family);
+        if (info.ip == GetIPAddress(ai)) {
             break;
         }
     }
@@ -363,22 +369,22 @@ int32_t QueryTraceRouteProbeResult(const std::string &destination, int32_t maxJu
     info.ai_family = family;
     const char *dest = destination.c_str();
     int32_t rc = getaddrinfo(dest, nullptr, &info, &ai);
-    if (rc < 0){
+    if (rc < 0) {
         return HTTP_STATUS_401;
     }
     
-	if (ai == nullptr) {
-		errno = EADDRNOTAVAIL;
-		return HTTP_STATUS_401;
-	}
+    if (ai == nullptr) {
+        errno = EADDRNOTAVAIL;
+        return HTTP_STATUS_401;
+    }
 
     rc = doTraceRoute(ai, maxJumpNumber, packetsType, traceRouteInfo);
 
     if (ai != nullptr) {
         freeaddrinfo(ai);
     }
-	return rc;
+    return rc;
 }
 
 }
-}
+}
