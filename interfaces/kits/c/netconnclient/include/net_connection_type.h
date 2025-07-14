@@ -290,6 +290,7 @@ typedef enum NetConn_PacketsType {
     /** UDP */
     NETCONN_PACKETS_UDP = 1,
 } NetConn_PacketsType;
+
 typedef struct NetConn_TraceRouteOption {
     /** Maximum number of jumps */
     uint8_t maxJumpNumber; /** default NETCONN_MAX_JUMP_NUM */
@@ -303,7 +304,7 @@ typedef struct NetConn_TraceRouteInfo {
     /** host name or address */
     char address[NETCONN_MAX_STR_LEN];
     /** RTT in millisecond */
-     uint32_t rtt[NETCONN_MAX_RTT_NUM];
+    uint32_t rtt[NETCONN_MAX_RTT_NUM];
 } NetConn_TraceRouteInfo;
 
 #ifdef __cplusplus
