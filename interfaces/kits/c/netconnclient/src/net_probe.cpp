@@ -40,13 +40,13 @@ namespace NetManagerStandard {
 constexpr int32_t PING_DATA_SIZE = 64;
 constexpr int32_t MAX_PING_DURATION = 1000;
 
-constexpr int32_t ICMPV4_ECHO_REQUEST = 8;
-constexpr int32_t ICMPV6_ECHO_REQUEST = 128;
+constexpr uint8_t ICMPV4_ECHO_REQUEST = 8u;
+constexpr uint8_t ICMPV6_ECHO_REQUEST = 128u;
 
 constexpr int32_t MSEC_PER_SECOND = 1000;
 constexpr int32_t NSEC_PER_MSEC = 1000000;
 
-constexpr int32_t PERCENTAGE = 100;
+constexpr int32_t PERCENTAGE = 100u;
 
 constexpr uint16_t PING_CHECKSUM_MASK = 255;
 
@@ -133,10 +133,37 @@ static int32_t WaitResponse(int32_t fd, iovec &iov, int64_t &respTime, int32_t t
     return rc;
 }
 
+/*
+ * When error like no routes or sendto failed occurs during ping operations, function will return success
+ * but with 100% packet loss.
+ */
+constexpr uint8_t LOSS_RATE_ALL = 100u;
+static int32_t ResetToFullLoss(NetConn_ProbeResultInfo &result, uint32_t duration)
+{
+    result.lossRate = LOSS_RATE_ALL;
+    result.rtt[NETCONN_RTT_MIN] = static_cast<uint32_t>(duration * MSEC_PER_SECOND);
+    result.rtt[NETCONN_RTT_MAX] = static_cast<uint32_t>(duration * MSEC_PER_SECOND);
+    result.rtt[NETCONN_RTT_AVG] = static_cast<uint32_t>(duration * MSEC_PER_SECOND);
+    result.rtt[NETCONN_RTT_STD] = 0u;
+
+    return 0;
+}
+
+static uint32_t CalcPingRttStd(std::vector<int64_t> &timesTake, uint32_t totalRecv, uint32_t rttAvg)
+{
+    int64_t sumDelay = 0;
+
+    for (uint32_t i = 0u; i < totalRecv; ++i) {
+        sumDelay += pow(rttAvg - timesTake[i], SQUARE);
+    }
+
+    return (totalRecv > 0) ? static_cast<uint32_t>(sqrt(static_cast<uint32_t>(sumDelay) / totalRecv)) : 0u;
+}
+
 const int64_t SEND_INTERVAL = 1000; /* ms */
 const int64_t WAIT_INTERVAL = 1000; /* ms */
 
-static int32_t DoPing(int32_t s, struct addrinfo *ai, int32_t duration, NetConn_ProbeResultInfo &result)
+static int32_t DoPing(int32_t s, struct addrinfo *ai, uint32_t duration, NetConn_ProbeResultInfo &result)
 {
     uint8_t buffer[sizeof(struct icmphdr) + PING_DATA_SIZE] = {0};    /* icmp header and data */
     iovec iov = {reinterpret_cast<void *>(buffer), sizeof(buffer)};
@@ -178,25 +205,28 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, int32_t duration, NetConn_
         timesTake[totalRecv++] = currentDelay;
         sumDelay += currentDelay;
 
-        result.rtt[NETCONN_RTT_MAX] = std::max(result.rtt[NETCONN_RTT_MAX], static_cast<int32_t>(currentDelay));
-        result.rtt[NETCONN_RTT_MIN] = std::min(result.rtt[NETCONN_RTT_MIN], static_cast<int32_t>(currentDelay));
+        result.rtt[NETCONN_RTT_MAX] = std::max(result.rtt[NETCONN_RTT_MAX], static_cast<uint32_t>(currentDelay));
+        result.rtt[NETCONN_RTT_MIN] = std::min(result.rtt[NETCONN_RTT_MIN], static_cast<uint32_t>(currentDelay));
     }
 
     if (totalRecv == 0) {
-        result.rtt[NETCONN_RTT_MIN]  = 0;
+        return ResetToFullLoss(result, duration);
     }
 
-    result.rtt[NETCONN_RTT_AVG] = (totalRecv > 0) ? (sumDelay / totalRecv) : 0;
-    result.lossRate = (totalSend > 0) ? ((totalSend - totalRecv) * PERCENTAGE / totalSend) : 0;
-
-    sumDelay = 0;
-    for (uint32_t i = 0; i < totalRecv; ++i) {
-        sumDelay += pow(result.rtt[NETCONN_RTT_AVG] - timesTake[i], SQUARE);
-    }
-
-    result.rtt[NETCONN_RTT_STD] = (totalRecv > 0) ? static_cast<uint32_t>(sqrt(sumDelay / totalRecv)) : 0;
+    result.rtt[NETCONN_RTT_AVG] = (totalRecv > 0) ? (static_cast<uint32_t>(sumDelay) / totalRecv) : 0u;
+    result.rtt[NETCONN_RTT_STD] = CalcPingRttStd(timesTake, totalRecv, result.rtt[NETCONN_RTT_AVG]);
+    result.lossRate = static_cast<uint8_t>((totalSend > 0) ? ((totalSend - totalRecv) * PERCENTAGE / totalSend) : 0u);
 
     return rc;
+}
+
+static void InitialProbeResult(NetConn_ProbeResultInfo &result)
+{
+    result.rtt[NETCONN_RTT_MIN] = UINT_MAX;
+    result.rtt[NETCONN_RTT_MAX] = 0u;
+    result.rtt[NETCONN_RTT_AVG] = 0u;
+    result.rtt[NETCONN_RTT_STD] = 0u;
+    result.lossRate = 0u;
 }
 
 int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_ProbeResultInfo &result)
@@ -213,32 +243,27 @@ int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_
     info.ai_family = family;
     rc = getaddrinfo(dest.c_str(), nullptr, &info, &ai);
     if (rc < 0 || ai == nullptr) {
-        return NETMANAGER_ERR_INTERNAL;
+        (void)ResetToFullLoss(result, duration);
+        return NETMANAGER_SUCCESS;
     }
-
-    result.rtt[NETCONN_RTT_MIN] = INT_MAX;
-    result.rtt[NETCONN_RTT_MAX] = 0;
-    result.rtt[NETCONN_RTT_AVG] = 0;
-    result.rtt[NETCONN_RTT_STD] = 0;
-    result.lossRate = 0;
 
     int32_t fd = socket(ai->ai_family, SOCK_DGRAM, (ai->ai_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6);
-    if (fd < 0) {
-        freeaddrinfo(ai);
-        return NETMANAGER_ERR_INTERNAL;
-    }
+    if (fd >= 0) {
+        InitialProbeResult(result);
 
-    rc = DoPing(fd, ai, duration, result);
-    if (rc < 0) {
-        rc = NETMANAGER_ERR_INTERNAL;
+	rc = DoPing(fd, ai, static_cast<uint32_t>(duration), result);
+        if (rc < 0) {
+            (void)ResetToFullLoss(result, duration);
+        }
+
+        close(fd);
     } else {
-        rc = NETMANAGER_SUCCESS;
+        (void)ResetToFullLoss(result, duration);
     }
 
-    close(fd);
     freeaddrinfo(ai);
 
-    return rc;
+    return NETMANAGER_SUCCESS;
 }
 
 }

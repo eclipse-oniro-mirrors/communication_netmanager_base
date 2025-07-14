@@ -278,9 +278,9 @@ typedef struct NetConn_NetConnCallback {
 
 constexpr int32_t NETCONN_MAX_RTT_NUM = 4;
 typedef struct NetConn_ProbeResultInfo {
-    int32_t lossRate;
+    uint8_t lossRate;
 
-    int32_t rtt[NETCONN_MAX_RTT_NUM];
+    uint32_t rtt[NETCONN_MAX_RTT_NUM];
 } NetConn_ProbeResultInfo;
 
 #ifdef __cplusplus
