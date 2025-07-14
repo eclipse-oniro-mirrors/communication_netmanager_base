@@ -1284,5 +1284,16 @@ int32_t NetsysNativeService::SetDnsCache(uint16_t netId, const std::string &host
     }
     return netsysService_->SetDnsCache(netId, hostName, addrInfo);
 }
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetsysNativeService::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    NETNATIVE_LOG_D("UpdateEnterpriseRoute");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->UpdateEnterpriseRoute(interfaceName, uid, add);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

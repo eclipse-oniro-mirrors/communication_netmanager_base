@@ -185,6 +185,9 @@ public:
         const std::string &ifName) override;
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
+#endif
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

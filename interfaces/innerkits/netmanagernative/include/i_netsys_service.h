@@ -226,6 +226,9 @@ public:
     virtual int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) = 0;
     virtual int32_t FlushDnsCache(uint16_t netId) = 0;
     virtual int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) = 0;
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
+#endif
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

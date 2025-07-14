@@ -2098,5 +2098,16 @@ int32_t NetsysNativeClient::SetDnsCache(uint16_t netId, const std::string &hostN
     return proxy->SetDnsCache(netId, hostName, addrInfo);
 }
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetsysNativeClient::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateEnterpriseRoute(interfaceName, uid, add);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

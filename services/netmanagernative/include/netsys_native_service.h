@@ -209,6 +209,9 @@ public:
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override;
     int32_t FlushDnsCache(uint16_t netId) override;
     int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override;
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
+#endif
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

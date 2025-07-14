@@ -57,6 +57,9 @@ constexpr int32_t RULE_LEVEL_OUTPUT_IFACE_VPN = 11500;
 constexpr int32_t RULE_LEVEL_OUTPUT_INTERFACE = 12000;
 constexpr int32_t RULE_LEVEL_LOCAL_NETWORK = 13000;
 constexpr int32_t RULE_LEVEL_SHARING = 14000;
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+constexpr int32_t RULE_LEVEL_ENTERPRISE = 15000;
+#endif
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
 constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION = 16500;
 constexpr uint32_t ROUTE_DISTRIBUTE_TO_CLIENT_TABLE = 90;
@@ -1626,5 +1629,30 @@ int32_t RouteManager::SetRouteInfo(TableType tableType, NetworkRouteInfo network
     routeInfo.isExcludedRoute = networkRouteInfo.isExcludedRoute;
     return 0;
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+/* route target uid to enterprise inner net */
+int32_t RouteManager::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    NETNATIVE_LOGI("UpdateEnterpriseRoute,interfaceName:%{public}s, uid:%{public}u, add:%{public}d ",
+        interfaceName.c_str(), uid, add);
+    uint32_t table = FindTableByInterfacename(interfaceName);
+    if (table == RT_TABLE_UNSPEC) {
+        NETNATIVE_LOGE("find table by name fail");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+ 
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_ENTERPRISE;
+    uint16_t action = add ? RTM_NEWRULE : RTM_DELRULE;
+ 
+    if (uid != 0) {
+        return UpdateRuleInfo(action, FR_ACT_TO_TBL, ruleInfo, uid, uid);
+    }
+ 
+    return UpdateRuleInfo(action, FR_ACT_TO_TBL, ruleInfo);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

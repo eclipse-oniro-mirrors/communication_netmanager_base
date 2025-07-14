@@ -145,6 +145,14 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "ENABLE_SET_APP_FROZENED" ]
   }
 
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+ 
+  if (netmanager_base_feature_enterprise_route_custom) {
+    defines += [ "FEATURE_ENTERPRISE_ROUTE_CUSTOM" ]
+  }
+  
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"

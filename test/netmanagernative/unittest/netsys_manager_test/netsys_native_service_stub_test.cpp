@@ -681,6 +681,12 @@ public:
     {
         return 0;
     }
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override
+    {
+        return 0;
+    }
+#endif
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -2366,5 +2372,71 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute001, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::string ifname = "wlan0";
+    bool add = true;
+ 
+    MessageParcel data;
+    if (!data.WriteString(ifname)) {
+        return;
+    }
+ 
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+ 
+    if (!data.WriteBool(add)) {
+        return;
+    }
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateEnterpriseRoute(data, reply);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateEnterpriseRoute(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute003, TestSize.Level1)
+{
+    std::string ifname = "wlan0";
+ 
+    MessageParcel data;
+    if (!data.WriteString(ifname)) {
+        return;
+    }
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateEnterpriseRoute(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+ 
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute004, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::string ifname = "wlan0";
+ 
+    MessageParcel data;
+    if (!data.WriteString(ifname)) {
+        return;
+    }
+ 
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+ 
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateEnterpriseRoute(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

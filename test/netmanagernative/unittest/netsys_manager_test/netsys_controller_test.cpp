@@ -1486,5 +1486,33 @@ HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::string ifname = "wlan0";
+    bool add = true;
+    auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    std::string ifname = "wlan0";
+    bool add = true;
+    auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
+{
+    uint32_t uid = 20000138;
+    std::string ifname = "notexist";
+    bool add = true;
+    auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
