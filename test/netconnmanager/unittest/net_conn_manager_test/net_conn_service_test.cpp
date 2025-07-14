@@ -2018,7 +2018,7 @@ HWTEST_F(NetConnServiceTest, ReplaceUserIdForUriTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, QueryTraceRouteTest001, TestSize.Level1)
 {
-    const std::string destination = "www.huawei.com";
+    const std::string destination = "www.text.com";
     int32_t maxJumpNumber = 30;
     int32_t packetsType = 1;
     std::string traceRouteInfo = "";
