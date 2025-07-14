@@ -2034,7 +2034,6 @@ HWTEST_F(NetConnServiceTest, QueryTraceRouteTest002, TestSize.Level1)
     std::string traceRouteInfo = "";
     auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
     EXPECT_EQ("", traceRouteInfo);
-    
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
