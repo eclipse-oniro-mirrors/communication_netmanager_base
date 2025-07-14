@@ -1370,10 +1370,10 @@ int32_t NetConnServiceProxy::QueryTraceRoute(
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteInt32(maxJumpNumber)) {
-       return NETMANAGER_ERR_WRITE_DATA_FAIL;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteInt32(packetsType)) {
-       return NETMANAGER_ERR_WRITE_DATA_FAIL;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     MessageParcel reply;
     int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE),
