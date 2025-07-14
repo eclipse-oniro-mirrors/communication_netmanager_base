@@ -1398,7 +1398,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest010, TestSize.Level1)
 
 HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest11, TestSize.Level1)
 {
-    const char *destination = "www.huawei.com";
+    const char *destination = "www.text.com";
     NetConn_TraceRouteInfo traceRouteInfo[30] = {};
     NetConn_TraceRouteOption Option = {30, NETCONN_PACKETS_ICMP};
     OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
