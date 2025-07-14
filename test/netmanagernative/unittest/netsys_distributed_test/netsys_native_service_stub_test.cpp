@@ -648,6 +648,13 @@ public:
     {
         return 0;
     }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override
+    {
+        return 0;
+    }
+#endif
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

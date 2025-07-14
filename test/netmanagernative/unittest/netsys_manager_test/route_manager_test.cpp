@@ -854,5 +854,34 @@ HWTEST_F(RouteManagerTest, GetRouteTableFromType001, TestSize.Level1)
     auto ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
     EXPECT_EQ(ret, 1);
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+HWTEST_F(RouteManagerTest, UpdateEnterpriseRoute001, TestSize.Level1)
+{
+    std::string ifname = "wlan0";
+    uint32_t uid = 20000138;
+    bool add = true;
+    int32_t ret = RouteManager::UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(RouteManagerTest, UpdateEnterpriseRoute002, TestSize.Level1)
+{
+    std::string ifname = "wlan0";
+    uint32_t uid = 0;
+    bool add = true;
+    int32_t ret = RouteManager::UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(RouteManagerTest, UpdateEnterpriseRoute003, TestSize.Level1)
+{
+    std::string ifname = "notexist";
+    uint32_t uid = 0;
+    bool add = true;
+    int32_t ret = RouteManager::UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

@@ -3917,5 +3917,53 @@ int32_t NetsysNativeServiceProxy::SetDnsCache(uint16_t netId, const std::string 
     }
     return ret;
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetsysNativeServiceProxy::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    NETNATIVE_LOG_D("Begin to UpdateEnterpriseRoute");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    if (!data.WriteString(interfaceName)) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute WriteString interfaceName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    if (!data.WriteUint32(uid)) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute WriteUint32 uid failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    if (!data.WriteBool(add)) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute WriteBool add failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in UpdateEnterpriseRoute");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_ENTERPRISE_ROUTE),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute SendRequest failed, error code: [%{public}d]", err);
+        return IPC_INVOKER_ERR;
+    }
+ 
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("UpdateEnterpriseRoute ReadInt32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS
