@@ -1357,6 +1357,43 @@ int32_t NetConnServiceProxy::GetPacUrl(std::string &pacUrl)
     return ret;
 }
 
+int32_t NetConnServiceProxy::QueryTraceRoute(
+    const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(destination)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt32(maxJumpNumber)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteInt32(packetsType)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadString(traceRouteInfo)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
 int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     MessageParcel data;

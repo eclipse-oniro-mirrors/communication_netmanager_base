@@ -122,6 +122,8 @@ public:
     virtual int32_t CloseSocketsUid(int32_t netId, uint32_t uid) = 0;
     virtual int32_t SetPacUrl(const std::string &pacUrl) = 0;
     virtual int32_t GetPacUrl(std::string &pacUrl) = 0;
+    virtual int32_t QueryTraceRoute(
+        const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo) = 0;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) = 0;
     virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) = 0;
     virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;

@@ -2015,5 +2015,25 @@ HWTEST_F(NetConnServiceTest, ReplaceUserIdForUriTest001, TestSize.Level1)
     auto ret = httpProxyTracker.ReplaceUserIdForUri(uri, userId);
     EXPECT_EQ(ret, "");
 }
+
+HWTEST_F(NetConnServiceTest, QueryTraceRouteTest001, TestSize.Level1)
+{
+    const std::string destination = "www.text.com";
+    int32_t maxJumpNumber = 30;
+    int32_t packetsType = 1;
+    std::string traceRouteInfo = "";
+    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    EXPECT_NE("", traceRouteInfo);
+}
+
+HWTEST_F(NetConnServiceTest, QueryTraceRouteTest002, TestSize.Level1)
+{
+    const std::string destination = "test";
+    int32_t maxJumpNumber = 30;
+    int32_t packetsType = 1;
+    std::string traceRouteInfo = "";
+    auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    EXPECT_EQ("", traceRouteInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

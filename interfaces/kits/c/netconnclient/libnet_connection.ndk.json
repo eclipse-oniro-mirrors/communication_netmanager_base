@@ -90,5 +90,9 @@
     {
         "first_introduced": "20",
         "name": "OH_NetConn_QueryProbeResult"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_NetConn_QueryTraceRoute"
     }
 ]

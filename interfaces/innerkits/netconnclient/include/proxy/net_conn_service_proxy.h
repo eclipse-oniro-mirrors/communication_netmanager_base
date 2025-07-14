@@ -103,6 +103,8 @@ public:
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
+    int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
+        std::string &traceRouteInfo) override;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     virtual int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;

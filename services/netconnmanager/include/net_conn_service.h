@@ -49,6 +49,8 @@
 #include "os_account_manager.h"
 #include "app_state_aware.h"
 
+#include "net_trace_route_probe.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
@@ -400,6 +402,8 @@ public:
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
+    int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
+        std::string &traceRouteInfo) override;
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
     int32_t EnableAppFrozenedCallbackLimitation(bool flag) override;
     bool IsAppFrozenedCallbackLimitation();
