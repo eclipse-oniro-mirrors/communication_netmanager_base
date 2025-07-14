@@ -251,7 +251,7 @@ int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_
     if (fd >= 0) {
         InitialProbeResult(result);
 
-	rc = DoPing(fd, ai, static_cast<uint32_t>(duration), result);
+        rc = DoPing(fd, ai, static_cast<uint32_t>(duration), result);
         if (rc < 0) {
             (void)ResetToFullLoss(result, duration);
         }
