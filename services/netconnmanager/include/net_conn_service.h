@@ -138,7 +138,7 @@ public:
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override;
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
 
     /**
      * Register net connection callback by NetSpecifier

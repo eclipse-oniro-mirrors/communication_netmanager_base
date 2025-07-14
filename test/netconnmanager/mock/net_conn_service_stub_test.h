@@ -59,7 +59,7 @@ public:
         return 0;
     }
 
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback)
     {
         return 0;
     }

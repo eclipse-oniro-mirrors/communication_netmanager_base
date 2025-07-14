@@ -84,7 +84,9 @@ int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground
 
 int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    return NetConnService::GetInstance()->RegisterNetConnCallback(callback);
+    auto netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    return NetConnService::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, 0);
 }
 
 int32_t NetConnServiceIface::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)

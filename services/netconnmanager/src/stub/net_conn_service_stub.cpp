@@ -41,8 +41,6 @@ NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY)] = {
         &NetConnServiceStub::OnSystemReady, {}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER)] = {
         &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION)] = {
@@ -574,33 +572,6 @@ int32_t NetConnServiceStub::OnRegisterNetSupplierCallback(MessageParcel &data, M
     }
 
     int32_t result = RegisterNetSupplierCallback(supplierId, callback);
-    if (!reply.WriteInt32(result)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote ptr is nullptr.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
-    if (callback == nullptr) {
-        NETMGR_LOG_E("Callback ptr is nullptr.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_LOCAL_PTR_NULL)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    int32_t result = RegisterNetConnCallback(callback);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

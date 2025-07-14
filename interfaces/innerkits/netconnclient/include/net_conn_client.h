@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <shared_mutex>
 
 #include "parcel.h"
 #include "singleton.h"
@@ -32,6 +33,7 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
+#include "net_conn_callback_stub.h"
 
 namespace OHOS {
 class ISystemAbilityStatusChange;
@@ -39,15 +41,13 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-constexpr uint32_t RESERVED_BUFFER_SIZE = 512;
-
 class NetConnClient : public std::enable_shared_from_this<NetConnClient> {
 public:
     /**
      * Do not use constor directly to create instance, it just for std::make_shared in `GetInstance()`
      */
     NetConnClient();
-    ~NetConnClient();
+    virtual ~NetConnClient();
     static NetConnClient &GetInstance();
 
     /**
@@ -154,7 +154,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
+    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
 
     /**
      * Register net connection callback by NetSpecifier
@@ -535,6 +535,26 @@ private:
         NetConnClient &client_;
     };
 
+    class NetConnCallbackManager : public NetConnCallbackStub {
+        friend NetConnClient;
+    public:
+        int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
+        int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
+        int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
+        int32_t NetLost(sptr<NetHandle> &netHandle) override;
+        int32_t NetUnavailable() override;
+        int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+
+        void AddNetConnCallback(const sptr<INetConnCallback>& callback);
+        void RemoveNetConnCallback(const sptr<INetConnCallback>& callback);
+    private:
+        sptr<NetHandle> netHandle_ = nullptr;
+        sptr<NetAllCapabilities> netAllCap_ = nullptr;
+        sptr<NetLinkInfo> netLinkInfo_ = nullptr;
+        std::shared_mutex netConnCallbackListMutex_;
+        std::list<sptr<INetConnCallback>> netConnCallbackList_;
+    };
+
 private:
     NetConnClient& operator=(const NetConnClient&) = delete;
     NetConnClient(const NetConnClient&) = delete;
@@ -545,6 +565,10 @@ private:
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
     static std::optional<std::string> ObtainBundleNameFromBundleMgr();
     void SubscribeSystemAbility();
+    using NetConnCallbackManagerMap = std::map<sptr<NetSpecifier>, sptr<NetConnCallbackManager>>;
+    int32_t UnRegisterNetConnCallbackManager(const sptr<INetConnCallback>& callback,
+        NetConnCallbackManagerMap& netConnCallbackManagerMap);
+    void RecoverCallbackAndGlobalProxy(NetConnCallbackManagerMap& netConnCallbackManagerMap);
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
@@ -552,20 +576,19 @@ private:
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
     HttpProxy appHttpProxy_;
     HttpProxy globalHttpProxy_;
-    char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
-    std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
+    sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
+    std::shared_mutex netConnCallbackManagerMapMutex_;
+    NetConnCallbackManagerMap netConnCallbackManagerMap_;
+    NetConnCallbackManagerMap systemNetConnCallbackManagerMap_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
-    std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;
     sptr<ISystemAbilityStatusChange> saStatusListener_;
-    static inline std::mutex instanceMtx_;
-    static inline std::shared_ptr<NetConnClient> instance_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -61,7 +61,7 @@ ohos_unittest("net_conn_multi_test") {
   ]
 
   deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if_static",
     "$INNERKITS_ROOT/netconnclient:net_security_config_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
@@ -95,6 +95,7 @@ ohos_unittest("net_conn_multi_test") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "googletest:gmock_main",
   ]
 
   defines = [
@@ -148,7 +149,7 @@ ohos_unittest("net_conn_multi_vnic_test") {
   ]
 
   deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if_static",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",

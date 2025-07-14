@@ -57,9 +57,6 @@
       "OHOS::NetManagerStandard::NetConnClient::GetAddressesByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, std::__h::vector<OHOS::NetManagerStandard::INetAddr, std::__h::allocator<OHOS::NetManagerStandard::INetAddr>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAddressByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, OHOS::NetManagerStandard::INetAddr&)";
       "OHOS::NetManagerStandard::NetConnClient::BindSocket(int, int)";
-      "OHOS::NetManagerStandard::NetConnClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
-      "OHOS::NetManagerStandard::NetConnClient::NetConnClient()";
-      "OHOS::NetManagerStandard::NetConnClient::~NetConnClient()";
       "OHOS::NetManagerStandard::NetConnClient::RequestNetConnection(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier>, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier> const&, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>, unsigned int const&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>)";
@@ -217,7 +214,6 @@
       "VTT?for?OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::CloseSocketsUid(int, unsigned int)";
-      "OHOS::NetManagerStandard::NetConnClient::DlCloseRemoveDeathRecipient()";
       "OHOS::NetManagerStandard::NetConnClient::GetSpecificNet(OHOS::NetManagerStandard::NetBearType, std::__h::list<int, std::__h::allocator<int>>&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppIsFrozened(unsigned int, bool)";
       "OHOS::NetManagerStandard::NetConnClient::EnableAppFrozenedCallbackLimitation(bool)";
