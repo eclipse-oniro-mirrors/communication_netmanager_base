@@ -92,7 +92,7 @@
         "name": "OH_NetConn_QueryProbeResult"
     },
     {
-        "first_introduced": "16",
-        "name": "OHOS_NetConn_QueryTraceRoute"
+        "first_introduced": "20",
+        "name": "OH_NetConn_QueryTraceRoute"
     }
 ]
