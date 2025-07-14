@@ -320,7 +320,7 @@ static int doTraceRoute(struct addrinfo *ai, int32_t maxJumpNumber, int32_t pack
         struct IpInfo info; // 每次循环创建一个IpInfo对象
         info.ttl = ttl;
         unsigned char buffer[sizeof(struct icmphdr) + TRACE_ROUTE_DATA_SIZE] = {0};   /* icmp header and data */
-	    struct icmphdr *ih = reinterpret_cast<struct icmphdr*>(buffer);
+        struct icmphdr *ih = reinterpret_cast<struct icmphdr*>(buffer);
         ih->type = (ai->ai_family == AF_INET) ? ICMP_ECHO_REQUEST : ICMPV6_ECHO_REQUEST;
         ih->code = 0;
         ih->un.echo.id = getpid();
