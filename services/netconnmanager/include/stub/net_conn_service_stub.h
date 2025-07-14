@@ -121,6 +121,7 @@ private:
     int32_t OnSetNetExtAttribute(MessageParcel &data, MessageParcel &reply);
     int32_t OnAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
     int32_t OnDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
+    int32_t OnQueryTraceRoute(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };

@@ -509,6 +509,10 @@ public:
     int32_t SetPacUrl(const std::string &pacUrl);
 
     int32_t GetPacUrl(std::string &pacUrl);
+
+    int32_t QueryTraceRoute(
+        const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo);
+
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList);
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident, std::list<int32_t> &netIdList);
 

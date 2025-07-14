@@ -800,6 +800,19 @@ int32_t NetConnClient::GetPacUrl(std::string &pacUrl)
     return proxy->GetPacUrl(pacUrl);
 }
 
+int32_t NetConnClient::QueryTraceRoute(
+    const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo)
+{
+    NETMGR_LOG_D("Enter QueryTraceRoute");
+
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+}
+
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     sptr<INetConnService> proxy = GetProxy();

@@ -381,6 +381,12 @@ public:
         return 0;
     }
 
+    int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
+        std::string &traceRouteInfo) override
+    {
+        return 0;
+    }
+
     int32_t GetPacUrl(std::string &pacUrl) override
     {
         return 0;

@@ -14,6 +14,7 @@
  */
 
 #include <map>
+#include <sstream>
 
 #include "net_conn_client.h"
 #include "net_connection_adapter.h"
@@ -277,6 +278,68 @@ int32_t ConvFromNetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_Ne
         netAllCapsObj.bearerTypes_.insert(iterMap->second);
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t Conv2TraceRouteInfoRtt(const std::string rttStr, uint32_t *rtt)
+{
+    if (rtt == nullptr) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(rttStr);
+    while (std::getline(tokenStream, token, ';')) {
+        tokens.push_back(token);
+    }
+    uint32_t tokensSize = tokens.size();
+    for (uint32_t i = 0; i < tokensSize; ++i) {
+        if (i >= NETCONN_MAX_RTT_NUM) {
+            return NETMANAGER_SUCCESS;
+        }
+        double num;
+        std::istringstream iss(tokens[i]);
+        if (iss >> num) {
+            rtt[i] = static_cast<uint32_t>(num);
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t Conv2TraceRouteInfo(
+    const std::string traceRouteInfoStr, NetConn_TraceRouteInfo *traceRouteInfo, int32_t maxJumpNumber)
+{
+    if (traceRouteInfo == nullptr) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    const uint32_t pos2 = 2;
+    const uint32_t pos3 = 3;
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(traceRouteInfoStr);
+    while (std::getline(tokenStream, token, ' ')) {
+        tokens.push_back(token);
+    }
+    uint32_t tokensSize = static_cast<uint32_t>(tokens.size());
+    int j = 0;
+    for (uint32_t i = 0; i <= tokensSize - pos3; i += pos3) {
+        if (j >= maxJumpNumber) {
+            return NETMANAGER_SUCCESS;
+        }
+        uint8_t num;
+        std::istringstream iss(tokens[i]);
+        if (iss >> num) {
+            traceRouteInfo[j].jumpNo = num;
+        }
+        if (strcpy_s(traceRouteInfo[j].address, NETCONN_MAX_STR_LEN, tokens[i + 1].c_str()) != 0) {
+            NETMGR_LOG_E("Conv2TraceRouteInfo string copy failed");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        if (Conv2TraceRouteInfoRtt(tokens[i + pos2], traceRouteInfo[j].rtt) != NETMANAGER_SUCCESS) {
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        j++;
+    }
     return NETMANAGER_SUCCESS;
 }
 

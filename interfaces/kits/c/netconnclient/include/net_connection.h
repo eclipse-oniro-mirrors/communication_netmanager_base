@@ -270,6 +270,9 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl);
 
 int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration, struct NetConn_ProbeResultInfo *result);
 
+int32_t OH_NetConn_QueryTraceRoute(
+    const char *destination, NetConn_TraceRouteOption *option, NetConn_TraceRouteInfo *traceRouteInfo);
+
 #ifdef __cplusplus
 }
 #endif

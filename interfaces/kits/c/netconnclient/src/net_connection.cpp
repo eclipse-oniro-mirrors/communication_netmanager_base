@@ -412,6 +412,34 @@ int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration,
     if (ret != 0) {
         NETMGR_LOG_E("Query probe result failed.");
     }
+    return ret;
+}
 
+int32_t OH_NetConn_QueryTraceRoute(
+    const char *destination, NetConn_TraceRouteOption *option, NetConn_TraceRouteInfo *traceRouteInfo)
+{
+    if (destination == nullptr || traceRouteInfo == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_QueryTraceRoute received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t packetsType = NetConn_PacketsType::NETCONN_PACKETS_ICMP;
+    int32_t maxJumpNumber = NETCONN_MAX_JUMP_NUM;
+    if (option != nullptr) {
+        maxJumpNumber = static_cast<int32_t>(option->maxJumpNumber);
+        if (maxJumpNumber > NETCONN_MAX_JUMP_NUM || maxJumpNumber <= 0) {
+            return NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        packetsType = static_cast<int32_t>(option->packetsType);
+    }
+    std::string traceRouteInfoStr = "";
+    int32_t ret = NetConnClient::GetInstance().QueryTraceRoute(std::string(destination), maxJumpNumber, packetsType,
+                                                               traceRouteInfoStr);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("OH_NetConn_QueryTraceRoute query failed with error code: %d", ret);
+        return ret;
+    }
+    if (Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber) != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("OH_NetConn_QueryTraceRoute conv2 routeinfo failed");
+    }
     return ret;
 }

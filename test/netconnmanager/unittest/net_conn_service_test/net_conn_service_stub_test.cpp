@@ -1483,5 +1483,16 @@ HWTEST_F(NetConnServiceStubTest, OnUnregisterPreAirplaneCallbackTest001, TestSiz
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceStubTest, OnQueryTraceRouteTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInt32(TEST_INT32_VALUE))
+    {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

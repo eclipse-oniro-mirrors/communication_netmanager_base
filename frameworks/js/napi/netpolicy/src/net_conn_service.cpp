@@ -2636,6 +2636,13 @@ int32_t NetConnService::GetPacUrl(std::string &pacUrl)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
+    std::string &traceRouteInfo)
+{
+    return OHOS::NetManagerStandard::QueryTraceRouteProbeResult(destination, maxJumpNumber,
+        packetsType, traceRouteInfo);
+}
+
 int32_t NetConnService::SetPacUrl(const std::string &pacUrl)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();

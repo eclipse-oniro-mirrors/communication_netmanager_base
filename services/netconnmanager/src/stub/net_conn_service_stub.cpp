@@ -212,6 +212,9 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnSetNetExtAttribute, {Permission::SET_NET_EXT_ATTRIBUTE}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE)] = {
         &NetConnServiceStub::OnGetNetExtAttribute, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE)] = {
+        &NetConnServiceStub::OnQueryTraceRoute,
+        {Permission::INTERNET, Permission::GET_NETWORK_LOCATION, Permission::ACCESS_NET_TRACE_INFO}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -1339,6 +1342,36 @@ int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessagePa
 
     if (!httpProxy.Marshalling(reply)) {
         return ERR_FLATTEN_OBJECT;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnQueryTraceRoute(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnQueryTraceRoute");
+    std::string destination = "";
+    int32_t maxJumpNumber = -1;
+    int32_t packetsType = -1;
+    std::string traceRouteInfo = "";
+    if (!data.ReadString(destination)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadInt32(maxJumpNumber)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadInt32(packetsType)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t result = QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (result != NETMANAGER_SUCCESS) {
+        return result;
+    }
+    if (!reply.WriteString(traceRouteInfo)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }

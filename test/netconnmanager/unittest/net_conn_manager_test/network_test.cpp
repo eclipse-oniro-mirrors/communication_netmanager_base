@@ -25,6 +25,7 @@
 #include "net_http_probe_result.h"
 #include "probe_thread.h"
 #include "net_connection.h"
+#include "net_connection_adapter.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1273,6 +1274,140 @@ HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest003, TestSize.Level1)
     int32_t netId = -1;
     auto ret = OH_NetConn_GetAddrInfo(host, serv, hint, res, netId);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest001, TestSize.Level1)
+{
+    const char *destination = "www.example.com";
+    NetConn_TraceRouteInfo traceRouteInfo[1] = {};
+    auto ret = OH_NetConn_QueryTraceRoute(destination, nullptr, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    ret = OH_NetConn_QueryTraceRoute(nullptr, nullptr, traceRouteInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest002, TestSize.Level1)
+{
+    std::string traceRouteInfoStr = "1 192.168.1.1 50 2 192.168.1.2 100 3 192.168.1.3 150";
+    NetConn_TraceRouteInfo traceRouteInfo[3];
+    int32_t maxJumpNumber = 3;
+
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber), NETMANAGER_SUCCESS);
+    EXPECT_EQ(traceRouteInfo[0].jumpNo, 1);
+    EXPECT_STREQ(traceRouteInfo[0].address, "192.168.1.1");
+    EXPECT_EQ(traceRouteInfo[0].rtt[0], 50);
+    EXPECT_EQ(traceRouteInfo[1].jumpNo, 2);
+    EXPECT_STREQ(traceRouteInfo[1].address, "192.168.1.2");
+    EXPECT_EQ(traceRouteInfo[1].rtt[0], 100);
+    EXPECT_EQ(traceRouteInfo[2].jumpNo, 3);
+    EXPECT_STREQ(traceRouteInfo[2].address, "192.168.1.3");
+    EXPECT_EQ(traceRouteInfo[2].rtt[0], 150);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest003, TestSize.Level1)
+{
+    std::string traceRouteInfoStr = "1 192.168.1.1 50 2 192.168.1.2 100 3 192.168.1.3 150";
+    NetConn_TraceRouteInfo traceRouteInfo[2];
+    int32_t maxJumpNumber = 2;
+
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber), NETMANAGER_SUCCESS);
+    EXPECT_EQ(traceRouteInfo[0].jumpNo, 1);
+    EXPECT_STREQ(traceRouteInfo[0].address, "192.168.1.1");
+    EXPECT_EQ(traceRouteInfo[0].rtt[0], 50);
+    EXPECT_EQ(traceRouteInfo[1].jumpNo, 2);
+    EXPECT_STREQ(traceRouteInfo[1].address, "192.168.1.2");
+    EXPECT_EQ(traceRouteInfo[1].rtt[0], 100);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest004, TestSize.Level1)
+{
+    std::string traceRouteInfoStr = "1 192.168.1.1 50 2 192.168.1.2 100 3 192.168.1.3 150";
+    int32_t maxJumpNumber = 3;
+
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, nullptr, maxJumpNumber), NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest005, TestSize.Level1)
+{
+    std::string traceRouteInfoStr = "1 192.168.1.1 50 2 192.168.1.2 invalid 3 192.168.1.3 150";
+    NetConn_TraceRouteInfo traceRouteInfo[3];
+    int32_t maxJumpNumber = 3;
+
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber), NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest006, TestSize.Level1)
+{
+    std::string rttStr = "100;200;300";
+    uint32_t* rtt = nullptr;
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+    EXPECT_EQ(result, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest007, TestSize.Level1)
+{
+    std::string rttStr = "100;200;300";
+    uint32_t rtt[3] = {0};
+
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(rtt[0], 100);
+    EXPECT_EQ(rtt[1], 200);
+    EXPECT_EQ(rtt[2], 300);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest008, TestSize.Level1)
+{
+    std::string rttStr;
+    for (int i = 0; i < NETCONN_MAX_RTT_NUM; ++i) {
+        rttStr += std::to_string(i) + ";";
+    }
+    uint32_t rtt[NETCONN_MAX_RTT_NUM] = {0};
+
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(rtt[0], 0);
+    EXPECT_EQ(rtt[1], 1);
+    EXPECT_EQ(rtt[2], 2);
+    EXPECT_EQ(rtt[3], 3);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest009, TestSize.Level1)
+{
+    std::string rttStr = "100;abc;300";
+    uint32_t rtt[3] = {0};
+
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(rtt[0], 100);
+    EXPECT_EQ(rtt[1], 0);
+    EXPECT_EQ(rtt[2], 300);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest010, TestSize.Level1)
+{
+    const std::string traceRouteInfoStr = "1 192.168.2.1 788;889;998;110 2 10.111.120.189 1334;1445;1667;1678";
+    NetConn_TraceRouteInfo traceRouteInfo[2] = {};
+    auto ret = Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, 2);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(1678, traceRouteInfo[1].rtt[3]);
+}
+
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest11, TestSize.Level1)
+{
+    const char *destination = "www.huawei.com";
+    NetConn_TraceRouteInfo traceRouteInfo[30] = {};
+    NetConn_TraceRouteOption Option = {30, NETCONN_PACKETS_ICMP};
+    OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
+    Option = {31, NETCONN_PACKETS_ICMP};
+    auto ret = OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    Option = {-1, NETCONN_PACKETS_UDP};
+    ret = OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
