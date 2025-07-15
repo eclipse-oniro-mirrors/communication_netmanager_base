@@ -60,8 +60,13 @@ ohos_shared_library("connection") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "hiappevent:hiappevent_innerapi",
   ]
+
+  if (support_jsapi) {
+    external_deps += [
+      "hiappevent:hiappevent_innerapi",
+    ]
+  }
 
   relative_install_dir = "module/net"
   part_name = "netmanager_base"
@@ -146,8 +151,13 @@ ohos_shared_library("connection_if") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
-    "hiappevent:hiappevent_innerapi",
   ]
+
+  if (support_jsapi) {
+    external_deps += [
+      "hiappevent:hiappevent_innerapi",
+    ]
+  }
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
