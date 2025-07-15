@@ -14,20 +14,25 @@
  */
 
 #include "hi_app_event_report.h"
-#include "net_mgr_log_wrapper.h"
 #include <random>
+#ifdef ENABLE_EMULATOR
+#include "net_mgr_log_wrapper.h"
 #include "time_service_client.h"
+#endif
 
 namespace OHOS {
 namespace NetManagerStandard {
+#ifdef ENABLE_EMULATOR
 const int64_t TIMEOUT = 90;
 const int64_t ROW = 30;
 const int64_t MAXVALUE = 999999;
 const int64_t PROCESSOR_ID_NOT_CREATE = -1;
 static int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
+#endif
 
 HiAppEventReport::HiAppEventReport(std::string sdk, std::string api)
 {
+#ifdef ENABLE_EMULATOR
     apiName_ = api;
     sdkName_ = sdk;
     std::random_device randSeed;
@@ -39,6 +44,7 @@ HiAppEventReport::HiAppEventReport(std::string sdk, std::string api)
     if (g_processorID == PROCESSOR_ID_NOT_CREATE) {
         g_processorID = AddProcessor();
     }
+#endif
 }
 
 HiAppEventReport::~HiAppEventReport()
@@ -47,6 +53,7 @@ HiAppEventReport::~HiAppEventReport()
 
 void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
 {
+#ifdef ENABLE_EMULATOR
     int64_t endTime = OHOS::MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
     OHOS::HiviewDFX::HiAppEvent::Event event("api_diagnostic", "api_exec_end", OHOS::HiviewDFX::HiAppEvent::BEHAVIOR);
     event.AddParam("trans_id", this->transId_);
@@ -61,10 +68,12 @@ void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
         "startTime:%{public}ld, endTime:%{public}ld, result:%{public}d, errCode:%{public}d, ret:%{public}d",
         this->transId_.c_str(), this->apiName_.c_str(), this->sdkName_.c_str(),
         this->beginTime_, endTime, result, errCode, ret);
+#endif
 }
 
 int64_t HiAppEventReport::AddProcessor()
 {
+#ifdef ENABLE_EMULATOR
     NETMGR_LOG_I("AddProcessor enter");
     OHOS::HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = "ha_app_event";
@@ -95,6 +104,7 @@ int64_t HiAppEventReport::AddProcessor()
         config.eventConfigs.push_back(event3);
     }
     return OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+#endif
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
