@@ -60,10 +60,15 @@ ohos_shared_library("napi_utils") {
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
-    "hiappevent:hiappevent_innerapi",
-    "time_service:time_client",
-    "ability_runtime:wantagent_innerkits",
   ]
+
+  if (support_jsapi) {
+    external_deps += [
+      "hiappevent:hiappevent_innerapi",
+      "time_service:time_client",
+      "ability_runtime:wantagent_innerkits",
+    ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
