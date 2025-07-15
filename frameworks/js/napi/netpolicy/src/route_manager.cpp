@@ -83,8 +83,8 @@ const std::string LOCAL_MANGLE_OUTPUT = "routectrl_mangle_OUTPUT";
 #endif // SUPPORT_SYSVPN
 constexpr uid_t UID_ROOT = 0;
 constexpr std::pair<uid_t, uid_t> UID_ALLOW_INTERNAL = {7023, 7023};
-constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
-constexpr uint32_t ROUTEMANAGER_ERROR = -1;
+constexpr int32_t ROUTEMANAGER_SUCCESS = 0;
+constexpr int32_t ROUTEMANAGER_ERROR = -1;
 constexpr bool ADD_CONTROL = true;
 constexpr bool DEL_CONTROL = false;
 const std::string RULEIIF_LOOPBACK = "lo";
