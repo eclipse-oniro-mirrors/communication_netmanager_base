@@ -29,7 +29,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getIfaceRxBytesSync(nic);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -40,7 +40,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getIfaceRxBytesSync(nic);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -54,7 +54,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getIfaceTxBytesSync(nic);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -65,7 +65,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getIfaceTxBytesSync(nic);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -79,7 +79,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getCellularRxBytesSync();
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -90,7 +90,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getCellularRxBytesSync();
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -104,7 +104,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getCellularTxBytesSync();
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -115,7 +115,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getCellularTxBytesSync();
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -129,7 +129,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getAllRxBytesSync();
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -140,7 +140,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getAllRxBytesSync();
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -154,7 +154,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getAllTxBytesSync();
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -165,7 +165,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getAllTxBytesSync();
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -179,7 +179,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -190,7 +190,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -204,7 +204,7 @@ export default namespace statistics {
       let p1 = taskpool.execute((): long => {
           return getUidTxBytesSync(uid);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as long);
       }, (err: Error): void => {
           callback(err as BusinessError, 0);
@@ -215,7 +215,7 @@ export default namespace statistics {
       return new Promise<long>((resolve, reject) => {
         taskpool.execute((): long => {
         return getUidTxBytesSync(uid);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
         resolve(content as long);
       }, (err: Error): void => {
         reject(err as BusinessError);
@@ -244,7 +244,7 @@ export default namespace statistics {
     let p1 = taskpool.execute((): NetStatsInfo => {
           return getTrafficStatsByIfaceSync(ifaceInfo);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as NetStatsInfo);
       }, (err: Error): void => {
           callback(err as BusinessError, new NetStatsInfoInner());
@@ -255,7 +255,7 @@ export default namespace statistics {
     return new Promise<NetStatsInfo>((resolve, reject) => {
         taskpool.execute((): NetStatsInfo => {
         return getTrafficStatsByIfaceSync(ifaceInfo);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
         resolve(content as NetStatsInfo);
       }, (err: Error): void => {
         reject(err as BusinessError);
@@ -268,7 +268,7 @@ export default namespace statistics {
     let p1 = taskpool.execute((): NetStatsInfo => {
           return getTrafficStatsByUidSync(uidInfo);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as NetStatsInfo);
       }, (err: Error): void => {
           callback(err as BusinessError, new NetStatsInfoInner());
@@ -279,7 +279,7 @@ export default namespace statistics {
     return new Promise<NetStatsInfo>((resolve, reject) => {
         taskpool.execute((): NetStatsInfo => {
         return getTrafficStatsByUidSync(uidInfo);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
         resolve(content as NetStatsInfo);
       }, (err: Error): void => {
         reject(err as BusinessError);
@@ -293,7 +293,7 @@ export default namespace statistics {
     let p1 = taskpool.execute((): long => {
         return getSockfdRxBytesSync(sockfd);
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as long);
     }, (err: Error): void => {
         callback(err as BusinessError, 0);
@@ -304,7 +304,7 @@ export default namespace statistics {
     return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getSockfdRxBytesSync(sockfd);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -318,7 +318,7 @@ export default namespace statistics {
     let p1 = taskpool.execute((): long => {
         return getSockfdTxBytesSync(sockfd);
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as long);
     }, (err: Error): void => {
         callback(err as BusinessError, 0);
@@ -329,7 +329,7 @@ export default namespace statistics {
     return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getSockfdTxBytesSync(sockfd);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as long);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -396,7 +396,7 @@ export default namespace statistics {
     return new Promise<UidNetStatsInfo>((resolve, reject) => {
           taskpool.execute((): UidNetStatsInfo => {
             return getTrafficStatsByNetworkSync(networkInfo);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as UidNetStatsInfo);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -410,7 +410,7 @@ export default namespace statistics {
     return new Promise<NetStatsInfoSequence>((resolve, reject) => {
           taskpool.execute((): NetStatsInfoSequence => {
           return getTrafficStatsByUidNetworkSync(uid, networkInfo);
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as NetStatsInfoSequence);
       }, (err: Error): void => {
           reject(err as BusinessError);
