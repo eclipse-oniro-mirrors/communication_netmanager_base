@@ -569,7 +569,7 @@ int32_t InterfaceManager::AssembleIPv6Neighbor(const std::string &ipv6Addr, cons
 
     struct ndmsg ndm = {};
     ndm.ndm_family = AF_INET6;
-    ndm.ndm_ifindex = index;
+    ndm.ndm_ifindex = static_cast<int32_t>(index);
     ndm.ndm_pad1 = 0;
     ndm.ndm_pad2 = 0;
     if (action == RTM_NEWNEIGH) {
