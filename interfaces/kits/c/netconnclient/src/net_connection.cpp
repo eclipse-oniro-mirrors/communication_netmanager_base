@@ -423,10 +423,10 @@ int32_t OH_NetConn_QueryTraceRoute(
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     int32_t packetsType = NetConn_PacketsType::NETCONN_PACKETS_ICMP;
-    int32_t maxJumpNumber = NETCONN_MAX_JUMP_NUM;
+    uint32_t maxJumpNumber = NETCONN_MAX_JUMP_NUM;
     if (option != nullptr) {
         maxJumpNumber = static_cast<int32_t>(option->maxJumpNumber);
-        if (maxJumpNumber > NETCONN_MAX_JUMP_NUM || maxJumpNumber <= 0) {
+        if (maxJumpNumber > NETCONN_MAX_JUMP_NUM) {
             return NETMANAGER_ERR_PARAMETER_ERROR;
         }
         packetsType = static_cast<int32_t>(option->packetsType);

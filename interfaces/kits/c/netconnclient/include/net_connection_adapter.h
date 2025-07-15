@@ -45,9 +45,9 @@ int32_t Conv2HttpProxy(const HttpProxy &httpProxyObj, NetConn_HttpProxy *httpPro
 void ConvertNetConn2HttpProxy(const NetConn_HttpProxy &netConn, HttpProxy &httpProxyObj);
 
 int32_t Conv2TraceRouteInfo(
-    const std::string traceRouteInfoStr, NetConn_TraceRouteInfo *traceRouteInfo, int32_t maxJumpNumber);
+    const std::string &traceRouteInfoStr, NetConn_TraceRouteInfo *traceRouteInfo, uint32_t maxJumpNumber);
 
-int32_t Conv2TraceRouteInfoRtt(const std::string rttStr, uint32_t *rtt);
+int32_t Conv2TraceRouteInfoRtt(const std::string &rttStr, uint32_t (*rtt)[NETCONN_MAX_RTT_NUM]);
 
 class NetConnCallbackStubAdapter : public NetConnCallbackStub {
 public:

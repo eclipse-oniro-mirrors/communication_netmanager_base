@@ -1713,6 +1713,16 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
+HWTEST_F(NetConnClientTest, QueryTraceRoute001, TestSize.Level1)
+{
+    auto ret0 = NetConnClient::GetInstance().QueryTraceRoute(TEST_DOMAIN1);
+    EXPECT_NE(ret0, NETMANAGER_SUCCESS);
+    std::string pacUrl = "";
+    auto ret1 = NetConnClient::GetInstance().QueryTraceRoute(pacUrl);
+    EXPECT_EQ(ret1, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(pacUrl, "");
+}
+
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
 {
     auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, true);
