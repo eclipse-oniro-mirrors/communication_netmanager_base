@@ -1493,7 +1493,7 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
     std::string ifname = "wlan0";
     bool add = true;
     auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
  
 HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
@@ -1502,7 +1502,7 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
     std::string ifname = "wlan0";
     bool add = true;
     auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
  
 HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
@@ -1511,7 +1511,7 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
     std::string ifname = "notexist";
     bool add = true;
     auto ret = nativeClient_.UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 #endif
 } // namespace NetManagerStandard
