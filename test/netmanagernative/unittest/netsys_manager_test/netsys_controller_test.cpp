@@ -1405,6 +1405,14 @@ HWTEST_F(NetsysControllerTest, UpdateIfIndexMap001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
+HWTEST_F(NetsysControllerTest, RegisterNetsysTrafficCallback002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 HWTEST_F(NetsysControllerTest, RegisterNetsysTrafficCallback001, TestSize.Level1)
 {
     sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
@@ -1455,6 +1463,14 @@ HWTEST_F(NetsysControllerTest, UnRegisterNetsysTrafficCallback001, TestSize.Leve
 {
     sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
     NetsysController::GetInstance().netsysService_ = nullptr;
+    int32_t ret = NetsysController::GetInstance().UnRegisterNetsysTrafficCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, UnRegisterNetsysTrafficCallback002, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
+    sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
     int32_t ret = NetsysController::GetInstance().UnRegisterNetsysTrafficCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
