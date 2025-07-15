@@ -61,6 +61,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
     InitDnsServerOpToInterfaceMap();
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    InitEnterpriseMap();
+#endif
     uids_ = {UID_ROOT, UID_HIVIEW, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR, UID_IOT_NET_MANAGER};
 }
@@ -372,6 +375,14 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP)] =
         &NetsysNativeServiceStub::CmdSetNetStatusMap;
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+void NetsysNativeServiceStub::InitEnterpriseMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_ENTERPRISE_ROUTE)] =
+        &NetsysNativeServiceStub::CmdUpdateEnterpriseRoute;
+}
+#endif
 
 int32_t NetsysNativeServiceStub::CmdRegisterNetsysTrafficCallback(MessageParcel &data, MessageParcel &reply)
 {
@@ -2696,5 +2707,42 @@ int32_t NetsysNativeServiceStub::CmdSetDnsCache(MessageParcel &data, MessageParc
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetsysNativeServiceStub::CmdUpdateEnterpriseRoute(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdUpdateEnterpriseRoute CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    
+    std::string interfaceName;
+    if (!data.ReadString(interfaceName)) {
+        NETNATIVE_LOGE("CmdUpdateEnterpriseRoute read interfaceName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("CmdUpdateEnterpriseRoute read uid failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    bool add = 0;
+    if (!data.ReadBool(add)) {
+        NETNATIVE_LOGE("CmdUpdateEnterpriseRoute read add failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    int32_t result = UpdateEnterpriseRoute(interfaceName, uid, add);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdUpdateEnterpriseRoute result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

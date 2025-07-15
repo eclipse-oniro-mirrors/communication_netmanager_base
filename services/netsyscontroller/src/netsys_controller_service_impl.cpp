@@ -1075,5 +1075,13 @@ int32_t NetsysControllerServiceImpl::SetDnsCache(uint16_t netId, const std::stri
     NETMGR_LOG_I("SetDnsCache Enter. netId[%{public}u]", netId);
     return netsysClient_->SetDnsCache(netId, hostName, addrInfo);
 }
+
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    NETMGR_LOG_I("UpdateEnterpriseRoute Enter. uid[%{public}u]", uid);
+    return netsysClient_->UpdateEnterpriseRoute(interfaceName, uid, add);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

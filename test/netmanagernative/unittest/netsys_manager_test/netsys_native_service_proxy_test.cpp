@@ -734,5 +734,39 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetDnsCache001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint32_t uid = 20000138;
+    std::string ifname = "wlan0";
+    bool add = true;
+    auto ret = netsysNativeService->UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint32_t uid = 0;
+    std::string ifname = "wlan0";
+    bool add = true;
+    auto ret = netsysNativeService->UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint32_t uid = 20000138;
+    std::string ifname = "notexist";
+    bool add = true;
+    auto ret = netsysNativeService->UpdateEnterpriseRoute(ifname, uid, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

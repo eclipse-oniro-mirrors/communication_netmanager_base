@@ -1064,6 +1064,9 @@ public:
     int32_t DelBrokerUidAccessPolicyMap(uint32_t uid);
     int32_t FlushDnsCache(uint16_t netId);
     int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add);
+#endif
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);

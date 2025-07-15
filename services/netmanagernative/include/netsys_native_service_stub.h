@@ -63,6 +63,9 @@ private:
     void InitStaticArpToInterfaceMap();
     void InitStaticIpv6ToInterfaceMap();
     void InitNetStatsInterfaceMap();
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    void InitEnterpriseMap();
+#endif
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
@@ -196,6 +199,9 @@ private:
     int32_t CmdSetDnsCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdAddStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelStaticIpv6Addr(MessageParcel &data, MessageParcel &reply);
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t CmdUpdateEnterpriseRoute(MessageParcel &data, MessageParcel &reply);
+#endif
 
 private:
     std::vector<int32_t> uids_;
