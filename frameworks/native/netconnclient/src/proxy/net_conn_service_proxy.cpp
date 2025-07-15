@@ -1364,6 +1364,7 @@ int32_t NetConnServiceProxy::QueryTraceRoute(
     }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.ReadString(traceRouteInfo)) {
+            traceRouteInfo.clear();
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
     }

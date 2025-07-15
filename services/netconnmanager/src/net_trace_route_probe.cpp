@@ -86,7 +86,7 @@ namespace NetManagerStandard {
 typedef struct IpInfo {
     int ttl;
     std::string ip;
-    int delay[5];
+    uint64_t delay[PING_NUM];
     std::string rtt;
 } IpInfo;
 
@@ -140,9 +140,9 @@ static int WaitResponse(int fd, int flag)
 void ComputeRtt(struct IpInfo &ipinfo)
 {
     // 初始化变量
-    int maxValue = ipinfo.delay[0];
-    int minValue = ipinfo.delay[0];
-    int sum = 0.0;
+    uint64_t maxValue = ipinfo.delay[0];
+    uint64_t minValue = ipinfo.delay[0];
+    uint64_t sum = 0;
 
     // 遍历数组，计算最大值、最小值和总和
     for (int i = 0; i < PING_NUM; ++i) {
@@ -155,15 +155,15 @@ void ComputeRtt(struct IpInfo &ipinfo)
         sum += ipinfo.delay[i];
     }
 
-    int avg = sum / PING_NUM; // 计算平均值
+    uint64_t avg = sum / PING_NUM; // 计算平均值
      
     // 计算标准差
-    int varianceSum = 0.0;
+    uint64_t varianceSum = 0;
     for (int i = 0; i < PING_NUM; ++i) {
         varianceSum += (ipinfo.delay[i] - avg) * (ipinfo.delay[i] - avg);
     }
-    int variance = varianceSum / PING_NUM;
-    int standardDeviation = sqrt(variance);
+    uint64_t variance = varianceSum / PING_NUM;
+    uint64_t standardDeviation = sqrt(variance);
     ipinfo.rtt = std::to_string(maxValue) + ";" + std::to_string(minValue) + ";" + std::to_string(avg) +
         ";" + std::to_string(standardDeviation) + " ";
 }
@@ -192,6 +192,9 @@ void TimeOutHandle(struct IpInfo &ipinfo, struct addrinfo *ai, int count)
         for (int i = 0; i < PING_NUM; i++) {
             ipinfo.delay[i] = TIME_BASE_MS;
         }
+        return;
+    }
+    if (count >= PING_NUM) {
         return;
     }
     ipinfo.delay[count] = TIME_BASE_MS;
@@ -241,7 +244,7 @@ void ReSend(struct IpInfo &ipinfo, int i)
         return;
     }
     long long timeRecv = Now() - timeSend;
-    ipinfo.rtt[i] = timeRecv; // 记录rtt
+    ipinfo.delay[i] = timeRecv; // 记录rtt
     close(sockfd);
     return;
 }

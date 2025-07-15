@@ -1713,6 +1713,16 @@ HWTEST_F(NetConnClientTest, GetPacUrl003, TestSize.Level1)
     EXPECT_NE(pacUrl, TEST_DOMAIN10);
 }
 
+HWTEST_F(NetConnClientTest, QueryTraceRoute001, TestSize.Level1)
+{
+    std::string url = "";
+    int32_t maxJumpNumber = 1;
+    int32_t packetsType = 1;
+    std::string traceRouteInfo;
+    auto ret0 = NetConnClient::GetInstance().QueryTraceRoute(url, maxJumpNumber, packetsType, traceRouteInfo);
+    EXPECT_NE(ret0, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnClientTest, SetAppIsFrozenedTest001, TestSize.Level1)
 {
     auto ret = NetConnClient::GetInstance().SetAppIsFrozened(20020177, true);

@@ -281,17 +281,23 @@ int32_t ConvFromNetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_Ne
     return NETMANAGER_SUCCESS;
 }
 
-int32_t Conv2TraceRouteInfoRtt(const std::string rttStr, uint32_t *rtt)
+std::vector<std::string> splitStr(const std::string &str, const char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, ' ')) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+int32_t Conv2TraceRouteInfoRtt(const std::string &rttStr, uint32_t (*rtt)[NETCONN_MAX_RTT_NUM])
 {
     if (rtt == nullptr) {
         return NETMANAGER_ERR_INTERNAL;
     }
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(rttStr);
-    while (std::getline(tokenStream, token, ';')) {
-        tokens.push_back(token);
-    }
+    std::vector<std::string> tokens = splitStr(rttStr, ';');
     uint32_t tokensSize = tokens.size();
     for (uint32_t i = 0; i < tokensSize; ++i) {
         if (i >= NETCONN_MAX_RTT_NUM) {
@@ -300,45 +306,40 @@ int32_t Conv2TraceRouteInfoRtt(const std::string rttStr, uint32_t *rtt)
         double num;
         std::istringstream iss(tokens[i]);
         if (iss >> num) {
-            rtt[i] = static_cast<uint32_t>(num);
+            *rtt[i] = static_cast<uint32_t>(num);
         }
     }
     return NETMANAGER_SUCCESS;
 }
 
-int32_t Conv2TraceRouteInfo(
-    const std::string traceRouteInfoStr, NetConn_TraceRouteInfo *traceRouteInfo, int32_t maxJumpNumber)
+int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceRouteInfo *traceRouteInfo,
+                            uint32_t maxJumpNumber)
 {
     if (traceRouteInfo == nullptr) {
         return NETMANAGER_ERR_INTERNAL;
     }
+
+    // traceRouteInfo is "1 *.*.*.*;2;3;4 ..." pos is space position
     const uint32_t pos2 = 2;
     const uint32_t pos3 = 3;
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(traceRouteInfoStr);
-    while (std::getline(tokenStream, token, ' ')) {
-        tokens.push_back(token);
-    }
+    std::vector<std::string> tokens = splitStr(traceRouteInfoStr, ' ');
     uint32_t tokensSize = static_cast<uint32_t>(tokens.size());
-    int j = 0;
-    for (uint32_t i = 0; i <= tokensSize - pos3; i += pos3) {
-        if (j >= maxJumpNumber) {
+    for (uint32_t i = 0; i * pos3 < tokensSize; i++) {
+        if (i >= maxJumpNumber) {
             return NETMANAGER_SUCCESS;
         }
         uint8_t num;
-        std::istringstream iss(tokens[i]);
+        std::istringstream iss(tokens[i * pos3]);
         if (iss >> num) {
-            traceRouteInfo[j].jumpNo = num;
+            traceRouteInfo[i].jumpNo = num;
         }
-        if (strcpy_s(traceRouteInfo[j].address, NETCONN_MAX_STR_LEN, tokens[i + 1].c_str()) != 0) {
+        if (strcpy_s(traceRouteInfo[i].address, NETCONN_MAX_STR_LEN, tokens[i * pos3 + 1].c_str()) != 0) {
             NETMGR_LOG_E("Conv2TraceRouteInfo string copy failed");
             return NETMANAGER_ERR_INTERNAL;
         }
-        if (Conv2TraceRouteInfoRtt(tokens[i + pos2], traceRouteInfo[j].rtt) != NETMANAGER_SUCCESS) {
+        if (Conv2TraceRouteInfoRtt(tokens[i * pos3 + pos2], &traceRouteInfo[i].rtt) != NETMANAGER_SUCCESS) {
             return NETMANAGER_ERR_INTERNAL;
         }
-        j++;
     }
     return NETMANAGER_SUCCESS;
 }

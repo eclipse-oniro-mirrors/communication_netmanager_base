@@ -41,6 +41,7 @@ static constexpr uint8_t WITHOUT_FIRST_PARM_MODEL = 1;
 static constexpr uint8_t WITHOUT_SECOND_PARM_MODEL = 2;
 static constexpr uint8_t WITHOUT_THIRD_PARM_MODEL = 3;
 static constexpr uint8_t WITHOUT_FOURTH_PARM_MODEL = 4;
+static constexpr int32_t MAX_JUMP_NUMBER = 30;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
@@ -1817,6 +1818,22 @@ void GetIfaceNameIdentMapsFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS), dataParcel);
 }
 
+void SetQueryTraceRouteFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string destination = NetConnGetString(STR_LEN);
+    int32_t maxJumpNumber = NetConnGetData<int32_t>() % MAX_JUMP_NUMBER;
+    int32_t packetsType = NetConnGetData<int32_t>() % WITHOUT_SECOND_PARM_MODEL;
+    dataParcel.WriteString(destination);
+    dataParcel.WriteInt32(maxJumpNumber);
+    dataParcel.WriteInt32(packetsType);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
@@ -1826,6 +1843,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetAppIsFrozenedTest(data, size);
     OHOS::NetManagerStandard::EnableAppFrozenedCallbackLimitationTest(data, size);
     OHOS::NetManagerStandard::GetSpecificNetByIdentFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetQueryTraceRouteFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

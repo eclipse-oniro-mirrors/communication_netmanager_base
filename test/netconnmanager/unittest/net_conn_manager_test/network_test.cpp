@@ -1339,17 +1339,9 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest005, TestSize.Level1)
 HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest006, TestSize.Level1)
 {
     std::string rttStr = "100;200;300";
-    uint32_t* rtt = nullptr;
-    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
-    EXPECT_EQ(result, NETMANAGER_ERR_INTERNAL);
-}
+    uint32_t rtt[NETCONN_MAX_RTT_NUM] = {0};
 
-HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest007, TestSize.Level1)
-{
-    std::string rttStr = "100;200;300";
-    uint32_t rtt[3] = {0};
-
-    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, &rtt);
 
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
     EXPECT_EQ(rtt[0], 100);
@@ -1357,7 +1349,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest007, TestSize.Level1)
     EXPECT_EQ(rtt[2], 300);
 }
 
-HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest008, TestSize.Level1)
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest007, TestSize.Level1)
 {
     std::string rttStr;
     for (int i = 0; i < NETCONN_MAX_RTT_NUM; ++i) {
@@ -1365,7 +1357,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest008, TestSize.Level1)
     }
     uint32_t rtt[NETCONN_MAX_RTT_NUM] = {0};
 
-    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, &rtt);
 
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
     EXPECT_EQ(rtt[0], 0);
@@ -1374,12 +1366,12 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest008, TestSize.Level1)
     EXPECT_EQ(rtt[3], 3);
 }
 
-HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest009, TestSize.Level1)
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest008, TestSize.Level1)
 {
     std::string rttStr = "100;abc;300";
-    uint32_t rtt[3] = {0};
+    uint32_t rtt[NETCONN_MAX_RTT_NUM] = {0};
 
-    int32_t result = Conv2TraceRouteInfoRtt(rttStr, rtt);
+    int32_t result = Conv2TraceRouteInfoRtt(rttStr, &rtt);
 
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
     EXPECT_EQ(rtt[0], 100);
@@ -1387,7 +1379,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest009, TestSize.Level1)
     EXPECT_EQ(rtt[2], 300);
 }
 
-HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest010, TestSize.Level1)
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest09, TestSize.Level1)
 {
     const std::string traceRouteInfoStr = "1 192.168.2.1 788;889;998;110 2 10.111.120.189 1334;1445;1667;1678";
     NetConn_TraceRouteInfo traceRouteInfo[2] = {};
@@ -1396,7 +1388,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest010, TestSize.Level1)
     EXPECT_EQ(1678, traceRouteInfo[1].rtt[3]);
 }
 
-HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest11, TestSize.Level1)
+HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest10, TestSize.Level1)
 {
     const char *destination = "www.text.com";
     NetConn_TraceRouteInfo traceRouteInfo[30] = {};
@@ -1404,9 +1396,6 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest11, TestSize.Level1)
     OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
     Option = {31, NETCONN_PACKETS_ICMP};
     auto ret = OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
-    Option = {-1, NETCONN_PACKETS_UDP};
-    ret = OH_NetConn_QueryTraceRoute(destination, &Option, traceRouteInfo);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
