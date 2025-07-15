@@ -341,12 +341,6 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest002, TestSize.Level1)
     }
 }
 
-HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
-{
-    auto ret = NetConnService::GetInstance()->RegisterNetConnCallback(g_callback);
-    EXPECT_EQ(ret, NETSYS_SUCCESS);
-}
-
 HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest001, TestSize.Level1)
 {
     sptr<INetConnCallback> netCallback = new (std::nothrow) NetConnCallbackStubCb();

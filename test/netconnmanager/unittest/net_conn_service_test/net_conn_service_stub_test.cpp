@@ -159,26 +159,6 @@ HWTEST_F(NetConnServiceStubTest, OnRegisterNetSupplierCallbackTest001, TestSize.
 }
 
 /**
- * @tc.name: OnRegisterNetConnCallbackTest001
- * @tc.desc: Test NetConnServiceStub OnRegisterNetConnCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceStubTest, OnRegisterNetConnCallbackTest001, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
-    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
-    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: OnUnregisterNetConnCallbackTest001
  * @tc.desc: Test NetConnServiceStub OnUnregisterNetConnCallback.
  * @tc.type: FUNC

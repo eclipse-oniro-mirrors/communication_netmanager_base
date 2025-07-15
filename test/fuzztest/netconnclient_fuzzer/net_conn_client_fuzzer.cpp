@@ -445,31 +445,6 @@ void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size
                     dataParcelNoRemoteObject);
 }
 
-void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
-{
-    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    if (callback == nullptr) {
-        return;
-    }
-
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK), dataParcel);
-
-    MessageParcel dataParcelNoRemoteObject;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoRemoteObject)) {
-        return;
-    }
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK),
-                    dataParcelNoRemoteObject);
-}
-
 void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr) {
@@ -1866,7 +1841,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UpdateNetSupplierInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetLinkInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetConnCallbackBySpecifierFuzzTest(data, size);
-    OHOS::NetManagerStandard::RegisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultNetFuzzTest(data, size);
     OHOS::NetManagerStandard::HasDefaultNetFuzzTest(data, size);

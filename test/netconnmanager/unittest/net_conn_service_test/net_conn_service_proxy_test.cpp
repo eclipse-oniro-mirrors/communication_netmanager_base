@@ -254,17 +254,6 @@ HWTEST_F(NetConnServiceProxyTest, RegisterNetSupplierCallbackTest001, TestSize.L
 }
 
 /**
- * @tc.name: RegisterNetConnCallbackTest001
- * @tc.desc: Test NetConnServiceProxy RegisterNetConnCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackTest001, TestSize.Level1)
-{
-    int32_t ret = instance_->RegisterNetConnCallback(netConnCallback_);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: RegisterNetConnCallbackTest002
  * @tc.desc: Test NetConnServiceProxy RegisterNetConnCallback.
  * @tc.type: FUNC
@@ -673,9 +662,6 @@ HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Lev
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     sptr<INetConnCallback> connCallback = nullptr;
-    ret = instance_->RegisterNetConnCallback(connCallback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
-
     sptr<NetSpecifier> netSpecifier = nullptr;
     uint32_t timeoutMS = 0;
     ret = instance_->RegisterNetConnCallback(netSpecifier, connCallback, timeoutMS);
