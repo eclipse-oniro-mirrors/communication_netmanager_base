@@ -41,6 +41,7 @@ static constexpr uint8_t WITHOUT_FIRST_PARM_MODEL = 1;
 static constexpr uint8_t WITHOUT_SECOND_PARM_MODEL = 2;
 static constexpr uint8_t WITHOUT_THIRD_PARM_MODEL = 3;
 static constexpr uint8_t WITHOUT_FOURTH_PARM_MODEL = 4;
+static constexpr int32_t MAX_JUMP_NUMBER = 30;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
@@ -1824,7 +1825,6 @@ void SetQueryTraceRouteFuzzTest(const uint8_t *data, size_t size)
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    constexpr int32_t MAX_JUMP_NUMBER = 30;
     std::string destination = NetConnGetString(STR_LEN);
     int32_t maxJumpNumber = NetConnGetData<int32_t>() % MAX_JUMP_NUMBER;
     int32_t packetsType = NetConnGetData<int32_t>() % WITHOUT_SECOND_PARM_MODEL;

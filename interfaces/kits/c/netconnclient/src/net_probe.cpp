@@ -123,7 +123,7 @@ static int32_t WaitResponse(int32_t fd, iovec &iov, int64_t &respTime, int32_t t
     }
 
     rc = recv(fd, iov.iov_base, iov.iov_len, 0);
-    if (rc >= (sizeof(struct icmphdr) + sizeof(int64_t))) {
+    if (rc >= static_cast<int32_t>(sizeof(struct icmphdr) + sizeof(int64_t))) {
         struct icmphdr *ih = reinterpret_cast<struct icmphdr*>(iov.iov_base);
         int64_t *timePtr = reinterpret_cast<int64_t *>(ih + 1);
 
