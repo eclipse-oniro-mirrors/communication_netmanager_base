@@ -12,7 +12,7 @@
 // limitations under the License.
 
 use std::{
-    ffi::{c_void, CStr},
+    ffi::{c_void, CStr, CString},
     marker::PhantomData,
     ops::Deref,
     ptr::null_mut,
@@ -815,11 +815,12 @@ impl<'local> AniEnv<'local> {
         index: usize,
     ) -> Result<AniRef<'local>, AniError> {
         let mut ret = null_mut() as ani_ref;
+        let c_field_name = CString::new(format!("${}", index)).expect("CString::new failed");
         let res = unsafe {
-            (**self.inner).TupleValue_GetItem_Ref.unwrap()(
+            (**self.inner).Object_GetFieldByName_Ref.unwrap()(
                 self.inner,
                 tuple.as_raw(),
-                index,
+                c_field_name.as_ptr(),
                 &mut ret as *mut _,
             )
         };
