@@ -109,6 +109,11 @@ HWTEST_F(NetStatsListenerTest, OnReceiveEvent004, TestSize.Level1)
     data.SetWant(want);
     instance_->OnReceiveEvent(data);
     ASSERT_NE(instance_, nullptr);
+
+    bool ret = CommonUtils::IsSameNaturalDay(1751357844, 1518743913);
+    ASSERT_EQ(ret, false);
+    ret = CommonUtils::IsSameNaturalDay(1751357844, 1751357850);
+    ASSERT_EQ(ret, true);
 }
 
 HWTEST_F(NetStatsListenerTest, RegisterStatsCallback001, TestSize.Level1)

@@ -1471,5 +1471,19 @@ HWTEST_F(NetConnClientTest, CloseSocketsUid002, TestSize.Level1)
     NetConnClient::GetInstance().DlCloseRemoveDeathRecipient();
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
+
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
+    netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    uint32_t timesOut = 0;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
+    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

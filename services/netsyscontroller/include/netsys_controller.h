@@ -28,7 +28,6 @@ namespace NetManagerStandard {
 class NetsysController {
 public:
     ~NetsysController() = default;
-    void Init();
 
     static NetsysController &GetInstance();
 
