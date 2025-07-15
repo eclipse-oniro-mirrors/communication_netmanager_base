@@ -16,8 +16,14 @@
 #ifndef HI_SDK_REPORT
 #define HI_SDK_REPORT
 
+#ifdef ENABLE_EMULATOR
 #include "app_event.h"
 #include "app_event_processor_mgr.h"
+#endif
+
+#include <vector>
+#include <cstdint>
+#include <string>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -31,6 +37,7 @@ public:
     ~HiAppEventReport();
     void ReportSdkEvent(const int result, const int errCode);
 
+#ifdef ENABLE_EMULATOR
 private:
     int64_t AddProcessor();
 
@@ -38,6 +45,7 @@ private:
     std::string transId_ = "";
     std::string apiName_ = "";
     std::string sdkName_ = "";
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
