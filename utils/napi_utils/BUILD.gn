@@ -20,6 +20,9 @@ config("napi_utils_config") {
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
+  if (support_jsapi) {
+    defines = [ "ENABLE_EMULATOR" ]
+  }
 }
 
 config("napi_utils_public_config") {
