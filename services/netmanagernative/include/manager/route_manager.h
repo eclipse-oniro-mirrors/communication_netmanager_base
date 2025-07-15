@@ -332,6 +332,18 @@ public:
                                   const std::vector<std::string> &extMessages, bool add);
 #endif // SUPPORT_SYSVPN
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    /**
+     * update enterprise route rules
+     *
+     * @param interfaceName Network if name
+     * @param uid app uid
+     * @param add true add, false remove
+     * @return Returns 0, update successfully, otherwise it will fail
+     */
+    static int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add);
+#endif
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;

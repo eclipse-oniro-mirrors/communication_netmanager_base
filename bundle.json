@@ -34,7 +34,8 @@
             "netmanager_base_enable_traffic_statistic",
             "netmanager_base_extended_features",
             "netmanager_base_share_traffic_limit_enable",
-            "netmanager_base_enable_set_app_frozened"
+            "netmanager_base_enable_set_app_frozened",
+            "netmanager_base_feature_enterprise_route_custom"
         ],
         "adapted_system_type": [
             "standard"

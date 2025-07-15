@@ -681,6 +681,12 @@ public:
     {
         return 0;
     }
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override
+    {
+        return 0;
+    }
+#endif
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -2365,6 +2371,5 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
-
 } // namespace NetsysNative
 } // namespace OHOS

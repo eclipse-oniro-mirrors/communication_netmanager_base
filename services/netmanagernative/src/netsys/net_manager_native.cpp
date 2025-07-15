@@ -200,6 +200,13 @@ int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceNa
     return ret;
 }
 
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+int32_t NetManagerNative::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
+{
+    return routeManager_->UpdateEnterpriseRoute(interfaceName, uid, add);
+}
+#endif
+
 int32_t NetManagerNative::NetworkRemoveRoute(int32_t netId, std::string interfaceName, std::string destination,
                                              std::string nextHop)
 {

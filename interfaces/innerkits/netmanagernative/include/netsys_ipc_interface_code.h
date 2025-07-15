@@ -154,6 +154,9 @@ enum class NetsysInterfaceCode {
     NETSYS_SET_DNS_CACHE,
     NETSYS_ADD_STATIC_IPV6,
     NETSYS_DEL_STATIC_IPV6,
+#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
+    NETSYS_UPDATE_ENTERPRISE_ROUTE,
+#endif
 };
 
 enum class NotifyInterfaceCode {
