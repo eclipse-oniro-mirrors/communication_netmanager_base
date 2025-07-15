@@ -69,7 +69,7 @@ int32_t NetPolicyDBClone::OnBackup(UniqueFd &fd, const std::string &backupInfo)
 {
     NetAccessPolicyRDB netAccessPolicyRdb;
     std::vector<NetAccessPolicyData> result = netAccessPolicyRdb.QueryAll();
-    NETMGR_LOG_I("OnBackup size: %{public}u", result.size());
+    NETMGR_LOG_I("OnBackup size: %{public}zu", result.size());
 
     std::string content;
     std::ostringstream ss;
