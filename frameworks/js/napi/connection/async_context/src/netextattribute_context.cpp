@@ -14,7 +14,9 @@
  */
  
 #include "netextattribute_context.h"
- 
+
+#include "netmanager_base_permission.h"
+#include "net_manager_constants.h"
 #include "napi_constant.h"
 #include "constant.h"
 #include "napi_utils.h"
@@ -22,6 +24,10 @@
  
 namespace OHOS {
 namespace NetManagerStandard {
+
+static constexpr const char *SET_NET_EXT_ATTRIBUTE = "ohos.permission.SET_NET_EXT_ATTRIBUTE";
+static constexpr const char *GET_NETWORK_INFO = "ohos.permission.GET_NETWORK_INFO";
+
 SetNetExtAttributeContext::SetNetExtAttributeContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager) {}
  
@@ -41,9 +47,12 @@ bool SetNetExtAttributeContext::CheckParamsType(napi_env env, napi_value *params
  
 void SetNetExtAttributeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
+    if (!NetManagerPermission::CheckPermission(SET_NET_EXT_ATTRIBUTE)) {
+        SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return;
+    }
     if (!CheckParamsType(GetEnv(), params, paramsCount)) {
         NETMANAGER_BASE_LOGE("check params type failed");
-        SetNeedThrowException(true);
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;
     }
@@ -59,16 +68,18 @@ GetNetExtAttributeContext::GetNetExtAttributeContext(napi_env env, std::shared_p
  
 void GetNetExtAttributeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
+    if (!NetManagerPermission::CheckPermission(GET_NETWORK_INFO)) {
+        SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return;
+    }
     if (paramsCount != PARAM_JUST_OPTIONS || NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) != napi_object) {
         NETMANAGER_BASE_LOGE("check params type failed");
-        SetNeedThrowException(true);
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;
     }
     auto value = NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], KEY_NET_ID);
     if (NapiUtils::GetValueType(GetEnv(), value) != napi_number) {
         NETMANAGER_BASE_LOGE("check params type failed");
-        SetNeedThrowException(true);
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;
     }
