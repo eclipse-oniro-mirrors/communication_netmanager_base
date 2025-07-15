@@ -646,5 +646,24 @@ HWTEST_F(NetsysNativeClientTest, SetDnsCacheTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeClientTest, OnDnsQueryResultReportTest001, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    uint32_t size = 1;
+    OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultReport{};
+    std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res = {netDnsResultReport};
+    int32_t ret = notifyCallback.OnDnsQueryResultReport(size, res);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, OnDnsQueryAbnormalReportTest001, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    uint32_t eventfailcause = 1;
+    OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultReport{};
+    int32_t ret = notifyCallback.OnDnsQueryAbnormalReport(eventfailcause, netDnsResultReport);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
