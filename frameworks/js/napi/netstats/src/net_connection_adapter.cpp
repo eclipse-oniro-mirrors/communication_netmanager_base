@@ -319,14 +319,13 @@ int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceR
         return NETMANAGER_ERR_INTERNAL;
     }
 
-    // traceRouteInfo is "1 172.0.0.1 1;2;3;4 ..." pos is space position
+    // traceRouteInfo is "1 *.*.*.*;2;3;4 ..." pos is space position
     const uint32_t pos2 = 2;
     const uint32_t pos3 = 3;
     std::vector<std::string> tokens = splitStr(traceRouteInfoStr, ' ');
     uint32_t tokensSize = static_cast<uint32_t>(tokens.size());
     for (uint32_t i = 0; i * pos3 < tokensSize; i++) {
-        if (i >= maxJumpNumber)
-        {
+        if (i >= maxJumpNumber) {
             return NETMANAGER_SUCCESS;
         }
         uint8_t num;
