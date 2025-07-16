@@ -17,7 +17,9 @@
 #include "netmanager_base_log.h"
 
 #include <algorithm>
+#ifndef CROSS_PLATFORM
 #include "hi_app_event_report.h"
+#endif
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -29,7 +31,9 @@ static constexpr const int EVENT_PARAM_NUM = 2;
 napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
               bool asyncCallback)
 {
+#ifndef CROSS_PLATFORM
     HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionOn");
+#endif
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
@@ -52,8 +56,9 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
         auto manager = *sharedManager;
         manager->AddListener(env, event, params[1], false, asyncCallback);
     }
-
+#ifndef CROSS_PLATFORM
     hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
+#endif
     return NapiUtils::GetUndefined(env);
 }
 
@@ -147,7 +152,9 @@ void DefineClass(napi_env env, napi_value exports, const std::initializer_list<n
 napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
     void *(*MakeData)(napi_env, size_t, napi_value *, std::shared_ptr<EventManager>&), Finalizer finalizer)
 {
+#ifndef CROSS_PLATFORM
     HiAppEventReport hiAppEventReport("NetworkKit", "VpncreateVpnConnection");
+#endif
     napi_value thisVal = nullptr;
     std::size_t argc = MAX_PARAM_NUM;
     napi_value argv[MAX_PARAM_NUM] = {nullptr};
@@ -175,7 +182,9 @@ napi_value NewInstance(napi_env env, napi_callback_info info, const std::string 
     }
     *sharedManager = manager;
     napi_wrap(env, result, reinterpret_cast<void *>(sharedManager), finalizer, nullptr, nullptr);
+#ifndef CROSS_PLATFORM
     hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
+#endif
 
     return result;
 }
