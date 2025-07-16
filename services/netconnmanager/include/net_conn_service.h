@@ -133,16 +133,6 @@ public:
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
 
     /**
-     * Register net connection callback
-     *
-     * @param netSpecifier specifier information
-     * @param callback The callback of INetConnCallback interface
-     *
-     * @return Returns 0, successfully register net connection callback, otherwise it will failed
-     */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
-
-    /**
      * Register net connection callback by NetSpecifier
      *
      * @param netSpecifier specifier information
