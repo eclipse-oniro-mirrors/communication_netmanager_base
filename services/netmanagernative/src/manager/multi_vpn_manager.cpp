@@ -212,6 +212,7 @@ int32_t MultiVpnManager::SetVpnUp(const std::string &ifName)
         return NETMANAGER_ERROR;
     }
     int32_t ret4 = SetVpnResult(net4Sock, SIOCSIFFLAGS, ifr);
+    close(net4Sock);
     if (ret4 == NETMANAGER_ERROR) {
         NETNATIVE_LOGI("set iff up failed");
         return NETMANAGER_ERROR;
