@@ -62,6 +62,10 @@ ohos_shared_library("connection") {
     "napi:ace_napi",
   ]
 
+  if (product_name != "qemu-arm-linux-min") {
+    external_deps += [ "hiappevent:hiappevent_innerapi" ]
+  }
+
   relative_install_dir = "module/net"
   part_name = "netmanager_base"
   subsystem_name = "communication"
@@ -146,6 +150,10 @@ ohos_shared_library("connection_if") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
+
+  if (product_name != "qemu-arm-linux-min") {
+    external_deps += [ "hiappevent:hiappevent_innerapi" ]
+  }
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
