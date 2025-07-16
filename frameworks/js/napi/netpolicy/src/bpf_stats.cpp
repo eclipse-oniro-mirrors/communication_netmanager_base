@@ -393,9 +393,6 @@ int32_t NetsysBpfStats::DeleteIncreaseTrafficMap(uint64_t ifIndex)
 int32_t NetsysBpfStats::UpdateIfIndexMap(int8_t key, uint64_t index)
 {
     NETNATIVE_LOGI("UpdateIfIndexMap start. key:%{public}d, index:%{public}" PRIu64, key, index);
-    if (index == UINT64_MAX) {
-        return -1;
-    }
 
     BpfMapper<uint8_t, uint64_t> netStatsIfIndexMap(IFINDEX_MAP_PATH, BPF_F_WRONLY);
     if (!netStatsIfIndexMap.IsValid()) {
