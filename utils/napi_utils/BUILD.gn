@@ -20,9 +20,6 @@ config("napi_utils_config") {
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
-  if (support_jsapi) {
-    defines = [ "ENABLE_EMULATOR" ]
-  }
 }
 
 config("napi_utils_public_config") {
@@ -36,6 +33,10 @@ config("napi_utils_public_config") {
   cflags = common_cflags
 
   cflags_cc = common_cflags
+
+  if (product_name != "qemu-arm-linux-min") {
+    defines = [ "ENABLE_EMULATOR" ]
+  }
 }
 
 ohos_shared_library("napi_utils") {
@@ -62,7 +63,7 @@ ohos_shared_library("napi_utils") {
     "napi:ace_napi",
   ]
 
-  if (support_jsapi) {
+  if (product_name != "qemu-arm-linux-min") {
     external_deps += [
       "hiappevent:hiappevent_innerapi",
       "time_service:time_client",
