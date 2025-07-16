@@ -191,18 +191,19 @@ IpCountResult CountInterfaceAddresses(const std::string& ifName)
 {
     IpCountResult result;
     struct ifaddrs* ifap = nullptr;
-    if (getifaddrs(&ifap) == 0) {
-        for (auto* ptr = ifap; ptr != nullptr; ptr = ptr->ifa_next) {
-            if (ptr->ifa_addr && ifName == ptr->ifa_name) {
-                if (ptr->ifa_addr->sa_family == AF_INET) {
-                    result.ipv4Count++;
-                } else if (ptr->ifa_addr->sa_family == AF_INET6) {
-                    result.ipv6Count++;
-                }
+    if (getifaddrs(&ifap) != 0) {
+        return result;
+    }
+    for (auto* ptr = ifap; ptr != nullptr; ptr = ptr->ifa_next) {
+        if (ptr->ifa_addr && ifName == ptr->ifa_name) {
+            if (ptr->ifa_addr->sa_family == AF_INET) {
+                result.ipv4Count++;
+            } else if (ptr->ifa_addr->sa_family == AF_INET6) {
+                result.ipv6Count++;
             }
         }
-        freeifaddrs(ifap);
     }
+    freeifaddrs(ifap);
     return result;
 }
 
