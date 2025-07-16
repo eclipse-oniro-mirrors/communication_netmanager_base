@@ -17,7 +17,6 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <linux/if.h>
 #include <linux/ipv6.h>
 #include <linux/if_tun.h>
 #include <netinet/in.h>
@@ -27,7 +26,14 @@
 #include <sys/un.h>
 #include <thread>
 #include <unistd.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <cstring>
+#include <string>
 
+#include "netlink_msg.h"
+#include "netlink_socket.h"
 #include "init_socket.h"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
@@ -144,58 +150,55 @@ int32_t VpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
 
 int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &tunAddr, int32_t prefix)
 {
-    ifreq ifr = {};
-    if (InitIfreq(ifr, ifName) != NETMANAGER_SUCCESS) {
+    char addrbuf[sizeof(in6_addr)] = {0};
+    int family = -1;
+
+    if (inet_pton(AF_INET, tunAddr.c_str(), addrbuf) == 1) {
+        family = AF_INET;
+    } else if (inet_pton(AF_INET6, tunAddr.c_str(), addrbuf) == 1) {
+        family = AF_INET6;
+    } else {
+        NETNATIVE_LOGE("invalid IP address: %{public}s", tunAddr.c_str());
         return NETMANAGER_ERROR;
     }
 
-    bool isIpv6 = CommonUtils::IsValidIPV6(tunAddr);
-    if (isIpv6) {
-        struct in6_ifreq ifr6 = {};
-        if (ioctl(net6Sock_, SIOCGIFINDEX, &ifr) <0) {
-            NETNATIVE_LOGE(" get network interface ipv6 failed: %{public}d", errno);
-            return NETMANAGER_ERROR;
-        }
-        if (inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) == 0) {
-            NETNATIVE_LOGE("inet_pton ipv6 address failed: %{public}d", errno);
-        }
-        ifr6.ifr6_prefixlen = prefix;
-        ifr6.ifr6_ifindex = ifr.ifr_ifindex;
-        if (ioctl(net6Sock_, SIOCSIFADDR, &ifr6) < 0) {
-            NETNATIVE_LOGE("ioctl set ipv6 address failed: %{public}d", errno);
-            return NETMANAGER_ERROR;
-        }
-    } else {
-        in_addr ipv4Addr = {};
-        if (inet_aton(tunAddr.c_str(), &ipv4Addr) == 0) {
-            NETNATIVE_LOGE("addr inet_aton error");
-            return NETMANAGER_ERROR;
-        }
-
-        auto sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_addr);
-        sin->sin_family = AF_INET;
-        sin->sin_addr = ipv4Addr;
-        if (ioctl(net4Sock_, SIOCSIFADDR, &ifr) < 0) {
-            NETNATIVE_LOGE("ioctl set ipv4 address failed: %{public}d", errno);
-            return NETMANAGER_ERROR;
-        }
-
-        if (prefix <= 0 || prefix >= NET_MASK_MAX_LENGTH) {
-            NETNATIVE_LOGE("prefix: %{public}d error", prefix);
-            return NETMANAGER_ERROR;
-        }
-        in_addr_t mask = prefix ? (~0 << (NET_MASK_MAX_LENGTH - prefix)) : 0;
-        sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_netmask);
-        sin->sin_family = AF_INET;
-        sin->sin_addr.s_addr = htonl(mask);
-        if (ioctl(net4Sock_, SIOCSIFNETMASK, &ifr) < 0) {
-            NETNATIVE_LOGE("ioctl set ip mask failed: %{public}d", errno);
-            return NETMANAGER_ERROR;
-        }
+    int ifindex = if_nametoindex(ifName.c_str());
+    if (ifindex == 0) {
+        NETNATIVE_LOGE("if_nametoindex failed: %{public}d", errno);
+        return NETMANAGER_ERROR;
     }
 
-    NETNATIVE_LOGI("set ip address success");
-    return NETMANAGER_SUCCESS;
+    return SendNetlinkAddress(ifindex, family, addrbuf, prefix);
+}
+
+int32_t VpnManager::SendNetlinkAddress(int ifindex, int family, const char* addrbuf, int prefix)
+{
+    if ((family == AF_INET && (prefix < 0 || prefix > 32)) ||
+        (family == AF_INET6 && (prefix < 0 || prefix > 128))) {
+        NETNATIVE_LOGE("Invalid prefix length: %{public}d", prefix);
+        return NETMANAGER_ERROR;
+    }
+
+    constexpr size_t kMaxMsgLen = 4096;
+    nmd::NetlinkMsg netMsg(NLM_F_CREATE, kMaxMsgLen, getpid());
+
+    ifaddrmsg ifa {};
+    ifa.ifa_family = static_cast<uint8_t>(family);
+    ifa.ifa_prefixlen = static_cast<uint8_t>(prefix);
+    ifa.ifa_flags = IFA_F_PERMANENT;
+    ifa.ifa_scope = 0;
+    ifa.ifa_index = ifindex;
+
+    netMsg.AddAddress(RTM_NEWADDR, ifa);
+
+    int addrLen = (family == AF_INET) ? 4 : 16;
+    if (netMsg.AddAttr(IFA_LOCAL, const_cast<char*>(addrbuf), addrLen) < 0 ||
+        netMsg.AddAttr(IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen) < 0) {
+        NETNATIVE_LOGE("AddAttr failed");
+        return NETMANAGER_ERROR;
+    }
+
+    return nmd::SendNetlinkMsgToKernel(netMsg.GetNetLinkMessage(), 0);
 }
 
 int32_t VpnManager::SetVpnUp()

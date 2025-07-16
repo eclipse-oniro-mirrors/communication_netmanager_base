@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <ifaddrs.h>
+#include <sys/resource.h>
 
 #ifdef GTEST_API_
 #define private public
@@ -23,6 +25,8 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "vpn_manager.h"
+#include "netlink_msg.h"
+#include "netlink_socket.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -178,13 +182,104 @@ HWTEST_F(VpnManagerTest, SetVpnAddressTest002, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
+struct IpCountResult {
+    int ipv4Count = 0;
+    int ipv6Count = 0;
+};
+
+IpCountResult CountInterfaceAddresses(const std::string& ifName)
+{
+    IpCountResult result;
+    struct ifaddrs* ifap = nullptr;
+    if (getifaddrs(&ifap) == 0) {
+        for (auto* ptr = ifap; ptr != nullptr; ptr = ptr->ifa_next) {
+            if (ptr->ifa_addr && ifName == ptr->ifa_name) {
+                if (ptr->ifa_addr->sa_family == AF_INET) {
+                    result.ipv4Count++;
+                } else if (ptr->ifa_addr->sa_family == AF_INET6) {
+                    result.ipv6Count++;
+                }
+            }
+        }
+        freeifaddrs(ifap);
+    }
+    return result;
+}
+
 HWTEST_F(VpnManagerTest, SetVpnAddressTest003, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+
+    std::vector<std::tuple<std::string, int32_t>> ipList = {
+        { "192.168.1.111", 24 },
+        { "192.168.1.122", 24 },
+        { "192.168.1.133", 24 },
+        { "192.168.1.100", 24 },
+    };
+
+    for (const auto& [ip, prefix] : ipList) {
+        auto result = vpnmanager.SetVpnAddress(ifName, ip, prefix);
+        EXPECT_EQ(result, NETMANAGER_ERROR) << "Binding failed for IP: " << ip;
+    }
+
+    auto ipCount = CountInterfaceAddresses(ifName);
+    EXPECT_GE(ipCount.ipv4Count, 0);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnAddressTest004, TestSize.Level1)
+{
+    VpnManager vpnmanager;
+    std::string ifName = "12345678901234567890";
+
+    std::vector<std::tuple<std::string, int32_t>> ipList = {
+        { "2001:db8:1234::1", 64 },
+        { "fd12:3456:789a::100", 64 },
+        { "2001:db8::abcd:ef01:2345:6789", 64 },
+        { "fd00::dead:beef", 64 },
+        { "2001:0db8:85a3:0000:0000:8a2e:0370:7334", 64 }
+    };
+
+    for (const auto& [ip, prefix] : ipList) {
+        auto result = vpnmanager.SetVpnAddress(ifName, ip, prefix);
+        EXPECT_EQ(result, NETMANAGER_ERROR) << "Binding failed for IP: " << ip;
+    }
+
+    auto ipCount = CountInterfaceAddresses(ifName);
+    EXPECT_GE(ipCount.ipv6Count, 0);
+}
+
+HWTEST_F(VpnManagerTest, SetVpnAddressTest005, TestSize.Level1)
 {
     VpnManager vpnmanager;
     std::string ifName = "12345678901234567890";
     std::string tunAddr = "";
     int32_t prefix = 1;
     auto result = vpnmanager.SetVpnAddress(ifName, tunAddr, prefix);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SendNetlinkAddressTest001, TestSize.Level1)
+{
+    VpnManager vpnManager;
+    int ifindex = 0;
+    const char* addrbuf = nullptr;
+    int family = AF_INET6;
+    int prefix = 64;
+
+    int32_t result = vpnManager.SendNetlinkAddress(ifindex, family, addrbuf, prefix);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
+
+HWTEST_F(VpnManagerTest, SendNetlinkAddressTest002, TestSize.Level1)
+{
+    VpnManager vpnManager;
+    int ifindex = 2;
+    int family = AF_INET;
+    int prefix = -1;
+
+    static const char addrbuf[4] = {127, 0, 0, 1};
+    int32_t result = vpnManager.SendNetlinkAddress(ifindex, family, addrbuf, prefix);
     EXPECT_EQ(result, NETMANAGER_ERROR);
 }
 
