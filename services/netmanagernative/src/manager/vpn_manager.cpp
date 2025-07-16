@@ -48,6 +48,8 @@ constexpr const char *TUN_CARD_NAME = "vpn-tun";
 constexpr const char *TUN_DEVICE_PATH = "/dev/tun";
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t MAX_UNIX_SOCKET_CLIENT = 5;
+constexpr uint8_t IPV4_LEN = 32;
+constexpr uint8_t IPV6_LEN = 128;
 } // namespace
 
 int32_t VpnManager::CreateVpnInterface()
@@ -173,8 +175,8 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
 
 int32_t VpnManager::SendNetlinkAddress(int ifindex, int family, const char* addrbuf, int prefix)
 {
-    if ((family == AF_INET && (prefix < 0 || prefix > 32)) ||
-        (family == AF_INET6 && (prefix < 0 || prefix > 128))) {
+    if ((family == AF_INET && (prefix < 0 || prefix > IPV4_LEN)) ||
+        (family == AF_INET6 && (prefix < 0 || prefix > IPV6_LEN))) {
         NETNATIVE_LOGE("Invalid prefix length: %{public}d", prefix);
         return NETMANAGER_ERROR;
     }
