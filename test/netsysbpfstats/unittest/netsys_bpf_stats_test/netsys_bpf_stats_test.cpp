@@ -487,6 +487,7 @@ HWTEST_F(NetsysBpfStatsTest, UpdateIfIndexMapTest001, TestSize.Level1)
     uint64_t index = 123;
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), -1);
+
     index = UINT64_MAX;
     EXPECT_EQ(bpfStats->UpdateIfIndexMap(key, index), -1);
 }
