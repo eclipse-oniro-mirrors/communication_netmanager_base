@@ -17,7 +17,7 @@
 #define NET_VPN_MANAGER_H
 
 #include <cstdint>
-#include <linux/if.h>
+#include <net/if.h>
 #include <string>
 
 namespace OHOS {
@@ -48,6 +48,7 @@ private:
     int32_t InitIfreq(ifreq &ifr, const std::string &cardName);
     int32_t SetVpnResult(std::atomic_int &fd, unsigned long cmd, ifreq &ifr);
 
+    int32_t SendNetlinkAddress(int ifindex, int family, const char* addrbuf, int prefix);
     int32_t SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd);
     void StartUnixSocketListen();
     void StartVpnInterfaceFdListen();
