@@ -970,5 +970,12 @@ HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 #endif
+
+HWTEST_F(NetsysControllerServiceImplTest, FlushDnsCache001, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    int32_t ret = instance_->FlushDnsCache(netId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

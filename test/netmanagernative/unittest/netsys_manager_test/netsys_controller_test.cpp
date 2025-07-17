@@ -1484,14 +1484,6 @@ HWTEST_F(NetsysControllerTest, SetUserDefinedServerFlag001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
-HWTEST_F(NetsysControllerTest, FlushDnsCache001, TestSize.Level1)
-{
-    uint16_t netId = 123;
-    NetsysController::GetInstance().netsysService_ = nullptr;
-    int32_t ret = NetsysController::GetInstance().FlushDnsCache(netId);
-    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
-}
-
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)
 {
     uint16_t netId = 101;
@@ -1530,5 +1522,22 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 #endif
+
+HWTEST_F(NetsysControllerTest, FlushDnsCache001, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->FlushDnsCache(netId);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
+{
+    uint16_t netId = 101;
+    auto netsysController = std::make_shared<NetsysController>();
+    int32_t ret = netsysController->FlushDnsCache(netId);
+    EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
