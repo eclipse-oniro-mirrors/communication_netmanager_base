@@ -73,14 +73,9 @@ int32_t WrapperListener::Stop()
         return NetlinkResult::ERROR;
     }
 
-    for (auto &pi : pipe_) {
-        if (pi > 0) {
-            close(pi);
-        }
-    }
-
     if (socket_ > -1) {
         close(socket_);
+        socket_ = -1;
     }
     const int32_t exitDelay = 1500;
     std::this_thread::sleep_for(std::chrono::milliseconds(exitDelay));
@@ -125,6 +120,12 @@ void WrapperListener::Listen()
             continue;
         }
         startReceiveFunc_(socket_);
+    }
+    
+    for (auto &pi : pipe_) {
+        if (pi > 0) {
+            close(pi);
+        }
     }
 }
 } // namespace OHOS::nmd
