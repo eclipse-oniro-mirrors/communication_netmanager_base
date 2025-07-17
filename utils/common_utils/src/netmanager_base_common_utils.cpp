@@ -438,10 +438,10 @@ int32_t StrToInt(const std::string &value, int32_t defaultErr)
     errno = 0;
     char *pEnd = nullptr;
     int64_t result = std::strtol(value.c_str(), &pEnd, 0);
-    if (pEnd == value.c_str() || (result < INT_MIN || result > LONG_MAX) || errno == ERANGE) {
+    if (pEnd == value.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
         return defaultErr;
     }
-    return result;
+    return static_cast<int32_t>(result);
 }
 
 uint32_t StrToUint(const std::string &value, uint32_t defaultErr)
