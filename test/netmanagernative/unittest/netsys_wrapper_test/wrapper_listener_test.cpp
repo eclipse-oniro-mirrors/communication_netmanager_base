@@ -61,7 +61,7 @@ HWTEST_F(WrapperListenerTest, StartTest002, TestSize.Level1)
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    bind(testSocket, (struct sockaddr*)&address, sizeof(address));
+    bind(testSocket, reinterpret_cast<struct sockaddr*>(&address), sizeof(address));
     std::unique_ptr<WrapperListener> listener = std::make_unique<WrapperListener>(testSocket, g_func);
     auto ret = listener->Start();
     EXPECT_EQ(ret, NetlinkResult::OK);
