@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 #include "netlink_define.h"
 #include "wrapper_listener.h"
@@ -57,6 +58,10 @@ HWTEST_F(WrapperListenerTest, StartTest001, TestSize.Level1)
 HWTEST_F(WrapperListenerTest, StartTest002, TestSize.Level1)
 {
     int32_t testSocket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    bind(testSocket, reinterpret_cast<struct sockaddr*>(&address), sizeof(address));
     std::unique_ptr<WrapperListener> listener = std::make_unique<WrapperListener>(testSocket, g_func);
     auto ret = listener->Start();
     EXPECT_EQ(ret, NetlinkResult::OK);
