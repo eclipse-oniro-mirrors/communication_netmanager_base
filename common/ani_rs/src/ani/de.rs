@@ -267,6 +267,7 @@ impl<'local> EnumDe<'local> {
                     "F64" => signature::DOUBLE,
                     "S" => signature::STRING,
                     "Array" => signature::ARRAY,
+                    "Record" => signature::RECORD,
                     "ArrayBuffer" => signature::ARRAY_BUFFER,
                     "Int8Array" => signature::INT8_ARRAY,
                     "Int16Array" => signature::INT16_ARRAY,
@@ -276,7 +277,7 @@ impl<'local> EnumDe<'local> {
                     "Uint32Array" => signature::UINT32_ARRAY,
                     _ => variant_cstring.as_c_str(),
                 };
-
+                
                 let class = self.env.find_class(&class_name)?;
                 if self.env.instance_of(&self.enum_item, &class)? {
                     return Ok(variant);

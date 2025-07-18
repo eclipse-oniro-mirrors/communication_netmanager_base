@@ -69,3 +69,6 @@ typed_array!(Int32Array);
 typed_array!(Uint8Array);
 typed_array!(Uint16Array);
 typed_array!(Uint32Array);
+
+#[derive(Serialize, Deserialize)]
+pub struct ArrayBuffer<'local>(&'local [u8]);

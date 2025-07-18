@@ -11,18 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::{business_error::BusinessError, typed_array::{ArrayBuffer, Uint8Array}};
+use ani_rs::business_error::BusinessError;
 
 #[ani_rs::native]
-pub fn array_buffer_test<'local>(
-    input: ArrayBuffer<'local>,
-) -> Result<ArrayBuffer<'local>, BusinessError> {
-    Ok(input)
-}
-
-#[ani_rs::native]
-pub fn uint8_array_test<'local>(
-    input: Uint8Array<'local>,
-) -> Result<Uint8Array<'local>, BusinessError> {
-    Ok(input)
+pub fn business_error_test() -> Result<(), BusinessError> {
+    Err(BusinessError::PERMISSION)
 }
