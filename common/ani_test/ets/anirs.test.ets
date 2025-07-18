@@ -65,6 +65,8 @@ export default namespace ani_test {
         HTTP3
     }
 
+    export type unionType = boolean | byte | short | int | long | float | double | String | ArrayBuffer | null | Record<string, string> | string[] | Uint8Array;
+
     export native function primitiveTest(input:PrimitiveTest): PrimitiveTest;
     export native function optionBool(input?:boolean): boolean | undefined;
     export native function optionByte(input?:byte): byte | undefined;
@@ -88,9 +90,10 @@ export default namespace ani_test {
     export native function recordString(input:Record<String,String>) : Record<String, String>
     export native function recordLong(input:Record<Long, Long>) : Record<Long, Long>
 
-    export native function unionTest ( input: boolean | byte | short | int | long | float | double | String | ArrayBuffer | null ): boolean | byte | short | int | long | float | double | String | ArrayBuffer | null;
+    export native function unionTest ( input: unionType ): unionType;
+    export native function unionTest2 ( input?: unionType ): unionType;
 
-    export native function arrayBufferTest(input: Uint8Array): Uint8Array;
+    export native function arrayBufferTest(input: ArrayBuffer): ArrayBuffer;
     export native function uint8ArrayTest(input: Uint8Array): Uint8Array;
     export native function structEnum(input: Config): Config;
 
@@ -102,6 +105,8 @@ export default namespace ani_test {
     export native function executeAsyncCallback2(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback3(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback4(callback: AsyncCallback<int>): void;
+
+    export native function businessErrorTest(): void;
 }
 
 function assertEQ<T, U>(expected: T, actual: U, message?: string): void {
@@ -121,6 +126,7 @@ function main():void{
     array_buffer_test();
     struct_test();
     callback_test();
+    business_test();
 }
 
 function primitive_test():void {
@@ -298,29 +304,43 @@ function union_test (): void
     let input0:byte = 1;
     let output0 = ani_test.unionTest( input0 );
     assertEQ( input0, output0 );
+    output0 = ani_test.unionTest2( input0 );
+    assertEQ( input0, output0 );
 
     let input1:short = 2;
     let output1 = ani_test.unionTest( input1 );
+    assertEQ( input1, output1 );
+    output1 = ani_test.unionTest2( input1 );
     assertEQ( input1, output1 );
 
     let input2:int = 3;
     let output2 = ani_test.unionTest( input2 );
     assertEQ( input2, output2 );
+    output2 = ani_test.unionTest2( input2 );
+    assertEQ( input2, output2 );
 
     let input3:long = 4;
     let output3 = ani_test.unionTest( input3 );
+    assertEQ( input3, output3 );
+    output3 = ani_test.unionTest2( input3 );
     assertEQ( input3, output3 );
 
     let input4:double = 5.0;
     let output4 = ani_test.unionTest( input4 );
     assertEQ( input4, output4 );
+    output4 = ani_test.unionTest2( input4 );
+    assertEQ( input4, output4 );
 
     let input5:String = "Hello";
     let output5 = ani_test.unionTest( input5 );
     assertEQ( input5, output5 );
+    output5 = ani_test.unionTest2( input5 );
+    assertEQ( input5, output5 );
 
     let input6:boolean = true;
     let output6 = ani_test.unionTest( input6 );
+    assertEQ( input6, output6 );
+    output6 = ani_test.unionTest2( input6 );
     assertEQ( input6, output6 );
 
     let input7 = new ArrayBuffer(4);
@@ -332,10 +352,42 @@ function union_test (): void
     let output7 = ani_test.unionTest( input7 ) as ArrayBuffer;
     let uint8ViewOutput = new Uint8Array(output7);
     assertEQ( JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput) );
+    output7 = ani_test.unionTest2( input7 ) as ArrayBuffer;
+    uint8ViewOutput = new Uint8Array(output7);
+    assertEQ( JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput) );
 
     let input8:null = null;
     let output8 = ani_test.unionTest( input8 );
     assertEQ( input8, output8 );
+    output8 = ani_test.unionTest2( input8 );
+    assertEQ( input8, output8 );
+
+    let input9: Record<String,String> = { "hello": "rust", "nihao": "ani" };
+    let output9 = ani_test.unionTest( input9 ) as Record<String,String>;
+    assertEQ( output9.get("hello") , "rust" );
+    assertEQ( output9.get( "nihao" ), "ani" );
+    output9 = ani_test.unionTest2( input9 ) as Record<String,String>;
+    assertEQ( output9.get("hello") , "rust" );
+    assertEQ( output9.get( "nihao" ), "ani" );
+    
+    let output10 = ani_test.unionTest2();
+    assertEQ( output10, undefined );
+
+    let input11: string[] = ['rust', 'java', 'c++'];
+    let output11 = ani_test.unionTest( input11 );
+    assertEQ( JSON.stringify(input11), JSON.stringify(output11) );
+    output11 = ani_test.unionTest2( input11 );
+    assertEQ( JSON.stringify(input11), JSON.stringify(output11) );
+
+    let buffer12 = new ArrayBuffer(3);
+    let uint8View12 = new Uint8Array(buffer12);
+    uint8View12[0] = 0;
+    uint8View12[1] = 1;
+    uint8View12[2] = 2;
+    let output12 = ani_test.unionTest( uint8View12 ) as Uint8Array;
+    assertEQ(JSON.stringify(output12), JSON.stringify(uint8View12));
+    output12 = ani_test.unionTest2( uint8View12 ) as Uint8Array;
+    assertEQ(JSON.stringify(output12), JSON.stringify(uint8View12));
 }
 
 function array_buffer_test (): void
@@ -346,8 +398,12 @@ function array_buffer_test (): void
     uint8View[1] = 2; // 2*256
     uint8View[2] = 3;
     uint8View[3] = 4;
-    let output = ani_test.arrayBufferTest(uint8View);
+    let output = ani_test.uint8ArrayTest(uint8View);
     assertEQ(JSON.stringify(uint8View), JSON.stringify(output));
+
+    let output2 = ani_test.arrayBufferTest(buffer);
+    let uint8ViewOutput = new Uint8Array(output2);
+    assertEQ(JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput));
 }
 
 function struct_test():void
@@ -436,3 +492,15 @@ function callback_test():void
     //     input8 += data;
     // })
 }
+
+function business_test()
+{
+    try {
+        ani_test.businessErrorTest();
+        assertEQ(true, false);
+    } catch (err: BusinessError) {
+        assertEQ(err.code, 201);
+        assertEQ(err.message, 'Permission denied');
+    }
+}
+ 

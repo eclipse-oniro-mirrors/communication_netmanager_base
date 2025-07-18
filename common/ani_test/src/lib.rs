@@ -20,6 +20,7 @@ mod primitive;
 mod record;
 mod ani_struct;
 mod ani_callback;
+mod business_error;
 
 ani_rs::ani_constructor!(
     namespace "Lanirs/test/ani_test"
@@ -43,6 +44,7 @@ ani_rs::ani_constructor!(
         "recordString" : record::record_string,
         "recordLong" : record::record_long,
         "unionTest" : ani_union::union_test,
+        "unionTest2" : ani_union::union_test2,
         "arrayBufferTest": array_buffer::array_buffer_test,
         "uint8ArrayTest": array_buffer::uint8_array_test,
         "structEnum": ani_struct::struct_enum,
@@ -55,5 +57,6 @@ ani_rs::ani_constructor!(
         "executeAsyncCallback2": ani_callback::execute_async_callback2,
         "executeAsyncCallback3": ani_callback::execute_async_callback3,
         "executeAsyncCallback4": ani_callback::execute_async_callback4,
+        "businessErrorTest": business_error::business_error_test,
     ]
 );
