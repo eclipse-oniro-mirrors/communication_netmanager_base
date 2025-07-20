@@ -185,5 +185,13 @@ HWTEST_F(NetConnServiceRegionalStubTest, NetConnServiceRegionalStubTest015, Test
     auto ret = instance_->OnRegisterNetSupplierCallback(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
+
+HWTEST_F(NetConnServiceRegionalStubTest, NetConnServiceRegionalStubTest016, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = instance_->OnRegisterNetConnCallback(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+}
 }
 }

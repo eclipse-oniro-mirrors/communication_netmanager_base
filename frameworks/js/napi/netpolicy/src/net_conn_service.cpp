@@ -300,6 +300,12 @@ int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const s
     return result;
 }
 
+int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
+{
+    NETMGR_LOG_D("RegisterNetConnCallback service in.");
+    return RegisterNetConnCallback(defaultNetSpecifier_, callback, 0);
+}
+
 int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
                                                 const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
@@ -605,9 +611,9 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
                      reqId);
         return NET_CONN_ERR_SAME_CALLBACK;
     }
-    auto registerType = (netSpecifier->netCapabilities_.netCaps_.count(
-        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0 ||
-        netSpecifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0) ?
+    auto registerType = (netSpecifier != nullptr && ((netSpecifier->netCapabilities_.netCaps_.count(
+        NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ||
+        (netSpecifier->netCapabilities_.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0))) ?
         REQUEST : REGISTER;
     NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u], regType[%{public}u]",
                  callingUid, reqId, registerType);

@@ -28,10 +28,6 @@
 #include "net_supplier_callback_stub.h"
 #include "netsys_sock_client.h"
 #include "system_ability_status_change_stub.h"
-#include "netmanager_base_permission.h"
-#ifndef NETMANAGER_TEST
-#include "ffrt.h"
-#endif
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
 static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
@@ -49,8 +45,7 @@ private:
 };
 NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr), saStatusListener_(nullptr)
 {
-    defaultNetSpecifier_ = sptr<NetSpecifier>::MakeSptr();
-    defaultNetSpecifier_->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
 }
 
 NetConnClient::~NetConnClient()
@@ -60,8 +55,16 @@ NetConnClient::~NetConnClient()
 
 NetConnClient &NetConnClient::GetInstance()
 {
-    static std::shared_ptr<NetConnClient> instance = std::make_shared<NetConnClient>();
-    return *instance;
+    auto temp = std::atomic_load_explicit(&instance_, std::memory_order_acquire);
+    if (temp == nullptr) {
+        std::lock_guard locker(instanceMtx_);
+        temp = std::atomic_load_explicit(&instance_, std::memory_order_relaxed);
+        if (temp == nullptr) {
+            temp = std::make_shared<NetConnClient>();
+            std::atomic_store_explicit(&instance_, temp, std::memory_order_release);
+        }
+    }
+    return *temp;
 }
 
 void NetConnClient::SubscribeSystemAbility()
@@ -261,7 +264,20 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
-    return RegisterNetConnCallback(defaultNetSpecifier_, callback, 0);
+    NETMGR_LOG_D("RegisterNetConnCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("The parameter of proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->RegisterNetConnCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterNetConnCallback success, save callback.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        registerConnTupleList_.push_back(std::make_tuple(nullptr, callback, 0));
+    }
+
+    return ret;
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
@@ -277,19 +293,11 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
         NETMGR_LOG_E("The parameter of proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    int32_t ret = NETMANAGER_SUCCESS;
-    std::unique_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
-    auto it = netConnCallbackManagerMap_.find(netSpecifier);
-    if (it != netConnCallbackManagerMap_.end()) {
-        it->second->AddNetConnCallback(callback);
-    } else {
-        auto cb = sptr<NetConnCallbackManager>::MakeSptr();
-        cb->AddNetConnCallback(callback);
-        ret = proxy->RegisterNetConnCallback(netSpecifier, cb, timeoutMS);
-        if (ret == NETMANAGER_SUCCESS) {
-            netConnCallbackManagerMap_.emplace(netSpecifier, cb);
-            NETMGR_LOG_D("RegisterNetConnCallback success, save callback.");
-        }
+    int32_t ret = proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterNetConnCallback success, save netSpecifier and callback and timeoutMS.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
     return ret;
@@ -308,19 +316,11 @@ int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifie
         NETMGR_LOG_E("The parameter of proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    int32_t ret = NETMANAGER_SUCCESS;
-    std::unique_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
-    auto it = systemNetConnCallbackManagerMap_.find(netSpecifier);
-    if (it != systemNetConnCallbackManagerMap_.end()) {
-        it->second->AddNetConnCallback(callback);
-    } else {
-        auto cb = sptr<NetConnCallbackManager>::MakeSptr();
-        cb->AddNetConnCallback(callback);
-        ret = proxy->RequestNetConnection(netSpecifier, cb, timeoutMS);
-        if (ret == NETMANAGER_SUCCESS) {
-            systemNetConnCallbackManagerMap_.emplace(netSpecifier, cb);
-            NETMGR_LOG_D("RegisterNetConnCallback success, save callback.");
-        }
+    int32_t ret = proxy->RequestNetConnection(netSpecifier, callback, timeoutMS);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RequestNetConnection success, save netSpecifier and callback and timeoutMS.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
     return ret;
@@ -334,11 +334,19 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    std::unique_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
-    int32_t ret1 = UnRegisterNetConnCallbackManager(callback, netConnCallbackManagerMap_);
-    int32_t ret2 = UnRegisterNetConnCallbackManager(callback, systemNetConnCallbackManagerMap_);
-    return (ret1 == NETMANAGER_SUCCESS && ret2 == NETMANAGER_SUCCESS) ? NETMANAGER_SUCCESS :
-        (ret1 == NETMANAGER_SUCCESS ? ret2 : ret1);
+    int32_t ret = proxy->UnregisterNetConnCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("UnregisterNetConnCallback success, delete callback.");
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        for (auto it = registerConnTupleList_.begin(); it != registerConnTupleList_.end(); ++it) {
+            if (std::get<1>(*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+                registerConnTupleList_.erase(it);
+                break;
+            }
+        }
+    }
+
+    return ret;
 }
 
 int32_t NetConnClient::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
@@ -591,26 +599,46 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
-    if (globalHttpProxy_.GetHost().empty() && preAirplaneCallback_ == nullptr) {
+    std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleListTmp;
+    {
+        std::lock_guard<std::mutex> locker(registerConnTupleListMutex_);
+        registerConnTupleListTmp = registerConnTupleList_;
+    }
+    if (registerConnTupleListTmp.empty() && globalHttpProxy_.GetHost().empty() &&
+        preAirplaneCallback_ == nullptr) {
         NETMGR_LOG_W("no need recovery");
         return;
     }
-    std::shared_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
-    RecoverCallbackAndGlobalProxy(netConnCallbackManagerMap_);
-    RecoverCallbackAndGlobalProxy(systemNetConnCallbackManagerMap_);
-    locker.unlock();
-
     auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return;
+    NETMGR_LOG_W("Get proxy %{public}s", proxy == nullptr ? "failed" : "success");
+    if (proxy != nullptr) {
+        for (auto mem : registerConnTupleListTmp) {
+            sptr<NetSpecifier> specifier = std::get<0>(mem);
+            sptr<INetConnCallback> callback = std::get<1>(mem);
+            uint32_t timeoutMS = std::get<2>(mem);
+            bool isInternalDefault = specifier != nullptr &&
+                specifier->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0;
+            int32_t ret = NETMANAGER_SUCCESS;
+            if (specifier != nullptr && timeoutMS != 0) {
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, timeoutMS) :
+                    proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
+                NETMGR_LOG_D("Register result hasNetSpecifier_ and timeoutMS_ %{public}d", ret);
+            } else if (specifier != nullptr) {
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, 0) :
+                    proxy->RegisterNetConnCallback(specifier, callback, 0);
+                NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
+            } else if (callback != nullptr) {
+                int32_t ret = proxy->RegisterNetConnCallback(callback);
+                NETMGR_LOG_D("Register netconn result %{public}d", ret);
+            }
+        }
     }
-    if (preAirplaneCallback_ != nullptr) {
+    if (proxy != nullptr && preAirplaneCallback_ != nullptr) {
         int32_t ret = proxy->RegisterPreAirplaneCallback(preAirplaneCallback_);
         NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
     }
 
-    if (!globalHttpProxy_.GetHost().empty()) {
+    if (proxy != nullptr && !globalHttpProxy_.GetHost().empty()) {
         int32_t ret = proxy->SetGlobalHttpProxy(globalHttpProxy_);
         NETMGR_LOG_D("globalHttpProxy_ Register result %{public}d", ret);
     }
@@ -1239,171 +1267,5 @@ int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std:
     return proxy->SetNetExtAttribute(netHandle.GetNetId(), netExtAttribute);
 }
 
-int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
-{
-    netHandle_ = netHandle;
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetAvailable(netHandle);
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
-    const sptr<NetAllCapabilities> &netAllCap)
-{
-    if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
-        netAllCap_ = netAllCap;
-    }
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetCapabilitiesChange(netHandle, netAllCap);
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
-    const sptr<NetLinkInfo> &info)
-{
-    if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
-        netLinkInfo_ = info;
-    }
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetConnectionPropertiesChange(netHandle, info);
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandle)
-{
-    if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
-        netHandle_ = nullptr;
-        netAllCap_ = nullptr;
-        netLinkInfo_ = nullptr;
-    }
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetLost(netHandle);
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
-{
-    netHandle_ = nullptr;
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetUnavailable();
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
-{
-    std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
-    lock.unlock();
-    for (auto& cb : tmpList) {
-        cb->NetBlockStatusChange(netHandle, blocked);
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-void NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback>& callback)
-{
-    std::unique_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    for (auto& cb : netConnCallbackList_) {
-        if (cb == callback) {
-            return;
-        }
-    }
-    netConnCallbackList_.push_back(callback);
-    lock.unlock();
-#ifndef NETMANAGER_TEST
-    ffrt::submit([this, callback] () {
-#endif
-            if (netHandle_ == nullptr) {
-                return;
-            }
-            callback->NetAvailable(netHandle_);
-            if (netAllCap_ != nullptr) {
-                callback->NetCapabilitiesChange(netHandle_, netAllCap_);
-            }
-            if (netLinkInfo_ != nullptr) {
-                callback->NetConnectionPropertiesChange(netHandle_, netLinkInfo_);
-            }
-#ifndef NETMANAGER_TEST
-        },
-        {}, {}, ffrt::task_attr().name("AddNetConnCallback"));
-#endif
-}
-
-void NetConnClient::NetConnCallbackManager::RemoveNetConnCallback(const sptr<INetConnCallback>& callback)
-{
-    std::unique_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
-    netConnCallbackList_.remove(callback);
-}
-
-int32_t NetConnClient::UnRegisterNetConnCallbackManager(const sptr<INetConnCallback>& callback,
-    NetConnCallbackManagerMap& netConnCallbackManagerMap)
-{
-#ifndef NETMANAGER_TEST
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-        NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-#endif
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("The parameter of proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    int ret = NETMANAGER_SUCCESS;
-    for (auto itMap = netConnCallbackManagerMap.begin(); itMap != netConnCallbackManagerMap.end();) {
-        auto& netConnCallbackManager = itMap->second;
-        netConnCallbackManager->netConnCallbackList_.remove(callback);
-        if (netConnCallbackManager->netConnCallbackList_.empty()) {
-            ret = proxy->UnregisterNetConnCallback(netConnCallbackManager);
-            if (ret == NETMANAGER_SUCCESS) {
-                NETMGR_LOG_D("UnregisterNetConnCallback success, delete callback.");
-                itMap = netConnCallbackManagerMap.erase(itMap);
-                continue;
-            }
-        }
-        itMap++;
-    }
-    return ret;
-}
-
-void NetConnClient::RecoverCallbackAndGlobalProxy(NetConnCallbackManagerMap& netConnCallbackManagerMap)
-{
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return;
-    }
-    for (auto& it : netConnCallbackManagerMap) {
-        bool isInternalDefault = it.first->netCapabilities_.netCaps_.
-            count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0;
-        int32_t ret = NETMANAGER_SUCCESS;
-        if (isInternalDefault) {
-            ret = proxy->RequestNetConnection(it.first, it.second, 0);
-        } else {
-            ret = proxy->RegisterNetConnCallback(it.first, it.second, 0);
-        }
-        NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
-    }
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

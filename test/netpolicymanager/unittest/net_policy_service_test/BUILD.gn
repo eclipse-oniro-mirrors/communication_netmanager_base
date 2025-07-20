@@ -66,6 +66,7 @@ ohos_unittest("net_policy_service_test") {
     "googletest:gmock_main",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "netmanager_base:net_conn_manager_if",
     "netmanager_base:net_stats_manager_if",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
