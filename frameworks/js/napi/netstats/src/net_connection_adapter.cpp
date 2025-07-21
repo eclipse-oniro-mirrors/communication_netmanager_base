@@ -328,7 +328,7 @@ int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceR
         if (i >= maxJumpNumber) {
             return NETMANAGER_SUCCESS;
         }
-        uint8_t num;
+        uint8_t num = 0;
         std::istringstream iss(tokens[i * pos3]);
         if (iss >> num) {
             traceRouteInfo[i].jumpNo = num;
