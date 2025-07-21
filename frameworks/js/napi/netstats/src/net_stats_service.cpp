@@ -1310,6 +1310,7 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
     if (dataState != static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
         if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
             NETMGR_LOG_E("simIdToIfIndexMap erase, simId: %{public}d", simId);
+            ClearTrafficMapBySlotId(slotId, simIdToIfIndexMap_[simId]);
             simIdToIfIndexMap_.erase(simId);
         }
         return true;

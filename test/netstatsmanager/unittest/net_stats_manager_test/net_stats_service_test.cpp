@@ -820,7 +820,7 @@ HWTEST_F(NetStatsServiceTest, CellularDataStateChangedFfrtTest001, TestSize.Leve
         static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED));
     auto ret = netStatsService1->CellularDataStateChangedFfrt(0,
         static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTING));
-
+    EXPECT_EQ(simIdToIfIndexMap_.find(1), nullptr);
     EXPECT_EQ(ret, true);
 }
 
