@@ -286,7 +286,7 @@ std::vector<std::string> splitStr(const std::string &str, const char delimiter)
     std::vector<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(str);
-    while (std::getline(tokenStream, token, ' ')) {
+    while (std::getline(tokenStream, token, delimiter)) {
         tokens.push_back(token);
     }
     return tokens;
@@ -306,7 +306,7 @@ int32_t Conv2TraceRouteInfoRtt(const std::string &rttStr, uint32_t (*rtt)[NETCON
         double num;
         std::istringstream iss(tokens[i]);
         if (iss >> num) {
-            *rtt[i] = static_cast<uint32_t>(num);
+            (*rtt)[i] = static_cast<uint32_t>(num);
         }
     }
     return NETMANAGER_SUCCESS;
