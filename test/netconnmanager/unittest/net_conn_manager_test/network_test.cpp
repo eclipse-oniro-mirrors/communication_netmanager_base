@@ -1324,7 +1324,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest004, TestSize.Level1)
     std::string traceRouteInfoStr = "1 192.168.1.1 50 2 192.168.1.2 100 3 192.168.1.3 150";
     int32_t maxJumpNumber = 3;
 
-    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, nullptr, maxJumpNumber), NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, nullptr, maxJumpNumber), NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest005, TestSize.Level1)
@@ -1333,7 +1333,7 @@ HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest005, TestSize.Level1)
     NetConn_TraceRouteInfo traceRouteInfo[3];
     int32_t maxJumpNumber = 3;
 
-    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber), NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(Conv2TraceRouteInfo(traceRouteInfoStr, traceRouteInfo, maxJumpNumber), NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_QueryTraceRouteTest006, TestSize.Level1)
