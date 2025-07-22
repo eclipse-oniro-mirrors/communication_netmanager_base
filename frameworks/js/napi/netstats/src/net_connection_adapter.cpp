@@ -328,10 +328,10 @@ int32_t Conv2TraceRouteInfo(const std::string &traceRouteInfoStr, NetConn_TraceR
         if (i >= maxJumpNumber) {
             return NETMANAGER_SUCCESS;
         }
-        uint8_t num = 0;
+        uint32_t num = 0;
         std::istringstream iss(tokens[i * pos3]);
         if (iss >> num) {
-            traceRouteInfo[i].jumpNo = num;
+            traceRouteInfo[i].jumpNo = static_cast<uint8_t>(num);
         }
         if (strcpy_s(traceRouteInfo[i].address, NETCONN_MAX_STR_LEN, tokens[i * pos3 + 1].c_str()) != 0) {
             NETMGR_LOG_E("Conv2TraceRouteInfo string copy failed");
