@@ -64,7 +64,7 @@ int32_t VpnManager::CreateVpnInterface()
         return NETMANAGER_ERROR;
     }
 
-    int32_t tunfd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK);
+    int32_t tunfd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (tunfd <= 0) {
         NETNATIVE_LOGE("open virtual device failed: %{public}d", errno);
         return NETMANAGER_ERROR;

@@ -362,9 +362,9 @@ int32_t MultiVpnManager::GetMultiVpnFd(const std::string &ifName, int32_t &multi
         return NETMANAGER_SUCCESS;
     }
     if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
-        multiVpnFd = open(PPP_DEVICE_PATH, O_RDWR | O_NONBLOCK);
+        multiVpnFd = open(PPP_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     } else if (strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) {
-        multiVpnFd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK);
+        multiVpnFd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     } else {
         NETNATIVE_LOGE("GetMultiVpnFd faild, IfName err");
         return NETMANAGER_ERROR;
