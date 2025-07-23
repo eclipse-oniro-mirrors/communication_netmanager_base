@@ -89,7 +89,8 @@
                 "runtime_core",
                 "time_service",
                 "faultloggerd",
-                "hiappevent"
+                "hiappevent",
+                "config_policy"
             ]
         },
         "build": {

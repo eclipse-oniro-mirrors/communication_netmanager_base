@@ -100,6 +100,7 @@ ohos_shared_library("net_policy_manager") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "config_policy:configpolicy_util",
   ]
 
   defines = [
@@ -180,6 +181,7 @@ ohos_static_library("net_policy_manager_static") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "config_policy:configpolicy_util",
   ]
 
   defines = [

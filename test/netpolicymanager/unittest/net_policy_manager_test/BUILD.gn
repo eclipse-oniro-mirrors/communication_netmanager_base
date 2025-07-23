@@ -49,6 +49,7 @@ ohos_unittest("net_policy_manager_test") {
     "ut_netsys_policy_wrapper.cpp",
     "net_access_policy_test.cpp",
     "net_policy_db_clone_test.cpp",
+    "net_access_policy_config_test.cpp",    
   ]
 
   include_dirs = [
