@@ -93,6 +93,7 @@ ohos_source_set("netstats_service_interface_stub") {
   external_deps = [
     "hilog:libhilog",
     "samgr:samgr_proxy",
+    "c_utils:utils",
   ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
