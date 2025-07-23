@@ -152,9 +152,6 @@ void DefineClass(napi_env env, napi_value exports, const std::initializer_list<n
 napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
     void *(*MakeData)(napi_env, size_t, napi_value *, std::shared_ptr<EventManager>&), Finalizer finalizer)
 {
-#ifndef CROSS_PLATFORM
-    HiAppEventReport hiAppEventReport("NetworkKit", "VpncreateVpnConnection");
-#endif
     napi_value thisVal = nullptr;
     std::size_t argc = MAX_PARAM_NUM;
     napi_value argv[MAX_PARAM_NUM] = {nullptr};
@@ -182,9 +179,6 @@ napi_value NewInstance(napi_env env, napi_callback_info info, const std::string 
     }
     *sharedManager = manager;
     napi_wrap(env, result, reinterpret_cast<void *>(sharedManager), finalizer, nullptr, nullptr);
-#ifndef CROSS_PLATFORM
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
-#endif
 
     return result;
 }
