@@ -243,7 +243,10 @@ void NetStatsService::RegisterCommonEvent()
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
-        [this](const EventFwk::Want &want) { return UpdateStatsData(); });
+        [this](const EventFwk::Want &want) {
+            NETMGR_LOG_I("Net stats shutdown event");
+            return UpdateStatsData();
+        });
     subscriber_->RegisterStatsCallback(
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, [this](const EventFwk::Want &want) {
             uint32_t uid = want.GetIntParam(UID, 0);

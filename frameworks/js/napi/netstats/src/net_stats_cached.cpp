@@ -373,6 +373,7 @@ void NetStatsCached::CacheIfaceStats()
 void NetStatsCached::CacheStats()
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
+    NETMGR_LOG_I("cacheStats");
     CacheUidStats();
     CacheAppStats();
     CacheUidSimStats();
@@ -385,6 +386,7 @@ void NetStatsCached::CacheStats()
 void NetStatsCached::WriteStats()
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
+    NETMGR_LOG_I("writeStats");
     WriteUidStats();
     WriteUidSimStats();
     WriteIfaceStats();
