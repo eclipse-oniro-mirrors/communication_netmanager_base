@@ -27,11 +27,11 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetAccessPolicyConfigUtils NetAccessPolicyConfigUtils::instance_;
 namespace {
-constexpr char *PATH = "etc/netmanager/net_access_policy_config.json";
-constexpr char *ARRAY_NAME = "configs";
-constexpr char *ITEM_BUNDLE_NAME = "bundleName";
-constexpr char *ITEM_DISABLE_WLAN_SWITCH = "disableWlanSwitch";
-constexpr char *ITEM_DISABLE_CELLULAR_SWITCH = "disableCellularSwitch";
+constexpr const char *PATH = "etc/netmanager/net_access_policy_config.json";
+constexpr const char *ARRAY_NAME = "configs";
+constexpr const char *ITEM_BUNDLE_NAME = "bundleName";
+constexpr const char *ITEM_DISABLE_WLAN_SWITCH = "disableWlanSwitch";
+constexpr const char *ITEM_DISABLE_CELLULAR_SWITCH = "disableCellularSwitch";
 } // namespace
 NetAccessPolicyConfigUtils &NetAccessPolicyConfigUtils::GetInstance()
 {
@@ -101,9 +101,9 @@ void NetAccessPolicyConfigUtils::ParseNetAccessPolicyConfigs()
 bool NetAccessPolicyConfigUtils::ReadFile(std::string &content, const std::string &fileName)
 {
     char buf[PATH_MAX];
-    char* cfgFilePath = GetOneCfgFile(fileName.c_str(), tmpPath, PATH_MAX);
+    char* cfgFilePath = GetOneCfgFile(fileName.c_str(), buf, PATH_MAX);
     char realPath[PATH_MAX] = {0};
-    if (cfgFilePath != nullptr || strlen(cfgFilePath) == 0 || strlen(cfgFilePath) > PATH_MAX ||
+    if (!cfgFilePath || strlen(cfgFilePath) == 0 || strlen(cfgFilePath) > PATH_MAX ||
         !realpath(cfgFilePath, realPath)) {
         NETMGR_LOG_E("file does not exist");
         return false;

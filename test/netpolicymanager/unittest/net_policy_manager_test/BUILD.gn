@@ -49,7 +49,7 @@ ohos_unittest("net_policy_manager_test") {
     "ut_netsys_policy_wrapper.cpp",
     "net_access_policy_test.cpp",
     "net_policy_db_clone_test.cpp",
-    "net_access_policy_config_test.cpp",    
+    "net_access_policy_config_test.cpp",
   ]
 
   include_dirs = [
@@ -93,6 +93,7 @@ ohos_unittest("net_policy_manager_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "config_policy:configpolicy_util",
   ]
 
   defines = [
