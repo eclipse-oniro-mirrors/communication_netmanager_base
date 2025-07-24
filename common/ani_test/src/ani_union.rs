@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::business_error::BusinessError;
+use std::collections::HashMap;
+
+use ani_rs::{business_error::BusinessError, typed_array::Uint8Array};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -25,9 +27,17 @@ enum Data<'local> {
     S(String),
     ArrayBuffer(&'local [u8]),
     Null(()),
+    Record(HashMap<String, String>),
+    Array(Vec<String>),
+    Uint8Array(Uint8Array<'local>),
 }
 
 #[ani_rs::native]
 pub fn union_test<'local>(input: Data<'local>) -> Result<Data<'local>, BusinessError> {
+    Ok(input)
+}
+
+#[ani_rs::native]
+pub fn union_test2<'local>(input: Option<Data<'local>>) -> Result<Option<Data<'local>>, BusinessError> {
     Ok(input)
 }
