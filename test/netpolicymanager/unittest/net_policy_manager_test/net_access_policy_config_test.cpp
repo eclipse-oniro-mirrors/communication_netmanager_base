@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 #include "net_access_policy_config.h"
 
 namespace OHOS {
@@ -39,7 +43,7 @@ void NetAccessPolicyConfigUtilsTest::SetUp() {}
 
 void NetAccessPolicyConfigUtilsTest::TearDown() {}
 
-HWTEST_F(NetAccessPolicyConfigUtilsTest, GetSupplierCallbackTest001, TestSize.Level1)
+HWTEST_F(NetAccessPolicyConfigUtilsTest, ReadFileTest001, TestSize.Level1)
 {
     NetAccessPolicyConfigUtils config;
     std::string content;
