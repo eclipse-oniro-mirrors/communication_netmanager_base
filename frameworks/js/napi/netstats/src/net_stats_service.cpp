@@ -1154,9 +1154,9 @@ bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 
 bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
 {
-    if (uid / USER_ID_DIVIDOR != netStatsCached_->GetCurDefaultUserId() &&
+    if (static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurDefaultUserId() &&
         uid / USER_ID_DIVIDOR != SYSTEM_DEFAULT_USERID &&
-        uid / USER_ID_DIVIDOR != netStatsCached_->GetCurPrivateUserId()) {
+        static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurPrivateUserId()) {
         NETMGR_LOG_E("CommonEventPackageRemoved uid:%{public}d", uid);
         return true;
     }
