@@ -539,8 +539,6 @@ private:
     void LoadGlobalHttpProxy(UserIdType userIdType, HttpProxy &httpProxy);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ProcessHttpProxyCancel(const sptr<NetSupplier> &supplier);
-    int32_t SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId);
-    int32_t SetGlobalHttpProxyInner(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void CreateActiveHttpProxyThread();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
@@ -643,7 +641,6 @@ private:
     std::atomic<bool> isInSleep_ = false;
     static constexpr int32_t INVALID_USER_ID = -1;
     static constexpr int32_t ROOT_USER_ID = 0;
-    int32_t currentUserId_ = INVALID_USER_ID;
     bool isFallbackProbeWithProxy_ = false;
     AppStateAwareCallback appStateAwareCallback_;
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;

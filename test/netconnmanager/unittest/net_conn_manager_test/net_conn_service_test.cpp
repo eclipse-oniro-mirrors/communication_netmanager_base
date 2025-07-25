@@ -844,7 +844,6 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest016, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest017, TestSize.Level1)
 {
-    NetConnService::GetInstance()->currentUserId_ = -1;
     HttpProxy httpProxy = {"", 0, {}};
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -852,7 +851,6 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest017, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest018, TestSize.Level1)
 {
-    NetConnService::GetInstance()->currentUserId_ = -1;
     HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -863,7 +861,6 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest019, TestSize.Level1)
     int32_t userId;
     int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
-        NetConnService::GetInstance()->currentUserId_ = userId;
         HttpProxy httpProxy = {"", 0, {}};
         auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
         ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -875,7 +872,6 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest020, TestSize.Level1)
     int32_t userId;
     int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
-        NetConnService::GetInstance()->currentUserId_ = userId;
         HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
         auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
         ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1953,12 +1949,10 @@ HWTEST_F(NetConnServiceTest, SendHttpProxyChangeBroadcast001, TestSize.Level1)
     HttpProxy httpProxy;
     httpProxy.SetPort(0);
     httpProxyTracker.ReadFromSettingsData(httpProxy);
-    NetConnService::GetInstance()->currentUserId_ = -1;
     NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
     int32_t userId;
     int32_t ret = NetConnService::GetInstance()->GetActiveUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
-        NetConnService::GetInstance()->currentUserId_ = userId;
         NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
         EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     }
@@ -2035,5 +2029,56 @@ HWTEST_F(NetConnServiceTest, QueryTraceRouteTest002, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
     EXPECT_EQ("", traceRouteInfo);
 }
+
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest001, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("usual.event.USER_SWITCHED");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest002, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("usual.event.DATA_SHARE_READY");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest003, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("usual.event.POWER_MANAGER_STATE_CHANGED");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest004, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("usual.event.SCREEN_OFF");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest005, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("usual.event.SCREEN_ON");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

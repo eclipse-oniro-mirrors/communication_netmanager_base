@@ -2516,75 +2516,10 @@ void NetConnService::GetHttpUrlFromConfig(std::string &httpUrl)
     NETMGR_LOG_D("Get net detection http url:[%{public}s]", httpUrl.c_str());
 }
 
-int32_t NetConnService::SetGlobalHttpProxyInner(const HttpProxy &httpProxy)
-{
-    NetHttpProxyTracker httpProxyTracker;
-    HttpProxy newHttpProxy = httpProxy;
-    int32_t userId = GetValidUserIdFromProxy(httpProxy);
-    if (userId == INVALID_USER_ID) {
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    if (IsPrimaryUserId(userId)) {
-        if (!httpProxyTracker.WriteToSettingsData(newHttpProxy)) {
-            NETMGR_LOG_E("SetGlobalHttpProxyInner write settingDate fail.");
-            return NETMANAGER_ERR_INTERNAL;
-        }
-    }
-    if (!httpProxyTracker.WriteToSettingsDataUser(newHttpProxy, userId)) {
-        NETMGR_LOG_E("SetGlobalHttpProxyInner write settingDateUser fail. userId=%{public}d", userId);
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    globalHttpProxyCache_.EnsureInsert(userId, httpProxy);
-    SendHttpProxyChangeBroadcast(httpProxy);
-    UpdateGlobalHttpProxy(httpProxy);
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnService::SetGlobalHttpProxyOld(HttpProxy httpProxy, int32_t activeUserId)
-{
-    if (currentUserId_ == INVALID_USER_ID) {
-        if (!httpProxy.GetHost().empty()) {
-            currentUserId_ = activeUserId;
-        }
-        httpProxy.SetUserId(currentUserId_);
-    } else if (currentUserId_ == activeUserId) {
-        httpProxy.SetUserId(currentUserId_);
-    } else {
-        if (httpProxy.GetHost().empty()) {
-            httpProxy.SetUserId(currentUserId_);
-            currentUserId_ = INVALID_USER_ID;
-        } else {
-            currentUserId_ = activeUserId;
-            httpProxy.SetUserId(currentUserId_);
-        }
-    }
-    SetGlobalHttpProxyInner(httpProxy);
-    if (!httpProxy.GetHost().empty()) {
-        httpProxyThreadCv_.notify_all();
-    }
-    if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
-        CreateActiveHttpProxyThread();
-    } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
-        httpProxyThreadNeedRun_ = false;
-    }
-    NETMGR_LOG_I("End SetGlobalHttpProxyOld.");
-    return NETMANAGER_SUCCESS;
-}
-
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    int32_t activeUserId;
-    int32_t ret = GetActiveUserId(activeUserId);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("SetGlobalHttpProxy failed to get active userId.");
-        return INVALID_USER_ID;
-    }
-    NETMGR_LOG_I(
-        "Enter SetGlobalHttpProxy. httpproxy = %{public}zu, currentUserId_=%{public}d, activeUserId=%{public}d",
-        httpProxy.GetHost().length(), currentUserId_, activeUserId);
-    if (httpProxy.GetUserId() == INVALID_USER_ID) {
-        return SetGlobalHttpProxyOld(httpProxy, activeUserId);
-    }
+    NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy=%{public}zu, proxyUserid=%{public}d",
+        httpProxy.GetHost().length(), httpProxy.GetUserId());
     HttpProxy oldHttpProxy;
     oldHttpProxy.SetUserId(httpProxy.GetUserId());
     GetGlobalHttpProxy(oldHttpProxy);
@@ -3264,6 +3199,7 @@ void NetConnService::SubscribeCommonEvent()
 #endif
     matchingSkills.AddEvent("usual.event.SCREEN_ON");
     matchingSkills.AddEvent("usual.event.SCREEN_OFF");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
@@ -3286,6 +3222,11 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         // executed in the SA process, so load http proxy from current active user.
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+        NETMGR_LOG_I("on receive user_switched");
+        HttpProxy curProxy;
+        GetGlobalHttpProxy(curProxy);
+        SendHttpProxyChangeBroadcast(curProxy);
     }
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (action == "usual.event.POWER_MANAGER_STATE_CHANGED") {
