@@ -559,6 +559,7 @@ private:
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(
         NetBearType bearerType, const std::string &ident);
     uint32_t FindSupplierForConnected(std::vector<sptr<NetSupplier>> &suppliers);
+    bool ConvertStrToInt(const std::string& str, int64_t& value);
     int32_t GetLocalUserId(int32_t &userId);
     int32_t GetActiveUserId(int32_t &userId);
     bool IsValidUserId(int32_t userId);
