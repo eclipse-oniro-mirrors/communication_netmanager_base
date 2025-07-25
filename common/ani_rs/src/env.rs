@@ -548,7 +548,7 @@ impl<'local> AniEnv<'local> {
     pub fn new_error(&self, message: &str) -> Result<AniRef<'local>, AniError> {
         unsafe {
             let class =
-                self.find_class(CStr::from_bytes_with_nul_unchecked(b"Lescompat/Error;\0"))?;
+                self.find_class(CStr::from_bytes_with_nul_unchecked(b"escompat.Error\0"))?;
 
             let mut method = null_mut() as ani_method;
 
@@ -556,7 +556,7 @@ impl<'local> AniEnv<'local> {
                 self.inner,
                 class.as_raw(),
                 CStr::from_bytes_with_nul_unchecked(b"<ctor>\0").as_ptr(),
-                CStr::from_bytes_with_nul_unchecked(b"Lstd/core/String;:V\0").as_ptr(),
+                CStr::from_bytes_with_nul_unchecked(b"C{std.core.String}:\0").as_ptr(),
                 &mut method as *mut _,
             );
 
@@ -596,14 +596,13 @@ impl<'local> AniEnv<'local> {
 
     pub fn business_error(&self, code: i32, message: &str) -> Result<AniRef<'local>, AniError> {
         unsafe {
-            let code: f64 = code as f64;
             let class = self.find_class(CStr::from_bytes_with_nul_unchecked(
-                b"L@ohos/base/BusinessError;\0",
+                b"@ohos.base.BusinessError\0",
             ))?;
             let method = self.find_method_with_signature(
                 &class,
                 CStr::from_bytes_with_nul_unchecked(b"<ctor>\0"),
-                CStr::from_bytes_with_nul_unchecked(b"DLescompat/Error;:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"iC{escompat.Error}:\0"),
             )?;
             let error = self.new_error(message)?;
             let mut business_error = null_mut() as ani_error;
