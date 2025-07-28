@@ -203,8 +203,8 @@ export default namespace connection {
   export native function enableAirplaneModeSync():void;
 
   export function enableAirplaneMode(callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-       return enableAirplaneModeSync();
+    let p1 = taskpool.execute(() => {
+        enableAirplaneModeSync();
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -215,8 +215,8 @@ export default namespace connection {
 
   export function enableAirplaneMode(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        taskpool.execute((): undefined => {
-          return enableAirplaneModeSync();
+        taskpool.execute(() => {
+            enableAirplaneModeSync();
         }).then(() => {
             resolve(undefined);
         }, (err: Error): void => {
@@ -228,8 +228,8 @@ export default namespace connection {
   export native function disableAirplaneModeSync():void;
 
   export function disableAirplaneMode(callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-      return disableAirplaneModeSync();
+    let p1 = taskpool.execute(() => {
+        disableAirplaneModeSync();
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -240,8 +240,8 @@ export default namespace connection {
 
   export function disableAirplaneMode(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        taskpool.execute((): undefined => {
-          return disableAirplaneModeSync();
+        taskpool.execute(() => {
+            disableAirplaneModeSync();
         }).then((content: NullishType) => {
             resolve(undefined);
         }, (err: Error): void => {
@@ -251,8 +251,8 @@ export default namespace connection {
   }
 
   export function reportNetConnected(netHandle: NetHandle, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-        return reportNetConnectedSync(netHandle);
+    let p1 = taskpool.execute(() => {
+        reportNetConnectedSync(netHandle);
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -263,8 +263,8 @@ export default namespace connection {
 
   export function reportNetConnected(netHandle: NetHandle): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        taskpool.execute((): undefined => {
-            return reportNetConnectedSync(netHandle);
+        taskpool.execute(() => {
+            reportNetConnectedSync(netHandle);
         }).then((content: NullishType) => {
             resolve(undefined);
         }, (err: Error): void => {
@@ -276,8 +276,8 @@ export default namespace connection {
   export native function reportNetConnectedSync(netHandle: NetHandle): void;
 
   export function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-       return reportNetDisconnectedSync(netHandle)
+    let p1 = taskpool.execute(() => {
+        reportNetDisconnectedSync(netHandle)
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -288,8 +288,8 @@ export default namespace connection {
 
   export function reportNetDisconnected(netHandle: NetHandle): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        taskpool.execute((): undefined => {
-           return reportNetDisconnectedSync(netHandle);
+        taskpool.execute(() => {
+            reportNetDisconnectedSync(netHandle);
         }).then((content: NullishType) => {
             resolve(undefined);
         }, (err: Error): void => {
@@ -351,8 +351,8 @@ export default namespace connection {
   export native function getAppNetSync(): NetHandle;
 
   export function setAppNet(netHandle: NetHandle, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-        return setAppNetSync(netHandle);
+    let p1 = taskpool.execute(() => {
+        setAppNetSync(netHandle);
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -363,8 +363,8 @@ export default namespace connection {
 
   export function setAppNet(netHandle: NetHandle): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return setAppNetSync(netHandle);
+      taskpool.execute(() => {
+          setAppNetSync(netHandle);
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -428,8 +428,8 @@ export default namespace connection {
   export native function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   export function setGlobalHttpProxy(httpProxy: HttpProxy, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-        return setGlobalHttpProxySync(httpProxy);
+    let p1 = taskpool.execute(() => {
+        setGlobalHttpProxySync(httpProxy);
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -440,8 +440,8 @@ export default namespace connection {
 
   export function setGlobalHttpProxy(httpProxy: HttpProxy): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return setGlobalHttpProxySync(httpProxy);
+      taskpool.execute(() => {
+          setGlobalHttpProxySync(httpProxy);
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -457,8 +457,8 @@ export default namespace connection {
   export native function getPacUrl(): string;
 
   export function addCustomDnsRule(host: string, ip: Array<string>, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-         return addCustomDnsRuleSync(host ,ip);
+    let p1 = taskpool.execute(() => {
+        addCustomDnsRuleSync(host ,ip);
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -469,8 +469,8 @@ export default namespace connection {
 
   export function addCustomDnsRule(host: string, ip: Array<string>): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return addCustomDnsRuleSync(host, ip);
+      taskpool.execute(() => {
+          addCustomDnsRuleSync(host, ip);
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -482,8 +482,8 @@ export default namespace connection {
   export native function addCustomDnsRuleSync(host: string, ip: Array<string>): void;
 
   export function removeCustomDnsRule(host: string, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-        return removeCustomDnsRuleSync(host);
+    let p1 = taskpool.execute(() => {
+        removeCustomDnsRuleSync(host);
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -494,8 +494,8 @@ export default namespace connection {
 
   export function removeCustomDnsRule(host: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return removeCustomDnsRuleSync(host)
+      taskpool.execute(() => {
+          removeCustomDnsRuleSync(host)
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -507,8 +507,8 @@ export default namespace connection {
   export native function removeCustomDnsRuleSync(host:string): void;
 
   export function clearCustomDnsRules(callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): undefined => {
-         return clearCustomDnsRulesSync();
+    let p1 = taskpool.execute(() => {
+        clearCustomDnsRulesSync();
     })
     p1.then(() => {
         callback(new BusinessError(), undefined);
@@ -519,8 +519,8 @@ export default namespace connection {
 
   export function clearCustomDnsRules(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return clearCustomDnsRulesSync();
+      taskpool.execute(() => {
+          clearCustomDnsRulesSync();
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -535,8 +535,8 @@ export default namespace connection {
 
   export function factoryReset(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      taskpool.execute((): undefined => {
-          return factoryResetSync();
+      taskpool.execute(() => {
+          factoryResetSync();
       }).then(() => {
           resolve(undefined);
       }, (err: Error): void => {
@@ -597,8 +597,8 @@ export default namespace connection {
 
     native registerSync():void;
     register(callback: AsyncCallback<void>): void {
-      let p1 = taskpool.execute((): undefined => {
-         return this.registerSync();
+      let p1 = taskpool.execute(() => {
+          this.registerSync();
       })
       p1.then(() => {
           callback(new BusinessError(), undefined);
@@ -610,8 +610,8 @@ export default namespace connection {
     native unregisterSync():void;
 
     unregister(callback: AsyncCallback<void>): void {
-      let p1 = taskpool.execute((): undefined => {
-         return this.unregisterSync();
+      let p1 = taskpool.execute(() => {
+          this.unregisterSync();
       })
       p1.then(() => {
           callback(new BusinessError(), undefined);
