@@ -125,7 +125,7 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
         }
     }
 
-    uint32_t size = static_cast<uint32_t>(netrequest.netCaps.size());
+    size = static_cast<uint32_t>(netrequest.netCaps.size());
     if (!data.WriteUint32(size)) {
         return;
     }
