@@ -24,17 +24,12 @@ int32_t NetSupplierCallbackBase::RequestNetwork(const std::string &ident,
     return 0;
 }
 
-int32_t NetSupplierCallbackBase::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
+int32_t NetSupplierCallbackBase::ReleaseNetwork(const NetRequest &netrequest)
 {
     return 0;
 }
 
 int32_t NetSupplierCallbackBase::AddRequest(const NetRequest &netrequest)
-{
-    return 0;
-}
-
-int32_t NetSupplierCallbackBase::RemoveRequest(const NetRequest &netrequest)
 {
     return 0;
 }

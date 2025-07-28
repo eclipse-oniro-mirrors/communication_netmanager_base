@@ -39,9 +39,8 @@ public:
 
     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
         const NetRequest &netRequest = {}) override;
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
+    int32_t ReleaseNetwork(const NetRequest &netrequest) override;
     int32_t AddRequest(const NetRequest &netrequest) override;
-    int32_t RemoveRequest(const NetRequest &netrequest) override;
 
 private:
     using NetSupplierCallbackFunc = int32_t (NetSupplierCallbackStub::*)(MessageParcel &, MessageParcel &);
@@ -50,7 +49,6 @@ private:
     int32_t OnRequestNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnReleaseNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnAddRequest(MessageParcel &data, MessageParcel &reply);
-    int32_t OnRemoveRequest(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetSupplierCallbackFunc> memberFuncMap_;

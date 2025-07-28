@@ -30,9 +30,8 @@ public:
 public:
     int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
                            const NetRequest &netrequest = {}) override;
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
+    int32_t ReleaseNetwork(const NetRequest &netrequest) override;
     int32_t AddRequest(const NetRequest &netrequest) override;
-    int32_t RemoveRequest(const NetRequest &netrequest) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

@@ -51,10 +51,10 @@ HWTEST_F(NetSupplierCallbackBaseTest, RequestNetwork001, TestSize.Level1)
 
 HWTEST_F(NetSupplierCallbackBaseTest, ReleaseNetwork001, TestSize.Level1)
 {
-    std::string ident = "testsupid";
-    std::set<NetCap> netCaps;
-    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
-    int32_t ret = supplierCbStub_->ReleaseNetwork(ident, netCaps);
+    NetRequest netrequest;
+    netrequest.ident = "testIdent";
+    netrequest.netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+    int32_t ret = supplierCbStub_->ReleaseNetwork(netrequest);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -62,12 +62,6 @@ HWTEST_F(NetSupplierCallbackBaseTest, AddRequest001, TestSize.Level1)
 {
     NetRequest netrequest;
     int32_t ret = supplierCbStub_->AddRequest(netrequest);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-HWTEST_F(NetSupplierCallbackBaseTest, RemoveRequest001, TestSize.Level1)
-{
-    NetRequest netrequest;
-    int32_t ret = supplierCbStub_->RemoveRequest(netrequest);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

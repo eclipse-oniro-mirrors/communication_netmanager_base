@@ -79,7 +79,7 @@ public:
         return NETMANAGER_SUCCESS;
     };
 
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t ReleaseNetwork(const NetRequest &netrequest) override
     {
         return NETMANAGER_SUCCESS;
     };
@@ -96,7 +96,7 @@ public:
         return NETMANAGER_SUCCESS;
     }
 
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    int32_t ReleaseNetwork(const NetRequest &netrequest) override
     {
         return NETMANAGER_SUCCESS;
     }
