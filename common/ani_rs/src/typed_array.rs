@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::ffi::CStr;
+use std::{
+    ffi::CStr,
+    ops::{Deref, DerefMut},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -39,36 +42,234 @@ impl TypedArray {
         };
         env.find_class(class_name)
     }
+
+    pub fn get_byte_size(&self) -> usize {
+        match self {
+            TypedArray::Int8 => 1,
+            TypedArray::Int16 => 2,
+            TypedArray::Int32 => 4,
+            TypedArray::Uint8 => 1,
+            TypedArray::Uint16 => 2,
+            TypedArray::Uint32 => 4,
+        }
+    }
 }
 
-macro_rules! typed_array {
-    ($ftype:ident) => {
+macro_rules! impl_typed_array {
+    ($name: ident, $helper_name: ident, $rust_type: ident, $array_type: expr, $serde_name: literal) => {
         #[derive(Serialize, Deserialize)]
-        pub struct $ftype<'local>(&'local [u8]);
+        #[serde(rename = $serde_name)]
+        pub struct $helper_name<'local>(&'local [u8]);
 
-        impl<'local> $ftype<'local> {
-            pub fn new(input: &'local [u8]) -> Self {
-                $ftype(input)
-            }
+        #[derive(Clone)]
+        pub struct $name {
+            inner: ArrayBuffer,
+        }
 
-            pub fn as_slice(&self) -> &'local [u8] {
-                self.0
+        impl $name {
+            pub unsafe fn new_with_slice(data: &[$rust_type]) -> Self {
+                Self {
+                    inner: ArrayBuffer::new(
+                        data.as_ptr() as *mut u8,
+                        data.len() * $array_type.get_byte_size(),
+                    ),
+                }
             }
 
             pub fn len(&self) -> usize {
-                self.0.len()
+                self.inner.len() / $array_type.get_byte_size()
+            }
+
+            pub fn to_vec(&self) -> Vec<$rust_type> {
+                Vec::from(self.as_ref())
+            }
+        }
+
+        impl AsRef<[$rust_type]> for $name {
+            fn as_ref(&self) -> &[$rust_type] {
+                if self.inner.data_ptr.is_null() {
+                    return &[];
+                }
+                unsafe {
+                    std::slice::from_raw_parts(self.inner.data_ptr as *mut $rust_type, self.len())
+                }
+            }
+        }
+
+        impl AsMut<[$rust_type]> for $name {
+            fn as_mut(&mut self) -> &mut [$rust_type] {
+                if self.inner.data_ptr.is_null() {
+                    return &mut [];
+                }
+                unsafe {
+                    std::slice::from_raw_parts_mut(
+                        self.inner.data_ptr as *mut $rust_type,
+                        self.len(),
+                    )
+                }
+            }
+        }
+
+        impl Deref for $name {
+            type Target = [$rust_type];
+
+            fn deref(&self) -> &[$rust_type] {
+                self.as_ref()
+            }
+        }
+
+        impl DerefMut for $name {
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                self.as_mut()
+            }
+        }
+
+        impl Serialize for $name {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                let data = self.inner.as_ref();
+                let helper = $helper_name(data);
+                helper.serialize(serializer)
+            }
+        }
+
+        impl<'de> Deserialize<'de> for $name {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                let value = $helper_name::deserialize(deserializer)?;
+                Ok(unsafe {
+                    $name {
+                        inner: ArrayBuffer::new_with_slice(value.0),
+                    }
+                })
             }
         }
     };
 }
 
-typed_array!(Int8Array);
-typed_array!(Int16Array);
-typed_array!(Int32Array);
-
-typed_array!(Uint8Array);
-typed_array!(Uint16Array);
-typed_array!(Uint32Array);
+impl_typed_array!(
+    Int8Array,
+    Int8ArrayHelper,
+    i8,
+    TypedArray::Int8,
+    "Int8Array"
+);
+impl_typed_array!(
+    Int16Array,
+    Int16ArrayHelper,
+    i16,
+    TypedArray::Int16,
+    "Int16Array"
+);
+impl_typed_array!(
+    Int32Array,
+    Int32ArrayHelper,
+    i32,
+    TypedArray::Int32,
+    "Int32Array"
+);
+impl_typed_array!(
+    Uint8Array,
+    Uint8ArrayHelper,
+    u8,
+    TypedArray::Uint8,
+    "Uint8Array"
+);
+impl_typed_array!(
+    Uint16Array,
+    Uint16ArrayHelper,
+    u16,
+    TypedArray::Uint16,
+    "Uint16Array"
+);
+impl_typed_array!(
+    Uint32Array,
+    Uint32ArrayHelper,
+    u32,
+    TypedArray::Uint32,
+    "Uint32Array"
+);
 
 #[derive(Serialize, Deserialize)]
-pub struct ArrayBuffer<'local>(&'local [u8]);
+pub struct ArrayBufferHelper<'local>(&'local [u8]);
+
+#[derive(Clone)]
+pub struct ArrayBuffer {
+    data_ptr: *mut u8,
+    length: usize,
+}
+
+impl ArrayBuffer {
+    fn new(data_ptr: *mut u8, length: usize) -> Self {
+        Self { data_ptr, length }
+    }
+
+    pub unsafe fn new_with_slice(data: &[u8]) -> Self {
+        Self::new(data.as_ptr() as *mut u8, data.len())
+    }
+
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
+    pub fn to_vec(&self) -> Vec<u8> {
+        Vec::from(self.as_ref())
+    }
+}
+
+impl AsRef<[u8]> for ArrayBuffer {
+    fn as_ref(&self) -> &[u8] {
+        if self.data_ptr.is_null() {
+            return &[];
+        }
+        unsafe { std::slice::from_raw_parts(self.data_ptr, self.length) }
+    }
+}
+
+impl AsMut<[u8]> for ArrayBuffer {
+    fn as_mut(&mut self) -> &mut [u8] {
+        if self.data_ptr.is_null() {
+            return &mut [];
+        }
+        unsafe { std::slice::from_raw_parts_mut(self.data_ptr, self.length) }
+    }
+}
+
+impl Deref for ArrayBuffer {
+    type Target = [u8];
+
+    fn deref(&self) -> &[u8] {
+        self.as_ref()
+    }
+}
+
+impl DerefMut for ArrayBuffer {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.as_mut()
+    }
+}
+
+impl Serialize for ArrayBuffer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let data = self.as_ref();
+        let helper = ArrayBufferHelper(data);
+        helper.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for ArrayBuffer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = ArrayBufferHelper::deserialize(deserializer)?;
+        Ok(unsafe { ArrayBuffer::new_with_slice(value.0) })
+    }
+}
