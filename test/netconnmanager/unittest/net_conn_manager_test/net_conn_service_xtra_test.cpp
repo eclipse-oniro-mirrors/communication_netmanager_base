@@ -561,27 +561,6 @@ HWTEST_F(NetConnServiceExtTest, GetHttpUrlFromConfigTest001, TestSize.Level1)
     netConnService->GetHttpUrlFromConfig(httpUrl);
 }
 
-HWTEST_F(NetConnServiceExtTest, SetGlobalHttpProxyOldTest001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    HttpProxy httpProxy;
-    int32_t activeUserId = 1;
-    netConnService->currentUserId_ = 0;
-    auto ret = netConnService->SetGlobalHttpProxyOld(httpProxy, activeUserId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceExtTest, SetGlobalHttpProxyOldTest002, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    HttpProxy httpProxy;
-    httpProxy.SetHost("127.0.0.1");
-    int32_t activeUserId = 1;
-    netConnService->currentUserId_ = 0;
-    auto ret = netConnService->SetGlobalHttpProxyOld(httpProxy, activeUserId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetConnServiceExtTest, IsValidUserIdTest001, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
