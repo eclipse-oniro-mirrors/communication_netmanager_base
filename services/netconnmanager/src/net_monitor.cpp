@@ -165,7 +165,9 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 void NetMonitor::Detection()
 {
     NetHttpProbeResult probeResult = SendProbe();
-    if (isDetecting_) {
+    bool isTmpDetecting = IsDetecting();
+    NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
+    if (IsDetecting()) {
         NetDetectionStatus result = UNKNOWN_STATE;
         ProcessDetection(probeResult, result);
     }
