@@ -65,7 +65,10 @@ export default namespace ani_test {
         HTTP3
     }
 
-    export type unionType = boolean | byte | short | int | long | float | double | String | ArrayBuffer | null | Record<string, string> | string[] | Uint8Array;
+    export type unionType = boolean | byte | short | int | long | float 
+                            | double | String | ArrayBuffer | null 
+                            | Record<string, string> | string[] 
+                            | Uint8Array | Int8Array | Uint16Array | Int16Array | Uint32Array | Int32Array ;
 
     export native function primitiveTest(input:PrimitiveTest): PrimitiveTest;
     export native function optionBool(input?:boolean): boolean | undefined;
@@ -94,9 +97,29 @@ export default namespace ani_test {
     export native function unionTest2 ( input?: unionType ): unionType;
 
     export native function arrayBufferTest(input: ArrayBuffer): ArrayBuffer;
+    export native function changeArrayBuffer(input: ArrayBuffer): ArrayBuffer;
+    export native function createArrayBuffer(): ArrayBuffer;
     export native function uint8ArrayTest(input: Uint8Array): Uint8Array;
-    export native function structEnum(input: Config): Config;
+    export native function int8ArrayTest(input: Int8Array): Int8Array;
+    export native function uint16ArrayTest(input: Uint16Array): Uint16Array;
+    export native function int16ArrayTest(input: Int16Array): Int16Array;
+    export native function uint32ArrayTest(input: Uint32Array): Uint32Array;
+    export native function int32ArrayTest(input: Int32Array): Int32Array;
+    export native function changeUint8Array(input: Uint8Array): Uint8Array;
+    export native function changeInt8Array(input: Int8Array): Int8Array;
+    export native function changeUint16Array(input: Uint16Array): Uint16Array;
+    export native function changeInt16Array(input: Int16Array): Int16Array;
+    export native function changeUint32Array(input: Uint32Array): Uint32Array;
+    export native function changeInt32Array(input: Int32Array): Int32Array;
 
+    export native function createUint8Array(input: Uint8Array): Uint8Array;
+    export native function createInt8Array(input: Int8Array): Int8Array;
+    export native function createUint16Array(input: Uint16Array): Uint16Array;
+    export native function createInt16Array(input: Int16Array): Int16Array;
+    export native function createUint32Array(input: Uint32Array): Uint32Array;
+    export native function createInt32Array(input: Int32Array): Int32Array;
+
+    export native function structEnum(input: Config): Config;
     export native function executeCallback1(callback: Callback<int>): void;
     export native function executeCallback2(callback: Callback<int>): void;
     export native function executeCallback3(callback: Callback<int>): void;
@@ -117,6 +140,7 @@ function assertEQ<T, U>(expected: T, actual: U, message?: string): void {
 }
 
 function main():void{
+    console.log("[ani_rs] start ani rs test");
     primitive_test();
     option_test();
     array_test();
@@ -124,9 +148,11 @@ function main():void{
     record_test();
     union_test();
     array_buffer_test();
+    type_array_test();
     struct_test();
     callback_test();
     business_test();
+    console.log("[ani_rs] end ani rs test");
 }
 
 function primitive_test():void {
@@ -343,18 +369,17 @@ function union_test (): void
     output6 = ani_test.unionTest2( input6 );
     assertEQ( input6, output6 );
 
-    let input7 = new ArrayBuffer(4);
-    let uint8View = new Uint8Array(input7);
-    uint8View[0] = 1; // 1*1
-    uint8View[1] = 2; // 2*256
-    uint8View[2] = 3;
-    uint8View[3] = 4;
+    let input7 = ArrayBuffer.from([1,2,3,4]);
     let output7 = ani_test.unionTest( input7 ) as ArrayBuffer;
-    let uint8ViewOutput = new Uint8Array(output7);
-    assertEQ( JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput) );
+    assertEQ(input7.at(0), output7.at(0));
+    assertEQ(input7.at(1), output7.at(1));
+    assertEQ(input7.at(2), output7.at(2));
+    assertEQ(input7.at(3), output7.at(3));
     output7 = ani_test.unionTest2( input7 ) as ArrayBuffer;
-    uint8ViewOutput = new Uint8Array(output7);
-    assertEQ( JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput) );
+    assertEQ(input7.at(0), output7.at(0));
+    assertEQ(input7.at(1), output7.at(1));
+    assertEQ(input7.at(2), output7.at(2));
+    assertEQ(input7.at(3), output7.at(3));
 
     let input8:null = null;
     let output8 = ani_test.unionTest( input8 );
@@ -379,31 +404,160 @@ function union_test (): void
     output11 = ani_test.unionTest2( input11 );
     assertEQ( JSON.stringify(input11), JSON.stringify(output11) );
 
-    let buffer12 = new ArrayBuffer(3);
-    let uint8View12 = new Uint8Array(buffer12);
-    uint8View12[0] = 0;
-    uint8View12[1] = 1;
-    uint8View12[2] = 2;
-    let output12 = ani_test.unionTest( uint8View12 ) as Uint8Array;
-    assertEQ(JSON.stringify(output12), JSON.stringify(uint8View12));
-    output12 = ani_test.unionTest2( uint8View12 ) as Uint8Array;
-    assertEQ(JSON.stringify(output12), JSON.stringify(uint8View12));
+    let input12 = new Uint8Array([0,1,2]);
+    let output12 = ani_test.unionTest( input12 ) as Uint8Array;
+    assertEQ(JSON.stringify(output12), JSON.stringify(input12));
+    output12 = ani_test.unionTest2( input12 ) as Uint8Array;
+    assertEQ(JSON.stringify(output12), JSON.stringify(input12));
+
+    let input13 = new Int8Array([0,1,2]);
+    let output13 = ani_test.unionTest( input13 ) as Int8Array;
+    assertEQ(JSON.stringify(output13), JSON.stringify(input13));
+    output13 = ani_test.unionTest2( input13 ) as Int8Array;
+    assertEQ(JSON.stringify(output13), JSON.stringify(input13));
+
+    let input14 = new Uint16Array([0,1,2]);
+    let output14 = ani_test.unionTest( input14 ) as Uint16Array;
+    assertEQ(JSON.stringify(output14), JSON.stringify(input14));
+    output14 = ani_test.unionTest2( input14 ) as Uint16Array;
+    assertEQ(JSON.stringify(output14), JSON.stringify(input14));
+
+    let input15 = new Int16Array([0,1,2]);
+    let output15 = ani_test.unionTest( input15 ) as Int16Array;
+    assertEQ(JSON.stringify(output15), JSON.stringify(input15));
+    output15 = ani_test.unionTest2( input15 ) as Int16Array;
+    assertEQ(JSON.stringify(output15), JSON.stringify(input15));
+
+    let input16 = new Uint32Array([0,1,2]);
+    let output16 = ani_test.unionTest( input16 ) as Uint32Array;
+    assertEQ(JSON.stringify(output16), JSON.stringify(input16));
+    output16 = ani_test.unionTest2( input16 ) as Uint32Array;
+    assertEQ(JSON.stringify(output16), JSON.stringify(input16));
+
+    let input17 = new Int32Array([0,1,2]);
+    let output17 = ani_test.unionTest( input17 ) as Int32Array;
+    assertEQ(JSON.stringify(output17), JSON.stringify(input17));
+    output17 = ani_test.unionTest2( input17 ) as Int32Array;
+    assertEQ(JSON.stringify(output17), JSON.stringify(input17));
 }
 
 function array_buffer_test (): void
 {
-    const buffer = new ArrayBuffer(4);
-    const uint8View = new Uint8Array(buffer);
-    uint8View[0] = 1; // 1*1
-    uint8View[1] = 2; // 2*256
-    uint8View[2] = 3;
-    uint8View[3] = 4;
-    let output = ani_test.uint8ArrayTest(uint8View);
-    assertEQ(JSON.stringify(uint8View), JSON.stringify(output));
+    let input1 = ArrayBuffer.from([1,2,3,4]);
+    let output1 = ani_test.arrayBufferTest(input1);
+    assertEQ(input1.at(0), output1.at(0));
+    assertEQ(input1.at(1), output1.at(1));
+    assertEQ(input1.at(2), output1.at(2));
+    assertEQ(input1.at(3), output1.at(3));
 
-    let output2 = ani_test.arrayBufferTest(buffer);
-    let uint8ViewOutput = new Uint8Array(output2);
-    assertEQ(JSON.stringify(uint8View), JSON.stringify(uint8ViewOutput));
+    let input2 = ArrayBuffer.from([1,2,3]);
+    let output2 = ani_test.changeArrayBuffer(input2);
+    assertEQ(input2.at(0), 2);
+    assertEQ(input2.at(1), 3);
+    assertEQ(input2.at(2), 4);
+    assertEQ(output2.at(0), 2);
+    assertEQ(output2.at(1), 3);
+    assertEQ(output2.at(2), 4);
+
+    let output3 = ani_test.createArrayBuffer();
+    assertEQ(output3.at(0), 1);
+    assertEQ(output3.at(1), 2);
+    assertEQ(output3.at(2), 3);
+    assertEQ(output3.at(3), 4);
+}
+
+function type_array_test(): void
+{
+    const input1 = new Uint8Array([1,2,3,4,5]);
+    let output1 = ani_test.uint8ArrayTest(input1);
+    assertEQ(JSON.stringify(input1), JSON.stringify(output1));
+
+    const input2 = new Int8Array([1,2,3,4,5]);
+    let output2 = ani_test.int8ArrayTest(input2);
+    assertEQ(JSON.stringify(input2), JSON.stringify(output2));
+
+    const input3 = new Uint16Array([1,2,3,4,5]);
+    let output3 = ani_test.uint16ArrayTest(input3);
+    assertEQ(JSON.stringify(input3), JSON.stringify(output3));
+
+    const input4 = new Int16Array([1,2,3,4,5]);
+    let output4 = ani_test.int16ArrayTest(input4);
+    assertEQ(JSON.stringify(input4), JSON.stringify(output4));
+
+    const input5 = new Uint32Array([1,2,3,4,5]);
+    let output5 = ani_test.uint32ArrayTest(input5);
+    assertEQ(JSON.stringify(input5), JSON.stringify(output5));
+
+    const input6 = new Int32Array([1,2,3,4,5]);
+    let output6 = ani_test.int32ArrayTest(input6);
+    assertEQ(JSON.stringify(input6), JSON.stringify(output6));
+
+    let input7 = new Uint8Array([1,2,3]);
+    let output7 = ani_test.changeUint8Array(input7);
+    assertEQ(JSON.stringify(input7), JSON.stringify(output7));
+    assertEQ(input7.at(0), 2);
+    assertEQ(input7.at(1), 3);
+    assertEQ(input7.at(2), 4);
+
+    let input8 = new Int8Array([1,2,3]);
+    let output8 = ani_test.changeInt8Array(input8);
+    assertEQ(JSON.stringify(input8), JSON.stringify(output8));
+    assertEQ(input8.at(0), 2);
+    assertEQ(input8.at(1), 3);
+    assertEQ(input8.at(2), 4);
+
+    let input9 = new Uint16Array([1,2,3]);
+    let output9 = ani_test.changeUint16Array(input9);
+    assertEQ(JSON.stringify(input9), JSON.stringify(output9));
+    assertEQ(input9.at(0), 2);
+    assertEQ(input9.at(1), 3);
+    assertEQ(input9.at(2), 4);
+
+    let input10 = new Int16Array([1,2,3]);
+    let output10 = ani_test.changeInt16Array(input10);
+    assertEQ(JSON.stringify(input10), JSON.stringify(output10));
+    assertEQ(input10.at(0), 2);
+    assertEQ(input10.at(1), 3);
+    assertEQ(input10.at(2), 4);
+
+    let input11 = new Uint32Array([1,2,3]);
+    let output11 = ani_test.changeUint32Array(input11);
+    assertEQ(JSON.stringify(input11), JSON.stringify(output11));
+    assertEQ(input11.at(0), 2);
+    assertEQ(input11.at(1), 3);
+    assertEQ(input11.at(2), 4);
+
+    let input12 = new Int32Array([1,2,3]);
+    let output12 = ani_test.changeInt32Array(input12);
+    assertEQ(JSON.stringify(input12), JSON.stringify(output12));
+    assertEQ(input12.at(0), 2);
+    assertEQ(input12.at(1), 3);
+    assertEQ(input12.at(2), 4);
+
+
+    const input13 = new Uint8Array([1,2,3,4,5]);
+    let output13 = ani_test.createUint8Array(input13);
+    assertEQ(JSON.stringify(input13), JSON.stringify(output13));
+
+    const input14 = new Int8Array([1,2,3,4,5]);
+    let output14 = ani_test.createInt8Array(input14);
+    assertEQ(JSON.stringify(input14), JSON.stringify(output14));
+
+    const input15 = new Uint16Array([1,2,3,4,5]);
+    let output15 = ani_test.createUint16Array(input15);
+    assertEQ(JSON.stringify(input15), JSON.stringify(output15));
+
+    const input16 = new Int16Array([1,2,3,4,5]);
+    let output16 = ani_test.createInt16Array(input16);
+    assertEQ(JSON.stringify(input16), JSON.stringify(output16));
+
+    const input17 = new Uint32Array([1,2,3,4,5]);
+    let output17 = ani_test.createUint32Array(input17);
+    assertEQ(JSON.stringify(input17), JSON.stringify(output17));
+
+    const input18 = new Int32Array([1,2,3,4,5]);
+    let output18 = ani_test.createInt32Array(input18);
+    assertEQ(JSON.stringify(input18), JSON.stringify(output18));
 }
 
 function struct_test():void

@@ -401,16 +401,8 @@ impl From<ffi::LinkAddress> for bridge::LinkAddress {
         bridge::LinkAddress {
             address: bridge::NetAddress {
                 address: value.address.address,
-                family: if value.address.family == 0 {
-                    None
-                } else {
-                    Some(value.address.family)
-                },
-                port: if value.address.port == 0 {
-                    None
-                } else {
-                    Some(value.address.port)
-                },
+                family: Some(value.address.family),
+                port: Some(value.address.port),
             },
             prefix_length: value.prefix_length,
         }
@@ -421,16 +413,8 @@ impl From<ffi::NetAddress> for bridge::NetAddress {
     fn from(value: ffi::NetAddress) -> Self {
         bridge::NetAddress {
             address: value.address,
-            family: if value.family == 0 {
-                None
-            } else {
-                Some(value.family)
-            },
-            port: if value.port == 0 {
-                None
-            } else {
-                Some(value.port)
-            },
+            family: Some(value.family),
+            port: Some(value.port),
         }
     }
 }
