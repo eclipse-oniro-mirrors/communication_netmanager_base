@@ -121,9 +121,7 @@ void NetProxyUserinfo::GetHttpProxyHostPass(HttpProxy &httpProxy)
     auto resultSet = rdbStore_->Query(dirAbsPred, columns);
     if (resultSet == nullptr) {
         NETMGR_LOG_E("net_conn database rdb store query failed - null resultSet");
-        if (resultSet != nullptr) {
-            resultSet->Close();
-        }
+        resultSet->Close();
         return;
     }
     if (resultSet->GoToFirstRow() != NativeRdb::E_OK) {
