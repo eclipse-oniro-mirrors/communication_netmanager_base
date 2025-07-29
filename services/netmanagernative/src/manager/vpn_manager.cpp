@@ -189,7 +189,7 @@ int32_t VpnManager::SendNetlinkAddress(int ifindex, int family, const char* addr
     ifa.ifa_prefixlen = static_cast<uint8_t>(prefix);
     ifa.ifa_flags = IFA_F_PERMANENT;
     ifa.ifa_scope = 0;
-    ifa.ifa_index = ifindex;
+    ifa.ifa_index = static_cast<uint32_t>(ifindex);
 
     netMsg.AddAddress(RTM_NEWADDR, ifa);
 
