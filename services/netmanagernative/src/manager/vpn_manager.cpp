@@ -164,7 +164,7 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
         return NETMANAGER_ERROR;
     }
 
-    int ifindex = if_nametoindex(ifName.c_str());
+    uin32_t ifindex = if_nametoindex(ifName.c_str());
     if (ifindex == 0) {
         NETNATIVE_LOGE("if_nametoindex failed: %{public}d", errno);
         return NETMANAGER_ERROR;
@@ -194,8 +194,9 @@ int32_t VpnManager::SendNetlinkAddress(int ifindex, int family, const char* addr
     netMsg.AddAddress(RTM_NEWADDR, ifa);
 
     int addrLen = (family == AF_INET) ? 4 : 16;
-    if (netMsg.AddAttr(IFA_LOCAL, const_cast<char*>(addrbuf), addrLen) < 0 ||
-        netMsg.AddAttr(IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen) < 0) {
+    int32_t resultLocal = netMsg.AddAttr(IFA_LOCAL, const_cast<char*>(addrbuf), addrLen);
+    int32_t resultAddress = netMsg.AddAttr(IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen);
+    if (resultLocal < 0 || resultAddress < 0) {
         NETNATIVE_LOGE("AddAttr failed");
         return NETMANAGER_ERROR;
     }
