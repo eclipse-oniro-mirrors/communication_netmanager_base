@@ -164,7 +164,7 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
         return NETMANAGER_ERROR;
     }
 
-    uin32_t ifindex = if_nametoindex(ifName.c_str());
+    uint32_t ifindex = if_nametoindex(ifName.c_str());
     if (ifindex == 0) {
         NETNATIVE_LOGE("if_nametoindex failed: %{public}d", errno);
         return NETMANAGER_ERROR;
