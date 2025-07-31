@@ -78,7 +78,6 @@
 
 #define ICMP_ECHO_REQUEST 8
 #define ICMPV6_ECHO_REQUEST 128
-#define HTTP_STATUS_401 401
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -316,7 +315,7 @@ static int doTraceRoute(struct addrinfo *ai, int32_t maxJumpNumber, int32_t pack
     std::vector<struct IpInfo> ipinfo;
     int sockfd = socket(ai->ai_family, SOCK_RAW, (ai->ai_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6);
     if (sockfd < 0) {
-        return HTTP_STATUS_401;
+        return 0;
     }
     int32_t count = 0;
     for (int32_t ttl = 1; ttl <= maxJumpNumber; ttl++) {
@@ -372,15 +371,9 @@ int32_t QueryTraceRouteProbeResult(const std::string &destination, int32_t maxJu
     info.ai_family = family;
     const char *dest = destination.c_str();
     int32_t rc = getaddrinfo(dest, nullptr, &info, &ai);
-    if (rc < 0) {
-        return HTTP_STATUS_401;
+    if (rc < 0 || ai == nullptr) {
+        return 0;
     }
-    
-    if (ai == nullptr) {
-        errno = EADDRNOTAVAIL;
-        return HTTP_STATUS_401;
-    }
-
     rc = doTraceRoute(ai, maxJumpNumber, packetsType, traceRouteInfo);
 
     if (ai != nullptr) {
