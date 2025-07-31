@@ -36,12 +36,8 @@ public:
 public:
     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps,
         const NetRequest &netrequest = {}) = 0;
-    virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
+    virtual int32_t ReleaseNetwork(const NetRequest &netrequest) = 0;
     virtual int32_t AddRequest(const NetRequest &netrequest)
-    {
-        return ERR_NONE;
-    }
-    virtual int32_t RemoveRequest(const NetRequest &netrequest)
     {
         return ERR_NONE;
     }

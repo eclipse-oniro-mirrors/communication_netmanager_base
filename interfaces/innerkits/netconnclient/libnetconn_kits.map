@@ -137,7 +137,7 @@
       "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceTxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackBase::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
-      "OHOS::NetManagerStandard::NetSupplierCallbackBase::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackBase::ReleaseNetwork(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackBase::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::INetSupplierCallback::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackBase::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
@@ -146,13 +146,13 @@
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
-      "OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::AddRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RemoveRequest(OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, OHOS::NetManagerStandard::NetRequest const&)";
-      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(OHOS::NetManagerStandard::NetRequest const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
       "virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
       vtable?for?OHOS::NetManagerStandard::NetSupplierCallbackBase;

@@ -102,6 +102,7 @@ HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
     supplier->UpdateGlobalHttpProxy(httpProxy);
 
     std::set<NetCap> caps;
+    uint32_t uid = 0;
     bool ret = supplier->CompareNetCaps(caps);
     ASSERT_TRUE(ret);
 
@@ -113,7 +114,7 @@ HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
 
     supplier->netController_ = nullptr;
     supplier->netSupplierInfo_.isAvailable_ = true;
-    ret = supplier->SupplierDisconnection(caps);
+    ret = supplier->SupplierDisconnection(caps, uid);
     ASSERT_FALSE(ret);
 
     int32_t result = supplier->GetNetId();

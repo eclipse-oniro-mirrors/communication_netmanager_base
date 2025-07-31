@@ -101,21 +101,35 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
 
 HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
 {
-    std::string ident = "testsupid";
-    std::set<NetCap> netCaps;
-    netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+    NetRequest netrequest;
+    netrequest.ident = "testsupid";
+    netrequest.netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
         return;
     }
-    if (!data.WriteString(ident)) {
+    bool result = data.WriteUint32(netrequest.uid) && data.WriteUint32(netrequest.requestId) &&
+                  data.WriteUint32(netrequest.registerType) && data.WriteString(netrequest.ident);
+    if (!result) {
         return;
     }
-    uint32_t size = static_cast<uint32_t>(netCaps.size());
+
+    uint32_t size = static_cast<uint32_t>(netrequest.bearTypes.size());
     if (!data.WriteUint32(size)) {
         return;
     }
-    for (auto netCap : netCaps) {
+    for (auto netBearType : netrequest.bearTypes) {
+        if (!data.WriteInt32(netBearType)) {
+            return;
+        }
+    }
+
+    size = static_cast<uint32_t>(netrequest.netCaps.size());
+    if (!data.WriteUint32(size)) {
+        return;
+    }
+    for (auto netCap : netrequest.netCaps) {
         data.WriteInt32(static_cast<uint32_t>(netCap));
     }
 
@@ -125,6 +139,7 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
         static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
 HWTEST_F(NetSupplierCallbackStubTest, OnAddRequest001, TestSize.Level1)
 {
     MessageParcel data;
@@ -183,82 +198,5 @@ HWTEST_F(NetSupplierCallbackStubTest, OnAddRequest003, TestSize.Level1)
     EXPECT_EQ(netSupplierCallbackStub->OnAddRequest(data, reply), NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
-HWTEST_F(NetSupplierCallbackStubTest, OnRemoveRequest001, TestSize.Level1)
-{
-    MessageParcel data;
-    int32_t uid = 0;
-    ASSERT_TRUE(data.WriteUint32(uid));
-    int32_t requestId = 0;
-    ASSERT_TRUE(data.WriteUint32(requestId));
-    int32_t registerType = 0;
-    ASSERT_TRUE(data.WriteUint32(registerType));
-    std::string ident = "testsupid";
-    ASSERT_TRUE(data.WriteString(ident));
-    std::vector<uint32_t> netBearTypes = {NetBearType::BEARER_CELLULAR, NetBearType::BEARER_DEFAULT};
-    ASSERT_TRUE(data.WriteUInt32Vector(netBearTypes));
-    std::vector<uint32_t> netCaps = {NetCap::NET_CAPABILITY_NOT_METERED, NetCap::NET_CAPABILITY_END};
-    ASSERT_TRUE(data.WriteUInt32Vector(netCaps));
-    MessageParcel reply;
-    auto netSupplierCallbackStub = std::make_shared<NetSupplierCallbackStub>();
-    EXPECT_EQ(netSupplierCallbackStub->OnRemoveRequest(data, reply), NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, OnRemoveRequest002, TestSize.Level1)
-{
-    MessageParcel data;
-    int32_t uid = 0;
-    ASSERT_TRUE(data.WriteUint32(uid));
-    int32_t requestId = 0;
-    ASSERT_TRUE(data.WriteUint32(requestId));
-    int32_t registerType = 0;
-    ASSERT_TRUE(data.WriteUint32(registerType));
-    std::string ident = "testsupid";
-    ASSERT_TRUE(data.WriteString(ident));
-    ASSERT_TRUE(data.WriteUint32(MAX_NET_BEARTYPE_NUM + 1));
-    ASSERT_TRUE(data.WriteUint32(0));
-    MessageParcel reply;
-    auto netSupplierCallbackStub = std::make_shared<NetSupplierCallbackStub>();
-    EXPECT_EQ(netSupplierCallbackStub->OnRemoveRequest(data, reply), NETMANAGER_ERR_INVALID_PARAMETER);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, OnRemoveRequest003, TestSize.Level1)
-{
-    MessageParcel data;
-    int32_t uid = 0;
-    ASSERT_TRUE(data.WriteUint32(uid));
-    int32_t requestId = 0;
-    ASSERT_TRUE(data.WriteUint32(requestId));
-    int32_t registerType = 0;
-    ASSERT_TRUE(data.WriteUint32(registerType));
-    std::string ident = "testsupid";
-    ASSERT_TRUE(data.WriteString(ident));
-    ASSERT_TRUE(data.WriteUint32(0));
-    ASSERT_TRUE(data.WriteUint32(MAX_NET_CAP_NUM + 1));
-    MessageParcel reply;
-    auto netSupplierCallbackStub = std::make_shared<NetSupplierCallbackStub>();
-    EXPECT_EQ(netSupplierCallbackStub->OnRemoveRequest(data, reply), NETMANAGER_ERR_INVALID_PARAMETER);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, AddRequest001, TestSize.Level1)
-{
-    auto netSupplierCallbackStub = std::make_shared<NetSupplierCallbackStub>();
-    NetRequest request;
-    netSupplierCallbackStub->AddRequest(request);
-    sptr<NetSupplierCallbackBase> cb = new NetSupplierCallbackBase();
-    netSupplierCallbackStub->RegisterSupplierCallbackImpl(cb);
-    netSupplierCallbackStub->AddRequest(request);
-    EXPECT_TRUE(netSupplierCallbackStub->callback_ != nullptr);
-}
-
-HWTEST_F(NetSupplierCallbackStubTest, RemoveRequest001, TestSize.Level1)
-{
-    auto netSupplierCallbackStub = std::make_shared<NetSupplierCallbackStub>();
-    NetRequest request;
-    netSupplierCallbackStub->RemoveRequest(request);
-    sptr<NetSupplierCallbackBase> cb = new NetSupplierCallbackBase();
-    netSupplierCallbackStub->RegisterSupplierCallbackImpl(cb);
-    netSupplierCallbackStub->RemoveRequest(request);
-    EXPECT_TRUE(netSupplierCallbackStub->callback_ != nullptr);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

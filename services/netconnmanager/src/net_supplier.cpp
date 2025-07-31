@@ -289,7 +289,7 @@ bool NetSupplier::GetRestrictBackground() const
     return restrictBackground_;
 }
 
-bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
+bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_t uid)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
@@ -305,7 +305,11 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
         return false;
     }
     NETMGR_LOG_D("execute ReleaseNetwork, supplierId[%{public}d]", supplierId_);
-    int32_t errCode = netController_->ReleaseNetwork(netSupplierIdent_, netCaps);
+    NetRequest request;
+    request.uid = uid;
+    request.ident = netSupplierIdent_;
+    request.netCaps = netCaps;
+    int32_t errCode = netController_->ReleaseNetwork(request);
     NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
         NETMGR_LOG_E("ReleaseNetwork fail");
@@ -369,8 +373,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         return;
     }
     if (requestList_.empty() && HasNetCap(NET_CAPABILITY_INTERNET)) {
-        RemoveRequest(netrequest);
-        SupplierDisconnection(netCaps_.ToSet());
+        SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
         return;
     }
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
@@ -384,8 +387,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
     requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
-    RemoveRequest(netrequest);
-    SupplierDisconnection(netCaps_.ToSet());
+    SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
@@ -397,8 +399,7 @@ int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
     requestList_.erase(netrequest.requestId);
     bestReqList_.erase(netrequest.requestId);
-    RemoveRequest(netrequest);
-    SupplierDisconnection(netCaps_.ToSet());
+    SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
     return NETMANAGER_SUCCESS;
 }
 
@@ -417,26 +418,6 @@ void NetSupplier::AddRequest(const NetRequest &netRequest)
     NETMGR_LOG_D("AddRequest errCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
         NETMGR_LOG_E("AddRequest fail");
-        return;
-    }
-    return;
-}
-
-void NetSupplier::RemoveRequest(const NetRequest &netrequest)
-{
-    if (netController_ == nullptr) {
-        NETMGR_LOG_E("netController_ is nullptr");
-        return;
-    }
-    NetRequest request;
-    request.uid = netrequest.uid;
-    request.ident = netSupplierIdent_;
-    request.netCaps = netCaps_.ToSet();
-    NETMGR_LOG_D("execute RemoveRequest");
-    int32_t errCode = netController_->RemoveRequest(request);
-    NETMGR_LOG_D("RemoveRequest errCode[%{public}d]", errCode);
-    if (errCode != REG_OK) {
-        NETMGR_LOG_E("RemoveRequest fail");
         return;
     }
     return;

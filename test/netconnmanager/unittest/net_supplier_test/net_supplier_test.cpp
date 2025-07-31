@@ -126,16 +126,17 @@ HWTEST_F(NetSupplierTest, SupplierConnectionTest001, TestSize.Level1)
 HWTEST_F(NetSupplierTest, SupplierDisconnectionTest001, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
+    uint32_t uid = 0;
     supplier->netSupplierInfo_.isAvailable_ = true;
     supplier->netSupplierIdent_ = "simId";
     sptr<INetSupplierCallback> callback;
     supplier->netController_ = callback;
-    bool ret = supplier->SupplierDisconnection(netCaps);
+    bool ret = supplier->SupplierDisconnection(netCaps, uid);
     EXPECT_FALSE(ret);
 
     supplier->netSupplierInfo_.isAvailable_ = false;
     netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
-    ret = supplier->SupplierDisconnection(netCaps);
+    ret = supplier->SupplierDisconnection(netCaps, uid);
     EXPECT_TRUE(ret);
 }
 
