@@ -246,7 +246,7 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
 int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsQueryResultReport(uint32_t size,
     std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res)
 {
-    NETMGR_LOG_I("NetsysNativeClient OnDnsQueryResultReport");
+    NETMGR_LOG_D("NetsysNativeClient OnDnsQueryResultReport");
     auto netsysNativeClient = netsysNativeClient_.lock();
     if (netsysNativeClient == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;

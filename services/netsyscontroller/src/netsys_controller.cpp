@@ -477,7 +477,7 @@ int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface,
 
 int32_t NetsysController::GetNetworkCellularSharingTraffic(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName)
 {
-    NETMGR_LOG_I("NetsysController GetNetworkCellularSharingTraffic");
+    NETMGR_LOG_D("NetsysController GetNetworkCellularSharingTraffic");
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");

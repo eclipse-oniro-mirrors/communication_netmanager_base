@@ -173,7 +173,7 @@ void NetMonitor::Detection()
 
 NetHttpProbeResult NetMonitor::SendProbe()
 {
-    NETMGR_LOG_I("start net detection");
+    NETMGR_LOG_D("start net detection");
     std::lock_guard<std::mutex> monitorLocker(probeMtx_);
     std::shared_ptr<TinyCountDownLatch> latch = std::make_shared<TinyCountDownLatch>(ONE_URL_DETECT_NUM);
     std::shared_ptr<TinyCountDownLatch> latchAll = std::make_shared<TinyCountDownLatch>(ALL_DETECT_THREAD_NUM);
@@ -227,7 +227,7 @@ void NetMonitor::CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std
             httpThread = std::make_shared<ProbeThread>(
                 netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
         } else {
-            NETMGR_LOG_I("create primary probeThread for others");
+            NETMGR_LOG_D("create primary probeThread for others");
             httpThread = std::make_shared<ProbeThread>(
                 netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP, httpUrl_, httpsUrl_);
             httpsThread = std::make_shared<ProbeThread>(
@@ -243,7 +243,7 @@ void NetMonitor::CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std
                 netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_,
                 fallbackHttpsUrl_);
         } else {
-            NETMGR_LOG_I("create fallback probeThread for others");
+            NETMGR_LOG_D("create fallback probeThread for others");
             httpThread = std::make_shared<ProbeThread>(
                 netId_, netBearType_, netLinkInfo_, latch, latchAll, ProbeType::PROBE_HTTP_FALLBACK, fallbackHttpUrl_,
                 fallbackHttpsUrl_);
@@ -313,7 +313,7 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(std::shared_ptr<ProbeTh
         return backHttpResult;
     }
     if (httpsResult.IsSuccessful()) {
-        NETMGR_LOG_I("primary https detect result: success");
+        NETMGR_LOG_D("primary https detect result: success");
         return httpsResult;
     }
     if (backHttpsResult.IsSuccessful()) {

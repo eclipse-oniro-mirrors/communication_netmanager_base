@@ -961,7 +961,7 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
     if (conn.hasNetSpecifier_) {
         sptr<NetSpecifier> specifier = new NetSpecifier(conn.netSpecifier_);
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, 0);
-        NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ %{public}d", ret);
+        NETMANAGER_BASE_LOGD("Register result hasNetSpecifier_ %{public}d", ret);
         context->SetErrorCode(ret);
         hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
         return ret == NETMANAGER_SUCCESS;
@@ -991,7 +991,7 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("Unregister result %{public}d", ret);
+        NETMANAGER_BASE_LOGD("Unregister result %{public}d", ret);
         hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
         context->SetErrorCode(ret);
     }

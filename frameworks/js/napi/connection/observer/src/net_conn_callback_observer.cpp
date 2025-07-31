@@ -43,7 +43,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         return 0;
     }
     if (!manager->HasEventListener(EVENT_NET_AVAILABLE)) {
-        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_AVAILABLE);
+        NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_AVAILABLE);
         return 0;
     }
 
@@ -80,7 +80,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         return 0;
     }
     if (!manager->HasEventListener(EVENT_NET_CAPABILITIES_CHANGE)) {
-        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CAPABILITIES_CHANGE);
+        NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_CAPABILITIES_CHANGE);
         return 0;
     }
     auto network = *netHandle;
@@ -118,7 +118,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         return 0;
     }
     if (!manager->HasEventListener(EVENT_NET_CONNECTION_PROPERTIES_CHANGE)) {
-        NETMANAGER_BASE_LOGI("no %{public}s listener", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
+        NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
         return 0;
     }
     auto network = *netHandle;

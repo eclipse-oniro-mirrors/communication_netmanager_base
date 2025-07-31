@@ -391,7 +391,7 @@ int32_t NetAccessPolicyRDB::QueryByUid(int uid, NetAccessPolicyData& uidPolicy)
         return ret;
     }
     if (rowCount == 0) {
-        NETMGR_LOG_E("query setting name:%{public}d, num is 0", uid);
+        NETMGR_LOG_D("query setting name:%{public}d, num is 0", uid);
         queryResultSet->Close();
         return NETMANAGER_ERROR;
     }

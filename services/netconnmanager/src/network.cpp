@@ -591,7 +591,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 
 void Network::StartNetDetection(bool needReport)
 {
-    NETMGR_LOG_I("Enter StartNetDetection");
+    NETMGR_LOG_D("Enter StartNetDetection");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (forbidDetectionFlag_) {
         NETMGR_LOG_W("Sleep status, forbid detection");
@@ -645,7 +645,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
         isDetectingForDns_ = true;
         netMonitor_->Start();
     } else if (IsDetectionForDnsFail(lastDetectResult, dnsHealthSuccess)) {
-        NETMGR_LOG_I("Dns report fail, start net detection");
+        NETMGR_LOG_D("Dns report fail, start net detection");
         netMonitor_->Start();
     } else {
         NETMGR_LOG_D("Not match, no need to restart.");
