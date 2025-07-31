@@ -221,8 +221,10 @@ void CreateUvQueueWorkByModuleId(napi_env env, const UvHandler &handler, uint64_
     }
 
     if (work) {
-        (void)uv_queue_work_with_qos(
-            loop, work, [](uv_work_t *) {}, MakeUvCallback(), uv_qos_default);
+        int32_t ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *) {}, MakeUvCallback(), uv_qos_default);
+        if (ret != 0) {
+            delete work;
+        }
     }
 }
 
@@ -682,8 +684,10 @@ void CreateUvQueueWork(napi_env env, void *data, void(handler)(uv_work_t *, int 
     auto work = new uv_work_t;
     work->data = data;
 
-    (void)uv_queue_work_with_qos(
-        loop, work, [](uv_work_t *) {}, handler, uv_qos_default);
+    int32_t ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *) {}, handler, uv_qos_default);
+    if (ret != 0) {
+        delete work;
+    }
 }
 
 /* scope */

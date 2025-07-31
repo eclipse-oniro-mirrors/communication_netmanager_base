@@ -315,6 +315,8 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         return result;
     }
 
+    SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP);
+
     /*
      * Add a forward rule, drop others
      */
