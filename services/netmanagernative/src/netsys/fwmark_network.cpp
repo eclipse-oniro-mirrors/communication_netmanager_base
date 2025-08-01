@@ -80,7 +80,7 @@ void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
                            errno);
             break;
         default:
-            NETNATIVE_LOGD("NO_ERROR_CODE CloseSocket socket:%{public}d, ret:%{public}d", *socket, ret);
+            NETNATIVE_LOG_D("NO_ERROR_CODE CloseSocket socket:%{public}d, ret:%{public}d", *socket, ret);
             break;
     }
     close(*socket);
