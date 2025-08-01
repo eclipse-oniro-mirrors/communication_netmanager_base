@@ -251,7 +251,7 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
     }
 
     if (excludeLoopback && IsLoopbackSocket(msg)) {
-        NETNATIVE_LOGD("Loop back socket, no need to close.");
+        NETNATIVE_LOG_D("Loop back socket, no need to close.");
         return;
     }
 
