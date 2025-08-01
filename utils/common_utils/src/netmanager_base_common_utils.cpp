@@ -842,7 +842,7 @@ bool IsInstallSourceFromSim2(const std::string &installSource)
 bool IsNeedDisplayTrafficAncoList()
 {
 #ifndef CROSS_PLATFORM
-    NETMGR_LOG_I("Is need display traffic anco list: %{public}s",
+    NETMGR_LOG_D("Is need display traffic anco list: %{public}s",
         system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false").c_str());
     return system::GetParameter(DISPLAY_TRAFFIC_ANCO_LIST, "false") == "true";
 #else

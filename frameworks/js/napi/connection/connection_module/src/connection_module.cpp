@@ -151,7 +151,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
 
     switch (netConnType) {
         case NetConnectionType::PARAMETER_ZERO: {
-            NETMANAGER_BASE_LOGI("ParseNetConnectionParams no params");
+            NETMANAGER_BASE_LOGD("ParseNetConnectionParams no params");
             return netConnection.release();
         }
         case NetConnectionType::PARAMETER_SPECIFIER: {

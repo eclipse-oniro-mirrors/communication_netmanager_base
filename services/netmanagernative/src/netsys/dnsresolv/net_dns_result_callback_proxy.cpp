@@ -73,7 +73,7 @@ int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
 int32_t NetDnsResultCallbackProxy::OnDnsQueryResultReport(uint32_t listsize,
     const std::list<NetDnsQueryResultReport> dnsResultReport)
 {
-    NETNATIVE_LOGE("Proxy OnDnsQueryResultReport");
+    NETNATIVE_LOG_D("Proxy OnDnsQueryResultReport");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");
@@ -116,7 +116,7 @@ int32_t NetDnsResultCallbackProxy::OnDnsQueryResultReport(uint32_t listsize,
 int32_t NetDnsResultCallbackProxy::OnDnsQueryAbnormalReport(uint32_t eventfailcause,
     const NetDnsQueryResultReport dnsResultReport)
 {
-    NETNATIVE_LOGE("Proxy OnDnsQueryAbnormalReport");
+    NETNATIVE_LOG_D("Proxy OnDnsQueryAbnormalReport");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetDnsResultCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");

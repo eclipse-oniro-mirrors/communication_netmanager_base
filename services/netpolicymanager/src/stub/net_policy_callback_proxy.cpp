@@ -170,7 +170,7 @@ int32_t NetPolicyCallbackProxy::SendRequest(MessageParcel &data, uint32_t code)
     MessageOption option;
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 

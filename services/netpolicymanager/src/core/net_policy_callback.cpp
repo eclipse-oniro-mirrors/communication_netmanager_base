@@ -144,7 +144,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t ru
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_I("NetUidRuleChange uid=%{public}d policy=%{public}d", uid, rule);
+    NETMGR_LOG_D("NetUidRuleChange uid=%{public}d policy=%{public}d", uid, rule);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidRuleChange(uid, rule);

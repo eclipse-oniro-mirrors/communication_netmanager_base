@@ -377,7 +377,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         return;
     }
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
-        NETMGR_LOG_W("Can not find request[%{public}d]", netrequest.requestId);
+        NETMGR_LOG_D("Can not find request[%{public}d]", netrequest.requestId);
         return;
     }
     if (netScore_ >= bestScore) {

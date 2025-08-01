@@ -123,7 +123,7 @@ void EventManager::DeleteListener(const std::string &type)
 
 void EventManager::DeleteAllListener()
 {
-    NETMANAGER_BASE_LOGI("DeleteAllListener");
+    NETMANAGER_BASE_LOGD("DeleteAllListener");
     std::unique_lock<std::shared_mutex> lock(mutexForListenersAndEmitByUv_);
     listeners_.clear();
 }
