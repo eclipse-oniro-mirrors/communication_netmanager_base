@@ -84,7 +84,7 @@ NotifyCallbackProxy::~NotifyCallbackProxy() {}
 int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
                                                        int scope)
 {
-    NETNATIVE_LOGD("Proxy OnInterfaceAddressUpdated");
+    NETNATIVE_LOG_D("Proxy OnInterfaceAddressUpdated");
     MessageParcel data;
     if (!WriteInterfaceAddressData(data, addr, ifName, flags, scope)) {
         NETNATIVE_LOGE("WriteInterfaceAddressData failed");
@@ -111,7 +111,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &addr, 
 int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
                                                        int scope)
 {
-    NETNATIVE_LOGD("Proxy OnInterfaceAddressRemoved");
+    NETNATIVE_LOG_D("Proxy OnInterfaceAddressRemoved");
     MessageParcel data;
     if (!WriteInterfaceAddressData(data, addr, ifName, flags, scope)) {
         NETNATIVE_LOGE("WriteInterfaceAddressData failed");
@@ -238,7 +238,7 @@ int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifNa
 int32_t NotifyCallbackProxy::OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
                                             const std::string &ifName)
 {
-    NETNATIVE_LOGD("Proxy OnRouteChanged");
+    NETNATIVE_LOG_D("Proxy OnRouteChanged");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");
