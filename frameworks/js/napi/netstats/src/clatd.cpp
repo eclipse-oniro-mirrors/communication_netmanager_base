@@ -219,7 +219,7 @@ void Clatd::ProcessV6Packet()
         NETNATIVE_LOGW("skip csum for packet which length is %{public}zd", readLen);
         skip_csum = true;
     }
-    if (tpNet < 0 || tpNet >= CLAT_DATA_LINK_HDR_LEN + CLAT_MAX_MTU) {
+    if (tpNet >= CLAT_DATA_LINK_HDR_LEN + CLAT_MAX_MTU) {
         return;
     }
     ClatdPacketConverter converter = ClatdPacketConverter(readBuf.payload + tpNet, packetLen - tpNet,
