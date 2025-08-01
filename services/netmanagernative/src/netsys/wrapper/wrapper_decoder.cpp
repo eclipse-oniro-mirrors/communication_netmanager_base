@@ -300,7 +300,7 @@ bool WrapperDecoder::InterpreteInfoMsg(const nlmsghdr *hdrMsg)
             message_->PushMessage(NetsysEventMessage::Type::IFINDEX, std::to_string(info->ifi_index));
             auto action = (info->ifi_flags & IFF_LOWER_UP) ? NetsysEventMessage::Action::LINKUP
                                                            : NetsysEventMessage::Action::LINKDOWN;
-            NETNATIVE_LOGD("rcv kernel action %{public}d", static_cast<int>(action));
+            NETNATIVE_LOG_D("rcv kernel action %{public}d", static_cast<int>(action));
             message_->SetAction(action);
             message_->SetSubSys(NetsysEventMessage::SubSys::NET);
             return true;
