@@ -1211,7 +1211,7 @@ int32_t NetConnService::NetDetectionAsync(int32_t netId)
         return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     iterNetwork->second->StartNetDetection(false);
-    NETMGR_LOG_I("End NetDetection");
+    NETMGR_LOG_D("End NetDetection");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1743,7 +1743,7 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
         NETMGR_LOG_E("Input parameter is null.");
         return;
     }
-    NETMGR_LOG_I("CallbackForAvailable supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
+    NETMGR_LOG_D("CallbackForAvailable supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
                  supplier->GetNetSupplierIdent().c_str());
     sptr<NetHandle> netHandle = supplier->GetNetHandle();
     callback->NetAvailable(netHandle);
@@ -2162,7 +2162,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
-    NETMGR_LOG_I("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
+    NETMGR_LOG_D("GetDefaultHttpProxy userId[%{public}d]", httpProxy.GetUserId());
     auto startTime = std::chrono::steady_clock::now();
     if (httpProxy.GetUserId() == ROOT_USER_ID || httpProxy.GetUserId() == INVALID_USER_ID) {
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
@@ -3421,7 +3421,7 @@ void NetConnService::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)
         return;
     }
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
-    NETMGR_LOG_I("OnRemoteDied, callingUid=%{public}u", callingUid);
+    NETMGR_LOG_D("OnRemoteDied, callingUid=%{public}u", callingUid);
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(diedRemoted);
     UnregisterNetConnCallback(callback);
 }
