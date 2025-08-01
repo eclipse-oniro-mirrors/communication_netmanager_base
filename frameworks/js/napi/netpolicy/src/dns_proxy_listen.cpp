@@ -220,7 +220,7 @@ void DnsProxyListen::StartListen()
             epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.empty() ? -1 : EPOLL_TIMEOUT);
         NETNATIVE_LOG_D("now socket num: %{public}zu", serverIdxOfSocket.size());
         if (nfds < 0) {
-            NETNATIVE_LOGD("epoll errno: %{public}d", errno);
+            NETNATIVE_LOG_D("epoll errno: %{public}d", errno);
             continue; // now ignore all errno.
         }
         if (nfds == 0) {
