@@ -1573,7 +1573,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
 
 uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
-    NETNATIVE_LOGD("FindTableByInterfacename netId %{public}d", netId);
+    NETNATIVE_LOG_D("FindTableByInterfacename netId %{public}d", netId);
     auto iter = interfaceToTable_.find(interfaceName);
     if (iter != interfaceToTable_.end()) {
         return ConvertTableByNetId(netId, iter->second);
