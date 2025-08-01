@@ -577,6 +577,124 @@ void SetNicTrafficAllowedFuzzTest(const uint8_t *data, size_t size)
     }
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), dataParcel);
 }
+
+void OnExtensionFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    MessageParcel data0;
+    MessageParcel reply0;
+    std::string extension = NetPolicyGetString(STR_LEN);
+    DelayedSingleton<NetPolicyService>::GetInstance()->OnExtension(extension, data0, reply0);
+
+    MessageParcel data1;
+    MessageParcel reply1;
+    extension = "backup";
+    DelayedSingleton<NetPolicyService>::GetInstance()->OnExtension(extension, data1, reply1);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    extension = "restore";
+    data2.WriteFileDescriptor(-1);
+    DelayedSingleton<NetPolicyService>::GetInstance()->OnExtension(extension, data2, reply2);
+    data2.WriteFileDescriptor(NetPolicyGetData<uint16_t>());
+    DelayedSingleton<NetPolicyService>::GetInstance()->OnExtension(extension, data2, reply2);
+}
+
+void DeleteNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    DelayedSingleton<NetPolicyService>::GetInstance()->DeleteNetworkAccessPolicy(uid);
+}
+
+void SetNicTrafficAllowedFuzzTest02(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    std::vector<std::string> ifaceNames;
+    ifaceNames.push_back(NetPolicyGetString(STR_LEN));
+    ifaceNames.push_back(NetPolicyGetString(STR_LEN));
+    bool status = NetPolicyGetData<bool>();
+    DelayedSingleton<NetPolicyService>::GetInstance()->SetNicTrafficAllowed(ifaceNames, status);
+}
+
+void DelBrokerUidAccessPolicyMapFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    DelayedSingleton<NetPolicyService>::GetInstance()->DelBrokerUidAccessPolicyMap(uid);
+}
+
+void UpdateNetworkAccessPolicyFromConfigFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    std::string bundleName = NetPolicyGetString(STR_LEN);
+    NetworkAccessPolicy policy;
+    DelayedSingleton<NetPolicyService>::GetInstance()->UpdateNetworkAccessPolicyFromConfig(bundleName, policy);
+}
+
+void ResetNetAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    DelayedSingleton<NetPolicyService>::GetInstance()->ResetNetAccessPolicy();
+}
+
+void FactoryResetPoliciesFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    DelayedSingleton<NetPolicyService>::GetInstance()->FactoryResetPolicies();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -607,5 +725,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetNetworkAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::NotifyNetAccessPolicyDiagFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNicTrafficAllowedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnExtensionFuzzTest(data, size);
+    OHOS::NetManagerStandard::DeleteNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNicTrafficAllowedFuzzTest02(data, size);
+    OHOS::NetManagerStandard::DelBrokerUidAccessPolicyMapFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateNetworkAccessPolicyFromConfigFuzzTest(data, size);
+    OHOS::NetManagerStandard::ResetNetAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::FactoryResetPoliciesFuzzTest(data, size);
     return 0;
 }
