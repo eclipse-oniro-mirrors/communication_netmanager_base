@@ -111,13 +111,13 @@ bool WriteToFile(const char *fileName, const char *value)
     }
     int fd = open(fileName, O_WRONLY | O_CLOEXEC);
     if (fd < 0) {
-        NETNATIVE_LOGE("failed to open %{private}s: %{public}s", fileName, strerror(errno));
+        NETNATIVE_LOGE("failed to open file: %{public}s", strerror(errno));
         return false;
     }
 
     const ssize_t len = strlen(value);
     if (write(fd, value, len) != len) {
-        NETNATIVE_LOGE("faield to write %{public}s to %{private}s: %{public}s", value, fileName, strerror(errno));
+        NETNATIVE_LOGE("faield to write %{public}s: %{public}s", value, strerror(errno));
         close(fd);
         return false;
     }
