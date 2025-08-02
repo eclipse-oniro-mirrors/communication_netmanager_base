@@ -67,11 +67,13 @@ macro_rules! impl_typed_array {
         }
 
         impl $name {
-            pub unsafe fn new_with_slice(data: &[$rust_type]) -> Self {
+            pub fn new_with_vec(data: Vec<$rust_type>) -> Self {
+                let raw_buffer = Vec::into_raw_parts(data);
                 Self {
                     inner: ArrayBuffer::new(
-                        data.as_ptr() as *mut u8,
-                        data.len() * $array_type.get_byte_size(),
+                        raw_buffer.0 as *mut u8,
+                        raw_buffer.1 * $array_type.get_byte_size(),
+                        Some(raw_buffer.2)
                     ),
                 }
             }
@@ -143,9 +145,20 @@ macro_rules! impl_typed_array {
                 let value = $helper_name::deserialize(deserializer)?;
                 Ok(unsafe {
                     $name {
-                        inner: ArrayBuffer::new_with_slice(value.0),
+                        inner: ArrayBuffer::new_with_external_slice(value.0),
                     }
                 })
+            }
+        }
+
+        impl Drop for $name {
+            fn drop(&mut self) {
+                if let Some(cap) = self.inner.cap.take() {
+                    let _ = unsafe {
+                        Vec::from_raw_parts(self.inner.data_ptr, self.len(), cap)
+                    };
+
+                }
             }
         }
     };
@@ -201,15 +214,21 @@ pub struct ArrayBufferHelper<'local>(&'local [u8]);
 pub struct ArrayBuffer {
     data_ptr: *mut u8,
     length: usize,
+    cap: Option<usize>, //Some when created from rust, only used to free Vec.
 }
 
 impl ArrayBuffer {
-    fn new(data_ptr: *mut u8, length: usize) -> Self {
-        Self { data_ptr, length }
+    fn new(data_ptr: *mut u8, length: usize, cap: Option<usize>) -> Self {
+        Self { data_ptr, length, cap }
     }
 
-    pub unsafe fn new_with_slice(data: &[u8]) -> Self {
-        Self::new(data.as_ptr() as *mut u8, data.len())
+    fn new_with_external_slice(data: &[u8]) -> Self {
+        Self::new(data.as_ptr() as *mut u8, data.len(), None)
+    }
+
+    pub fn new_with_vec(data: Vec<u8>) -> Self {
+        let raw_buffer = Vec::into_raw_parts(data);
+        Self::new(raw_buffer.0, raw_buffer.1, Some(raw_buffer.2))
     }
 
     pub fn len(&self) -> usize {
@@ -270,6 +289,16 @@ impl<'de> Deserialize<'de> for ArrayBuffer {
         D: serde::Deserializer<'de>,
     {
         let value = ArrayBufferHelper::deserialize(deserializer)?;
-        Ok(unsafe { ArrayBuffer::new_with_slice(value.0) })
+        Ok(unsafe { ArrayBuffer::new_with_external_slice(value.0) })
+    }
+}
+
+impl Drop for ArrayBuffer {
+    fn drop(&mut self) {
+        if let Some(cap) = self.cap.take() {
+            let _ = unsafe {
+                Vec::from_raw_parts(self.data_ptr, self.len(), cap)
+            };
+        }
     }
 }
