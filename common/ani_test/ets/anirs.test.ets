@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Callback, BusinessError, AsyncCallback} from "@ohos.base";
+import {Callback, BusinessError, AsyncCallback, ErrorCallback} from "@ohos.base";
 
 export default namespace ani_test {
     loadLibrary("ani_test")
@@ -128,6 +128,12 @@ export default namespace ani_test {
     export native function executeAsyncCallback2(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback3(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback4(callback: AsyncCallback<int>): void;
+
+    export native function executeErrorCallback1(callback: ErrorCallback): void;
+    export native function executeErrorCallback2(callback: ErrorCallback): void;
+    export native function executeErrorCallback3(callback: ErrorCallback): void;
+    export native function executeErrorCallback4(callback: ErrorCallback): void;
+
 
     export native function businessErrorTest(): void;
 }
@@ -640,10 +646,48 @@ function callback_test():void
 
     // 在devecho上测试，将callback抛到主线程执行
     // let input8: int = 0;
-    // ani_test.executeAsyncCallback4((err: BusinessError, data: int) => {
+    // ani_test.executeAsyncCallback4((err: BusinessError|null, data: int|undefined) => {
     //     console.log("[ani_test] executeCallback4 data = %{public}d", data);
+    //     assertEQ(err?.code, 404);
+    //     if (data) {
+    //        input8 += data;
+    //     }
+    // })
+
+
+    let input9: int = 0;
+    ani_test.executeErrorCallback1((err: BusinessError) => {
+        assertEQ(err.code, 401);
+        input9 += 1;
+    })
+    assertEQ(input9, 1);
+
+    let input10: int = 0;
+    ani_test.executeErrorCallback2((err: BusinessError) => {
+        assertEQ(err.code, 402);
+        input10 += 2 
+    })
+    assertEQ(input10, 2);
+
+    let input11: int = 0;
+    ani_test.executeErrorCallback3((err: BusinessError) => {
+        assertEQ(err.code, 403);
+        input11 += 3;
+    })
+    
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input11, 3);
+
+
+    // 在devecho上测试，将callback抛到主线程执行
+    // let input12: int = 0;
+    // ani_test.executeErrorCallback4((err: BusinessError) => {
     //     assertEQ(err.code, 404);
-    //     input8 += data;
+    //     input12 += 4;
     // })
 }
 

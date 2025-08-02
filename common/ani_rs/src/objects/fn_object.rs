@@ -39,6 +39,10 @@ pub struct AniFnObject<'local>(AniObject<'local>);
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AniAsyncCallback<'local>(AniObject<'local>);
 
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AniErrorCallback<'local>(AniObject<'local>);
+
 impl<'local> AsRef<AniFnObject<'local>> for AniFnObject<'local> {
     fn as_ref(&self) -> &AniFnObject<'local> {
         &self
@@ -46,6 +50,12 @@ impl<'local> AsRef<AniFnObject<'local>> for AniFnObject<'local> {
 }
 
 impl<'local> AsRef<AniObject<'local>> for AniAsyncCallback<'local> {
+    fn as_ref(&self) -> &AniObject<'local> {
+        &self.0
+    }
+}
+
+impl<'local> AsRef<AniObject<'local>> for AniErrorCallback<'local> {
     fn as_ref(&self) -> &AniObject<'local> {
         &self.0
     }
@@ -67,6 +77,14 @@ impl<'local> Deref for AniAsyncCallback<'local> {
     }
 }
 
+impl<'local> Deref for AniErrorCallback<'local> {
+    type Target = AniObject<'local>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl<'local> From<AniFnObject<'local>> for AniObject<'local> {
     fn from(value: AniFnObject<'local>) -> Self {
         value.0
@@ -75,6 +93,12 @@ impl<'local> From<AniFnObject<'local>> for AniObject<'local> {
 
 impl<'local> From<AniAsyncCallback<'local>> for AniObject<'local> {
     fn from(value: AniAsyncCallback<'local>) -> Self {
+        value.0
+    }
+}
+
+impl<'local> From<AniErrorCallback<'local>> for AniObject<'local> {
+    fn from(value: AniErrorCallback<'local>) -> Self {
         value.0
     }
 }
@@ -91,6 +115,12 @@ impl<'local> From<AniAsyncCallback<'local>> for AniRef<'local> {
     }
 }
 
+impl<'local> From<AniErrorCallback<'local>> for AniRef<'local> {
+    fn from(value: AniErrorCallback<'local>) -> Self {
+        value.0.into()
+    }
+}
+
 impl<'local> From<AniRef<'local>> for AniFnObject<'local> {
     fn from(value: AniRef<'local>) -> Self {
         Self::from_raw(value.as_raw() as ani_fn_object)
@@ -103,6 +133,12 @@ impl<'local> From<AniRef<'local>> for AniAsyncCallback<'local> {
     }
 }
 
+impl<'local> From<AniRef<'local>> for AniErrorCallback<'local> {
+    fn from(value: AniRef<'local>) -> Self {
+        Self::from_raw(value.as_raw() as ani_object)
+    }
+}
+
 impl<'local> From<AniObject<'local>> for AniFnObject<'local> {
     fn from(value: AniObject<'local>) -> Self {
         Self::from_raw(value.into_raw())
@@ -110,6 +146,12 @@ impl<'local> From<AniObject<'local>> for AniFnObject<'local> {
 }
 
 impl<'local> From<AniObject<'local>> for AniAsyncCallback<'local> {
+    fn from(value: AniObject<'local>) -> Self {
+        Self::from_raw(value.into_raw())
+    }
+}
+
+impl<'local> From<AniObject<'local>> for AniErrorCallback<'local> {
     fn from(value: AniObject<'local>) -> Self {
         Self::from_raw(value.into_raw())
     }
@@ -158,22 +200,45 @@ impl<'local> AniAsyncCallback<'local> {
     }
 }
 
+impl<'local> AniErrorCallback<'local> {
+    pub fn from_raw(ptr: ani_object) -> Self {
+        Self(AniObject::from_raw(ptr))
+    }
+
+    pub fn as_raw(&self) -> ani_object {
+        self.0.as_raw()
+    }
+
+    pub fn into_raw(self) -> ani_object {
+        self.0.into_raw()
+    }
+
+    pub fn into_global(
+        self,
+        env: &AniEnv,
+    ) -> Result<GlobalRef<AniErrorCallback<'static>>, AniError> {
+        let global = env.create_global_ref(self.into())?;
+        let error_callback = AniErrorCallback::from_raw(global.as_raw());
+        Ok(GlobalRef(error_callback))
+    }
+}
+
 impl<'local> AniFnObject<'local> {
-    pub fn execute_local<const N: usize, T>(
+    pub fn execute_local<T>(
         &self,
         env: &AniEnv<'local>,
         input: T,
     ) -> Result<AniRef, AniError>
     where
-        T: Input<N>,
+        T: InputVec,
     {
         let input = input.input(&env);
         env.function_object_call(&self, &input)
     }
 
-    pub fn execute_current<const N: usize, T>(&self, input: T) -> Result<AniRef, AniError>
+    pub fn execute_current<T>(&self, input: T) -> Result<AniRef, AniError>
     where
-        T: Input<N>,
+        T: InputVec,
     {
         if let Ok(env) = AniVm::get_instance().get_env() {
             self.execute_local(&env, input)
@@ -248,6 +313,43 @@ impl<'local> AniAsyncCallback<'local> {
     }
 }
 
+impl<'local> AniErrorCallback<'local> {
+    pub fn execute_local(
+        &self,
+        env: &AniEnv<'local>,
+        business_error: BusinessError,
+    ) -> Result<AniRef, AniError> {
+        let business_error_ref = env.business_error(business_error.code(), business_error.message()).unwrap();
+        let mut v = vec![business_error_ref];
+        let f = AniFnObject::from(self.0.clone());
+        env.function_object_call(&f, &v)
+    }
+
+    pub fn execute_current(
+        &self,
+        business_error: BusinessError,
+    ) -> Result<AniRef, AniError> {
+        if let Ok(env) = AniVm::get_instance().get_env() {
+            self.execute_local(&env, business_error)
+        } else {
+            let env = AniVm::get_instance().attach_current_thread()?;
+            let res = self.execute_local(&env, business_error);
+            AniVm::get_instance().detach_current_thread()?;
+            return res;
+        }
+    }
+
+    pub fn into_global_callback(
+        self,
+        env: &AniEnv<'local>,
+    ) -> Result<GlobalRefErrorCallback, AniError> {
+        let global_ref = self.into_global(env)?;
+        Ok(GlobalRefErrorCallback {
+            inner: Arc::new(global_ref),
+        })
+    }
+}
+
 impl GlobalRef<AniFnObject<'static>> {
     pub fn execute_global<T>(self: &Arc<Self>, input: T)
     where
@@ -257,12 +359,12 @@ impl GlobalRef<AniFnObject<'static>> {
         let me = self.clone();
         RustClosure::new(move || {
             if let Ok(env) = AniVm::get_instance().get_env() {
-                let _ = env.function_object_call(&me.0, &input.input(&env));
+                me.0.execute_local(&env, input).unwrap();
             } else {
                 ani_rs_error!("Failed to get_env in thread");
             }
         })
-        .send_event("async callback execute global");
+        .send_event("callback execute global");
     }
 
     pub fn execute_global_spawn_thread<T>(self: &Arc<Self>, input: T)
@@ -282,13 +384,11 @@ impl GlobalRef<AniFnObject<'static>> {
         });
         ylong_runtime::spawn_blocking(move || {
             if let Ok(env) = AniVm::get_instance().get_env() {
-                let input = input.input(&env);
-                env.function_object_call(&me.0, &input).unwrap();
+                me.0.execute_local(&env, input).unwrap();
             } else {
                 match AniVm::get_instance().attach_current_thread() {
                     Ok(env) => {
-                        let input = input.input(&env);
-                        env.function_object_call(&me.0, &input).unwrap();
+                        me.0.execute_local(&env, input).unwrap();
                         AniVm::get_instance().detach_current_thread().unwrap();
                     }
                     Err(err) => {
@@ -353,6 +453,56 @@ impl GlobalRef<AniAsyncCallback<'static>> {
     }
 }
 
+impl GlobalRef<AniErrorCallback<'static>> {
+    pub fn execute_global(self: &Arc<Self>, business_error: BusinessError)
+    where
+        Self: 'static,
+    {
+        let me = self.clone();
+        RustClosure::new(move || {
+            if let Ok(env) = AniVm::get_instance().get_env() {
+                me.0.execute_local(&env, business_error).unwrap();
+            } else {
+                ani_rs_error!("Failed to get_env in thread");
+            }
+        })
+        .send_event("Error callback execute global");
+    }
+
+    pub fn execute_global_spawn_thread(
+        self: &Arc<Self>,
+        business_error: BusinessError,
+    ) where
+        Self: 'static,
+    {
+        let me = self.clone();
+        INIT_RUNTIME.call_once(|| {
+            RuntimeBuilder::new_multi_thread()
+                .max_blocking_pool_size(MAX_BLOCKING_POOL_SIZE)
+                .worker_num(1)
+                .build_global()
+                .unwrap_or_else(|_| {
+                    ani_rs_error!("Failed to init runtime");
+                });
+        });
+        ylong_runtime::spawn_blocking(move || {
+            if let Ok(env) = AniVm::get_instance().get_env() {
+                me.0.execute_local(&env, business_error).unwrap();
+            } else {
+                match AniVm::get_instance().attach_current_thread() {
+                    Ok(env) => {
+                        me.0.execute_local(&env, business_error).unwrap();
+                        AniVm::get_instance().detach_current_thread().unwrap();
+                    }
+                    Err(err) => {
+                        ani_rs_error!("Failed to attach_current_thread in thread, err = {:?}", err);
+                    }
+                }
+            }
+        });
+    }
+}
+
 #[derive(Clone)]
 pub struct GlobalRefCallback<T: InputVec + Send + 'static> {
     inner: Arc<GlobalRef<AniFnObject<'static>>>,
@@ -365,6 +515,11 @@ pub struct GlobalRefAsyncCallback<T: InputVec + Send + 'static> {
     phantom: std::marker::PhantomData<T>,
 }
 
+#[derive(Clone)]
+pub struct GlobalRefErrorCallback {
+    inner: Arc<GlobalRef<AniErrorCallback<'static>>>,
+}
+
 impl<T: InputVec + Send + 'static> PartialEq for GlobalRefCallback<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner == other.inner
@@ -372,6 +527,12 @@ impl<T: InputVec + Send + 'static> PartialEq for GlobalRefCallback<T> {
 }
 
 impl<T: InputVec + Send + 'static> PartialEq for GlobalRefAsyncCallback<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+impl PartialEq for GlobalRefErrorCallback {
     fn eq(&self, other: &Self) -> bool {
         self.inner == other.inner
     }
@@ -402,17 +563,21 @@ impl<T: InputVec + Send + 'static> GlobalRefCallback<T> {
     }
 }
 
-pub trait Input<const N: usize> {
-    fn input<'local>(&self, env: &AniEnv<'local>) -> [AniRef<'local>; N];
+impl Eq for GlobalRefErrorCallback {}
+
+impl GlobalRefErrorCallback {
+    pub fn execute(&self, business_error: BusinessError) {
+        self.inner.execute_global(business_error);
+    }
+
+    pub fn execute_spawn_thread(&self, business_error: BusinessError) {
+        self.inner
+            .execute_global_spawn_thread(business_error);
+    }
 }
 
 pub trait InputVec {
     fn input<'local>(&self, env: &AniEnv<'local>) -> Vec<AniRef<'local>>;
-}
-impl Input<0> for () {
-    fn input<'local>(&self, _env: &AniEnv<'local>) -> [AniRef<'local>; 0] {
-        []
-    }
 }
 
 impl InputVec for () {
@@ -423,16 +588,6 @@ impl InputVec for () {
 
 macro_rules! single_tuple_impl {
     ( $flen:tt $(($field:tt $ftype:ident)),*) => {
-        impl<$($ftype),*> Input<$flen> for ($($ftype,)*)
-        where $($ftype: Serialize), *
-        {
-            fn input<'local>(&self, env: &AniEnv<'local>) -> [AniRef<'local>; $flen] {
-                [
-                    $(env.serialize(&self.$field).unwrap(),)*
-                ]
-            }
-        }
-
         impl<$($ftype),*> InputVec for ($($ftype,)*)
         where $($ftype: Serialize), *
         {

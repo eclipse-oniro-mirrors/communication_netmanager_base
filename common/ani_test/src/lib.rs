@@ -76,6 +76,10 @@ ani_rs::ani_constructor!(
         "executeAsyncCallback2": ani_callback::execute_async_callback2,
         "executeAsyncCallback3": ani_callback::execute_async_callback3,
         "executeAsyncCallback4": ani_callback::execute_async_callback4,
+        "executeErrorCallback1": ani_callback::execute_error_callback1,
+        "executeErrorCallback2": ani_callback::execute_error_callback2,
+        "executeErrorCallback3": ani_callback::execute_error_callback3,
+        "executeErrorCallback4": ani_callback::execute_error_callback4,
         "businessErrorTest": business_error::business_error_test,
     ]
 );
