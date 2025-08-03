@@ -50,7 +50,7 @@ constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
 constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
-constexpr int32_t SCREENOFF_DETECTION_INTERVEL_MS = 2 * 60 * 1000;
+constexpr int32_t SCREENOFF_DETECTION_INTERVAL_MS = 2 * 60 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 4;
@@ -170,7 +170,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
-    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSeconds();
+    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -473,9 +473,9 @@ void NetMonitor::SetScreenState(bool isScreenOn)
 
 void NetMonitor::DetectionDelayWhenScreenOff()
 {
-    uint64_t nowTime = CommonUtils::GetCurrentMilliSeconds();
-    if (!isScreenOn_ && (nowTime - lastDetectTimestamp_) < SCREENOFF_DETECTION_INTERVEL_MS) {
-        uint64_t delayTime = SCREENOFF_DETECTION_INTERVEL_MS - (nowTime - lastDetectTimestamp_);
+    uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
+    if (!isScreenOn_ && (nowTime - lastDetectTimestamp_) < SCREENOFF_DETECTION_INTERVAL_MS) {
+        uint64_t delayTime = SCREENOFF_DETECTION_INTERVAL_MS - (nowTime - lastDetectTimestamp_);
         std::unique_lock<std::mutex> locker(detectionMtx_);
         detectionCond_.wait_for(locker, std::chrono::milliseconds(delayTime));
         locker.unlock();

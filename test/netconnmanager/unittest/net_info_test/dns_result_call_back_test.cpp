@@ -74,7 +74,7 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
     netDnsFailReport2.uid_ = TEST_UID;
     netDnsFailReport2.pid_ = TEST_PID;
     netDnsFailReport2.timeused_ = TEST_TIME;
-    netDnsFailReport2.queryresult_ = TEST_FAIL;
+    netDnsFailReport2.queryresult_ = TEST_FAIL_PARAM_INVALID;
     netDnsFailReport2.host_ = TEST_HOST;
 
     std::list<NetsysNative::NetDnsResultReport> netDnsResultReport;
