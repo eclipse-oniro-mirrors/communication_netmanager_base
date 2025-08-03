@@ -81,10 +81,11 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
+    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, int64_t lastDetectTime)
     : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
 {
     netBearType_ = bearType;
+    lastDetectTimestamp_ = lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -485,6 +486,11 @@ int64_t NetMonitor::GetNowMilliSeconds()
 {
     auto timePoint = std::chrono::system_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(timePoint).count();
+}
+
+int64_t NetMonitor::GetLastDetectTime()
+{
+    return lastDetectTimestamp_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

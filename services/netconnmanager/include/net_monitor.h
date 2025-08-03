@@ -45,7 +45,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
+        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, int64_t lastDetectTime);
 
     /**
      * Destroy the NetMonitor
@@ -91,6 +91,7 @@ public:
     void SetScreenState(bool isScreenOn);
 
     void DetectionDelayWhenScreenOff();
+    int64_t GetLastDetectTime();
 
 private:
     void LoadGlobalHttpProxy();
