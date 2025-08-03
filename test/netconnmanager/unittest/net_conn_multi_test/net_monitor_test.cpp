@@ -58,6 +58,7 @@ public:
 
 void NetMonitorTest::SetUpTestCase()
 {
+    instance_->isScreenOn_ = true;
     instance_->Start();
 }
 
@@ -300,6 +301,15 @@ HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
     EXPECT_NO_THROW(instance_->Detection());
     instance_->netBearType_ = BEARER_WIFI;
     EXPECT_NO_THROW(instance_->Detection());
+}
+
+HWTEST_F(NetMonitorTest, DetectionDelayWhenScreenOffTest001, TestSize.Level1)
+{
+    instance_->detectionDelay_ = 0;
+    instance_->isScreenOn_ = false;
+    instance_->lastDetectTimestamp_ = instance_->GetNowMilliSeconds();
+    instance_->DetectionDelayWhenScreenOff();
+    EXPECT_NE(instance_->detectionDelay_, 0);
 }
 
 } // namespace NetManagerStandard
