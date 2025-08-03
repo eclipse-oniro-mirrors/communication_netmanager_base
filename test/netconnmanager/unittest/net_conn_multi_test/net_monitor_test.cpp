@@ -308,10 +308,13 @@ HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
 HWTEST_F(NetMonitorTest, DetectionDelayWhenScreenOffTest001, TestSize.Level1)
 {
     instance_->isScreenOn_ = false;
+    instance_->isDetecting_ = false;
     instance_->lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
-    uint64_t time = CommonUtils::GetCurrentMilliSecond();
-    EXPECT_TRUE(instance_->lastDetectTimestamp_ < time);
-    instance_->DetectionDelayWhenScreenOff();
+    sleep(1);
+    isntance_->Start();
+    EXPECT_TRUE(instance_->isDetecting_);
+    sleep(1);
+    instance_->Stop();
 }
 
 } // namespace NetManagerStandard
