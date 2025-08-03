@@ -83,12 +83,12 @@ void NetDnsResultCallback::IterateDnsReportResults(
     int32_t defaultNetid = 0;
     int32_t result = NetConnService::GetInstance()->GetDefaultNet(defaultNetid);
     NETMGR_LOG_D("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);
-    if (!CheckDnsSentByResult(it.queryresult_)) {
-        continue;
-    }
     for (auto &it : netDnsResultReport) {
         NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
+        if (!CheckDnsSentByResult(it.queryresult_)) {
+            continue;
+        }
         NetDnsResult existResult;
         bool ret =  netDnsResult_.Find(it.netid_, existResult);
         if (!ret && it.netid_ == 0) {

@@ -22,6 +22,7 @@
 #define private public
 #include "net_monitor.h"
 #undef private
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -52,8 +53,9 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
+    static inline NetMonitorInfo info = {true, 0};
     static inline std::shared_ptr<NetMonitor> instance_ =
-        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, true, 0);
+        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, info);
 };
 
 void NetMonitorTest::SetUpTestCase()
@@ -305,11 +307,11 @@ HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
 
 HWTEST_F(NetMonitorTest, DetectionDelayWhenScreenOffTest001, TestSize.Level1)
 {
-    instance_->detectionDelay_ = 0;
     instance_->isScreenOn_ = false;
-    instance_->lastDetectTimestamp_ = instance_->GetNowMilliSeconds();
+    instance_->lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
+    uint64_t time = CommonUtils::GetCurrentMilliSecond();
+    EXPECT_TRUE(instance_->lastDetectTimestamp_ < time);
     instance_->DetectionDelayWhenScreenOff();
-    EXPECT_NE(instance_->detectionDelay_, 0);
 }
 
 } // namespace NetManagerStandard

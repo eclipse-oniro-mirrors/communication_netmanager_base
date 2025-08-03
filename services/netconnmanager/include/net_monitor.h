@@ -34,6 +34,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+typedef struct {
+    bool isScreenOn;
+    uint64_t lastDetectTime;
+} NetMonitorInfo;
+
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
     /**
@@ -45,7 +50,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, int64_t lastDetectTime);
+        const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo);
 
     /**
      * Destroy the NetMonitor
@@ -91,7 +96,7 @@ public:
     void SetScreenState(bool isScreenOn);
 
     void DetectionDelayWhenScreenOff();
-    int64_t GetLastDetectTime();
+    uint64_t GetLastDetectTime();
 
 private:
     void LoadGlobalHttpProxy();
@@ -108,7 +113,6 @@ private:
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
-    int64_t GetNowMilliSeconds();
 
 private:
     uint32_t netId_ = 0;
@@ -132,7 +136,7 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
-    int64_t lastDetectTimestamp_ = 0;
+    uint64_t lastDetectTimestamp_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

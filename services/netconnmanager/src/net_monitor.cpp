@@ -81,11 +81,11 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn, int64_t lastDetectTime)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
+    const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
 {
     netBearType_ = bearType;
-    lastDetectTimestamp_ = lastDetectTime;
+    lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -170,7 +170,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
-    lastDetectTimestamp_ = GetNowMilliSeconds();
+    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSeconds();
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -473,22 +473,16 @@ void NetMonitor::SetScreenState(bool isScreenOn)
 
 void NetMonitor::DetectionDelayWhenScreenOff()
 {
-    int64_t nowTime = GetNowMilliSeconds();
+    uint64_t nowTime = CommonUtils::GetCurrentMilliSeconds();
     if (!isScreenOn_ && (nowTime - lastDetectTimestamp_) < SCREENOFF_DETECTION_INTERVEL_MS) {
-        detectionDelay_ = SCREENOFF_DETECTION_INTERVEL_MS - (nowTime - lastDetectTimestamp_);
+        uint64_t delayTime = SCREENOFF_DETECTION_INTERVEL_MS - (nowTime - lastDetectTimestamp_);
         std::unique_lock<std::mutex> locker(detectionMtx_);
-        detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
+        detectionCond_.wait_for(locker, std::chrono::milliseconds(delayTime));
         locker.unlock();
     }
 }
 
-int64_t NetMonitor::GetNowMilliSeconds()
-{
-    auto timePoint = std::chrono::system_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(timePoint).count();
-}
-
-int64_t NetMonitor::GetLastDetectTime()
+uint64_t NetMonitor::GetLastDetectTime()
 {
     return lastDetectTimestamp_;
 }

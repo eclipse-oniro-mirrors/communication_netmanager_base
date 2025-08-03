@@ -103,6 +103,12 @@ inline uint64_t GetCurrentSecond()
         .count();
 }
 
+inline uint64_t GetCurrentMilliSecond()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+        .count();
+}
+
 bool IsSameNaturalDay(uint32_t current, uint32_t another);
 bool WriteFile(const std::string &filePath, const std::string &fileContent);
 std::string GetHostnameFromURL(const std::string &url);
