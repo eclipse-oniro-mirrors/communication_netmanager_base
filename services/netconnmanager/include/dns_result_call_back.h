@@ -26,6 +26,10 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
+enum DnsFailReason {
+    DNS_FAIL_REASON_PARAM_INVALID = -1101,
+};
+
 struct NetDnsResult {
     uint32_t        totalReports_;
     uint32_t        failReports_;
@@ -39,6 +43,7 @@ public:
 private:
     void IterateDnsReportResults(const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport);
     void RequestNetDetection(uint32_t &failvalue_, uint32_t netid);
+    bool CheckDnsSentByResult(uint32_t result);
 
 private:
     SafeMap<uint32_t, NetDnsResult> netDnsResult_;

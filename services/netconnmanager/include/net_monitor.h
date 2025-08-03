@@ -90,6 +90,8 @@ public:
      */
     void SetScreenState(bool isScreenOn);
 
+    void DetectionDelayWhenScreenOff();
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -105,6 +107,7 @@ private:
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
+    int64_t GetNowMilliSeconds();
 
 private:
     uint32_t netId_ = 0;
@@ -128,6 +131,7 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
+    int64_t lastDetectTimestamp_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

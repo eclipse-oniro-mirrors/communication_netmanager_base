@@ -83,6 +83,9 @@ void NetDnsResultCallback::IterateDnsReportResults(
     int32_t defaultNetid = 0;
     int32_t result = NetConnService::GetInstance()->GetDefaultNet(defaultNetid);
     NETMGR_LOG_D("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);
+    if (!CheckDnsSentByResult(it.queryresult_)) {
+        continue;
+    }
     for (auto &it : netDnsResultReport) {
         NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
@@ -113,6 +116,14 @@ void NetDnsResultCallback::IterateDnsReportResults(
             netDnsResult_.EnsureInsert(it.netid_, existResult);
         }
     }
+}
+
+bool NetDnsResultCallback::CheckDnsSentByResult(uint32_t result)
+{
+    if (result == DNS_FAIL_REASON_PARAM_INVALID) {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

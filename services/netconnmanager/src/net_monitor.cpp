@@ -28,6 +28,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <string>
+#include <chrono>
 
 #include "net_monitor.h"
 #include "dns_config_client.h"
@@ -49,6 +50,7 @@ constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
 constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
+constexpr int32_t SCREENOFF_DETECTION_INTERVEL_MS = 2 * 60 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 4;
@@ -72,6 +74,7 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
         NETMGR_LOG_E("netMonitor is nullptr");
         return;
     }
+    netMonitor->DetectionDelayWhenScreenOff();
     while (netMonitor->IsDetecting()) {
         netMonitor->Detection();
     }
@@ -91,9 +94,11 @@ void NetMonitor::Start()
 {
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
-        NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
-        detectionDelay_ = 0;
-        detectionCond_.notify_all();
+        if (isScreenOn_) {
+            NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
+            detectionDelay_ = 0;
+            detectionCond_.notify_all();
+        }
         return;
     }
     isDetecting_ = true;
@@ -164,6 +169,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
+    lastDetectTimestamp_ = GetNowMilliSeconds();
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -462,6 +468,23 @@ bool NetMonitor::CheckIfSettingsDataReady()
 void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
+}
+
+void NetMonitor::DetectionDelayWhenScreenOff()
+{
+    int64_t nowTime = GetNowMilliSeconds();
+    if (!isScreenOn_ && (nowTime - lastDetectTimestamp_) < SCREENOFF_DETECTION_INTERVEL_MS) {
+        detectionDelay_ = SCREENOFF_DETECTION_INTERVEL_MS - (nowTime - lastDetectTimestamp_);
+        std::unique_lock<std::mutex> locker(detectionMtx_);
+        detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
+        locker.unlock();
+    }
+}
+
+int64_t NetMonitor::GetNowMilliSeconds()
+{
+    auto timePoint = std::chrono::system_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(timePoint).count();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
