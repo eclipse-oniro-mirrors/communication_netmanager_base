@@ -334,7 +334,6 @@ HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     EXPECT_NE(network->netMonitor_, nullptr);
     network->detectResult_ = INVALID_DETECTION_STATE;
     network->NetDetectionForDnsHealth(false);
-    network->InitNetMonitor();
 }
 
 HWTEST_F(NetworkTest, HandleNetMonitorResultTest001, TestSize.Level1)
