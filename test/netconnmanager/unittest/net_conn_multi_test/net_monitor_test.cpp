@@ -311,7 +311,7 @@ HWTEST_F(NetMonitorTest, DetectionDelayWhenScreenOffTest001, TestSize.Level1)
     instance_->isDetecting_ = false;
     instance_->lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
     sleep(1);
-    isntance_->Start();
+    instance_->Start();
     EXPECT_TRUE(instance_->isDetecting_);
     sleep(1);
     instance_->Stop();
