@@ -26,10 +26,6 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-enum DnsFailReason {
-    DNS_FAIL_REASON_PARAM_INVALID = -1101,
-};
-
 struct NetDnsResult {
     uint32_t        totalReports_;
     uint32_t        failReports_;

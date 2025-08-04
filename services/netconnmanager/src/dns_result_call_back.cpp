@@ -21,6 +21,11 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr double FAIL_RATE = 0.6;
 constexpr int32_t MAX_FAIL_VALUE = 3;
+
+enum DnsFailReason {
+    DNS_FAIL_REASON_PARAM_INVALID = -1101,
+};
+
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
