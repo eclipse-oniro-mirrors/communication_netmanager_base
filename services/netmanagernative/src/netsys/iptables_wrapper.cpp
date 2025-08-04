@@ -16,6 +16,8 @@
 #include "iptables_wrapper.h"
 
 #include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/resource.h>
 
 #include "datetime_ex.h"
 #include "net_manager_constants.h"
