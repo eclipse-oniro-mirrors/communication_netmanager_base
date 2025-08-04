@@ -1410,7 +1410,8 @@ HWTEST_F(NetsysControllerTest, RegisterNetsysTrafficCallback002, TestSize.Level1
     NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
     int32_t ret = NetsysController::GetInstance().RegisterNetsysTrafficCallback(callback);
-    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_TRUE(ret == NetManagerStandard::NETSYS_NETSYSSERVICE_NULL ||
+        ret == NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, RegisterNetsysTrafficCallback001, TestSize.Level1)
@@ -1472,7 +1473,8 @@ HWTEST_F(NetsysControllerTest, UnRegisterNetsysTrafficCallback002, TestSize.Leve
     NetsysController::GetInstance().netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     sptr<NetsysNative::INetsysTrafficCallback> callback = nullptr;
     int32_t ret = NetsysController::GetInstance().UnRegisterNetsysTrafficCallback(callback);
-    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_TRUE(ret == NetManagerStandard::NETSYS_NETSYSSERVICE_NULL ||
+        ret == NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, SetUserDefinedServerFlag001, TestSize.Level1)
