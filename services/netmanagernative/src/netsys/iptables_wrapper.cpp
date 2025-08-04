@@ -34,6 +34,8 @@ namespace {
 constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
 constexpr const char *IP6TABLES_CMD_PATH = "/system/bin/ip6tables";
 constexpr const int32_t MAX_IPTABLES_FFRT_TASK_NUM = 200;
+constexpr const int32_t IPTABLES_PROCESS_PRIORITY = -20;
+constexpr const int32_t DEFAULT_PROCESS_PRIORITY = 0;
 } // namespace
 
 IptablesWrapper::IptablesWrapper()
@@ -55,18 +57,22 @@ void IptablesWrapper::ExecuteCommand(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
     NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
     if (CommonUtils::ForkExec(cmdWithWait) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), DEFAULT_PROCESS_PRIORITY);
 }
 
 void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 {
     std::string cmdWithWait = command + " -w 5 ";
     NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
     if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), DEFAULT_PROCESS_PRIORITY);
 }
 
 int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &command)
