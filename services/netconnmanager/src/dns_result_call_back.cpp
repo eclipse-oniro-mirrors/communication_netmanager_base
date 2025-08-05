@@ -91,7 +91,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
     for (auto &it : netDnsResultReport) {
         NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
-        if (!CheckDnsSentByResult(it.queryresult_)) {
+        if (!CheckDnsSentByResult(static_cast<int32_t>(it.queryresult_))) {
             continue;
         }
         NetDnsResult existResult;
@@ -123,7 +123,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
     }
 }
 
-bool NetDnsResultCallback::CheckDnsSentByResult(uint32_t result)
+bool NetDnsResultCallback::CheckDnsSentByResult(int32_t result)
 {
     if (result == DNS_FAIL_REASON_PARAM_INVALID) {
         return false;
