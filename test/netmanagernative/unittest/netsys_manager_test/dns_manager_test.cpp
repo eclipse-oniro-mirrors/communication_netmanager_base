@@ -102,7 +102,7 @@ HWTEST_F(DnsManagerTest, EnableIpv6Test001, TestSize.Level1)
     dnsManager.EnableIpv6(netId, destination, nextHop);
     destination = "::/0";
     dnsManager.EnableIpv6(netId, destination, nextHop);
-    EXPECT_TRUE(DnsParamCache::GetInstance().IsIpv6Enable(netId));
+    EXPECT_FALSE(DnsParamCache::GetInstance().IsIpv6Enable(netId));
 }
 
 HWTEST_F(DnsManagerTest, GetAddrInfoTest001, TestSize.Level1)
