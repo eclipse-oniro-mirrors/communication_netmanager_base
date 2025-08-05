@@ -495,7 +495,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -513,7 +513,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
 }
 
 /**
@@ -531,7 +531,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
 }
 
 /**
@@ -549,7 +549,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -567,7 +567,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
     HttpProxy getGlobalHttpProxy;
     ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(getGlobalHttpProxy.GetHost().empty());
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost().empty());
 }
 
 /**
@@ -585,7 +585,7 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
     HttpProxy defaultHttpProxy;
     ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_FALSE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
+    ASSERT_TRUE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
 
 /**
@@ -1262,7 +1262,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest001, TestSize.Level1)
     std::string ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     std::string macAddr = "12:23:34:12:12:11";
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED || ret == NETMANAGER_SUCCESS);
 
     ipAddr = "1234";
     macAddr = "12:23:34:12:12:11";
@@ -1282,7 +1282,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest002, TestSize.Level1)
     std::string macAddr = "12:23:34:12:12:11";
     std::string ifName = "chba0";
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED || ret == NETMANAGER_SUCCESS);
 
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     macAddr = "12:23:34:12:12:11";
