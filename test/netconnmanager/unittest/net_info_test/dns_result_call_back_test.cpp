@@ -30,6 +30,7 @@ constexpr const int32_t TEST_PID = 1000;
 constexpr const int32_t TEST_TIME = 500;
 constexpr const int32_t TEST_PASS = 0;
 constexpr const int32_t TEST_FAIL = -1;
+constexpr const int32_t TEST_FAIL_PARAM_INVALID = -1101;
 constexpr const char *TEST_HOST = "www.test.com";
 
 class TestDnsResultCallback : public testing::Test {
@@ -54,6 +55,7 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
 {
     NetsysNative::NetDnsResultReport netDnsPassReport;
     NetsysNative::NetDnsResultReport netDnsFailReport;
+    NetsysNative::NetDnsResultReport netDnsFailReport2;
     netDnsPassReport.netid_ = TEST_NETID;
     netDnsPassReport.uid_ = TEST_UID;
     netDnsPassReport.pid_ = TEST_PID;
@@ -68,9 +70,17 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
     netDnsFailReport.queryresult_ = TEST_FAIL;
     netDnsFailReport.host_ = TEST_HOST;
 
+    netDnsFailReport2.netid_ = TEST_NETID;
+    netDnsFailReport2.uid_ = TEST_UID;
+    netDnsFailReport2.pid_ = TEST_PID;
+    netDnsFailReport2.timeused_ = TEST_TIME;
+    netDnsFailReport2.queryresult_ = TEST_FAIL_PARAM_INVALID;
+    netDnsFailReport2.host_ = TEST_HOST;
+
     std::list<NetsysNative::NetDnsResultReport> netDnsResultReport;
     netDnsResultReport.push_back(netDnsPassReport);
     netDnsResultReport.push_back(netDnsFailReport);
+    netDnsResultReport.push_back(netDnsFailReport2);
     int32_t ret = instance_->OnDnsResultReport(netDnsResultReport.size(), netDnsResultReport);
     EXPECT_EQ(ret, 0);
 }

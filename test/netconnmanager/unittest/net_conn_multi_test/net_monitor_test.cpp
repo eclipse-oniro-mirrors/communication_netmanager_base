@@ -22,6 +22,7 @@
 #define private public
 #include "net_monitor.h"
 #undef private
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -52,12 +53,14 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
+    static inline NetMonitorInfo info = {true, 0};
     static inline std::shared_ptr<NetMonitor> instance_ =
-        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, true);
+        std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, info);
 };
 
 void NetMonitorTest::SetUpTestCase()
 {
+    instance_->isScreenOn_ = true;
     instance_->Start();
 }
 
@@ -300,6 +303,18 @@ HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
     EXPECT_NO_THROW(instance_->Detection());
     instance_->netBearType_ = BEARER_WIFI;
     EXPECT_NO_THROW(instance_->Detection());
+}
+
+HWTEST_F(NetMonitorTest, DetectionDelayWhenScreenOffTest001, TestSize.Level1)
+{
+    instance_->isScreenOn_ = false;
+    instance_->isDetecting_ = false;
+    instance_->lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
+    sleep(1);
+    instance_->Start();
+    EXPECT_TRUE(instance_->isDetecting_);
+    sleep(1);
+    instance_->Stop();
 }
 
 } // namespace NetManagerStandard

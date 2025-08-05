@@ -21,6 +21,11 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr double FAIL_RATE = 0.6;
 constexpr int32_t MAX_FAIL_VALUE = 3;
+
+enum DnsFailReason {
+    DNS_FAIL_REASON_PARAM_INVALID = -1101,
+};
+
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
@@ -86,6 +91,9 @@ void NetDnsResultCallback::IterateDnsReportResults(
     for (auto &it : netDnsResultReport) {
         NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
+        if (!CheckDnsSentByResult(it.queryresult_)) {
+            continue;
+        }
         NetDnsResult existResult;
         bool ret =  netDnsResult_.Find(it.netid_, existResult);
         if (!ret && it.netid_ == 0) {
@@ -113,6 +121,14 @@ void NetDnsResultCallback::IterateDnsReportResults(
             netDnsResult_.EnsureInsert(it.netid_, existResult);
         }
     }
+}
+
+bool NetDnsResultCallback::CheckDnsSentByResult(uint32_t result)
+{
+    if (result == DNS_FAIL_REASON_PARAM_INVALID) {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

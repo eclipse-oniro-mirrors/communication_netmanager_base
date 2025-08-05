@@ -39,6 +39,7 @@ public:
 private:
     void IterateDnsReportResults(const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport);
     void RequestNetDetection(uint32_t &failvalue_, uint32_t netid);
+    bool CheckDnsSentByResult(uint32_t result);
 
 private:
     SafeMap<uint32_t, NetDnsResult> netDnsResult_;
