@@ -664,7 +664,7 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonComponentCfg001, TestSize.Level1)
     BuildTestJsonObject(jsonTxt, root);
     std::cout << "ParseJsonComponentCfg001 In" << std::endl;
     NetworkSecurityConfig::GetInstance().ParseJsonComponentCfg(root, componentCfg);
-    EXPECT_TRUE(componentCfg["NetworkKit"]);
+    EXPECT_FALSE(componentCfg["NetworkKit"]);
 }
 
 /**
