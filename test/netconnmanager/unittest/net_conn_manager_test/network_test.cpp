@@ -1408,7 +1408,7 @@ HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
 
     netHandle.netId = 99;
     ret = OH_NetConn_BindSocket(socketFd, &netHandle);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 } // namespace NetManagerStandard

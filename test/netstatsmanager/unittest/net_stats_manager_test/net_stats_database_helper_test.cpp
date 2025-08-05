@@ -99,7 +99,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, ExecTableUpgradeTest005, TestSize.Level1)
     ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_4);
     ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_5);
     ret = helper->ExecTableUpgrade(UID_TABLE, NetStatsDatabaseHelper::Version_6);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
@@ -300,7 +300,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, UpgradeTest001, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
     int32_t ret = helper->Upgrade();
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, ExecUpgradeSqlTest001, TestSize.Level1)

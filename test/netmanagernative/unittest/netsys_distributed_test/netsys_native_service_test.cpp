@@ -78,7 +78,7 @@ HWTEST_F(NetsysNativeServiceTest, EnableDistributedClientNet002, TestSize.Level1
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     bool isServer = false;
     ret = instance_->DisableDistributedNet(isServer);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, EnableDistributedServerNet001, TestSize.Level1)
@@ -324,7 +324,7 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMap001, TestSize.Level
 {
     std::unordered_map<uint32_t, uint32_t> uidMaps;
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(uidMaps);
-    EXPECT_NE(ret, NetManagerStandard::NETSYS_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

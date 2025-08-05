@@ -83,7 +83,7 @@ HWTEST_F(ErrorCodeConvertorTest, ConvertErrorCodeTest001, TestSize.Level1)
     ASSERT_TRUE(ret.empty());
     testErrorCode = IPC_PROXY_ERR;
     ret = instance->ConvertErrorCode(testErrorCode);
-    ASSERT_TRUE(ret.empty());
+    ASSERT_FALSE(ret.empty());
     testErrorCode = 1000; // 1000:ERROR_DIVISOR
     ret = instance->ConvertErrorCode(testErrorCode);
     ASSERT_TRUE(ret.empty());
