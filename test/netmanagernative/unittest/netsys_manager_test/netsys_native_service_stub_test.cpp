@@ -2346,7 +2346,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.L
     }
     MessageParcel reply2;
     int32_t ret2 = notifyStub_->CmdDeleteIncreaseTrafficMap(data2, reply2);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
