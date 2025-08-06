@@ -41,6 +41,7 @@ static constexpr uint32_t TEST_UID1 = 10010;
 static constexpr uint32_t TEST_UID2 = 10100;
 static constexpr uint32_t TEST_UID_IF1 = 11001;
 static constexpr uint32_t TEST_UID_IF2 = 11002;
+static constexpr uint32_t TEST_UID_IF3 = 12;
 static constexpr uint32_t TEST_BYTES0 = 11;
 static constexpr uint32_t STATS_TYPE_INVALID_VALUE = 4;
 static constexpr uint64_t TEST_COOKIE1 = 1;
@@ -339,6 +340,12 @@ HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
     ret = uidIfStatsMap.Write(key2, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
+    app_uid_if_stats_key key3 = {0};
+    key3.ifIndex = TEST_UID_IF3;
+    key3.uId = TEST_UID2;
+    ret = uidIfStatsMap.Write(key3, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     EXPECT_EQ(bpfStats->GetAllStatsInfo(stats), NETSYS_SUCCESS);
@@ -364,6 +371,12 @@ HWTEST_F(NetsysBpfStatsTest, GetAllSimStatsInfo001, TestSize.Level1)
     key2.ifIndex = TEST_UID_IF2;
     key2.uId = TEST_UID2;
     ret = uidSimStatsMap.Write(key2, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    app_uid_sim_stats_key key3 = {0};
+    key3.ifIndex = TEST_UID_IF3;
+    key3.uId = TEST_UID2;
+    ret = uidSimStatsMap.Write(key3, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
