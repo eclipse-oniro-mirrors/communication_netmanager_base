@@ -72,6 +72,8 @@ ani_rs::ani_constructor!(
         "executeCallback2": ani_callback::execute_callback2,
         "executeCallback3": ani_callback::execute_callback3,
         "executeCallback4": ani_callback::execute_callback4,
+        "executeCallback5": ani_callback::execute_callback5,
+        "executeCallback6": ani_callback::execute_callback6,
         "executeAsyncCallback1": ani_callback::execute_async_callback1,
         "executeAsyncCallback2": ani_callback::execute_async_callback2,
         "executeAsyncCallback3": ani_callback::execute_async_callback3,
