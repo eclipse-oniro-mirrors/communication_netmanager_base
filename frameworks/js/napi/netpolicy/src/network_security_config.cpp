@@ -455,13 +455,11 @@ void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pin
             continue;
         }
         pin.digestAlgorithm_ = cJSON_GetStringValue(digestAlgorithm);
-        NETMGR_LOG_D("digestAlgorithm: %{public}s", pin.digestAlgorithm_.c_str());
         cJSON *digest = cJSON_GetObjectItem(pinsItem, TAG_DIGEST.c_str());
         if (digest == nullptr || !cJSON_IsString(digest)) {
             continue;
         }
         pin.digest_ = cJSON_GetStringValue(digest);
-        NETMGR_LOG_D("digest: %{public}s", pin.digest_.c_str());
         pinSet.pins_.push_back(pin);
     }
     auto isOpenMode = cJSON_GetObjectItem(root, "openMode");
@@ -682,7 +680,6 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
 
     std::stringstream ss;
     for (const auto &pin : pPinSet->pins_) {
-        NETMGR_LOG_D("Got pinnned pubkey %{public}s", pin.digest_.c_str());
         ss << pin.digestAlgorithm_ << "//" << pin.digest_ << ";";
     }
 
@@ -751,10 +748,6 @@ void NetworkSecurityConfig::DumpConfigs()
         }
         NETMGR_LOG_I("domainConfigs_.domains_.pinSet_.expiration_[%{public}s]",
                      domainConfig.pinSet_.expiration_.c_str());
-        for (auto &pin : domainConfig.pinSet_.pins_) {
-            NETMGR_LOG_I("domainConfigs_.domains_.pinSet_.pins[%{public}s][%{public}s]", pin.digestAlgorithm_.c_str(),
-                         pin.digest_.c_str());
-        }
         for (auto &cert : domainConfig.trustAnchors_.certs_) {
             NETMGR_LOG_I("domainConfigs_.domains_.trustAnchors_.certs_[%{public}s]", cert.c_str());
         }
