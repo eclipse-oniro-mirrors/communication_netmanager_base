@@ -13,7 +13,7 @@
 
 use std::thread;
 
-use ani_rs::{business_error::BusinessError, objects::{AniAsyncCallback, AniFnObject, AniErrorCallback}, AniEnv};
+use ani_rs::{business_error::BusinessError, objects::{AniAsyncCallback, AniErrorCallback, AniFnObject}, typed_array::{ArrayBuffer, Uint32Array}, AniEnv};
 
 #[ani_rs::native]
 pub fn execute_callback1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
@@ -45,6 +45,29 @@ pub fn execute_callback4(env: &AniEnv, callback: AniFnObject) -> Result<(), Busi
     Ok(())
 }
 
+#[ani_rs::native]
+pub fn execute_callback5(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback.into_global_callback::<(ArrayBuffer,)>(env).unwrap();
+
+    thread::spawn(move || {
+        let buff = ArrayBuffer::new_with_vec(vec![1,2,3]);
+        global_callback.execute_spawn_thread((buff,));
+    });
+    
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_callback6(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback.into_global_callback::<(Uint32Array,)>(env).unwrap();
+
+    thread::spawn(move || {
+        let buff = Uint32Array::new_with_vec(vec![10,20,30]);
+        global_callback.execute_spawn_thread((buff,));
+    });
+    
+    Ok(())
+}
 
 #[ani_rs::native]
 pub fn execute_async_callback1(env: &AniEnv, async_callback: AniAsyncCallback) -> Result<(), BusinessError> {

@@ -124,6 +124,8 @@ export default namespace ani_test {
     export native function executeCallback2(callback: Callback<int>): void;
     export native function executeCallback3(callback: Callback<int>): void;
     export native function executeCallback4(callback: Callback<int>): void;
+    export native function executeCallback5(callback: Callback<ArrayBuffer>): void;
+    export native function executeCallback6(callback: Callback<Uint32Array>): void;
     export native function executeAsyncCallback1(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback2(callback: AsyncCallback<int>): void;
     export native function executeAsyncCallback3(callback: AsyncCallback<int>): void;
@@ -689,6 +691,30 @@ function callback_test():void
     //     assertEQ(err.code, 404);
     //     input12 += 4;
     // })
+
+    let input13: int = 0;
+    ani_test.executeCallback5((data: ArrayBuffer) => {
+        input13 += data.at(0) + data.at(1) + data.at(2);
+    })
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input13, 6);
+
+    let input14: double = 0;
+    ani_test.executeCallback6((data: Uint32Array) => {
+        input14 += data.at(0) as double;
+        input14 += data.at(1) as double;
+        input14 += data.at(2) as double;
+    })
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input14, 60);
 }
 
 function business_test()
