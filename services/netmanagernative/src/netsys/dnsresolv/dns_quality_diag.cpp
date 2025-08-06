@@ -126,7 +126,6 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         if (failreason == 0) {
             ParseReportAddr(size, addrinfo, report);
         }
-        NETNATIVE_LOG_D("ReportDnsResult: %{public}s", report.host_.c_str());
         std::shared_ptr<NetsysNative::NetDnsResultReport> rpt =
             std::make_shared<NetsysNative::NetDnsResultReport>(report);
         auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT, rpt);
