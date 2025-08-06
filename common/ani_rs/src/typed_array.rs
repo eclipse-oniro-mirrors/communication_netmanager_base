@@ -59,7 +59,7 @@ macro_rules! impl_typed_array {
     ($name: ident, $helper_name: ident, $rust_type: ident, $array_type: expr, $serde_name: literal) => {
         #[derive(Serialize, Deserialize)]
         #[serde(rename = $serde_name)]
-        pub struct $helper_name<'local>(&'local [u8]);
+        struct $helper_name<'local>(&'local [u8]);
 
         #[derive(Clone)]
         pub struct $name {
@@ -161,6 +161,9 @@ macro_rules! impl_typed_array {
                 }
             }
         }
+
+        unsafe impl Send for $name {}
+        unsafe impl Sync for $name {}
     };
 }
 
@@ -208,7 +211,7 @@ impl_typed_array!(
 );
 
 #[derive(Serialize, Deserialize)]
-pub struct ArrayBufferHelper<'local>(&'local [u8]);
+struct ArrayBufferHelper<'local>(&'local [u8]);
 
 #[derive(Clone)]
 pub struct ArrayBuffer {
@@ -302,3 +305,6 @@ impl Drop for ArrayBuffer {
         }
     }
 }
+
+unsafe impl Send for ArrayBuffer {}
+unsafe impl Sync for ArrayBuffer {}
