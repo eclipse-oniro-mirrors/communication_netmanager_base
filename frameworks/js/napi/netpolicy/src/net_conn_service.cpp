@@ -825,7 +825,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     uint32_t reqId = 0;
     uint32_t uid = 0;
     if (!FindSameCallback(callback, reqId, registerType, uid) || registerType == INVALIDTYPE) {
-        NETMGR_LOG_E("NotFindSameCallback callUid:%{public}u reqId:%{public}u, uid:%{public}d",
+        NETMGR_LOG_D("NotFindSameCallback callUid:%{public}u reqId:%{public}u, uid:%{public}d",
                      callingUid, reqId, uid);
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
