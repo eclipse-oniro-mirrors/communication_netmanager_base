@@ -366,7 +366,7 @@ __attribute__((no_sanitize("cfi"))) std::string NetworkSecurityConfig::GetJsonPr
     std::string jsonProfile;
     auto ret = netBundle->GetJsonFromBundle(jsonProfile);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("get profile failed");
+        NETMGR_LOG_I("get profile failed");
         dlclose(handler);
         return "";
     }
