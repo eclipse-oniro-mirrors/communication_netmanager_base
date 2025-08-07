@@ -54,7 +54,7 @@ int32_t NetConnCallbackProxy::NetAvailable(sptr<NetHandle> &netHandle)
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_AVAILABLE),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -107,7 +107,7 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -147,7 +147,7 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &net
         remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE),
                             data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -181,7 +181,7 @@ int32_t NetConnCallbackProxy::NetLost(sptr<NetHandle> &netHandle)
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_LOST),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -206,7 +206,7 @@ int32_t NetConnCallbackProxy::NetUnavailable()
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_UNAVAILABLE),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -242,7 +242,7 @@ int32_t NetConnCallbackProxy::NetBlockStatusChange(sptr<NetHandle> &netHandle, b
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
@@ -281,7 +281,7 @@ int32_t PreAirplaneCallbackProxy::PreAirplaneStart()
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(PreAirplaneCallbackInterfaceCode::PRE_AIRPLANE_START),
                                       data, reply, option);
     if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        NETMGR_LOG_D("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
