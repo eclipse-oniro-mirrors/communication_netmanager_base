@@ -70,7 +70,7 @@ using GetNetBundleClass = INetBundle *(*)();
 NetworkSecurityConfig::NetworkSecurityConfig()
 {
     if (GetConfig() != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("GetConfig failed");
+        NETMGR_LOG_I("GetConfig failed");
     } else {
         NETMGR_LOG_D("Succeed to get NetworkSecurityConfig");
     }
@@ -326,7 +326,7 @@ int32_t NetworkSecurityConfig::GetConfig()
     std::string json;
     auto ret = GetJsonFromBundle(json);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("Get json failed.");
+        NETMGR_LOG_I("Get json failed.");
         return ret;
     }
 
