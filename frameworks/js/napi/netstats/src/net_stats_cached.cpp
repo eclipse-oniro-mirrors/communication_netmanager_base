@@ -876,7 +876,7 @@ void NetStatsCached::CacheIptablesStats()
 
     int32_t ret = NetsysController::GetInstance().GetNetworkCellularSharingTraffic(traffic, ifaceName);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetTrafficBytes err, ret[%{public}d]", ret);
+        NETMGR_LOG_I("GetTrafficBytes err, ret[%{public}d]", ret);
         return;
     }
     CacheIptablesStatsService(traffic, ifaceName);
