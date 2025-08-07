@@ -50,7 +50,7 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
     AppExecFwk::BundleInfo bundleInfo;
     auto ret = bundleMgrProxy->GetBundleInfoForSelf(0, bundleInfo);
     if (ret != ERR_OK) {
-        NETMGR_LOG_E("GetSelfBundleName: bundleName get fail.");
+        NETMGR_LOG_I("GetSelfBundleName: bundleName get fail.");
         return NETMANAGER_ERR_INTERNAL;
     }
     ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
