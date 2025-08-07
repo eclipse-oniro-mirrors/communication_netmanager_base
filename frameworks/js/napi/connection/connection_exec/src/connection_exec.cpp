@@ -1035,7 +1035,7 @@ bool ConnectionExec::NetInterfaceExec::ExecIfaceUnregister(IfaceUnregisterContex
 
     int32_t ret = NetConnClient::GetInstance().UnregisterNetInterfaceCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("Unregister result %{public}d", ret);
+        NETMANAGER_BASE_LOGD("Unregister result %{public}d", ret);
         context->SetErrorCode(ret);
     }
     return ret == NETMANAGER_SUCCESS;
