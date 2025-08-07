@@ -216,7 +216,7 @@ int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &inf
 {
     NETMGR_LOG_I("WriteStatsData enter tableName:%{public}s", tableName.c_str());
     if (infos.empty() || tableName.empty()) {
-        NETMGR_LOG_E("Param wrong, info: %{public}zu, tableName: %{public}zu", infos.size(), tableName.size());
+        NETMGR_LOG_I("Param wrong, info: %{public}zu, tableName: %{public}zu", infos.size(), tableName.size());
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
