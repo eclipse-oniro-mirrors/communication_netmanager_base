@@ -1872,7 +1872,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkCellularSharingTraffic(NetworkSharin
 
     int32_t ret = reply.ReadInt32();
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGD("Fail to GetNetworkCellularSharingTraffic ret= %{public}d", ret);
+        NETNATIVE_LOGI("Fail to GetNetworkCellularSharingTraffic ret= %{public}d", ret);
         return ret;
     }
 
