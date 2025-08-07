@@ -439,7 +439,7 @@ int32_t SharingManager::GetNetworkCellularSharingTraffic(NetworkSharingTraffic &
         std::string result = iptablesWrapper_->RunCommandForRes(ipType, cmds);
         int32_t ret = QueryCellularSharingTraffic(traffic0, result, ifaceName0);
         if (ret != NETMANAGER_SUCCESS) {
-            NETNATIVE_LOGE("ipv4 GetNetworkSharingTraffic failed");
+            NETNATIVE_LOGI("ipv4 GetNetworkSharingTraffic failed");
             return NETMANAGER_ERROR;
         }
         traffic.receive += traffic0.receive;
@@ -476,7 +476,7 @@ int32_t SharingManager::QueryCellularSharingTraffic(NetworkSharingTraffic &traff
             return NETMANAGER_SUCCESS;
         }
     }
-    NETNATIVE_LOGE("GetNetworkSharingTraffic failed");
+    NETNATIVE_LOGI("GetNetworkSharingTraffic failed");
     return NETMANAGER_ERROR;
 }
 
