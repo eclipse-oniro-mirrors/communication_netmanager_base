@@ -70,7 +70,7 @@ using GetNetBundleClass = INetBundle *(*)();
 NetworkSecurityConfig::NetworkSecurityConfig()
 {
     if (GetConfig() != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetConfig failed");
+        NETMGR_LOG_D("GetConfig failed");
     } else {
         NETMGR_LOG_D("Succeed to get NetworkSecurityConfig");
     }
@@ -326,7 +326,7 @@ int32_t NetworkSecurityConfig::GetConfig()
     std::string json;
     auto ret = GetJsonFromBundle(json);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Get json failed.");
+        NETMGR_LOG_D("Get json failed.");
         return ret;
     }
 
@@ -366,7 +366,7 @@ __attribute__((no_sanitize("cfi"))) std::string NetworkSecurityConfig::GetJsonPr
     std::string jsonProfile;
     auto ret = netBundle->GetJsonFromBundle(jsonProfile);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("get profile failed");
+        NETMGR_LOG_D("get profile failed");
         dlclose(handler);
         return "";
     }
