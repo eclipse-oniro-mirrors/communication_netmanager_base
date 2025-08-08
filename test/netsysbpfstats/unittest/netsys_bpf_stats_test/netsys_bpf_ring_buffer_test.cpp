@@ -116,6 +116,7 @@ HWTEST_F(NetsysBpfRingBufferTest, HandleNetStatsEventCallbackTest001, TestSize.L
 HWTEST_F(NetsysBpfRingBufferTest, ListenNetStatsRingBufferThreadTest001, TestSize.Level1)
 {
     std::unique_ptr<NetsysBpfRingBuffer> bpfringbuffer = std::make_unique<NetsysBpfRingBuffer>();
+    bpfringbuffer->existNetStatsThread_ = false;
     bpfringbuffer->ListenNetStatsRingBufferThread();
     EXPECT_NE(bpfringbuffer, nullptr);
 }
