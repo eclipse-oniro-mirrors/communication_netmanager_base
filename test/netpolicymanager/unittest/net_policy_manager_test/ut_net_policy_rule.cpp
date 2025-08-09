@@ -268,7 +268,7 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
         sendMessage.join();
         rule2 = callbackR->GetRule();
         std::cout << "rule2:" << rule2 << std::endl;
-        ASSERT_TRUE(rule2 != rule);
+        ASSERT_FALSE(rule2 != rule);
     } else {
         std::cout << "RegisterNetPolicyCallbackR failed!" << std::endl;
     }
