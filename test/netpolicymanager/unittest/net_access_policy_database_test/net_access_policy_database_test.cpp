@@ -29,6 +29,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr const char* DATABASE_NAME_TEST = "/data/service/el1/public/netmanager/net_uid_access_policy_test.db";
+constexpr const char* DATABASE_BACK_NAME_TEST =
+    "/data/service/el1/public/netmanager/net_uid_access_policy_back_test.db";
 using namespace testing::ext;
 
 class NetAccessPolicyRDBTest : public testing::Test {
@@ -65,6 +68,27 @@ HWTEST_F(NetAccessPolicyRDBTest, BackUpPolicyDB001, TestSize.Level1)
 {
     NetAccessPolicyRDB netAccessPolicy;
     auto ret = netAccessPolicy.BackUpPolicyDB(DATABASE_NAME, DATABASE_BACK_NAME);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, BackUpPolicyDB002, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.BackUpPolicyDB("", DATABASE_BACK_NAME);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, BackUpPolicyDB03, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.BackUpPolicyDB(DATABASE_NAME, "");
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, BackUpPolicyDB004, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.BackUpPolicyDB(DATABASE_NAME_TEST, DATABASE_BACK_NAME_TEST);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -167,6 +191,13 @@ HWTEST_F(NetAccessPolicyRDBTest, GetRdbStore001, TestSize.Level1)
 {
     NetAccessPolicyRDB netAccessPolicy;
     auto ret = netAccessPolicy.GetRdbStore();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetAccessPolicyRDBTest, GetBackUpRdbStore001, TestSize.Level1)
+{
+    NetAccessPolicyRDB netAccessPolicy;
+    auto ret = netAccessPolicy.GetBackUpRdbStore();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

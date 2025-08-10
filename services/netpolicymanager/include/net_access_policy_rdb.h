@@ -59,6 +59,7 @@ public:
     ~NetAccessPolicyRDB() = default;
     int32_t InitRdbStore();
     int32_t GetRdbStore();
+    int32_t GetBackUpRdbStore();
     int32_t InsertData(NetAccessPolicyData policy);
     int32_t DeleteByUid(const int32_t uid);
     int32_t UpdateByUid(int32_t uid, NetAccessPolicyData policy);
@@ -87,6 +88,7 @@ public:
 
 private:
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_{nullptr};
+    std::shared_ptr<NativeRdb::RdbStore> backupRdbStore_{nullptr};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
