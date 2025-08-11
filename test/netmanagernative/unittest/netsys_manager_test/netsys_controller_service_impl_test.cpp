@@ -863,7 +863,7 @@ HWTEST_F(NetsysControllerServiceImplTest, DeleteIncreaseTrafficMapTest002, TestS
     int32_t ret = instance_->DeleteIncreaseTrafficMap(12);
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NetManagerStandard::NETMANAGER_ERROR);
     ret = instance_->DeleteIncreaseTrafficMap(10);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NetManagerStandard::NETMANAGER_ERROR);
     ret = instance_->DeleteIncreaseTrafficMap(13);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }

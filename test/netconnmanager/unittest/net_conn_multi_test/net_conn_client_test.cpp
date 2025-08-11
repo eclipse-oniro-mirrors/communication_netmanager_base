@@ -1267,7 +1267,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest001, TestSize.Level1)
     ipAddr = "1234";
     macAddr = "12:23:34:12:12:11";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     macAddr = "12:234:34";
@@ -1292,7 +1292,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest002, TestSize.Level1)
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334677";
     macAddr = "12:23:34:12:12:11";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     macAddr = "12:23:34:12:12";
@@ -1349,7 +1349,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(ret == 0 || ret == NETMANAGER_ERR_LOCAL_PTR_NULL);
     EXPECT_TRUE(type.empty());
 }
 

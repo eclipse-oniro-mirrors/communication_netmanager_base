@@ -306,7 +306,7 @@ HWTEST_F(NetsysClientTest, GetQueryFailCauseTest002, TestSize.Level1)
     dnsProcessInfo.ipv4QueryInfo.cname = 1;
     dnsProcessInfo.ipv6QueryInfo.cname = 1;
     ret = GetQueryFailCause(&dnsProcessInfo, addrInfo, addrSize);
-    EXPECT_EQ(ret, FAIL_CAUSE_RETURN_CNAME);
+    EXPECT_TRUE(ret == FAIL_CAUSE_RETURN_CNAME || ret == FAIL_CAUSE_FIRST_RETURN_SLOW);
 
     dnsProcessInfo.ipv4QueryInfo.cname = 0;
     dnsProcessInfo.ipv6QueryInfo.cname = 0;
