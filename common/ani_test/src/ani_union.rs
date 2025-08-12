@@ -13,11 +13,11 @@
 
 use std::collections::HashMap;
 
-use ani_rs::{business_error::BusinessError, typed_array::Uint8Array};
+use ani_rs::{business_error::BusinessError, typed_array::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-enum Data<'local> {
+enum Data {
     Boolean(bool),
     I8(i8),
     I16(i16),
@@ -25,19 +25,24 @@ enum Data<'local> {
     I64(i64),
     F64(f64),
     S(String),
-    ArrayBuffer(&'local [u8]),
+    ArrayBuffer(ArrayBuffer),
     Null(()),
     Record(HashMap<String, String>),
     Array(Vec<String>),
-    Uint8Array(Uint8Array<'local>),
+    Int8Array(Int8Array),
+    Uint8Array(Uint8Array),
+    Int16Array(Int16Array),
+    Uint16Array(Uint16Array),
+    Int32Array(Int32Array),
+    Uint32Array(Uint32Array),
 }
 
 #[ani_rs::native]
-pub fn union_test<'local>(input: Data<'local>) -> Result<Data<'local>, BusinessError> {
+pub fn union_test(input: Data) -> Result<Data, BusinessError> {
     Ok(input)
 }
 
 #[ani_rs::native]
-pub fn union_test2<'local>(input: Option<Data<'local>>) -> Result<Option<Data<'local>>, BusinessError> {
+pub fn union_test2(input: Option<Data>) -> Result<Option<Data>, BusinessError> {
     Ok(input)
 }

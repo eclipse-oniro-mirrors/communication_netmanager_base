@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![feature(vec_into_raw_parts)]
+
 pub use ani_rs_macros::ani;
 pub use ani_rs_macros::native;
 
