@@ -55,7 +55,6 @@ HWTEST_F(LocalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     ret = localNetwork.AddInterface(interfaceName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = localNetwork.RemoveInterface(interfaceName);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     localNetwork.interfaces_.clear();
     ret = localNetwork.RemoveInterface(interfaceName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);

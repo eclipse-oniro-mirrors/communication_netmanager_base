@@ -123,7 +123,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager007, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
     int64_t ret = flow->GetIfaceRxBytes(iface);
-    ASSERT_GE(ret, 0);
+    ASSERT_NE(ret, 0);
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager008, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
     int64_t ret = flow->GetIfaceTxBytes(iface);
-    ASSERT_GE(ret, 0);
+    ASSERT_NE(ret, 0);
 }
 
 /**
@@ -149,7 +149,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager009, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
     int64_t ret = flow->GetIfaceRxPackets(iface);
-    ASSERT_GE(ret, 0);
+    ASSERT_NE(ret, 0);
 }
 
 /**
@@ -162,7 +162,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager010, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
     int64_t ret = flow->GetIfaceTxPackets(iface);
-    ASSERT_GE(ret, 0);
+    ASSERT_NE(ret, 0);
 }
 
 /**

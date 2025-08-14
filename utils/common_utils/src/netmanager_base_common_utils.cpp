@@ -96,10 +96,10 @@ std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "
                                           "es",   "in",      "online", "shop", "vip", "club", "xyz",  "top", "icu",
                                           "work", "website", "tech",   "asia", "xin", "co",   "mobi", "info"};
 constexpr const char *BUNDLENAME_DELIMITER = ",";
-constexpr const char *SIM_APP_BUNDLENAMES = "com.example.sim.tmp,com.example.sim";
-constexpr const char *INSTALL_SOURCE_FROM_SIM = "com.sim.installSource";
-constexpr const char *SIM2_BUNDLENAMES = "com.phony.bundleName.temp,com.phony.bundleName";
-constexpr const char *INSTALL_SOURCE_FROM_SIM2 = "com.phony.installSource";
+constexpr const char *SIM_APP_BUNDLENAMES = "com.droi.iapps,com.droi.tong";
+constexpr const char *INSTALL_SOURCE_FROM_SIM = "com.zhuoyi.appstore.lite";
+constexpr const char *SIM2_BUNDLENAMES = "com.easy.abroadHarmony.temp,com.easy.hmos.abroad";
+constexpr const char *INSTALL_SOURCE_FROM_SIM2 = "com.easy.abroad";
 std::mutex g_commonUtilsMutex;
 
 std::string Strip(const std::string &str, char ch)

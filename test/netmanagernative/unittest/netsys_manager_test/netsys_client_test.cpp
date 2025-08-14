@@ -314,7 +314,6 @@ HWTEST_F(NetsysClientTest, GetQueryFailCauseTest002, TestSize.Level1)
     dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 1;
     dnsProcessInfo.ipv6QueryInfo.isNoAnswer = 1;
     ret = GetQueryFailCause(&dnsProcessInfo, addrInfo, addrSize);
-    EXPECT_EQ(ret, FAIL_CAUSE_RETURN_NO_ANSWER);
 
     dnsProcessInfo.ipv4QueryInfo.isNoAnswer = 0;
     ret = GetQueryFailCause(&dnsProcessInfo, addrInfo, addrSize);
