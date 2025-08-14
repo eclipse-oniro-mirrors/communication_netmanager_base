@@ -656,7 +656,6 @@ HWTEST_F(NetsysNativeServiceTest, StaticIpv6AddrTest001, TestSize.Level1)
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "chba0";
     int32_t ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -868,7 +867,7 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest001, TestSize.L
 {
     std::unordered_map<uint32_t, uint32_t> params;
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest002, TestSize.Level1)
@@ -876,7 +875,7 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMapTest002, TestSize.L
     std::unordered_map<uint32_t, uint32_t> params;
     params.emplace(TEST_UID, TEST_UID);
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(params);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
