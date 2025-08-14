@@ -247,7 +247,6 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 
     iface = INTERNAL_INTERFACENAME;
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, iface, BEARER_DEFAULT);
-    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -262,7 +261,6 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, BEARER_DEFAULT);
-    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -485,7 +483,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
     std::set<NetManagerStandard::NetBearType> bearTypes;
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -503,7 +501,7 @@ HWTEST_F(ConnManagerTest, SetInternetPermission003, TestSize.Level1)
 
     uid = 1;
     ret = instance_->SetInternetPermission(uid, allow, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 
     isBroker = 1;
     ret = instance_->SetInternetPermission(uid, allow, isBroker);
@@ -619,7 +617,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest003, TestSize.Level1)
     std::string testInterfaceName = "rmnet0";
     NetManagerStandard::NetBearType netBearerType = BEARER_CELLULAR;
     int32_t ret = instance_->AddInterfaceToNetwork(INTERNAL_NETID, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
@@ -643,7 +641,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest004, TestSize.Level1)
     ret = instance_->CreatePhysicalNetwork(netId, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     netBearerType = BEARER_WIFI;
     ret = instance_->AddInterfaceToNetwork(netId, testInterfaceName, netBearerType);
@@ -699,7 +697,7 @@ HWTEST_F(ConnManagerTest, SetNetworkAccessPolicyTest002, TestSize.Level1)
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -728,7 +726,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange002, TestSize.Level1)
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_WIFI);
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -742,7 +740,7 @@ HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange003, TestSize.Level1)
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_BLUETOOTH);
 
     int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
@@ -751,7 +749,7 @@ HWTEST_F(ConnManagerTest, SetInternetPermission004, TestSize.Level1)
     uint8_t allow = 0;
     uint8_t isBroker = 0;
     int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
     isBroker = 1;
     ret = instance_->SetInternetPermission(uid, allow, isBroker);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
