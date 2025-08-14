@@ -721,6 +721,9 @@ void Network::SetDefaultNetWork()
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_SET_DEFAULT_NETWORK_FAILED, ERROR_MSG_SET_DEFAULT_NETWORK_FAILED);
     }
+#ifdef FEATURE_SUPPORT_POWERMANAGER
+    StartNetDetection(false);
+#endif
 }
 
 void Network::ClearDefaultNetWorkNetId()
