@@ -113,7 +113,7 @@ bool HttpProxy::Marshalling(Parcel &parcel) const
         }
         ++size;
         if (size >= MAX_EXCLUSION_SIZE) {
-            return true;
+            break;
         }
     }
     parcel.WriteString(username_);
