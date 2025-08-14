@@ -19,6 +19,7 @@
 #include "iremote_proxy.h"
 
 #include "i_net_conn_callback.h"
+#include "i_net_pac_file_url_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -53,6 +54,20 @@ private:
     bool WriteInterfaceToken(MessageParcel &data);
 
     static inline BrokerDelegator<PreAirplaneCallbackProxy> delegator_;
+};
+
+class PacFileUrlCallbackProxy : public IRemoteProxy<INetPacFileUrlCallback> {
+public:
+    explicit PacFileUrlCallbackProxy(const sptr<IRemoteObject> &impl);
+
+    virtual ~PacFileUrlCallbackProxy() = default;
+
+    int32_t PacFileUrlChange(const std::string& pacFileUrl) override;
+
+ private:
+    bool WriteInterfaceToken(MessageParcel &data);
+
+    static inline BrokerDelegator<PacFileUrlCallbackProxy> delegator_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

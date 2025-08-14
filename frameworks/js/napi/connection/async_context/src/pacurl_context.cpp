@@ -21,7 +21,69 @@
  
 namespace OHOS {
 namespace NetManagerStandard {
+ProxyModeContext::ProxyModeContext(napi_env env, std::shared_ptr<EventManager> &manager) : BaseContext(env, manager) {}
+
+void ProxyModeContext::ParseParams(napi_value *params, size_t paramsCount)
+{
+    if (!CheckParamsType(GetEnv(), params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("check params type failed");
+        SetParseOK(false);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return;
+    }
+    mode_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    SetParseOK(true);
+}
+
+bool ProxyModeContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
+{
+    if (paramsCount == PARAM_JUST_OPTIONS) {
+        return NapiUtils::GetValueType(env, params[ARG_INDEX_0]) == napi_number;
+    }
+    return false;
+}
+
+FindPacFileUrlContext::FindPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager)
+    : BaseContext(env, manager)
+{
+}
+
+void FindPacFileUrlContext::ParseParams(napi_value *params, size_t paramsCount)
+{
+    if (!CheckParamsType(GetEnv(), params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("check params type failed");
+        SetParseOK(false);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return;
+    }
+    url_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
+    SetParseOK(true);
+}
+
+bool FindPacFileUrlContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
+{
+    if (paramsCount == PARAM_JUST_OPTIONS) {
+        return NapiUtils::GetValueType(env, params[ARG_INDEX_0]) == napi_string;
+    }
+    return false;
+}
+
+GetPacFileUrlContext::GetPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager)
+    : BaseContext(env, manager)
+{
+}
+
+void GetPacFileUrlContext::ParseParams(napi_value *params, size_t paramsCount)
+{
+    if (paramsCount != PARAM_NONE) {
+        SetParseOK(false);
+        return;
+    }
+    SetParseOK(true);
+}
+
 SetPacUrlContext::SetPacUrlContext(napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager) {}
+
  
 bool SetPacUrlContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 {
@@ -42,6 +104,32 @@ void SetPacUrlContext::ParseParams(napi_value *params, size_t paramsCount)
     pacUrl_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
     SetParseOK(true);
 }
+
+SetPacFileUrlContext::SetPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager)
+    : BaseContext(env, manager)
+{
+}
+
+bool SetPacFileUrlContext::CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
+{
+    if (paramsCount == PARAM_JUST_OPTIONS) {
+        return NapiUtils::GetValueType(env, params[ARG_INDEX_0]) == napi_string;
+    }
+    return false;
+}
+
+void SetPacFileUrlContext::ParseParams(napi_value *params, size_t paramsCount)
+{
+    if (!CheckParamsType(GetEnv(), params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("check params type failed");
+        SetParseOK(false);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return;
+    }
+    pacUrl_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
+    SetParseOK(true);
+}
+
  
 GetPacUrlContext::GetPacUrlContext(napi_env env, std::shared_ptr<EventManager>& manager) : BaseContext(env, manager) {}
  

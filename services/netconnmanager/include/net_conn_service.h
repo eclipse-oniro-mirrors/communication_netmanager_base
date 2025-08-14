@@ -50,6 +50,8 @@
 #include "app_state_aware.h"
 
 #include "net_trace_route_probe.h"
+#include "net_pac_local_proxy_server.h"
+#include "net_pac_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -82,6 +84,9 @@ public:
         static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
         return instance;
     }
+    std::shared_ptr<NetPACManager> GetNetPacManager();
+    int StartPacLocalProxyServer();
+    int StopPacLocalProxyServer();
     void OnStart() override;
     void OnStop() override;
     /**
@@ -402,6 +407,13 @@ public:
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
+    int32_t SetPacFileUrl(const std::string &pacUrl) override;
+    int32_t SetProxyMode(const int mode) override;
+    int32_t GetProxyMode(int &mode) override;
+    int32_t GetPacFileUrl(std::string &pacUrl) override;
+    int32_t FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy) override;
+    int32_t RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override;
+    int32_t UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override;
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
         std::string &traceRouteInfo) override;
     int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
@@ -634,7 +646,9 @@ private:
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
+    std::map<int32_t, sptr<INetPacFileUrlCallback>> pacFileUrlCallbacks_;
     std::mutex preAirplaneCbsMutex_;
+    std::mutex pacFileUrlCbsMutex_;
     std::shared_ptr<NetConnListener> subscriber_ = nullptr;
 
     bool hasSARemoved_ = false;
@@ -646,6 +660,10 @@ private:
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
     std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
     uint32_t delaySupplierId_ = 0;
+    std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> netPACManager_;
+    std::mutex netPacManagerMutex_;
+    std::shared_ptr<OHOS::NetManagerStandard::ProxyServer> netPACProxyServer_;
+    std::mutex netPacProxyServerMutex_;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -673,6 +691,10 @@ private:
         NetConnService &client_;
     };
  
+    void CheckProxyStatus();
+    uint32_t SetProxyOff();
+    uint32_t SetProxyManual();
+    uint32_t SetProxyAuto();
     void OnRemoteDied(const wptr<IRemoteObject> &remoteObject);
     void OnNetSupplierRemoteDied(const wptr<IRemoteObject> &remoteObject);
     void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);

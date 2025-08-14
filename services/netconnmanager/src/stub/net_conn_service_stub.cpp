@@ -37,6 +37,29 @@ const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
 } // namespace
+
+void NetConnServiceStub::InitPacFileCallbackFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_PAC_FILE_URL_CALLBACK)] = {
+        &NetConnServiceStub::OnRegisterPacFileProxyCallback, {Permission::SET_PAC_URL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_PAC_FILE_URL_CALLBACK)] = {
+        &NetConnServiceStub::OnUnregisterPacFileProxyCallback, {Permission::SET_PAC_URL}};
+}
+
+void NetConnServiceStub::InitNetSupplierFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
+        &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
+        &NetConnServiceStub::OnUnregisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS)] = {
+        &NetConnServiceStub::OnUpdateNetCaps, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO)] = {
+        &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
+        &NetConnServiceStub::OnUpdateNetLinkInfo, {Permission::CONNECTIVITY_INTERNAL}};
+}
+
 NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY)] = {
@@ -51,16 +74,6 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
-        &NetConnServiceStub::OnRegisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK)] = {
-        &NetConnServiceStub::OnUnregisterNetSupplier, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_CAPS)] = {
-        &NetConnServiceStub::OnUpdateNetCaps, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO)] = {
-        &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
-        &NetConnServiceStub::OnUpdateNetLinkInfo, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK)] = {
@@ -91,6 +104,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID)] = {
         &NetConnServiceStub::OnSetReuseSupplierId, {Permission::CONNECTIVITY_INTERNAL}};
+    InitNetSupplierFuncToInterfaceMap();
+    InitPacFileCallbackFuncToInterfaceMap();
     InitAll();
 }
 
@@ -152,6 +167,24 @@ void NetConnServiceStub::InitStaticIpv6ToInterfaceMap()
         &NetConnServiceStub::OnDelStaticIpv6Addr, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
+void NetConnServiceStub::InitProxyFuncToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PROXY_MODE)] = {
+        &NetConnServiceStub::OnSetProxyMode, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_FILE_URL)] = {
+        &NetConnServiceStub::OnSetPacFileUrl, {Permission::SET_PAC_URL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_FILE_URL)] = {
+        &NetConnServiceStub::OnGetPacFileUrl, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE)] = {
+        &NetConnServiceStub::OnGetProxyMode, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FIND_PAC_PROXY_FOR_URL)] = {
+        &NetConnServiceStub::OnFindProxyForURL, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL)] = {&NetConnServiceStub::OnSetPacUrl,
+                                                                                    {Permission::SET_PAC_URL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {&NetConnServiceStub::OnGetPacUrl,
+                                                                                    {}};
+}
+
 void NetConnServiceStub::InitQueryFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES)] = {
@@ -198,10 +231,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
         &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL)] = {
-        &NetConnServiceStub::OnSetPacUrl, {Permission::SET_PAC_URL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL)] = {
-        &NetConnServiceStub::OnGetPacUrl, {}};
+    InitProxyFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
@@ -1410,6 +1440,95 @@ int32_t NetConnServiceStub::OnSetPacUrl(MessageParcel &data, MessageParcel &repl
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceStub::OnFindProxyForURL(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnFindProxyForURL");
+    std::string url = "";
+    if (!data.ReadString(url)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    std::string host = "";
+    if (!data.ReadString(host)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    std::string proxy;
+    int32_t ret = FindProxyForURL(url, host, proxy);
+
+    int32_t status = 0;
+    if (ret != 0) {
+        status = NETMANAGER_ERR_INTERNAL;
+    }
+    if (!reply.WriteInt32(status)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteString(proxy)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetPacFileUrl(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnGetPacFileUrl");
+    std::string pacUrl = "";
+    int32_t ret = GetPacFileUrl(pacUrl);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    if (!reply.WriteString(pacUrl)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetProxyMode(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnGetProxyMode");
+    int mode = -1;
+    int32_t ret = GetProxyMode(mode);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    if (!reply.WriteInt32(mode)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetProxyMode(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnSetProxyMode");
+    int mode = -1;
+    if (!data.ReadInt32(mode)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = SetProxyMode(mode);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetPacFileUrl(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnSetPacFileUrl");
+    std::string pacUrl;
+    if (!data.ReadString(pacUrl)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = SetPacFileUrl(pacUrl);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("stub execute OnGetNetIdByIdentifier");
@@ -1483,6 +1602,44 @@ int32_t NetConnServiceStub::OnUnregisterNetInterfaceCallback(MessageParcel &data
 
     sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
     int32_t ret = UnregisterNetInterfaceCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<INetPacFileUrlCallback> callback = iface_cast<INetPacFileUrlCallback>(remote);
+    int32_t ret = RegisterNetPacFileUrlInterfaceCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUnregisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote ptr is nullptr.");
+        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    sptr<INetPacFileUrlCallback> callback = iface_cast<INetPacFileUrlCallback>(remote);
+    int32_t ret = UnregisterNetPacFileUrlInterfaceCallback(callback);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

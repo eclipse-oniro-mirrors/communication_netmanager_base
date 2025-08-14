@@ -22,6 +22,7 @@
 #include "net_connection_type.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_pac_proxy_adapter.h"
 
 using namespace OHOS::NetManagerStandard;
 
@@ -392,6 +393,92 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
     std::string pacUrlstr = "";
     int32_t ret = NetConnClient::GetInstance().GetPacUrl(pacUrlstr);
     if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return ret;
+}
+
+int32_t OH_NetConn_SetProxyMode(const int mode)
+{
+    int32_t ret = NetConnClient::GetInstance().SetProxyMode(mode);
+    return ret;
+}
+
+int32_t OH_NetConn_GetProxyMode(int * mode)
+{
+    if (mode == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetProxyMode received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int temp;
+    int32_t ret = NetConnClient::GetInstance().GetProxyMode(temp);
+    if (ret) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    *mode = temp;
+    return ret;
+}
+
+int32_t OH_NetConn_SetPacFileUrl(const char *pacUrl)
+{
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_SetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t ret = NetConnClient::GetInstance().SetPacFileUrl(std::string(pacUrl));
+    return ret;
+}
+
+int32_t OH_NetConn_GetPacFileUrl(char *pacUrl)
+{
+    if (pacUrl == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    std::string pacUrlstr = "";
+    int32_t ret = NetConnClient::GetInstance().GetPacFileUrl(pacUrlstr);
+    if (strcpy_s(pacUrl, PAC_URL_MAX_LEN, pacUrlstr.c_str()) != 0) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return ret;
+}
+
+int32_t OH_NetConn_RegisterPacFileUrlCallback(OH_NetConn_PacFileUrlChange *pacFileUrlChange, uint32_t *callbackId)
+{
+    if (pacFileUrlChange == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (callbackId == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    int32_t ret = NetPacFilePorxyCallbackManager::GetInstance().RegisterPacFileUrlCallback(nullptr, pacFileUrlChange, 0,
+                                                                                           callbackId);
+    return RegisterErrorCodeTrans(ret);
+}
+
+int32_t OH_NetConn_UnregisterPacFileUrlCallback(uint32_t callBackId)
+{
+    return NetPacFilePorxyCallbackManager::GetInstance().UnregisterPacFileUrlCallback(callBackId);
+}
+
+int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *proxy)
+{
+    if (url == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetPacUrl received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    std::string pacProxyStr = "";
+    std::string hostStr;
+    if (host && strlen(host) > 0) {
+        hostStr.append(host);
+    }
+    int32_t ret = NetConnClient::GetInstance().FindProxyForURL(url, pacProxyStr, hostStr);
+    if (strcpy_s(proxy, PAC_URL_MAX_LEN, pacProxyStr.c_str()) != 0) {
         NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
         return NETMANAGER_ERR_INTERNAL;
     }

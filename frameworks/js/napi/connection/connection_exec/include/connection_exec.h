@@ -184,6 +184,26 @@ public:
 
     static napi_value SetNetExtAttributeCallback(SetNetExtAttributeContext *context);
 
+    static bool ExecSetPacFileUrl(SetPacFileUrlContext *context);
+
+    static bool ExecSetProxyMode(ProxyModeContext *context);
+
+    static bool ExecGetProxyMode(ProxyModeContext *context);
+
+    static napi_value SetProxyModeCallback(ProxyModeContext *context);
+
+    static napi_value GetProxyModeCallback(ProxyModeContext *context);
+
+    static napi_value SetPacFileUrlCallback(SetPacFileUrlContext *context);
+
+    static bool ExecGetPacFileUrl(GetPacFileUrlContext *context);
+
+    static napi_value GetPacFileUrlCallback(GetPacFileUrlContext *context);
+
+    static bool ExecFindProxyForUrl(FindPacFileUrlContext *context);
+
+    static napi_value FindProxyForUrlCallback(FindPacFileUrlContext *context);
+
     class NetHandleExec final {
     public:
         NetHandleExec() = delete;

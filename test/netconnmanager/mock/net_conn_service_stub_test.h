@@ -43,6 +43,16 @@ public:
         return 0;
     }
 
+    int32_t SetProxyMode(const int mode) override
+    {
+        return 0;
+    }
+
+    int32_t GetProxyMode(int &mode) override
+    {
+        return 0;
+    }
+
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override
     {
@@ -388,6 +398,31 @@ public:
     }
 
     int32_t GetPacUrl(std::string &pacUrl) override
+    {
+        return 0;
+    }
+
+    int32_t SetPacFileUrl(const std::string &pacUrl) override
+    {
+        return 0;
+    }
+
+    int32_t GetPacFileUrl(std::string &pacUrl) override
+    {
+        return 0;
+    }
+
+    int32_t FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy) override
+    {
+        return 0;
+    }
+
+    int32_t RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override
+    {
+        return 0;
+    }
+
+    int32_t UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override
     {
         return 0;
     }

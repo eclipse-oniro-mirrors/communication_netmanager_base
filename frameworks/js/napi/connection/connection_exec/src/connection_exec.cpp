@@ -1114,4 +1114,90 @@ void ConnectionExec::FillDns(napi_env env, napi_value connectionProperties, NetL
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_DNSES, dnsList);
     }
 }
+
+bool ConnectionExec::ExecSetProxyMode(ProxyModeContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().SetProxyMode(context->mode_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetProxyMode failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+bool ConnectionExec::ExecGetProxyMode(ProxyModeContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().GetProxyMode(context->mode_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetProxyMode failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetProxyModeCallback(ProxyModeContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value ConnectionExec::GetProxyModeCallback(ProxyModeContext *context)
+{
+    return NapiUtils::CreateInt32(context->GetEnv(), context->mode_);
+}
+
+bool ConnectionExec::ExecSetPacFileUrl(SetPacFileUrlContext *context)
+{
+    if (context->pacUrl_.empty()) {
+        NETMANAGER_BASE_LOGE("pac Url is empty!");
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+    int32_t errorCode = NetConnClient::GetInstance().SetPacFileUrl(context->pacUrl_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec SetPacFileUrl failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetPacFileUrlCallback(SetPacFileUrlContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecGetPacFileUrl(GetPacFileUrlContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().GetPacFileUrl(context->pacUrl_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetPacFileUrl failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetPacFileUrlCallback(GetPacFileUrlContext *context)
+{
+    return NapiUtils::CreateStringUtf8(context->GetEnv(), context->pacUrl_);
+}
+
+bool ConnectionExec::ExecFindProxyForUrl(FindPacFileUrlContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().FindProxyForURL(context->url_, context->proxy_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec ExecFindProxyForUrl failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::FindProxyForUrlCallback(FindPacFileUrlContext *context)
+{
+    return NapiUtils::CreateStringUtf8(context->GetEnv(), context->proxy_);
+}
+
 } // namespace OHOS::NetManagerStandard

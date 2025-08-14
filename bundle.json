@@ -63,6 +63,7 @@
                 "samgr",
                 "libuv",
                 "curl",
+                "jerryscript",
                 "init",
                 "ffrt",
                 "common_event_service",

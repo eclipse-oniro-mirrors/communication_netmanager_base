@@ -22,7 +22,52 @@
 #include "base_context.h"
 #include "event_manager.h"
  
+#include <napi/native_api.h>
 namespace OHOS::NetManagerStandard {
+class ProxyModeContext : public BaseContext {
+public:
+    ProxyModeContext() = delete;
+    ProxyModeContext(napi_env env, std::shared_ptr<EventManager> &manager);
+    void ParseParams(napi_value *params, size_t paramsCount);
+    bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount);
+
+public:
+    int mode_;
+};
+
+class FindPacFileUrlContext : public BaseContext {
+public:
+    FindPacFileUrlContext() = delete;
+    FindPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager);
+    void ParseParams(napi_value *params, size_t paramsCount);
+    bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount);
+
+public:
+    std::string url_;
+    std::string proxy_;
+};
+
+class SetPacFileUrlContext : public BaseContext {
+public:
+    SetPacFileUrlContext() = delete;
+    SetPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager);
+    void ParseParams(napi_value *params, size_t paramsCount);
+    bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount);
+
+public:
+    std::string pacUrl_;
+};
+
+class GetPacFileUrlContext : public BaseContext {
+public:
+    GetPacFileUrlContext() = delete;
+    GetPacFileUrlContext(napi_env env, std::shared_ptr<EventManager> &manager);
+    void ParseParams(napi_value *params, size_t paramsCount);
+
+public:
+    std::string pacUrl_;
+};
+
 class SetPacUrlContext : public BaseContext {
 public:
     SetPacUrlContext() = delete;

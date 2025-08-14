@@ -34,6 +34,7 @@
 #include "net_supplier_info.h"
 #include "conn_ipc_interface_code.h"
 #include "safe_map.h"
+#include "i_net_pac_file_url_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -122,6 +123,13 @@ public:
     virtual int32_t CloseSocketsUid(int32_t netId, uint32_t uid) = 0;
     virtual int32_t SetPacUrl(const std::string &pacUrl) = 0;
     virtual int32_t GetPacUrl(std::string &pacUrl) = 0;
+    virtual int32_t SetPacFileUrl(const std::string &pacUrl) = 0;
+    virtual int32_t SetProxyMode(const int mode) = 0;
+    virtual int32_t GetProxyMode(int &mode) = 0;
+    virtual int32_t GetPacFileUrl(std::string &pacUrl) = 0;
+    virtual int32_t FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy) = 0;
+    virtual int32_t RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) = 0;
+    virtual int32_t UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) = 0;
     virtual int32_t QueryTraceRoute(
         const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo) = 0;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) = 0;

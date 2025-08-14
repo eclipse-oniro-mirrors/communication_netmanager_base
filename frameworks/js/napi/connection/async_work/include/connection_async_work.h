@@ -40,7 +40,15 @@ public:
 
     static void ExecGetNetCapabilities(napi_env env, void *data);
 
+    static void ExecGetProxyMode(napi_env env, void *data);
+
+    static void ExecSetProxyMode(napi_env env, void *data);
+
     static void GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data);
+
+    static void GetProxyModeCallback(napi_env env, napi_status status, void *data);
+
+    static void SetProxyModeCallback(napi_env env, napi_status status, void *data);
 
     static void ExecGetConnectionProperties(napi_env env, void *data);
 
