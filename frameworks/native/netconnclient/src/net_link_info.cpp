@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_ADDR_SIZE = 16;
-static constexpr uint32_t MAX_ROUTE_SIZE = 32;
+static constexpr uint32_t MAX_ROUTE_SIZE = 1024;
 
 NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
 {
@@ -64,29 +64,37 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(domain_)) {
         return false;
     }
-    if (!parcel.WriteUint32(netAddrList_.size())) {
+    uint32_t size = netAddrList_.size();
+    size = size > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : size;
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = netAddrList_.begin(); it != netAddrList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    uint32_t i;
+    auto netAddrIt = netAddrList_.begin();
+    for (i = 0; i < size && netAddrIt != netAddrList_.end(); i++, netAddrIt++) {
+        if (!netAddrIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write net address to parcel failed");
             return false;
         }
     }
-    if (!parcel.WriteUint32(dnsList_.size())) {
+    size = dnsList_.size() > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : dnsList_.size();
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = dnsList_.begin(); it != dnsList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    auto dnsIt = dnsList_.begin();
+    for (i = 0; i < size && dnsIt != dnsList_.end(); i++, dnsIt++) {
+        if (!dnsIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write dns to parcel failed");
             return false;
         }
     }
-    if (!parcel.WriteUint32(routeList_.size())) {
+    size = routeList_.size() > MAX_ROUTE_SIZE ? MAX_ROUTE_SIZE : routeList_.size();
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = routeList_.begin(); it != routeList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    auto routeIt = routeList_.begin();
+    for (i = 0; i < size && routeIt != routeList_.end(); i++, routeIt++) {
+        if (!routeIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write route to parcel failed");
             return false;
         }
@@ -184,29 +192,37 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
     if (!parcel.WriteString(object->domain_)) {
         return false;
     }
-    if (!parcel.WriteUint32(object->netAddrList_.size())) {
+    uint32_t size = object->netAddrList_.size();
+    size = size > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : size;
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = object->netAddrList_.begin(); it != object->netAddrList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    uint32_t i;
+    auto netAddrIt = object->netAddrList_.begin();
+    for (i = 0; i < size && netAddrIt != object->netAddrList_.end(); i++, netAddrIt++) {
+        if (!netAddrIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write objects net address to parcel failed");
             return false;
         }
     }
-    if (!parcel.WriteUint32(object->dnsList_.size())) {
+    size = object->dnsList_.size() > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : object->dnsList_.size();
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = object->dnsList_.begin(); it != object->dnsList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    auto dnsIt = object->dnsList_.begin();
+    for (i = 0; i < size && dnsIt != object->dnsList_.end(); i++, dnsIt++) {
+        if (!dnsIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write objects dns to parcel failed");
             return false;
         }
     }
-    if (!parcel.WriteUint32(object->routeList_.size())) {
+    size = object->routeList_.size() > MAX_ROUTE_SIZE ? MAX_ROUTE_SIZE : object->routeList_.size();
+    if (!parcel.WriteUint32(size)) {
         return false;
     }
-    for (auto it = object->routeList_.begin(); it != object->routeList_.end(); it++) {
-        if (!it->Marshalling(parcel)) {
+    auto routeIt = object->routeList_.begin();
+    for (i = 0; i < size && routeIt != object->routeList_.end(); i++, routeIt++) {
+        if (!routeIt->Marshalling(parcel)) {
             NETMGR_LOG_E("write objects route to parcel failed");
             return false;
         }

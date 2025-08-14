@@ -46,6 +46,7 @@
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
+static constexpr size_t MAX_ROUTE_LENGTH = 1024;
 static constexpr size_t MAX_IPV4_STR_LEN = 16;
 static constexpr size_t MAX_IPV6_STR_LEN = 64;
 class ConnectionExec final {
