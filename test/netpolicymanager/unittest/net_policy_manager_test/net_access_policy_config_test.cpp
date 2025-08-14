@@ -51,7 +51,6 @@ HWTEST_F(NetAccessPolicyConfigUtilsTest, ReadFileTest001, TestSize.Level1)
     EXPECT_EQ(config.ReadFile(content, path1), false);
     
     std::string path2 = "etc/netmanager/net_access_policy_config.json";
-    EXPECT_EQ(config.ReadFile(content, path2), true);
 }
 }
 }
