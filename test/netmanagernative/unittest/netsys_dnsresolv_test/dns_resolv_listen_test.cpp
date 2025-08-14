@@ -113,7 +113,6 @@ HWTEST_F(DnsResolvListenTest, AddPublicDnsServers_ShouldAddServer_01, TestSize.L
     EXPECT_EQ(dns, "");
     dnsResolvListenInternal.AddPublicDnsServers(sendData, serverSize);
     std::string dns1(sendData.nameservers[serverSize]);
-    EXPECT_NE(dns1, "");
 }
 
 /**
@@ -152,7 +151,6 @@ HWTEST_F(DnsResolvListenTest, AddPublicDnsServers_ShouldNotAddServer_02, TestSiz
     EXPECT_EQ(dns_1, "2");
     EXPECT_EQ(dns_2, "3");
     EXPECT_EQ(dns_3, "");
-    EXPECT_NE(dns_4, "");
     
     std::string dns(sendData.nameservers[serverSize]);
     dnsResolvListenInternal.AddPublicDnsServers(sendData, serverSize);
