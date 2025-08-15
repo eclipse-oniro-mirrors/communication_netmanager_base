@@ -66,6 +66,9 @@ ohos_shared_library("net_conn_manager") {
     "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
+    "src/net_pac_local_proxy_server.cpp",
+    "src/net_pac_manager.cpp",
+    "src/pac_functions.cpp",
   ]
   use_exceptions = true
 
@@ -115,6 +118,7 @@ ohos_shared_library("net_conn_manager") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "jerryscript:jerryscript_shared_not_lite",
   ]
 
   defines = [
@@ -190,6 +194,9 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
+    "src/net_pac_local_proxy_server.cpp",
+    "src/net_pac_manager.cpp",
+    "src/pac_functions.cpp",
   ]
 
   configs = [ ":net_conn_manager_config" ]
@@ -223,6 +230,7 @@ ohos_static_library("net_conn_manager_static") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "jerryscript:jerryscript_shared_not_lite",
   ]
 
   defines = [

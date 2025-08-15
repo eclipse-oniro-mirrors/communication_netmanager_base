@@ -204,6 +204,13 @@ static void AddCleanupHook(napi_env env)
     napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
 }
 
+#define DEFINE_PAC_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_PROXY_MODE, GetProxyMode),        \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_PROXY_MODE, SetProxyMode),        \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_FILE_PAC_URL, SetPacFileUrl),     \
+    DECLARE_NAPI_FUNCTION(FUNCTION_FIND_PROXY_FOR_URL, FindProxyForUrl), \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_FILE_PAC_URL, GetPacFileUrl),
+
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
     std::initializer_list<napi_property_descriptor> functions = {
@@ -250,6 +257,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE, GetNetExtAttribute),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync),
+        DEFINE_PAC_FUNCTIONS
     };
     return functions;
 }
@@ -307,6 +315,19 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     napi_value types = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, types, netBearTypes);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_NET_BEAR_TYPE, types);
+
+    std::initializer_list<napi_property_descriptor> proxyModeTypes = {
+        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_OFF",
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_OFF))),
+        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_MANUAL",
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_MANUAL))),
+        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_AUTO",
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_AUTO))),
+    };
+
+    napi_value pmtypes = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, pmtypes, proxyModeTypes);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_PROXY_MODE_TYPE, pmtypes);
 }
 
 napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info info)
@@ -341,6 +362,20 @@ napi_value ConnectionModule::IsDefaultNetMeteredSync(napi_env env, napi_callback
 {
     return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED,
         nullptr, ConnectionExec::ExecIsDefaultNetMetered, ConnectionExec::IsDefaultNetMeteredCallback);
+}
+
+napi_value ConnectionModule::GetProxyMode(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<ProxyModeContext>(env, info, FUNCTION_GET_PROXY_MODE, nullptr,
+                                                                ConnectionAsyncWork::ExecGetProxyMode,
+                                                                ConnectionAsyncWork::GetProxyModeCallback);
+}
+
+napi_value ConnectionModule::SetProxyMode(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<ProxyModeContext>(env, info, FUNCTION_GET_NET_CAPABILITIES, nullptr,
+                                                                ConnectionAsyncWork::ExecSetProxyMode,
+                                                                ConnectionAsyncWork::SetProxyModeCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)
@@ -630,6 +665,27 @@ napi_value ConnectionModule::SetNetExtAttribute(napi_env env, napi_callback_info
     return ModuleTemplate::Interface<SetNetExtAttributeContext>(env, info, FUNCTION_SET_NET_EXT_ATTRIBUTE, nullptr,
                                                                  ConnectionAsyncWork::ExecSetNetExtAttribute,
                                                                  ConnectionAsyncWork::SetNetExtAttributeCallback);
+}
+
+napi_value ConnectionModule::SetPacFileUrl(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<SetPacFileUrlContext>(env, info, FUNCTION_SET_FILE_PAC_URL, nullptr,
+                                                         ConnectionExec::ExecSetPacFileUrl,
+                                                         ConnectionExec::SetPacFileUrlCallback);
+}
+
+napi_value ConnectionModule::GetPacFileUrl(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetPacFileUrlContext>(env, info, FUNCTION_GET_FILE_PAC_URL, nullptr,
+                                                               ConnectionExec::ExecGetPacFileUrl,
+                                                               ConnectionExec::GetPacFileUrlCallback);
+}
+
+napi_value ConnectionModule::FindProxyForUrl(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<FindPacFileUrlContext>(env, info, FUNCTION_GET_FILE_PAC_URL, nullptr,
+                                                                ConnectionExec::ExecFindProxyForUrl,
+                                                                ConnectionExec::FindProxyForUrlCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)

@@ -60,10 +60,16 @@ public:
     static constexpr const char *INTERFACE_NET_CONNECTION = "NetConnection";
     static constexpr const char *INTERFACE_NET_CAP = "NetCap";
     static constexpr const char *INTERFACE_NET_BEAR_TYPE = "NetBearType";
+    static constexpr const char *INTERFACE_PROXY_MODE_TYPE = "ProxyMode";
     static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK = "factoryReset";
     static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK_SYNC = "factoryResetNetworkSync";
     static constexpr const char *FUNCTION_SET_PAC_URL = "setPacUrl";
     static constexpr const char *FUNCTION_GET_PAC_URL = "getPacUrl";
+    static constexpr const char *FUNCTION_SET_FILE_PAC_URL = "setPacFileUrl";
+    static constexpr const char *FUNCTION_GET_FILE_PAC_URL = "getPacFileUrl";
+    static constexpr const char *FUNCTION_GET_PROXY_MODE = "getProxyMode";
+    static constexpr const char *FUNCTION_SET_PROXY_MODE = "setProxyMode";
+    static constexpr const char *FUNCTION_FIND_PROXY_FOR_URL = "findProxyForUrl";
     static constexpr const char *FUNCTION_SET_INTERFACE_UP = "setInterfaceUp";
     static constexpr const char *FUNCTION_SET_INTERFACE_IP_ADDRESS = "setNetInterfaceIpAddress";
     static constexpr const char *FUNCTION_ADD_NETWORK_ROUTE = "addNetworkRoute";
@@ -115,6 +121,8 @@ private:
     static napi_value IsDefaultNetMetered(napi_env env, napi_callback_info info);
     static napi_value IsDefaultNetMeteredSync(napi_env env, napi_callback_info info);
     static napi_value GetNetCapabilities(napi_env env, napi_callback_info info);
+    static napi_value GetProxyMode(napi_env env, napi_callback_info info);
+    static napi_value SetProxyMode(napi_env env, napi_callback_info info);
     static napi_value GetNetCapabilitiesSync(napi_env env, napi_callback_info info);
     static napi_value GetConnectionProperties(napi_env env, napi_callback_info info);
     static napi_value GetConnectionPropertiesSync(napi_env env, napi_callback_info info);
@@ -137,7 +145,10 @@ private:
     static napi_value FactoryResetNetwork(napi_env env, napi_callback_info info);
     static napi_value FactoryResetNetworkSync(napi_env env, napi_callback_info info);
     static napi_value SetPacUrl(napi_env env, napi_callback_info info);
+    static napi_value SetPacFileUrl(napi_env env, napi_callback_info info);
     static napi_value GetPacUrl(napi_env env, napi_callback_info info);
+    static napi_value GetPacFileUrl(napi_env env, napi_callback_info info);
+    static napi_value FindProxyForUrl(napi_env env, napi_callback_info info);
     static napi_value SetInterfaceUp(napi_env env, napi_callback_info info);
     static napi_value SetNetInterfaceIpAddress(napi_env env, napi_callback_info info);
     static napi_value AddNetworkRoute(napi_env env, napi_callback_info info);

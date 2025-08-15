@@ -14,6 +14,10 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
+config("net_connection_config"){
+   include_dirs = [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient/include" ]
+}
+
 ohos_shared_library("net_connection") {
   sanitize = {
     cfi = true
@@ -27,8 +31,11 @@ ohos_shared_library("net_connection") {
   include_dirs =
       [ "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/include" ]
 
+  public_configs = [ ":net_connection_config" ]
+
   sources = [
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_probe.cpp",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_pac_proxy_adapter.cpp",
     "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/net_connection_adapter.cpp",
     "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/src/net_connection.cpp",
   ]

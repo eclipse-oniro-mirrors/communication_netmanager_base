@@ -45,6 +45,12 @@ enum NetCap {
     NET_CAPABILITY_END = 32 // The maximum value is 32. Do not exceed the limit.
 };
 
+enum ProxyModeType {
+    PROXY_MODE_OFF = 0,
+    PROXY_MODE_MANUAL = 1,
+    PROXY_MODE_AUTO = 2
+};
+
 enum NetBearType {
     BEARER_CELLULAR = 0,
     BEARER_WIFI = 1,

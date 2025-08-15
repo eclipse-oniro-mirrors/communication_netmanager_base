@@ -21,6 +21,8 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_fuzztest("NetConnClientFuzzTest") {
   module_out_path = fuzz_test_path
   fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netconnclient_fuzzer"
+  _cfi_blocklist_path =
+      "$NETMANAGER_BASE_ROOT/test/fuzztest/netconnclient_fuzzer/cfi_blocklist.txt"
 
   include_dirs = [
     "$INNERKITS_ROOT/include",
@@ -44,7 +46,11 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-flto",
+    "-fvisibility=hidden",
   ]
+
+  ldflags = [ "-flto" ]
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",

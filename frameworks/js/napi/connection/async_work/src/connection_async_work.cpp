@@ -67,9 +67,29 @@ void ConnectionAsyncWork::IsDefaultNetMeteredCallback(napi_env env, napi_status 
         env, status, data);
 }
 
+void ConnectionAsyncWork::ExecSetProxyMode(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<ProxyModeContext, ConnectionExec::ExecSetProxyMode>(env, data);
+}
+
+void ConnectionAsyncWork::ExecGetProxyMode(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<ProxyModeContext, ConnectionExec::ExecGetProxyMode>(env, data);
+}
+
 void ConnectionAsyncWork::ExecGetNetCapabilities(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetNetCapabilitiesContext, ConnectionExec::ExecGetNetCapabilities>(env, data);
+}
+
+void ConnectionAsyncWork::GetProxyModeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<ProxyModeContext, ConnectionExec::GetProxyModeCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::SetProxyModeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<ProxyModeContext, ConnectionExec::SetProxyModeCallback>(env, status, data);
 }
 
 void ConnectionAsyncWork::GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data)

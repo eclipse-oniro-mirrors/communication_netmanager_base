@@ -38,6 +38,9 @@ private:
 private:
     void InitQueryFuncToInterfaceMap();
     void InitQueryFuncToInterfaceMapExt();
+    void InitProxyFuncToInterfaceMap();
+    void InitPacFileCallbackFuncToInterfaceMap();
+    void InitNetSupplierFuncToInterfaceMap();
     void InitVnicFuncToInterfaceMap();
     void InitVirnicFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
@@ -92,6 +95,9 @@ private:
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRegisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnUnregisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnFindProxyForURL(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNetInterfaceIpAddress(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetInterfaceUp(MessageParcel &data, MessageParcel &reply);
@@ -114,6 +120,10 @@ private:
     int32_t OnCloseSocketsUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPacUrl(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPacUrl(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetPacFileUrl(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetPacFileUrl(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetProxyMode(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetProxyMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppIsFrozened(MessageParcel &data, MessageParcel &reply);
     int32_t OnEnableAppFrozenedCallbackLimitation(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetReuseSupplierId(MessageParcel &data, MessageParcel &reply);

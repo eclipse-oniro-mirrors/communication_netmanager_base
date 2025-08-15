@@ -57,6 +57,8 @@ constexpr const char *KEY_GLOBAL_PROXY_HOST = "settings.netmanager.proxy_host";
 constexpr const char *KEY_GLOBAL_PROXY_PORT = "settings.netmanager.proxy_port";
 constexpr const char *KEY_GLOBAL_PROXY_EXCLUSIONS = "settings.netmanager.proxy_exclusions";
 constexpr const char *KEY_PAC_URL = "settings.netmanager.pac_url";
+constexpr const char *KEY_PROXY_MODE = "settings.netmanager.proxy_mode";
+constexpr const char *KEY_PAC_FILE_URL = "settings.netmanager.pac_file_url";
 } // namespace
 
 class NetDataShareHelperUtils final {

@@ -273,6 +273,20 @@ int32_t OH_NetConn_QueryProbeResult(const char *destination, int32_t duration, s
 int32_t OH_NetConn_QueryTraceRoute(
     const char *destination, NetConn_TraceRouteOption *option, NetConn_TraceRouteInfo *traceRouteInfo);
 
+int32_t OH_NetConn_RegisterPacFileUrlCallback(OH_NetConn_PacFileUrlChange *pacFileUrlChange, uint32_t *callbackId);
+
+int32_t OH_NetConn_UnregisterPacFileUrlCallback(uint32_t callBackId);
+
+int32_t OH_NetConn_SetPacFileUrl(const char *pacUrl);
+
+int32_t OH_NetConn_SetProxyMode(const int mode);
+
+int32_t OH_NetConn_GetProxyMode(int *config);
+
+int32_t OH_NetConn_GetPacFileUrl(char *pacUrl);
+
+int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *proxy);
+
 #ifdef __cplusplus
 }
 #endif
