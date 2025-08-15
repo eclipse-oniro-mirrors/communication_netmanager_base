@@ -25,6 +25,7 @@ mod method;
 mod module;
 mod namespace;
 mod object;
+mod json;
 
 pub use ani_enum::AniEnum;
 pub use ani_ref::AniRef;
@@ -43,6 +44,8 @@ pub use fn_object::GlobalRefErrorCallback;
 
 pub use function::AniNativeFunction;
 pub use method::AniMethod;
+pub use method::AniStaticMethod;
 pub use module::AniModule;
 pub use namespace::AniNamespace;
 pub use object::AniObject;
+pub use json::JsonValue;

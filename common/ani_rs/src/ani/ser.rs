@@ -41,6 +41,7 @@ pub struct AniSer<'local> {
     env: AniEnv<'local>,
     res: AniRef<'local>,
     typed_array: Option<TypedArray>,
+    is_ani_ref: bool,
 }
 
 impl<'local> AniSer<'local> {
@@ -50,6 +51,7 @@ impl<'local> AniSer<'local> {
             env: env.clone(),
             res,
             typed_array: None,
+            is_ani_ref: false,
         })
     }
 
@@ -294,10 +296,6 @@ macro_rules! common_impl {
             self.set_value(v)
         }
 
-        fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-            self.set_value(v)
-        }
-
         fn serialize_i128(self, _v: i128) -> Result<Self::Ok, Self::Error> {
             Err(error_msg::I128_UNSUPPORTED)
         }
@@ -369,17 +367,20 @@ macro_rules! common_impl {
             T: serde::Serialize,
         {
             let typed_array = match name {
-                "Int8Array" => Some(TypedArray::Int8),
-                "Int16Array" => Some(TypedArray::Int16),
-                "Int32Array" => Some(TypedArray::Int32),
-                "Uint8Array" => Some(TypedArray::Uint8),
-                "Uint16Array" => Some(TypedArray::Uint16),
-                "Uint32Array" => Some(TypedArray::Uint32),
+                "@Int8Array" => Some(TypedArray::Int8),
+                "@Int16Array" => Some(TypedArray::Int16),
+                "@Int32Array" => Some(TypedArray::Int32),
+                "@Uint8Array" => Some(TypedArray::Uint8),
+                "@Uint16Array" => Some(TypedArray::Uint16),
+                "@Uint32Array" => Some(TypedArray::Uint32),
                 _ => None,
             };
             let mut ser = AniSer::new(&self.env)?;
             if let Some(typed_array) = typed_array {
                 ser.set_typed_array(typed_array);
+            }
+            if name == "@AniRef" {
+                ser.is_ani_ref = true;
             }
             value.serialize(&mut ser);
             let value = ser.finish();
@@ -439,6 +440,15 @@ macro_rules! common_impl {
 impl<'a, 'local> serde::ser::Serializer for &'a mut AniSer<'local> {
     common_impl!();
 
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
+        if self.is_ani_ref {
+            let ani_ref = AniRef::from_raw(v as _);
+            self.set_value(ani_ref)
+        } else {
+            self.set_value(v)
+        }
+    }
+
     fn serialize_u8(self, _v: u8) -> Result<Self::Ok, Self::Error> {
         Err(error_msg::U8_UNSUPPORTED)
     }
@@ -486,6 +496,11 @@ impl<'a, 'local> serde::ser::Serializer for &'a mut AniSer<'local> {
 
 impl<'a, 'recur, 'local> serde::ser::Serializer for &'a mut StructSer<'recur, 'local> {
     common_impl!();
+
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
+        self.set_value(v)
+    }
+
     fn serialize_u8(self, _v: u8) -> Result<Self::Ok, Self::Error> {
         Err(error_msg::U8_UNSUPPORTED)
     }
@@ -533,6 +548,10 @@ impl<'a, 'recur, 'local> serde::ser::Serializer for &'a mut StructSer<'recur, 'l
 
 impl<'a, 'recur, 'local> serde::ser::Serializer for &'a mut ArraySer<'recur, 'local> {
     common_impl!();
+
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
+        self.set_value(v)
+    }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         let data = match self.data.as_mut() {

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 use std::ops::Deref;
-
+use serde::Serialize;
 use crate::{ani_rs_error, objects::AniRef, AniVm};
 
 impl<T: Into<AniRef<'static>> + Clone> Drop for GlobalRef<T> {
@@ -44,5 +44,15 @@ impl<T: Into<AniRef<'static>> + Clone> Deref for GlobalRef<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<T: Into<AniRef<'static>> + Clone> Serialize for GlobalRef<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let ani_ref: AniRef = self.0.clone().into();
+        ani_ref.serialize(serializer)
     }
 }

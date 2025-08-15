@@ -13,7 +13,13 @@
 
 use std::thread;
 
-use ani_rs::{business_error::BusinessError, objects::{AniAsyncCallback, AniErrorCallback, AniFnObject}, typed_array::{ArrayBuffer, Uint32Array}, AniEnv};
+use ani_rs::{
+    business_error::BusinessError,
+    global::GlobalRef,
+    objects::{AniAsyncCallback, AniErrorCallback, AniFnObject, AniObject, AniRef},
+    typed_array::{ArrayBuffer, Uint32Array},
+    AniEnv,
+};
 
 #[ani_rs::native]
 pub fn execute_callback1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
@@ -41,36 +47,43 @@ pub fn execute_callback4(env: &AniEnv, callback: AniFnObject) -> Result<(), Busi
     thread::spawn(move || {
         global_callback.execute((4,));
     });
-    
+
     Ok(())
 }
 
 #[ani_rs::native]
 pub fn execute_callback5(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
-    let global_callback = callback.into_global_callback::<(ArrayBuffer,)>(env).unwrap();
+    let global_callback = callback
+        .into_global_callback::<(ArrayBuffer,)>(env)
+        .unwrap();
 
     thread::spawn(move || {
-        let buff = ArrayBuffer::new_with_vec(vec![1,2,3]);
+        let buff = ArrayBuffer::new_with_vec(vec![1, 2, 3]);
         global_callback.execute_spawn_thread((buff,));
     });
-    
+
     Ok(())
 }
 
 #[ani_rs::native]
 pub fn execute_callback6(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
-    let global_callback = callback.into_global_callback::<(Uint32Array,)>(env).unwrap();
+    let global_callback = callback
+        .into_global_callback::<(Uint32Array,)>(env)
+        .unwrap();
 
     thread::spawn(move || {
-        let buff = Uint32Array::new_with_vec(vec![10,20,30]);
+        let buff = Uint32Array::new_with_vec(vec![10, 20, 30]);
         global_callback.execute_spawn_thread((buff,));
     });
-    
+
     Ok(())
 }
 
 #[ani_rs::native]
-pub fn execute_async_callback1(env: &AniEnv, async_callback: AniAsyncCallback) -> Result<(), BusinessError> {
+pub fn execute_async_callback1(
+    env: &AniEnv,
+    async_callback: AniAsyncCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(401, "failed1".to_string());
     async_callback.execute_local(env, Some(err), (1,)).unwrap();
     Ok(())
@@ -84,7 +97,10 @@ pub fn execute_async_callback2(async_callback: AniAsyncCallback) -> Result<(), B
 }
 
 #[ani_rs::native]
-pub fn execute_async_callback3(env: &AniEnv, async_callback: AniAsyncCallback) -> Result<(), BusinessError> {
+pub fn execute_async_callback3(
+    env: &AniEnv,
+    async_callback: AniAsyncCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(403, "failed3".to_string());
     let global_callback = async_callback.into_global_callback::<(i32,)>(env).unwrap();
     global_callback.execute_spawn_thread(Some(err), (3,));
@@ -92,18 +108,24 @@ pub fn execute_async_callback3(env: &AniEnv, async_callback: AniAsyncCallback) -
 }
 
 #[ani_rs::native]
-pub fn execute_async_callback4(env: &AniEnv, async_callback: AniAsyncCallback) -> Result<(), BusinessError> {
+pub fn execute_async_callback4(
+    env: &AniEnv,
+    async_callback: AniAsyncCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(404, "failed4".to_string());
     let global_callback = async_callback.into_global_callback::<(i32,)>(env).unwrap();
     thread::spawn(move || {
         global_callback.execute(Some(err), (4,));
     });
-    
+
     Ok(())
 }
 
 #[ani_rs::native]
-pub fn execute_error_callback1(env: &AniEnv, error_callback: AniErrorCallback) -> Result<(), BusinessError> {
+pub fn execute_error_callback1(
+    env: &AniEnv,
+    error_callback: AniErrorCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(401, "failed1".to_string());
     error_callback.execute_local(env, err).unwrap();
     Ok(())
@@ -117,7 +139,10 @@ pub fn execute_error_callback2(error_callback: AniErrorCallback) -> Result<(), B
 }
 
 #[ani_rs::native]
-pub fn execute_error_callback3(env: &AniEnv, error_callback: AniErrorCallback) -> Result<(), BusinessError> {
+pub fn execute_error_callback3(
+    env: &AniEnv,
+    error_callback: AniErrorCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(403, "failed3".to_string());
     let global_callback = error_callback.into_global_callback(env).unwrap();
     global_callback.execute_spawn_thread(err);
@@ -125,12 +150,90 @@ pub fn execute_error_callback3(env: &AniEnv, error_callback: AniErrorCallback) -
 }
 
 #[ani_rs::native]
-pub fn execute_error_callback4(env: &AniEnv, error_callback: AniErrorCallback) -> Result<(), BusinessError> {
+pub fn execute_error_callback4(
+    env: &AniEnv,
+    error_callback: AniErrorCallback,
+) -> Result<(), BusinessError> {
     let err = BusinessError::new(404, "failed4".to_string());
     let global_callback = error_callback.into_global_callback(env).unwrap();
     thread::spawn(move || {
         global_callback.execute(err);
     });
-    
+
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_ani_ref_callback1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let s = String::from("rust");
+    let argv = env.serialize(&s).unwrap();
+    callback.execute_local(env, (argv,)).unwrap();
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_ani_ref_callback2(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback
+        .into_global_callback::<(GlobalRef<AniRef<'static>>,)>(env)
+        .unwrap();
+    let s = String::from("rust");
+    let argv = env.serialize(&s).unwrap();
+    let global_argv = argv.into_global(env).unwrap();
+    global_callback.execute_spawn_thread((global_argv,));
+    Ok(())
+}
+
+#[ani_rs::ani(path = "Lanirs/test/ani_test/AniRefStruct", output = "only")]
+struct AniRefCallbackStruct {
+    ani_obj_string: GlobalRef<AniObject<'static>>,
+    ani_string: String,
+}
+
+#[ani_rs::native]
+pub fn execute_ani_ref_callback3(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let s1 = String::from("rust ");
+    let s1_ref = env.serialize(&s1).unwrap();
+    let s1_obj = AniObject::from(s1_ref);
+    let s1_global = s1_obj.into_global(env).unwrap();
+    let s2 = String::from("cpp");
+    let argv = AniRefCallbackStruct {
+        ani_obj_string: s1_global,
+        ani_string: s2,
+    };
+
+    callback.execute_local(env, (argv,)).unwrap();
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_ani_ref_callback4(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback
+        .into_global_callback::<(AniRefCallbackStruct,)>(env)
+        .unwrap();
+
+    let s1 = String::from("rust ");
+    let s1_ref = env.serialize(&s1).unwrap();
+    let s1_obj = AniObject::from(s1_ref);
+    let s1_global = s1_obj.into_global(env).unwrap();
+    let s2 = String::from("cpp");
+    let argv = AniRefCallbackStruct {
+        ani_obj_string: s1_global,
+        ani_string: s2,
+    };
+
+    global_callback.execute((argv,));
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_multi_callbacks(
+    env: &AniEnv,
+    callback1: AniFnObject,
+    callback2: AniAsyncCallback,
+    callback3: AniErrorCallback,
+) -> Result<(), BusinessError> {
+    callback1.execute_local(env, (1,)).unwrap();
+    callback2.execute_local(env, None, (2,)).unwrap();
+    callback3.execute_local(env, BusinessError::new_static(3, "err")).unwrap();
     Ok(())
 }

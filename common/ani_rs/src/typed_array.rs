@@ -172,42 +172,42 @@ impl_typed_array!(
     Int8ArrayHelper,
     i8,
     TypedArray::Int8,
-    "Int8Array"
+    "@Int8Array"
 );
 impl_typed_array!(
     Int16Array,
     Int16ArrayHelper,
     i16,
     TypedArray::Int16,
-    "Int16Array"
+    "@Int16Array"
 );
 impl_typed_array!(
     Int32Array,
     Int32ArrayHelper,
     i32,
     TypedArray::Int32,
-    "Int32Array"
+    "@Int32Array"
 );
 impl_typed_array!(
     Uint8Array,
     Uint8ArrayHelper,
     u8,
     TypedArray::Uint8,
-    "Uint8Array"
+    "@Uint8Array"
 );
 impl_typed_array!(
     Uint16Array,
     Uint16ArrayHelper,
     u16,
     TypedArray::Uint16,
-    "Uint16Array"
+    "@Uint16Array"
 );
 impl_typed_array!(
     Uint32Array,
     Uint32ArrayHelper,
     u32,
     TypedArray::Uint32,
-    "Uint32Array"
+    "@Uint32Array"
 );
 
 #[derive(Serialize, Deserialize)]

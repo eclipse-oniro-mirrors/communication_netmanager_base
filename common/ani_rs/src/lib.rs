@@ -33,8 +33,8 @@ pub mod error;
 pub mod objects;
 pub mod signature;
 pub mod typed_array;
+pub mod global;
 
-mod global;
 mod iterator;
 mod macros;
 mod primitive;

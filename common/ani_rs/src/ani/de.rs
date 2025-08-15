@@ -36,6 +36,7 @@ pub struct AniDe<'local> {
     obj: AniObject<'local>,
 
     typed_array: Option<TypedArray>,
+    is_ani_ref: bool,
 }
 
 impl<'local> AniDe<'local> {
@@ -44,6 +45,7 @@ impl<'local> AniDe<'local> {
             env: env.clone(),
             obj,
             typed_array: None,
+            is_ani_ref: false,
         }
     }
 
@@ -62,6 +64,7 @@ struct StructDe<'local> {
     fields: &'static [&'static str],
 
     typed_array: Option<TypedArray>,
+    is_ani_ref: bool,
 }
 
 impl<'local> StructDe<'local> {
@@ -71,6 +74,7 @@ impl<'local> StructDe<'local> {
             obj,
             fields,
             typed_array: None,
+            is_ani_ref: false,
         }
     }
 
@@ -165,6 +169,7 @@ struct ArrayDe<'local> {
     index: usize,
 
     typed_array: Option<TypedArray>,
+    is_ani_ref: bool,
 }
 
 impl<'local> ArrayDe<'local> {
@@ -175,6 +180,7 @@ impl<'local> ArrayDe<'local> {
             len,
             index: 0,
             typed_array: None,
+            is_ani_ref: false,
         }
     }
 
@@ -214,6 +220,7 @@ struct EnumDe<'local> {
     variants: &'static [&'static str],
 
     typed_array: Option<TypedArray>,
+    is_ani_ref: bool,
 }
 
 impl<'local> EnumDe<'local> {
@@ -229,6 +236,7 @@ impl<'local> EnumDe<'local> {
             enum_name,
             variants,
             typed_array: None,
+            is_ani_ref: false,
         }
     }
 
@@ -378,7 +386,12 @@ macro_rules! impl_de {
             where
                 V: serde::de::Visitor<'local>,
             {
-                visitor.visit_i64(self.get_value()?)
+                if self.is_ani_ref {
+                    let ani_ref: AniRef = self.get_value()?;
+                    visitor.visit_i64(ani_ref.as_raw() as i64)
+                } else {
+                    visitor.visit_i64(self.get_value()?)
+                }
             }
 
             fn deserialize_u8<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
@@ -526,14 +539,17 @@ macro_rules! impl_de {
                 V: serde::de::Visitor<'local>,
             {
                 self.typed_array = match name {
-                    "Int8Array" => Some(TypedArray::Int8),
-                    "Int16Array" => Some(TypedArray::Int16),
-                    "Int32Array" => Some(TypedArray::Int32),
-                    "Uint8Array" => Some(TypedArray::Uint8),
-                    "Uint16Array" => Some(TypedArray::Uint16),
-                    "Uint32Array" => Some(TypedArray::Uint32),
+                    "@Int8Array" => Some(TypedArray::Int8),
+                    "@Int16Array" => Some(TypedArray::Int16),
+                    "@Int32Array" => Some(TypedArray::Int32),
+                    "@Uint8Array" => Some(TypedArray::Uint8),
+                    "@Uint16Array" => Some(TypedArray::Uint16),
+                    "@Uint32Array" => Some(TypedArray::Uint32),
                     _ => None,
                 };
+                if name == "@AniRef" {
+                    self.is_ani_ref = true;
+                }
                 visitor.visit_newtype_struct(self)
             }
 

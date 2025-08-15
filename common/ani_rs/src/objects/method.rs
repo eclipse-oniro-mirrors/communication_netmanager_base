@@ -13,7 +13,7 @@
 
 use std::marker::PhantomData;
 
-use ani_sys::ani_method;
+use ani_sys::{ani_method, ani_static_method};
 
 #[repr(transparent)]
 pub struct AniMethod<'local> {
@@ -34,6 +34,29 @@ impl AniMethod<'_> {
     }
 
     pub fn into_raw(self) -> ani_method {
+        self.inner
+    }
+}
+
+#[repr(transparent)]
+pub struct AniStaticMethod<'local> {
+    pub inner: ani_static_method,
+    lifetime: PhantomData<&'local ()>,
+}
+
+impl AniStaticMethod<'_> {
+    pub fn from_raw(ptr: ani_static_method) -> Self {
+        Self {
+            inner: ptr,
+            lifetime: PhantomData,
+        }
+    }
+
+    pub fn as_raw(&self) -> ani_static_method {
+        self.inner
+    }
+
+    pub fn into_raw(self) -> ani_static_method {
         self.inner
     }
 }
