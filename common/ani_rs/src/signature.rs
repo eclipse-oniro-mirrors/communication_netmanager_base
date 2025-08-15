@@ -17,29 +17,29 @@ const fn cstr(s: &[u8]) -> &CStr {
     unsafe { CStr::from_bytes_with_nul_unchecked(s) }
 }
 
-pub const BOOLEAN: &CStr = cstr(b"Lstd/core/Boolean;\0");
-pub const BYTE: &CStr = cstr(b"Lstd/core/Byte;\0");
-pub const SHORT: &CStr = cstr(b"Lstd/core/Short;\0");
-pub const INT: &CStr = cstr(b"Lstd/core/Int;\0");
-pub const LONG: &CStr = cstr(b"Lstd/core/Long;\0");
-pub const FLOAT: &CStr = cstr(b"Lstd/core/Float;\0");
-pub const DOUBLE: &CStr = cstr(b"Lstd/core/Double;\0");
-pub const STRING: &CStr = cstr(b"Lstd/core/String;\0");
-pub const CHAR: &CStr = cstr(b"Lstd/core/Char;\0");
+pub const BOOLEAN: &CStr = cstr(b"std.core.Boolean\0");
+pub const BYTE: &CStr = cstr(b"std.core.Byte\0");
+pub const SHORT: &CStr = cstr(b"std.core.Short\0");
+pub const INT: &CStr = cstr(b"std.core.Int\0");
+pub const LONG: &CStr = cstr(b"std.core.Long\0");
+pub const FLOAT: &CStr = cstr(b"std.core.Float\0");
+pub const DOUBLE: &CStr = cstr(b"std.core.Double\0");
+pub const STRING: &CStr = cstr(b"std.core.String\0");
+pub const CHAR: &CStr = cstr(b"std.core.Char\0");
 
-pub const MAP: &CStr = cstr(b"Lescompat/ReadonlyMap;\0");
-pub const ARRAY: &CStr = cstr(b"Lescompat/Array;\0");
-pub const ARRAY_BUFFER: &CStr = cstr(b"Lescompat/ArrayBuffer;\0");
-pub const RECORD: &CStr = cstr(b"Lescompat/Record;\0");
-pub const ITERATOR: &CStr = cstr(b"Lescompat/Iterator;\0");
+pub const MAP: &CStr = cstr(b"escompat.ReadonlyMap\0");
+pub const ARRAY: &CStr = cstr(b"escompat.Array\0");
+pub const ARRAY_BUFFER: &CStr = cstr(b"escompat.ArrayBuffer\0");
+pub const RECORD: &CStr = cstr(b"escompat.Record\0");
+pub const ITERATOR: &CStr = cstr(b"escompat.Iterator\0");
 
-pub const INT8_ARRAY: &CStr = cstr(b"Lescompat/Int8Array;\0");
-pub const INT16_ARRAY: &CStr = cstr(b"Lescompat/Int16Array;\0");
-pub const INT32_ARRAY: &CStr = cstr(b"Lescompat/Int32Array;\0");
+pub const INT8_ARRAY: &CStr = cstr(b"escompat.Int8Array\0");
+pub const INT16_ARRAY: &CStr = cstr(b"escompat.Int16Array\0");
+pub const INT32_ARRAY: &CStr = cstr(b"escompat.Int32Array\0");
 
-pub const UINT8_ARRAY: &CStr = cstr(b"Lescompat/Uint8Array;\0");
-pub const UINT16_ARRAY: &CStr = cstr(b"Lescompat/Uint16Array;\0");
-pub const UINT32_ARRAY: &CStr = cstr(b"Lescompat/Uint32Array;\0");
+pub const UINT8_ARRAY: &CStr = cstr(b"escompat.Uint8Array\0");
+pub const UINT16_ARRAY: &CStr = cstr(b"escompat.Uint16Array\0");
+pub const UINT32_ARRAY: &CStr = cstr(b"escompat.Uint32Array\0");
 
 pub const SET: &CStr = cstr(b"$_set\0");
 pub const GET: &CStr = cstr(b"$_get\0");

@@ -21,7 +21,7 @@ use crate::{
     AniEnv, AniVm,
 };
 use ani_sys::{ani_fn_object, ani_object};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{
     ops::Deref,
     sync::{Arc, Once},
@@ -154,6 +154,30 @@ impl<'local> From<AniObject<'local>> for AniAsyncCallback<'local> {
 impl<'local> From<AniObject<'local>> for AniErrorCallback<'local> {
     fn from(value: AniObject<'local>) -> Self {
         Self::from_raw(value.into_raw())
+    }
+}
+
+impl<'de> Deserialize<'de> for AniFnObject<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        let obj = AniObject::deserialize(deserializer)?;
+        Ok(AniFnObject::from(obj))
+    }
+}
+
+impl<'de> Deserialize<'de> for AniAsyncCallback<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        let obj = AniObject::deserialize(deserializer)?;
+        Ok(AniAsyncCallback::from(obj))
+    }
+}
+
+impl<'de> Deserialize<'de> for AniErrorCallback<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        let obj = AniObject::deserialize(deserializer)?;
+        Ok(AniErrorCallback::from(obj))
     }
 }
 

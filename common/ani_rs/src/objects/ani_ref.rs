@@ -14,8 +14,11 @@
 use std::{marker::PhantomData, ops::Deref, ptr::null_mut};
 
 use ani_sys::ani_ref;
+use serde::{Deserialize, Serialize};
 
-use crate::AniVm;
+use crate::{AniVm, AniEnv, global::GlobalRef, error::AniError};
+
+use super::AniObject;
 
 #[repr(transparent)]
 #[derive(Debug, Clone)]
@@ -66,6 +69,11 @@ impl AniRef<'_> {
     pub fn null() -> Self {
         Self::from_raw(null_mut() as _)
     }
+
+    pub fn into_global(self, env: &AniEnv) -> Result<GlobalRef<AniRef<'static>>, AniError> {
+        let ani_ref = env.create_global_ref(self)?;
+        Ok(GlobalRef(ani_ref))
+    }
 }
 
 impl PartialEq for AniRef<'_> {
@@ -78,3 +86,27 @@ impl PartialEq for AniRef<'_> {
 }
 
 impl Eq for AniRef<'_> {}
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug)]
+#[serde(rename = "@AniRef")]
+struct AniRefHelper(i64);
+
+impl<'de> Deserialize<'de> for AniRef<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+        let ani_ref_raw = AniRefHelper::deserialize(deserializer)?;
+        Ok(AniRef::from_raw(ani_ref_raw.0 as ani_ref))
+    }
+}
+
+impl Serialize for AniRef<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        let ani_ref_raw = self.as_raw() as i64;
+        let helper = AniRefHelper(ani_ref_raw);
+        helper.serialize(serializer)
+    }
+}

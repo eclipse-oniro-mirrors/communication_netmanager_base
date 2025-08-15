@@ -21,11 +21,19 @@ mod record;
 mod ani_struct;
 mod ani_callback;
 mod business_error;
+mod ani_json;
 
 ani_rs::ani_constructor!(
     namespace "Lanirs/test/ani_test"
     [
         "primitiveTest" : primitive::primitive_test,
+        "anirefDeserializeTest": primitive::aniref_deserialize_test,
+        "anirefStructDeTest": primitive::aniref_struct_de_test,
+        "anirefArrayDeTest": primitive::aniref_array_de_test,
+        "anirefSerializeTest": primitive::aniref_serialize_test,
+        "anirefStructTest": primitive::aniref_struct_test,
+        "anirefArrayTest": primitive::aniref_array_test,
+        "returnAniRefTest": primitive::return_ani_ref_test,
         "optionBool" : option::option_bool,
         "optionByte" : option::option_byte,
         "optionShort" : option::option_i16,
@@ -66,6 +74,7 @@ ani_rs::ani_constructor!(
         "createUint16Array": array_buffer::create_uint16_array,
         "createInt32Array": array_buffer::create_int32_array,
         "createUint32Array": array_buffer::create_uint32_array,
+        "arrayBufferStrcutTest": array_buffer::array_buffer_strcut_test,
         "structEnum": ani_struct::struct_enum,
         "enumTestStruct": ani_enum::enum_test_struct,
         "executeCallback1": ani_callback::execute_callback1,
@@ -82,6 +91,19 @@ ani_rs::ani_constructor!(
         "executeErrorCallback2": ani_callback::execute_error_callback2,
         "executeErrorCallback3": ani_callback::execute_error_callback3,
         "executeErrorCallback4": ani_callback::execute_error_callback4,
+        "executeAniRefCallback1": ani_callback::execute_ani_ref_callback1,
+        "executeAniRefCallback2": ani_callback::execute_ani_ref_callback2,
+        "executeAniRefCallback3": ani_callback::execute_ani_ref_callback3,
+        "executeAniRefCallback4": ani_callback::execute_ani_ref_callback4,
+        "executeMultiCallbacks": ani_callback::execute_multi_callbacks,
         "businessErrorTest": business_error::business_error_test,
+        "jsonSerDeserTest": ani_json::json_ser_deser_test,
+        "jsonStringifyTest1": ani_json::json_stringify_test1,
+        "jsonParseTest1": ani_json::json_parse_test1,
+        "executeJsonCallback1": ani_json::execute_json_callback1,
+        "executeJsonCallback2": ani_json::execute_json_callback2,
+        "jsonRequestTest": ani_json::json_request_test,
+        "jsonResponseTest1": ani_json::json_response_test1,
+        "jsonResponseTest2": ani_json::json_response_test2,
     ]
 );
