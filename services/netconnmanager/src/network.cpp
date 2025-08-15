@@ -337,6 +337,22 @@ void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
     NETMGR_LOG_D("Network UpdateInterfaces out.");
 }
 
+void Network::RemoveRouteByFamily(INetAddr::IpType addrFamily)
+{
+    auto route = netLinkInfo_.routeList_.begin();
+    while (route != netLinkInfo_.routeList_.end()) {
+        if (route->destination_.type_ != addrFamily) {
+            route++;
+            continue;
+        }
+        std::string destAddress =
+            route->destination_.address_ + "/" + std::to_string(route->destination_.prefixlen_);
+        NetsysController::GetInstance().NetworkRemoveRoute(netId_, route->iface_, destAddress,
+            route->gateway_.address_);
+        route = netLinkInfo_.routeList_.erase(route);
+    }
+}
+
 void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
@@ -366,15 +382,8 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
                 CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             std::unique_lock<std::shared_mutex> lock(netLinkInfoMutex_);
-            netLinkInfo_.routeList_.remove_if([family](const Route &route) {
-                INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
-                if (family == AF_INET) {
-                    addrFamily = INetAddr::IpType::IPV4;
-                } else if (family == AF_INET6) {
-                    addrFamily = INetAddr::IpType::IPV6;
-                }
-                return route.destination_.type_ == addrFamily;
-            });
+            INetAddr::IpType addrFamily = family == AF_INET ? INetAddr::IpType::IPV4 : INetAddr::IpType::IPV6;
+            RemoveRouteByFamily(addrFamily);
         }
     }
 

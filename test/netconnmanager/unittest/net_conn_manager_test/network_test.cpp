@@ -162,6 +162,30 @@ HWTEST_F(NetworkTest, UpdateIpAddrsTest001, TestSize.Level1)
     network->UpdateIpAddrs(newNetLinkInfo);
 }
 
+HWTEST_F(NetworkTest, RemoveRouteByFamily001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    EXPECT_NE(network, nullptr);
+    Route route1;
+    Route route2;
+    route1.destination_.type_ = INetAddr::IpType::IPV4;
+    route1.iface_ = "rmnet0";
+    route1.destination_.address_ = "0.0.0.0";
+    route1.destination_.prefixlen_ = 24;
+    route1.gateway_.address_ = "0.0.0.0";
+    route2.destination_.type_ = INetAddr::IpType::IPV6;
+    route2.iface_ = "rmnet0";
+    route2.destination_.address_ = "fe80::1";
+    route2.destination_.prefixlen_ = 64;
+    route2.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(route1);
+    network->netLinkInfo_.routeList_.push_back(route2);
+
+    network->RemoveRouteByFamily(INetAddr::IpType::IPV6);
+    EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 1);
+}
+
 HWTEST_F(NetworkTest, HandleUpdateIpAddrsTest001, TestSize.Level1)
 {
     int32_t netId = 1;
