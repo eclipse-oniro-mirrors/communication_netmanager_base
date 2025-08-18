@@ -338,11 +338,25 @@ HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest001, TestSize.Level1)
 HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest002, TestSize.Level1)
 {
     auto netConnService = NetConnService::GetInstance();
+    uint32_t reqId = 1;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
     EXPECT_NE(supplier, nullptr);
-    netConnService->NotFindBestSupplier(1, nullptr, supplier, nullptr);
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    uint32_t uid = 1099;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, uid, handler);
+    netConnService->NotFindBestSupplier(reqId, active, supplier, callback);
+    int32_t netId = 123;
+    netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
+    netConnService->uidLostDelaySet_.insert(uid);
+    netConnService->NotFindBestSupplier(reqId, active, supplier, callback);
+    netConnService->uidLostDelaySet_.clear();
+    netConnService->notifyLostDelayCache_.Clear();
 }
 
 HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest003, TestSize.Level1)
@@ -1266,6 +1280,29 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest004, TestSize.Level1)
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
     ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    activates.clear();
+    uid = 1099;
+    int32_t netId = 123;
+    uint32_t reqId = 1;
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler, uid, REQUEST);
+    active->SetRequestId(reqId);
+    active->lastNetId_ = netId;
+    active->SetIsAppFrozened(!isFrozened);
+    active->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
+    active->SetServiceSupply(nullptr);
+    activates.push_back(active);
+    netConnService->netUidActivates_[uid] = activates;
+    netConnService->netActivates_[reqId] = active;
+    netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
+    netConnService->uidLostDelaySet_.insert(uid);
+    netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
+    EXPECT_TRUE(active->isNotifyLostDelay_);
+    EXPECT_EQ(active->notifyLostNetId_, netId);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableAppFrozenedCallbackLimitationTest002, TestSize.Level1)
@@ -1407,6 +1444,10 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsync001, TestSize.Level1)
     netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
     supplier->supplierId_ = supplierId;
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    int32_t netId = 123;
+    auto network = std::make_shared<Network>(netId, supplierId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    supplier->SetNetwork(network);
     netConnService->delaySupplierId_ = supplierId;
     netConnService->netSuppliers_[1] = supplier;
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo();
@@ -1415,8 +1456,102 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsync001, TestSize.Level1)
     netSupplierInfo->strength_ = 0x64;
     netSupplierInfo->frequency_ = 0x10;
     netConnService->isDelayHandleFindBestNetwork_ = true;
-    netConnService->UpdateNetSupplierInfoAsync(1, netSupplierInfo, 100);
+    int32_t callingUid = 100;
+    netConnService->UpdateNetSupplierInfoAsync(supplierId, netSupplierInfo, callingUid);
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
+    netSupplierInfo->isAvailable_ = true;
+    netConnService->UpdateNetSupplierInfoAsync(supplierId, netSupplierInfo, callingUid);
 }
+
+HWTEST_F(NetConnServiceExtTest, CallbackForSupplier, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    EXPECT_NE(supplier, nullptr);
+    int32_t netId = 123;
+    uint32_t supplierId = 1;
+    netConnService->netSuppliers_[supplierId] = supplier;
+    auto network = std::make_shared<Network>(netId, supplierId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    supplier->SetNetwork(network);
+    uint32_t reqId = 1;
+    supplier->bestReqList_.insert(reqId);
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    uint32_t uid = 1099;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler, uid, REQUEST);
+    active->SetRequestId(reqId);
+    netConnService->netActivates_[reqId] = active;
+    netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
+    netConnService->uidLostDelaySet_.insert(uid);
+    CallbackType type = CallbackType::CALL_TYPE_LOST;
+    netConnService->CallbackForSupplier(supplier, type);
+    EXPECT_TRUE(active->isNotifyLostDelay_);
+    EXPECT_EQ(active->notifyLostNetId_, netId);
+    netConnService->uidLostDelaySet_.clear();
+    netConnService->notifyLostDelayCache_.Clear();
+    netConnService->netActivates_[reqId] = nullptr;
+}
+
+HWTEST_F(NetConnServiceExtTest, FindNotifyLostUid, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    uint32_t uid = 1099;
+    netConnService->uidLostDelaySet_.insert(uid);
+    auto res = netConnService->FindNotifyLostUid(uid);
+    EXPECT_TRUE(res);
+    netConnService->uidLostDelaySet_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, StopNotifyLostDelay, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    int32_t netId = 123;
+    netConnService->notifyLostDelayCache_.EnsureInsert(netId, true);
+    netConnService->StopNotifyLostDelay(netId);
+    auto res = netConnService->FindNotifyLostDelayCache(netId);
+    EXPECT_FALSE(res);
+    netConnService->uidLostDelaySet_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, HandleNotifyLostDelay, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    uint32_t uid = 1099;
+    int32_t netId = 123;
+    netConnService->uidLostDelaySet_.insert(uid);
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    active->isNotifyLostDelay_ = true;
+    active->notifyLostNetId_ = netId;
+    active->netServiceSupplied_ = nullptr;
+    activates.push_back(active);
+    netConnService->netUidActivates_[uid] = activates;
+    netConnService->HandleNotifyLostDelay(netId);
+    EXPECT_FALSE(active->isNotifyLostDelay_);
+    EXPECT_EQ(active->notifyLostNetId_, 0);
+    netConnService->uidLostDelaySet_.clear();
+}
+
+HWTEST_F(NetConnServiceExtTest, UpdateUidLostDelay, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    uint32_t uid = 1099;
+    std::set<uint32_t> uidLostDelaySet;
+    uidLostDelaySet.insert(uid);
+    netConnService->UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_FALSE(netConnService->uidLostDelaySet_.empty());
+    uidLostDelaySet.clear();
+    netConnService->UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_TRUE(netConnService->uidLostDelaySet_.empty());
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

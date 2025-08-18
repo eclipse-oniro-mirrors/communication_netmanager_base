@@ -101,5 +101,13 @@ HWTEST_F(NetConnServiceIfaceTest, RegisterNetFactoryResetCallbackTest001, TestSi
     ret = instance_.RegisterNetFactoryResetCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetConnServiceIfaceTest, UpdateUidLostDelay, TestSize.Level1)
+{
+    std::set<uint32_t> uidLostDelaySet;
+    uidLostDelaySet.insert(1000);
+    int32_t ret = instance_.UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

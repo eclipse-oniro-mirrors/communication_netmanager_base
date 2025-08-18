@@ -86,6 +86,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {
@@ -550,6 +554,16 @@ HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest002, TestSize.Level1)
     sptr<NetPolicyBaseService> netPolicyService = new (std::nothrow) TestNetPolicyService();
     instance_.RegisterPolicyService(netPolicyService);
     EXPECT_EQ(instance_.ResetPolicyFactory(), NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateUidLostDelay, TestSize.Level1)
+{
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    std::set<uint32_t> uidLostDelaySet;
+    uidLostDelaySet.insert(1000);
+    auto ret = instance_.UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

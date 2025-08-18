@@ -67,6 +67,10 @@ public:
     bool IsAllowCallback(CallbackType callbackType);
     int32_t GetLastNetid();
     void SetLastNetid(const int32_t netid);
+    void SetNotifyLostDelay(bool isNotifyLostDelay);
+    void SetNotifyLostNetId(int32_t notifyLostNetId);
+    int32_t GetNotifyLostNetId();
+    bool GetNotifyLostDelay();
 private:
     bool CompareByNetworkIdent(const std::string &ident, NetBearType bearerType, bool skipCheckIdent);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -90,6 +94,9 @@ private:
     std::atomic<bool> isAppFrozened_ = false;
     std::atomic<int32_t> lastCallbackType_ = 0;
     int32_t lastNetId_ = 0;
+    std::recursive_mutex notifyLostMutex_;
+    std::atomic<bool> isNotifyLostDelay_ = false;
+    std::atomic<int32_t> notifyLostNetId_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

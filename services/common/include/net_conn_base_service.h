@@ -16,7 +16,6 @@
 #define NET_CONN_BASE_SERVICE_H
 
 #include <set>
-
 #include "net_all_capabilities.h"
 #include "net_link_info.h"
 #include "net_supplier_info.h"
@@ -39,6 +38,7 @@ public:
     virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
     virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;
+    virtual int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

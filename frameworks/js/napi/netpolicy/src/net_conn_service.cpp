@@ -81,6 +81,7 @@ constexpr int32_t SUCCESS_CODE = 204;
 constexpr int32_t RETRY_TIMES = 3;
 constexpr long AUTH_TIME_OUT = 5L;
 constexpr uint32_t MAX_NET_EXT_ATTRIBUTE = 10240;
+constexpr int64_t DELAY_LOST_TIME = 3000;
 constexpr const char *BOOTEVENT_NETMANAGER_SERVICE_READY = "bootevent.netmanager.ready";
 constexpr const char *BOOTEVENT_NETSYSNATIVE_SERVICE_READY = "bootevent.netsysnative.ready";
 constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
@@ -1028,17 +1029,16 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     EventReport::SendSupplierBehaviorEvent(eventInfo);
     NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
                  supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
+    bool isOldAvailable = supplier->IsAvailable();
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
-        CallbackForSupplier(supplier, CALL_TYPE_LOST);
-        if (supplierId == delaySupplierId_) {
-            RemoveDelayNetwork();
-        }
+        HandleSupplierNotAvailable(supplierId, isOldAvailable, supplier);
         std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
         locker.unlock();
         ProcessHttpProxyCancel(supplier);
     } else {
+        StopNotifyLostDelay(supplier->GetNetId());
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
     // Init score again here in case of net supplier type changed.
@@ -1050,6 +1050,18 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     FindBestNetworkForAllRequest();
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::HandleSupplierNotAvailable(uint32_t supplierId, bool isOldAvailable, sptr<NetSupplier> &supplier)
+{
+    if (isOldAvailable) {
+        StartNotifyLostDelay(supplier->GetNetId());
+    }
+    CallbackForSupplier(supplier, CALL_TYPE_LOST);
+    std::unique_lock<std::recursive_mutex> lock(delayFindBestNetMutex_);
+    if (supplierId == delaySupplierId_) {
+        RemoveDelayNetwork();
+    }
 }
 
 void NetConnService::RemoveDelayNetwork()
@@ -1595,7 +1607,15 @@ void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<N
         supplier->RemoveBestRequest(reqId);
         if (callback != nullptr) {
             sptr<NetHandle> netHandle = supplier->GetNetHandle();
-            callback->NetLost(netHandle);
+            int32_t netId = supplier->GetNetId();
+            if (active != nullptr && FindNotifyLostDelayCache(netId) &&
+                CheckNotifyLostDelay(active->GetUid(), netId, CALL_TYPE_LOST)) {
+                active->SetNotifyLostDelay(true);
+                active->SetNotifyLostNetId(netId);
+                NETMGR_LOG_I("NotFindBestSupplier supplier->GetNetId():%{public}d", netId);
+            } else {
+                callback->NetLost(netHandle);
+            }
         }
     }
     if (active != nullptr) {
@@ -1633,7 +1653,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
 
 void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
 {
-    if (request == nullptr) {
+    if (request == nullptr || request->GetNetSpecifier() == nullptr) {
         NETMGR_LOG_E("request is null");
         return;
     }
@@ -1696,9 +1716,17 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
         std::shared_lock<std::shared_mutex> lock(netActivatesMutex_);
         netActivatesBck = netActivates_;
     }
+    int32_t netId = supplier->GetNetId();
     for (auto it : bestReqList) {
         auto reqIt = netActivatesBck.find(it);
         if (reqIt == netActivatesBck.end() || reqIt->second == nullptr || reqIt->second->GetNetCallback() == nullptr) {
+            continue;
+        }
+        uint32_t uid = reqIt->second->GetUid();
+        uint32_t reqId = reqIt->second->GetRequestId();
+        if (FindNotifyLostDelayCache(netId) && CheckNotifyLostDelay(uid, netId, type)) {
+            reqIt->second->SetNotifyLostDelay(true);
+            reqIt->second->SetNotifyLostNetId(netId);
             continue;
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
@@ -1706,6 +1734,104 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
         HandleCallback(supplier, netHandle, callback, type);
     }
 }
+
+bool NetConnService::FindNotifyLostUid(uint32_t uid)
+{
+    std::unique_lock<std::recursive_mutex> lock(uidLostDelayMutex_);
+    if (uidLostDelaySet_.find(uid) != uidLostDelaySet_.end()) {
+        NETMGR_LOG_I("FindNotifyLostUid uid[%{public}d].", uid);
+        return true;
+    }
+    return false;
+}
+
+void NetConnService::StopNotifyLostDelay(int32_t netId)
+{
+    notifyLostDelayCache_.Erase(netId);
+    if (netConnEventHandler_ == nullptr) {
+        return;
+    }
+    NETMGR_LOG_I("StopNotifyLostDelay netId:%{public}d", netId);
+    auto taskName = "HandleNotifyLostDelay" + std::to_string(netId);
+    netConnEventHandler_->RemoveTask(taskName);
+    HandleNotifyLostDelay(netId);
+}
+
+void NetConnService::StartNotifyLostDelay(int32_t netId)
+{
+    if (netConnEventHandler_ == nullptr) {
+        return;
+    }
+    NETMGR_LOG_I("StartNotifyLostDelay netId:%{public}d", netId);
+    auto taskName = "HandleNotifyLostDelay" + std::to_string(netId);
+    netConnEventHandler_->RemoveTask(taskName);
+    netConnEventHandler_->PostAsyncTask([this, netId]() { HandleNotifyLostDelay(netId); },
+        taskName, DELAY_LOST_TIME);
+    notifyLostDelayCache_.EnsureInsert(netId, true);
+}
+
+bool NetConnService::FindNotifyLostDelayCache(int32_t netId)
+{
+    bool isNotifyLostDelayCache = false;
+    notifyLostDelayCache_.Find(netId, isNotifyLostDelayCache);
+    return isNotifyLostDelayCache;
+}
+
+bool NetConnService::CheckNotifyLostDelay(uint32_t uid, int32_t netId, CallbackType type)
+{
+    if (netConnEventHandler_ == nullptr || type != CALL_TYPE_LOST || !FindNotifyLostUid(uid)) {
+        return false;
+    }
+    NETMGR_LOG_I("CheckNotifyLostDelay type:%{public}d netId:%{public}d uid:%{public}d",
+        static_cast<int32_t>(type), netId, uid);
+    return true;
+}
+
+void NetConnService::HandleNotifyLostDelay(int32_t netId)
+{
+    std::lock_guard guard(uidActivateMutex_);
+    for (auto uid : uidLostDelaySet_) {
+        auto it = netUidActivates_.find(uid);
+        if (it == netUidActivates_.end()) {
+            continue;
+        }
+        std::vector<std::shared_ptr<NetActivate>> activates = it->second;
+        for (auto iter = activates.begin(); iter != activates.end();++iter) {
+            auto curNetAct = (*iter);
+            if (curNetAct == nullptr) {
+                continue;
+            }
+            sptr<NetSupplier> netSupplier = curNetAct->GetServiceSupply();
+            sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
+            bool isNotifyLostDelay = curNetAct->GetNotifyLostDelay();
+            int32_t notifyLostNetId = curNetAct->GetNotifyLostNetId();
+            if (isNotifyLostDelay && (notifyLostNetId == netId)) {
+                curNetAct->SetNotifyLostDelay(false);
+                curNetAct->SetNotifyLostNetId(0);
+            }
+            if (netSupplier != nullptr) {
+                continue;
+            }
+            if (callback == nullptr) {
+                continue;
+            }
+            sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
+            netHandle->SetNetId(netId);
+            callback->NetLost(netHandle);
+        }
+    }
+}
+
+int32_t NetConnService::UpdateUidLostDelay(const std::set<uint32_t> &uidSet)
+{
+    std::unique_lock<std::recursive_mutex> lock(uidLostDelayMutex_);
+    uidLostDelaySet_ = uidSet;
+    for (auto &uid : uidLostDelaySet_) {
+        NETMGR_LOG_I("UpdateUidLostDelay uid[%{public}d].", uid);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 
 void NetConnService::HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
     sptr<INetConnCallback> callback, CallbackType type)
@@ -3977,6 +4103,11 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
                 continue;
             }
             int32_t lastNetid = curNetAct->GetLastNetid();
+            if (FindNotifyLostDelayCache(lastNetid) && CheckNotifyLostDelay(uid, lastNetid, callbackType)) {
+                curNetAct->SetNotifyLostDelay(true);
+                curNetAct->SetNotifyLostNetId(lastNetid);
+                continue;
+            }
             if (callback) {
                 sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
                 netHandle->SetNetId(lastNetid);

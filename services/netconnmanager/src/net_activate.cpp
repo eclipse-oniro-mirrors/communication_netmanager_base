@@ -279,25 +279,52 @@ void NetActivate::SetLastNetid(const int32_t netid)
 
 bool NetActivate::IsAllowCallback(CallbackType callbackType)
 {
-    if (!NetConnService::GetInstance()->IsAppFrozenedCallbackLimitation()) {
-        return true;
-    }
     bool isAppFrozened = isAppFrozened_.load();
     bool isForegroundApp = AppStateAwareManager::GetInstance().IsForegroundApp(uid_);
-    if (isAppFrozened && !isForegroundApp) {
+    if (NetConnService::GetInstance()->IsAppFrozenedCallbackLimitation() && isAppFrozened && !isForegroundApp) {
         if (lastCallbackType_ != CALL_TYPE_LOST && callbackType == CALL_TYPE_LOST
             && lastNetId_ == 0 && netServiceSupplied_ != nullptr
             && netServiceSupplied_->GetNetHandle() != nullptr) {
                 lastNetId_ = netServiceSupplied_->GetNetHandle()->GetNetId();
         }
         SetLastCallbackType(callbackType);
-    
         NETMGR_LOG_I("UID[%{public}d] is AppFrozened, not Allow send callbackType[%{public}d]",
             uid_, callbackType);
         return false;
     }
+    std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
+    if (isNotifyLostDelay_ && callbackType == CALL_TYPE_LOST) {
+        NETMGR_LOG_I("UID[%{public}d] is delay, not Allow send callbackType[%{public}d]",
+            uid_, callbackType);
+        return false;
+    }
+    isNotifyLostDelay_ = false;
+    notifyLostNetId_ = 0;
     return true;
 }
 
+void NetActivate::SetNotifyLostDelay(bool isNotifyLostDelay)
+{
+    std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
+    isNotifyLostDelay_ = isNotifyLostDelay;
+}
+
+void NetActivate::SetNotifyLostNetId(int32_t notifyLostNetId)
+{
+    std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
+    notifyLostNetId_ = notifyLostNetId;
+}
+
+int32_t NetActivate::GetNotifyLostNetId()
+{
+    std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
+    return notifyLostNetId_;
+}
+
+bool NetActivate::GetNotifyLostDelay()
+{
+    std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
+    return isNotifyLostDelay_;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

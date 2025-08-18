@@ -190,5 +190,14 @@ int32_t NetManagerCenter::RegisterNetFactoryResetCallback(const sptr<INetFactory
     NETMGR_LOG_I("NetManagerCenter RegisterNetFactoryResetCallback");
     return connService_->RegisterNetFactoryResetCallback(callback);
 }
+
+int32_t NetManagerCenter::UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->UpdateUidLostDelay(uidLostDelaySet);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
