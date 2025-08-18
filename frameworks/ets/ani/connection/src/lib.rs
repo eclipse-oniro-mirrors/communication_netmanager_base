@@ -16,6 +16,7 @@
 mod bridge;
 mod connection;
 mod error_code;
+mod log;
 pub mod wrapper;
 
 use ani_rs::ani_constructor;
@@ -50,7 +51,8 @@ ani_constructor!(
     ]
     class "L@ohos/net/connection/connection/NetHandleInner"
     [
-        "getAddressByNameSync" : connection::get_address_by_name,
+        "getAddressByNameSyncWithHandle" : connection::get_address_by_name_with_handle,
+        "getAddressesByNameSyncWithHandle": connection::get_addresses_by_name_with_handle,
     ]
     class "L@ohos/net/connection/connection/NetConnectionInner"
     [
@@ -68,3 +70,21 @@ ani_constructor!(
         "clean" : connection::connection_clean,
     ]
 );
+
+const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
+    log_type: hilog_rust::LogType::LogCore,
+    domain: 0xD0015B0,
+    tag: "NetMgrSubSystem",
+};
+
+#[used]
+#[link_section = ".init_array"]
+static G_CONNECTION_PANIC_HOOK: extern "C" fn() = {
+    #[link_section = ".text.startup"]
+    extern "C" fn init() {
+        std::panic::set_hook(Box::new(|info| {
+            connection_error!("Panic occurred: {:?}", info);
+        }));
+    }
+    init
+};
