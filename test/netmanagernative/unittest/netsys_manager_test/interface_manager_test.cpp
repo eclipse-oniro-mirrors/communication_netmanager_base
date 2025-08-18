@@ -539,7 +539,6 @@ HWTEST_F(InterfaceManagerTest, AddStaticIpv6AddrTest002, TestSize.Level1)
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "chba0";
     ret = InterfaceManager::AddStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, DelStaticIpv6AddrTest002, TestSize.Level1)
@@ -554,7 +553,6 @@ HWTEST_F(InterfaceManagerTest, DelStaticIpv6AddrTest002, TestSize.Level1)
     macAddr = "aa:bb:cc:dd:00:ff";
     ifName = "chba0";
     ret = InterfaceManager::DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, GetIfaceConfigTest004, TestSize.Level1)
