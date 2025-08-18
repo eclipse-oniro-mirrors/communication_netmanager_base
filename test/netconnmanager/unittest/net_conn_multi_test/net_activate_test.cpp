@@ -437,7 +437,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-HWTEST_F(NetActivateTest, IsAllowCallbackTest004, TestSize.Level1) +
+HWTEST_F(NetActivateTest, IsAllowCallbackTest004, TestSize.Level1)
 {
     NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = true;
     instance_->isAppFrozened_ = false;
@@ -448,7 +448,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest004, TestSize.Level1) +
     NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = false;
 }
 
-HWTEST_F(NetActivateTest, NotifyLostDelay, TestSize.Level1) +
+HWTEST_F(NetActivateTest, NotifyLostDelay, TestSize.Level1)
 {
     instance_->SetNotifyLostDelay(true);
     bool isNotifyLostDelay = instance_->GetNotifyLostDelay();
