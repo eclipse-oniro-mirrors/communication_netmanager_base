@@ -580,7 +580,7 @@ HWTEST_F(NetManagerCenterTest, RegisterNetFactoryResetCallbackTest001, TestSize.
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetManagerCenterTest, UpdateUidLostDelay, TestSize.Level1) +
+HWTEST_F(NetManagerCenterTest, UpdateUidLostDelay, TestSize.Level1)
 {
     sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
     instance_.RegisterConnService(connService);
