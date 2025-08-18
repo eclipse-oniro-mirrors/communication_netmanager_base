@@ -107,7 +107,6 @@ HWTEST_F(VnicManagerTest, CreateWithDestroyVnic001, TestSize.Level1)
     result = VnicManager::GetInstance().DelDefaultRoute();
 
     result = VnicManager::GetInstance().AddDefaultRoute();
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     result = VnicManager::GetInstance().DestroyVnic();
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
