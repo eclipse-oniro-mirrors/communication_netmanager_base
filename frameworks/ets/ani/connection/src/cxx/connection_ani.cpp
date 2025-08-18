@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <memory>
+#include <string>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include "connection_ani.h"
 #include "access_token.h"
 #include "accesstoken_kit.h"
@@ -27,9 +31,9 @@
 #include "tokenid_kit.h"
 #include "wrapper.rs.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_log.h"
 #include "errorcode_convertor.h"
-#include <memory>
-#include <string>
+
 namespace OHOS {
 namespace NetManagerAni {
 using namespace Security::AccessToken;
@@ -248,38 +252,119 @@ ConnectionProperties GetConnectionProperties(int32_t net_id, int32_t &ret)
     return ConvertConnectionProperties(info);
 }
 
+static int32_t TransErrorCode(int32_t error)
+{
+    switch (error) {
+        case NO_PERMISSION_CODE:
+            return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+        case PERMISSION_DENIED_CODE:
+            return NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED;
+        case NET_UNREACHABLE_CODE:
+            return NetManagerStandard::NETMANAGER_ERR_INTERNAL;
+        default:
+            return NetManagerStandard::NETMANAGER_ERR_OPERATION_FAILED;
+    }
+}
+
+static void SetAddressInfo(const std::string &host, addrinfo *info, NetAddress &address)
+{
+    address.address = rust::String(host);
+    if (info->ai_addr->sa_family == AF_INET) {
+        address.family = Family::IPv4;
+        auto addr4 = reinterpret_cast<sockaddr_in *>(info->ai_addr);
+        address.port = addr4->sin_port;
+    } else if (info->ai_addr->sa_family == AF_INET6) {
+        address.family = Family::IPv6;
+        auto addr6 = reinterpret_cast<sockaddr_in6 *>(info->ai_addr);
+        address.port = addr6->sin6_port;
+    }
+}
+
 rust::vec<NetAddress> GetAddressesByName(const std::string &host, int32_t netId, int32_t &ret)
 {
-    std::vector<NetManagerStandard::INetAddr> addrList;
+    addrinfo *res = nullptr;
+    queryparam param;
+    param.qp_type = QEURY_TYPE_NORMAL;
+    param.qp_netid = netId;
     rust::vec<NetAddress> addresses;
-    ret = NetManagerStandard::NetConnClient::GetInstance().GetAddressesByName(host, netId, addrList);
-    if (ret != 0) {
+    if (host.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
         return addresses;
     }
 
-    for (const auto &addr : addrList) {
-        NetAddress address{
-            .address = addr.address_,
-            .family = addr.family_,
-            .port = addr.port_,
-        };
+    int status = getaddrinfo_ext(host.c_str(), nullptr, nullptr, &res, &param);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
+        ret = TransErrorCode(errno);
+        return addresses;
+    }
+
+    for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
+        std::string addrHost;
+        if (tmp->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
+            char ip[MAX_IPV4_STR_LEN] = {0};
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            addrHost = ip;
+        } else if (tmp->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
+            char ip[MAX_IPV6_STR_LEN] = {0};
+            inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+            addrHost = ip;
+        }
+
+        NetAddress address;
+        SetAddressInfo(addrHost, tmp, address);
         addresses.push_back(address);
     }
+    freeaddrinfo(res);
     return addresses;
 }
 
 NetAddress GetAddressByName(const std::string &host, int32_t netId, int32_t &ret)
 {
-    NetManagerStandard::INetAddr addr;
-    ret = NetManagerStandard::NetConnClient::GetInstance().GetAddressByName(host, netId, addr);
-    if (ret != 0) {
+    addrinfo *res = nullptr;
+    queryparam param;
+    param.qp_type = QEURY_TYPE_NORMAL;
+    param.qp_netid = netId;
+    if (host.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        ret = NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
         return NetAddress{};
     }
-    return NetAddress{
-        .address = addr.address_,
-        .family = addr.family_,
-        .port = addr.port_,
-    };
+
+    int status = getaddrinfo_ext(host.c_str(), nullptr, nullptr, &res, &param);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
+        ret = TransErrorCode(errno);
+        return NetAddress{};
+    }
+    if (res == nullptr) {
+        NETMANAGER_BASE_LOGE("addrinfo is nullptr!");
+        return NetAddress{};
+    }
+
+    std::string addrHost;
+    if (res->ai_family == AF_INET) {
+        auto addr = reinterpret_cast<sockaddr_in *>(res->ai_addr);
+        char ip[MAX_IPV4_STR_LEN] = {0};
+        inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+        addrHost = ip;
+    } else if (res->ai_family == AF_INET6) {
+        auto addr = reinterpret_cast<sockaddr_in6 *>(res->ai_addr);
+        char ip[MAX_IPV6_STR_LEN] = {0};
+        inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+        addrHost = ip;
+    }
+
+    NetAddress address;
+    SetAddressInfo(addrHost, res, address);
+
+    freeaddrinfo(res);
+    return address;
 }
 
 void NetDetection(int32_t netId, int32_t &ret)

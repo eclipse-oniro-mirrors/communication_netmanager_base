@@ -38,6 +38,17 @@ struct NetBlockStatusInfo;
 struct NetCapabilityInfo;
 struct NetConnectionPropertyInfo;
 
+static constexpr size_t MAX_IPV4_STR_LEN = 16;
+static constexpr size_t MAX_IPV6_STR_LEN = 64;
+static constexpr int32_t NO_PERMISSION_CODE = 1;
+static constexpr int32_t PERMISSION_DENIED_CODE = 13;
+static constexpr int32_t NET_UNREACHABLE_CODE = 101;
+
+enum Family {
+    IPv4 = 1,
+    IPv6 = 2,
+};
+
 NetHandle GetDefaultNetHandle(int32_t &ret);
 
 rust::vec<NetHandle> GetAllNets(int32_t &ret);

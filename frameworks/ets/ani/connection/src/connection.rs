@@ -113,17 +113,23 @@ pub(crate) fn get_connection_properties(
 
 #[ani_rs::native]
 pub(crate) fn get_addresses_by_name(host: String) -> Result<Vec<NetAddress>, BusinessError> {
-    let net_handle = NetConnClient::get_default_net_handle().map_err(convert_to_business_error)?;
-    NetConnClient::get_addresses_by_name(&host, net_handle.net_id)
-        .map_err(convert_to_business_error)
+    NetConnClient::get_addresses_by_name(&host, 0).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
-pub(crate) fn get_address_by_name(
+pub(crate) fn get_address_by_name_with_handle(
     this: NetHandle,
     host: String,
 ) -> Result<NetAddress, BusinessError> {
     NetConnClient::get_address_by_name(&host, this.net_id).map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub(crate) fn get_addresses_by_name_with_handle(
+    this: NetHandle,
+    host: String,
+) -> Result<Vec<NetAddress>, BusinessError> {
+    NetConnClient::get_addresses_by_name(&host, this.net_id).map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
