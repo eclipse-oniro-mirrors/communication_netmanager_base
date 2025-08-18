@@ -69,6 +69,7 @@ ohos_rust_shared_library("connection_ani") {
   external_deps = [
     "runtime_core:ani",
     "hilog:hilog_rust",
+    "hilog:libhilog",
     "ipc:ipc_rust",
   ]
 
