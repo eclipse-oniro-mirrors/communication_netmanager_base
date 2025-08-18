@@ -70,7 +70,43 @@ export default namespace ani_test {
                             | Record<string, string> | string[] 
                             | Uint8Array | Int8Array | Uint16Array | Int16Array | Uint32Array | Int32Array ;
 
+    export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+
+    export class AniRefStruct {
+        aniObjString: string;
+        aniString: string;
+    }
+
+    export class ArrayBufferStruct {
+        buffer1: ArrayBuffer;
+        buffer2: Int32Array;
+    }
+
+    export enum HttpDataType {
+        STRING = 0,
+        OBJECT = 1,
+        ARRAY_BUFFER = 2
+    }
+
+    export class HttpRequestOptions {
+        extraData?: string | RecordData | ArrayBuffer;
+        expectDataType?: HttpDataType;
+    }
+
+    export class HttpResponse {
+        result: string | RecordData | ArrayBuffer;
+        resultType: HttpDataType;
+    }
+
     export native function primitiveTest(input:PrimitiveTest): PrimitiveTest;
+    export native function anirefDeserializeTest(input: string): boolean;
+    export native function anirefStructDeTest(input: AniRefStruct): boolean;
+    export native function anirefArrayDeTest(input: Array<string>): Array<string>;
+    export native function anirefSerializeTest(input: string): boolean;
+    export native function anirefStructTest(input: AniRefStruct): AniRefStruct;
+    export native function anirefArrayTest(input: Array<string>): Array<string>;
+    export native function returnAniRefTest(): string;
+
     export native function optionBool(input?:boolean): boolean | undefined;
     export native function optionByte(input?:byte): byte | undefined;
     export native function optionShort(input?:short): short | undefined;
@@ -118,6 +154,7 @@ export default namespace ani_test {
     export native function createInt16Array(input: Int16Array): Int16Array;
     export native function createUint32Array(input: Uint32Array): Uint32Array;
     export native function createInt32Array(input: Int32Array): Int32Array;
+    export native function arrayBufferStrcutTest(input: ArrayBufferStruct): ArrayBufferStruct
 
     export native function structEnum(input: Config): Config;
     export native function executeCallback1(callback: Callback<int>): void;
@@ -135,9 +172,22 @@ export default namespace ani_test {
     export native function executeErrorCallback2(callback: ErrorCallback): void;
     export native function executeErrorCallback3(callback: ErrorCallback): void;
     export native function executeErrorCallback4(callback: ErrorCallback): void;
-
+    export native function executeAniRefCallback1(callback: Callback<string>): void;
+    export native function executeAniRefCallback2(callback: Callback<string>): void;
+    export native function executeAniRefCallback3(callback: Callback<AniRefStruct>): void;
+    export native function executeAniRefCallback4(callback: Callback<AniRefStruct>): void;
+    export native function executeMultiCallbacks(callback1: Callback<int>, callback2: AsyncCallback<int>, callback3: ErrorCallback): void;
 
     export native function businessErrorTest(): void;
+
+    export native function jsonSerDeserTest(data: RecordData): RecordData;
+    export native function jsonStringifyTest1(data: RecordData): string;
+    export native function jsonParseTest1(data: string): RecordData;
+    export native function executeJsonCallback1(callback: Callback<Record<string, number>>): void;
+    export native function executeJsonCallback2(callback: Callback<Record<string, number>>): void;
+    export native function jsonRequestTest(options: HttpRequestOptions): string;
+    export native function jsonResponseTest1(callback: AsyncCallback<HttpResponse>, testCase: int): void;
+    export native function jsonResponseTest2(callback: AsyncCallback<HttpResponse>, testCase: int): void;
 }
 
 function assertEQ<T, U>(expected: T, actual: U, message?: string): void {
@@ -160,6 +210,7 @@ function main():void{
     struct_test();
     callback_test();
     business_test();
+    json_test();
     console.log("[ani_rs] end ani rs test");
 }
 
@@ -182,6 +233,37 @@ function primitive_test():void {
     assertEQ(input.primitiveI64, output.primitiveI64);
     assertEQ(input.primitiveF32, output.primitiveF32);
     assertEQ(input.primitiveF64, output.primitiveF64);
+
+    let output2 = ani_test.anirefDeserializeTest('hello');
+    assertEQ(output2, true);
+
+    let input3: ani_test.AniRefStruct = {
+        aniObjString: 'hello world',
+        aniString: 'hello world',
+    }
+    let output3 = ani_test.anirefStructDeTest(input3)
+    assertEQ(output3, true);
+
+    let input4 = ['rust', 'java', 'c++']
+    let output4 = ani_test.anirefArrayDeTest(input4)
+    assertEQ(JSON.stringify(input4), JSON.stringify(output4))
+
+    let output5 = ani_test.anirefSerializeTest('hello');
+    assertEQ(output5, true);
+
+    let input6: ani_test.AniRefStruct = {
+        aniObjString: 'hello world',
+        aniString: 'hello world',
+    }
+    let output6 = ani_test.anirefStructTest(input6)
+    assertEQ(JSON.stringify(input6), JSON.stringify(output6))
+
+    let input7 = ['rust', 'java', 'c++']
+    let output7 = ani_test.anirefArrayDeTest(input7)
+    assertEQ(JSON.stringify(input7), JSON.stringify(output7))
+
+    let output8 = ani_test.returnAniRefTest();
+    assertEQ(output8, 'hello world')
 }
 
 function option_test():void {
@@ -566,6 +648,16 @@ function type_array_test(): void
     const input18 = new Int32Array([1,2,3,4,5]);
     let output18 = ani_test.createInt32Array(input18);
     assertEQ(JSON.stringify(input18), JSON.stringify(output18));
+
+    let input19: ani_test.ArrayBufferStruct = {
+        buffer1: ArrayBuffer.from([1,2,3]),
+        buffer2: new Int32Array([1,2,3,4,5]),
+    }
+    let output19 = ani_test.arrayBufferStrcutTest(input19);
+    assertEQ(input19.buffer1.at(0), output19.buffer1.at(0));
+    assertEQ(input19.buffer1.at(1), output19.buffer1.at(1));
+    assertEQ(input19.buffer1.at(2), output19.buffer1.at(2));
+    assertEQ(JSON.stringify(input19.buffer2), JSON.stringify(output19.buffer2));
 }
 
 function struct_test():void
@@ -601,7 +693,7 @@ function callback_test():void
     });
     assertEQ(input3, 3);
 
-    // 在devecho上测试，将callback抛到主线程执行
+    // 在devecho上测试, 将callback抛到主线程执行
     // let input4: int = 0;
     // ani_test.executeCallback4((data: int) => {
     //     input4 += data;
@@ -646,7 +738,7 @@ function callback_test():void
     assertEQ(input7, 3);
 
 
-    // 在devecho上测试，将callback抛到主线程执行
+    // 在devecho上测试, 将callback抛到主线程执行
     // let input8: int = 0;
     // ani_test.executeAsyncCallback4((err: BusinessError|null, data: int|undefined) => {
     //     console.log("[ani_test] executeCallback4 data = %{public}d", data);
@@ -685,7 +777,7 @@ function callback_test():void
     assertEQ(input11, 3);
 
 
-    // 在devecho上测试，将callback抛到主线程执行
+    // 在devecho上测试, 将callback抛到主线程执行
     // let input12: int = 0;
     // ani_test.executeErrorCallback4((err: BusinessError) => {
     //     assertEQ(err.code, 404);
@@ -715,6 +807,54 @@ function callback_test():void
         }, 500)
     });
     assertEQ(input14, 60);
+
+
+    let input15 = 'hello ';
+    ani_test.executeAniRefCallback1((data: string) => {
+        input15 += data;
+    })
+    assertEQ(input15, 'hello rust');
+
+    let input16 = 'hello ';
+    ani_test.executeAniRefCallback2((data: string) => {
+        input16 += data;
+    })
+    
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input16, 'hello rust');
+
+    let input17 = 'hello ';
+    ani_test.executeAniRefCallback3((data: ani_test.AniRefStruct) => {
+        input17 += data.aniObjString;
+        input17 += data.aniString;
+    })
+    assertEQ(input17, 'hello rust cpp');
+
+    // 在devecho上测试, 将callback抛到主线程执行
+    //ani_test.executeAniRefCallback4((data: ani_test.AniRefStruct) => {
+    //    input18 += data.aniObjString;
+    //    input18 += data.aniString;
+    //})
+
+    let output19 = 0
+    ani_test.executeMultiCallbacks(
+        (data: int) => {
+            output19 += data;
+        }, 
+        (err: BusinessError|null, data: int|undefined) => {
+            if (data) {
+                output19 += data as int;
+            }
+        }, 
+        (err: BusinessError) => {
+            output19 += err.code;
+        }
+    )
+    assertEQ(output19, 6);
 }
 
 function business_test()
@@ -727,4 +867,148 @@ function business_test()
         assertEQ(err.message, 'Permission denied');
     }
 }
- 
+
+function json_test()
+{
+    let input1: Record<string, number> = {
+        'x': 1,
+        'y': 2,
+    }
+    let output1 = ani_test.jsonStringifyTest1(input1)
+    assertEQ(output1, '{"x":1,"y":2}');
+
+    let input2: Record<string, Record<string, number>> = {
+        'x': {
+            'xx': 1
+        },
+        'y': {
+            'yy': 2
+        },
+    }
+    let output2 = ani_test.jsonStringifyTest1(input2)
+    assertEQ(output2, '{"x":{"xx":1},"y":{"yy":2}}');
+
+    let input3: Record<string, Record<string, Record<string, number>>> = {
+        'x': {
+            'xx': {
+                'xxx1':1,
+                'xxx2':2
+            }
+        },
+        'y': {
+            'yy': {
+                'yyy1':3,
+                'yyy2':4,
+            }
+        },
+    }
+    let output3 = ani_test.jsonStringifyTest1(input3)
+    assertEQ(output3, '{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}');
+
+    let input4 = '{"x":1,"y":2}'
+    let output4 = ani_test.jsonParseTest1(input4)
+    assertEQ(JSON.stringify(output4), input4)
+
+    let input5 = '{"x":{"xx":1},"y":{"yy":2}}'
+    let output5 = ani_test.jsonParseTest1(input5)
+    assertEQ(JSON.stringify(output5), input5)
+
+    let input6 = '{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}'
+    let output6 = ani_test.jsonParseTest1(input6)
+    assertEQ(JSON.stringify(output6), input6)
+
+    let input7: Record<string, Record<string, Record<string, number>>> = {
+        'x': {
+            'xx': {
+                'xxx1':1,
+                'xxx2':2
+            }
+        },
+        'y': {
+            'yy': {
+                'yyy1':3,
+                'yyy2':4,
+            }
+        },
+    }
+    let output7 = ani_test.jsonSerDeserTest(input7)
+    assertEQ(JSON.stringify(input7), JSON.stringify(output7))
+
+    let input8: number = 0
+    ani_test.executeJsonCallback1((data: Record<string, number>) => {
+        input8 += data.get('x') as number
+        input8 += data.get('y') as number
+    })
+    assertEQ(input8, 3)
+
+    let input9: number = 0
+    ani_test.executeJsonCallback1((data: Record<string, number>) => {
+        input9 += data.get('x') as number
+        input9 += data.get('y') as number
+    })
+    await new Promise<int>((resolve) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 500)
+    });
+    assertEQ(input9, 3)
+
+    let input10: ani_test.HttpRequestOptions = {
+        extraData: 'hello',
+        expectDataType: ani_test.HttpDataType.STRING
+    }
+    let output10 = ani_test.jsonRequestTest(input10);
+    assertEQ(output10, 'hello')
+
+    let input11: ani_test.HttpRequestOptions = {
+        extraData: input7,
+        expectDataType: ani_test.HttpDataType.OBJECT
+    }
+    let output11 = ani_test.jsonRequestTest(input11);
+    assertEQ(output11, '{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}')
+
+    let input12: ani_test.HttpRequestOptions = {
+        extraData: ArrayBuffer.from([48,49,50,51]),
+        expectDataType: ani_test.HttpDataType.ARRAY_BUFFER
+    }
+    let output12 = ani_test.jsonRequestTest(input12);
+    assertEQ(output12, '0123')
+
+    let output13: string = ''
+    ani_test.jsonResponseTest1((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+        if (data?.resultType == ani_test.HttpDataType.STRING) {
+            output13 = data?.result as string
+        }
+    }, 0)
+    assertEQ(output13, 'hello world')
+
+    let output14: Record<string, Record<string, Record<string, number>>> = {}
+    ani_test.jsonResponseTest1((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+        if (data?.resultType == ani_test.HttpDataType.OBJECT) {
+            output14 = data?.result as Record<string, Record<string, Record<string, number>>>
+        }
+    }, 1)
+    assertEQ(JSON.stringify(output14), '{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}')
+
+    let output15: ArrayBuffer = new ArrayBuffer(3)
+    ani_test.jsonResponseTest1((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+        if (data?.resultType == ani_test.HttpDataType.ARRAY_BUFFER) {
+            output15 = data?.result as ArrayBuffer
+        }
+    }, 2)
+    assertEQ(output15.at(0), 48);
+    assertEQ(output15.at(1), 49);
+    assertEQ(output15.at(2), 50);
+
+    // 在devecho上测试, 将callback抛到主线程执行
+    //ani_test.jsonResponseTest2((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+    //    console.log('%{public}s', ' data = ' + JSON.stringify(data));
+    //}, 0)
+    //ani_test.jsonResponseTest2((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+    //    console.log('%{public}s', ' data = ' + JSON.stringify(data));
+    //}, 1)
+    //ani_test.jsonResponseTest2((err: BusinessError|null, data: ani_test.HttpResponse|undefined) => {
+    //    console.log('%{public}s', ' data = ' + JSON.stringify(data));
+    //}, 2)
+
+}

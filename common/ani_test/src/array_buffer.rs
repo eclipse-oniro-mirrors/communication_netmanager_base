@@ -159,3 +159,14 @@ pub fn create_uint32_array(input: Uint32Array) -> Result<Uint32Array, BusinessEr
     let output = unsafe { Uint32Array::new_with_vec(data) };
     Ok(output)
 }
+
+#[ani_rs::ani(path = "Lanirs/test/ani_test/ArrayBufferStruct")]
+pub struct ArrayBufferStruct {
+    pub buffer1: ArrayBuffer,
+    pub buffer2: Int32Array,
+}
+
+#[ani_rs::native]
+pub fn array_buffer_strcut_test(input: ArrayBufferStruct) -> Result<ArrayBufferStruct, BusinessError> {
+    Ok(input)
+}

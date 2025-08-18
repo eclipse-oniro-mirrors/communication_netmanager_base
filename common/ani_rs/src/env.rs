@@ -20,7 +20,7 @@ use std::{
 
 use ani_sys::{
     ani_array, ani_class, ani_enum, ani_enum_item, ani_env, ani_error, ani_method, ani_namespace,
-    ani_object, ani_ref, ani_string,
+    ani_object, ani_ref, ani_static_method, ani_string,
 };
 use serde::{Deserialize, Serialize};
 
@@ -30,7 +30,7 @@ use crate::{
     iterator::AniIter,
     objects::{
         AniClass, AniEnum, AniEnumItem, AniFnObject, AniMethod, AniNamespace, AniNativeFunction,
-        AniObject, AniRef, AniString,
+        AniObject, AniRef, AniStaticMethod, AniString,
     },
     signature::{self, ENTRIES},
 };
@@ -146,6 +146,53 @@ impl<'local> AniEnv<'local> {
                 Err(AniError::from_code(msg, res))
             } else {
                 Ok(AniMethod::from_raw(method))
+            }
+        }
+    }
+
+    pub fn find_static_method(
+        &self,
+        class: &AniClass,
+        name: &CStr,
+    ) -> Result<AniStaticMethod<'local>, AniError> {
+        unsafe {
+            let mut method = null_mut() as ani_static_method;
+            let res = (**self.inner).Class_FindStaticMethod.unwrap()(
+                self.inner,
+                class.as_raw(),
+                name.as_ptr(),
+                null_mut(),
+                &mut method as *mut _,
+            );
+            if res != 0 {
+                let msg = format!("Failed to find static method {}", name.to_string_lossy());
+                Err(AniError::from_code(msg, res))
+            } else {
+                Ok(AniStaticMethod::from_raw(method))
+            }
+        }
+    }
+
+    pub fn find_static_method_with_signature(
+        &self,
+        class: &AniClass,
+        name: &CStr,
+        signature: &CStr,
+    ) -> Result<AniStaticMethod<'local>, AniError> {
+        unsafe {
+            let mut method = null_mut() as ani_static_method;
+            let res = (**self.inner).Class_FindStaticMethod.unwrap()(
+                self.inner,
+                class.as_raw(),
+                name.as_ptr(),
+                signature.as_ptr(),
+                &mut method as *mut _,
+            );
+            if res != 0 {
+                let msg = format!("Failed to find static method {}", name.to_string_lossy());
+                Err(AniError::from_code(msg, res))
+            } else {
+                Ok(AniStaticMethod::from_raw(method))
             }
         }
     }
@@ -416,6 +463,22 @@ impl<'local> AniEnv<'local> {
         let res = T::call_method_ref(value, &self, obj, method, &mut result as _);
         if res != 0 {
             let msg = String::from("Failed to call method");
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(AniRef::from_raw(result))
+        }
+    }
+
+    pub fn call_static_method_ref<T: Input>(
+        &self,
+        class: &AniClass,
+        method: &AniStaticMethod,
+        value: T,
+    ) -> Result<AniRef<'local>, AniError> {
+        let mut result = null_mut() as ani_ref;
+        let res = T::call_static_method_ref(value, &self, class, method, &mut result as _);
+        if res != 0 {
+            let msg = String::from("Failed to call static method");
             Err(AniError::from_code(msg, res))
         } else {
             Ok(AniRef::from_raw(result))
@@ -838,7 +901,6 @@ impl<'local> AniEnv<'local> {
                 local.as_raw(),
                 &mut ani_ref as *mut _,
             )
-            
         };
         if res != 0 {
             let msg = String::from("Failed to create global ref");
@@ -876,6 +938,14 @@ pub trait Input {
         class: &AniClass,
         method: &AniMethod,
         result: *mut ani_object,
+    ) -> u32;
+
+    fn call_static_method_ref(
+        self,
+        env: &AniEnv,
+        class: &AniClass,
+        method: &AniStaticMethod,
+        result: *mut ani_ref,
     ) -> u32;
 }
 
@@ -916,6 +986,24 @@ macro_rules! single_tuple_impl {
             ) -> u32{
                 unsafe {
                     (**env.inner).Object_New.unwrap()(
+                        env.inner,
+                        class.as_raw(),
+                        method.as_raw(),
+                        result,
+                        $(self.$field,)*
+                    )
+                }
+            }
+
+            fn call_static_method_ref(
+                self,
+                env: &AniEnv,
+                class: &AniClass,
+                method: &AniStaticMethod,
+                result: *mut ani_ref,
+            ) -> u32 {
+                unsafe {
+                    (**env.inner).Class_CallStaticMethod_Ref.unwrap()(
                         env.inner,
                         class.as_raw(),
                         method.as_raw(),
