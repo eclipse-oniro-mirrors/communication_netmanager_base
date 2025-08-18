@@ -94,6 +94,7 @@ private:
     bool IsIfaceNameInUse();
     bool IsNat464Prefered();
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
+    void RemoveRouteByFamily(INetAddr::IpType addrFamily);
 
 private:
     int32_t netId_ = 0;
