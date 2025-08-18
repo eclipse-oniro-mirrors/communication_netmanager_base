@@ -78,6 +78,59 @@ sptr<NetLinkInfo> GetNetLinkInfo()
     return netLinkInfo;
 }
 
+sptr<NetLinkInfo> GetOverSizeNetLinkInfo()
+{
+    sptr<NetLinkInfo> netLinkInfo = (std::make_unique<NetLinkInfo>()).release();
+    netLinkInfo->ifaceName_ = "test";
+    netLinkInfo->domain_ = "test";
+
+    int addrSize = 20;
+    for (int i = 0; i < addrSize; i++) {
+        sptr<INetAddr> netAddr = (std::make_unique<INetAddr>()).release();
+        netAddr->type_ = INetAddr::IPV4;
+        netAddr->family_ = 0x10;
+        netAddr->prefixlen_ = 0x17;
+        netAddr->address_ = "0.0.0." + std::to_string(i);
+        netAddr->netMask_ = "0.0.0.0";
+        netAddr->hostName_ = "netAddr";
+        netLinkInfo->netAddrList_.push_back(*netAddr);
+    }
+
+    for (int i = 0; i < addrSize; i++) {
+        sptr<INetAddr> netAddr = (std::make_unique<INetAddr>()).release();
+        netAddr->type_ = INetAddr::IPV4;
+        netAddr->family_ = 0x10;
+        netAddr->prefixlen_ = 0x17;
+        netAddr->address_ = "0.0.0." + std::to_string(i);
+        netAddr->netMask_ = "0.0.0.0";
+        netAddr->hostName_ = "netAddr";
+        netLinkInfo->dnsList_.push_back(*netAddr);
+    }
+
+    int routeSize = 1080;
+    for (int i = 0; i < routeSize; i++) {
+        sptr<Route> route = (std::make_unique<Route>()).release();
+        route->iface_ = "iface0";
+        route->destination_.type_ = INetAddr::IPV4;
+        route->destination_.family_ = 0x10;
+        route->destination_.prefixlen_ = 0x17;
+        route->destination_.address_ = "0.0.0." + std::to_string(i);
+        route->destination_.netMask_ = "0.0.0.0";
+        route->destination_.hostName_ = "netAddr";
+        route->gateway_.type_ = INetAddr::IPV4;
+        route->gateway_.family_ = 0x10;
+        route->gateway_.prefixlen_ = 0x17;
+        route->gateway_.address_ = "0.0.0.0";
+        route->gateway_.netMask_ = "0.0.0.0";
+        route->gateway_.hostName_ = "netAddr";
+        netLinkInfo->routeList_.push_back(*route);
+    }
+
+    netLinkInfo->mtu_ = 0x5DC;
+
+    netLinkInfo->httpProxy_ = {TEST_IPV4_ADDR, 80, {"localhost"}};
+    return netLinkInfo;
+}
 /**
  * @tc.name: UnmarshallingTest
  * @tc.desc: Test NetLinkInfo::Marshalling
@@ -192,5 +245,56 @@ HWTEST_F(NetLinkInfoTest, operatorAndMarshallingTest, TestSize.Level1)
     bool bRet = netLinkInfo->Marshalling(data);
     ASSERT_TRUE(bRet == true);
 }
+
+/**
+ * @tc.name: OversizeNetLinkinfoMarshallingTest
+ * @tc.desc: Test NetLinkInfo::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, OversizeNetLinkinfoMarshallingTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetOverSizeNetLinkInfo();
+    ASSERT_TRUE(netLinkInfo != nullptr);
+    ASSERT_TRUE(netLinkInfo->netAddrList_.size() == 20);
+    ASSERT_TRUE(netLinkInfo->dnsList_.size() == 20);
+    ASSERT_TRUE(netLinkInfo->routeList_.size() == 1080);
+
+    MessageParcel data;
+    sptr<NetLinkInfo> netLinkInfo_ptr = nullptr;
+    bool bRet = netLinkInfo->Marshalling(data);
+    ASSERT_TRUE(bRet == true);
+
+    netLinkInfo_ptr = netLinkInfo->Unmarshalling(data);
+    ASSERT_TRUE(netLinkInfo_ptr != nullptr);
+    ASSERT_TRUE(netLinkInfo_ptr->netAddrList_.size() == 16);
+    ASSERT_TRUE(netLinkInfo_ptr->dnsList_.size() == 16);
+    ASSERT_TRUE(netLinkInfo_ptr->routeList_.size() == 1024);
+}
+
+/**
+ * @tc.name: OversizeNetLinkinfoMarshallingTest02
+ * @tc.desc: Test NetLinkInfo::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, OversizeNetLinkinfoMarshallingTest02, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetOverSizeNetLinkInfo();
+    ASSERT_TRUE(netLinkInfo != nullptr);
+    ASSERT_TRUE(netLinkInfo->netAddrList_.size() == 20);
+    ASSERT_TRUE(netLinkInfo->dnsList_.size() == 20);
+    ASSERT_TRUE(netLinkInfo->routeList_.size() == 1080);
+
+    MessageParcel data;
+    sptr<NetLinkInfo> netLinkInfo_ptr = nullptr;
+    bool bRet = NetLinkInfo::Marshalling(data, netLinkInfo);
+    ASSERT_TRUE(bRet == true);
+
+    netLinkInfo_ptr = NetLinkInfo::Unmarshalling(data);
+    ASSERT_TRUE(netLinkInfo_ptr != nullptr);
+    ASSERT_TRUE(netLinkInfo_ptr->netAddrList_.size() == 16);
+    ASSERT_TRUE(netLinkInfo_ptr->dnsList_.size() == 16);
+    ASSERT_TRUE(netLinkInfo_ptr->routeList_.size() == 1024);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

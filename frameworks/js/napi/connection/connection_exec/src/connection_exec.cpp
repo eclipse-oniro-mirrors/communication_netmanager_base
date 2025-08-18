@@ -1069,10 +1069,10 @@ void ConnectionExec::FillLinkAddress(napi_env env, napi_value connectionProperti
 
 void ConnectionExec::FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
 {
-    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ARRAY_LENGTH));
+    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ROUTE_LENGTH) {
+        napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ROUTE_LENGTH));
         auto it = linkInfo->routeList_.begin();
-        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
+        for (uint32_t index = 0; index < MAX_ROUTE_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
             napi_value route = NapiUtils::CreateObject(env);
             NapiUtils::SetStringPropertyUtf8(env, route, KEY_INTERFACE, it->iface_);
 

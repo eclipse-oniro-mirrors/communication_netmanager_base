@@ -45,6 +45,8 @@ struct NET_SYMBOL_VISIBLE NetLinkInfo final : public Parcelable {
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
     static bool ReadInfoFromParcel(Parcel &parcel, sptr<NetLinkInfo> &ptr);
     static bool Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object);
+    bool AddrMarshalling(Parcel &parcel, const std::list<INetAddr> &addrList) const;
+    bool RouteMarshalling(Parcel &parcel, const std::list<Route> &routeList) const;
     void Initialize();
     bool HasNetAddr(const INetAddr &netAddr) const;
     bool HasRoute(const Route &route) const;
