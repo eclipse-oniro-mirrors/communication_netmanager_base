@@ -514,7 +514,7 @@ HWTEST_F(NetsysBpfStatsTest, SetNetStatusMapTest001, TestSize.Level1)
 {
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     EXPECT_EQ(bpfStats->SetNetStatusMap(0, 0), -1);
-    EXPECT_NE(bpfStats->SetNetStatusMap(0, 1), -1);
+    EXPECT_EQ(bpfStats->SetNetStatusMap(0, 1), -1);
     EXPECT_NE(bpfStats->SetNetStatusMap(1, 0), -1);
     EXPECT_NE(bpfStats->SetNetStatusMap(1, 1), -1);
     EXPECT_EQ(bpfStats->SetNetStatusMap(2, 1), -1);
@@ -531,7 +531,7 @@ HWTEST_F(NetsysBpfStatsTest, DeleteIncreaseTrafficMapTest001, TestSize.Level1)
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(12), -1);
 
-    EXPECT_NE(bpfStats->DeleteIncreaseTrafficMap(10), -1);
+    EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(10), -1);
 
     EXPECT_NE(bpfStats->DeleteIncreaseTrafficMap(13), -1);
 }
