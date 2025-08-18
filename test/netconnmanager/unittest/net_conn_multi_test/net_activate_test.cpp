@@ -437,5 +437,30 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(NetActivateTest, IsAllowCallbackTest004, TestSize.Level1) +
+{
+    NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = true;
+    instance_->isAppFrozened_ = false;
+    instance_->isNotifyLostDelay_ = true;
+    CallbackType callbackType = CALL_TYPE_LOST;
+    auto ret = instance_->IsAllowCallback(callbackType);
+    EXPECT_FALSE(ret);
+    NetConnService::GetInstance()->enableAppFrozenedCallbackLimitation_ = false;
+}
+
+HWTEST_F(NetActivateTest, NotifyLostDelay, TestSize.Level1) +
+{
+    instance_->SetNotifyLostDelay(true);
+    bool isNotifyLostDelay = instance_->GetNotifyLostDelay();
+    EXPECT_TRUE(isNotifyLostDelay);
+    instance_->SetNotifyLostDelay(false);
+    EXPECT_FALSE(instance_->isNotifyLostDelay_);
+    instance_->SetNotifyLostNetId(100);
+    int32_t notifyLostNetId = instance_->GetNotifyLostNetId();
+    EXPECT_EQ(notifyLostNetId, 100);
+    instance_->SetNotifyLostNetId(0);
+    EXPECT_EQ(instance_->notifyLostNetId_, 0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

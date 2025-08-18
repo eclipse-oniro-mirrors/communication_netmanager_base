@@ -106,5 +106,10 @@ int32_t NetConnServiceIface::SetReuseSupplierId(uint32_t supplierId, uint32_t re
 {
     return NetConnService::GetInstance()->SetReuseSupplierId(supplierId, reuseSupplierId, isReused);
 }
+
+int32_t NetConnServiceIface::UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet)
+{
+    return NetConnService::GetInstance()->UpdateUidLostDelay(uidLostDelaySet);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

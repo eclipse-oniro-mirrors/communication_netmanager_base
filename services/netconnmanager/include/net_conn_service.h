@@ -425,6 +425,7 @@ public:
         const std::string &ifName) override;
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
+    int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -607,6 +608,7 @@ private:
     void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
     void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
+
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
@@ -658,8 +660,12 @@ private:
     bool isFallbackProbeWithProxy_ = false;
     AppStateAwareCallback appStateAwareCallback_;
     std::atomic<bool> enableAppFrozenedCallbackLimitation_ = false;
+    std::recursive_mutex delayFindBestNetMutex_;
     std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
     uint32_t delaySupplierId_ = 0;
+    std::recursive_mutex uidLostDelayMutex_;
+    std::set<uint32_t> uidLostDelaySet_;
+    SafeMap<int32_t, bool> notifyLostDelayCache_;
     std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> netPACManager_;
     std::mutex netPacManagerMutex_;
     std::shared_ptr<OHOS::NetManagerStandard::ProxyServer> netPACProxyServer_;
@@ -710,6 +716,13 @@ private:
     void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
     void RemoveDelayNetwork();
     void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
+    bool CheckNotifyLostDelay(uint32_t uid, int32_t netId, CallbackType type);
+    void HandleNotifyLostDelay(int32_t netId);
+    bool FindNotifyLostUid(uint32_t uid);
+    void StopNotifyLostDelay(int32_t netId);
+    void StartNotifyLostDelay(int32_t netId);
+    bool FindNotifyLostDelayCache(int32_t netId);
+    void HandleSupplierNotAvailable(uint32_t supplierId, bool isOldAvailable, sptr<NetSupplier> &supplier);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;

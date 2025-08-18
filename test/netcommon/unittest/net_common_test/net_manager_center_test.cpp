@@ -86,6 +86,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {
@@ -573,6 +577,16 @@ HWTEST_F(NetManagerCenterTest, RegisterNetFactoryResetCallbackTest001, TestSize.
     sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
     instance_.RegisterConnService(connService);
     auto ret = instance_.RegisterNetFactoryResetCallback(nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateUidLostDelay, TestSize.Level1) +
+{
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    std::set<uint32_t> uidLostDelaySet;
+    uidLostDelaySet.insert(1000);
+    auto ret = instance_.UpdateUidLostDelay(uidLostDelaySet);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 } // namespace NetManagerStandard
