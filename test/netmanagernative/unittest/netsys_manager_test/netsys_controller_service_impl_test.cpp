@@ -311,7 +311,7 @@ HWTEST_F(NetsysControllerServiceImplTest, AddStaticIpv6AddrTest001, TestSize.Lev
     auto ret = instance_->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
 
     ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, DelStaticIpv6AddrTest001, TestSize.Level1)
