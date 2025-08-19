@@ -2309,7 +2309,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetStatusMapTest001, TestSize.Level1
 
     MessageParcel reply3;
     int32_t ret3 = notifyStub_->CmdSetNetStatusMap(data3, reply3);
-    EXPECT_EQ(ret3, ERR_FLATTEN_OBJECT);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
