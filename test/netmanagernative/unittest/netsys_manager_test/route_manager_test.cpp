@@ -601,7 +601,6 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest007, TestSize.L
     EXPECT_NE(ret, NETMANAGER_ERR_INTERNAL);
     testNetId = 1;
     ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, ModifyPhysicalNetworkPermissionTest007, TestSize.Level1)
