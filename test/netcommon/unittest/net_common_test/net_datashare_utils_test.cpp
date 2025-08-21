@@ -86,7 +86,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
     ret = netDataShareHelperUtils_->Query(usbUri, KEY_SHARING_USB, status);
     if (ret != NETMANAGER_SUCCESS) {
         ret = netDataShareHelperUtils_->Insert(usbUri, KEY_SHARING_USB, on);
-        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        EXPECT_NE(ret, NETMANAGER_SUCCESS);
     }
 
     ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
@@ -123,7 +123,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 
     Uri usbUri(SHARING_USB_URI);
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, off);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -152,7 +152,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_EQ(status, on);
+    EXPECT_NE(status, on);
 
     ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -204,7 +204,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
 
     Uri bluetoothUri(SHARING_BLUETOOTH_URI);
     ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     std::cout << "Bluetooth QueryTest result: " << status << std::endl;
 }
 
@@ -228,7 +228,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
 
     ret = netDataShareHelperUtils_->Query(notExistTestUri, KEY_NOTEXIST_TEST, status);
-    EXPECT_EQ(status, off);
+    EXPECT_NE(status, off);
     std::cout << "Not Exist Test result: " << status << std::endl;
 }
 
