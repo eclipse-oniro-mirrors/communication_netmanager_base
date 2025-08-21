@@ -72,8 +72,6 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "cellular_data:tel_cellular_data_api",
-    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "distributed_notification_service:ans_innerkits",
     "eventhandler:libeventhandler",
@@ -87,6 +85,13 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+    ]
+  }
 }
 
 ###############################################################################
