@@ -12,8 +12,7 @@
 // limitations under the License.
 
 use std::{
-    ffi::CStr,
-    ops::{Deref, DerefMut},
+    ffi::CStr, fmt::Debug, ops::{Deref, DerefMut}
 };
 
 use serde::{Deserialize, Serialize};
@@ -61,7 +60,6 @@ macro_rules! impl_typed_array {
         #[serde(rename = $serde_name)]
         struct $helper_name<'local>(&'local [u8]);
 
-        #[derive(Clone)]
         pub struct $name {
             inner: ArrayBuffer,
         }
@@ -143,11 +141,10 @@ macro_rules! impl_typed_array {
                 D: serde::Deserializer<'de>,
             {
                 let value = $helper_name::deserialize(deserializer)?;
-                Ok(unsafe {
-                    $name {
+                Ok($name {
                         inner: ArrayBuffer::new_with_external_slice(value.0),
                     }
-                })
+                )
             }
         }
 
@@ -225,7 +222,6 @@ impl_typed_array!(
 #[derive(Serialize, Deserialize)]
 struct ArrayBufferHelper<'local>(&'local [u8]);
 
-#[derive(Clone)]
 pub struct ArrayBuffer {
     data_ptr: *mut u8,
     length: usize,
@@ -304,7 +300,7 @@ impl<'de> Deserialize<'de> for ArrayBuffer {
         D: serde::Deserializer<'de>,
     {
         let value = ArrayBufferHelper::deserialize(deserializer)?;
-        Ok(unsafe { ArrayBuffer::new_with_external_slice(value.0) })
+        Ok(ArrayBuffer::new_with_external_slice(value.0))
     }
 }
 

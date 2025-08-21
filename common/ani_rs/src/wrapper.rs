@@ -1,3 +1,5 @@
+use crate::{ani_rs_error, error::AniError};
+
 // Copyright (C) 2025 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +26,27 @@ impl RustClosure {
         })
     }
 
-    pub(crate) fn execute(&mut self) {
+    pub fn execute(&mut self) {
         (self.closure).take().map(|a| a());
     }
 
-    pub(crate) fn send_event(self: Box<Self>, name: &str) {
-        ffi::AniSendEvent(self, name);
+    pub(crate) fn send_event(self: Box<Self>, name: &str) -> Result<(), AniError> {
+        let res = ffi::AniSendEvent(self, name);
+        if res != 0 {
+            ani_rs_error!("Failed to send event {}", name);
+            let msg = format!("Failed to send event {}", name);
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(())
+        }
     }
+}
+
+pub fn send_event_from_closure<F>(callback: F, func_name: &str) -> Result<(), AniError>
+where
+    F: FnOnce() + Send + 'static,
+{
+    RustClosure::new(callback).send_event(func_name)
 }
 
 #[cxx::bridge]
@@ -43,6 +59,6 @@ mod ffi {
     unsafe extern "C++" {
         include!("ani_rs_bind.h");
 
-        fn AniSendEvent(closure: Box<RustClosure>, name: &str);
+        fn AniSendEvent(closure: Box<RustClosure>, name: &str) -> u32;
     }
 }

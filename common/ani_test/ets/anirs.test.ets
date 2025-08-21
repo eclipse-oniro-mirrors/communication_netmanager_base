@@ -128,6 +128,7 @@ export default namespace ani_test {
 
     export native function recordString(input:Record<String,String>) : Record<String, String>
     export native function recordLong(input:Record<Long, Long>) : Record<Long, Long>
+    export native function recordStruct(input: Record<int, ResponseCode>): Record<int, ResponseCode>
 
     export native function unionTest ( input: unionType ): unionType;
     export native function unionTest2 ( input?: unionType ): unionType;
@@ -177,6 +178,10 @@ export default namespace ani_test {
     export native function executeAniRefCallback3(callback: Callback<AniRefStruct>): void;
     export native function executeAniRefCallback4(callback: Callback<AniRefStruct>): void;
     export native function executeMultiCallbacks(callback1: Callback<int>, callback2: AsyncCallback<int>, callback3: ErrorCallback): void;
+    export native function executeThrowErrorCallback1(callback: Callback<int>): void;
+    export native function executeThrowErrorCallback2(callback: AsyncCallback<int>): void;
+    export native function sendEventTest1(callback: Callback<int>): void;
+    export native function sendEventTest2(callback: Callback<int>): void;
 
     export native function businessErrorTest(): void;
 
@@ -192,13 +197,21 @@ export default namespace ani_test {
 
 function assertEQ<T, U>(expected: T, actual: U, message?: string): void {
   if (expected !== actual) {
-    const errorMessage = message || `Assertion failed: expected ${expected}, but got ${actual}`;
+    const errorMessage = message || `[AniRs] Assertion failed: expected ${expected}, but got ${actual}`;
     throw new Error(errorMessage);
   }
 }
 
+async function msSleep(count:int) : Promise<int> {
+    return new Promise<int>((resolve, reject) => {
+        setTimeout(() => {
+        resolve(0)
+        }, count)
+    })
+}
+
 function main():void{
-    console.log("[ani_rs] start ani rs test");
+    console.log("[AniRs] start ani rs test");
     primitive_test();
     option_test();
     array_test();
@@ -211,7 +224,7 @@ function main():void{
     callback_test();
     business_test();
     json_test();
-    console.log("[ani_rs] end ani rs test");
+    console.log("[AniRs] end ani rs test");
 }
 
 function primitive_test():void {
@@ -413,6 +426,13 @@ function record_test (): void
     let output1 = ani_test.recordLong( input1 );
     assertEQ( output1.get( 1 ), 2 );
     assertEQ( output1.get( 3 ), 4 );
+
+    let inputResponse1: ani_test.ResponseCode = {code: 10, url: "www.baidu.com"};
+    let inputResponse2: ani_test.ResponseCode = {code: 20, url: "www.google.com"};
+    let input2: Record<int, ani_test.ResponseCode> = {1: inputResponse1, 2: inputResponse2};
+    let output2 = ani_test.recordStruct(input2);
+    assertEQ(JSON.stringify(output2.get(1)), JSON.stringify(inputResponse1));
+    assertEQ(JSON.stringify(output2.get(2)), JSON.stringify(inputResponse2));
 }
 
 function union_test (): void 
@@ -686,11 +706,7 @@ function callback_test():void
         input3 += data;
     })
     
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input3, 3);
 
     // 在devecho上测试, 将callback抛到主线程执行
@@ -730,13 +746,8 @@ function callback_test():void
         
     })
     
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input7, 3);
-
 
     // 在devecho上测试, 将callback抛到主线程执行
     // let input8: int = 0;
@@ -769,11 +780,7 @@ function callback_test():void
         input11 += 3;
     })
     
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input11, 3);
 
 
@@ -788,11 +795,7 @@ function callback_test():void
     ani_test.executeCallback5((data: ArrayBuffer) => {
         input13 += data.at(0) + data.at(1) + data.at(2);
     })
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input13, 6);
 
     let input14: double = 0;
@@ -801,11 +804,7 @@ function callback_test():void
         input14 += data.at(1) as double;
         input14 += data.at(2) as double;
     })
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input14, 60);
 
 
@@ -820,11 +819,7 @@ function callback_test():void
         input16 += data;
     })
     
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input16, 'hello rust');
 
     let input17 = 'hello ';
@@ -855,6 +850,22 @@ function callback_test():void
         }
     )
     assertEQ(output19, 6);
+
+    ani_test.executeThrowErrorCallback1((data: int) => {
+        throw new Error('[AniRs] i am throw error 1')
+    })
+
+    ani_test.executeThrowErrorCallback2((err: BusinessError|null, data: int|undefined) => {
+        throw new Error('[AniRs] i am throw error 2')
+    })
+
+    ani_test.sendEventTest1((data: int) => {
+        console.log('%{public}s', 'sendEventTest1 data = ' + JSON.stringify(data));
+    })
+
+    ani_test.sendEventTest2((data: int) => {
+        console.log('%{public}s', 'sendEventTest2 data = ' + JSON.stringify(data));
+    })
 }
 
 function business_test()
@@ -946,11 +957,7 @@ function json_test()
         input9 += data.get('x') as number
         input9 += data.get('y') as number
     })
-    await new Promise<int>((resolve) => {
-        setTimeout(() => {
-            resolve(1)
-        }, 500)
-    });
+    await msSleep(500);
     assertEQ(input9, 3)
 
     let input10: ani_test.HttpRequestOptions = {
