@@ -90,6 +90,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {

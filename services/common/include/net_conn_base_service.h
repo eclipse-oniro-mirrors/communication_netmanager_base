@@ -39,6 +39,7 @@ public:
     virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
     virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;
     virtual int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) = 0;
+    virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
