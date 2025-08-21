@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::{AniObject, AniRef, AniString};
+use super::{AniRef, AniString};
 use crate::{error::AniError, global::GlobalRef, AniEnv};
-use ani_sys::{ani_object, ani_ref};
+use ani_sys::ani_ref;
 use serde::{Deserialize, Serialize};
 use std::ffi::CStr;
 
@@ -34,7 +34,7 @@ impl<'local> From<JsonValue<'local>> for AniRef<'local> {
 }
 
 impl JsonValue<'_> {
-    const TOOL_CLASS_NAME: &CStr = unsafe {
+    const TOOL_CLASS_NAME: &'static CStr = unsafe {
         CStr::from_bytes_with_nul_unchecked(b"@ohos.app.ability.Want.RecordSerializeTool\0")
     };
 
@@ -64,13 +64,13 @@ impl JsonValue<'_> {
 
     pub fn parse<'local>(
         env: &AniEnv<'local>,
-        param_string: &String,
+        param_string: &str,
     ) -> Result<JsonValue<'local>, AniError> {
         let cls = env.find_class(Self::TOOL_CLASS_NAME)?;
         let parse_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"parseNoThrow\0") };
         let method = env.find_static_method(&cls, parse_name)?;
 
-        let ani_string = env.convert_std_string(param_string.as_str())?;
+        let ani_string = env.convert_std_string(param_string)?;
         let param = ani_string.as_raw();
         let res = env.call_static_method_ref(&cls, &method, (param,))?;
         Ok(JsonValue(res))

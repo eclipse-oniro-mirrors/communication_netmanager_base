@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef ANI_RS_BIND_H
+#define ANI_RS_BIND_H
+
+#include <memory>
 
 #include "cxx.h"
 #include "event_handler.h"
 #include "event_runner.h"
-#include <memory>
+#include "ani.h"
 
 struct RustClosure;
 
-void AniSendEvent(rust::box<RustClosure> closure, const rust::str name);
+uint32_t AniSendEvent(rust::box<RustClosure> closure, const rust::str name);
+
+#endif

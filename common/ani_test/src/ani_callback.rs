@@ -18,7 +18,7 @@ use ani_rs::{
     global::GlobalRef,
     objects::{AniAsyncCallback, AniErrorCallback, AniFnObject, AniObject, AniRef},
     typed_array::{ArrayBuffer, Uint32Array},
-    AniEnv,
+    AniEnv, AniVm,
 };
 
 #[ani_rs::native]
@@ -235,5 +235,45 @@ pub fn execute_multi_callbacks(
     callback1.execute_local(env, (1,)).unwrap();
     callback2.execute_local(env, None, (2,)).unwrap();
     callback3.execute_local(env, BusinessError::new_static(3, "err")).unwrap();
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_throw_error_callback1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback.into_global_callback(env).unwrap();
+    global_callback.execute((1,));
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn execute_throw_error_callback2(env: &AniEnv, async_callback: AniAsyncCallback) -> Result<(), BusinessError> {
+    let global_callback = async_callback.into_global_callback(env).unwrap();
+    global_callback.execute(None, (1,));
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn send_event_test1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback.into_global(env).unwrap();
+
+    thread::spawn(move || {
+        ani_rs::send_event_from_closure(move || {
+            let env = AniVm::get_instance().get_env().unwrap();
+            let _ = global_callback.execute_local(&env, (1,)).unwrap();
+        }, "send_event_test1").unwrap();
+    });
+
+    Ok(())
+}
+
+#[ani_rs::native]
+pub fn send_event_test2(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
+    let global_callback = callback.into_global(env).unwrap();
+    
+    ani_rs::send_event_from_closure(move || {
+        let env = AniVm::get_instance().get_env().unwrap();
+        let _ = global_callback.execute_local(&env, (2,)).unwrap();
+    }, "send_event_test2").unwrap();
+
     Ok(())
 }

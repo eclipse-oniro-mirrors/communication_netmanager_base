@@ -11,17 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::str::from_utf8;
-
 use ani_rs::{
-    business_error::BusinessError,
-    global::GlobalRef,
-    objects::{AniAsyncCallback, AniFnObject, AniObject, AniRef, JsonValue},
-    typed_array::ArrayBuffer,
-    AniEnv,
+    business_error::BusinessError, global::GlobalRef, objects::{AniAsyncCallback, AniFnObject, AniObject, AniRef, JsonValue}, signature, typed_array::ArrayBuffer, AniEnv
 };
-
-use crate::array_buffer::ArrayBufferStruct;
 
 #[ani_rs::native]
 pub fn json_ser_deser_test(json: JsonValue) -> Result<JsonValue, BusinessError> {
@@ -30,7 +22,7 @@ pub fn json_ser_deser_test(json: JsonValue) -> Result<JsonValue, BusinessError> 
 
 #[ani_rs::native]
 pub fn json_stringify_test1(env: &AniEnv, json: JsonValue) -> Result<String, BusinessError> {
-    let res = json.stringify(env).unwrap();
+    let res = json.stringify(env)?;
     Ok(res)
 }
 
@@ -39,27 +31,26 @@ pub fn json_parse_test1<'local>(
     env: &AniEnv<'local>,
     data: String,
 ) -> Result<JsonValue<'local>, BusinessError> {
-    let obj = JsonValue::parse(env, &data).unwrap();
+    let obj = JsonValue::parse(env, &data)?;
     Ok(obj)
 }
 
 #[ani_rs::native]
 pub fn execute_json_callback1(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
     let data = String::from(r#"{"x":1,"y":2}"#);
-    let argv = JsonValue::parse(env, &data).unwrap();
-    callback.execute_local(env, (argv,)).unwrap();
+    let argv = JsonValue::parse(env, &data)?;
+    callback.execute_local(env, (argv,))?;
     Ok(())
 }
 
 #[ani_rs::native]
 pub fn execute_json_callback2(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
     let global_callback = callback
-        .into_global_callback::<(GlobalRef<JsonValue<'static>>,)>(env)
-        .unwrap();
+        .into_global_callback::<(GlobalRef<JsonValue<'static>>,)>(env)?;
 
     let data = String::from(r#"{"x":1,"y":2}"#);
-    let argv = JsonValue::parse(env, &data).unwrap();
-    let global_argv = argv.into_global(env).unwrap();
+    let argv = JsonValue::parse(env, &data)?;
+    let global_argv = argv.into_global(env)?;
     global_callback.execute_spawn_thread((global_argv,));
     Ok(())
 }
@@ -86,23 +77,23 @@ pub fn json_request_test(
     if options.expect_data_type.is_none() || options.extra_data.is_none() {
         return Err(BusinessError::PARAMETER);
     }
-    let data_type = options.expect_data_type.unwrap();
+    let _data_type = options.expect_data_type.unwrap();
     let obj_data = options.extra_data.unwrap();
-    let res = match data_type {
-        HttpDataType::String => {
-            let res = env.deserialize::<String>(obj_data).unwrap();
-            res
-        }
-        HttpDataType::Object => {
-            let json_value = env.deserialize::<JsonValue>(obj_data).unwrap();
-            let res = json_value.stringify(env).unwrap();
-            res
-        }
-        HttpDataType::ArrayBuffer => {
-            let buffer = env.deserialize::<ArrayBuffer>(obj_data).unwrap();
-            let res = buffer.as_ref();
-            String::from_utf8_lossy(res).to_string()
-        }
+
+    let string_class = env.find_class(signature::STRING)?;
+    let array_buffer_class = env.find_class(signature::ARRAY_BUFFER)?;
+
+    let res = if env.instance_of(&obj_data, &string_class)? {
+        let res = env.deserialize::<String>(obj_data)?;
+        res
+    } else if env.instance_of(&obj_data, &array_buffer_class)? {
+        let buffer = env.deserialize::<ArrayBuffer>(obj_data)?;
+        let res = buffer.as_ref();
+        String::from_utf8_lossy(res).to_string()
+    } else {
+        let json_value = env.deserialize::<JsonValue>(obj_data)?;
+        let res = json_value.stringify(env)?;
+        res
     };
     Ok(res)
 }
@@ -130,21 +121,21 @@ pub fn json_response_test1(
 ) -> Result<(), BusinessError> {
     if test_case == 0 {
         let s = String::from("hello world");
-        let s_ref = env.serialize(&s).unwrap().into_global(env).unwrap();
+        let s_ref = env.serialize(&s)?.into_global(env)?;
         let response = HttpResponse::new(s_ref, HttpDataType::String);
-        async_callback.execute_local(env, None, (response,));
+        async_callback.execute_local(env, None, (response,))?;
     } else if test_case == 1 {
         let data =
             String::from(r#"{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}"#);
-        let json_value = JsonValue::parse(env, &data).unwrap();
-        let json_global = AniRef::from(json_value).into_global(env).unwrap();
+        let json_value = JsonValue::parse(env, &data)?;
+        let json_global = AniRef::from(json_value).into_global(env)?;
         let response = HttpResponse::new(json_global, HttpDataType::Object);
-        async_callback.execute_local(env, None, (response,));
+        async_callback.execute_local(env, None, (response,))?;
     } else {
         let data = ArrayBuffer::new_with_vec(vec![48, 49, 50]);
-        let buffer_global = env.serialize(&data).unwrap().into_global(env).unwrap();
+        let buffer_global = env.serialize(&data)?.into_global(env)?;
         let response = HttpResponse::new(buffer_global, HttpDataType::ArrayBuffer);
-        async_callback.execute_local(env, None, (response,));
+        async_callback.execute_local(env, None, (response,))?;
     }
 
     Ok(())
@@ -157,24 +148,23 @@ pub fn json_response_test2(
     test_case: i32,
 ) -> Result<(), BusinessError> {
     let global_callback = async_callback
-        .into_global_callback::<(HttpResponse,)>(env)
-        .unwrap();
+        .into_global_callback::<(HttpResponse,)>(env)?;
 
     if test_case == 0 {
         let s = String::from("hello world");
-        let s_ref = env.serialize(&s).unwrap().into_global(env).unwrap();
+        let s_ref = env.serialize(&s)?.into_global(env)?;
         let response = HttpResponse::new(s_ref, HttpDataType::String);
         global_callback.execute(None, (response,));
     } else if test_case == 1 {
         let data =
             String::from(r#"{"x":{"xx":{"xxx1":1,"xxx2":2}},"y":{"yy":{"yyy1":3,"yyy2":4}}}"#);
-        let json_value = JsonValue::parse(env, &data).unwrap();
-        let json_global = AniRef::from(json_value).into_global(env).unwrap();
+        let json_value = JsonValue::parse(env, &data)?;
+        let json_global = AniRef::from(json_value).into_global(env)?;
         let response = HttpResponse::new(json_global, HttpDataType::Object);
         global_callback.execute(None, (response,));
     } else {
         let data = ArrayBuffer::new_with_vec(vec![48, 49, 50]);
-        let buffer_global = env.serialize(&data).unwrap().into_global(env).unwrap();
+        let buffer_global = env.serialize(&data)?.into_global(env)?;
         let response = HttpResponse::new(buffer_global, HttpDataType::ArrayBuffer);
         global_callback.execute(None, (response,));
     }

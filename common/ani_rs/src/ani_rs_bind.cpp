@@ -18,11 +18,11 @@
 #include <memory>
 #include <thread>
 
-void AniSendEvent(rust::box<RustClosure> closure, const rust::str name)
+uint32_t AniSendEvent(rust::box<RustClosure> closure, const rust::str name)
 {
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
     if (!runner) {
-        return;
+        return ani_status::ANI_NOT_FOUND;
     }
     auto handler = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     auto closureWrapper = std::make_shared<rust::Box<RustClosure>>(std::move(closure));
@@ -30,4 +30,5 @@ void AniSendEvent(rust::box<RustClosure> closure, const rust::str name)
     auto callback = [closureWrapper = std::move(closureWrapper),
         main_handle = handler]() mutable { (*closureWrapper)->execute(); };
     handler->PostTask(callback, std::string(name));
+    return ani_status::ANI_OK;
 }
