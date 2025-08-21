@@ -39,6 +39,7 @@ mod iterator;
 mod macros;
 mod primitive;
 mod wrapper;
+pub use wrapper::send_event_from_closure;
 mod log;
 
 const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
