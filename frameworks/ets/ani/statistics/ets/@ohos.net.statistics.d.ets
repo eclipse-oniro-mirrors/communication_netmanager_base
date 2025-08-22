@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,13 @@
 
 
 import type { AsyncCallback, Callback } from '@ohos.base';
-// import type connection from '@ohos.net.connection';
+import type connection from '@ohos.net.connection';
 import { BusinessError }  from '@ohos.base';
 
 export default namespace statistics {
   loadLibrary("statistics_ani")
 
-  // type NetBearType = connection.NetBearType;
+  type NetBearType = connection.NetBearType;
 
   export native function getIfaceRxBytesSync(nic: string): long;
 
@@ -173,9 +173,9 @@ export default namespace statistics {
   });
   }
 
-  export native function getUidRxBytesSync(uid: long): long;
+  export native function getUidRxBytesSync(uid: int): long;
 
-  function getUidRxBytes(uid: long, callback: AsyncCallback<long>): void {
+  function getUidRxBytes(uid: int, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
       })
@@ -186,7 +186,7 @@ export default namespace statistics {
       });
   }
 
-  function getUidRxBytes(uid: long): Promise<long> {
+  function getUidRxBytes(uid: int): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
@@ -198,9 +198,9 @@ export default namespace statistics {
   });
   }
 
-  export native function getUidTxBytesSync(uid: long): long;
+  export native function getUidTxBytesSync(uid: int): long;
 
-  function getUidTxBytes(uid: long, callback: AsyncCallback<long>): void {
+  function getUidTxBytes(uid: int, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getUidTxBytesSync(uid);
       })
@@ -211,7 +211,7 @@ export default namespace statistics {
       });
   }
 
-  function getUidTxBytes(uid: long): Promise<long> {
+  function getUidTxBytes(uid: int): Promise<long> {
       return new Promise<long>((resolve, reject) => {
         taskpool.execute((): long => {
         return getUidTxBytesSync(uid);
@@ -223,17 +223,69 @@ export default namespace statistics {
     });
   }
 
-  // function on(type: 'netStatsChange', callback: Callback<NetStatsChangeInfo>): void;
+  export function on(type: 'netStatsChange', callback: Callback<NetStatsChangeInfo>): void {
+    if (type == 'netStatsChange') {
+      onNetStatsChange(callback as Callback<NetStatsChangeInfo>);
+    }
+  }
 
-  // function off(type: 'netStatsChange', callback?: Callback<NetStatsChangeInfo>): void;
+  export function off(type: 'netStatsChange', callback?: Callback<NetStatsChangeInfo>): void {
+    if (type == 'netStatsChange') {
+      offNetStatsChange(callback as Callback<NetStatsChangeInfo> | undefined);
+    }
+  }
 
-  // function getTrafficStatsByIface(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  export native function onNetStatsChange(callback: Callback<NetStatsChangeInfo>): void;
+  export native function offNetStatsChange(callback?: Callback<NetStatsChangeInfo>): void;
 
-  // function getTrafficStatsByIface(ifaceInfo: IfaceInfo): Promise<NetStatsInfo>;
+  export native function getTrafficStatsByIfaceSync(ifaceInfo: IfaceInfo): NetStatsInfo;
 
-  // function getTrafficStatsByUid(uidInfo: UidInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  function getTrafficStatsByIface(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void {
+    let p1 = taskpool.execute((): NetStatsInfo => {
+          return getTrafficStatsByIfaceSync(ifaceInfo);
+      })
+      p1.then((content: NullishType) => {
+          callback(new BusinessError(), content as NetStatsInfo);
+      }, (err: Error): void => {
+          callback(err as BusinessError, new NetStatsInfoInner());
+      });
+  }
 
-  // function getTrafficStatsByUid(uidInfo: UidInfo): Promise<NetStatsInfo>;
+  function getTrafficStatsByIface(ifaceInfo: IfaceInfo): Promise<NetStatsInfo> {
+    return new Promise<NetStatsInfo>((resolve, reject) => {
+        taskpool.execute((): NetStatsInfo => {
+        return getTrafficStatsByIfaceSync(ifaceInfo);
+      }).then((content: NullishType) => {
+        resolve(content as NetStatsInfo);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  export native function getTrafficStatsByUidSync(uidInfo: UidInfo): NetStatsInfo;
+  function getTrafficStatsByUid(uidInfo: UidInfo, callback: AsyncCallback<NetStatsInfo>): void {
+    let p1 = taskpool.execute((): NetStatsInfo => {
+          return getTrafficStatsByUidSync(uidInfo);
+      })
+      p1.then((content: NullishType) => {
+          callback(new BusinessError(), content as NetStatsInfo);
+      }, (err: Error): void => {
+          callback(err as BusinessError, new NetStatsInfoInner());
+      });
+  }
+
+  function getTrafficStatsByUid(uidInfo: UidInfo): Promise<NetStatsInfo> {
+    return new Promise<NetStatsInfo>((resolve, reject) => {
+        taskpool.execute((): NetStatsInfo => {
+        return getTrafficStatsByUidSync(uidInfo);
+      }).then((content: NullishType) => {
+        resolve(content as NetStatsInfo);
+      }, (err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
 
   export native function getSockfdRxBytesSync(sockfd: int): long;
 
@@ -287,59 +339,82 @@ export default namespace statistics {
 
   export interface IfaceInfo {
     iface: string;
-
-    startTime: number;
-
-    endTime: number;
+    startTime: int;
+    endTime: int;
   }
 
   export interface UidInfo {
     ifaceInfo: IfaceInfo;
-
-    uid: number;
+    uid: int;
   }
 
   export interface NetStatsInfo {
-    rxBytes: number;
+    rxBytes: long;
+    txBytes: long;
+    rxPackets: long;
+    txPackets: long;
+  }
 
-    txBytes: number;
-
-    rxPackets: number;
-
-    txPackets: number;
+  export class NetStatsInfoInner implements NetStatsInfo {
+    rxBytes: long;
+    txBytes: long;
+    rxPackets: long;
+    txPackets: long;
   }
 
   export interface NetStatsChangeInfo {
     iface: string;
-    uid?: number;
+    uid?: int;
   }
 
-  // export interface NetStatsInfoSequence {
-  //   startTime: number;
-  //   endTime: number;
-  //   info: NetStatsInfo;
-  // }
+  export type NetStatsInfoSequence = Array<NetStatsInfoSequenceItem>;
 
-  // export interface UidNetStatsInfo {
-  //   [uid: number]: NetStatsInfo;
-  // }
+  export interface NetStatsInfoSequenceItem {
+    startTime: int;
+    endTime: int;
+    info: NetStatsInfo;
+  }
 
-  // export interface NetworkInfo {
-  //   type: NetBearType;
-  //   startTime: number;
-  //   endTime: number;
-  //   simId?: number;
-  // }
+  export class NetStatsInfoSequenceItemInner implements NetStatsInfoSequenceItem {
+    startTime: int;
+    endTime: int;
+    info: NetStatsInfo;
+  }
 
-  // function getTrafficStatsByNetwork(networkInfo: NetworkInfo): Promise<UidNetStatsInfo>;
-  // function getTrafficStatsByUidNetwork(uid: number, networkInfo: NetworkInfo): Promise<NetStatsInfoSequence[]>;
-}
+  export type UidNetStatsInfo = Record<int, NetStatsInfo>;
 
-function main() {
-  try {
-    let w = statistics.getAllRxBytesSync();
-    console.log(w);
-  } catch(e:BusinessError) {
-    console.log(e);
+  export interface NetworkInfo {
+    type: NetBearType;
+    startTime: int;
+    endTime: int;
+    simId?: int;
+  }
+
+  export native function getTrafficStatsByNetworkSync(networkInfo: NetworkInfo): UidNetStatsInfo;
+
+  function getTrafficStatsByNetwork(networkInfo: NetworkInfo): Promise<UidNetStatsInfo> {
+    return new Promise<UidNetStatsInfo>((resolve, reject) => {
+          taskpool.execute((): UidNetStatsInfo => {
+            return getTrafficStatsByNetworkSync(networkInfo);
+      }).then((content: NullishType) => {
+          resolve(content as UidNetStatsInfo);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
+    });
+  }
+
+  export native function getTrafficStatsByUidNetworkSync(uid: int, networkInfo: NetworkInfo): NetStatsInfoSequence;
+
+  function getTrafficStatsByUidNetwork(uid: int, networkInfo: NetworkInfo): Promise<NetStatsInfoSequence> {
+    return new Promise<NetStatsInfoSequence>((resolve, reject) => {
+          taskpool.execute((): NetStatsInfoSequence => {
+          return getTrafficStatsByUidNetworkSync(uid, networkInfo);
+      }).then((content: NullishType) => {
+          resolve(content as NetStatsInfoSequence);
+      }, (err: Error): void => {
+          reject(err as BusinessError);
+      });
+    });
   }
 }
