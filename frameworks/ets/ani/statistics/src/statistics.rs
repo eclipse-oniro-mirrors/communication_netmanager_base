@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::business_error::BusinessError;
-
+use crate::bridge;
+use crate::wrapper;
 use crate::{error_code::convert_to_business_error, wrapper::NetStatsClient};
+use ani_rs::business_error::BusinessError;
+use std::collections::HashMap;
 
 #[ani_rs::native]
 pub fn get_all_rx_bytes() -> Result<i64, BusinessError> {
@@ -82,5 +84,46 @@ pub fn get_sockfd_rx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
 pub fn get_sockfd_tx_bytes(sockfd: i32) -> Result<i64, BusinessError> {
     NetStatsClient::get_sockfd_tx_bytes(sockfd)
         .map(|v| v as i64)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_traffic_stats_by_iface(
+    ifaceInfo: bridge::IfaceInfo,
+) -> Result<bridge::NetStatsInfo, BusinessError> {
+    NetStatsClient::get_traffic_stats_by_iface(ifaceInfo.into())
+        .map(|v| v as bridge::NetStatsInfo)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_traffic_stats_by_uid(
+    uidInfo: bridge::UidInfo,
+) -> Result<bridge::NetStatsInfo, BusinessError> {
+    NetStatsClient::get_traffic_stats_by_uid(uidInfo.into())
+        .map(|v| v as bridge::NetStatsInfo)
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_traffic_stats_by_network(
+    networkInfo: bridge::AniNetworkInfo,
+) -> Result<HashMap<i32, bridge::NetStatsInfo>, BusinessError> {
+    NetStatsClient::get_traffic_stats_by_network(networkInfo.into())
+        .map(|v: Vec<bridge::AniUidNetStatsInfoPair>| {
+            v.into_iter()
+                .map(|item| (item.uid, item.net_stats_info))
+                .collect()
+        })
+        .map_err(convert_to_business_error)
+}
+
+#[ani_rs::native]
+pub fn get_traffic_stats_by_uid_network(
+    uid: i32,
+    networkInfo: bridge::AniNetworkInfo,
+) -> Result<Vec<bridge::AniNetStatsInfoSequenceItem>, BusinessError> {
+    NetStatsClient::get_traffic_stats_by_uid_network(uid, networkInfo.into())
+        .map(|v| v as Vec<bridge::AniNetStatsInfoSequenceItem>)
         .map_err(convert_to_business_error)
 }
