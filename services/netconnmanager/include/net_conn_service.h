@@ -723,6 +723,7 @@ private:
     void StartNotifyLostDelay(int32_t netId);
     bool FindNotifyLostDelayCache(int32_t netId);
     void HandleSupplierNotAvailable(uint32_t supplierId, bool isOldAvailable, sptr<NetSupplier> &supplier);
+    void CancelRequestForSupplier(std::shared_ptr<NetActivate> &netActivate, uint32_t reqId);
     std::mutex remoteMutex_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
