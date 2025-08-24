@@ -18,7 +18,6 @@
 
 #include "common_notify_callback_test.h"
 #include "iservice_registry.h"
-#include "net_dns_health_callback_stub.h"
 #include "net_dns_result_callback_stub.h"
 #include "netsys_native_client.h"
 #include "notify_callback_stub.h"
@@ -128,17 +127,6 @@ public:
         return 0;
     }
     int32_t OnDnsQueryAbnormalReport(uint32_t eventfailcause, NetsysNative::NetDnsQueryResultReport res) override
-    {
-        return 0;
-    }
-};
-
-class TestNetDnsHealthCallbackFuzzTest : public NetsysNative::NetDnsHealthCallbackStub {
-public:
-    TestNetDnsHealthCallbackFuzzTest() = default;
-    ~TestNetDnsHealthCallbackFuzzTest() override{};
-
-    int32_t OnDnsHealthReport(const NetsysNative::NetDnsHealthReport &dnsHealthReport) override
     {
         return 0;
     }
@@ -1387,34 +1375,6 @@ void CmdUnregisterDnsResultListenerFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_RESULT_LISTENER),
-                    dataParcel);
-}
-
-void CmdRegisterDnsHealthListenerFuzzTest(const uint8_t *data, size_t size)
-{
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    sptr<NetsysNative::INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallbackFuzzTest();
-    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_DNS_HEALTH_LISTENER),
-                    dataParcel);
-}
-
-void CmdUnregisterDnsHealthListenerFuzzTest(const uint8_t *data, size_t size)
-{
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    sptr<NetsysNative::INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallbackFuzzTest();
-    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER),
                     dataParcel);
 }
 

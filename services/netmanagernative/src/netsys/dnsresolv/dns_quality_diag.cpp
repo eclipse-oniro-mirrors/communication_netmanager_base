@@ -66,14 +66,6 @@ int32_t DnsQualityDiag::InitHandler()
     return 0;
 }
 
-int32_t DnsQualityDiag::SendHealthReport(NetsysNative::NetDnsHealthReport healthreport)
-{
-    for (auto cb: healthListeners_) {
-        cb->OnDnsHealthReport(healthreport);
-    }
-
-    return 0;
-}
 int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, NetsysNative::NetDnsResultReport &report)
 {
     for (uint8_t i = 0; i < size; i++) {
@@ -304,25 +296,6 @@ int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallbac
         handler_started = false;
     }
     NETNATIVE_LOG_D("UnregisterResultListener");
-    
-    return 0;
-}
-
-int32_t DnsQualityDiag::RegisterHealthListener(const sptr<INetDnsHealthCallback> &callback)
-{
-    healthListeners_.push_back(callback);
-    handler_started = true;
-    handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
-    
-    return 0;
-}
-
-int32_t DnsQualityDiag::UnregisterHealthListener(const sptr<INetDnsHealthCallback> &callback)
-{
-    healthListeners_.remove(callback);
-    if (healthListeners_.empty()) {
-        handler_started = false;
-    }
     
     return 0;
 }

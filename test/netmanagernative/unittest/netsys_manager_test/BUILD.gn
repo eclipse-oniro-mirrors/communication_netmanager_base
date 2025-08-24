@@ -76,6 +76,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -87,6 +88,7 @@ ohos_unittest("netsys_native_manager_test") {
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
@@ -152,6 +154,7 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -217,6 +220,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -278,7 +282,9 @@ ohos_unittest("netsys_controller_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -344,7 +350,8 @@ ohos_unittest("netsys_native_client_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -412,9 +419,10 @@ ohos_unittest("netsys_native_service_proxy_test") {
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
   external_deps = [
@@ -478,6 +486,7 @@ ohos_unittest("resolver_config_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -535,7 +544,8 @@ ohos_unittest("conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
+    "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [

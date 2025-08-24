@@ -33,10 +33,6 @@ config("netmgr_common_config") {
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
-
-  cflags = common_cflags
-
-  cflags_cc = common_cflags
 }
 
 ohos_shared_library("net_manager_common") {
@@ -47,6 +43,9 @@ ohos_shared_library("net_manager_common") {
   }
 
   branch_protector_ret = "pac_ret"
+
+  cflags = common_cflags
+  cflags_cc = common_cflags
 
   sources = [
     "common_utils/src/base64_utils.cpp",

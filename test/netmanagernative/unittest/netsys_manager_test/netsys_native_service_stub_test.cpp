@@ -22,7 +22,6 @@
 #include "common_net_diag_callback_test.h"
 #include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
-#include "net_dns_health_callback_stub.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
@@ -43,17 +42,6 @@ public:
     ~TestNetDnsResultCallback() override{};
 
     int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) override
-    {
-        return 0;
-    }
-};
-
-class TestNetDnsHealthCallback : public NetDnsHealthCallbackStub {
-public:
-    TestNetDnsHealthCallback() = default;
-    ~TestNetDnsHealthCallback() override{};
-
-    int32_t OnDnsHealthReport(const NetDnsHealthReport &dnsHealthReport) override
     {
         return 0;
     }
@@ -544,16 +532,6 @@ public:
     }
 
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
     {
         return 0;
     }
@@ -1963,38 +1941,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsResultListener001, TestSiz
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUnregisterDnsResultListener(data, reply);
-    EXPECT_EQ(ret, IPC_STUB_ERR);
-}
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterDnsHealthListener001, TestSize.Level1)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    sptr<INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallback();
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
-
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdRegisterDnsHealthListener(data, reply);
-    EXPECT_EQ(ret, IPC_STUB_ERR);
-}
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsHealthListener001, TestSize.Level1)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    sptr<INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallback();
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
-
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdUnregisterDnsHealthListener(data, reply);
     EXPECT_EQ(ret, IPC_STUB_ERR);
 }
 

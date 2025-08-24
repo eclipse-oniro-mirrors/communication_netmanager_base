@@ -20,7 +20,6 @@
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller_service_impl.h"
 #include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -1427,28 +1426,6 @@ int32_t NetsysController::UnregisterDnsQueryResultCallback(
     }
     // LCOV_EXCL_STOP
     return netsysService_->UnregisterDnsQueryResultCallback(callback);
-}
-
-int32_t NetsysController::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
-{
-    // LCOV_EXCL_START This will never happen.
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    // LCOV_EXCL_STOP
-    return netsysService_->RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetsysController::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
-{
-    // LCOV_EXCL_START This will never happen.
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    // LCOV_EXCL_STOP
-    return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 
 int32_t NetsysController::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)

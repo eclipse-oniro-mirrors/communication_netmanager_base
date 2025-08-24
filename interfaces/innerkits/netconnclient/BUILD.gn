@@ -79,7 +79,6 @@ ohos_static_library("net_conn_parcel") {
 
 ohos_shared_library("net_conn_manager_if") {
   cflags = common_cflags
-
   cflags_cc = common_cflags
 
   branch_protector_ret = "pac_ret"
@@ -148,7 +147,6 @@ config("socket_permission_config") {
 
 ohos_shared_library("socket_permission") {
   cflags = common_cflags
-
   cflags_cc = common_cflags
 
   branch_protector_ret = "pac_ret"
@@ -174,6 +172,7 @@ config("net_security_config_if_config") {
 ohos_shared_library("net_security_config_if") {
   cflags = common_cflags
   cflags_cc = common_cflags
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

@@ -38,7 +38,7 @@ ohos_unittest("wearable_distributed_net_manager_test") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller_static",
   ]
 

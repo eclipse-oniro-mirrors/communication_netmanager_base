@@ -48,7 +48,11 @@ config("netsys_native_manager_config") {
   if (netmanager_base_enable_public_dns_server && !is_emulator) {
     defines += [ "ENABLE_PUBLIC_DNS_SERVER" ]
   }
-  
+
+  if (netmanager_base_enable_feature_sysvpn) {
+    defines += [ "SUPPORT_SYSVPN" ]
+  }
+
   if (netmanager_base_feature_enterprise_route_custom) {
     defines += [ "FEATURE_ENTERPRISE_ROUTE_CUSTOM" ]
   }
@@ -56,17 +60,13 @@ config("netsys_native_manager_config") {
 
 netsys_native_manager_sources = [
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/dns_proxy_listen.cpp",
-  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/route_manager.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/clatd.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/data_receiver.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/dns_resolv_listen.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/netlink_manager.cpp",
   "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/netlink_socket_diag.cpp",
-  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
-  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_net_diag_data.cpp",
-  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
+  "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netpolicy/src/route_manager.cpp",
+  "src/notify_callback_proxy.cpp",
   "src/dhcp_controller.cpp",
   "src/manager/bandwidth_manager.cpp",
   "src/manager/clat_manager.cpp",
@@ -87,12 +87,7 @@ netsys_native_manager_sources = [
   "src/netsys/dnsresolv/dns_quality_diag.cpp",
   "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
   "src/netsys/dnsresolv/dns_resolv_config.cpp",
-  "src/netsys/dnsresolv/net_dns_health_callback_proxy.cpp",
-  "src/netsys/dnsresolv/net_dns_health_callback_stub.cpp",
   "src/netsys/dnsresolv/net_dns_result_callback_proxy.cpp",
-  "src/netsys/dnsresolv/net_dns_result_callback_stub.cpp",
-  "src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
-  "src/netsys/dnsresolv/netsys_net_dns_result_data.cpp",
   "src/netsys/fwmark_network.cpp",
   "src/netsys/iptables_wrapper.cpp",
   "src/netsys/local_network.cpp",
@@ -111,13 +106,12 @@ netsys_native_manager_sources = [
   "src/netsys_native_service.cpp",
   "src/netsys_native_service_stub.cpp",
   "src/netsys_traffic_callback_proxy.cpp",
-  "src/netsys_traffic_callback_stub.cpp",
-  "src/notify_callback_stub.cpp",
 ]
 
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+  "$INNERKITS_ROOT/netmanagernative:net_native_parcel",
   "$NETMANAGERNATIVE_ROOT:netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   "bpf:netsys",

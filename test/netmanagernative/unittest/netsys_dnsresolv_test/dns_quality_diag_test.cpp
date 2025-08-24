@@ -70,12 +70,6 @@ HWTEST_F(DnsQualityDiagTest, GetInstanceShouldReturnSingletonInstance, TestSize.
     EXPECT_EQ(instance1.report_delay, instance2.report_delay);
 }
 
-HWTEST_F(DnsQualityDiagTest, SendHealthReport_ShouldReturnZero_WhenCalled, TestSize.Level0)
-{
-    NetsysNative::NetDnsHealthReport healthreport;
-    EXPECT_EQ(dnsQualityDiag.SendHealthReport(healthreport), 0);
-}
-
 HWTEST_F(DnsQualityDiagTest, ParseReportAddr_ShouldAddIPv4AndIPv6_WhenCalledWithValidAddrInfo, TestSize.Level0)
 {
     uint32_t size = 2;
@@ -274,18 +268,6 @@ HWTEST_F(DnsQualityDiagTest, UnregisterResultListener_Unreg_After_Reg, TestSize.
     EXPECT_EQ(dnsQualityDiag.RegisterResultListener(callback, timeStep), 0);
     
     EXPECT_EQ(dnsQualityDiag.UnregisterResultListener(callback), 0);
-}
-
-HWTEST_F(DnsQualityDiagTest, RegisterHealthListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
-{
-    sptr<NetsysNative::INetDnsHealthCallback> callback;
-    EXPECT_EQ(dnsQualityDiag.RegisterHealthListener(callback), 0);
-}
-
-HWTEST_F(DnsQualityDiagTest, UnregisterHealthListener_ShouldReturnZero_WhenCalled, TestSize.Level0)
-{
-    sptr<NetsysNative::INetDnsHealthCallback> callback;
-    EXPECT_EQ(dnsQualityDiag.UnregisterHealthListener(callback), 0);
 }
 
 HWTEST_F(DnsQualityDiagTest, SetLoopDelay_ShouldReturnZero_WhenCalled, TestSize.Level0)

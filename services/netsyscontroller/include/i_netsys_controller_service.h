@@ -27,7 +27,6 @@
 #include "interface_type.h"
 #include "i_net_diag_callback.h"
 #include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 #include "net_stats_info.h"
 #include "netsys_controller_callback.h"
 #include "netsys_dns_report_callback.h"
@@ -898,22 +897,6 @@ public:
      */
     virtual int32_t UnregisterDnsQueryResultCallback(
         const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback) = 0;
-
-    /**
-     * Register Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) = 0;
-
-    /**
-     * Unregister Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) = 0;
 
     /**
      * Get Cookie Stats.

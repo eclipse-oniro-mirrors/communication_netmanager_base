@@ -23,7 +23,6 @@
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
 #include "dns_quality_event_handler.h"
-#include "i_net_dns_health_callback.h"
 #include "i_net_dns_result_callback.h"
 #include "netsys_net_dns_result_data.h"
 #include "dns_config_client.h"
@@ -60,10 +59,6 @@ public:
 
     int32_t UnregisterResultListener(const sptr<NetsysNative::INetDnsResultCallback> &callback);
 
-    int32_t RegisterHealthListener(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
-
-    int32_t UnregisterHealthListener(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
-
     int32_t SetLoopDelay(int32_t delay);
 
     int32_t HandleEvent(const AppExecFwk::InnerEvent::Pointer &event);
@@ -91,15 +86,12 @@ private:
 
     std::list<sptr<NetsysNative::INetDnsResultCallback>> resultListeners_;
 
-    std::list<sptr<NetsysNative::INetDnsHealthCallback>> healthListeners_;
-
     std::shared_ptr<DnsQualityEventHandler> handler_;
 
     std::list<NetsysNative::NetDnsResultReport> report_;
 
     std::list<NetsysNative::NetDnsQueryResultReport> dnsQueryReport_;
 
-    int32_t SendHealthReport(NetsysNative::NetDnsHealthReport healthreport);
     int32_t InitHandler();
     int32_t query_default_host();
     int32_t handle_dns_loop();

@@ -15,9 +15,7 @@
 
 #ifndef COMMON_MOCK_NET_REMOTE_OBJECT_TEST_H
 #define COMMON_MOCK_NET_REMOTE_OBJECT_TEST_H
-
-#include "notify_callback_proxy.h"
-
+#include "iremote_object.h"
 namespace OHOS {
 namespace NetManagerStandard {
 class MockNetIRemoteObject : public IRemoteObject {

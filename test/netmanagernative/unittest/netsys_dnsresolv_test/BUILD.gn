@@ -28,7 +28,6 @@ ohos_unittest("netsys_dnsresolv_test") {
     "dns_quality_diag_test.cpp",
     "dns_quality_event_handler_test.cpp",
     "dns_resolv_listen_test.cpp",
-    "net_dns_health_callback_proxy_test.cpp",
     "net_dns_result_callback_proxy_test.cpp",
   ]
 
@@ -56,6 +55,7 @@ ohos_unittest("netsys_dnsresolv_test") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -88,15 +88,15 @@ ohos_unittest("netsys_dnsresolv_test") {
 ohos_unittest("netsys_dnsresolv_mock_test") {
   module_out_path = "netmanager_base/netmanager_base/dnsresolv_test"
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "../mock/src/parcel.cpp",
-    "netsys_net_dns_health_data_test.cpp",
     "netsys_net_dns_result_data_test.cpp",
   ]
 
   sources += [
-    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
-    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv/netsys_net_dns_result_data.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dnsresolv/netsys_net_dns_result_data.cpp",
   ]
 
   include_dirs = [
@@ -110,7 +110,8 @@ ohos_unittest("netsys_dnsresolv_mock_test") {
 
   deps = [
     "$NETMANAGERNATIVE_ROOT:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
   external_deps = [

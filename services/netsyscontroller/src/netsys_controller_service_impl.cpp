@@ -865,18 +865,6 @@ int32_t NetsysControllerServiceImpl::UnregisterDnsQueryResultCallback(
     return netsysClient_->UnregisterDnsQueryResultCallback(callback);
 }
 
-int32_t NetsysControllerServiceImpl::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    NETMGR_LOG_D("RegisterDnsResultListener");
-    return netsysClient_->RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetsysControllerServiceImpl::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    NETMGR_LOG_D("UnregisterDnsResultListener");
-    return netsysClient_->UnregisterDnsHealthCallback(callback);
-}
-
 int32_t NetsysControllerServiceImpl::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     NETMGR_LOG_D("GetCookieStats: type=%{public}u", type);

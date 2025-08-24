@@ -22,7 +22,6 @@
 #include "common_net_diag_callback_test.h"
 #include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
-#include "net_dns_health_callback_stub.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
@@ -523,16 +522,6 @@ public:
     }
 
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
     {
         return 0;
     }

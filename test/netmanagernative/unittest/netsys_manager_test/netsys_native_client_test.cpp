@@ -412,12 +412,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     ret = nativeClient_.UnregisterDnsResultCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 
-    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
-    ret = nativeClient_.RegisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-    ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-
     sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
     ret = nativeClient_.RegisterDnsQueryResultCallback(queryCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);

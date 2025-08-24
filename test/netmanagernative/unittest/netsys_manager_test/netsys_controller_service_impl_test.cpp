@@ -29,10 +29,12 @@
 #include "net_stats_constants.h"
 #include "netsys_controller.h"
 #include "netsys_controller_service_impl.h"
+#include "common_mock_netsys_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+using namespace testing;
 using namespace testing::ext;
 } // namespace
 static constexpr uint32_t TEST_UID = 1;
@@ -51,6 +53,7 @@ public:
     void TearDown();
 
     static inline std::shared_ptr<NetsysControllerServiceImpl> instance_ = nullptr;
+    sptr<NetsysNative::MockINetsysService> mockNetsysService_ = sptr<NetsysNative::MockINetsysService>::MakeSptr();
 
 private:
     void AddExtMockApi();
@@ -741,12 +744,16 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
 HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1)
 {
-    uint64_t stats = 0;
-    auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_CALL(*mockNetsysService_, GetCookieStats(_, _, _)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
 
-    ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    uint64_t stats = 0;
+    auto ret = netsysControllerServiceImpl->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysControllerServiceImpl->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, GetNetworkSharingTypeTest001, TestSize.Level1)
@@ -774,13 +781,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->UnregisterDnsResultCallback(reportCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 
-    sptr<NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
-    ret = instance_->RegisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-
-    ret = instance_->UnregisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-
     sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
     ret = instance_->RegisterDnsQueryResultCallback(queryCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -791,12 +791,17 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
 HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
 {
+    EXPECT_CALL(*mockNetsysService_, SetIpv6PrivacyExtensions(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetsysService_, SetEnableIpv6(_, _)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
     std::string interface = "wlan0";
     uint32_t on = 1;
-    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    int32_t ret = netsysControllerServiceImpl->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->SetEnableIpv6(interface, on);
+    ret = netsysControllerServiceImpl->SetEnableIpv6(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -857,13 +862,14 @@ HWTEST_F(NetsysControllerServiceImplTest, DelBrokerUidAccessPolicyMapTest001, Te
 
 HWTEST_F(NetsysControllerServiceImplTest, DeleteIncreaseTrafficMapTest002, TestSize.Level1)
 {
+    EXPECT_CALL(*mockNetsysService_, DeleteIncreaseTrafficMap(_)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
-    int32_t ret = instance_->DeleteIncreaseTrafficMap(12);
-    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NetManagerStandard::NETMANAGER_ERROR);
-    ret = instance_->DeleteIncreaseTrafficMap(10);
-    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == NetManagerStandard::NETMANAGER_ERROR);
-    ret = instance_->DeleteIncreaseTrafficMap(13);
+    int32_t ret = netsysControllerServiceImpl->DeleteIncreaseTrafficMap(12);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
@@ -974,6 +980,17 @@ HWTEST_F(NetsysControllerServiceImplTest, FlushDnsCache001, TestSize.Level1)
     uint16_t netId = 101;
     int32_t ret = instance_->FlushDnsCache(netId);
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, CreateVnic001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetsysService_, CreateVnic(_, _, _, _)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    std::string tunAddr;
+    std::set<int32_t> uids;
+    int32_t ret = netsysControllerServiceImpl->CreateVnic(1400, tunAddr, 0, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

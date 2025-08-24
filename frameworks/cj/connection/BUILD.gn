@@ -43,14 +43,12 @@ ohos_shared_library("cj_net_connection_ffi") {
   ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
 
   cflags_cc = [
     "-fvisibility=hidden",
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]

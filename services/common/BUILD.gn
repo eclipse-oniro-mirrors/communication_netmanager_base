@@ -119,10 +119,6 @@ config("net_service_common_config") {
     "include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
   ]
-
-  cflags = common_cflags
-
-  cflags_cc = common_cflags
 }
 
 ohos_shared_library("net_service_common") {
@@ -135,6 +131,9 @@ ohos_shared_library("net_service_common") {
   }
 
   branch_protector_ret = "pac_ret"
+
+  cflags = common_cflags
+  cflags_cc = common_cflags
 
   sources = [
     "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src/app_state_aware.cpp",

@@ -976,16 +976,6 @@ int32_t NetsysNativeService::UnregisterDnsResultCallback(const sptr<INetDnsResul
     return netsysService_->UnregisterDnsResultCallback(callback);
 }
 
-int32_t NetsysNativeService::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    return netsysService_->RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    return netsysService_->UnregisterDnsHealthCallback(callback);
-}
-
 int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
 {
     int32_t result = netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);

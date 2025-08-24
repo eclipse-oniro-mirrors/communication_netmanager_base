@@ -94,24 +94,7 @@ public:
     void TearDown();
 };
 
-void NetConnServiceExtTest::SetUpTestCase()
-{
-    NetConnService::GetInstance()->OnStart();
-    if (NetConnService::GetInstance()->state_ != NetConnService::STATE_RUNNING) {
-        NetConnService::GetInstance()->netConnEventRunner_ =
-            AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
-        ASSERT_NE(NetConnService::GetInstance()->netConnEventRunner_, nullptr);
-        NetConnService::GetInstance()->netConnEventHandler_ =
-            std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
-        NetConnService::GetInstance()->serviceIface_ = std::make_unique<NetConnServiceIface>().release();
-        NetManagerCenter::GetInstance().RegisterConnService(NetConnService::GetInstance()->serviceIface_);
-        NetHttpProxyTracker httpProxyTracker;
-        HttpProxy httpProxy;
-        httpProxy.SetPort(0);
-        httpProxyTracker.ReadFromSettingsData(httpProxy);
-        NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
-    }
-}
+void NetConnServiceExtTest::SetUpTestCase() {}
 
 void NetConnServiceExtTest::TearDownTestCase() {}
 
@@ -121,47 +104,50 @@ void NetConnServiceExtTest::TearDown() {}
 
 HWTEST_F(NetConnServiceExtTest, CheckIfSettingsDataReadyTest001, TestSize.Level1)
 {
-    NetConnService::GetInstance()->isDataShareReady_ = true;
-    auto ret = NetConnService::GetInstance()->CheckIfSettingsDataReady();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->isDataShareReady_ = true;
+    auto ret = netConnService->CheckIfSettingsDataReady();
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, CheckIfSettingsDataReadyTest002, TestSize.Level1)
 {
-    NetConnService::GetInstance()->isDataShareReady_ = false;
-    auto ret = NetConnService::GetInstance()->CheckIfSettingsDataReady();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->isDataShareReady_ = false;
+    auto ret = netConnService->CheckIfSettingsDataReady();
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, OnNetSupplierRemoteDiedTest001, TestSize.Level1)
 {
     wptr<IRemoteObject> remoteObject = nullptr;
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    EXPECT_FALSE(NetConnService::GetInstance()->registerToService_);
-    NetConnService::GetInstance()->OnNetSupplierRemoteDied(remoteObject);
+    auto netConnService = std::make_shared<NetConnService>();
+    EXPECT_FALSE(netConnService->registerToService_);
+    netConnService->OnNetSupplierRemoteDied(remoteObject);
 }
 
 HWTEST_F(NetConnServiceExtTest, OnNetSupplierRemoteDiedTest002, TestSize.Level1)
 {
     wptr<IRemoteObject> remoteObject = new MockNetIRemoteObject();
     EXPECT_NE(remoteObject, nullptr);
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    NetConnService::GetInstance()->OnNetSupplierRemoteDied(remoteObject);
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->OnNetSupplierRemoteDied(remoteObject);
 }
 
 HWTEST_F(NetConnServiceExtTest, OnNetSupplierRemoteDiedTest003, TestSize.Level1)
 {
     wptr<IRemoteObject> remoteObject = new MockNetIRemoteObject();
     EXPECT_NE(remoteObject, nullptr);
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    NetConnService::GetInstance()->OnNetSupplierRemoteDied(remoteObject);
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->OnNetSupplierRemoteDied(remoteObject);
 }
 
 HWTEST_F(NetConnServiceExtTest, RemoveNetSupplierDeathRecipientTest002, TestSize.Level1)
 {
     sptr<INetSupplierCallback> callback = nullptr;
-    EXPECT_FALSE(NetConnService::GetInstance()->registerToService_);
-    NetConnService::GetInstance()->RemoveNetSupplierDeathRecipient(callback);
+    auto netConnService = std::make_shared<NetConnService>();
+    EXPECT_FALSE(netConnService->registerToService_);
+    netConnService->RemoveNetSupplierDeathRecipient(callback);
 }
 
 HWTEST_F(NetConnServiceExtTest, RequestNetConnectionAsyncTest002, TestSize.Level1)
@@ -169,7 +155,8 @@ HWTEST_F(NetConnServiceExtTest, RequestNetConnectionAsyncTest002, TestSize.Level
     uint32_t callingUid = 1;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallback> uidCallback = nullptr;
-    int32_t ret = NetConnService::GetInstance()->RequestNetConnectionAsync(netSpecifier, uidCallback, 0, callingUid);
+    auto netConnService = std::make_shared<NetConnService>();
+    int32_t ret = netConnService->RequestNetConnectionAsync(netSpecifier, uidCallback, 0, callingUid);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
@@ -177,7 +164,9 @@ HWTEST_F(NetConnServiceExtTest, UnregisterNetSupplierAsyncTest001, TestSize.Leve
 {
     uint32_t supplierId = 1;
     int32_t callingUid = 1;
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -194,7 +183,7 @@ HWTEST_F(NetConnServiceExtTest, UnregisterNetSupplierAsyncTest002, TestSize.Leve
 {
     uint32_t supplierId = 1;
     int32_t callingUid = 1;
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -212,7 +201,7 @@ HWTEST_F(NetConnServiceExtTest, CheckAndCompareUidTest001, TestSize.Level1)
 {
     uint32_t supplierId = 1;
     int32_t callingUid = 2;
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -226,7 +215,9 @@ HWTEST_F(NetConnServiceExtTest, CheckAndCompareUidTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandleScreenEventTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     netConnService->defaultNetSupplier_ = nullptr;
     EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
     netConnService->HandleScreenEvent(true);
@@ -234,7 +225,7 @@ HWTEST_F(NetConnServiceExtTest, HandleScreenEventTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, UpdateNetCapsAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::set<NetCap> netCaps;
     uint32_t supplierId = 0;
     EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
@@ -246,7 +237,7 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetCapsAsyncTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, UpdateNetCapsAsyncTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::set<NetCap> netCaps;
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
@@ -264,7 +255,7 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetCapsAsyncTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthSyncTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     int32_t netId = 0;
     auto iterNetwork = netConnService->networks_.find(netId);
     EXPECT_EQ(iterNetwork, netConnService->networks_.end());
@@ -274,7 +265,7 @@ HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthSyncTest002, TestSize.Le
 
 HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthSyncTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     int32_t netId = 1;
     netConnService->networks_[netId] = nullptr;
     auto iterNetwork = netConnService->networks_.find(netId);
@@ -285,7 +276,7 @@ HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthSyncTest003, TestSize.Le
 
 HWTEST_F(NetConnServiceExtTest, RestrictBackgroundChangedAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netSuppliers_.clear();
     netConnService->netSuppliers_[0] = nullptr;
     auto ret = netConnService->RestrictBackgroundChangedAsync(true);
@@ -294,15 +285,15 @@ HWTEST_F(NetConnServiceExtTest, RestrictBackgroundChangedAsyncTest001, TestSize.
 
 HWTEST_F(NetConnServiceExtTest, RequestAllNetworkExceptDefaultTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->defaultNetSupplier_ = nullptr;
-    EXPECT_FALSE(NetConnService::GetInstance()->registerToService_);
+    EXPECT_FALSE(netConnService->registerToService_);
     netConnService->RequestAllNetworkExceptDefault();
 }
 
 HWTEST_F(NetConnServiceExtTest, RequestAllNetworkExceptDefaultTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -312,7 +303,7 @@ HWTEST_F(NetConnServiceExtTest, RequestAllNetworkExceptDefaultTest002, TestSize.
 
 HWTEST_F(NetConnServiceExtTest, GenerateNetIdTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netIdLastValue_ = MAX_NET_ID;
     netConnService->defaultNetSupplier_ = nullptr;
     EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
@@ -322,22 +313,34 @@ HWTEST_F(NetConnServiceExtTest, GenerateNetIdTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GenerateInternalNetIdTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->internalNetIdLastValue_ = MAX_NET_ID;
     auto ret = netConnService->GenerateInternalNetId();
-    EXPECT_NE(ret, MIN_INTERNAL_NET_ID);
+    EXPECT_EQ(ret, MIN_INTERNAL_NET_ID);
+}
+
+HWTEST_F(NetConnServiceExtTest, GenerateInternalNetIdTest002, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->internalNetIdLastValue_ = MAX_NET_ID;
+    int32_t netId = 1;
+    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
+        NetBearType::BEARER_ETHERNET, nullptr);
+    netConnService->networks_.emplace(MIN_INTERNAL_NET_ID, network);
+    auto ret = netConnService->GenerateInternalNetId();
+    EXPECT_EQ(ret, 2);
 }
 
 HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     netConnService->NotFindBestSupplier(1, nullptr, nullptr, nullptr);
 }
 
 HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t reqId = 1;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
@@ -361,7 +364,7 @@ HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -372,7 +375,7 @@ HWTEST_F(NetConnServiceExtTest, NotFindBestSupplierTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandleCallbackTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     CallbackType type = CALL_TYPE_UPDATE_LINK;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
@@ -385,7 +388,7 @@ HWTEST_F(NetConnServiceExtTest, HandleCallbackTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandleCallbackTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     CallbackType type = CALL_TYPE_UNAVAILABLE;
     sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     EXPECT_NE(callback, nullptr);
@@ -396,7 +399,7 @@ HWTEST_F(NetConnServiceExtTest, HandleCallbackTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, CallbackForAvailableTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -406,7 +409,7 @@ HWTEST_F(NetConnServiceExtTest, CallbackForAvailableTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, CallbackForAvailableTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -417,7 +420,7 @@ HWTEST_F(NetConnServiceExtTest, CallbackForAvailableTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, MakeDefaultNetWorkTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> oldSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -428,7 +431,7 @@ HWTEST_F(NetConnServiceExtTest, MakeDefaultNetWorkTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetNetSupplierFromListTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netSuppliers_[1] = nullptr;
     std::string ident;
     auto ret = netConnService->GetNetSupplierFromList(BEARER_CELLULAR, ident);
@@ -437,7 +440,7 @@ HWTEST_F(NetConnServiceExtTest, GetNetSupplierFromListTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetNetSupplierFromListTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netSuppliers_[1] = nullptr;
     std::string ident;
     std::set<NetCap> netCaps;
@@ -447,7 +450,7 @@ HWTEST_F(NetConnServiceExtTest, GetNetSupplierFromListTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetSpecificNetTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     NetBearType bearerType = static_cast<NetBearType>(-1);
     std::list<int32_t> netIdList;
     auto ret = netConnService->GetSpecificNet(bearerType, netIdList);
@@ -456,7 +459,7 @@ HWTEST_F(NetConnServiceExtTest, GetSpecificNetTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetSpecificNetTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netSuppliers_[1] = nullptr;
     NetBearType bearerType = BEARER_CELLULAR;
     std::list<int32_t> netIdList;
@@ -466,7 +469,7 @@ HWTEST_F(NetConnServiceExtTest, GetSpecificNetTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetSpecificNetByIdentTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     NetBearType bearerType = static_cast<NetBearType>(-1);
     std::string ident;
     std::list<int32_t> netIdList;
@@ -476,7 +479,7 @@ HWTEST_F(NetConnServiceExtTest, GetSpecificNetByIdentTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetSpecificNetByIdentTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->netSuppliers_[1] = nullptr;
     NetBearType bearerType = BEARER_CELLULAR;
     std::string ident;
@@ -487,7 +490,7 @@ HWTEST_F(NetConnServiceExtTest, GetSpecificNetByIdentTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetAllNetsTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
     std::list<int32_t> netIdList;
     auto ret = netConnService->GetAllNets(netIdList);
@@ -496,7 +499,7 @@ HWTEST_F(NetConnServiceExtTest, GetAllNetsTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetConnectionPropertiesTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
     NetLinkInfo info;
     auto ret = netConnService->GetConnectionProperties(0, info);
@@ -505,7 +508,7 @@ HWTEST_F(NetConnServiceExtTest, GetConnectionPropertiesTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetIfaceNamesTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::list<std::string> ifaceNames;
     auto ret = netConnService->GetIfaceNames(static_cast<NetBearType>(-1), ifaceNames);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_TYPE_NOT_FOUND);
@@ -513,7 +516,7 @@ HWTEST_F(NetConnServiceExtTest, GetIfaceNamesTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetNetIdByIdentifierTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::list<int32_t> netIdList;
     netConnService->netSuppliers_[0] = nullptr;
     auto ret = netConnService->GetNetIdByIdentifier(TEST_IDENT, netIdList);
@@ -522,7 +525,7 @@ HWTEST_F(NetConnServiceExtTest, GetNetIdByIdentifierTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetDumpMessageTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -535,7 +538,7 @@ HWTEST_F(NetConnServiceExtTest, GetDumpMessageTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, IsValidDecValueTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string inputValue = "inputValue test";
     auto ret = netConnService->IsValidDecValue(inputValue);
     EXPECT_FALSE(ret);
@@ -543,7 +546,7 @@ HWTEST_F(NetConnServiceExtTest, IsValidDecValueTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, IsValidDecValueTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string inputValue = "input";
     auto ret = netConnService->IsValidDecValue(inputValue);
     EXPECT_FALSE(ret);
@@ -551,7 +554,7 @@ HWTEST_F(NetConnServiceExtTest, IsValidDecValueTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetAirplaneModeTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_TRUE(netConnService->preAirplaneCallbacks_.empty());
     netConnService->preAirplaneCallbacks_[0] = new IPreAirplaneCallbackStubTestCb();
     netConnService->preAirplaneCallbacks_[1] = nullptr;
@@ -561,7 +564,7 @@ HWTEST_F(NetConnServiceExtTest, SetAirplaneModeTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     HttpProxy tempProxy;
     netConnService->SetCurlOptions(nullptr, tempProxy);
@@ -569,7 +572,7 @@ HWTEST_F(NetConnServiceExtTest, SetCurlOptionsTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetHttpUrlFromConfigTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     std::string httpUrl;
     netConnService->GetHttpUrlFromConfig(httpUrl);
@@ -577,14 +580,14 @@ HWTEST_F(NetConnServiceExtTest, GetHttpUrlFromConfigTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, IsValidUserIdTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->IsValidUserId(-1);
     EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetConnServiceExtTest, GetValidUserIdFromProxyTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     HttpProxy httpProxy;
     httpProxy.SetUserId(NetConnService::ROOT_USER_ID);
@@ -593,7 +596,7 @@ HWTEST_F(NetConnServiceExtTest, GetValidUserIdFromProxyTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetValidUserIdFromProxyTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     HttpProxy httpProxy;
     httpProxy.SetUserId(NetConnService::INVALID_USER_ID);
@@ -602,26 +605,24 @@ HWTEST_F(NetConnServiceExtTest, GetValidUserIdFromProxyTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    EXPECT_NE(netConnService->netConnEventRunner_, nullptr);
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
-    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     auto ret = netConnService->NetDetectionForDnsHealth(1, true);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, NetDetectionForDnsHealthTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
-    netConnService->netConnEventHandler_ = nullptr;
     auto ret = netConnService->NetDetectionForDnsHealth(1, true);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     NetConnService::UserIdType userIdType = NetConnService::UserIdType::LOCAL;
     HttpProxy httpProxy;
@@ -630,7 +631,7 @@ HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     NetConnService::UserIdType userIdType = static_cast<NetConnService::UserIdType>(-1);
     HttpProxy httpProxy;
@@ -639,7 +640,7 @@ HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     NetConnService::UserIdType userIdType = NetConnService::UserIdType::SPECIFY;
     HttpProxy httpProxy;
@@ -649,9 +650,10 @@ HWTEST_F(NetConnServiceExtTest, LoadGlobalHttpProxyTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, UpdateGlobalHttpProxyTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    HttpProxy httpProxy;
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    HttpProxy httpProxy;
     EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     netConnService->UpdateGlobalHttpProxy(httpProxy);
 }
@@ -806,27 +808,34 @@ HWTEST_F(NetConnServiceExtTest, NetUidPolicyChangeTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, NetUidPolicyChangeTest002, TestSize.Level1)
 {
-    NetConnService::NetPolicyCallback policyCallback(NetConnService::GetInstance());
-    EXPECT_NE(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
-    EXPECT_NE(NetConnService::GetInstance()->netConnEventHandler_, nullptr);
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    netConnService->defaultNetSupplier_ = sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    NetConnService::NetPolicyCallback policyCallback(netConnService);
+    EXPECT_NE(policyCallback.netConnService_.lock(), nullptr);
+    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     auto ret = policyCallback.NetUidPolicyChange(1, 1);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceExtTest, NetUidPolicyChangeTest003, TestSize.Level1)
 {
-    NetConnService::NetPolicyCallback policyCallback(NetConnService::GetInstance());
-    EXPECT_NE(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
+    NetConnService::NetPolicyCallback policyCallback(netConnService);
+    EXPECT_NE(policyCallback.netConnService_.lock(), nullptr);
     auto ret = policyCallback.NetUidPolicyChange(1, 1);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, NetUidPolicyChangeTest004, TestSize.Level1)
 {
-    NetConnService::NetPolicyCallback policyCallback(NetConnService::GetInstance());
-    EXPECT_NE(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
-    NetConnService::GetInstance()->defaultNetSupplier_ = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
+    NetConnService::NetPolicyCallback policyCallback(netConnService);
+    EXPECT_NE(policyCallback.netConnService_.lock(), nullptr);
+    netConnService->defaultNetSupplier_ = nullptr;
     auto ret = policyCallback.NetUidPolicyChange(1, 1);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
@@ -836,20 +845,21 @@ HWTEST_F(NetConnServiceExtTest, SendNetPolicyChangeTest001, TestSize.Level1)
     std::weak_ptr<NetConnService> netConnService;
     netConnService.reset();
     NetConnService::NetPolicyCallback policyCallback(netConnService);
-    EXPECT_EQ(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
+    EXPECT_EQ(policyCallback.netConnService_.lock(), nullptr);
     policyCallback.SendNetPolicyChange(1, 1);
 }
 
 HWTEST_F(NetConnServiceExtTest, SendNetPolicyChangeTest002, TestSize.Level1)
 {
-    NetConnService::NetPolicyCallback policyCallback(NetConnService::GetInstance());
-    EXPECT_EQ(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
+    auto netConnService = std::make_shared<NetConnService>();
+    NetConnService::NetPolicyCallback policyCallback(netConnService);
+    EXPECT_NE(policyCallback.netConnService_.lock(), nullptr);
     policyCallback.SendNetPolicyChange(1, 1);
 }
 
 HWTEST_F(NetConnServiceExtTest, SendNetPolicyChangeTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -860,7 +870,7 @@ HWTEST_F(NetConnServiceExtTest, SendNetPolicyChangeTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, OnAddSystemAbilityTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->hasSARemoved_);
     std::string deviceId = "dev1";
     netConnService->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
@@ -868,7 +878,7 @@ HWTEST_F(NetConnServiceExtTest, OnAddSystemAbilityTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, OnAddSystemAbilityTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_FALSE(netConnService->registerToService_);
     std::string deviceId = "dev1";
     netConnService->OnAddSystemAbility(ACCESS_TOKEN_MANAGER_SERVICE_ID, deviceId);
@@ -879,7 +889,7 @@ HWTEST_F(NetConnServiceExtTest, OnAddSystemAbilityTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, OnRemoveSystemAbilityTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string deviceId = "dev1";
     netConnService->OnRemoveSystemAbility(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, deviceId);
     EXPECT_FALSE(netConnService->hasSARemoved_);
@@ -887,7 +897,7 @@ HWTEST_F(NetConnServiceExtTest, OnRemoveSystemAbilityTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     sptr<NetSupplier> supplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
@@ -898,7 +908,7 @@ HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest002, TestSiz
 
 HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->defaultNetActivate_ = nullptr;
     netConnService->CreateDefaultRequest();
     bool ret = netConnService->IsSupplierMatchRequestAndNetwork(netConnService->defaultNetSupplier_);
@@ -907,16 +917,19 @@ HWTEST_F(NetConnServiceExtTest, IsSupplierMatchRequestAndNetworkTest003, TestSiz
 
 HWTEST_F(NetConnServiceExtTest, RecoverNetSysTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->defaultNetSupplier_ = sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps);
     netConnService->netSuppliers_[0] = nullptr;
     netConnService->netSuppliers_[1] = netConnService->defaultNetSupplier_;
     netConnService->RecoverNetSys();
+    EXPECT_NE(netConnService->netSuppliers_.size(), 0);
 }
 
 HWTEST_F(NetConnServiceExtTest, RecoverNetSysTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
     netConnService->netSuppliers_[1] = nullptr;
     netConnService->RecoverNetSys();
@@ -924,14 +937,12 @@ HWTEST_F(NetConnServiceExtTest, RecoverNetSysTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, RegisterSlotTypeTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->netConnEventHandler_ = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t supplierId = 10;
     int32_t type = 0;
     auto ret = netConnService->RegisterSlotType(supplierId, type);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    EXPECT_NE(netConnService->netConnEventRunner_, nullptr);
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     ret = netConnService->RegisterSlotType(supplierId, type);
@@ -947,7 +958,12 @@ HWTEST_F(NetConnServiceExtTest, RegisterSlotTypeTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetSlotTypeTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    netConnService->netSuppliers_.emplace(1, sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps));
     std::string type;
     EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     EXPECT_EQ(netConnService->defaultNetSupplier_, nullptr);
@@ -966,14 +982,18 @@ HWTEST_F(NetConnServiceExtTest, GetSlotTypeTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, OnNetSysRestartTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->OnNetSysRestart();
+    EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    netConnService->OnNetSysRestart();
+    EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
 }
 
 HWTEST_F(NetConnServiceExtTest, IsIfaceNameInUseTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     int32_t netId = 1;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
@@ -991,8 +1011,11 @@ HWTEST_F(NetConnServiceExtTest, IsIfaceNameInUseTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, GetNetCapabilitiesAsStringTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->netSuppliers_[0] = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->netSuppliers_.emplace(0, nullptr);
+    netConnService->netSuppliers_.emplace(1, sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps));
     uint32_t supplierId = 2;
     auto ret = netConnService->GetNetCapabilitiesAsString(supplierId);
     EXPECT_TRUE(ret.empty());
@@ -1008,15 +1031,17 @@ HWTEST_F(NetConnServiceExtTest, GetNetCapabilitiesAsStringTest001, TestSize.Leve
 
 HWTEST_F(NetConnServiceExtTest, FindSupplierWithInternetByBearerTypeTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    EXPECT_FALSE(netConnService->netSuppliers_[1]->GetNetCaps().HasNetCap(NET_CAPABILITY_INTERNET));
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->FindSupplierWithInternetByBearerType(NetBearType::BEARER_WIFI, TEST_IDENT);
     EXPECT_TRUE(ret.empty());
 }
 
 HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->defaultNetSupplier_ = sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps);
     EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
     wptr<IRemoteObject> remoteObject = nullptr;
     netConnService->OnRemoteDied(remoteObject);
@@ -1024,7 +1049,7 @@ HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     wptr<IRemoteObject> remoteObject = new MockNetIRemoteObject();
     EXPECT_NE(remoteObject, nullptr);
     netConnService->OnRemoteDied(remoteObject);
@@ -1032,7 +1057,7 @@ HWTEST_F(NetConnServiceExtTest, OnRemoteDiedTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, FindSupplierForConnectedTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::vector<sptr<NetSupplier>> suppliers = {nullptr};
     auto ret = netConnService->FindSupplierForConnected(suppliers);
     EXPECT_EQ(ret, 0);
@@ -1040,30 +1065,35 @@ HWTEST_F(NetConnServiceExtTest, FindSupplierForConnectedTest001, TestSize.Level1
 
 HWTEST_F(NetConnServiceExtTest, OnReceiveEventTest001, TestSize.Level1)
 {
+    auto netConnService = std::make_shared<NetConnService>();
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netConnService->defaultNetSupplier_ = sptr<NetSupplier>::MakeSptr(BEARER_CELLULAR, netSupplierIdent, netCaps);
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
     NetConnService::NetConnListener listener(subscribeInfo, nullptr);
-    EXPECT_NE(NetConnService::GetInstance()->defaultNetSupplier_, nullptr);
+    EXPECT_NE(netConnService->defaultNetSupplier_, nullptr);
     EventFwk::CommonEventData eventData;
     listener.OnReceiveEvent(eventData);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableVnicNetworkTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     sptr<NetLinkInfo> netLinkInfo = new NetLinkInfo();
     const std::set<int32_t> uids;
     EXPECT_EQ(netConnService->netConnEventHandler_, nullptr);
     auto ret = netConnService->EnableVnicNetwork(netLinkInfo, uids);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
-    netConnService->netConnEventHandler_ = nullptr;
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     ret = netConnService->EnableVnicNetwork(netLinkInfo, uids);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableVnicNetworkAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     sptr<NetLinkInfo> netLinkInfo = new NetLinkInfo();
     const std::set<int32_t> uids;
 
@@ -1085,10 +1115,11 @@ HWTEST_F(NetConnServiceExtTest, EnableVnicNetworkAsyncTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, DisableVnicNetworkTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->DisableVnicNetwork();
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     EXPECT_NE(netConnService->netConnEventHandler_, nullptr);
     ret = netConnService->DisableVnicNetwork();
@@ -1097,7 +1128,7 @@ HWTEST_F(NetConnServiceExtTest, DisableVnicNetworkTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string virnicAddr;
     std::string iif;
     auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, iif);
@@ -1106,7 +1137,7 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest001, TestSize
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string virnicAddr = "192.168.1.300";
     std::string iif = "eth0";
     auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, iif);
@@ -1115,7 +1146,7 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest002, TestSize
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string virnicAddr = "192.168.1.5";
     std::string iif = "eth0";
     auto ret = netConnService->EnableDistributedClientNetAsync(virnicAddr, iif);
@@ -1124,23 +1155,22 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedClientNetAsyncTest003, TestSize
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string iif = "eth0";
     std::string devIface = "bond0";
     std::string dstAddr = "192.168.1.100";
-    auto tmpHandler = netConnService->netConnEventHandler_;
-    netConnService->netConnEventHandler_ = nullptr;
     auto ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
-    netConnService->netConnEventHandler_ = tmpHandler;
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string iif;
     std::string devIface;
     std::string dstAddr;
@@ -1159,7 +1189,7 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest001, TestSize
 
 HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string iif = "eth0";
     std::string devIface = "bond0";
     std::string dstAddr = "192.168.1.100";
@@ -1169,27 +1199,26 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest002, TestSize
 
 HWTEST_F(NetConnServiceExtTest, DisableDistributedNetTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    auto tmpHandler = netConnService->netConnEventHandler_;
-    netConnService->netConnEventHandler_ = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->DisableDistributedNet(true);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
-    netConnService->netConnEventHandler_ = tmpHandler;
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     ret = netConnService->DisableDistributedNet(true);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceExtTest, DisableDistributedNetAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->DisableDistributedNetAsync(false);
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceExtTest, CloseSocketsUidAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     int32_t netId = 0;
     uint32_t uid = 1;
     EXPECT_EQ(netConnService->networks_.find(netId), netConnService->networks_.end());
@@ -1204,7 +1233,7 @@ HWTEST_F(NetConnServiceExtTest, CloseSocketsUidAsyncTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t uid = 1;
     netConnService->netUidActivates_.clear();
     auto ret = netConnService->SetAppIsFrozenedAsync(uid, true);
@@ -1213,7 +1242,7 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t uid = 1;
     bool isFrozened = false;
     std::vector<std::shared_ptr<NetActivate>> activates;
@@ -1241,11 +1270,18 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t uid = 1;
     bool isFrozened = false;
-    auto &activates = netConnService->netUidActivates_[uid];
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    activates.push_back(active);
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
+    netConnService->netUidActivates_[uid] = activates;
     auto ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -1267,12 +1303,19 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest004, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t uid = 1;
     bool isFrozened = false;
-    auto &activates = netConnService->netUidActivates_[uid];
+    std::vector<std::shared_ptr<NetActivate>> activates;
+    sptr<NetSpecifier> specifier = nullptr;
+    sptr<INetConnCallback> callback = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback;
+    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
+    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, 0, handler);
+    activates.push_back(active);
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_AVAILABLE);
     activates[0]->SetServiceSupply(nullptr);
+    netConnService->netUidActivates_[uid] = activates;
     EXPECT_EQ(activates[0]->GetServiceSupply(), nullptr);
     auto ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1280,11 +1323,18 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest004, TestSize.Level1)
     activates[0]->SetLastCallbackType(CallbackType::CALL_TYPE_LOST);
     ret = netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 
-    activates.clear();
-    uid = 1099;
+HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest005, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    uint32_t uid = 1099;
     int32_t netId = 123;
     uint32_t reqId = 1;
+    bool isFrozened = false;
+    std::vector<std::shared_ptr<NetActivate>> activates;
     sptr<NetSpecifier> specifier = nullptr;
     sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     std::weak_ptr<INetActivateCallback> timeoutCallback;
@@ -1307,15 +1357,14 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest004, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, EnableAppFrozenedCallbackLimitationTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->netConnEventHandler_ = nullptr;
+    auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->EnableAppFrozenedCallbackLimitation(true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceExtTest, SetReuseSupplierIdTest002, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t supplierId = 1;
     uint32_t reuseSupplierId = 1;
     netConnService->netSuppliers_.clear();
@@ -1326,7 +1375,7 @@ HWTEST_F(NetConnServiceExtTest, SetReuseSupplierIdTest002, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, SetReuseSupplierIdTest003, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t supplierId = 1;
     uint32_t reuseSupplierId = 2;
     std::string netSupplierIdent;
@@ -1348,7 +1397,7 @@ HWTEST_F(NetConnServiceExtTest, SetReuseSupplierIdTest003, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
@@ -1356,8 +1405,8 @@ HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
     uint32_t supplierId = 1;
     netConnService->defaultNetSupplier_->supplierId_ = supplierId;
     netConnService->isDelayHandleFindBestNetwork_ = true;
-    netConnService->netSuppliers_[0] = netConnService->defaultNetSupplier_;
-    NetConnService::GetInstance()->HandleDetectionResult(supplierId, VERIFICATION_STATE);
+    netConnService->netSuppliers_[1] = netConnService->defaultNetSupplier_;
+    netConnService->HandleDetectionResult(supplierId, VERIFICATION_STATE);
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
     netConnService->defaultNetSupplier_ = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
     netConnService->netSuppliers_[0] = netConnService->defaultNetSupplier_;
@@ -1367,7 +1416,7 @@ HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
     netConnService->isDelayHandleFindBestNetwork_ = true;
     netConnService->delaySupplierId_ = supplierId;
     netConnService->netSuppliers_[1] = supplier;
-    NetConnService::GetInstance()->HandleDetectionResult(supplierId, VERIFICATION_STATE);
+    netConnService->HandleDetectionResult(supplierId, VERIFICATION_STATE);
     EXPECT_TRUE(netConnService->isDelayHandleFindBestNetwork_);
     netConnService->delaySupplierId_ = 0;
     netConnService->HandleDetectionResult(supplierId, VERIFICATION_STATE);
@@ -1376,7 +1425,7 @@ HWTEST_F(NetConnServiceExtTest, HandleDetectionResult001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandlePreFindBestNetworkForDelay001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     netConnService->HandlePreFindBestNetworkForDelay(1, nullptr);
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
@@ -1401,7 +1450,9 @@ HWTEST_F(NetConnServiceExtTest, HandlePreFindBestNetworkForDelay001, TestSize.Le
 
 HWTEST_F(NetConnServiceExtTest, HandleFindBestNetworkForDelay001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     netConnService->HandleFindBestNetworkForDelay();
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
@@ -1419,7 +1470,7 @@ HWTEST_F(NetConnServiceExtTest, HandleFindBestNetworkForDelay001, TestSize.Level
 
 HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsyncInvalid001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t supplierId = 1;
     netConnService->isDelayHandleFindBestNetwork_ = false;
     netConnService->UpdateNetSupplierInfoAsyncInvalid(supplierId);
@@ -1428,16 +1479,17 @@ HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsyncInvalid001, TestSize.L
 
 HWTEST_F(NetConnServiceExtTest, RemoveDelayNetwork001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->isDelayHandleFindBestNetwork_ = true;
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    netConnService->isDelayHandleFindBestNetwork_ = true;
     netConnService->RemoveDelayNetwork();
     EXPECT_FALSE(netConnService->isDelayHandleFindBestNetwork_);
 }
 
 HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsync001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;

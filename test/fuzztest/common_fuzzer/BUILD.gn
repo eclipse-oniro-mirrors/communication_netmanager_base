@@ -58,6 +58,7 @@ ohos_fuzztest("CommonFuzzTest") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   defines = [

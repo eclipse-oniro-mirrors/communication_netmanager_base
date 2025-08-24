@@ -1079,13 +1079,6 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest003, TestSize.Level1)
     ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 
-    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
-    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-
-    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-
     sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
     ret = NetsysController::GetInstance().RegisterDnsQueryResultCallback(queryCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -1122,17 +1115,6 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
-    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    uint64_t stats = 0;
-    ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> queryCallback = nullptr;
