@@ -78,8 +78,8 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-    const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
+    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
 {
     netBearType_ = bearType;
     LoadGlobalHttpProxy();
