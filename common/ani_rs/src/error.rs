@@ -17,6 +17,8 @@ use std::{
     fmt::{Debug, Display},
 };
 
+use crate::business_error::BusinessError;
+
 #[derive(Debug)]
 pub struct AniError {
     code: Option<AniErrorCode>,
@@ -82,7 +84,7 @@ impl AniError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum AniErrorCode {
     Error = 1,
     InvalidArgs,
@@ -161,5 +163,18 @@ impl From<FromBytesWithNulError> for AniError {
             code: None,
             message: Msg::Temp(format!("{}", value)),
         }
+    }
+}
+
+impl From<AniError> for BusinessError {
+    fn from(value: AniError) -> Self {
+        let code = value.code.as_ref().map_or(-1, |ani_code| {
+            ani_code.clone() as i32
+        });
+        let msg = match value.message {
+            Msg::Literal(s) => s.to_string(),
+            Msg::Temp(s) => s,
+        };
+        BusinessError::new(code, msg)
     }
 }

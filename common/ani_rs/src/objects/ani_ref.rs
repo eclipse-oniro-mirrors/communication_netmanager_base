@@ -15,10 +15,7 @@ use std::{marker::PhantomData, ops::Deref, ptr::null_mut};
 
 use ani_sys::ani_ref;
 use serde::{Deserialize, Serialize};
-
 use crate::{AniVm, AniEnv, global::GlobalRef, error::AniError};
-
-use super::AniObject;
 
 #[repr(transparent)]
 #[derive(Debug, Clone)]

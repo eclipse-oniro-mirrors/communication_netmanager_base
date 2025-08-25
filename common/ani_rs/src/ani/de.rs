@@ -97,7 +97,7 @@ impl<'local> MapAccess<'local> for StructDe<'local> {
         K: serde::de::DeserializeSeed<'local>,
     {
         if self.fields.is_empty() {
-            return Ok(None);
+            Ok(None)
         } else {
             Ok(Some(seed.deserialize(self).unwrap()))
         }

@@ -159,7 +159,9 @@ impl<'local> From<AniObject<'local>> for AniErrorCallback<'local> {
 
 impl<'de> Deserialize<'de> for AniFnObject<'_> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         let obj = AniObject::deserialize(deserializer)?;
         Ok(AniFnObject::from(obj))
     }
@@ -167,7 +169,9 @@ impl<'de> Deserialize<'de> for AniFnObject<'_> {
 
 impl<'de> Deserialize<'de> for AniAsyncCallback<'_> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         let obj = AniObject::deserialize(deserializer)?;
         Ok(AniAsyncCallback::from(obj))
     }
@@ -175,7 +179,9 @@ impl<'de> Deserialize<'de> for AniAsyncCallback<'_> {
 
 impl<'de> Deserialize<'de> for AniErrorCallback<'_> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         let obj = AniObject::deserialize(deserializer)?;
         Ok(AniErrorCallback::from(obj))
     }
@@ -248,11 +254,7 @@ impl<'local> AniErrorCallback<'local> {
 }
 
 impl<'local> AniFnObject<'local> {
-    pub fn execute_local<T>(
-        &self,
-        env: &AniEnv<'local>,
-        input: T,
-    ) -> Result<AniRef, AniError>
+    pub fn execute_local<T>(&self, env: &AniEnv<'local>, input: T) -> Result<AniRef, AniError>
     where
         T: InputVec,
     {
@@ -270,7 +272,7 @@ impl<'local> AniFnObject<'local> {
             let env = AniVm::get_instance().attach_current_thread()?;
             let res = self.execute_local(&env, input);
             AniVm::get_instance().detach_current_thread()?;
-            return res;
+            res
         }
     }
 
@@ -297,9 +299,9 @@ impl<'local> AniAsyncCallback<'local> {
         T: InputVec,
     {
         let business_error = if let Some(err) = business_error {
-            env.business_error(err.code(), err.message()).unwrap()
+            env.business_error(err.code(), err.message())?
         } else {
-            env.business_error(0, "Ok").unwrap()
+            env.business_error(0, "Ok")?
         };
         let mut v = vec![business_error];
         v.append(&mut input.input(env));
@@ -321,7 +323,7 @@ impl<'local> AniAsyncCallback<'local> {
             let env = AniVm::get_instance().attach_current_thread()?;
             let res = self.execute_local(&env, business_error, input);
             AniVm::get_instance().detach_current_thread()?;
-            return res;
+            res
         }
     }
 
@@ -343,23 +345,21 @@ impl<'local> AniErrorCallback<'local> {
         env: &AniEnv<'local>,
         business_error: BusinessError,
     ) -> Result<AniRef, AniError> {
-        let business_error_ref = env.business_error(business_error.code(), business_error.message()).unwrap();
-        let mut v = vec![business_error_ref];
+        let business_error_ref =
+            env.business_error(business_error.code(), business_error.message())?;
+        let v = vec![business_error_ref];
         let f = AniFnObject::from(self.0.clone());
         env.function_object_call(&f, &v)
     }
 
-    pub fn execute_current(
-        &self,
-        business_error: BusinessError,
-    ) -> Result<AniRef, AniError> {
+    pub fn execute_current(&self, business_error: BusinessError) -> Result<AniRef, AniError> {
         if let Ok(env) = AniVm::get_instance().get_env() {
             self.execute_local(&env, business_error)
         } else {
             let env = AniVm::get_instance().attach_current_thread()?;
             let res = self.execute_local(&env, business_error);
             AniVm::get_instance().detach_current_thread()?;
-            return res;
+            res
         }
     }
 
@@ -381,9 +381,16 @@ impl GlobalRef<AniFnObject<'static>> {
         T: InputVec + Send + 'static,
     {
         let me = self.clone();
-        RustClosure::new(move || {
+        let _ = RustClosure::new(move || {
             if let Ok(env) = AniVm::get_instance().get_env() {
-                me.0.execute_local(&env, input).unwrap();
+                let _ = me.0.execute_local(&env, input).map_err(|err| {
+                    ani_rs_error!("Failed to execute Arkts Callback, error = {}", err);
+                    env.exist_unhandled_error().map(|is_unhandled| {
+                        if is_unhandled {
+                            let _ = env.describe_error();
+                        }
+                    })
+                });
             } else {
                 ani_rs_error!("Failed to get_env in thread");
             }
@@ -431,9 +438,18 @@ impl GlobalRef<AniAsyncCallback<'static>> {
         T: InputVec + Send + 'static,
     {
         let me = self.clone();
-        RustClosure::new(move || {
+        let _ = RustClosure::new(move || {
             if let Ok(env) = AniVm::get_instance().get_env() {
-                me.0.execute_local(&env, business_error, input).unwrap();
+                let _ =
+                    me.0.execute_local(&env, business_error, input)
+                        .map_err(|err| {
+                            ani_rs_error!("Failed to execute arkts AsyncCallback, error = {}", err);
+                            env.exist_unhandled_error().map(|is_unhandled| {
+                                if is_unhandled {
+                                    let _ = env.describe_error();
+                                }
+                            })
+                        });
             } else {
                 ani_rs_error!("Failed to get_env in thread");
             }
@@ -483,9 +499,16 @@ impl GlobalRef<AniErrorCallback<'static>> {
         Self: 'static,
     {
         let me = self.clone();
-        RustClosure::new(move || {
+        let _ = RustClosure::new(move || {
             if let Ok(env) = AniVm::get_instance().get_env() {
-                me.0.execute_local(&env, business_error).unwrap();
+                let _ = me.0.execute_local(&env, business_error).map_err(|err| {
+                    ani_rs_error!("Failed to execute Arkts ErrorCallback, error = {}", err);
+                    env.exist_unhandled_error().map(|is_unhandled| {
+                        if is_unhandled {
+                            let _ = env.describe_error();
+                        }
+                    })
+                });
             } else {
                 ani_rs_error!("Failed to get_env in thread");
             }
@@ -493,10 +516,8 @@ impl GlobalRef<AniErrorCallback<'static>> {
         .send_event("Error callback execute global");
     }
 
-    pub fn execute_global_spawn_thread(
-        self: &Arc<Self>,
-        business_error: BusinessError,
-    ) where
+    pub fn execute_global_spawn_thread(self: &Arc<Self>, business_error: BusinessError)
+    where
         Self: 'static,
     {
         let me = self.clone();
@@ -595,8 +616,7 @@ impl GlobalRefErrorCallback {
     }
 
     pub fn execute_spawn_thread(&self, business_error: BusinessError) {
-        self.inner
-            .execute_global_spawn_thread(business_error);
+        self.inner.execute_global_spawn_thread(business_error);
     }
 }
 

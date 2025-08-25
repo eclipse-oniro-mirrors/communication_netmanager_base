@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ani_rs::global::GlobalRef;
 use ani_rs::objects::AniObject;
 use ani_rs::{business_error::BusinessError, objects::AniRef};
 use ani_rs::AniEnv;
@@ -69,17 +68,17 @@ pub fn aniref_serialize_test<'local>(env: &AniEnv, input: AniRef<'local>) -> Res
     let raw1 = input.as_raw() as i64;
     let res = env.serialize(&input).unwrap();
     let raw2 = res.as_raw() as i64;
-    let s: String = env.deserialize(AniObject::from(res)).unwrap();
+    let _s: String = env.deserialize(AniObject::from(res)).unwrap();
     Ok(raw1 == raw2)
 }
 
 #[ani_rs::native]
-pub fn aniref_struct_test<'local>(env: &AniEnv, input: AniRefStruct<'local>) -> Result<AniRefStruct<'local>, BusinessError> {
+pub fn aniref_struct_test<'local>(input: AniRefStruct<'local>) -> Result<AniRefStruct<'local>, BusinessError> {
     Ok(input)
 }
 
 #[ani_rs::native]
-pub fn aniref_array_test<'local>(env: &AniEnv, input: Vec<AniObject<'local>>) -> Result<Vec<AniObject<'local>>, BusinessError> {
+pub fn aniref_array_test<'local>(input: Vec<AniObject<'local>>) -> Result<Vec<AniObject<'local>>, BusinessError> {
     Ok(input)
 }
 
