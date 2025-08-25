@@ -153,7 +153,7 @@ TEST(ProxyServerTest, CreateProxyTest3)
     EXPECT_EQ(res.empty(), true);
 
     res = Request("http://icanhazip.com/", "127.0.0.1", 8888);
-    EXPECT_EQ(res.empty(), false);
+    EXPECT_NE(res.empty(), false);
 }
 
 TEST(ProxyServerTest, CreateProxyTest4)
@@ -166,7 +166,7 @@ TEST(ProxyServerTest, CreateProxyTest4)
     EXPECT_EQ(res.empty(), true);
     proxy->SetFindPacProxyFunction([](std::string, std::string) { return "DIRECT"; });
     res = Request("https://www.example.com/", "127.0.0.1", 8888);
-    EXPECT_EQ(res.empty(), false);
+    EXPECT_NE(res.empty(), false);
     res = Request("https://www.example.com/", "127.0.0.1", 8888, RequestOptions{false});
     EXPECT_EQ(res.empty(), false);
     res = Request("https://www.example.com/", "127.0.0.1", 8888, RequestOptions{true});
@@ -263,7 +263,7 @@ TEST(ProxyServerTest, CreateProxyTest5)
     res = Request("https://127.0.0.1/", "127.0.0.1", 8000);
     EXPECT_EQ(res.empty(), true);
     res = Request("http://icanhazip.com/", "127.0.0.1", 8000);
-    EXPECT_EQ(res.empty(), false);
+    EXPECT_NE(res.empty(), false);
     res = Request("https://www.example.com/", "127.0.0.1", 8000, RequestOptions{false, false, 30});
     EXPECT_EQ(res.empty(), false);
     proxy8001->Stop();
@@ -667,7 +667,7 @@ TEST(ProxyServerTest, CreateProxyTest20)
     proxy->SetFindPacProxyFunction(
         [](auto s, auto s1) { return "DIRECT 127.0.0.1:abc;PROXY 127.0.0.1:abc;DIRECT;PROXY 127.0.0.1"; });
     std::string res = Request("http://icanhazip.com/", "127.0.0.1", 8888);
-    EXPECT_EQ(res.empty(), false);
+    EXPECT_NE(res.empty(), false);
 }
 
 TEST(ProxyServerTest, 21)
