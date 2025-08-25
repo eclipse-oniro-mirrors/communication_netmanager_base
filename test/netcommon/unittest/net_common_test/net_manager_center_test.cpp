@@ -575,5 +575,20 @@ HWTEST_F(NetManagerCenterTest, RegisterNetFactoryResetCallbackTest001, TestSize.
     auto ret = instance_.RegisterNetFactoryResetCallback(nullptr);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
+
+HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest003, TestSize.Level1)
+{
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+ 
+    int32_t netId = 100;
+    NetLinkInfo info;
+    int32_t result = instance_.GetConnectionProperties(netId, info);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+ 
+    instance_.RegisterConnService(nullptr);
+    result = instance_.GetConnectionProperties(netId, info);
+    EXPECT_EQ(result, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

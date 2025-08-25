@@ -128,6 +128,22 @@ enum {
     NET_MDNS_ERR_WRITE_DUMP = 2204010,
 };
 
+enum {
+    EAP_ERRCODE_SUCCESS = 0, /* successfully */
+    EAP_ERRCODE_PERMISSION_DENIED = 201, /* permission denied */
+    EAP_ERRCODE_INVALID_NETID = 33200001, /* invalid netId */
+    EAP_ERRCODE_LOGOFF_FAIL = 33200002, /* log off fail */
+    EAP_ERRCODE_INVALID_PROFILE = 33200003, /* Invalid profile */
+    EAP_ERRCODE_INVALID_RESULT = 33200004, /* Invalid result */
+    EAP_ERRCODE_INVALID_SIZE_OF_EAPDATA  = 33200005, /* Invalid size of eap data */
+    EAP_ERRCODE_INVALID_NET_TYPE = 33200006, /* Invalid net type */
+    EAP_ERRCODE_INVALID_EAP_CODE = 33200007, /* Invalid eap code */
+    EAP_ERRCODE_INVALID_EAP_TYPE = 33200008, /* Invalid eap type */
+    EAP_ERRCODE_NETMANAGER_STOP = 33200009, /* netmanager stop */
+    EAP_ERRCODE_INVALID_ETH_STATE = 33200010, /* Invalid eth state */
+    EAP_ERRCODE_INTERNAL_ERROR = 33200099, /* internal error */
+};
+
 #ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
 enum {
     NETMANAGER_WEARABLE_DISTRIBUTED_NET_ERR_START_FAIL = 2205001,
