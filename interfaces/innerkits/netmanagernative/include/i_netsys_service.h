@@ -18,12 +18,12 @@
 #include <netdb.h>
 #include <string>
 #include <set>
+#include <unordered_map>
 
 #include "dns_config_client.h"
 #include "i_net_diag_callback.h"
 #include "i_notify_callback.h"
 #include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 #include "i_netsys_traffic_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
@@ -186,8 +186,6 @@ public:
         const std::string &ifName) = 0;
     virtual int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) = 0;
     virtual int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) = 0;
-    virtual int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
-    virtual int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
     virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;

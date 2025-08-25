@@ -768,13 +768,6 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest003, TestSize.Lev
 
     ret = instance_->UnregisterDnsResultCallback(dnsResultCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    sptr<INetDnsHealthCallback> healthCallback = nullptr;
-    ret = instance_->RegisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->UnregisterDnsHealthCallback(healthCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTypeTest001, TestSize.Level1)

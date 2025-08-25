@@ -140,8 +140,6 @@ public:
 
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override;
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override;
-    int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
-    int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
     int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)  override;
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;

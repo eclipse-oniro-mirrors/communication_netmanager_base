@@ -26,7 +26,6 @@
 #include "netsys_native_service_stub.h"
 #include "securec.h"
 #include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 #include "netsys_traffic_callback_proxy.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -326,10 +325,6 @@ void NetsysNativeServiceStub::InitNetDnsDiagOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdRegisterDnsResultListener;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_RESULT_LISTENER)] =
         &NetsysNativeServiceStub::CmdUnregisterDnsResultListener;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_DNS_HEALTH_LISTENER)] =
-        &NetsysNativeServiceStub::CmdRegisterDnsHealthListener;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER)] =
-        &NetsysNativeServiceStub::CmdUnregisterDnsHealthListener;
 }
 
 void NetsysNativeServiceStub::InitNetVnicInterfaceMap()
@@ -2046,52 +2041,6 @@ int32_t NetsysNativeServiceStub::CmdUnregisterDnsResultListener(MessageParcel &d
     }
 
     result = UnregisterDnsResultCallback(callback);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdRegisterDnsHealthListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsHealthCallback> callback = iface_cast<INetDnsHealthCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = RegisterDnsHealthCallback(callback);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdUnregisterDnsHealthListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsHealthCallback> callback = iface_cast<INetDnsHealthCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = UnregisterDnsHealthCallback(callback);
     reply.WriteInt32(result);
     return result;
 }

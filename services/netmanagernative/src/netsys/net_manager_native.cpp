@@ -646,16 +646,6 @@ int32_t NetManagerNative::UnregisterDnsResultCallback(const sptr<INetDnsResultCa
     return dnsManager_->UnregisterDnsResultCallback(callback);
 }
 
-int32_t NetManagerNative::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    return dnsManager_->RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetManagerNative::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    return dnsManager_->UnregisterDnsHealthCallback(callback);
-}
-
 int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);

@@ -31,7 +31,6 @@ ohos_unittest("netsys_netfirewall_test") {
   ]
 
   deps = [
-    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
     "$NETSYSNATIVE_SOURCE_DIR/bpf:netsys",
     "$NETSYSNATIVE_SOURCE_DIR/bpf:netsys_bpf_utils",
   ]

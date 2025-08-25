@@ -63,10 +63,10 @@ ohos_shared_library("net_stats_manager") {
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   cflags = common_cflags + [
@@ -173,7 +173,6 @@ ohos_static_library("net_stats_manager_static") {
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$INNERKITS_ROOT/netstatsclient:netstats_service_interface_stub",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",

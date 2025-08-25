@@ -1730,24 +1730,29 @@ int32_t NetsysNativeClient::UnregisterDnsResultCallback(
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeClient::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+int32_t NetsysNativeClient::RegisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
 {
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    NETMGR_LOG_I("NetsysNativeClient::RegisterDnsQueryResultCallback");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return proxy->RegisterDnsHealthCallback(callback);
+    std::lock_guard lock(cbDnsQueryReportObjMutex_);
+    cbDnsQueryReportObjects_.push_back(callback);
+    return NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeClient::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+int32_t NetsysNativeClient::UnregisterDnsQueryResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
 {
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return proxy->UnregisterDnsHealthCallback(callback);
+    std::lock_guard lock(cbDnsQueryReportObjMutex_);
+    cbDnsQueryReportObjects_.remove(callback);
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
@@ -1778,31 +1783,6 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->UpdateNetworkSharingType(type, isOpen);
-}
-
-int32_t NetsysNativeClient::RegisterDnsQueryResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
-{
-    NETMGR_LOG_I("NetsysNativeClient::RegisterDnsQueryResultCallback");
-    if (callback == nullptr) {
-        NETMGR_LOG_E("Callback is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    std::lock_guard lock(cbDnsQueryReportObjMutex_);
-    cbDnsQueryReportObjects_.push_back(callback);
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetsysNativeClient::UnregisterDnsQueryResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback)
-{
-    if (callback == nullptr) {
-        NETMGR_LOG_E("Callback is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    std::lock_guard lock(cbDnsQueryReportObjMutex_);
-    cbDnsQueryReportObjects_.remove(callback);
-    return NETMANAGER_SUCCESS;
 }
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE

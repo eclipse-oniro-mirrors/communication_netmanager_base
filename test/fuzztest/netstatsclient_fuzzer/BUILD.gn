@@ -57,6 +57,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   defines = [

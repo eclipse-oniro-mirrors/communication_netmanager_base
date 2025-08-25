@@ -38,13 +38,11 @@ ohos_shared_library("connection") {
   sources = [ "connection_module/src/connection_module.cpp" ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
 
   cflags_cc = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
@@ -127,13 +125,11 @@ ohos_shared_library("connection_if") {
   ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
 
   cflags_cc = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]

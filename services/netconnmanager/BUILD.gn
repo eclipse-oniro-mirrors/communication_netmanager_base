@@ -78,10 +78,10 @@ ohos_shared_library("net_conn_manager") {
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   cflags = common_cflags + [
@@ -125,10 +125,6 @@ ohos_shared_library("net_conn_manager") {
     "NETMGR_LOG_TAG = \"NetConnManager\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
-
-  if (netmanager_base_enable_feature_sysvpn) {
-    defines += [ "SUPPORT_SYSVPN" ]
-  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
@@ -205,7 +201,6 @@ ohos_static_library("net_conn_manager_static") {
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
@@ -238,10 +233,6 @@ ohos_static_library("net_conn_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETMANAGER_TEST",
   ]
-
-  if (netmanager_base_enable_feature_sysvpn) {
-    defines += [ "SUPPORT_SYSVPN" ]
-  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

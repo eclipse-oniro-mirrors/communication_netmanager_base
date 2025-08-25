@@ -875,22 +875,6 @@ public:
         const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback) override;
         
     /**
-     * Register Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) override;
-
-    /**
-     * Unregister Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) override;
-
-    /**
      * Get Cookie Stats.
      *
      * @param stats stats

@@ -60,7 +60,7 @@ ohos_fuzztest("NetSysClientFuzzTest") {
   sources = [ "net_sys_client_fuzzer.cpp" ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",

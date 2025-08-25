@@ -24,7 +24,6 @@
 
 #include "i_netsys_service.h"
 #include "i_net_diag_callback.h"
-#include "i_net_dns_health_callback.h"
 #include "net_dns_result_callback_stub.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
@@ -914,22 +913,6 @@ public:
      */
     int32_t UnregisterDnsQueryResultCallback(
         const sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> &callback);
-
-    /**
-     * Register Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
-
-    /**
-     * Unregister Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
 
     /**
      * Get Cookie Stats.

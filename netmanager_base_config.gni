@@ -65,7 +65,6 @@ declare_args() {
 fuzz_test_path = "netmanager_base/netmanager_base"
 
 common_cflags = [
-  "-fstack-protector-strong",
   "-D_FORTIFY_SOURCE=2",
   "-fdata-sections",
   "-ffunction-sections",

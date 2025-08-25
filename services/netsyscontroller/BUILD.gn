@@ -59,9 +59,11 @@ ohos_shared_library("netsys_controller") {
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
   ]
 
+  version_script = "netsys_controller.map"
+
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -134,8 +136,8 @@ ohos_static_library("netsys_controller_static") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$INNERKITS_ROOT/netmanagernative:net_native_parcel",
   ]
 
   external_deps = [

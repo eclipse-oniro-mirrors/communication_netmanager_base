@@ -40,6 +40,7 @@ ohos_unittest("bandwidth_manager_test") {
   deps = [
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
@@ -93,6 +94,7 @@ ohos_unittest("bandwidth_manager_class_test") {
   deps = [
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller_static",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
 
   external_deps = [
