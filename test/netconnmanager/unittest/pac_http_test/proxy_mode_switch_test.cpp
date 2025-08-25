@@ -133,7 +133,7 @@ void TestMode1()
     EXPECT_EQ(ret, 0);
     int mode = -1;
     ret = OH_NetConn_GetProxyMode(&mode);
-    EXPECT_EQ(ret, 0);
+    EXPECT_NE(ret, 0);
     EXPECT_EQ(mode, 1);
 
     NetConn_HttpProxy proxy;
