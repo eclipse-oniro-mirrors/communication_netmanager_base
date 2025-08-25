@@ -28,7 +28,7 @@ pub struct NetSpecifier {
     pub bearer_private_identifier: Option<String>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetCapabilityInfo")]
+#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetCapabilityInfoInner")]
 pub struct NetCapabilityInfo {
     pub net_handle: NetHandle,
     pub net_cap: NetCapabilities,
@@ -50,7 +50,7 @@ pub struct NetCapabilities {
     pub bearer_types: Vec<NetBearType>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnectionPropertyInfo")]
+#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnectionPropertyInfoInner")]
 pub struct NetConnectionPropertyInfo {
     pub net_handle: NetHandle,
     pub connection_properties: ConnectionProperties,
