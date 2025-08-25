@@ -34,11 +34,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-typedef struct {
-    bool isScreenOn;
-    uint64_t lastDetectTime;
-} NetMonitorInfo;
-
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
     /**
@@ -50,7 +45,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-        const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo);
+        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
 
     /**
      * Destroy the NetMonitor
@@ -95,9 +90,6 @@ public:
      */
     void SetScreenState(bool isScreenOn);
 
-    void DetectionDelayWhenScreenOff();
-    uint64_t GetLastDetectTime();
-
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -136,7 +128,6 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
-    uint64_t lastDetectTimestamp_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
