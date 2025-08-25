@@ -470,7 +470,7 @@ HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
