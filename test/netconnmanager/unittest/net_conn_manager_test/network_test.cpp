@@ -1435,5 +1435,26 @@ HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(NetworkTest, SetSleepModeTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    network->InitNetMonitor();
+    EXPECT_NE(network->netMonitor_, nullptr);
+    network->SetSleepMode(true);
+    EXPECT_EQ(network->isSleep_, true);
+}
+
+HWTEST_F(NetworkTest, SetSleepModeTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    network->InitNetMonitor();
+    EXPECT_NE(network->netMonitor_, nullptr);
+    network->netMonitor_ = nullptr;
+    network->SetSleepMode(false);
+    EXPECT_EQ(network->isSleep_, false);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

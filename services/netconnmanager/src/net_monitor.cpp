@@ -78,10 +78,11 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
+    const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
 {
     netBearType_ = bearType;
+    isSleep_ = netMonitorInfo.isSleep;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -90,6 +91,9 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 void NetMonitor::Start()
 {
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
+    if (isSleep_) {
+        return;
+    }
     if (isDetecting_) {
         NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
         detectionDelay_ = 0;
@@ -462,6 +466,14 @@ bool NetMonitor::CheckIfSettingsDataReady()
 void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
+}
+
+void NetMonitor::SetSleepMode(bool isSleep)
+{
+    isSleep_ = isSleep;
+    if (isSleep_) {
+        Stop();
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

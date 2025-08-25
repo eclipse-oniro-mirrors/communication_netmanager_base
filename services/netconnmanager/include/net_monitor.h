@@ -34,6 +34,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+typedef struct {
+    bool isScreenOn;
+    bool isSleep;
+} NetMonitorInfo;
+
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
     /**
@@ -45,7 +50,7 @@ public:
      * @param callback Network monitor callback weak reference
      */
     NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-        const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn);
+        const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo);
 
     /**
      * Destroy the NetMonitor
@@ -90,6 +95,8 @@ public:
      */
     void SetScreenState(bool isScreenOn);
 
+    void SetSleepMode(bool isSleep);
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -128,6 +135,7 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
+    bool isSleep_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -2080,5 +2080,15 @@ HWTEST_F(NetConnServiceTest, OnReceiveEventTest005, TestSize.Level1)
     EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
 }
 
+HWTEST_F(NetConnServiceTest, OnReceiveEventTest006, TestSize.Level1)
+{
+    EventFwk::CommonEventData data;
+    EventFwk::Want want;
+    want.SetAction("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
+    data.SetWant(want);
+    NetConnService::GetInstance()->OnReceiveEvent(data);
+    EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -223,6 +223,39 @@ HWTEST_F(NetConnServiceExtTest, HandleScreenEventTest001, TestSize.Level1)
     netConnService->HandleScreenEvent(true);
 }
 
+HWTEST_F(NetConnServiceExtTest, HandleSleepModeChangeEvent001, TestSize.Level1)
+{
+    auto netConnService = NetConnService::GetInstance();
+    netConnService->isSmartSleepMode_ = false;
+    netConnService->HandleSleepModeChangeEvent(false);
+    
+    netConnService->isSmartSleepMode_ = false;
+    netConnService->HandleSleepModeChangeEvent(true);
+
+    netConnService->isSmartSleepMode_ = false;
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
+    netConnService->HandleSleepModeChangeEvent(true);
+    EXPECT_EQ(netConnService->isSmartSleepMode_, true);
+    
+    netConnService->isSmartSleepMode_ = false;
+    uint32_t supplierId = 1;
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    netSupplier->network_ = nullptr;
+    netConnService->netSuppliers_[supplierId] = netSupplier;
+    netConnService->HandleSleepModeChangeEvent(true);
+    
+    netConnService->isSmartSleepMode_ = true;
+    uint32_t netId = 2;
+    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
+        NetBearType::BEARER_CELLULAR, nullptr);
+    netSupplier->network_ = network;
+    netConnService->netSuppliers_[supplierId] = netSupplier;
+    netConnService->HandleSleepModeChangeEvent(false);
+    EXPECT_EQ(netConnService->isSmartSleepMode_, false);
+}
+
 HWTEST_F(NetConnServiceExtTest, UpdateNetCapsAsyncTest001, TestSize.Level1)
 {
     auto netConnService = std::make_shared<NetConnService>();

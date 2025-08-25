@@ -817,6 +817,33 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
     }
 }
 
+void NetConnService::HandleSleepModeChangeEvent(bool isSleep)
+{
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    if (isSmartSleepMode_ == isSleep) {
+        return;
+    }
+    isSmartSleepMode_ = isSleep;
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        int delayTime = 0;
+        if (netConnEventHandler_) {
+            netConnEventHandler_->PostAsyncTask([pNetwork, isSleep]() { pNetwork->SetSleepMode(isSleep); },
+                                                delayTime);
+        }
+        if (!isSleep && netConnEventHandler_) {
+            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(true); }, delayTime);
+        }
+    }
+}
+
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
@@ -3547,6 +3574,7 @@ void NetConnService::SubscribeCommonEvent()
     matchingSkills.AddEvent("usual.event.SCREEN_ON");
     matchingSkills.AddEvent("usual.event.SCREEN_OFF");
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    matchingSkills.AddEvent("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
@@ -3585,6 +3613,10 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HandleScreenEvent(true);
     } else if (action == "usual.event.SCREEN_OFF") {
         HandleScreenEvent(false);
+    }
+    if (action == "COMMON_EVENT_USER_SLEEP_STATE_CHANGED") {
+        bool isSleep = want.GetBoolParam("isSleep", false);
+        HandleSleepModeChangeEvent(isSleep);
     }
 }
 
