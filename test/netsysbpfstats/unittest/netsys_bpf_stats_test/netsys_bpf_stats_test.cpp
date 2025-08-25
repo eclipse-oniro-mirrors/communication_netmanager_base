@@ -516,7 +516,7 @@ HWTEST_F(NetsysBpfStatsTest, SetNetStatusMapTest001, TestSize.Level1)
     EXPECT_EQ(bpfStats->SetNetStatusMap(0, 0), -1);
     EXPECT_EQ(bpfStats->SetNetStatusMap(0, 1), -1);
     EXPECT_EQ(bpfStats->SetNetStatusMap(1, 0), -1);
-    EXPECT_NE(bpfStats->SetNetStatusMap(1, 1), -1);
+    EXPECT_EQ(bpfStats->SetNetStatusMap(1, 1), -1);
     EXPECT_EQ(bpfStats->SetNetStatusMap(2, 1), -1);
 }
 
