@@ -60,6 +60,7 @@ public:
 
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
+    int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
 
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
