@@ -817,15 +817,24 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
     }
 }
 
-void NetConnService::HandleSleepModeChangeEvent(bool isSleep)
+bool NetConnService::IsWifiSupplierAvailable()
 {
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    if (isSmartSleepMode_ == isSleep) {
-        return;
-    }
-    isSmartSleepMode_ = isSleep;
     for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR) {
+        if (pNetSupplier.second != nullptr && pNetSupplier.second->GetNetSupplierType() == BEARER_WIFI &&
+            pNetSupplier.second->IsAvailable()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void NetConnService::SetCellularDetectSleepMode(bool isSleep)
+{
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR ||
+            pNetSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
             continue;
         }
         std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
@@ -838,9 +847,52 @@ void NetConnService::HandleSleepModeChangeEvent(bool isSleep)
             netConnEventHandler_->PostAsyncTask([pNetwork, isSleep]() { pNetwork->SetSleepMode(isSleep); },
                                                 delayTime);
         }
-        if (!isSleep && netConnEventHandler_) {
+    }
+}
+
+void NetConnService::SetCellularDetectSleepModeWhenWifiStateChange(sptr<NetSupplier> &supplier)
+{
+    if (supplier == nullptr || supplier->GetNetSupplierType() != BEARER_WIFI) {
+        return;
+    }
+    // wifi available, cancel cellular sleep mode
+    bool isSleep = supplier->IsAvailable() ? false : isSmartSleepMode_;
+    SetCellularDetectSleepMode(isSleep);
+}
+
+void NetConnService::ActiveCellularDetectWhenExitSleep()
+{
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
+    for (const auto& pNetSupplier : netSuppliers_) {
+        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR ||
+            pNetSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            continue;
+        }
+        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
+        if (pNetwork == nullptr) {
+            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
+            continue;
+        }
+        int delayTime = 0;
+        if (pNetSupplier.second->IsAvailable() && netConnEventHandler_) {
             netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(true); }, delayTime);
         }
+    }
+}
+
+void NetConnService::HandleSleepModeChangeEvent(bool isSleep)
+{
+    if (isSmartSleepMode_ == isSleep) {
+        return;
+    }
+    isSmartSleepMode_ = isSleep;
+    if (isSleep && IsWifiSupplierAvailable()) {
+        // if wifi available, not set cellular detect sleep
+        return;
+    }
+    SetCellularDetectSleepMode(isSleep);
+    if (!isSleep) {
+        ActiveCellularDetectWhenExitSleep();
     }
 }
 
@@ -1075,6 +1127,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     }
     initLocker.unlock();
     FindBestNetworkForAllRequest();
+    SetCellularDetectSleepModeWhenWifiStateChange(supplier);
     NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
 }

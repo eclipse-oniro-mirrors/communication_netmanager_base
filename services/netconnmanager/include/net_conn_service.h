@@ -713,6 +713,10 @@ private:
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     void HandleSleepModeChangeEvent(bool isSleep);
+    bool IsWifiSupplierAvailable();
+    void SetCellularDetectSleepMode(bool isSleep);
+    void SetCellularDetectSleepModeWhenWifiStateChange(sptr<NetSupplier> &supplier);
+    void ActiveCellularDetectWhenExitSleep();
     void HandleFindBestNetworkForDelay();
     void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
     void RemoveDelayNetwork();
