@@ -106,5 +106,10 @@ int32_t NetConnServiceIface::SetReuseSupplierId(uint32_t supplierId, uint32_t re
 {
     return NetConnService::GetInstance()->SetReuseSupplierId(supplierId, reuseSupplierId, isReused);
 }
+
+int32_t NetConnServiceIface::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
+{
+    return NetConnService::GetInstance()->GetConnectionProperties(netId, info);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
