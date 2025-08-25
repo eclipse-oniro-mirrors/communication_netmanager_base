@@ -237,7 +237,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
 void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET_BY_IDENT)] = {
-        &NetConnServiceStub::OnGetSpecificNetByIdent, {}};
+        &NetConnServiceStub::OnGetSpecificNetByIdent, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_EXT_ATTRIBUTE)] = {
         &NetConnServiceStub::OnSetNetExtAttribute, {Permission::SET_NET_EXT_ATTRIBUTE}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_EXT_ATTRIBUTE)] = {
