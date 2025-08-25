@@ -49,7 +49,6 @@ constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
 constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
-constexpr int32_t SCREENOFF_DETECTION_INTERVAL_MS = 5 * 60 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 4;
@@ -73,18 +72,16 @@ static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
         NETMGR_LOG_E("netMonitor is nullptr");
         return;
     }
-    netMonitor->DetectionDelayWhenScreenOff();
     while (netMonitor->IsDetecting()) {
         netMonitor->Detection();
     }
 }
 
 NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
-    const std::weak_ptr<INetMonitorCallback> &callback, NetMonitorInfo &netMonitorInfo)
-    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
+    const std::weak_ptr<INetMonitorCallback> &callback, bool isScreenOn)
+    : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(isScreenOn)
 {
     netBearType_ = bearType;
-    lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -94,11 +91,9 @@ void NetMonitor::Start()
 {
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
-        if (isScreenOn_) {
-            NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
-            detectionDelay_ = 0;
-            detectionCond_.notify_all();
-        }
+        NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
+        detectionDelay_ = 0;
+        detectionCond_.notify_all();
         return;
     }
     isDetecting_ = true;
@@ -169,7 +164,6 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
-    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -468,22 +462,6 @@ bool NetMonitor::CheckIfSettingsDataReady()
 void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
-}
-
-void NetMonitor::DetectionDelayWhenScreenOff()
-{
-    uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
-    if (!isScreenOn_ && (nowTime - lastDetectTimestamp_) < SCREENOFF_DETECTION_INTERVAL_MS) {
-        uint64_t delayTime = SCREENOFF_DETECTION_INTERVAL_MS - (nowTime - lastDetectTimestamp_);
-        std::unique_lock<std::mutex> locker(detectionMtx_);
-        detectionCond_.wait_for(locker, std::chrono::milliseconds(delayTime));
-        locker.unlock();
-    }
-}
-
-uint64_t NetMonitor::GetLastDetectTime()
-{
-    return lastDetectTimestamp_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
