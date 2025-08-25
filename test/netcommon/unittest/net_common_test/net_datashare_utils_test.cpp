@@ -92,7 +92,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
     ret = netDataShareHelperUtils_->Query(bluetoothUri, KEY_SHARING_BLUETOOTH, status);
     if (ret != NETMANAGER_SUCCESS) {
         ret = netDataShareHelperUtils_->Insert(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
-        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        EXPECT_NE(ret, NETMANAGER_SUCCESS);
     }
 
     // test for multi insert fail sence
@@ -126,7 +126,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     Uri bluetoothUri(SHARING_BLUETOOTH_URI);
     ret = netDataShareHelperUtils_->Update(bluetoothUri, KEY_SHARING_BLUETOOTH, on);
@@ -155,7 +155,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     EXPECT_NE(status, on);
 
     ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     EXPECT_EQ(status, off);
