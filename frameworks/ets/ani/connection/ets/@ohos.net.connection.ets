@@ -633,6 +633,12 @@ export default namespace connection {
     netCap: NetCapabilities;
   }
 
+  export class NetCapabilityInfoInner implements NetCapabilityInfo {
+    netHandle: NetHandle;
+
+    netCap: NetCapabilities;
+  }
+
   export interface NetHandle {
     netId: int;
 

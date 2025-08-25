@@ -338,7 +338,7 @@ pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), Busin
         Ok(())
     } else {
         Err(BusinessError::new(
-            -1,
+            2101007,
             format!("No network change callback to unregister"),
         ))
     }
