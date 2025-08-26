@@ -189,7 +189,7 @@ int32_t NetPolicyDBClone::OnRestoreSingleApp(const std::string &bundleNameFromLi
     if (policyData.uid == -1) {
         NETMGR_LOG_I("policyData.uid = -1");
         return NETMANAGER_ERROR;
-    }    
+    }
     NETMGR_LOG_I("Get policyData. [%{public}d, %{public}d]", policyData.wifiPolicy, policyData.cellularPolicy);
     policyData.setFromConfigFlag = 1;
     int32_t insertRet = netAccessPolicyRdb.InsertData(policyData);

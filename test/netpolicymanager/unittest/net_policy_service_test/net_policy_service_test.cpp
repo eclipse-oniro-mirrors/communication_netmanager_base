@@ -29,6 +29,10 @@
 #include "system_ability_definition.h"
 #include "netmanager_base_test_security.h"
 #include "net_policy_callback_proxy.h"
+#include "net_policy_listener.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+#include "want.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -370,7 +374,7 @@ HWTEST_F(UtNetPolicyService, OnReceiveEvent002, TestSize.Level1)
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
     std::string bundleName = "test";
     want.SetBundle(bundleName);
-    want.SetParam("bundleName",bundleName);
+    want.SetParam("bundleName", bundleName);
     EventFwk::CommonEventData data;
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
