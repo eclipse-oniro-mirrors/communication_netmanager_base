@@ -863,7 +863,7 @@ void NetConnService::ActiveCellularDetectWhenExitSleep()
             continue;
         }
         std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork != nullptr) {
+        if (pNetwork != nullptr && pNetSupplier.second->IsAvailable()) {
             pNetwork->StartNetDetection(true);
         }
     }
