@@ -710,6 +710,7 @@ private:
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent();
+    void SubscribeSleepEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
     void HandleSleepModeChangeEvent(bool isSleep);

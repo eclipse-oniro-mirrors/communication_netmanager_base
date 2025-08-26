@@ -3629,7 +3629,7 @@ void NetConnService::SubscribeCommonEvent()
 }
 
 void NetConnService::SubscribeSleepEvent()
-{    
+{
     EventFwk::MatchingSkills sleepSkills;
     sleepSkills.AddEvent("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
     EventFwk::CommonEventSubscribeInfo sleepSubscribeInfo(sleepSkills);
