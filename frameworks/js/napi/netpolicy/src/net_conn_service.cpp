@@ -885,7 +885,7 @@ void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const
     if (it != netUidActivates_.end()) {
         std::vector<std::shared_ptr<NetActivate>> &activates = it->second;
         for (auto iter = activates.begin(); iter != activates.end();) {
-            if ((*iter)->GetNetCallback() == callback) {
+            if ((*iter)->GetNetCallback()->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
                 iter = activates.erase(iter);
                 break;
             } else {
@@ -894,6 +894,23 @@ void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const
         }
         if (activates.empty()) {
             netUidActivates_.erase(it);
+        }
+    }
+}
+
+void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netActivate, uint32_t reqId)
+{
+    NetRequest netRequest(netActivate->GetUid(), reqId);
+    if (netActivate) {
+        sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+        if (supplier) {
+            supplier->CancelRequest(netRequest);
+        }
+    }
+    NET_SUPPLIER_MAP::iterator iterSupplier;
+    for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+        if (iterSupplier->second != nullptr) {
+            iterSupplier->second->CancelRequest(netRequest);
         }
     }
 }
@@ -918,19 +935,7 @@ void NetConnService::DecreaseNetActivates(const uint32_t callingUid, const sptr<
         }
         reqId = iterActive->first;
         auto netActivate = iterActive->second;
-        NetRequest netRequest(netActivate->GetUid(), reqId);
-        if (netActivate) {
-            sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
-            if (supplier) {
-                supplier->CancelRequest(netRequest);
-            }
-        }
-        NET_SUPPLIER_MAP::iterator iterSupplier;
-        for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
-            if (iterSupplier->second != nullptr) {
-                iterSupplier->second->CancelRequest(netRequest);
-            }
-        }
+        CancelRequestForSupplier(netActivate, reqId);
         iterActive = netActivates_.erase(iterActive);
         RemoveClientDeathRecipient(callback);
     }
@@ -1461,7 +1466,7 @@ void NetConnService::FindBestNetworkForAllRequest()
     NET_ACTIVATE_MAP::iterator iterActive;
     sptr<NetSupplier> bestSupplier = nullptr;
     for (iterActive = netActivatesBck.begin(); iterActive != netActivatesBck.end(); ++iterActive) {
-        if (!iterActive->second) {
+        if (!iterActive->second || iterActive->second->IsAppFrozened()) {
             continue;
         }
         int score = static_cast<int>(FindBestNetworkForRequest(bestSupplier, iterActive->second));
@@ -4090,34 +4095,20 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
         }
         curNetAct->SetIsAppFrozened(isFrozened);
         if (isFrozened) {
+            CancelRequestForSupplier(curNetAct, curNetAct->GetRequestId());
+            curNetAct->SetServiceSupply(nullptr);
             continue;
         }
-        sptr<NetSupplier> netSupplier = curNetAct->GetServiceSupply();
-        sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
-        CallbackType callbackType = curNetAct->GetLastCallbackType();
-        if (callbackType == CALL_TYPE_UNKNOWN) {
-            continue;
-        }
-        if (netSupplier == nullptr) {
-            if (callbackType != CALL_TYPE_LOST) {
-                continue;
-            }
-            int32_t lastNetid = curNetAct->GetLastNetid();
-            if (FindNotifyLostDelayCache(lastNetid) && CheckNotifyLostDelay(uid, lastNetid, callbackType)) {
-                curNetAct->SetNotifyLostDelay(true);
-                curNetAct->SetNotifyLostNetId(lastNetid);
-                continue;
-            }
-            if (callback) {
-                sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
-                netHandle->SetNetId(lastNetid);
-                callback->NetLost(netHandle);
-            }
-        } else if (callbackType == CALL_TYPE_AVAILABLE) {
-            CallbackForAvailable(netSupplier, curNetAct->GetNetCallback());
+        sptr<NetSupplier> bestNet = nullptr;
+        int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, curNetAct));
+        if (bestScore != 0 && bestNet != nullptr) {
+            NetRequest netRequest(curNetAct->GetUid(), curNetAct->GetRequestId());
+            bestNet->SelectAsBestNetwork(netRequest);
+            curNetAct->SetServiceSupply(bestNet);
+            sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
+            CallbackForAvailable(bestNet, callback);
         } else {
-            sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
-            HandleCallback(netSupplier, netHandle, callback, callbackType);
+            SendRequestToAllNetwork(curNetAct);
         }
         curNetAct->SetLastNetid(0);
         curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
