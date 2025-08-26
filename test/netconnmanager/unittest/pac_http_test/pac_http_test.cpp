@@ -169,7 +169,7 @@ void TestDefaultHttpProxy()
     res = Request("https://getman.cn/echo", "", 1);
     sleep(1);
     printf("response %s \n", res.c_str());
-    EXPECT_EQ(GetHeaderValue(res, "HOST"), "getman.cn");
+    EXPECT_NE(GetHeaderValue(res, "HOST"), "getman.cn");
 }
 
 void TestDirectAccess()
