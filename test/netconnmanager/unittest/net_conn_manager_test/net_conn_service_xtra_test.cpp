@@ -225,33 +225,46 @@ HWTEST_F(NetConnServiceExtTest, HandleScreenEventTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceExtTest, HandleSleepModeChangeEvent001, TestSize.Level1)
 {
-    auto netConnService = NetConnService::GetInstance();
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
     netConnService->isSmartSleepMode_ = false;
     netConnService->HandleSleepModeChangeEvent(false);
-    
-    netConnService->isSmartSleepMode_ = false;
-    netConnService->HandleSleepModeChangeEvent(true);
-
-    netConnService->isSmartSleepMode_ = false;
-    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
-    netConnService->HandleSleepModeChangeEvent(true);
-    EXPECT_EQ(netConnService->isSmartSleepMode_, true);
     
     netConnService->isSmartSleepMode_ = false;
     uint32_t supplierId = 1;
     std::string netSupplierIdent;
     std::set<NetCap> netCaps;
-    sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
-    netSupplier->network_ = nullptr;
+    sptr<NetSupplier> netSupplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    auto network = std::make_shared<Network>(1, supplierId, nullptr, BEARER_WIFI, nullptr);
+    netSupplier->SetNetwork(network);
+    netSupplier->netSupplierInfo_.isAvailable_ = true;
     netConnService->netSuppliers_[supplierId] = netSupplier;
     netConnService->HandleSleepModeChangeEvent(true);
-    
+    EXPECT_EQ(netConnService->isSmartSleepMode_, true);
+
     netConnService->isSmartSleepMode_ = true;
-    uint32_t netId = 2;
-    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
-        NetBearType::BEARER_CELLULAR, nullptr);
-    netSupplier->network_ = network;
-    netConnService->netSuppliers_[supplierId] = netSupplier;
+    netConnService->netSuppliers_[supplierId]->netSupplierInfo_.isAvailable_ = false;
+    
+    uint32_t supplierId2 = 2;
+    sptr<NetSupplier> netSupplier2 = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    auto network2 = std::make_shared<Network>(2, supplierId2, nullptr, BEARER_CELLULAR, nullptr);
+    netSupplier2->SetNetwork(network2);
+    netSupplier2->netSupplierInfo_.isAvailable_ = true;
+    netConnService->netSuppliers_[supplierId2] = netSupplier2;
+    
+    uint32_t supplierId3 = 3;
+    sptr<NetSupplier> netSupplier3 = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    auto network3 = std::make_shared<Network>(3, supplierId3, nullptr, BEARER_CELLULAR, nullptr);
+    netSupplier3->SetNetwork(network3);
+    netSupplier3->netSupplierInfo_.isAvailable_ = true;
+    netConnService->netSuppliers_[supplierId3] = netSupplier3;
+    
+    uint32_t supplierId4 = 4;
+    sptr<NetSupplier> netSupplier4 = new NetSupplier(BEARER_CELLULAR, netSupplierIdent, netCaps);
+    netSupplier4->SetNetwork(nullptr);
+    netSupplier4->netSupplierInfo_.isAvailable_ = true;
+    netConnService->netSuppliers_[supplierId4] = netSupplier4;
     netConnService->HandleSleepModeChangeEvent(false);
     EXPECT_EQ(netConnService->isSmartSleepMode_, false);
 }
