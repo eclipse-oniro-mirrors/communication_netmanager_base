@@ -165,5 +165,39 @@ HWTEST_F(NetPolicyDBCloneTest, FdCloneTest001, TestSize.Level1)
     ret = netpolicyClonePtr->FdClone(fd);
     EXPECT_EQ(ret, true);
 }
+
+HWTEST_F(NetPolicyDBCloneTest, OnRestoreSingleAppTest001, TestSize.Level1)
+{
+    auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
+    if (netpolicyClonePtr == nullptr) {
+        return;
+    }
+    std::string bundleNameFromListen = "";
+    int ret = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
+    EXPECT_EQ(ret, -1);
+
+    NetAccessPolicyData policyData;
+    netpolicyClonePtr->unInstallApps_["test"] = policyData;
+    bundleNameFromListen = "test";
+    int ret2 = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
+    EXPECT_EQ(ret2, -1);
+
+    NetAccessPolicyData policyData2;
+    netpolicyClonePtr->unInstallApps_["com.taobao.taobao4hmos"] = policyData2;
+    bundleNameFromListen = "com.taobao.taobao4hmos";
+    int ret3 = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
+    EXPECT_EQ(ret3, 0);
+}
+
+HWTEST_F(NetPolicyDBCloneTest, ClearBackupInfoTest001, TestSize.Level1)
+{
+    auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
+    if (netpolicyClonePtr == nullptr) {
+        return;
+    }
+
+    netpolicyClonePtr->ClearBackupInfo();
+    EXPECT_NE(netpolicyClonePtr, nullptr);
+}
 }
 }

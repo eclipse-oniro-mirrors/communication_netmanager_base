@@ -25,6 +25,7 @@ namespace {
 using namespace OHOS::EventFwk;
 constexpr const char* UID = "uid";
 constexpr const char* STATUS_FIELD = "rgmStatus";
+constexpr const char* BUNDLE_NAME = "bundleName";
 const std::string STATUS_UNLOCKED = "rgm_user_unlocked";
 };
 
@@ -58,6 +59,10 @@ void NetPolicyListener::OnReceiveEvent(const CommonEventData &data)
         if (status == STATUS_UNLOCKED) {
             netPolicyService_->SetBrokerUidAccessPolicyMap(std::nullopt);
         }
+    }
+    if (wantAction == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
+        std::string bundleName = want.GetStringParam(BUNDLE_NAME);
+        netPolicyService_->OnRestoreSingleApp(bundleName);
     }
 }
 } // namespace NetManagerStandard

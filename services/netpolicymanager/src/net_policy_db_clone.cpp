@@ -36,6 +36,7 @@ namespace NetManagerStandard {
 namespace {
 const int32_t MAIN_USER_ID = 100;
 const int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
+const uint32_t DAY_MILLISECONDS =  24 * 60 * 60 * 1000;
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -107,14 +108,14 @@ int32_t NetPolicyDBClone::OnBackup(UniqueFd &fd, const std::string &backupInfo)
 int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
 {
     if (!FdClone(fd)) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
 
     std::ifstream file;
     file.open(POLICY_DATABASE_BACKUP_FILE);
     if (!file.is_open()) {
         NETMGR_LOG_E("Failed to open backup file");
-        return -1;
+        return NETMANAGER_ERROR;
     }
 
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
@@ -125,7 +126,7 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
     std::shared_ptr<NetPolicyRule> netPolicyRule =
         DelayedSingleton<NetPolicyCore>::GetInstance()->CreateCore<NetPolicyRule>();
     if (netPolicyRule == nullptr) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
 
     std::string line;
@@ -141,12 +142,12 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
         policyData.uid = bundleMgrProxy->GetUidByBundleName(bundleName, MAIN_USER_ID);
         if (policyData.uid == -1) {
             NETMGR_LOG_E("Failed to get uid from bundleName. [%{public}s]", bundleName.c_str());
+            unInstallApps_[bundleName] = policyData;
             continue;
         }
         policyData.setFromConfigFlag = 1;
         int32_t insertRet = netAccessPolicyRdb.InsertData(policyData);
         if (insertRet != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("insert error");
             continue;
         }
         NetworkAccessPolicy policy;
@@ -156,7 +157,51 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
     }
 
     file.close();
-    return 0;
+    ClearBackupInfo();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyDBClone::OnRestoreSingleApp(const std::string &bundleNameFromListen)
+{
+    NETMGR_LOG_I("Get OnRestoreSingleApp bundleName. [%{public}s]", bundleNameFromListen.c_str());
+    std::lock_guard<std::mutex> lock(mutex_);
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::shared_ptr<NetPolicyRule> netPolicyRule =
+        DelayedSingleton<NetPolicyCore>::GetInstance()->CreateCore<NetPolicyRule>();
+    if (netPolicyRule == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+
+    NetAccessPolicyRDB netAccessPolicyRdb;
+    std::string bundleName;
+    NetAccessPolicyData policyData;
+    auto it = unInstallApps_.find(bundleNameFromListen);
+    if (it == unInstallApps_.end()) {
+        return NETMANAGER_ERROR;
+    }
+    bundleName = it->first;
+    policyData = it->second;
+    policyData.uid = bundleMgrProxy->GetUidByBundleName(bundleName, MAIN_USER_ID);
+    if (policyData.uid == -1) {
+        NETMGR_LOG_I("policyData.uid = -1");
+        return NETMANAGER_ERROR;
+    }    
+    NETMGR_LOG_I("Get policyData. [%{public}d, %{public}d]", policyData.wifiPolicy, policyData.cellularPolicy);
+    policyData.setFromConfigFlag = 1;
+    int32_t insertRet = netAccessPolicyRdb.InsertData(policyData);
+    if (insertRet != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("insert error");
+        return NETMANAGER_ERROR;
+    }
+    NetworkAccessPolicy policy;
+    policy.wifiAllow = policyData.wifiPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
+    policy.cellularAllow = policyData.cellularPolicy == NET_ACCESS_POLICY_ALLOW_VALUE ? true : false;
+    (void)netPolicyRule->SetNetworkAccessPolicy(policyData.uid, policy, true);
+    return NETMANAGER_SUCCESS;
 }
 
 bool NetPolicyDBClone::FdClone(UniqueFd &fd)
@@ -182,5 +227,20 @@ bool NetPolicyDBClone::FdClone(UniqueFd &fd)
     return true;
 }
 
+void NetPolicyDBClone::ClearBackupInfo()
+{
+    NETMGR_LOG_I("start timer: clearBackupInfo");
+    clearBackupInfoTimer_ = std::make_unique<FfrtTimer>();
+    if (clearBackupInfoTimer_ == nullptr) {
+        return;
+    }
+
+    clearBackupInfoTimer_->StartPro(DAY_MILLISECONDS, this, [](void *data) -> void {
+        auto dbclone = reinterpret_cast<NetPolicyDBClone *>(data);
+        dbclone->unInstallApps_.clear();
+        NETMGR_LOG_I("clearBackupInfo success");
+        dbclone->clearBackupInfoTimer_->StopPro();
+    });
+}
 }
 }

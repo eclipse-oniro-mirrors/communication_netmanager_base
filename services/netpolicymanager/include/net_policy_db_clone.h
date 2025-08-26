@@ -16,8 +16,11 @@
 #ifndef NET_POLICY_DB_CLONE_H
 #define NET_POLICY_DB_CLONE_H
 
+#include <mutex>
 #include <string>
 #include "unique_fd.h"
+#include "net_access_policy_rdb.h"
+#include "ffrt_timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,7 +29,14 @@ public:
     static NetPolicyDBClone &GetInstance();
     int32_t OnBackup(UniqueFd &fd, const std::string &backupInfo);
     int32_t OnRestore(UniqueFd &fd, const std::string &restoreInfo);
+    int32_t OnRestoreSingleApp(const std::string &bundleName);
+    void ClearBackupInfo();
     bool FdClone(UniqueFd &fd);
+    std::map<std::string, NetAccessPolicyData> unInstallApps_;
+    std::unique_ptr<FfrtTimer> clearBackupInfoTimer_ = nullptr;
+
+private:
+    std::mutex mutex_;
 };
 }
 }
