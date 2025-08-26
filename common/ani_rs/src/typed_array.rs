@@ -162,6 +162,18 @@ macro_rules! impl_typed_array {
             }
         }
 
+        impl Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{:?}", self.as_ref())
+            }
+        }
+
+        impl Clone for $name {
+            fn clone(&self) -> Self {
+                Self::new_with_vec(self.to_vec())
+            }
+        }
+
         unsafe impl Send for $name {}
         unsafe impl Sync for $name {}
     };
@@ -303,6 +315,18 @@ impl Drop for ArrayBuffer {
                 Vec::from_raw_parts(self.data_ptr, self.len(), cap)
             };
         }
+    }
+}
+
+impl Debug for ArrayBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.as_ref())
+    }
+}
+
+impl Clone for ArrayBuffer {
+    fn clone(&self) -> Self {
+        Self::new_with_vec(self.to_vec())
     }
 }
 
