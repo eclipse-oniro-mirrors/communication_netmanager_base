@@ -209,9 +209,7 @@ void DnsResolvListenInternal::ProcGetConfigCommand(int clientSockFd, uint16_t ne
         ReplaceDnsServer(sendData, servers);
         // the last one is for baidu DNS Server
 #ifdef ENABLE_PUBLIC_DNS_SERVER
-        if (!IsUserDefinedServer(static_cast<uint16_t>(netId), uid)) {
-            AddPublicDnsServers(sendData, i);
-        }
+        AddPublicDnsServers(sendData, i);
 #endif
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfig))) {
@@ -260,9 +258,7 @@ void DnsResolvListenInternal::ProcGetConfigCommandExt(int clientSockFd, uint16_t
         sendData.nonPublicNum = i;
         // the last one is for baidu DNS Server
 #ifdef ENABLE_PUBLIC_DNS_SERVER
-        if (!IsUserDefinedServer(static_cast<uint16_t>(netId), uid)) {
-            AddPublicDnsServersExt(sendData, i);
-        }
+        AddPublicDnsServersExt(sendData, i);
 #endif
     }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&sendData), sizeof(ResolvConfigExt))) {
