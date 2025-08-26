@@ -736,6 +736,7 @@ private:
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
     std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
+    std::shared_ptr<NetConnListener> sleepSubscriberPtr_ = nullptr;
     bool isScreenOn_ = true;
     bool isSmartSleepMode_ = false;
 };

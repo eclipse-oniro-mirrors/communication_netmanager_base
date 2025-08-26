@@ -838,14 +838,8 @@ void NetConnService::SetCellularDetectSleepMode(bool isSleep)
             continue;
         }
         std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
-        }
-        int delayTime = 0;
-        if (netConnEventHandler_) {
-            netConnEventHandler_->PostAsyncTask([pNetwork, isSleep]() { pNetwork->SetSleepMode(isSleep); },
-                                                delayTime);
+        if (pNetwork != nullptr) {
+            pNetwork->SetSleepMode(isSleep);
         }
     }
 }
@@ -869,13 +863,8 @@ void NetConnService::ActiveCellularDetectWhenExitSleep()
             continue;
         }
         std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork == nullptr) {
-            NETMGR_LOG_E("pNetwork is null, id:%{public}d", pNetSupplier.first);
-            continue;
-        }
-        int delayTime = 0;
-        if (pNetSupplier.second->IsAvailable() && netConnEventHandler_) {
-            netConnEventHandler_->PostAsyncTask([pNetwork]() { pNetwork->StartNetDetection(true); }, delayTime);
+        if (pNetwork != nullptr) {
+            pNetwork->StartNetDetection(true);
         }
     }
 }
@@ -3606,6 +3595,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         SubscribeCommonEvent();
+        SubscribeSleepEvent();
     }
 }
 
@@ -3627,7 +3617,6 @@ void NetConnService::SubscribeCommonEvent()
     matchingSkills.AddEvent("usual.event.SCREEN_ON");
     matchingSkills.AddEvent("usual.event.SCREEN_OFF");
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    matchingSkills.AddEvent("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
@@ -3636,6 +3625,22 @@ void NetConnService::SubscribeCommonEvent()
     }
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
         NETMGR_LOG_E("system event register fail.");
+    }
+}
+
+void NetConnService::SubscribeSleepEvent()
+{    
+    EventFwk::MatchingSkills sleepSkills;
+    sleepSkills.AddEvent("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
+    EventFwk::CommonEventSubscribeInfo sleepSubscribeInfo(sleepSkills);
+    sleepSubscribeInfo.SetPermission("ohos.permission.PERCEIVE_SMART_POWER_SCENARIO");
+
+    if (sleepSubscriberPtr_ == nullptr) {
+        sleepSubscriberPtr_ = std::make_shared<NetConnListener>(sleepSubscribeInfo,
+            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+    }
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(sleepSubscriberPtr_)) {
+        NETMGR_LOG_E("sleep state subscribe fail.");
     }
 }
 
