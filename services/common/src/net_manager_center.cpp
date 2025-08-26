@@ -190,5 +190,13 @@ int32_t NetManagerCenter::RegisterNetFactoryResetCallback(const sptr<INetFactory
     NETMGR_LOG_I("NetManagerCenter RegisterNetFactoryResetCallback");
     return connService_->RegisterNetFactoryResetCallback(callback);
 }
+
+int32_t NetManagerCenter::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->GetConnectionProperties(netId, info);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

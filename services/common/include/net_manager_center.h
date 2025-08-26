@@ -59,6 +59,7 @@ public:
     bool IsUidNetAllowed(uint32_t uid, bool metered);
 
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
+    int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
 
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
