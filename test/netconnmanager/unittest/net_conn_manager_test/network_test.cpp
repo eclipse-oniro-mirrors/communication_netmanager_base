@@ -511,6 +511,7 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
     auto network = std::make_shared<Network>(netId, netId, detectionHandler, NetBearType::BEARER_WIFI, nullptr);
     network->InitNetMonitor();
     uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
+    network->netMonitor_->lastDetectTimestamp_ = nowTime - 30;
     std::cout << "last_lapse_ms:" << nowTime - network->netMonitor_->GetLastDetectTime();
 
     auto ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
@@ -522,8 +523,8 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
         EXPECT_TRUE(ret);
     }
     if (network->netMonitor_) {
-        sleep(1);
         nowTime = CommonUtils::GetCurrentMilliSecond();
+        network->netMonitor_->lastDetectTimestamp_ = nowTime - 300;
         std::cout << "last_lapse_ms:" << nowTime - network->netMonitor_->GetLastDetectTime();
         nowTime = CommonUtils::GetCurrentMilliSecond();
         ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
