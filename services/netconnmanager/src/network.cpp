@@ -293,7 +293,6 @@ bool Network::DelayStartDetectionForIpUpdate(bool hasSameIpAddr)
     uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
     std::string taskName = "DelayStartDetection";
     if ((nowTime - netMonitor_->GetLastDetectTime()) >= LAST_DETECTION_LAPSE_MS) {
-        NETMGR_LOG_I("UpdateNetLinkInfo: Over the last detection time");
         return false;
     }
     NETMGR_LOG_I("UpdateNetLinkInfo: delay start detection");
@@ -426,6 +425,7 @@ bool Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     }
 
     HandleUpdateIpAddrs(newNetLinkInfo);
+    return hasSameIpAddr;
 }
 
 void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)

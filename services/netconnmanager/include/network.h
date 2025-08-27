@@ -117,7 +117,6 @@ private:
     std::unique_ptr<Nat464Service> nat464Service_;
     std::shared_mutex netCapsMutex;
     uint64_t lastDetectTime_ = 0;
-    
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;
 #endif

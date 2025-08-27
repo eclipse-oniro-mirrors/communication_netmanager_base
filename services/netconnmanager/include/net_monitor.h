@@ -36,8 +36,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 typedef struct {
     bool isScreenOn;
-    bool isSleep;
     uint64_t lastDetectTime;
+    bool isSleep;
 } NetMonitorInfo;
 
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
