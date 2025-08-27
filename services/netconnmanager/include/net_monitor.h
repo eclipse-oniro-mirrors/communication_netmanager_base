@@ -37,6 +37,7 @@ namespace NetManagerStandard {
 typedef struct {
     bool isScreenOn;
     bool isSleep;
+    uint64_t lastDetectTime;
 } NetMonitorInfo;
 
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
@@ -97,6 +98,8 @@ public:
 
     void SetSleepMode(bool isSleep);
 
+    uint64_t GetLastDetectTime();
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -136,6 +139,7 @@ private:
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
     bool isSleep_ = false;
+    uint64_t lastDetectTimestamp_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

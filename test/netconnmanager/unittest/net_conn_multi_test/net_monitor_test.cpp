@@ -22,11 +22,13 @@
 #define private public
 #include "net_monitor.h"
 #undef private
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr uint64_t LAST_DETECT_TIME = 0;
 constexpr uint32_t TEST_NETID = 999;
 constexpr int32_t SUCCESS_CODE = 204;
 constexpr int32_t PORTAL_CODE_MIN = 200;
@@ -52,7 +54,7 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
-    static inline NetMonitorInfo info = {true, false};
+    static inline NetMonitorInfo info = {true, 0, false};
     static inline std::shared_ptr<NetMonitor> instance_ =
         std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, info);
 };

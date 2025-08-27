@@ -43,11 +43,12 @@ public:
     uint32_t GetSupplierId() const;
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
+    bool DelayStartDetectionForIpUpdate(bool hasSameIpAddr);
     NetLinkInfo GetNetLinkInfo() const;
     std::string GetIfaceName() const;
     std::string GetIdent() const;
     HttpProxy GetHttpProxy() const;
-    void UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
+    bool UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &newNetLinkInfo);
     void UpdateRoutes(const NetLinkInfo &newNetLinkInfo);
@@ -115,6 +116,7 @@ private:
     std::set<NetCap> netCaps_;
     std::unique_ptr<Nat464Service> nat464Service_;
     std::shared_mutex netCapsMutex;
+    uint64_t lastDetectTime_ = 0;
     
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;

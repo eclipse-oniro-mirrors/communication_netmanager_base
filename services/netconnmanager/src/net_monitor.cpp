@@ -82,6 +82,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     : netId_(netId), netLinkInfo_(netLinkInfo), netMonitorCallback_(callback), isScreenOn_(netMonitorInfo.isScreenOn)
 {
     netBearType_ = bearType;
+    lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     isSleep_ = netMonitorInfo.isSleep;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
@@ -168,6 +169,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
 
 void NetMonitor::Detection()
 {
+    lastDetectTimestamp_ = CommonUtils::GetCurrentMilliSecond();
     NetHttpProbeResult probeResult = SendProbe();
     bool isTmpDetecting = IsDetecting();
     NETMGR_LOG_I("Detection isTmpDetecting[%{public}d]", isTmpDetecting);
@@ -474,6 +476,11 @@ void NetMonitor::SetSleepMode(bool isSleep)
     if (isSleep_) {
         Stop();
     }
+}
+
+uint64_t NetMonitor::GetLastDetectTime()
+{
+    return lastDetectTimestamp_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

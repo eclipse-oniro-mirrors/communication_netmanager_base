@@ -442,6 +442,96 @@ HWTEST_F(NetworkTest, UpdateNetConnStateTest002, TestSize.Level1)
     network->UpdateNetConnState(netConnState);
 }
 
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    EXPECT_NE(network, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    auto ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
+    EXPECT_TRUE(ret);
+    network->netSupplierType_ = NetBearType::BEARER_CELLULAR;
+    network->netCaps_.insert(NetCap::NET_CAPABILITY_INTERNET);
+    network->netMonitor_ = nullptr;
+    ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_CELLULAR, nullptr);
+    network->InitNetMonitor();
+    EXPECT_NE(network->netMonitor_, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    INetAddr addr1;
+    INetAddr addr2;
+    addr1.address_ = "10.0.0.2";
+    addr2.address_ = "fe80::";
+    network->netLinkInfo_.netAddrList_.push_back(addr1);
+    network->netCaps_.insert(NetCap::NET_CAPABILITY_INTERNET);
+    auto ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
+    EXPECT_TRUE(ret);
+    network->netLinkInfo_.netAddrList_.push_back(addr2);
+    ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, DelayStartDetectionTest001, TestSize.Level1)
+{
+    bool hasSameIpAddr = false;
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    network->InitNetMonitor();
+    EXPECT_NE(network->netMonitor_, nullptr);
+    auto ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+    EXPECT_FALSE(ret);
+    hasSameIpAddr = true;
+    ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+    EXPECT_FALSE(ret);
+    network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_CELLULAR, nullptr);
+    network->InitNetMonitor();
+    ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+    EXPECT_FALSE(ret);
+    network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network->InitNetMonitor();
+    network->netMonitor_->Stop();
+    ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
+{
+    bool hasSameIpAddr = true;
+    int32_t netId = 1;
+    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {
+        std::cout << "supplierId:" << supplierId;
+        std::cout << " IfValid:" << ifValid << std::endl;
+    };
+    auto network = std::make_shared<Network>(netId, netId, detectionHandler, NetBearType::BEARER_WIFI, nullptr);
+    network->InitNetMonitor();
+    uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
+    network->netMonitor_->lastDetectTimestamp_ = nowTime - 30;
+    std::cout << "last_lapse_ms:" << nowTime - network->netMonitor_->GetLastDetectTime();
+
+    auto ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+    EXPECT_TRUE(ret);
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("RUNNER_CREATE");
+    if (runner) {
+        network->eventHandler_ = std::make_shared<NetConnEventHandler>(runner);
+        ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+        EXPECT_TRUE(ret);
+    }
+    if (network->netMonitor_) {
+        nowTime = CommonUtils::GetCurrentMilliSecond();
+        network->netMonitor_->lastDetectTimestamp_ = nowTime - 300;
+        std::cout << "last_lapse_ms:" << nowTime - network->netMonitor_->GetLastDetectTime();
+        nowTime = CommonUtils::GetCurrentMilliSecond();
+        ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
+        EXPECT_FALSE(ret);
+    }
+}
+
 HWTEST_F(NetworkTest, IsNat464PreferedTest001, TestSize.Level1)
 {
     int32_t netId = 1;
