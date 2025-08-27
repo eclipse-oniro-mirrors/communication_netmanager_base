@@ -2325,7 +2325,7 @@ int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &dat
     if (!data.ReadUint32(size)) {
         return ERR_FLATTEN_OBJECT;
     }
-
+    size = (size > DEARER_DEFAULT) ? DEARER_DEFAULT : size;
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
             return ERR_FLATTEN_OBJECT;
