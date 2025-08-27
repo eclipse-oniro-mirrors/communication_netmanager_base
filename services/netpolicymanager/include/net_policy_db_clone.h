@@ -20,7 +20,6 @@
 #include <string>
 #include "unique_fd.h"
 #include "net_access_policy_rdb.h"
-#include "ffrt_timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,7 +32,6 @@ public:
     void ClearBackupInfo();
     bool FdClone(UniqueFd &fd);
     std::map<std::string, NetAccessPolicyData> unInstallApps_;
-    std::unique_ptr<FfrtTimer> clearBackupInfoTimer_ = nullptr;
 
 private:
     std::mutex mutex_;

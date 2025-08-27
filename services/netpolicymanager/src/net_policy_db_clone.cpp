@@ -34,9 +34,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-const int32_t MAIN_USER_ID = 100;
-const int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
-const uint32_t DAY_MILLISECONDS =  24 * 60 * 60 * 1000;
+constexpr int32_t MAIN_USER_ID = 100;
+constexpr int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
+constexpr uint64_t DAY_MILLISECONDS =  24ULL * 60ULL * 60ULL * 1000ULL * 1000ULL;
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -230,17 +230,13 @@ bool NetPolicyDBClone::FdClone(UniqueFd &fd)
 void NetPolicyDBClone::ClearBackupInfo()
 {
     NETMGR_LOG_I("start timer: clearBackupInfo");
-    clearBackupInfoTimer_ = std::make_unique<FfrtTimer>();
-    if (clearBackupInfoTimer_ == nullptr) {
-        return;
-    }
+    std::function<void()> ClearApps = [this]() {
+        this->unInstallApps_.clear();
+        NETMGR_LOG_I("ClearBackupApps");
+    };
 
-    clearBackupInfoTimer_->StartPro(DAY_MILLISECONDS, this, [](void *data) -> void {
-        auto dbclone = reinterpret_cast<NetPolicyDBClone *>(data);
-        dbclone->unInstallApps_.clear();
-        NETMGR_LOG_I("clearBackupInfo success");
-        dbclone->clearBackupInfoTimer_->StopPro();
-    });
+    ffrt::submit(std::move(ClearApps), {}, {},
+        ffrt::task_attr().delay(static_cast<uint64_t>(DAY_MILLISECONDS)).name("FfrtTimerClearBackupInfo"));
 }
 }
 }

@@ -278,6 +278,7 @@ protected:
 private:
     void Init();
     int32_t GetDumpMessage(std::string &message);
+    void ListenCommonEvent();
 
     void OnNetSysRestart();
     void ResetNetAccessPolicy();
