@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int32_t MAX_UNMARSHALLING_SIZE = 65535;
 int32_t NetworkAccessPolicy::Marshalling(Parcel &parcel, AccessPolicySave& policies, bool flag)
 {
     if (flag) {
@@ -44,6 +45,9 @@ int32_t NetworkAccessPolicy::Marshalling(Parcel &parcel, AccessPolicySave& polic
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     } else {
+        if (policies.uid_policies.size() > MAX_UNMARSHALLING_SIZE) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
         if (!parcel.WriteUint32(policies.uid_policies.size())) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
@@ -95,7 +99,9 @@ int32_t NetworkAccessPolicy::Unmarshalling(Parcel &parcel, AccessPolicySave& pol
         if (!parcel.ReadUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
-
+        if (size > MAX_UNMARSHALLING_SIZE) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
         for (uint32_t i = 0; i < size; ++i) {
             NetworkAccessPolicy tmp_policy;
             uint32_t uid;

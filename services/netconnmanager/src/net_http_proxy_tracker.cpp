@@ -102,7 +102,7 @@ bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy, KeyUri keyUr
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     int32_t ret = dataShareHelperUtils->Update(keyUri.hostUri_, KEY_GLOBAL_PROXY_HOST, host);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Set host:%{public}s to datashare failed", host.c_str());
+        NETMGR_LOG_E("Set host to datashare failed");
         return false;
     }
 

@@ -31,6 +31,8 @@ static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 7;
 static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
+constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -2510,7 +2512,7 @@ int32_t NetsysNativeServiceProxy::NetDiagGetRouteTable(std::list<NetDiagRouteTab
             NETNATIVE_LOGE("Read uint32 failed");
             return ERR_FLATTEN_OBJECT;
         }
-
+        size = (size > MAX_ROUTE_TABLE_SIZE) ? MAX_ROUTE_TABLE_SIZE : size;
         for (uint32_t i = 0; i < size; ++i) {
             NetDiagRouteTable routeTable;
             if (!NetDiagRouteTable::Unmarshalling(reply, routeTable)) {
@@ -2599,7 +2601,7 @@ int32_t NetsysNativeServiceProxy::NetDiagGetInterfaceConfig(std::list<NetDiagIfa
             NETNATIVE_LOGE("Read uint32 failed");
             return ERR_FLATTEN_OBJECT;
         }
-
+        size = (size > MAX_CONFIG_LIST_SIZE) ? MAX_CONFIG_LIST_SIZE : size;
         for (uint32_t i = 0; i < size; ++i) {
             NetDiagIfaceConfig ifaceConfig;
             if (!NetDiagIfaceConfig::Unmarshalling(reply, ifaceConfig)) {
@@ -3413,6 +3415,7 @@ int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType
     }
 
     uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    size = (size > BEARER_DEFAULT) ? BEARER_DEFAULT : size;
     if (!data.WriteUint32(size)) {
         return ERR_FLATTEN_OBJECT;
     }
