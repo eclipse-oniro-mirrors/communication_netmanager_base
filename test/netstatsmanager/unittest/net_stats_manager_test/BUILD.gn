@@ -52,8 +52,6 @@ ohos_unittest("net_stats_mock_data") {
     "access_token:libtoken_setproc",
     "cJSON:cjson",
     "c_utils:utils",
-    "cellular_data:tel_cellular_data_api",
-    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "distributed_notification_service:ans_innerkits",
     "ffrt:libffrt",
@@ -63,6 +61,13 @@ ohos_unittest("net_stats_mock_data") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+    ]
+  }
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
@@ -142,9 +147,7 @@ ohos_unittest("net_stats_manager_test") {
     "access_token:libtoken_setproc",
     "cJSON:cjson",
     "c_utils:utils",
-    "cellular_data:tel_cellular_data_api",
     "common_event_service:cesfwk_innerkits",
-    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "distributed_notification_service:ans_innerkits",
     "ffrt:libffrt",
@@ -154,6 +157,13 @@ ohos_unittest("net_stats_manager_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+    ]
+  }
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
@@ -221,9 +231,7 @@ ohos_unittest("net_stats_cached_service_test") {
     "access_token:libtoken_setproc",
     "cJSON:cjson",
     "c_utils:utils",
-    "cellular_data:tel_cellular_data_api",
     "common_event_service:cesfwk_innerkits",
-    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "distributed_notification_service:ans_innerkits",
     "ffrt:libffrt",
@@ -233,6 +241,13 @@ ohos_unittest("net_stats_cached_service_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+    ]
+  }
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
@@ -295,9 +310,7 @@ ohos_unittest("net_stats_service_common_test") {
     "access_token:libtoken_setproc",
     "cJSON:cjson",
     "c_utils:utils",
-    "cellular_data:tel_cellular_data_api",
     "common_event_service:cesfwk_innerkits",
-    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "distributed_notification_service:ans_innerkits",
     "ffrt:libffrt",
@@ -307,6 +320,13 @@ ohos_unittest("net_stats_service_common_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+    ]
+  }
 
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
