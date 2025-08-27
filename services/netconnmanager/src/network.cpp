@@ -51,6 +51,8 @@ constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default networ
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
+constexpr int32_t DETECTION_RESULT_WAIT_MS = 3 * 1000;
+constexpr int32_t LAST_DETECTION_LAPSE_MS = 200;
 constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 constexpr int32_t MAX_IPV4_DNS_NUM = 5;
 constexpr int32_t MAX_IPV6_DNS_NUM = 2;
@@ -232,12 +234,13 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateInterfaces(netLinkInfo);
     bool isIfaceNameInUse = NetConnServiceIface().IsIfaceNameInUse(netLinkInfo.ifaceName_, netId_);
     bool flag = false;
+    bool hasSameIpAddr = false;
     {
         std::shared_lock<std::shared_mutex> nlock(netCapsMutex);
         flag = netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end();
     }
     if (!isIfaceNameInUse || flag) {
-        UpdateIpAddrs(netLinkInfo);
+        hasSameIpAddr = UpdateIpAddrs(netLinkInfo);
     }
     UpdateRoutes(netLinkInfo);
     UpdateDns(netLinkInfo);
@@ -266,7 +269,40 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
         }
     }
     if (find) {
+        if (netMonitor_) {
+            if (DelayStartDetectionForIpUpdate(hasSameIpAddr)) {
+                return true;
+            }
+        }
         StartNetDetection(true);
+    }
+    return true;
+}
+
+bool Network::DelayStartDetectionForIpUpdate(bool hasSameIpAddr)
+{
+    if (!hasSameIpAddr) {
+        return false;
+    }
+    if ((netSupplierType_ != BEARER_CELLULAR && netSupplierType_ != BEARER_WIFI)) {
+        return false;
+    }
+    if (!netMonitor_->IsDetecting()) {
+        return false;
+    }
+    uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
+    std::string taskName = "DelayStartDetection";
+    if ((nowTime - netMonitor_->GetLastDetectTime()) >= LAST_DETECTION_LAPSE_MS) {
+        NETMGR_LOG_I("UpdateNetLinkInfo: Over the last detection time");
+        return false;
+    }
+    NETMGR_LOG_I("UpdateNetLinkInfo: delay start detection");
+    if (eventHandler_) {
+        eventHandler_->RemoveTask(taskName);
+        eventHandler_->PostAsyncTask(
+            [this]() {
+                StartNetDetection(true);
+            }, taskName, DETECTION_RESULT_WAIT_MS);
     }
     return true;
 }
@@ -353,16 +389,18 @@ void Network::RemoveRouteByFamily(INetAddr::IpType addrFamily)
     }
 }
 
-void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
+bool Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
+    bool hasSameIpAddr = false;
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfoBck.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
+            hasSameIpAddr = true;
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                 CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
@@ -666,6 +704,7 @@ void Network::StopNetDetection()
     NETMGR_LOG_D("Enter StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
+        lastDetectTime_ = netMonitor_->GetLastDetectTime();
         netMonitor_ = nullptr;
     }
 }
@@ -678,6 +717,7 @@ void Network::InitNetMonitor()
     NetMonitorInfo netMonitorInfo;
     netMonitorInfo.isScreenOn = isScreenOn_;
     netMonitorInfo.isSleep = isSleep_;
+    netMonitorInfo.lastDetectTime = lastDetectTime_;
     netMonitor_ = std::make_shared<NetMonitor>(
         netId_, netSupplierType_, netLinkInfo_, monitorCallback, netMonitorInfo);
     if (netMonitor_ == nullptr) {
