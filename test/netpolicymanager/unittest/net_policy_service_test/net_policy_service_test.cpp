@@ -29,6 +29,10 @@
 #include "system_ability_definition.h"
 #include "netmanager_base_test_security.h"
 #include "net_policy_callback_proxy.h"
+#include "net_policy_listener.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+#include "want.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -308,6 +312,14 @@ HWTEST_F(UtNetPolicyService, OnAddSystemAbility003, TestSize.Level1)
     EXPECT_EQ(instance_->hasSARemoved_, false);
 }
 
+HWTEST_F(UtNetPolicyService, OnAddSystemAbility004, TestSize.Level1)
+{
+    int32_t systemAbilityId = FILEMANAGEMENT_BACKUP_SERVICE_SA_ID;
+    std::string deviceId = "";
+    instance_->OnAddSystemAbility(systemAbilityId, deviceId);
+    EXPECT_EQ(instance_->hasSARemoved_, false);
+}
+
 HWTEST_F(UtNetPolicyService, OnNetSysRestart002, TestSize.Level1)
 {
     instance_->netPolicyRule_ = nullptr;
@@ -315,5 +327,58 @@ HWTEST_F(UtNetPolicyService, OnNetSysRestart002, TestSize.Level1)
     EXPECT_EQ(instance_->netPolicyRule_, nullptr);
 }
 
+HWTEST_F(UtNetPolicyService, OnReceiveEvent001, TestSize.Level1)
+{
+    std::shared_ptr<NetPolicyService> policyPtr = std::make_shared<NetPolicyService>();
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    matchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPriority(1);
+    std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
+        subscribeInfo, std::static_pointer_cast<NetPolicyService>(policyPtr));
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
+ 
+    EventFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    EventFwk::CommonEventData data;
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+ 
+    EventFwk::Want want2;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    EventFwk::CommonEventData data2;
+    data2.SetWant(want2);
+    subscriber->OnReceiveEvent(data2);
+ 
+    EventFwk::Want want3;
+    want.SetAction(COMMON_EVENT_STATUS_CHANGED);
+    EventFwk::CommonEventData data3;
+    data3.SetWant(want3);
+    subscriber->OnReceiveEvent(data3);
+ 
+    EXPECT_NE(subscriber, nullptr);
+}
+
+HWTEST_F(UtNetPolicyService, OnReceiveEvent002, TestSize.Level1)
+{
+    std::shared_ptr<NetPolicyService> policyPtr = std::make_shared<NetPolicyService>();
+    EventFwk::MatchingSkills matchingSkills;
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPriority(1);
+    std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
+        subscribeInfo, std::static_pointer_cast<NetPolicyService>(policyPtr));
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
+    EventFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
+    std::string bundleName = "test";
+    want.SetBundle(bundleName);
+    want.SetParam("bundleName", bundleName);
+    EventFwk::CommonEventData data;
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    EXPECT_NE(subscriber, nullptr);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

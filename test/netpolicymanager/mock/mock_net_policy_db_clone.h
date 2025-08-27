@@ -30,6 +30,7 @@ public:
     virtual int32_t OnBackup(UniqueFd &fd, const std::string &backupInfo) = 0;
     virtual int32_t OnRestore(UniqueFd &fd, const std::string &restoreInfo) = 0;
     virtual bool FdClone(UniqueFd &fd) = 0;
+    virtual int32_t OnRestoreSingleApp(const std::string &bundleNameFromListen) = 0;
 };
 
 class NetPolicyDBClone : public MockNetPolicyDBClone {
@@ -38,6 +39,7 @@ public:
     MOCK_METHOD2(OnBackup, int32_t(UniqueFd &fd, const std::string &backupInfo));
     MOCK_METHOD2(OnRestore, int32_t(UniqueFd &fd, const std::string &backupInfo));
     MOCK_METHOD1(FdClone, bool(UniqueFd &fd));
+    MOCK_METHOD1(OnRestoreSingleApp, int32_t(const std::string &bundleNameFromListen));
 };
 }  // namespace NetManagerStandard
 }  // namespace OHOS

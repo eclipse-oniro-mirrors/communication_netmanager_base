@@ -147,6 +147,7 @@ void NetPolicyService::Init()
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifndef UNITTEST_FORBID_FFRT
     ffrtQueue_.submit([this]() {
 #endif
@@ -173,6 +174,20 @@ void NetPolicyService::Init()
 #ifndef UNITTEST_FORBID_FFRT
     }, ffrt::task_attr().name("InitSetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
 #endif
+}
+
+void NetPolicyService::ListenCommonEvent()
+{
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
+    matchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPriority(1);
+    std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
+        subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
@@ -417,6 +432,9 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         RegisterFactoryResetCallback();
     }
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        ListenCommonEvent();
+    }
     if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
 #ifndef UNITTEST_FORBID_FFRT
         ffrtQueue_.submit([this]() {
@@ -425,16 +443,6 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 #ifndef UNITTEST_FORBID_FFRT
         }, ffrt::task_attr().name("SetBrokerUidAccessPolicyMapFunc").delay(DELAY_US));
 #endif
-
-        EventFwk::MatchingSkills matchingSkills;
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
-        matchingSkills.AddEvent(COMMON_EVENT_STATUS_CHANGED);
-        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-        subscribeInfo.SetPriority(1);
-        std::shared_ptr<NetPolicyListener> subscriber = std::make_shared<NetPolicyListener>(
-            subscribeInfo, std::static_pointer_cast<NetPolicyService>(shared_from_this()));
-        EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
 #ifndef UNITTEST_FORBID_FFRT
         ffrtQueue_.submit([this]() {
 #endif
@@ -920,6 +928,13 @@ int32_t NetPolicyService::OnRestore(MessageParcel& data, MessageParcel& reply)
     close(fd.Release());
     CommonUtils::DeleteFile(POLICY_DATABASE_BACKUP_FILE);
     return 0;
+}
+
+int32_t NetPolicyService::OnRestoreSingleApp(const std::string &bundleName)
+{
+    int ret = NetPolicyDBClone::GetInstance().OnRestoreSingleApp(bundleName);
+    NETMGR_LOG_I("OnRestoreSingleApp ret:%{public}d", ret);
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

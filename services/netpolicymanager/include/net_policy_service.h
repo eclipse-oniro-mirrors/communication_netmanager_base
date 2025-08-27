@@ -266,6 +266,7 @@ public:
 
     void SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid);
     void DelBrokerUidAccessPolicyMap(uint32_t uid);
+    int32_t OnRestoreSingleApp(const std::string &bundleName);
 
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
@@ -277,6 +278,7 @@ protected:
 private:
     void Init();
     int32_t GetDumpMessage(std::string &message);
+    void ListenCommonEvent();
 
     void OnNetSysRestart();
     void ResetNetAccessPolicy();
