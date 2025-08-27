@@ -72,7 +72,7 @@ constexpr uint32_t BIT_32_LEN = 32;
 constexpr uint32_t BIT_MAX_LEN = 255;
 constexpr uint32_t DECIMAL_DIGITAL = 10;
 constexpr uint32_t BYTE_ALIGNMENT = 8;
-constexpr uint32_t THOUSAND_LEN = 100;
+constexpr uint32_t ROUTE_TABLE_OFFSET_FROM_INDEX = 2000;
 constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
@@ -712,7 +712,7 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
         NETNATIVE_LOGE("create Virnic Route, if_nametoindex error %{public}d", errno);
         return -errno;
     }
-    table += THOUSAND_LEN;
+    table += ROUTE_TABLE_OFFSET_FROM_INDEX;
 
     std::string out;
     std::string createVirnicRoute = std::string(IP_CMD_PATH) + " route add default via " + virNicVethAddr +
@@ -1584,7 +1584,7 @@ uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName
         NETNATIVE_LOGE("RouteManager cannot find interface %{public}s", interfaceName.c_str());
         return RT_TABLE_UNSPEC;
     }
-    table += THOUSAND_LEN;
+    table += ROUTE_TABLE_OFFSET_FROM_INDEX;
     std::lock_guard lock(RouteManager::interfaceToTableLock_);
     interfaceToTable_[interfaceName] = table;
     return ConvertTableByNetId(netId, table);
