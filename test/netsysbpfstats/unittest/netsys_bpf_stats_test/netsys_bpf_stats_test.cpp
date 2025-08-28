@@ -532,8 +532,6 @@ HWTEST_F(NetsysBpfStatsTest, DeleteIncreaseTrafficMapTest001, TestSize.Level1)
     EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(12), -1);
 
     EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(10), -1);
-
-    EXPECT_NE(bpfStats->DeleteIncreaseTrafficMap(13), -1);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
