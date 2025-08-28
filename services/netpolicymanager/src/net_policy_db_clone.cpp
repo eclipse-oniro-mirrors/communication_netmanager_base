@@ -120,7 +120,6 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
 
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return NETMANAGER_ERR_INTERNAL;
     }
     std::shared_ptr<NetPolicyRule> netPolicyRule =
