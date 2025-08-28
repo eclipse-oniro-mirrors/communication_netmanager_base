@@ -36,7 +36,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr int32_t MAIN_USER_ID = 100;
 constexpr int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
-constexpr uint64_t DAY_MILLISECONDS =  24ULL * 60ULL * 60ULL * 1000ULL * 1000ULL;
+constexpr uint64_t DAY_MICROSECONDS =  24ULL * 60ULL * 60ULL * 1000ULL * 1000ULL;
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -131,6 +131,7 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
 
     std::string line;
     NetAccessPolicyRDB netAccessPolicyRdb;
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string bundleName;
@@ -164,7 +165,7 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
 int32_t NetPolicyDBClone::OnRestoreSingleApp(const std::string &bundleNameFromListen)
 {
     NETMGR_LOG_I("Get OnRestoreSingleApp bundleName. [%{public}s]", bundleNameFromListen.c_str());
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
@@ -231,12 +232,13 @@ void NetPolicyDBClone::ClearBackupInfo()
 {
     NETMGR_LOG_I("start timer: clearBackupInfo");
     std::function<void()> ClearApps = [this]() {
+        std::lock_guard<ffrt::mutex> lock(mutex_);
         this->unInstallApps_.clear();
         NETMGR_LOG_I("ClearBackupApps");
     };
 
     ffrt::submit(std::move(ClearApps), {}, {},
-        ffrt::task_attr().delay(static_cast<uint64_t>(DAY_MILLISECONDS)).name("FfrtTimerClearBackupInfo"));
+        ffrt::task_attr().delay(static_cast<uint64_t>(DAY_MICROSECONDS)).name("FfrtTimerClearBackupInfo"));
 }
 }
 }
