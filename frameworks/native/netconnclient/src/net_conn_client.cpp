@@ -813,7 +813,7 @@ int32_t NetConnClient::QueryTraceRoute(
     return proxy->QueryTraceRoute(destination, maxJumpNumber, packetsType, traceRouteInfo);
 }
 
-int32_t NetConnClient::SetProxyMode(const int mode)
+int32_t NetConnClient::SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode)
 {
     NETMGR_LOG_I("Enter SetProxyMode");
 
@@ -825,7 +825,7 @@ int32_t NetConnClient::SetProxyMode(const int mode)
     return proxy->SetProxyMode(mode);
 }
 
-int32_t NetConnClient::GetProxyMode(int &mode)
+int32_t NetConnClient::GetProxyMode(OHOS::NetManagerStandard::ProxyModeType &mode)
 {
     NETMGR_LOG_I("Enter GetProxyMode");
 
@@ -870,40 +870,6 @@ int32_t NetConnClient::FindProxyForURL(const std::string &url, std::string &prox
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->FindProxyForURL(url, host, proxyStr);
-}
-
-int32_t NetConnClient::RegisterPacFileProxyCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    NETMGR_LOG_D("RegisterPacFileProxyCallback client in.");
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    int32_t ret = proxy->RegisterNetPacFileUrlInterfaceCallback(callback);
-    if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("RegisterPacFileProxyCallback success, save callback.");
-        netPorxyCallback_ = callback;
-    }
-    return ret;
-}
-
-int32_t NetConnClient::UnregisterPacFileProxyCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    NETMGR_LOG_D("UnregisterPacFileProxyCallback client in.");
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-
-    int32_t ret = proxy->UnregisterNetPacFileUrlInterfaceCallback(callback);
-    if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_D("UnregisterPacFileProxyCallback success,delete callback.");
-        netPorxyCallback_ = nullptr;
-    }
-
-    return ret;
 }
 
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)

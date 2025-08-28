@@ -66,9 +66,6 @@ ohos_shared_library("net_conn_manager") {
     "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
-    "src/net_pac_local_proxy_server.cpp",
-    "src/net_pac_manager.cpp",
-    "src/pac_functions.cpp",
   ]
   use_exceptions = true
 
@@ -126,6 +123,14 @@ ohos_shared_library("net_conn_manager") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
+  if(netmanager_base_enable_pac_proxy){
+      defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+      external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
+      sources += [ "src/pac_functions.cpp" ]
+      sources += [ "src/net_pac_local_proxy_server.cpp" ]
+      sources += [ "src/net_pac_manager.cpp" ]
+  }
+
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
@@ -149,11 +154,11 @@ ohos_shared_library("net_conn_manager") {
   if (netmanager_base_enable_feature_net_firewall) {
     defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
   }
- 
+
   if (netmanager_base_feature_enterprise_route_custom) {
     defines += [ "FEATURE_ENTERPRISE_ROUTE_CUSTOM" ]
   }
-  
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -190,9 +195,6 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
-    "src/net_pac_local_proxy_server.cpp",
-    "src/net_pac_manager.cpp",
-    "src/pac_functions.cpp",
   ]
 
   configs = [ ":net_conn_manager_config" ]
@@ -233,6 +235,14 @@ ohos_static_library("net_conn_manager_static") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETMANAGER_TEST",
   ]
+
+  if(netmanager_base_enable_pac_proxy){
+      defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+      external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
+      sources += [ "src/pac_functions.cpp" ]
+      sources += [ "src/net_pac_local_proxy_server.cpp" ]
+      sources += [ "src/net_pac_manager.cpp" ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]

@@ -34,6 +34,7 @@
 #include "netmanager_base_log.h"
 #include "net_pac_local_proxy_server.h"
 #include "netmanager_base_common_utils.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -46,6 +47,7 @@ constexpr int THREAD_COUNT = 4;
 constexpr int BUFFER_SIZE = 8192;
 constexpr int BACKLOG = 128;
 constexpr int MAX_HEADER_SIZE = 8192;
+constexpr int MS_1 = 1000;
 constexpr const char DEFAULT_URL[] = "127.0.0.1";
 constexpr const char CONNECT_STR[] = "CONNECT";
 constexpr const char PROTOCOL_SEPARATOR[] = "://";
@@ -83,7 +85,7 @@ ProxyServer::ProxyServer(int port, int numThreads)
     : port_(port), serverSocket_(-1), numThreads_(numThreads), running_(false)
 {
     if (numThreads_ <= 0) {
-        numThreads_ = std::thread::hardware_concurrency();
+        numThreads_ = static_cast<size_t>(std::thread::hardware_concurrency());
         if (numThreads_ <= 0) {
             numThreads_ = THREAD_COUNT;
         }
@@ -93,6 +95,29 @@ ProxyServer::ProxyServer(int port, int numThreads)
 ProxyServer::~ProxyServer()
 {
     Stop();
+}
+
+ssize_t ProxyServer::SendAll(int sockfd, const void* buffer, size_t length, int32_t flag)
+{
+    const char* ptr = static_cast<const char*>(buffer);
+    size_t totalSent = 0;
+    while (totalSent < length) {
+        ssize_t sent = send(sockfd, ptr + totalSent, length - totalSent, flag);
+        if (sent < 0) {
+            if (errno == EINTR) {
+                continue;
+            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                usleep(MS_1);
+                continue;
+            } else {
+                return -1;
+            }
+        } else if (sent == 0) {
+            break;
+        }
+        totalSent += static_cast<size_t>(sent);
+    }
+    return totalSent;
 }
 
 void ProxyServer::SetFindPacProxyFunction(std::function<std::string(std::string, std::string)> pac)
@@ -118,7 +143,7 @@ bool ProxyServer::Start()
         return false;
     }
     int flags = fcntl(serverSocket_, F_GETFL, 0);
-    if (flags < 0 || fcntl(serverSocket_, F_SETFL, flags | O_NONBLOCK) < 0) {
+    if (flags < 0 || fcntl(serverSocket_, F_SETFL, static_cast<unsigned short>(flags) | O_NONBLOCK) < 0) {
         NETMGR_LOG_E("set socket O_NONBLOCK fail");
         close(serverSocket_);
         serverSocket_ = -1;
@@ -201,7 +226,7 @@ bool ProxyServer::ParseConnectRequest(const std::string &header, std::string &ho
     size_t colonPos = hostPort.find(COLON_CHAR);
     if (colonPos != std::string::npos) {
         host = hostPort.substr(0, colonPos);
-        port = std::stoi(hostPort.substr(colonPos + 1));
+        port = CommonUtils::StrToInt(hostPort.substr(colonPos + 1));
     } else {
         host = hostPort;
         port = HTTPS_PORT;
@@ -221,7 +246,7 @@ bool ProxyServer::ParseHttpRequest(const std::string &header, std::string &host,
     size_t colonPos = hostLine.find(COLON_CHAR);
     if (colonPos != std::string::npos) {
         host = hostLine.substr(0, colonPos);
-        port = std::stoi(hostLine.substr(colonPos + 1));
+        port = CommonUtils::StrToInt(hostLine.substr(colonPos + 1));
     } else {
         host = hostLine;
         port = HTTP_PORT;
@@ -249,7 +274,8 @@ void ProxyServer::TunnelData(int client, int server)
         }
         if (ret == 0)
             continue;
-        if ((fds[0].revents & (POLLHUP | POLLERR)) || (fds[1].revents & (POLLHUP | POLLERR)))
+        if ((static_cast<unsigned short>(fds[0].revents) & (POLLHUP | POLLERR)) ||
+                (static_cast<unsigned short>(fds[1].revents) & (POLLHUP | POLLERR)))
             break;
         if (fds[0].revents & POLLIN) {
             int n = recv(client, buffer, BUFFER_SIZE, 0);
@@ -257,18 +283,18 @@ void ProxyServer::TunnelData(int client, int server)
                 clientClosed = true;
                 continue;
             }
-            if (send(server, buffer, n, 0) <= 0) {
+            if (SendAll(server, buffer, n, 0) <= 0) {
                 serverClosed = true;
                 continue;
             }
         }
-        if (fds[1].revents & POLLIN) {
+        if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
             int n = recv(server, buffer, BUFFER_SIZE, 0);
             if (n <= 0) {
                 serverClosed = true;
                 continue;
             }
-            if (send(client, buffer, n, 0) <= 0) {
+            if (SendAll(client, buffer, n, 0) <= 0) {
                 clientClosed = true;
                 continue;
             }
@@ -281,47 +307,76 @@ std::string ProxyServer::ReceiveResponseHeader(int socket)
     std::string header;
     char buffer[BUFFER_SIZE];
     int bytesRead;
-    while ((bytesRead = recv(socket, buffer, sizeof(buffer) - 1, 0)) > 0) {
-        buffer[bytesRead] = NULL_CHAR;
-        header.append(buffer);
-        if (header.find(CRLF2) != std::string::npos) {
+    bool headerComplete = false;
+    while (!headerComplete && header.size() < MAX_HEADER_SIZE) {
+        bytesRead = recv(socket, buffer, sizeof(buffer) - 1, 0);
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            header.append(buffer, bytesRead);
+            if (header.find(CRLF2) != std::string::npos) {
+                headerComplete = true;
+            }
+        } else if (bytesRead == 0) {
+            NETMGR_LOG_W("Connection closed while receiving header, got %{private}zu bytes", header.size());
             break;
+        } else {
+            if (errno == EINTR) {
+                continue;
+            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                NETMGR_LOG_W("Socket timeout while receiving header");
+                break;
+            } else {
+                NETMGR_LOG_E("recv error while receiving header: %{private}s", strerror(errno));
+                break;
+            }
         }
-        if (header.size() > MAX_HEADER_SIZE) {
-            break;
-        }
+    }
+    if (header.size() >= MAX_HEADER_SIZE && !headerComplete) {
+        NETMGR_LOG_W("Header size limit reached without finding complete header");
     }
     return header;
 }
 
 int ProxyServer::ConnectToServer(const std::string &host, int port)
 {
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    struct addrinfo hints;
+    struct addrinfo *result;
+    struct addrinfo *rp;
+    int serverSocket = -1;
+    memset_s(&hints, sizeof(struct addrinfo), 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    std::string portStr = std::to_string(port);
+    int status = getaddrinfo(host.c_str(), portStr.c_str(), &hints, &result);
+    if (status != 0) {
+        NETMGR_LOG_E("getaddrinfo fail: %s", gai_strerror(status));
+        return -1;
+    }
+    for (rp = result; rp != nullptr; rp = rp->ai_next) {
+        serverSocket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (serverSocket < 0) {
+            continue;
+        }
+        struct timeval timeout;
+        timeout.tv_sec = TIME_OUT_S;
+        timeout.tv_usec = 0;
+        if (setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
+            setsockopt(serverSocket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+            NETMGR_LOG_E("set socket timeout fail: %s", strerror(errno));
+            close(serverSocket);
+            serverSocket = -1;
+            continue;
+        }
+        if (connect(serverSocket, rp->ai_addr, rp->ai_addrlen) == 0) {
+            break;
+        }
+        close(serverSocket);
+        serverSocket = -1;
+    }
+    freeaddrinfo(result);
     if (serverSocket < 0) {
-        NETMGR_LOG_E("create socket fail");
-        return -1;
-    }
-    struct timeval timeout;
-    timeout.tv_sec = TIME_OUT_S;
-    timeout.tv_usec = 0;
-    if (setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
-        setsockopt(serverSocket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-        NETMGR_LOG_E("set socket SO_RCVTIMEO fail");
-        close(serverSocket);
-        return -1;
-    }
-    struct hostent *server = gethostbyname(host.c_str());
-    if (server == nullptr) {
-        NETMGR_LOG_E("gethostbyname fail");
-        close(serverSocket);
-        return -1;
-    }
-    sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    memcpy_s(&serverAddr.sin_addr.s_addr, sizeof(serverAddr.sin_addr.s_addr), server->h_addr, server->h_length);
-    if (connect(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
-        close(serverSocket);
+        NETMGR_LOG_E("connect to %s:%d fail", host.c_str(), port);
         return -1;
     }
     return serverSocket;
@@ -335,7 +390,7 @@ int ProxyServer::ConnectViaUpstreamProxy(const std::string &targetHost, int targ
         NETMGR_LOG_E("connect upstream proxy fail %{private}s:%{private}d", proxyHost.c_str(), proxyPort);
         return -1;
     }
-    if (send(proxySocket, originalRequest.c_str(), originalRequest.length(), 0) < 0) {
+    if (SendAll(proxySocket, originalRequest.c_str(), originalRequest.length(), 0) < 0) {
         close(proxySocket);
         return -1;
     }
@@ -354,7 +409,7 @@ int ProxyServer::ConnectViaUpstreamProxyHttps(const std::string &targetHost, int
     connectRequest << CONNECT_STR << SPACE_STR << targetHost << COLON_STR << targetPort << HTTP_1_1
                    << HOST_STR << targetHost << COLON_STR << targetPort << CRLF << PROXY_CONNECTION;
     std::string requestStr = connectRequest.str();
-    if (send(proxySocket, requestStr.c_str(), requestStr.length(), 0) < 0) {
+    if (SendAll(proxySocket, requestStr.c_str(), requestStr.length(), 0) < 0) {
         NETMGR_LOG_E("send CONNECT to upstream proxy fail ");
         close(proxySocket);
         return -1;
@@ -491,7 +546,7 @@ bool ProxyServer::ReadRequestHeader(int clientSocket, std::string &requestHeader
         if (requestHeader.find(CRLF2) != std::string::npos) {
             return true;
         }
-        if (requestHeader.size() > MAX_HEADER_SIZE) {
+        if (requestHeader.size() >= MAX_HEADER_SIZE) {
             return false;
         }
     }
@@ -529,7 +584,7 @@ int ProxyServer::HandleDirectConnection(const std::string &targetHost, int targe
     NETMGR_LOG_D("Trying DIRECT connection to %{private}s:%{private}d", targetHost.c_str(), targetPort);
     int serverSocket = ConnectToServer(targetHost, targetPort);
     if (serverSocket >= 0 && !isHttps && !requestHeader.empty()) {
-        if (send(serverSocket, requestHeader.c_str(), requestHeader.length(), 0) < 0) {
+        if (SendAll(serverSocket, requestHeader.c_str(), requestHeader.length(), 0) < 0) {
             close(serverSocket);
             serverSocket = -1;
         }
@@ -567,7 +622,7 @@ void ProxyServer::LogFailedConnection(const std::string &proxyType, const std::s
 
 void ProxyServer::SendErrorResponse(int clientSocket, const char *response)
 {
-    send(clientSocket, response, strlen(response), 0);
+    SendAll(clientSocket, response, strlen(response), 0);
 }
 
 void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requestHeader, const std::string &url)
@@ -578,8 +633,7 @@ void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requ
         SendErrorResponse(clientSocket, HTTP_1_1_400);
         return;
     }
-    NETMGR_LOG_D("CONNECT request - local proxy port:%{private}d url:%{private}s host:%{private}s port:%{private}d",
-        port_, url.c_str(), host.c_str(), port);
+
     std::vector<ProxyConfig> proxyList;
     GetProxyList(url, host, proxyList);
     int serverSocket = TryConnectWithProxyList(host, port, proxyList, true);
@@ -587,7 +641,7 @@ void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requ
         SendErrorResponse(clientSocket, HTTP_1_1_502);
         return;
     }
-    if (send(clientSocket, HTTP_1_1_200_CONNECTED, strlen(HTTP_1_1_200_CONNECTED), 0) < 0) {
+    if (SendAll(clientSocket, HTTP_1_1_200_CONNECTED, strlen(HTTP_1_1_200_CONNECTED), 0) < 0) {
         NETMGR_LOG_E("send CONNECT Response fail");
         close(serverSocket);
         return;
@@ -601,7 +655,7 @@ void ProxyServer::ForwardData(int fromSocket, int toSocket)
     char buffer[BUFFER_SIZE];
     int bytesReceived;
     while ((bytesReceived = recv(fromSocket, buffer, BUFFER_SIZE, 0)) > 0) {
-        if (send(toSocket, buffer, bytesReceived, 0) < 0) {
+        if (SendAll(toSocket, buffer, bytesReceived, 0) < 0) {
             break;
         }
     }
@@ -692,7 +746,7 @@ void ProxyServer::AcceptLoop()
         if (ret == 0) {
             continue;
         }
-        if (!(fd.revents & POLLIN)) {
+        if (!(static_cast<unsigned short>(fd.revents) & POLLIN)) {
             continue;
         }
         struct sockaddr_in clientAddr;
@@ -722,7 +776,9 @@ bool ProxyServer::IsPortAvailable(int port)
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(static_cast<uint16_t>(port));
-    inet_pton(AF_INET, DEFAULT_URL, &(serverAddr.sin_addr));
+    if (!inet_pton(AF_INET, DEFAULT_URL, &(serverAddr.sin_addr))) {
+        return false;
+    }
     int bindResult = bind(sockfd, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (bindResult < 0) {
         const char *errmsg = strerror(errno);
@@ -738,7 +794,7 @@ int ProxyServer::FindAvailablePort(int startPort, int endPort)
     for (int port = startPort; port <= endPort; ++port) {
         portsToTry.push_back(port);
     }
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(portsToTry.begin(), portsToTry.end(), std::default_random_engine(seed));
     for (int port : portsToTry) {
         if (IsPortAvailable(port)) {

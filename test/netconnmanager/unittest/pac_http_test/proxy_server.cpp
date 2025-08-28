@@ -45,9 +45,9 @@ using namespace OHOS::NetManagerStandard;
 
 std::map<std::string, std::string> ProxyServer::pacScripts;
 std::string ProxyServer::proxServerTargetUrl;
-int ProxyServer::proxServerPort;
+int32_t ProxyServer::proxServerPort;
 
-ProxyServer::ProxyServer(int port, int numThreads)
+ProxyServer::ProxyServer(int32_t port, int32_t numThreads)
     : port_(port), serverSocket_(-1), numThreads_(numThreads), running_(false)
 {
     if (numThreads_ <= 0) {
@@ -97,14 +97,14 @@ bool ProxyServer::Start()
         PRINT_RED_FMT_LN("create socket fail \n");
         return false;
     }
-    int opt = 1;
+    int32_t opt = 1;
     if (setsockopt(serverSocket_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         PRINT_RED_FMT_LN("SO_REUSEADDR fail \n");
         close(serverSocket_);
         serverSocket_ = -1;
         return false;
     }
-    int flags = fcntl(serverSocket_, F_GETFL, 0);
+    int32_t flags = fcntl(serverSocket_, F_GETFL, 0);
     if (flags < 0 || fcntl(serverSocket_, F_SETFL, flags | O_NONBLOCK) < 0) {
         printf("O_NONBLOCK fail \n");
         close(serverSocket_);
@@ -130,7 +130,7 @@ bool ProxyServer::Start()
     LOG("run localserver on port:%d threads: %d \n", port_, numThreads_);
     running_ = true;
     ResetStats();
-    for (int i = 0; i < numThreads_; i++) {
+    for (int32_t i = 0; i < numThreads_; i++) {
         workers_.push_back(std::thread(&ProxyServer::WorkerThread, this));
     }
     acceptThread_ = std::thread(&ProxyServer::AcceptLoop, this);
@@ -205,7 +205,7 @@ std::string ProxyServer::GetRequestMethod(const std::string &header)
     return header.substr(0, spacePos);
 }
 
-bool ProxyServer::ParseConnectRequest(const std::string &header, std::string &host, int &port)
+bool ProxyServer::ParseConnectRequest(const std::string &header, std::string &host, int32_t &port)
 {
     size_t methodEnd = header.find(' ');
     if (methodEnd == std::string::npos) {
@@ -228,7 +228,7 @@ bool ProxyServer::ParseConnectRequest(const std::string &header, std::string &ho
     return true;
 }
 
-bool ProxyServer::ParseHttpRequest(const std::string &header, std::string &host, int &port)
+bool ProxyServer::ParseHttpRequest(const std::string &header, std::string &host, int32_t &port)
 {
     size_t hostPos = header.find("Host: ");
     if (hostPos == std::string::npos) {
@@ -250,7 +250,7 @@ bool ProxyServer::ParseHttpRequest(const std::string &header, std::string &host,
     return true;
 }
 
-static bool HandlePollError(int ret, int errnoVal)
+static bool HandlePollError(int32_t ret, int32_t errnoVal)
 {
     if (ret < 0) {
         if (errnoVal == EINTR) {
@@ -267,9 +267,9 @@ static bool CheckPollHupOrErr(const struct pollfd *fds)
     return (fds[0].revents & (POLLHUP | POLLERR)) || (fds[1].revents & (POLLHUP | POLLERR));
 }
 
-static bool TransferData(int srcFd, int dstFd, char *buffer, size_t bufferSize, std::shared_ptr<Stats> stats)
+static bool TransferData(int32_t srcFd, int32_t dstFd, char *buffer, size_t bufferSize, std::shared_ptr<Stats> stats)
 {
-    int n = recv(srcFd, buffer, bufferSize, 0);
+    int32_t n = recv(srcFd, buffer, bufferSize, 0);
     if (n <= 0) {
         return true;
     }
@@ -281,7 +281,7 @@ static bool TransferData(int srcFd, int dstFd, char *buffer, size_t bufferSize, 
     return false;
 }
 
-void ProxyServer::TunnelData(int client, int server)
+void ProxyServer::TunnelData(int32_t client, int32_t server)
 {
     struct pollfd fds[2];
     fds[0].fd = client;
@@ -292,7 +292,7 @@ void ProxyServer::TunnelData(int client, int server)
     bool clientClosed = false;
     bool serverClosed = false;
     while (!clientClosed && !serverClosed && running_) {
-        int ret = poll(fds, 2, 1000);
+        int32_t ret = poll(fds, 2, 1000);
         if (HandlePollError(ret, errno)) {
             break;
         }
@@ -313,7 +313,7 @@ void ProxyServer::TunnelData(int client, int server)
         }
     }
 }
-std::string ProxyServer::ReceiveResponseHeader(int socket)
+std::string ProxyServer::ReceiveResponseHeader(int32_t socket)
 {
     std::string header;
     char buffer[bufferSize];
@@ -332,7 +332,7 @@ std::string ProxyServer::ReceiveResponseHeader(int socket)
     return header;
 }
 
-bool ProxyServer::IsPortAvailable(int port)
+bool ProxyServer::IsPortAvailable(int32_t port)
 {
     int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
@@ -355,7 +355,7 @@ bool ProxyServer::IsPortAvailable(int port)
     return (bindResult == 0);
 }
 
-int ProxyServer::FindAvailablePort(int startPort, int endPort)
+int ProxyServer::FindAvailablePort(int32_t startPort, int32_t endPort)
 {
     std::vector<int> portsToTry;
     for (int port = startPort; port <= endPort; ++port) {
@@ -514,7 +514,7 @@ std::string ProxyServer::GetRequestUrl(const std::string &header)
 }
 
 bool ProxyServer::ParseProxyInfo(std::string url, std::string host, std::string &proxyType, std::string &proxyHost,
-                                 int &proxyPort)
+                                 int32_t &proxyPort)
 {
     std::string pacScirpt;
     if (pacFunction_) {
@@ -527,7 +527,7 @@ bool ProxyServer::ParseProxyInfo(std::string url, std::string host, std::string 
 }
 
 bool ProxyServer::ParsePacResult(const std::string &pacResult, std::string &proxyType, std::string &proxyHost,
-                                 int &proxyPort)
+                                 int32_t &proxyPort)
 {
     proxyType = "";
     proxyHost = "";
@@ -588,7 +588,7 @@ std::string AddHttpHeader(const std::string &httpMessage, const std::string &hea
     return httpMessage.substr(0, headersEnd) + newHeader + httpMessage.substr(headersEnd);
 }
 
-void ProxyServer::HandleClient(int clientSocket)
+void ProxyServer::HandleClient(int32_t clientSocket)
 {
     stats_->activeConnections++;
 
@@ -617,7 +617,7 @@ void ProxyServer::HandleClient(int clientSocket)
     }
 }
 
-bool ProxyServer::SetSocketTimeout(int socket)
+bool ProxyServer::SetSocketTimeout(int32_t socket)
 {
     struct timeval timeout;
     timeout.tv_sec = TIME_OUT;
@@ -629,7 +629,7 @@ bool ProxyServer::SetSocketTimeout(int socket)
     return true;
 }
 
-bool ProxyServer::ReadRequestHeader(int clientSocket, std::string &requestHeader)
+bool ProxyServer::ReadRequestHeader(int32_t clientSocket, std::string &requestHeader)
 {
     char buffer[bufferSize];
     int bytesReceived = 0;
@@ -651,7 +651,7 @@ bool ProxyServer::ReadRequestHeader(int clientSocket, std::string &requestHeader
     return bytesReceived > 0;
 }
 
-void ProxyServer::CleanupConnection(int clientSocket)
+void ProxyServer::CleanupConnection(int32_t clientSocket)
 {
     close(clientSocket);
     stats_->activeConnections--;
@@ -689,7 +689,7 @@ void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requ
     CleanupConnection(clientSocket);
 }
 
-void ProxyServer::HandleHttpRequest(int clientSocket, std::string &requestHeader, const std::string &url)
+void ProxyServer::HandleHttpRequest(int32_t clientSocket, std::string &requestHeader, const std::string &url)
 {
     stats_->httpRequests++;
     std::string host;
@@ -710,7 +710,7 @@ void ProxyServer::HandleHttpRequest(int clientSocket, std::string &requestHeader
     CleanupConnection(clientSocket);
 }
 
-int ProxyServer::EstablishServerConnection(const std::string &url, const std::string &host, int port,
+int ProxyServer::EstablishServerConnection(const std::string &url, const std::string &host, int32_t port,
                                            const std::string &requestType, std::string &requestHeader)
 {
     std::string proxyType;
@@ -742,13 +742,13 @@ int ProxyServer::EstablishServerConnection(const std::string &url, const std::st
     return serverSocket;
 }
 
-void ProxyServer::SendErrorResponse(int clientSocket, const char *response)
+void ProxyServer::SendErrorResponse(int32_t clientSocket, const char *response)
 {
     send(clientSocket, response, strlen(response), 0);
     CleanupConnection(clientSocket);
 }
 
-void ProxyServer::ForwardResponseToClient(int clientSocket, int serverSocket)
+void ProxyServer::ForwardResponseToClient(int32_t clientSocket, int32_t serverSocket)
 {
     char buffer[bufferSize];
     int bytesReceived;

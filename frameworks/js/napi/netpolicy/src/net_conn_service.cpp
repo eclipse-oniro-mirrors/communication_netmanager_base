@@ -323,8 +323,8 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
     return result;
 }
 
-int32_t NetConnService::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
-                                             const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+int32_t NetConnService::RequestNetConnection(
+    const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
 {
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
@@ -2798,12 +2798,22 @@ int32_t NetConnService::GetPacFileUrl(std::string &pacUrl)
     Uri uri(PAC_URL_URI);
     int32_t ret = dataShareHelperUtils->Query(uri, KEY_PAC_FILE_URL, pacUrl);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query pac url failed.");
-        return NETMANAGER_ERR_INTERNAL;
+        NETMGR_LOG_W("Query pac url failed.");
+        pacUrl.clear();
     }
     return NETMANAGER_SUCCESS;
 }
 
+void NetConnService::CheckProxyStatus()
+{
+    OHOS::NetManagerStandard::ProxyModeType mode;
+    if (GetProxyMode(mode) != NETMANAGER_SUCCESS) {
+        return;
+    }
+    SetProxyMode(mode);
+}
+
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
 int NetConnService::StopPacLocalProxyServer()
 {
     std::lock_guard<std::mutex> guard{netPacProxyServerMutex_};
@@ -2860,15 +2870,6 @@ std::shared_ptr<NetPACManager> NetConnService::GetNetPacManager()
     return netPACManager_;
 }
 
-void NetConnService::CheckProxyStatus()
-{
-    int mode = -1;
-    if (GetProxyMode(mode) != NETMANAGER_SUCCESS) {
-        mode = 0;
-    }
-    SetProxyMode(mode);
-}
-
 uint32_t NetConnService::SetProxyOff()
 {
     StopPacLocalProxyServer();
@@ -2882,22 +2883,6 @@ uint32_t NetConnService::SetProxyOff()
     return NETMANAGER_SUCCESS;
 }
 
-uint32_t NetConnService::SetProxyManual()
-{
-    StopPacLocalProxyServer();
-    NetHttpProxyTracker httpProxyTracker;
-    HttpProxy globalProxy;
-    httpProxyTracker.ReadFromSettingsData(globalProxy);
-
-    int ret = SetGlobalHttpProxy(globalProxy);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("SetGlobalHttpProxy failed.");
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    SendHttpProxyChangeBroadcast(globalProxy);
-    return NETMANAGER_SUCCESS;
-}
-
 uint32_t NetConnService::SetProxyAuto()
 {
     std::string pacUrl;
@@ -2905,66 +2890,62 @@ uint32_t NetConnService::SetProxyAuto()
         if (!GetNetPacManager()->InitPACScriptWithURL(pacUrl)) {
             NETMGR_LOG_E("InitPACScriptWithURL failed.");
             StopPacLocalProxyServer();
-            return NETMANAGER_ERR_INTERNAL;
+            return NETMANAGER_ERR_OPERATION_FAILED;
         }
         if (!StartPacLocalProxyServer()) {
             NETMGR_LOG_E("StartPacLocalProxyServer failed.");
-            return NETMANAGER_ERR_INTERNAL;
-        }
-
-        std::lock_guard guard(pacFileUrlCbsMutex_);
-        for (const auto &mem : pacFileUrlCallbacks_) {
-            if (mem.second != nullptr) {
-                mem.second->PacFileUrlChange(pacUrl);
-            }
+            return NETMANAGER_ERR_OPERATION_FAILED;
         }
         return NETMANAGER_SUCCESS;
     }
-    return NETMANAGER_ERR_INTERNAL;
+    return NETMANAGER_ERR_OPERATION_FAILED;
 }
+#endif
 
-int32_t NetConnService::SetProxyMode(const int mode)
+int32_t NetConnService::SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode)
 {
-    if (mode == PROXY_MODE_OFF || mode == PROXY_MODE_AUTO || mode == PROXY_MODE_MANUAL) {
-        Uri hostUri(GLOBAL_PROXY_HOST_URI);
-        auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
-        int ret = dataShareHelperUtils->Update(hostUri, KEY_PROXY_MODE, std::to_string(mode));
-        if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("Update proxy mode fail %d", mode);
-            return ret;
-        }
-        switch (mode) {
-            case PROXY_MODE_OFF: {
-                return SetProxyOff();
-            }
-            case PROXY_MODE_MANUAL: {
-                return SetProxyManual();
-            }
-            case PROXY_MODE_AUTO:
-                return SetProxyAuto();
-        }
-        return NETMANAGER_SUCCESS;
-    } else {
-        NETMGR_LOG_E("mode value error %d", mode);
-        return NETMANAGER_ERR_INTERNAL;
+    Uri hostUri(GLOBAL_PROXY_HOST_URI);
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    int ret = dataShareHelperUtils->Update(hostUri, KEY_PROXY_MODE, std::to_string(mode));
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update proxy mode fail %d", mode);
+        return NETMANAGER_ERR_OPERATION_FAILED;
     }
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    switch (mode) {
+        case PROXY_MODE_OFF: {
+            return SetProxyOff();
+        }
+        case PROXY_MODE_AUTO:
+            return SetProxyAuto();
+    }
+#endif
+    NETMGR_LOG_E("invalide proxy mode %{public}d", mode);
+    return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetProxyMode(int &mode)
+int32_t NetConnService::GetProxyMode(OHOS::NetManagerStandard::ProxyModeType &mode)
 {
     Uri hostUri(GLOBAL_PROXY_HOST_URI);
     std::string modeStr;
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     int ret = dataShareHelperUtils->Query(hostUri, KEY_PROXY_MODE, modeStr);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Update proxy mode fail");
-        return ret;
+        NETMGR_LOG_W("get proxy mode fail");
+        mode = PROXY_MODE_OFF;
+        return NETMANAGER_SUCCESS;
     }
     int temp = CommonUtils::StrToInt(modeStr);
-    if (temp >= ProxyModeType::PROXY_MODE_OFF && temp <= ProxyModeType::PROXY_MODE_AUTO) {
-        mode = temp;
-    } else {
-        mode = -1;
+    switch (temp) {
+        case PROXY_MODE_OFF:
+            mode = PROXY_MODE_OFF;
+            break;
+        case PROXY_MODE_AUTO:
+            mode = PROXY_MODE_AUTO;
+            break;
+        default:
+            NETMGR_LOG_E("invalide proxy mode %{public}d", temp);
+            return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     return NETMANAGER_SUCCESS;
 }
@@ -2976,39 +2957,26 @@ int32_t NetConnService::SetPacFileUrl(const std::string &pacUrl)
     int32_t ret = dataShareHelperUtils->Update(uri, KEY_PAC_FILE_URL, pacUrl);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Update pacUrl to datashare failed.");
-        return NETMANAGER_ERR_INTERNAL;
+        return NETMANAGER_ERR_OPERATION_FAILED;
     }
-
-    std::lock_guard guard(pacFileUrlCbsMutex_);
-    for (const auto &mem : pacFileUrlCallbacks_) {
-        if (mem.second != nullptr) {
-            mem.second->PacFileUrlChange(pacUrl);
-        }
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    if (pacUrl.empty()) {
+        return SetProxyOff();
+    } else {
+        return SetProxyAuto();
     }
+#endif
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy)
 {
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
     return GetNetPacManager()->FindProxyForURL(url, host, proxy);
-}
-
-int32_t NetConnService::RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    int32_t callingUid = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
-    NETMGR_LOG_D("RegisterNetPacFileUrlInterfaceCallback, calllinguid [%{public}d]", callingUid);
-    std::lock_guard guard(pacFileUrlCbsMutex_);
-    pacFileUrlCallbacks_[callingUid] = callback;
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnService::UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    int32_t callingUid = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
-    NETMGR_LOG_D("UnregisterNetPacFileUrlInterfaceCallback, calllinguid [%{public}d]", callingUid);
-    std::lock_guard guard(pacFileUrlCbsMutex_);
-    pacFileUrlCallbacks_.erase(callingUid);
-    return NETMANAGER_SUCCESS;
+#else
+     proxy.clear();
+     return NETMANAGER_SUCCESS;
+#endif
 }
 
 void NetConnService::CreateActiveHttpProxyThread()

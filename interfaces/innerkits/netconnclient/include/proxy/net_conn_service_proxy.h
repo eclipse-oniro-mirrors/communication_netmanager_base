@@ -104,12 +104,10 @@ public:
     int32_t SetPacUrl(const std::string &pacUrl) override;
     int32_t GetPacUrl(std::string &pacUrl) override;
     int32_t SetPacFileUrl(const std::string &pacUrl) override;
-    int32_t SetProxyMode(const int mode) override;
-    int32_t GetProxyMode(int &mode) override;
+    int32_t SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode) override;
+    int32_t GetProxyMode(OHOS::NetManagerStandard::ProxyModeType &mode) override;
     int32_t GetPacFileUrl(std::string &pacUrl) override;
     int32_t FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy) override;
-    int32_t RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override;
-    int32_t UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback) override;
     int32_t QueryTraceRoute(const std::string &destination, int32_t maxJumpNumber, int32_t packetsType,
         std::string &traceRouteInfo) override;
     virtual int32_t SetAppIsFrozened(uint32_t uid, bool isFrozened) override;
