@@ -20,7 +20,7 @@
 #include <string>
 #include "unique_fd.h"
 #include "net_access_policy_rdb.h"
-
+#include "ffrt.h"
 namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyDBClone {
@@ -34,7 +34,7 @@ public:
     std::map<std::string, NetAccessPolicyData> unInstallApps_;
 
 private:
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
 };
 }
 }

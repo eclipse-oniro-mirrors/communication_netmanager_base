@@ -183,8 +183,8 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreSingleAppTest001, TestSize.Level1)
     EXPECT_EQ(ret2, -1);
 
     NetAccessPolicyData policyData2;
-    netpolicyClonePtr->unInstallApps_["com.taobao.taobao4hmos"] = policyData2;
-    bundleNameFromListen = "com.taobao.taobao4hmos";
+    netpolicyClonePtr->unInstallApps_["com.ohos.sceneboard"] = policyData2;
+    bundleNameFromListen = "com.ohos.sceneboard";
     int ret3 = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
     EXPECT_EQ(ret3, 0);
 }

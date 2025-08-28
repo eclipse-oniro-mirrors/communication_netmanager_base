@@ -314,7 +314,7 @@ HWTEST_F(UtNetPolicyService, OnAddSystemAbility003, TestSize.Level1)
 
 HWTEST_F(UtNetPolicyService, OnAddSystemAbility004, TestSize.Level1)
 {
-    int32_t systemAbilityId = FILEMANAGEMENT_BACKUP_SERVICE_SA_ID;
+    int32_t systemAbilityId = COMMON_EVENT_SERVICE_ID;
     std::string deviceId = "";
     instance_->OnAddSystemAbility(systemAbilityId, deviceId);
     EXPECT_EQ(instance_->hasSARemoved_, false);
