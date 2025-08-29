@@ -28,11 +28,6 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-struct ProxyConfig {
-    std::string type;
-    std::string host;
-    int port;
-};
 class ProxyServer {
 public:
     ProxyServer(int port, int numThreads);
@@ -44,6 +39,12 @@ public:
     double GetThroughput() const;
     static int FindAvailablePort(int startPort, int endPort);
 private:
+    struct ProxyConfig {
+        std::string type;
+        std::string host;
+        int port;
+    };
+    ssize_t SendAll(int sockfd, const void* buffer, size_t length, int32_t flag);
     static bool IsPortAvailable(int port);
     void ParsePacResult(const std::string &pacResult, std::vector<ProxyConfig> &proxyList);
     int HandleDirectConnection(const std::string &targetHost, int targetPort, bool isHttps,

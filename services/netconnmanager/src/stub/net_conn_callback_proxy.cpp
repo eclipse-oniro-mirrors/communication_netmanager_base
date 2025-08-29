@@ -294,48 +294,5 @@ bool PreAirplaneCallbackProxy::WriteInterfaceToken(MessageParcel &data)
     }
     return true;
 }
-
-PacFileUrlCallbackProxy::PacFileUrlCallbackProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetPacFileUrlCallback>(impl)
-{
-}
-
-int32_t PacFileUrlCallbackProxy::PacFileUrlChange(const std::string &pacFileUrl)
-{
-    NETMGR_LOG_I("PreAirplanePacFileUrlCallbackProxy::PacFileUrlChange()");
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    if (!data.WriteString(pacFileUrl)) {
-        NETMGR_LOG_E("WriteString failed");
-        return NETMANAGER_ERR_INTERNAL;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret =
-        remote->SendRequest(static_cast<uint32_t>(PacFileUrlInterfaceCode::PAC_FILE_URL_CHANGE), data, reply, option);
-    if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-    }
-    return ret;
-}
-
-bool PacFileUrlCallbackProxy::WriteInterfaceToken(MessageParcel &data)
-{
-    if (!data.WriteInterfaceToken(INetPacFileUrlCallback::GetDescriptor())) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return false;
-    }
-    return true;
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

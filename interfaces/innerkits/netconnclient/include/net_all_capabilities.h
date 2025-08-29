@@ -47,8 +47,7 @@ enum NetCap {
 
 enum ProxyModeType {
     PROXY_MODE_OFF = 0,
-    PROXY_MODE_MANUAL = 1,
-    PROXY_MODE_AUTO = 2
+    PROXY_MODE_AUTO = 1
 };
 
 enum NetBearType {

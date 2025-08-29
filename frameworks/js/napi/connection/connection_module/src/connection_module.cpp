@@ -319,8 +319,6 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     std::initializer_list<napi_property_descriptor> proxyModeTypes = {
         DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_OFF",
             NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_OFF))),
-        DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_MANUAL",
-            NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_MANUAL))),
         DECLARE_NAPI_STATIC_PROPERTY("PROXY_MODE_AUTO",
             NapiUtils::CreateUint32(env, static_cast<uint32_t>(ProxyModeType::PROXY_MODE_AUTO))),
     };

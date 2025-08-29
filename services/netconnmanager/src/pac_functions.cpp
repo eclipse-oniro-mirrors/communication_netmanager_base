@@ -468,14 +468,16 @@ static jerry_value_t JsDateRangeArg61(const jerry_value_t args[], struct tm *tim
 {
     int day0 = jerry_get_number_value(args[ARG_INDEX_0]);
     jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon0_buff[mon0_size];
+    jerry_char_t mon0_buff[mon0_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_1], mon0_buff, mon0_size);
+    mon0_buff[mon0_size] = NULL_CHAR;
     int m0 = MonthAbbrToNumber((const char *)mon0_buff);
     int year0 = jerry_get_number_value(args[ARG_INDEX_2]);
     int day1 = jerry_get_number_value(args[ARG_INDEX_3]);
     jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_4]);
-    jerry_char_t mon1_buff[mon1_size];
+    jerry_char_t mon1_buff[mon1_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_4], mon1_buff, mon1_size);
+    mon1_buff[mon1_size] = NULL_CHAR;
     int m1 = MonthAbbrToNumber((const char *)mon1_buff);
     int year1 = jerry_get_number_value(args[ARG_INDEX_5]);
     int value0 = (year0) * TEN_THOUSAND + (m0 + 1) * HUNDRED + day0;
@@ -489,14 +491,16 @@ static jerry_value_t JsDateRangeArg42(const jerry_value_t args[], struct tm *tim
 {
     int day0 = 1;
     jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_0]);
-    jerry_char_t mon0_buff[mon0_size];
+    jerry_char_t mon0_buff[mon0_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_0], mon0_buff, mon0_size);
+    mon0_buff[mon0_size] = NULL_CHAR;
     int m0 = MonthAbbrToNumber((const char *)mon0_buff);
     int year0 = jerry_get_number_value(args[ARG_INDEX_1]);
     int day1 = ARG_COUNT_31;
     jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_2]);
-    jerry_char_t mon1_buff[mon1_size];
+    jerry_char_t mon1_buff[mon1_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_2], mon1_buff, mon1_size);
+    mon1_buff[mon1_size] = NULL_CHAR;
     int m1 = MonthAbbrToNumber((const char *)mon1_buff);
     int year1 = jerry_get_number_value(args[ARG_INDEX_3]);
     int value0 = (year0) * TEN_THOUSAND + (m0 + 1) * HUNDRED + day0;
@@ -510,13 +514,15 @@ static jerry_value_t JsDateRangeArg41(const jerry_value_t args[], struct tm *tim
 {
     int day0 = jerry_get_number_value(args[ARG_INDEX_0]);
     jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon0_buff[mon0_size];
+    jerry_char_t mon0_buff[mon0_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_1], mon0_buff, mon0_size);
+    mon0_buff[mon0_size] = NULL_CHAR;
     int m0 = MonthAbbrToNumber((const char *)mon0_buff);
     int day1 = jerry_get_number_value(args[ARG_INDEX_2]);
     jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_3]);
-    jerry_char_t mon1_buff[mon1_size];
+    jerry_char_t mon1_buff[mon1_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_3], mon1_buff, mon1_size);
+    mon1_buff[mon1_size] = NULL_CHAR;
     int m1 = MonthAbbrToNumber((const char *)mon1_buff);
     int currentValue = (timeinfo->tm_mon + 1) * HUNDRED + timeinfo->tm_mday;
     int value0 = (m0 + 1) * HUNDRED + day0;
@@ -527,11 +533,13 @@ static jerry_value_t JsDateRangeArg41(const jerry_value_t args[], struct tm *tim
 static jerry_value_t JsDateRangeArg2StrStr(const jerry_value_t args[], struct tm *timeinfo)
 {
     jerry_size_t mon0_size = jerry_get_string_size(args[ARG_INDEX_0]);
-    jerry_char_t mon0_buff[mon0_size];
+    jerry_char_t mon0_buff[mon0_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_0], mon0_buff, mon0_size);
+    mon0_buff[mon0_size] = NULL_CHAR;
     jerry_size_t mon1_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t mon1_buff[mon1_size];
+    jerry_char_t mon1_buff[mon1_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_1], mon1_buff, mon1_size);
+    mon1_buff[mon1_size] = NULL_CHAR;
     int m0 = MonthAbbrToNumber((const char *)mon0_buff);
     int m1 = MonthAbbrToNumber((const char *)mon1_buff);
     return jerry_create_boolean(timeinfo->tm_mon >= m0 && timeinfo->tm_mon <= m1);
@@ -552,7 +560,7 @@ static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm
 {
     int num = jerry_get_number_value(args[ARG_INDEX_0]);
     jerry_size_t str_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t str_buff[str_size];
+    jerry_char_t str_buff[str_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_1], str_buff, str_size);
     str_buff[str_size] = NULL_CHAR;
     if (strcmp((const char *)(str_buff), GMT) == 0) {
@@ -612,8 +620,9 @@ static jerry_value_t JsDateRangeArg3(const jerry_value_t args[], struct tm *time
 {
     int day = jerry_get_number_value(args[0]);
     jerry_size_t mon_size = jerry_get_string_size(args[1]);
-    jerry_char_t mon_buff[mon_size];
+    jerry_char_t mon_buff[mon_size+11];
     jerry_string_to_char_buffer(args[1], mon_buff, mon_size);
+    mon_buff[mon_size] = NULL_CHAR;
     int month = MonthAbbrToNumber((const char *)mon_buff);
     int year = jerry_get_number_value(args[2]);
     if (month < 0) {
@@ -696,9 +705,9 @@ static TimezoneResult ProcessTimezone(time_t rawtime, const jerry_value_t args[]
         return {timeinfo, useGMT, true};
     }
     jerry_size_t str_size = jerry_get_string_size(args[ARG_INDEX_1]);
-    jerry_char_t str_buf[ARG_COUNT_4];
+    jerry_char_t str_buf[str_size+1];
     jerry_string_to_char_buffer(args[ARG_INDEX_1], str_buf, str_size);
-    str_buf[str_size < ARG_COUNT_3 ? str_size : ARG_COUNT_3] = NULL_CHAR;
+    str_buf[str_size]  = NULL_CHAR;
     if (strcmp((char *)str_buf, GMT) == 0) {
         timeinfo = gmtime(&rawtime);
         useGMT = true;

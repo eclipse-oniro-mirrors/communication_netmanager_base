@@ -21,7 +21,6 @@
 #include "token_setproc.h"
 #include <gtest/gtest.h>
 
-std::string g_callbackUrl;
 using namespace OHOS::Security::AccessToken;
 
 PermissionDef pacPerm = {
@@ -59,7 +58,7 @@ HapInfoParams testInfoParms = {
 };
 static void Test1()
 {
-    int ret = -1;
+    int32_t ret = -1;
     {
         std::string url = "http://127.0.0.1/index";
         std::string host = "127.0.0.1";
@@ -105,17 +104,13 @@ TEST(MyTests, PacFileUrlClient)
     AccessTokenID accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
 
-    OH_NetConn_PacFileUrlChange pac_file_url_change;
-    pac_file_url_change.onNetPacFileUrlChange = [](auto url) { g_callbackUrl = url; };
-    uint32_t callbackId;
-    int32_t r = OH_NetConn_RegisterPacFileUrlCallback(&pac_file_url_change, &callbackId);
-    EXPECT_EQ(r, 0);
     StartHttpServer();
     sleep(6);
     std::string url = "http://localhost:8888/";
     char pacFileUrl[1024];
-    int ret = OH_NetConn_SetPacFileUrl(url.c_str());
-    OH_NetConn_SetProxyMode(OHOS::NetManagerStandard::ProxyModeType::PROXY_MODE_AUTO);
+    int32_t ret = OH_NetConn_SetPacFileUrl(url.c_str());
+    EXPECT_EQ(ret, 0);
+    ret = OH_NetConn_SetProxyMode(OHOS::NetManagerStandard::ProxyModeType::PROXY_MODE_AUTO);
     EXPECT_EQ(ret, 0);
     {
         std::string url = "http://127.0.0.1/index";
@@ -128,9 +123,7 @@ TEST(MyTests, PacFileUrlClient)
     ret = OH_NetConn_GetPacFileUrl(pacFileUrl);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(std::string(pacFileUrl), url);
-    EXPECT_EQ(g_callbackUrl, url);
     Test1();
-    OH_NetConn_UnregisterPacFileUrlCallback(callbackId);
     AccessTokenKit::DeleteToken(accessID_);
     SetSelfTokenID(currentID_);
 }

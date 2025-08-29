@@ -38,14 +38,6 @@ const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
 } // namespace
 
-void NetConnServiceStub::InitPacFileCallbackFuncToInterfaceMap()
-{
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_PAC_FILE_URL_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterPacFileProxyCallback, {Permission::SET_PAC_URL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_PAC_FILE_URL_CALLBACK)] = {
-        &NetConnServiceStub::OnUnregisterPacFileProxyCallback, {Permission::SET_PAC_URL}};
-}
-
 void NetConnServiceStub::InitNetSupplierFuncToInterfaceMap()
 {
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER)] = {
@@ -105,7 +97,6 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_REUSE_SUPPLIER_ID)] = {
         &NetConnServiceStub::OnSetReuseSupplierId, {Permission::CONNECTIVITY_INTERNAL}};
     InitNetSupplierFuncToInterfaceMap();
-    InitPacFileCallbackFuncToInterfaceMap();
     InitAll();
 }
 
@@ -1456,7 +1447,8 @@ int32_t NetConnServiceStub::OnFindProxyForURL(MessageParcel &data, MessageParcel
 
     int32_t status = 0;
     if (ret != 0) {
-        status = NETMANAGER_ERR_INTERNAL;
+        proxy.clear();
+        status = NETMANAGER_SUCCESS;
     }
     if (!reply.WriteInt32(status)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -1487,7 +1479,7 @@ int32_t NetConnServiceStub::OnGetPacFileUrl(MessageParcel &data, MessageParcel &
 int32_t NetConnServiceStub::OnGetProxyMode(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("stub execute OnGetProxyMode");
-    int mode = -1;
+    OHOS::NetManagerStandard::ProxyModeType mode;
     int32_t ret = GetProxyMode(mode);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -1504,11 +1496,22 @@ int32_t NetConnServiceStub::OnGetProxyMode(MessageParcel &data, MessageParcel &r
 int32_t NetConnServiceStub::OnSetProxyMode(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("stub execute OnSetProxyMode");
-    int mode = -1;
+    int32_t mode = -1;
     if (!data.ReadInt32(mode)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t ret = SetProxyMode(mode);
+    OHOS::NetManagerStandard::ProxyModeType proxyMode;
+    switch (mode) {
+        case PROXY_MODE_OFF:
+            proxyMode = PROXY_MODE_OFF;
+            break;
+        case PROXY_MODE_AUTO:
+            proxyMode = PROXY_MODE_AUTO;
+            break;
+        default:
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    int32_t ret = SetProxyMode(proxyMode);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -1602,44 +1605,6 @@ int32_t NetConnServiceStub::OnUnregisterNetInterfaceCallback(MessageParcel &data
 
     sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
     int32_t ret = UnregisterNetInterfaceCallback(callback);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnRegisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote ptr is nullptr.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    sptr<INetPacFileUrlCallback> callback = iface_cast<INetPacFileUrlCallback>(remote);
-    int32_t ret = RegisterNetPacFileUrlInterfaceCallback(callback);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnUnregisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote ptr is nullptr.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    sptr<INetPacFileUrlCallback> callback = iface_cast<INetPacFileUrlCallback>(remote);
-    int32_t ret = UnregisterNetPacFileUrlInterfaceCallback(callback);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

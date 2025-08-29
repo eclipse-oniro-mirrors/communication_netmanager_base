@@ -20,8 +20,8 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
-constexpr int PORT = 8888;
-constexpr int TIMEOUT = 3;
+constexpr int32_t PORT = 8888;
+constexpr int32_t TIMEOUT = 3;
 static bool g_isRunning = true;
 static std::string g_fileContent =
     "// PAC (Proxy Auto-Configuration) 脚本示例\n"
@@ -140,15 +140,15 @@ static std::string g_fileContent =
     "    return \"PROXY default-proxy.com:8080; DIRECT\";\n"
     "}";
 
-int CreateServerSocket()
+int32_t CreateServerSocket()
 {
-    int serverFd = socket(AF_INET, SOCK_STREAM, 0);
+    int32_t serverFd = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFd < 0) {
         std::cerr << "创建套接字失败" << std::endl;
         return -1;
     }
 
-    int opt = 1;
+    int32_t opt = 1;
     if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         std::cerr << "设置套接字选项失败" << std::endl;
         close(serverFd);
@@ -158,7 +158,7 @@ int CreateServerSocket()
     return serverFd;
 }
 
-bool BindServerSocket(int serverFd, int port)
+bool BindServerSocket(int32_t serverFd, int32_t port)
 {
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -188,9 +188,9 @@ std::string GenerateHttpResponse(const std::string &fileContent, const std::stri
            fileContent;
 }
 
-void HandleClientConnection(int clientSocket, const std::string &response)
+void HandleClientConnection(int32_t clientSocket, const std::string &response)
 {
-    constexpr int bufferSize = 1024;
+    constexpr int32_t bufferSize = 1024;
     char buffer[bufferSize] = {0};
     read(clientSocket, buffer, bufferSize);
     std::cout << "收到请求：\n" << buffer << std::endl;
@@ -199,7 +199,7 @@ void HandleClientConnection(int clientSocket, const std::string &response)
     close(clientSocket);
 }
 
-void RunHttpServer(int serverFd)
+void RunHttpServer(int32_t serverFd)
 {
     if (listen(serverFd, TIMEOUT) < 0) {
         std::cerr << "监听失败" << std::endl;
@@ -211,9 +211,9 @@ void RunHttpServer(int serverFd)
     std::string response = GenerateHttpResponse(g_fileContent, filename);
     printf("###############\n %s \n#########\n", g_fileContent.c_str());
     struct sockaddr_in address;
-    int addrlen = sizeof(address);
+    int32_t addrlen = sizeof(address);
     while (g_isRunning) {
-        int clientSocket =
+        int32_t clientSocket =
             accept(serverFd, reinterpret_cast<sockaddr *>(&address), reinterpret_cast<socklen_t *>(&addrlen));
         if (clientSocket < 0) {
             std::cerr << "接受连接失败" << std::endl;
@@ -226,7 +226,7 @@ void RunHttpServer(int serverFd)
 void StartHttpServer()
 {
     std::thread httpThread([]() {
-        int serverFd = CreateServerSocket();
+        int32_t serverFd = CreateServerSocket();
         if (serverFd < 0) {
             return 1;
         }

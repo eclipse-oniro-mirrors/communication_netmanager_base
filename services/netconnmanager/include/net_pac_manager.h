@@ -15,14 +15,14 @@
 
 #ifndef JERRY_NET_PAC_MANAGER_H
 #define JERRY_NET_PAC_MANAGER_H
-
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
 #include <string>
 #include <memory>
 #include "mutex"
 namespace OHOS {
 namespace NetManagerStandard {
 enum PAC_STATUS {
-    /*
+    /**
      * 执行成功
      */
     PAC_OK,
@@ -77,5 +77,5 @@ private:
 };
 }  // namespace NetManagerStandard
 }  // namespace OHOS
-
+#endif
 #endif  // JERRY_NET_PAC_MANAGER_H

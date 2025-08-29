@@ -173,13 +173,13 @@ std::string GetHeaderValue(const std::string &request, const std::string &header
     return request.substr(valueStart, valueEnd - valueStart);
 }
 
-int InitializeServerSocket(int port, const std::string &ip)
+int32_t InitializeServerSocket(int32_t port, const std::string &ip)
 {
-    int serverFd = socket(AF_INET, SOCK_STREAM, 0);
+    int32_t serverFd = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFd < 0) {
         return -1;
     }
-    int opt = 1;
+    int32_t opt = 1;
     if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         return -1;
     }
@@ -201,10 +201,10 @@ int InitializeServerSocket(int port, const std::string &ip)
     return serverFd;
 }
 
-void HandleTestRequest(int socket, const std::string &request, struct sockaddr_in &address)
+void HandleTestRequest(int32_t socket, const std::string &request, struct sockaddr_in &address)
 {
     std::string clientIp = inet_ntoa(address.sin_addr);
-    int clientPort = ntohs(address.sin_port);
+    int32_t clientPort = ntohs(address.sin_port);
     bool isProxy = request.find("Proxy-Connection") != std::string::npos;
     std::string info = "{\"ClientIp\":\"";
     info += clientIp;
@@ -240,7 +240,7 @@ void HandleTestRequest(int socket, const std::string &request, struct sockaddr_i
     send(socket, response.c_str(), response.length(), 0);
 }
 
-void HandlePacRequest(int socket, const std::string &content)
+void HandlePacRequest(int32_t socket, const std::string &content)
 {
     std::string filename = "download.txt";
     printf("\033[34msend pac script %.128s \n\033[0m", content.c_str());
@@ -261,17 +261,17 @@ void HandlePacRequest(int socket, const std::string &content)
     send(socket, response.c_str(), response.length(), 0);
 }
 
-void HandleClientConnection(int serverFd, std::string pacScript)
+void HandleClientConnection(int32_t serverFd, std::string pacScript)
 {
     struct sockaddr_in address;
-    int addrlen = sizeof(address);
+    int32_t addrlen = sizeof(address);
     if (pacScript.empty()) {
         pacScript = g_defaultFileContent;
     }
 #define SIZE_1024 1024
     char buffer[SIZE_1024] = {0};
 
-    int clientSocket =
+    int32_t clientSocket =
         accept(serverFd, reinterpret_cast<sockaddr *>(&address), reinterpret_cast<socklen_t *>(&addrlen));
     if (clientSocket < 0) {
         return;
@@ -291,10 +291,10 @@ void HandleClientConnection(int serverFd, std::string pacScript)
 
 static bool g_isRunning = true;
 
-void StartHttpServer(int port, std::string ip, std::string pacScript)
+void StartHttpServer(int32_t port, std::string ip, std::string pacScript)
 {
     std::thread httpThread([port, ip, pacScript]() {
-        int serverFd = InitializeServerSocket(port, ip);
+        int32_t serverFd = InitializeServerSocket(port, ip);
         if (serverFd < 0) {
             return 1;
         }

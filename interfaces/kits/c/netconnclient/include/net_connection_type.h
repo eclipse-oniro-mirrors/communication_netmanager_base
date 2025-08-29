@@ -265,7 +265,6 @@ typedef void (*OH_NetConn_NetConnectionPropertiesChange)(NetConn_NetHandle *netH
 typedef void (*OH_NetConn_NetLost)(NetConn_NetHandle *netHandle);
 
 typedef void (*OH_NetConn_NetUnavailable)(void);
-typedef void (*OH_NetConn_NetPacFileUrlChange)(const char *url);
 
 typedef void (*OH_NetConn_NetBlockStatusChange)(NetConn_NetHandle *netHandle, bool blocked);
 
@@ -274,7 +273,6 @@ typedef struct NetConn_NetConnCallback {
     OH_NetConn_NetCapabilitiesChange onNetCapabilitiesChange;
     OH_NetConn_NetConnectionPropertiesChange onConnetionProperties;
     OH_NetConn_NetLost onNetLost;
-    OH_NetConn_NetPacFileUrlChange onNetPacFileUrlChange;
     OH_NetConn_NetUnavailable onNetUnavailable;
     OH_NetConn_NetBlockStatusChange onNetBlockStatusChange;
 } NetConn_NetConnCallback;
@@ -308,12 +306,6 @@ typedef struct NetConn_TraceRouteInfo {
     /** RTT in millisecond */
     uint32_t rtt[NETCONN_MAX_RTT_NUM];
 } NetConn_TraceRouteInfo;
-
-typedef void (*OH_NetPacFileUrlChange)(const char *url);
-
-typedef struct OH_NetConn_PacFileUrlChange {
-    OH_NetPacFileUrlChange onNetPacFileUrlChange;
-} OH_NetConn_PacFileUrlChange;
 #ifdef __cplusplus
 }
 #endif

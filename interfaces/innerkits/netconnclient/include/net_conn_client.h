@@ -32,7 +32,6 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
-#include "i_net_pac_file_url_callback.h"
 
 namespace OHOS {
 class ISystemAbilityStatusChange;
@@ -513,17 +512,13 @@ public:
 
     int32_t SetPacFileUrl(const std::string &pacUrl);
 
-    int32_t SetProxyMode(const int mode);
+    int32_t SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode);
 
-    int32_t GetProxyMode(int &mode);
+    int32_t GetProxyMode(OHOS::NetManagerStandard::ProxyModeType &mode);
 
     int32_t GetPacFileUrl(std::string &pacUrl);
 
     int32_t FindProxyForURL(const std::string &url, std::string &proxy, const std::string host = "");
-
-    int32_t RegisterPacFileProxyCallback(const sptr<INetPacFileUrlCallback> callback);
-
-    int32_t UnregisterPacFileProxyCallback(const sptr<INetPacFileUrlCallback> callback);
 
     int32_t QueryTraceRoute(
         const std::string &destination, int32_t maxJumpNumber, int32_t packetsType, std::string &traceRouteInfo);
@@ -579,7 +574,6 @@ private:
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
-    sptr<INetPacFileUrlCallback> netPorxyCallback_;
     std::mutex registerConnTupleListMutex_;
     std::mutex netSupplierCallbackMutex_;
     std::string pacUrl_;

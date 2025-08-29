@@ -47,7 +47,9 @@ ohos_unittest("local_proxy_server_test") {
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
     ]
-
+    if(netmanager_base_enable_pac_proxy){
+        defines = [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     part_name = "netstack"
     subsystem_name = "communication"
 }
@@ -83,7 +85,9 @@ ohos_unittest("pac_http_test") {
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
     ]
-
+    if(netmanager_base_enable_pac_proxy){
+        defines = [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     part_name = "netstack"
     subsystem_name = "communication"
 }
@@ -121,7 +125,9 @@ ohos_unittest("proxy_switch_mode_test") {
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
     ]
-
+    if(netmanager_base_enable_pac_proxy){
+        defines = [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     part_name = "netstack"
     subsystem_name = "communication"
 }
@@ -159,7 +165,9 @@ ohos_unittest("proxy_switch_server_tool") {
         "access_token:libnativetoken",
         "access_token:libtoken_setproc",
     ]
-
+    if(netmanager_base_enable_pac_proxy){
+        defines = [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     part_name = "netstack"
     subsystem_name = "communication"
 }

@@ -22,7 +22,6 @@
 #include "net_connection_type.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_pac_proxy_adapter.h"
 
 using namespace OHOS::NetManagerStandard;
 
@@ -399,23 +398,23 @@ int32_t OH_NetConn_GetPacUrl(char *pacUrl)
     return ret;
 }
 
-int32_t OH_NetConn_SetProxyMode(const int mode)
+int32_t OH_NetConn_SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode)
 {
     int32_t ret = NetConnClient::GetInstance().SetProxyMode(mode);
     return ret;
 }
 
-int32_t OH_NetConn_GetProxyMode(int * mode)
+int32_t OH_NetConn_GetProxyMode(OHOS::NetManagerStandard::ProxyModeType *mode)
 {
     if (mode == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetProxyMode received invalid parameters");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    int temp;
+    OHOS::NetManagerStandard::ProxyModeType temp;
     int32_t ret = NetConnClient::GetInstance().GetProxyMode(temp);
     if (ret) {
-        NETMGR_LOG_E("OH_NetConn_GetPacUrl string copy failed");
-        return NETMANAGER_ERR_INTERNAL;
+        NETMGR_LOG_E("OH_NetConn_GetProxyMode string copy failed");
+        return RegisterErrorCodeTrans(ret);
     }
     *mode = temp;
     return ret;
@@ -444,26 +443,6 @@ int32_t OH_NetConn_GetPacFileUrl(char *pacUrl)
         return NETMANAGER_ERR_INTERNAL;
     }
     return ret;
-}
-
-int32_t OH_NetConn_RegisterPacFileUrlCallback(OH_NetConn_PacFileUrlChange *pacFileUrlChange, uint32_t *callbackId)
-{
-    if (pacFileUrlChange == nullptr) {
-        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback netConnCallback is NULL");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
-    }
-    if (callbackId == nullptr) {
-        NETMGR_LOG_E("OH_NetConn_RegisterNetConnCallback callbackId is NULL");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
-    }
-    int32_t ret = NetPacFilePorxyCallbackManager::GetInstance().RegisterPacFileUrlCallback(nullptr, pacFileUrlChange, 0,
-                                                                                           callbackId);
-    return RegisterErrorCodeTrans(ret);
-}
-
-int32_t OH_NetConn_UnregisterPacFileUrlCallback(uint32_t callBackId)
-{
-    return NetPacFilePorxyCallbackManager::GetInstance().UnregisterPacFileUrlCallback(callBackId);
 }
 
 int32_t OH_NetConn_FindProxyForURL(const char *url, const char *host, char *proxy)
