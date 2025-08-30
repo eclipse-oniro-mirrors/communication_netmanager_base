@@ -101,7 +101,7 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
         return ret;
     }
     NETNATIVE_LOG_D("FwmarkNetwork: SetMark netId: %{public}d, socketFd:%{public}d, cmd:%{public}d", command->netId,
-                   *socketFd, command->cmdId);
+        *socketFd, command->cmdId);
     switch (command->cmdId) {
         case FwmarkCommand::SELECT_NETWORK: {
             fwmark.netId = command->netId;
