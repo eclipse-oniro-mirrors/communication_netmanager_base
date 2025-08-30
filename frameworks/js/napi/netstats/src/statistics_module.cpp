@@ -56,6 +56,7 @@ constexpr const char *FUNCTION_GET_SOCKFD_RXBYTES = "getSockfdRxBytes";
 constexpr const char *FUNCTION_GET_SOCKFD_TXBYTES = "getSockfdTxBytes";
 constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK = "getTrafficStatsByNetwork";
 constexpr const char *FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK = "getTrafficStatsByUidNetwork";
+constexpr const char *FUNCTION_GET_SELF_TRAFFIC_STATS = "getSelfTrafficStats";
 } // namespace
 
 napi_value GetCellularRxBytes(napi_env env, napi_callback_info info)
@@ -156,6 +157,13 @@ napi_value GetTrafficStatsByUidNetwork(napi_env env, napi_callback_info info)
         StatisticsAsyncWork::ExecGetTrafficStatsByUidNetwork, StatisticsAsyncWork::GetTrafficStatsByUidNetworkCallback);
 }
 
+napi_value GetSelfTrafficStats(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetSelfTrafficStatsContext>(
+        env, info, FUNCTION_GET_SELF_TRAFFIC_STATS, nullptr,
+        StatisticsAsyncWork::ExecGetSelfTrafficStats, StatisticsAsyncWork::GetSelfTrafficStatsCallback);
+}
+
 napi_value UpdateIfacesStats(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<UpdateIfacesStatsContext>(env, info, FUNCTION_UPDATE_IFACE_STATS, nullptr,
@@ -199,6 +207,7 @@ napi_value InitStatisticsModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_UID_STATS, GetIfaceUidStats),
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_TRAFFIC_STATS_BY_NETWORK, GetTrafficStatsByNetwork),
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_TRAFFIC_STATS_BY_UID_NETWORK, GetTrafficStatsByUidNetwork),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_SELF_TRAFFIC_STATS, GetSelfTrafficStats),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_IFACE_STATS, UpdateIfacesStats),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_STATS_DATA, UpdateStatsData),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),

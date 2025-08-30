@@ -54,6 +54,7 @@ ohos_shared_library("statistics") {
     "src/context/get_traffic_stats_by_uid_network_context.cpp",
     "src/context/get_uid_rxbytes_context.cpp",
     "src/context/update_iface_stats_context.cpp",
+    "src/context/get_self_traffic_stats_context.cpp",
     "src/statistics_async_work.cpp",
     "src/statistics_callback_observer.cpp",
     "src/statistics_exec.cpp",

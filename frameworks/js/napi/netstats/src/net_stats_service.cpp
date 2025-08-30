@@ -896,10 +896,11 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
                                                      const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
-    int32_t checkPermission = CheckNetManagerAvailable();
-    if (checkPermission != NETMANAGER_SUCCESS) {
-        return checkPermission;
+    if (NetManagerPermission::IsSystemCaller() &&
+        !NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
+
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
