@@ -111,7 +111,10 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
 
 int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid = 0, requestId = 0, registerType = 0, isRemoveUid = 0;
+    uint32_t uid = 0;
+    uint32_t requestId = 0;
+    uint32_t registerType = 0;
+    uint32_t isRemoveUid = 0;
     std::string ident;
     uint32_t size = 0;
     int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
@@ -123,7 +126,6 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     std::set<NetBearType> netBearTypes;
     int32_t value = 0;
     if (size > MAX_NET_BEARTYPE_NUM) {
-        NETMGR_LOG_E("Net beartype size is too large");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
@@ -141,7 +143,6 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     if (size > MAX_NET_CAP_NUM) {
-        NETMGR_LOG_E("Net cap size is too large");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     for (uint32_t i = 0; i < size; i++) {
