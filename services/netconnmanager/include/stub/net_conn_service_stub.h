@@ -95,8 +95,6 @@ private:
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
-    int32_t OnRegisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUnregisterPacFileProxyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnFindProxyForURL(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNetInterfaceIpAddress(MessageParcel &data, MessageParcel &reply);

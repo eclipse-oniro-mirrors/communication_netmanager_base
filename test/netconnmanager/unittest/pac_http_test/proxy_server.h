@@ -53,7 +53,7 @@ struct Stats {
 };
 class ProxyServer {
 public:
-    explicit ProxyServer(int port = 8080, int numThreads = 0);
+    explicit ProxyServer(int32_t port = 8080, int32_t numThreads = 0);
 
     ~ProxyServer();
 
@@ -71,44 +71,45 @@ public:
 
     double GetThroughput() const;
 
-    int FindAvailablePort(int startPort = 1024, int endPort = 65535);
+    int32_t FindAvailablePort(int32_t startPort = 1024, int32_t endPort = 65535);
 
     static std::string proxServerTargetUrl;
-    static int proxServerPort;
+    static int32_t proxServerPort;
     static std::map<std::string, std::string> pacScripts;
 private:
-    bool IsPortAvailable(int port);
-    void ForwardResponseToClient(int clientSocket, int serverSocket);
-    void SendErrorResponse(int clientSocket, const char *response);
-    bool SetSocketTimeout(int socket);
-    bool ReadRequestHeader(int clientSocket, std::string &requestHeader);
-    void CleanupConnection(int clientSocket);
-    void HandleConnectRequest(int clientSocket, const std::string &requestHeader, const std::string &url);
-    void HandleHttpRequest(int clientSocket, std::string &requestHeader, const std::string &url);
-    bool ParsePacResult(const std::string &pacResult, std::string &proxyType, std::string &proxyHost, int &proxyPort);
-    int EstablishServerConnection(const std::string &url, const std::string &host, int port,
+    bool IsPortAvailable(int32_t port);
+    void ForwardResponseToClient(int32_t clientSocket, int32_t serverSocket);
+    void SendErrorResponse(int32_t clientSocket, const char *response);
+    bool SetSocketTimeout(int32_t socket);
+    bool ReadRequestHeader(int32_t clientSocket, std::string &requestHeader);
+    void CleanupConnection(int32_t clientSocket);
+    void HandleConnectRequest(int32_t clientSocket, const std::string &requestHeader, const std::string &url);
+    void HandleHttpRequest(int32_t clientSocket, std::string &requestHeader, const std::string &url);
+    bool ParsePacResult(const std::string &pacResult, std::string &proxyType,
+                std::string &proxyHost, int32_t &proxyPort);
+    int32_t EstablishServerConnection(const std::string &url, const std::string &host, int32_t port,
                                   const std::string &requestType, std::string &requestHeader);
     bool ParseProxyInfo(std::string url, std::string host, std::string &proxyType, std::string &proxyHost,
-                        int &proxyPort);
+                        int32_t &proxyPort);
 
     struct ClientTask {
-        int clientSocket;
+        int32_t clientSocket;
         struct sockaddr_in clientAddr;
 
-        ClientTask(int socket, const struct sockaddr_in &addr) : clientSocket(socket), clientAddr(addr) {}
+        ClientTask(int32_t socket, const struct sockaddr_in &addr) : clientSocket(socket), clientAddr(addr) {}
     };
 
-    void HandleClient(int clientSocket);
+    void HandleClient(int32_t clientSocket);
 
     std::string GetRequestUrl(const std::string &header);
 
     std::string GetRequestMethod(const std::string &header);
 
-    bool ParseConnectRequest(const std::string &header, std::string &host, int &port);
+    bool ParseConnectRequest(const std::string &header, std::string &host, int32_t &port);
 
-    bool ParseHttpRequest(const std::string &header, std::string &host, int &port);
+    bool ParseHttpRequest(const std::string &header, std::string &host, int32_t &port);
 
-    void TunnelData(int client, int server);
+    void TunnelData(int32_t client, int32_t server);
 
     int ConnectToServer(const std::string &host, int port);
 
@@ -124,7 +125,7 @@ private:
 
     void AddTask(const ClientTask &task);
 
-    std::string ReceiveResponseHeader(int socket);
+    std::string ReceiveResponseHeader(int32_t socket);
 
     int port_;
     int serverSocket_;

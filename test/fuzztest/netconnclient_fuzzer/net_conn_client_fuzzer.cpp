@@ -30,7 +30,6 @@
 #include "net_interface_callback_stub.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_factoryreset_callback_stub.h"
-#include "net_pac_file_url_callback_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -95,7 +94,6 @@ public:
 };
 
 class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {};
-class NetPacFileUrlCallbackTest : public NetPacFileUrlCallbackStub {};
 
 static bool g_isInited = false;
 void Init()
@@ -1857,45 +1855,6 @@ void FindProxyForURLFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FIND_PAC_PROXY_FOR_URL), dataParcel);
 }
 
-void RegisterNetPacFileUrlInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
-{
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    auto callback = sptr<NetPacFileUrlCallbackStub>::MakeSptr();
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_PAC_FILE_URL_CALLBACK), dataParcel);
-}
-
-void UnregisterNetPacFileUrlInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr) {
-        return;
-    }
-    NetManagerBaseAccessToken token;
-    sptr<INetPacFileUrlCallback> callback = new (std::nothrow) NetPacFileUrlCallbackTest();
-    if (callback == nullptr) {
-        return;
-    }
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_PAC_FILE_URL_CALLBACK), dataParcel);
-    MessageParcel dataParcelNoRemoteObject;
-    if (!WriteInterfaceToken(dataParcelNoRemoteObject)) {
-        return;
-    }
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    dataParcelNoRemoteObject.WriteRemoteObject(callback->AsObject().GetRefPtr());
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_PAC_FILE_URL_CALLBACK),
-                    dataParcelNoRemoteObject);
-}
-
 void PacFileUrlFuzzTest(const uint8_t *data, size_t size)
 {
     SetPacFileUrlFuzzTest(data, size);
@@ -1903,8 +1862,6 @@ void PacFileUrlFuzzTest(const uint8_t *data, size_t size)
     GetProxyModeFuzzTest(data, size);
     GetPacFileUrlFuzzTest(data, size);
     FindProxyForURLFuzzTest(data, size);
-    RegisterNetPacFileUrlInterfaceCallbackFuzzTest(data, size);
-    UnregisterNetPacFileUrlInterfaceCallbackFuzzTest(data, size);
 }
 
 void SetReuseSupplierIdFuzzTest(const uint8_t *data, size_t size)

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
 #include <cstring>
 #include <string>
 #include <curl/curl.h>
@@ -31,6 +31,7 @@ constexpr const char USER_AGENT[] = "libcurl-agent/1.0";
 const std::string TRUE = "true";
 const std::string FALSE = "false";
 const std::string EMPTY = "";
+constexpr int32_t HTTP_CODE_200 = 200;
 } // namespace
 
 static std::string g_script;
@@ -157,13 +158,12 @@ PAC_STATUS NetPACManager::FindProxyForURL(const std::string &url, const std::str
     PAC_STATUS status = PAC_OK;
     if (!jerry_value_is_error(call_result)) {
         if (jerry_value_is_string(call_result)) {
-            jerry_length_t str_length = jerry_get_string_length(call_result);
-            if (str_length > 0) {
-                // 确保缓冲区足够大
-                std::vector<char> buffer(str_length + 1, 0);
-                jerry_string_to_char_buffer(call_result, reinterpret_cast<jerry_char_t *>(buffer.data()), str_length);
-                buffer[str_length] = NULL_CHAR;
-                proxy.append(buffer.data());
+            jerry_length_t strLength = jerry_get_string_length(call_result);
+            if (strLength > 0) {
+                char buffer[strLength + 1];
+                jerry_string_to_char_buffer(call_result, reinterpret_cast<jerry_char_t *>(buffer), strLength);
+                buffer[strLength] = NULL_CHAR;
+                proxy.append(buffer, strLength);
             }
         } else if (jerry_value_is_boolean(call_result)) {
             proxy.append(jerry_get_boolean_value(call_result) ? TRUE : FALSE);
@@ -221,7 +221,21 @@ void NetPACManager::DownloadPACScript(const std::string &url)
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     CURLcode res = curl_easy_perform(curl_handle);
     if (res != CURLE_OK) {
+        NETMGR_LOG_E("CURL perform failed: %{private}s", curl_easy_strerror(res));
         return;
+    }
+    int responseCode;
+    curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &responseCode);
+    if (responseCode != HTTP_CODE_200) {
+        NETMGR_LOG_E("HTTP request failed with status code: %ld", responseCode);
+        return;
+    }
+    if (data.empty()) {
+        NETMGR_LOG_E("Downloaded PAC script is empty");
+        return;
+    }
+    if (data.find("FindProxyForURL") == std::string::npos) {
+        NETMGR_LOG_W("Downloaded content may not be a valid PAC script (no FindProxyForURL function found)");
     }
     return;
 }
@@ -260,3 +274,4 @@ std::string NetPACManager::ParseHost(const std::string &url)
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
+#endif

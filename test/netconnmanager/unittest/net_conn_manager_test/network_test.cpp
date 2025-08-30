@@ -1525,6 +1525,57 @@ HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
+HWTEST_F(NetworkTest, PAC_OH_NetConn_SetPacFileUrl_001, TestSize.Level1)
+{
+    int32_t ret = OH_NetConn_SetPacFileUrl(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    char url[204];
+    ret = OH_NetConn_GetPacFileUrl(url);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(std::string(url), "");
+    ret = OH_NetConn_SetPacFileUrl("testurl");
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    ret = OH_NetConn_GetPacFileUrl(url);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, PAC_OH_NetConn_FindProxyForURL_001, TestSize.Level1)
+{
+    int32_t ret = OH_NetConn_FindProxyForURL(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    char empty[] = "";
+    ret = OH_NetConn_FindProxyForURL(nullptr, nullptr, empty);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    ret = OH_NetConn_FindProxyForURL(nullptr, empty, empty);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    ret = OH_NetConn_FindProxyForURL(empty, empty, empty);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    char url[] = "example.com";
+    char host[] = "example.com";
+    char proxy[1024];
+    ret = OH_NetConn_FindProxyForURL(url, host, proxy);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, PAC_OH_NetConn_SetProxyMode_001, TestSize.Level1)
+{
+    int32_t ret = OH_NetConn_SetProxyMode(PROXY_MODE_OFF);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ProxyModeType mode;
+    ret  = OH_NetConn_GetProxyMode(&mode);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(mode, PROXY_MODE_OFF);
+    ret = OH_NetConn_SetProxyMode(PROXY_MODE_AUTO);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    EXPECT_EQ(ret != NETMANAGER_SUCCESS, true);
+#else
+    EXPECT_EQ(ret == NETMANAGER_SUCCESS, true);
+#endif
+    ret  = OH_NetConn_GetProxyMode(&mode);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(mode, PROXY_MODE_AUTO);
+}
+
 HWTEST_F(NetworkTest, SetSleepModeTest001, TestSize.Level1)
 {
     int32_t netId = 1;
@@ -1545,6 +1596,5 @@ HWTEST_F(NetworkTest, SetSleepModeTest002, TestSize.Level1)
     network->SetSleepMode(false);
     EXPECT_EQ(network->isSleep_, false);
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS

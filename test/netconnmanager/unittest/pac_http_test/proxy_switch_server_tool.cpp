@@ -23,14 +23,14 @@
 #include <iostream>
 
 using namespace OHOS::NetManagerStandard;
-std::map<int, std::shared_ptr<ProxyServer>> services;
+std::map<int32_t, std::shared_ptr<ProxyServer>> services;
 #define PAC_PROXY_SERVER 9000
 #define GLOBAL_PROXY_SERVER 9001
 #define PROT_8080 8080
 #define PROT_8889 8889
 #define TIME 10
 
-static void StartProxyServer(int port)
+static void StartProxyServer(int32_t port)
 {
     std::shared_ptr<ProxyServer> server = std::make_shared<ProxyServer>(port);
     services.insert({port, server});

@@ -18,55 +18,55 @@
 #include "pac_server.h"
 #include <gtest/gtest.h>
 
-constexpr int TM_YEAR_BASE = 1900;
-constexpr int YEAR_1900 = 1900;
-constexpr int YEAR_1999 = 1999;
-constexpr int YEAR_2022 = 2022;
-constexpr int YEAR_2023 = 2023;
-constexpr int YEAR_2024 = 2024;
-constexpr int YEAR_2025 = 2025;
-constexpr int YEAR_2033 = 2033;
+constexpr int32_t TM_YEAR_BASE = 1900;
+constexpr int32_t YEAR_1900 = 1900;
+constexpr int32_t YEAR_1999 = 1999;
+constexpr int32_t YEAR_2022 = 2022;
+constexpr int32_t YEAR_2023 = 2023;
+constexpr int32_t YEAR_2024 = 2024;
+constexpr int32_t YEAR_2025 = 2025;
+constexpr int32_t YEAR_2033 = 2033;
 
-constexpr int MONTH_JAN = 0;
-constexpr int MONTH_FEB = 1;
-constexpr int MONTH_MAY = 4;
-constexpr int MONTH_JUN = 5;
-constexpr int MONTH_JUL = 6;
-constexpr int MONTH_AUG = 7;
-constexpr int MONTH_NOV = 10;
-constexpr int MONTH_DEC = 11;
+constexpr int32_t MONTH_JAN = 0;
+constexpr int32_t MONTH_FEB = 1;
+constexpr int32_t MONTH_MAY = 4;
+constexpr int32_t MONTH_JUN = 5;
+constexpr int32_t MONTH_JUL = 6;
+constexpr int32_t MONTH_AUG = 7;
+constexpr int32_t MONTH_NOV = 10;
+constexpr int32_t MONTH_DEC = 11;
 
-constexpr int DAY_1 = 1;
-constexpr int DAY_2 = 2;
-constexpr int DAY_5 = 5;
-constexpr int DAY_11 = 11;
-constexpr int DAY_15 = 15;
-constexpr int DAY_16 = 16;
-constexpr int DAY_24 = 24;
-constexpr int DAY_25 = 25;
-constexpr int DAY_31 = 31;
+constexpr int32_t DAY_1 = 1;
+constexpr int32_t DAY_2 = 2;
+constexpr int32_t DAY_5 = 5;
+constexpr int32_t DAY_11 = 11;
+constexpr int32_t DAY_15 = 15;
+constexpr int32_t DAY_16 = 16;
+constexpr int32_t DAY_24 = 24;
+constexpr int32_t DAY_25 = 25;
+constexpr int32_t DAY_31 = 31;
 
-constexpr int HOUR_8 = 8;
-constexpr int HOUR_11 = 11;
-constexpr int HOUR_22 = 22;
+constexpr int32_t HOUR_8 = 8;
+constexpr int32_t HOUR_11 = 11;
+constexpr int32_t HOUR_22 = 22;
 
-constexpr int WEEKDAY_SUN = 0;
-constexpr int WEEKDAY_MON = 1;
-constexpr int WEEKDAY_SAT = 6;
+constexpr int32_t WEEKDAY_SUN = 0;
+constexpr int32_t WEEKDAY_MON = 1;
+constexpr int32_t WEEKDAY_SAT = 6;
 
-constexpr int K_HOUR12 = 12;
-constexpr int K_HOUR9 = 9;
-constexpr int K_HOUR13 = 13;
-constexpr int K_HOUR8 = 8;
-constexpr int K_HOUR17 = 17;
+constexpr int32_t K_HOUR12 = 12;
+constexpr int32_t K_HOUR9 = 9;
+constexpr int32_t K_HOUR13 = 13;
+constexpr int32_t K_HOUR8 = 8;
+constexpr int32_t K_HOUR17 = 17;
 
-constexpr int K_MINUTE0 = 0;
-constexpr int K_MINUTE30 = 30;
-constexpr int K_MINUTE59 = 59;
+constexpr int32_t K_MINUTE0 = 0;
+constexpr int32_t K_MINUTE30 = 30;
+constexpr int32_t K_MINUTE59 = 59;
 
-constexpr int K_SECOND0 = 0;
-constexpr int K_SECOND1 = 1;
-constexpr int K_SECOND59 = 59;
+constexpr int32_t K_SECOND0 = 0;
+constexpr int32_t K_SECOND1 = 1;
+constexpr int32_t K_SECOND59 = 59;
 
 using namespace OHOS::NetManagerStandard;
 std::string script =
@@ -205,7 +205,7 @@ TEST(MyTests, weekdayRange)
     struct tm *timeinfo;
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    int dayOfWeek = timeinfo->tm_wday;
+    int32_t dayOfWeek = timeinfo->tm_wday;
     if (dayOfWeek == 0 || dayOfWeek == 6) {
         EXPECT_EQ(proxy, "false");
     } else {
@@ -885,7 +885,7 @@ TEST(MyTests, dateRange)
     SetEnableMock(false);
 }
 
-void SetupTestTime(int hour, int minute, int second = 0)
+void SetupTestTime(int32_t hour, int32_t minute, int32_t second = 0)
 {
     GetDefaultTmLocalTime()->tm_hour = hour;
     GetDefaultTmLocalTime()->tm_min = minute;
@@ -1033,7 +1033,7 @@ TEST(MyTests, FindProxyForURL_InitAndBasic)
 {
     std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> manager =
         std::make_shared<OHOS::NetManagerStandard::NetPACManager>();
-    int ret = manager->InitPACScriptWithURL("http://localhost:8888/");
+    int32_t ret = manager->InitPACScriptWithURL("http://localhost:8888/");
     {
         std::string url = "http://127.0.0.1/index";
         std::string host = "127.0.0.1";
