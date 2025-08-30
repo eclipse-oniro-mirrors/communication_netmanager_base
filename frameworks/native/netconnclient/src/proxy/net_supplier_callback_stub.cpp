@@ -111,10 +111,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
 
 int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid = 0;
-    uint32_t requestId = 0;
-    uint32_t registerType = 0;
-    uint32_t isRemoveUid = 0;
+    uint32_t uid = 0, requestId = 0, registerType = 0, isRemoveUid = 0;
     std::string ident;
     uint32_t size = 0;
     int32_t result = data.ReadUint32(uid) && data.ReadUint32(requestId) && data.ReadUint32(registerType) &&
