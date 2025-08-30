@@ -22,6 +22,7 @@
 #include "net_stats_network.h"
 #include "netmanager_base_log.h"
 #include "statistics_observer_wrapper.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -170,6 +171,25 @@ bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetwork
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecGetSelfTrafficStats(GetSelfTrafficStatsContext *context)
+{
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    if (network == nullptr) {
+        NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
+        return false;
+    }
+    network->simId_ = context->GetSimId();
+    network->startTime_ = context->GetStartTime();
+    network->endTime_ = context->GetEndTime();
+    network->type_ = context->GetNetBearType();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t result = NetStatsClient::GetInstance().GetTrafficStatsByUidNetwork(context->GetNetStatsInfoSequence(),
+                                                                               uid, network);
+    NETMANAGER_BASE_LOGE("ExecGetSelfTrafficStats callingUid:%{public}d, result:%{public}d", uid, result);
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
@@ -247,6 +267,28 @@ napi_value StatisticsExec::GetGetTrafficStatsByNetworkCallback(GetTrafficStatsBy
 }
 
 napi_value StatisticsExec::GetGetTrafficStatsByUidNetworkCallback(GetTrafficStatsByUidNetworkContext *context)
+{
+    auto list = context->GetNetStatsInfoSequence();
+    napi_value stats = NapiUtils::CreateArray(context->GetEnv(), list.size());
+    size_t index = 0;
+    for (const auto &item : list) {
+        napi_value info = NapiUtils::CreateObject(context->GetEnv());
+        NapiUtils::SetInt64Property(context->GetEnv(), info, RX_BYTES, item.info_.rxBytes_);
+        NapiUtils::SetInt64Property(context->GetEnv(), info, TX_BYTES, item.info_.txBytes_);
+        NapiUtils::SetInt64Property(context->GetEnv(), info, RX_PACKETS, item.info_.rxPackets_);
+        NapiUtils::SetInt64Property(context->GetEnv(), info, TX_PACKETS, item.info_.txPackets_);
+
+        napi_value tmp = NapiUtils::CreateObject(context->GetEnv());
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, START_TIME, item.startTime_);
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, END_TIME, item.endTime_);
+        NapiUtils::SetNamedProperty(context->GetEnv(), tmp, NET_STATS_INFO, info);
+
+        NapiUtils::SetArrayElement(context->GetEnv(), stats, index++, tmp);
+    }
+    return stats;
+}
+
+napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContext *context)
 {
     auto list = context->GetNetStatsInfoSequence();
     napi_value stats = NapiUtils::CreateArray(context->GetEnv(), list.size());

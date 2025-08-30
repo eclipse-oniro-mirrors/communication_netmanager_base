@@ -110,6 +110,12 @@ void StatisticsAsyncWork::ExecGetTrafficStatsByUidNetwork(napi_env env, void *da
         env, data);
 }
 
+void StatisticsAsyncWork::ExecGetSelfTrafficStats(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetSelfTrafficStatsContext, StatisticsExec::ExecGetSelfTrafficStats>(
+        env, data);
+}
+
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(
@@ -198,6 +204,12 @@ void StatisticsAsyncWork::GetTrafficStatsByUidNetworkCallback(napi_env env, napi
 {
     BaseAsyncWork::AsyncWorkCallback<GetTrafficStatsByUidNetworkContext,
                                      StatisticsExec::GetGetTrafficStatsByUidNetworkCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::GetSelfTrafficStatsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetSelfTrafficStatsContext,
+                                     StatisticsExec::GetSelfTrafficStatsCallback>(env, status, data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
