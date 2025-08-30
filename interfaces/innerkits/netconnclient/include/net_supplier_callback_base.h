@@ -30,6 +30,7 @@ struct NetRequest {
     uint32_t uid = 0;
     uint32_t requestId = 0;
     uint32_t registerType = REGISTER;
+    uint32_t isRemoveUid = 0;
     std::string ident;
     std::set<NetBearType> bearTypes;
     std::set<NetCap> netCaps;
