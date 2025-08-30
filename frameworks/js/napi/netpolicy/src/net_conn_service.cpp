@@ -450,7 +450,7 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
 int32_t NetConnService::NetDetection(int32_t netId)
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    NETMGR_LOG_I("NetDetection, call uid [%{public}d]", callingUid);
+    NETMGR_LOG_D("NetDetection, call uid [%{public}d]", callingUid);
     httpProxyThreadCv_.notify_all();
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
@@ -1122,7 +1122,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     initLocker.unlock();
     FindBestNetworkForAllRequest();
     SetCellularDetectSleepModeWhenWifiStateChange(supplier);
-    NETMGR_LOG_I("UpdateNetSupplierInfo service out.");
+    NETMGR_LOG_D("UpdateNetSupplierInfo service out.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1224,7 +1224,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     if (oldHttpProxy != netLinkInfo->httpProxy_) {
         SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
     }
-    NETMGR_LOG_I("UpdateNetLinkInfo service out.");
+    NETMGR_LOG_D("UpdateNetLinkInfo service out.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1298,7 +1298,7 @@ bool NetConnService::IsCallingUserSupplier(uint32_t supplierId)
 
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
-    NETMGR_LOG_I("Enter NetDetection, netId=[%{public}d]", netId);
+    NETMGR_LOG_D("Enter NetDetection, netId=[%{public}d]", netId);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr) || !iterNetwork->second->IsConnected()) {
         NETMGR_LOG_E("Could not find the corresponding network or network is not connected.");
@@ -1566,7 +1566,7 @@ void NetConnService::FindBestNetworkForAllRequest()
         NetRequest netRequest(iterActive->second->GetUid(), iterActive->first);
         bestSupplier->SelectAsBestNetwork(netRequest);
     }
-    NETMGR_LOG_I("FindBestNetworkForAllRequest end");
+    NETMGR_LOG_D("FindBestNetworkForAllRequest end");
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
@@ -1676,7 +1676,7 @@ int32_t NetConnService::GenerateInternalNetId()
 void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
                                          const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
-    NETMGR_LOG_I("Could not find best supplier for request:[%{public}d]", reqId);
+    NETMGR_LOG_D("Could not find best supplier for request:[%{public}d]", reqId);
     if (supplier != nullptr) {
         supplier->RemoveBestRequest(reqId);
         if (callback != nullptr) {
@@ -1737,7 +1737,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
             request->GetRegisterType(),
             request->GetNetSpecifier()->ident_,
             request->GetBearType());
-    NETMGR_LOG_I("Send request[%{public}d] to all supplier", netrequest.requestId);
+    NETMGR_LOG_D("Send request[%{public}d] to all supplier", netrequest.requestId);
     NET_SUPPLIER_MAP::iterator iter;
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {

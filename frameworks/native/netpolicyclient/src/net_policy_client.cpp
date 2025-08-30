@@ -129,7 +129,7 @@ sptr<INetPolicyService> NetPolicyClient::GetProxy()
 
     sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     if (remote == nullptr) {
-        NETMGR_LOG_E("get Remote service failed");
+        NETMGR_LOG_D("get Remote service failed");
         return nullptr;
     }
 

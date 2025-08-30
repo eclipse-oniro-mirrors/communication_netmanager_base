@@ -74,7 +74,7 @@ void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
 int64_t HiAppEventReport::AddProcessor()
 {
 #ifdef ENABLE_EMULATOR
-    NETMGR_LOG_I("AddProcessor enter");
+    NETMGR_LOG_D("AddProcessor enter");
     OHOS::HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = "ha_app_event";
     config.appId = "com_hua" "wei_hmos_sdk_ocg";

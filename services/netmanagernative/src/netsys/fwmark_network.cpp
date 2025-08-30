@@ -100,7 +100,7 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
         CloseSocket(socketFd, ret, ERROR_CODE_GETSOCKOPT_FAILED);
         return ret;
     }
-    NETNATIVE_LOGI("FwmarkNetwork: SetMark netId: %{public}d, socketFd:%{public}d, cmd:%{public}d", command->netId,
+    NETNATIVE_LOG_D("FwmarkNetwork: SetMark netId: %{public}d, socketFd:%{public}d, cmd:%{public}d", command->netId,
                    *socketFd, command->cmdId);
     switch (command->cmdId) {
         case FwmarkCommand::SELECT_NETWORK: {

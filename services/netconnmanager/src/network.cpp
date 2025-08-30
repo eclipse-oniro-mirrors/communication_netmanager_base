@@ -729,7 +729,7 @@ void Network::InitNetMonitor()
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
-    NETMGR_LOG_I("HNMR, [%{public}d]", netDetectionState);
+    NETMGR_LOG_D("HNMR, [%{public}d]", netDetectionState);
     isDetectingForDns_ = false;
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {

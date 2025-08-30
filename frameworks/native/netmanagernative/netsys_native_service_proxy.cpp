@@ -64,7 +64,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
                                                     const std::vector<std::string> &servers,
                                                     const std::vector<std::string> &domains)
 {
-    NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", retryCount);
+    NETNATIVE_LOG_D("Begin to SetResolverConfig %{public}d", retryCount);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;

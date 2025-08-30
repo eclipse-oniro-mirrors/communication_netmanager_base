@@ -516,7 +516,7 @@ int32_t NetConnServiceProxy::UpdateNetSupplierInfo(uint32_t supplierId, const sp
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
-    NETMGR_LOG_I("UpdateNetSupplierInfo out.");
+    NETMGR_LOG_D("UpdateNetSupplierInfo out.");
     return reply.ReadInt32();
 }
 
