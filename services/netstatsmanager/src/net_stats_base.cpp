@@ -314,7 +314,7 @@ int32_t NetStatsRDB::QueryBySimId(int simId, NetStatsData& simStats)
         return ret;
     }
     if (rowCount == 0) {
-        NETMGR_LOG_E("query setting name:%{public}d, num is 0", simId);
+        NETMGR_LOG_D("query setting name:%{public}d, num is 0", simId);
         queryResultSet->Close();
         return NETMANAGER_ERROR;
     }

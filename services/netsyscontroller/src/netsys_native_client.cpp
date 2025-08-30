@@ -1028,7 +1028,7 @@ __attribute__((no_sanitize("cfi"))) sptr<OHOS::NetsysNative::INetsysService> Net
 
     auto remote = samgr->GetSystemAbility(OHOS::COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     if (remote == nullptr) {
-        NETMGR_LOG_E("Get remote service failed");
+        NETMGR_LOG_D("Get remote service failed");
         return nullptr;
     }
 

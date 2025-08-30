@@ -554,13 +554,13 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
         if (netBearType_ == BEARER_CELLULAR) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-        NETMGR_LOG_I("Get net[%{public}d] ip addr for HTTP probe url ", netId_);
+        NETMGR_LOG_D("Get net[%{public}d] ip addr for HTTP probe url ", netId_);
         ipAddress = GetAddrInfo(httpDomain);
         return SetResolveOption(ProbeType::PROBE_HTTP, httpDomain, ipAddress, DEFAULT_HTTP_PORT);
     }
 
     if (IsHttpsDetect(probeType)) {
-        NETMGR_LOG_I("Get net[%{public}d] ip addr for HTTPS probe url ", netId_);
+        NETMGR_LOG_D("Get net[%{public}d] ip addr for HTTPS probe url ", netId_);
         ipAddress = GetAddrInfo(httpsDomain);
         return SetResolveOption(ProbeType::PROBE_HTTPS, httpsDomain, ipAddress, DEFAULT_HTTPS_PORT);
     }
@@ -692,7 +692,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
                          httpProbeResult_.GetCode());
         } else if (curlMsg->easy_handle == httpsCurl_) {
             httpsProbeResult_ = {responseCode, redirectUrl};
-            NETMGR_LOG_I("Recv net[%{public}d] https probe response, code:[%{public}d]", netId_,
+            NETMGR_LOG_D("Recv net[%{public}d] https probe response, code:[%{public}d]", netId_,
                          httpsProbeResult_.GetCode());
         } else {
             NETMGR_LOG_E("Unknown curl handle.");

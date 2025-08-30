@@ -92,7 +92,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier, bool skipCh
         return false;
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
-        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
+        NETMGR_LOG_D("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
                      supplier->GetSupplierId(), requestId_);
         return false;
     }

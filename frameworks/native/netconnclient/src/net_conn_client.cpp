@@ -386,7 +386,7 @@ int32_t NetConnClient::UpdateNetCaps(const std::set<NetCap> &netCaps, const uint
 
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
-    NETMGR_LOG_I("UpdateNetSupplierInfo client in.");
+    NETMGR_LOG_D("UpdateNetSupplierInfo client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -562,7 +562,7 @@ sptr<INetConnService> NetConnClient::GetProxy()
 
     sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     if (remote == nullptr) {
-        NETMGR_LOG_E("get Remote service failed");
+        NETMGR_LOG_D("get Remote service failed");
         return nullptr;
     }
 

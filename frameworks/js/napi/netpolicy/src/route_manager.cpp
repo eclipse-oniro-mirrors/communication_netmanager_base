@@ -1100,7 +1100,7 @@ int32_t RouteManager::UpdateClatTunInterface(const std::string &interfaceName, N
     ruleInfo.ruleOif = RULEOIF_NULL;
 
     if (int32_t ret = UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo)) {
-        NETNATIVE_LOGE("UpdateRuleInfo failed, err is %{public}d", ret);
+        NETNATIVE_LOG_D("UpdateRuleInfo failed, err is %{public}d", ret);
         return ret;
     }
 
@@ -1320,7 +1320,7 @@ int32_t RouteManager::ClearSharingRules(const std::string &inputInterface)
 
 int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart, uid_t uidEnd)
 {
-    NETNATIVE_LOGI("UpdateRuleInfo");
+    NETNATIVE_LOG_D("UpdateRuleInfo");
     if (ruleInfo.rulePriority < 0) {
         NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
         return ROUTEMANAGER_ERROR;
