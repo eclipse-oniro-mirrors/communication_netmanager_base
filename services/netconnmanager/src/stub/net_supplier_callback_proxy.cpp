@@ -71,7 +71,8 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const NetRequest &netRequest)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     bool result = data.WriteUint32(netRequest.uid) && data.WriteUint32(netRequest.requestId) &&
-                  data.WriteUint32(netRequest.registerType) && data.WriteString(netRequest.ident);
+                  data.WriteUint32(netRequest.registerType) && data.WriteUint32(netRequest.isRemoveUid) &&
+                  data.WriteString(netRequest.ident);
     if (!result) {
         NETMGR_LOG_E("Write uid, requestId, registerType or ident failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;

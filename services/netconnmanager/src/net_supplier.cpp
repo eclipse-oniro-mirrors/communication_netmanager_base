@@ -27,6 +27,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr int32_t REG_OK = 0;
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
+constexpr uint32_t REMOVE_UID_ONLY = 255;
 }
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
 
@@ -296,10 +297,6 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_
     bool isInternal = HasNetCap(NET_CAPABILITY_INTERNAL_DEFAULT);
     bool isXcap = HasNetCap(NET_CAPABILITY_XCAP);
     bool isMms = HasNetCap(NET_CAPABILITY_MMS);
-    if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
-        NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
-        return true;
-    }
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
         return false;
@@ -309,6 +306,9 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_
     request.uid = uid;
     request.ident = netSupplierIdent_;
     request.netCaps = netCaps;
+    if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
+        request.isRemoveUid = REMOVE_UID_ONLY;
+    }
     int32_t errCode = netController_->ReleaseNetwork(request);
     NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
