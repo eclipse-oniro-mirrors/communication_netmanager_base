@@ -21,7 +21,9 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "functional"
 
+static std::function<void()> g_handler;
 static std::string g_defaultFileContent =
     "// PAC (Proxy Auto-Configuration) 脚本示例\n"
     "// 包含所有主要PAC函数的使用示例，只演示基础函数使用。\n"
@@ -158,6 +160,11 @@ bool IsTestRequest(const std::string &request)
     return false;
 }
 
+void SetTestHttpHandler(std::function<void()> function)
+{
+    g_handler = function;
+}
+
 std::string GetHeaderValue(const std::string &request, const std::string &headerName)
 {
     std::string headerPrefix = headerName + ": ";
@@ -281,6 +288,9 @@ void HandleClientConnection(int32_t serverFd, std::string pacScript)
     std::string request(buffer);
 
     if (IsTestRequest(request)) {
+        if (g_handler) {
+            g_handler();
+        }
         HandleTestRequest(clientSocket, request, address);
     } else {
         HandlePacRequest(clientSocket, pacScript);

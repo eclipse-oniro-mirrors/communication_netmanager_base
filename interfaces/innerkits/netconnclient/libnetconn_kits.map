@@ -227,14 +227,6 @@
       "OHOS::NetManagerStandard::NetConnClient::SetNetExtAttribute(OHOS::NetManagerStandard::NetHandle const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetExtAttribute(OHOS::NetManagerStandard::NetHandle const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
 
-      VTT?for?OHOS::NetManagerStandard::NetPacFileUrlCallbackStub;
-      vtable?for?OHOS::NetManagerStandard::NetPacFileUrlCallbackStub;
-      "OHOS::NetManagerStandard::NetPacFileUrlCallbackStub::NetPacFileUrlCallbackStub()";
-      "OHOS::NetManagerStandard::NetPacFileUrlCallbackStub::~NetPacFileUrlCallbackStub()";
-      "OHOS::NetManagerStandard::NetPacFileUrlCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
-      "non-virtual thunk to OHOS::NetManagerStandard::NetPacFileUrlCallbackStub::~NetPacFileUrlCallbackStub()";
-      "virtual thunk to OHOS::NetManagerStandard::NetPacFileUrlCallbackStub::~NetPacFileUrlCallbackStub()";
-
       "OHOS::NetManagerStandard::NetConnClient::SetNetExtAttribute(OHOS::NetManagerStandard::NetHandle const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetExtAttribute(OHOS::NetManagerStandard::NetHandle const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::SetPacFileUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
