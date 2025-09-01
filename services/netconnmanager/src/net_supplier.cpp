@@ -135,7 +135,8 @@ int32_t NetSupplier::UpdateNetLinkInfo(NetLinkInfo &netLinkInfo)
         netLinkInfo.ident_ = GetNetSupplierIdent().substr(strlen(SIMID_IDENT_PREFIX));
     }
     NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToString(" ").c_str());
-    if (!network_->UpdateNetLinkInfo(netLinkInfo)) {
+    std::shared_ptr<Network> network = network_;
+    if (!network->UpdateNetLinkInfo(netLinkInfo)) {
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     UpdateNetConnState(NET_CONN_STATE_CONNECTED);
