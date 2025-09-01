@@ -1494,5 +1494,57 @@ HWTEST_F(NetConnServiceStubTest, OnQueryTraceRouteTest001, TestSize.Level1)
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
+HWTEST_F(NetConnServiceStubTest, PAC_OnSetPacFileUrl001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteString(TEST_STRING_VALUE))
+    {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_PAC_FILE_URL);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, PAC_OnGetPacFileUrl001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_PAC_FILE_URL);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, PAC_OnSetProxyMode001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInt32(TEST_INT32_VALUE))
+    {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_PROXY_MODE);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, PAC_OnGetProxyMode001, TestSize.Level1)
+{
+    MessageParcel data;
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_PROXY_MODE);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+HWTEST_F(NetConnServiceStubTest, PAC_OnFindProxyForURL, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteString(TEST_STRING_VALUE))
+    {
+        return;
+    }
+    if (!data.WriteString(TEST_STRING_VALUE))
+    {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_FIND_PAC_PROXY_FOR_URL);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -18,6 +18,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "ipc_skeleton.h"
+#include "net_conn_service_pac_proxy_helper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1308,53 +1309,18 @@ int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &h
 
 int32_t NetConnServiceProxy::SetPacUrl(const std::string &pacUrl)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteString(pacUrl)) {
-        NETMGR_LOG_E("Write pacUrl string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_URL),
-                                      data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->SetPacUrl(pacUrl);
 }
 
 int32_t NetConnServiceProxy::GetPacUrl(std::string &pacUrl)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_URL),
-                                      data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadString(pacUrl)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->GetPacUrl(pacUrl);
 }
 
 int32_t NetConnServiceProxy::QueryTraceRoute(
@@ -1395,184 +1361,44 @@ int32_t NetConnServiceProxy::QueryTraceRoute(
     return ret;
 }
 
-int32_t NetConnServiceProxy::SetProxyMode(const int mode)
+int32_t NetConnServiceProxy::SetProxyMode(const OHOS::NetManagerStandard::ProxyModeType mode)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteInt32(mode)) {
-        NETMGR_LOG_E("Write proxy policy string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PROXY_MODE),
-                                      data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->SetProxyMode(mode);
 }
 
-int32_t NetConnServiceProxy::GetProxyMode(int &mode)
+int32_t NetConnServiceProxy::GetProxyMode(OHOS::NetManagerStandard::ProxyModeType &mode)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE),
-                                      data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadInt32(mode)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->GetProxyMode(mode);
 }
 
 int32_t NetConnServiceProxy::SetPacFileUrl(const std::string &pacUrl)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteString(pacUrl)) {
-        NETMGR_LOG_E("Write pacFileUrl string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PAC_FILE_URL), data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->SetPacFileUrl(pacUrl);
 }
 
 int32_t NetConnServiceProxy::GetPacFileUrl(std::string &pacUrl)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PAC_FILE_URL), data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadString(pacUrl)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
-    return ret;
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->GetPacFileUrl(pacUrl);
 }
 
 int32_t NetConnServiceProxy::FindProxyForURL(const std::string &url, const std::string &host, std::string &proxy)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteString(url)) {
-        NETMGR_LOG_E("Write url string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    if (!data.WriteString(host)) {
-        NETMGR_LOG_E("Write host string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-
-    MessageParcel reply;
-    uint32_t codeTemp = static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FIND_PAC_PROXY_FOR_URL);
-    int32_t error = RemoteSendRequest(codeTemp, data, reply);
-    if (error != NETMANAGER_SUCCESS) {
-        return error;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadString(proxy)) {
-            return NETMANAGER_ERR_READ_REPLY_FAIL;
-        }
-    }
-    return ret;
-}
-
-int32_t NetConnServiceProxy::RegisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-
-    MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(
-        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_PAC_FILE_URL_CALLBACK), dataParcel, replyParcel);
-    if (retCode != NETMANAGER_SUCCESS) {
-        return retCode;
-    }
-    return replyParcel.ReadInt32();
-}
-
-int32_t NetConnServiceProxy::UnregisterNetPacFileUrlInterfaceCallback(const sptr<INetPacFileUrlCallback> callback)
-{
-    if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-
-    MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(
-        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_PAC_FILE_URL_CALLBACK), dataParcel, replyParcel);
-    if (retCode != NETMANAGER_SUCCESS) {
-        return retCode;
-    }
-    return replyParcel.ReadInt32();
+    auto fun = [&](uint32_t code, MessageParcel &data, MessageParcel &reply) {
+        return RemoteSendRequest(code, data, reply);
+    };
+    return NetConnServicePacProxyHelper::GetInstance(fun)->FindProxyForURL(url, host, proxy);
 }
 
 int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)

@@ -34,7 +34,7 @@ using namespace OHOS::NetManagerStandard;
 struct RequestOptions {
     bool largeHeader = false;
     bool ccr = false;
-    int timeout = 30;
+    int32_t timeout = 30;
 };
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *userp)
@@ -53,7 +53,7 @@ struct curl_slist *SetupHeaders(const std::string &ip, uint16_t port, bool large
     headers = curl_slist_append(headers, proxyPortStr.c_str());
     headers = curl_slist_append(headers, "X-Custom-Header: CustomValue");
     if (largeHeader) {
-        for (int i = 0; i < HEADER_LARGE; i++) {
+        for (int32_t i = 0; i < HEADER_LARGE; i++) {
             std::string testHeader = "testHeader";
             testHeader.append(std::to_string(i)).append(": ").append(std::to_string(i));
             headers = curl_slist_append(headers, testHeader.c_str());
@@ -80,7 +80,7 @@ static void SetupProxyAndUrl(CURL *curl, const std::string &url, const std::stri
     }
 }
 
-static void SetupCommonOptions(CURL *curl, std::string &readBuffer, int timeout)
+static void SetupCommonOptions(CURL *curl, std::string &readBuffer, int32_t timeout)
 {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
@@ -123,12 +123,12 @@ static std::string Request(std::string url, std::string ip, uint16_t port, Reque
 #if 1
 TEST(ProxyServerTest, CreateProxyTest)
 {
-    int portStart = 1024;
-    int portEnd = 65535;
-    int port = ProxyServer::FindAvailablePort(portStart, portEnd);
+    int32_t portStart = 1024;
+    int32_t portEnd = 65535;
+    int32_t port = ProxyServer::FindAvailablePort(portStart, portEnd);
     auto proxy = std::make_shared<ProxyServer>(port, 0);
     proxy->Start();
-    int port1 = ProxyServer::FindAvailablePort(portStart, portEnd);
+    int32_t port1 = ProxyServer::FindAvailablePort(portStart, portEnd);
     auto proxy1 = std::make_shared<ProxyServer>(port1, 0);
     proxy1->Start();
     EXPECT_EQ(proxy->IsRunning(), true);
@@ -136,7 +136,7 @@ TEST(ProxyServerTest, CreateProxyTest)
 
 TEST(ProxyServerTest, CreateProxyTest1)
 {
-    int port = 8888;
+    int32_t port = 8888;
     auto proxy = std::make_shared<ProxyServer>(port, 0);
     proxy->Start();
     auto proxy1 = std::make_shared<ProxyServer>(port, 0);
@@ -145,7 +145,7 @@ TEST(ProxyServerTest, CreateProxyTest1)
 
 TEST(ProxyServerTest, CreateProxyTest3)
 {
-    int port = 8888;
+    int32_t port = 8888;
     auto proxy = std::make_shared<ProxyServer>(port, 0);
     proxy->Start();
     proxy->SetFindPacProxyFunction([](std::string, std::string) { return "DIRECT"; });
@@ -158,7 +158,7 @@ TEST(ProxyServerTest, CreateProxyTest3)
 
 TEST(ProxyServerTest, CreateProxyTest4)
 {
-    int port = 8888;
+    int32_t port = 8888;
     auto proxy = std::make_shared<ProxyServer>(port, 0);
     proxy->Start();
     proxy->SetFindPacProxyFunction([](std::string, std::string) { return "SOCKS4 127.0.0.1:1234"; });
@@ -184,7 +184,7 @@ TEST(ProxyServerTest, CreateProxyTest10)
     proxy->SetFindPacProxyFunction([](std::string, std::string) { return "DIRECT"; });
     std::vector<std::thread> threads;
 #define THREAD_COUNT 10
-    for (int i = 0; i < THREAD_COUNT; ++i) {
+    for (int32_t i = 0; i < THREAD_COUNT; ++i) {
         RequestOptions opts;
         opts.timeout = 2;
         threads.emplace_back([]() {
@@ -214,11 +214,11 @@ TEST(ProxyServerTest, CreateProxyTest9)
 
 TEST(ProxyServerTest, CreateProxyTest8)
 {
-    std::vector<int> fds;
+    std::vector<int32_t> fds;
     struct rlimit limit;
     long maxFd = sysconf(_SC_OPEN_MAX);
-    for (int i = 0; i < maxFd + 3; i++) {
-        int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    for (int32_t i = 0; i < maxFd + 3; i++) {
+        int32_t fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (fd == -1) {
             EXPECT_EQ(ProxyServer::FindAvailablePort(9000, 9000), -1);
             auto proxy8000 = std::make_shared<ProxyServer>(8000, -1);
@@ -237,7 +237,7 @@ TEST(ProxyServerTest, CreateProxyTest7)
 {
     auto proxy8000 = std::make_shared<ProxyServer>(8000, -1);
     EXPECT_EQ(proxy8000->Start(), true);
-    int port = ProxyServer::FindAvailablePort(8000, 8000);
+    int32_t port = ProxyServer::FindAvailablePort(8000, 8000);
     EXPECT_EQ(port, -1);
 }
 
@@ -286,13 +286,13 @@ TEST(ProxyServerTest, CreateProxyTest11)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
 #define LARGET_SIZE (1024 * 50)
     std::string path(LARGET_SIZE, 'A');
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -337,12 +337,12 @@ TEST(ProxyServerTest, CreateProxyTest12)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -386,12 +386,12 @@ TEST(ProxyServerTest, CreateProxyTest13)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -436,10 +436,10 @@ TEST(ProxyServerTest, CreateProxyTest14)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    std::vector<int> fds;
+    std::vector<int32_t> fds;
     struct rlimit limit;
-    for (int i = 0; i < maxFd; i++) {
-        int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    for (int32_t i = 0; i < maxFd; i++) {
+        int32_t fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (fd == -1) {
             RequestOptions opts;
             opts.largeHeader = false;
@@ -469,12 +469,12 @@ TEST(ProxyServerTest, CreateProxyTest16)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -518,12 +518,12 @@ TEST(ProxyServerTest, CreateProxyTest17)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -567,12 +567,12 @@ TEST(ProxyServerTest, CreateProxyTest18)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
@@ -616,12 +616,12 @@ TEST(ProxyServerTest, CreateProxyTest19)
     auto proxy = std::make_shared<ProxyServer>(8000, 1);
     EXPECT_EQ(proxy->Start(), true);
     proxy->SetFindPacProxyFunction([](auto s, auto s1) { return "DIRECT"; });
-    int sockfd = -1;
+    int32_t sockfd = -1;
     struct sockaddr_in serverAddr;
     struct hostent *server;
     std::string host = "127.0.0.1";
     std::string path;
-    int port = 8000;
+    int32_t port = 8000;
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0) {
         std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;

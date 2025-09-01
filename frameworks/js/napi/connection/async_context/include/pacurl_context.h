@@ -21,8 +21,8 @@
 #include <napi/native_api.h>
 #include "base_context.h"
 #include "event_manager.h"
- 
-#include <napi/native_api.h>
+#include "net_all_capabilities.h"
+
 namespace OHOS::NetManagerStandard {
 class ProxyModeContext : public BaseContext {
 public:
@@ -32,7 +32,7 @@ public:
     bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount);
 
 public:
-    int mode_;
+    OHOS::NetManagerStandard::ProxyModeType mode_;
 };
 
 class FindPacFileUrlContext : public BaseContext {

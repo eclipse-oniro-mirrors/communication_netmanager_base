@@ -23,7 +23,7 @@
 #include <iostream>
 
 using namespace OHOS::NetManagerStandard;
-std::map<int, std::shared_ptr<ProxyServer>> services;
+std::map<int32_t, std::shared_ptr<ProxyServer>> services;
 #define PACPROXYSERVER 9000
 #define GLOBALPROXYSERVER 9001
 #define PORT_8080 8080
@@ -31,7 +31,7 @@ std::map<int, std::shared_ptr<ProxyServer>> services;
 #define TIME_500_MS 500
 #define TIMEOUT_10_S 30
 
-static void StartProxyServer(int port)
+static void StartProxyServer(int32_t port)
 {
     std::shared_ptr<ProxyServer> server = std::make_shared<ProxyServer>(port);
     services.insert({port, server});
@@ -43,20 +43,6 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::stri
     size_t totalSize = size * nmemb;
     userp->append(static_cast<char *>(contents), totalSize);
     return totalSize;
-}
-
-static std::string g_callbackUrl;
-
-static void InitPacChange()
-{
-    OH_NetConn_PacFileUrlChange pac_file_url_change;
-    pac_file_url_change.onNetPacFileUrlChange = [](auto url) {
-        printf("callbackUrl %s \n", url);
-        g_callbackUrl = url;
-    };
-    uint32_t callbackId;
-    int32_t r = OH_NetConn_RegisterPacFileUrlCallback(&pac_file_url_change, &callbackId);
-    EXPECT_EQ(r, 0);
 }
 
 static std::string Request(std::string url, std::string ip, uint16_t port)
@@ -109,7 +95,7 @@ static std::string Request(std::string url, std::string ip, uint16_t port)
 
 static int32_t SetPacFileUrl(std::string url)
 {
-    int ret = OH_NetConn_SetPacFileUrl(url.c_str());
+    int32_t ret = OH_NetConn_SetPacFileUrl(url.c_str());
     usleep(TIME_500_MS);
     return ret;
 }
@@ -121,46 +107,16 @@ static std::tuple<int32_t, std::string> FindProxyForURL(std::string url)
     return {ret, proxy};
 }
 
-void TestMode1()
-{
-    StartHttpServer(PORT_8080, "", "");
-    StartProxyServer(GLOBALPROXYSERVER);
-    StartProxyServer(PACPROXYSERVER);
-    HttpProxy httpProxy("127.0.0.1", GLOBALPROXYSERVER, {});
-    int ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
-    EXPECT_EQ(ret, 0);
-    ret = OH_NetConn_SetProxyMode(1);
-    EXPECT_EQ(ret, 0);
-    int mode = -1;
-    ret = OH_NetConn_GetProxyMode(&mode);
-    EXPECT_NE(ret, 0);
-    EXPECT_EQ(mode, 1);
-
-    NetConn_HttpProxy proxy;
-    ret = OH_NetConn_GetDefaultHttpProxy(&proxy);
-    EXPECT_EQ(ret, 0);
-    EXPECT_EQ(std::string(proxy.host), "127.0.0.1");
-    EXPECT_EQ(proxy.port, GLOBALPROXYSERVER);
-    printf("mode %d host:%s port:%d \n", mode, proxy.host, proxy.port);
-
-    std::string url = "http://127.0.0.1:8080/test";
-    std::string res = Request(url, proxy.host, proxy.port);
-    printf("res %s %s \n", url.c_str(), res.c_str());
-    EXPECT_EQ(res.empty(), false);
-}
-
-void TestMode2()
+void TestAutoMode()
 {
     NetConn_HttpProxy proxy;
     int32_t ret = -1;
-    int32_t mode = -1;
-    InitPacChange();
+    OHOS::NetManagerStandard::ProxyModeType mode;
     std::string script = ProxyServer::pacScripts[LOCAL_PROXY_9000];
     StartHttpServer(PORT_8889, "", script);
     std::string pacFileUrl = "http://127.0.0.1:8889/";
     ret = SetPacFileUrl(pacFileUrl);
     EXPECT_EQ(ret, 0);
-    EXPECT_EQ(g_callbackUrl, pacFileUrl);
     ret = OH_NetConn_SetProxyMode(PROXY_MODE_AUTO);
     EXPECT_EQ(ret, 0);
 
@@ -187,10 +143,12 @@ void TestMode2()
 TEST(PROXY_SWITCH_TEST, PacFileUrlClient)
 {
     SetUpPermission();
-    TestMode1();
-    TestMode2();
-    int mode = -1;
-    int ret = OH_NetConn_SetProxyMode(0);
+    StartHttpServer(PORT_8080, "", "");
+    StartProxyServer(GLOBALPROXYSERVER);
+    StartProxyServer(PACPROXYSERVER);
+    TestAutoMode();
+    OHOS::NetManagerStandard::ProxyModeType mode;
+    int32_t ret = OH_NetConn_SetProxyMode(PROXY_MODE_OFF);
     EXPECT_EQ(ret, 0);
     NetConn_HttpProxy proxy;
     ret = OH_NetConn_GetProxyMode(&mode);

@@ -18,10 +18,14 @@
 #include "napi_constant.h"
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
- 
+#include "net_all_capabilities.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
-ProxyModeContext::ProxyModeContext(napi_env env, std::shared_ptr<EventManager> &manager) : BaseContext(env, manager) {}
+ProxyModeContext::ProxyModeContext(napi_env env, std::shared_ptr<EventManager> &manager) : BaseContext(env, manager)
+{
+    mode_ = PROXY_MODE_OFF;
+}
 
 void ProxyModeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
@@ -31,7 +35,19 @@ void ProxyModeContext::ParseParams(napi_value *params, size_t paramsCount)
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return;
     }
-    mode_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    int32_t mode = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    switch (mode) {
+        case PROXY_MODE_OFF:
+            mode_ = PROXY_MODE_OFF;
+            break;
+        case PROXY_MODE_AUTO:
+            mode_ = PROXY_MODE_AUTO;
+            break;
+        default:
+            SetParseOK(false);
+            SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+            return;
+    }
     SetParseOK(true);
 }
 

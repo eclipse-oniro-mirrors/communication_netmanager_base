@@ -15,6 +15,6 @@
 #ifndef PACHTTPTEST_PAC_SERVER_H
 #define PACHTTPTEST_PAC_SERVER_H
 
-void StartHttpServer(int port, std::string ip, std::string pacScript);
+void StartHttpServer(int32_t port, std::string ip, std::string pacScript);
 
 #endif // PACHTTPTEST_PAC_SERVER_H

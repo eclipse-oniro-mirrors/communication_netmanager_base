@@ -76,7 +76,9 @@ ohos_unittest("net_client_pac_file_url_test") {
     if (enable_netmgr_debug) {
         defines += [ "NETMGR_DEBUG" ]
     }
-
+    if(netmanager_base_enable_pac_proxy){
+        defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     external_deps += [ "hilog:libhilog" ]
 
     part_name = "netmanager_base"
@@ -146,7 +148,9 @@ ohos_unittest("net_pac_manager_test") {
     if (enable_netmgr_debug) {
         defines += [ "NETMGR_DEBUG" ]
     }
-
+    if(netmanager_base_enable_pac_proxy){
+        defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    }
     external_deps += [ "hilog:libhilog" ]
 
     part_name = "netmanager_base"
