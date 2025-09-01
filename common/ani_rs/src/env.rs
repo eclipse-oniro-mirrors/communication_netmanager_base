@@ -293,31 +293,6 @@ impl<'local> AniEnv<'local> {
         }
     }
 
-    pub fn new_array_ref(
-        &self,
-        class: &AniClass<'local>,
-        size: usize,
-    ) -> Result<AniRef<'local>, AniError> {
-        let mut array = null_mut() as ani_array;
-
-        let res = unsafe {
-            (**self.inner).Array_New_Ref.unwrap()(
-                self.inner,
-                class.as_raw(),
-                size,
-                self.undefined()?.as_raw(),
-                &mut array as _,
-            )
-        };
-
-        if res != 0 {
-            let msg = format!("Failed to create a new ref array of size {}", size);
-            Err(AniError::from_code(msg, res))
-        } else {
-            Ok(AniRef::from_raw(array))
-        }
-    }
-
     pub fn new_array<T: AniExt>(&self, size: usize) -> Result<AniRef<'local>, AniError> {
         T::new_array(self, size)
     }
