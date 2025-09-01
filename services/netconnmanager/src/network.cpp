@@ -299,8 +299,8 @@ bool Network::DelayStartDetectionForIpUpdate(bool hasSameIpAddr)
     if (eventHandler_) {
         eventHandler_->RemoveTask(taskName);
         eventHandler_->PostAsyncTask(
-            [this]() {
-                StartNetDetection(true);
+            [self = shared_from_this()] {
+                self->StartNetDetection(true);
             }, taskName, DETECTION_RESULT_WAIT_MS);
     }
     return true;
