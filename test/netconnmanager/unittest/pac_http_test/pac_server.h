@@ -14,7 +14,11 @@
  */
 #ifndef PACHTTPTEST_PAC_SERVER_H
 #define PACHTTPTEST_PAC_SERVER_H
+#include "functional"
+#include <string>
 
 void StartHttpServer(int32_t port, std::string ip, std::string pacScript);
+
+void SetTestHttpHandler(std::function<void()> function);
 
 #endif // PACHTTPTEST_PAC_SERVER_H

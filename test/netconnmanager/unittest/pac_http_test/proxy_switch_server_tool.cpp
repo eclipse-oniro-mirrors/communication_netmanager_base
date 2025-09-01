@@ -24,11 +24,13 @@
 
 using namespace OHOS::NetManagerStandard;
 std::map<int32_t, std::shared_ptr<ProxyServer>> services;
-#define PAC_PROXY_SERVER 9000
-#define GLOBAL_PROXY_SERVER 9001
+#define PROXY_PORT_9000 9000
+#define PROXY_PORT_9001 9001
 #define PROT_8080 8080
 #define PROT_8889 8889
-#define TIME 10
+#define TIME 20
+
+static int32_t g_counter = 0;
 
 static void StartProxyServer(int32_t port)
 {
@@ -39,11 +41,27 @@ static void StartProxyServer(int32_t port)
 
 TEST(PROXY_SWITCH_TEST, PacFileUrlClient)
 {
-    StartProxyServer(GLOBAL_PROXY_SERVER);
-    StartProxyServer(PAC_PROXY_SERVER);
+    StartProxyServer(PROXY_PORT_9001);
+    StartProxyServer(PROXY_PORT_9000);
+    services[PROXY_PORT_9000]->Stop();
+    services[PROXY_PORT_9001]->Stop();
     SetUpPermission();
     StartHttpServer(PROT_8080, "", "");
-    std::string script = ProxyServer::pacScripts[LOCAL_PROXY_9000];
+    SetTestHttpHandler([]() {
+        int32_t n = g_counter % 3;
+        switch (n) {
+            case 0:
+                services[PROXY_PORT_9001]->Start();
+                break;
+            case 1:
+                services[PROXY_PORT_9000]->Start();
+                break;
+            default:
+                break;
+        }
+        g_counter++;
+    });
+    std::string script = ProxyServer::pacScripts[ALL_DIRECT];
     printf(" pac script  %s \n", script.c_str());
     StartHttpServer(PROT_8889, "", script);
     EXPECT_EQ(services.empty(), false);
