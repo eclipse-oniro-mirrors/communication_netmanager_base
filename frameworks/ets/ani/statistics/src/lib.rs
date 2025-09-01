@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod bridge;
 mod error_code;
+mod register;
 mod statistics;
 mod wrapper;
 
@@ -30,6 +32,11 @@ ani_constructor! {
         "getUidTxBytesSync" : statistics::get_uid_tx_bytes,
         "getSockfdRxBytesSync" : statistics::get_sockfd_rx_bytes,
         "getSockfdTxBytesSync" : statistics::get_sockfd_tx_bytes,
-
+        "onNetStatsChange": register::on_net_states_change,
+        "offNetStatsChange": register::off_net_states_change,
+        "getTrafficStatsByIfaceSync": statistics::get_traffic_stats_by_iface,
+        "getTrafficStatsByUidSync": statistics::get_traffic_stats_by_uid,
+        "getTrafficStatsByNetworkSync" : statistics::get_traffic_stats_by_network,
+        "getTrafficStatsByUidNetworkSync" : statistics::get_traffic_stats_by_uid_network,
     ]
 }
