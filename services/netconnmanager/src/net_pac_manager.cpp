@@ -34,6 +34,8 @@ const std::string EMPTY = "";
 constexpr int32_t HTTP_CODE_200 = 200;
 } // namespace
 
+static std::string g_script;
+
 NetPACManager::NetPACManager() : pacScriptVal_(jerry_create_undefined()), status_(false), engineInitialized_(false)
 {
 }
@@ -91,12 +93,13 @@ bool NetPACManager::InitPACScriptWithURL(const std::string &scriptUrl)
         jerry_cleanup();
         engineInitialized_ = false;
     }
-    const std::string &script = DownloadPACScript(scriptUrl);
-    if (script.empty()) {
+    g_script.clear();
+    DownloadPACScript(scriptUrl);
+    if (g_script.empty()) {
         status_ = false;
         return false;
     }
-    const char *pac_script = script.c_str();
+    const char *pac_script = g_script.c_str();
     jerry_init(JERRY_INIT_EMPTY);
     engineInitialized_ = true;
     PacFunctions::RegisterPacFunctions();
@@ -181,10 +184,11 @@ static size_t WriteToString(void *contents, size_t size, size_t nmemb, void *use
     size_t realsize = size * nmemb;
     std::string *mem = static_cast<std::string *>(userp);
     mem->append(static_cast<char *>(contents), realsize);
+    g_script.append(static_cast<char *>(contents), realsize);
     return realsize;
 }
 
-std::string NetPACManager::DownloadPACScript(const std::string &url)
+void NetPACManager::DownloadPACScript(const std::string &url)
 {
     struct CurlGlobalGuard {
         CurlGlobalGuard()
@@ -198,7 +202,7 @@ std::string NetPACManager::DownloadPACScript(const std::string &url)
     } curlGuard;
     CURL *curl_handle = curl_easy_init();
     if (!curl_handle) {
-        return EMPTY;
+        return;
     }
     struct CurlHandleDeleter {
         void operator()(CURL *handle)
@@ -235,6 +239,7 @@ std::string NetPACManager::DownloadPACScript(const std::string &url)
     }
     return;
 }
+
 
 void NetPACManager::SetFileUrl(const std::string &url)
 {
