@@ -44,8 +44,6 @@ public:
     void SetUp();
 
     void TearDown();
-    static inline std::shared_ptr<NetsysNativeClient> nativeClientInstance_ = std::make_shared<NetsysNativeClient>();
-    static inline NetsysNativeClient &nativeClient_ = *nativeClientInstance_;
 };
 
 void NetsysNativeClientTest::SetUpTestCase() {}
@@ -58,7 +56,8 @@ void NetsysNativeClientTest::TearDown() {}
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceAddressUpdatedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string addr = IP_ADDR;
     const std::string ifName = INTERFACE_NAME;
     int flags = 1;
@@ -70,7 +69,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceAddressUpdatedTest001, TestSize.Leve
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceAddressRemovedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string addr = IP_ADDR;
     const std::string ifName = INTERFACE_NAME;
     int flags = 1;
@@ -82,7 +82,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceAddressRemovedTest001, TestSize.Leve
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceAddedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string ifName = INTERFACE_NAME;
     notifyCallback.netsysNativeClient_.cbObjects_ = {nullptr};
     int32_t ret = notifyCallback.OnInterfaceAdded(ifName);
@@ -91,7 +92,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceAddedTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceRemovedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string ifName = INTERFACE_NAME;
     notifyCallback.netsysNativeClient_.cbObjects_ = {nullptr};
     int32_t ret = notifyCallback.OnInterfaceRemoved(ifName);
@@ -100,7 +102,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceRemovedTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceChangedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string ifName = INTERFACE_NAME;
     notifyCallback.netsysNativeClient_.cbObjects_ = {nullptr};
     int32_t ret = notifyCallback.OnInterfaceChanged(ifName, true);
@@ -109,7 +112,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceChangedTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnInterfaceLinkStateChangedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     const std::string ifName = INTERFACE_NAME;
     notifyCallback.netsysNativeClient_.cbObjects_ = {nullptr};
     int32_t ret = notifyCallback.OnInterfaceLinkStateChanged(ifName, true);
@@ -118,7 +122,8 @@ HWTEST_F(NetsysNativeClientTest, OnInterfaceLinkStateChangedTest001, TestSize.Le
 
 HWTEST_F(NetsysNativeClientTest, OnRouteChangedTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
     bool updated = true;
     const std::string route = "route";
     const std::string gateway = "gateway";
@@ -130,7 +135,8 @@ HWTEST_F(NetsysNativeClientTest, OnRouteChangedTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnDnsResultReportTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClient);
     uint32_t size = 1;
     OHOS::NetsysNative::NetDnsResultReport netDnsResultRepor{};
     std::list<OHOS::NetsysNative::NetDnsResultReport> res = {netDnsResultRepor};
@@ -141,7 +147,8 @@ HWTEST_F(NetsysNativeClientTest, OnDnsResultReportTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnDnsQueryResultReportTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClient);
     uint32_t size = 1;
     OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultRepor{};
     std::list<OHOS::NetsysNative::NetDnsQueryResultReport> res = {netDnsResultRepor};
@@ -152,7 +159,8 @@ HWTEST_F(NetsysNativeClientTest, OnDnsQueryResultReportTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeClientTest, OnDnsQueryAbnormalReportTest001, TestSize.Level1)
 {
-    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClientInstance_);
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNetDnsResultCallback notifyCallback(nativeClient);
     uint32_t eventfailcause = 1;
     OHOS::NetsysNative::NetDnsQueryResultReport netDnsResultRepor{};
     notifyCallback.netsysNativeClient_.cbDnsQueryReportObjects_ = {nullptr};
@@ -162,38 +170,42 @@ HWTEST_F(NetsysNativeClientTest, OnDnsQueryAbnormalReportTest001, TestSize.Level
 
 HWTEST_F(NetsysNativeClientTest, DelInterfaceAddressTest001, TestSize.Level1)
 {
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
     const std::string ifName = INTERFACE_NAME;
     const std::string ipAddr = IP_ADDR;
     int32_t prefixLength = 1;
     const std::string netCapabilities = "netCapabilities";
-    int32_t ret = nativeClient_.DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+    int32_t ret = nativeClient->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeClientTest, InterfaceSetIffUpTest001, TestSize.Level1)
 {
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
     const std::string ifName = INTERFACE_NAME;
-    int32_t ret = nativeClient_.InterfaceSetIffUp(ifName);
+    int32_t ret = nativeClient->InterfaceSetIffUp(ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeClientTest, ProcessDhcpResultTest001, TestSize.Level1)
 {
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
     sptr<OHOS::NetsysNative::DhcpResultParcel> dhcpResult = new (std::nothrow) OHOS::NetsysNative::DhcpResultParcel();
     sptr<NetsysControllerCallback> netsysCallback = nullptr;
-    nativeClient_.cbObjects_.push_back(netsysCallback);
-    nativeClient_.ProcessDhcpResult(dhcpResult);
-    EXPECT_TRUE(nativeClient_.cbObjects_.empty());
+    nativeClient->cbObjects_.push_back(netsysCallback);
+    nativeClient->ProcessDhcpResult(dhcpResult);
+    EXPECT_TRUE(nativeClient->cbObjects_.empty());
 }
 
 HWTEST_F(NetsysNativeClientTest, ProcessBandwidthReachedLimitTest001, TestSize.Level1)
 {
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
     const std::string limitName = "limitName";
     const std::string iface = INTERFACE_NAME;
     sptr<NetsysControllerCallback> netsysCallback = nullptr;
-    nativeClient_.cbObjects_.push_back(netsysCallback);
-    nativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
-    EXPECT_TRUE(nativeClient_.cbObjects_.empty());
+    nativeClient->cbObjects_.push_back(netsysCallback);
+    nativeClient->ProcessBandwidthReachedLimit(limitName, iface);
+    EXPECT_TRUE(nativeClient->cbObjects_.empty());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

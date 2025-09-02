@@ -29,8 +29,10 @@ static constexpr uint32_t IPV4_MAX_LENGTH = 32;
 NetsysController::NetsysController()
 {
     NETMGR_LOG_I("netsys Init");
+#ifndef NETMANAGER_TEST
     netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     netsysService_->Init();
+#endif
 }
 
 NetsysController &NetsysController::GetInstance()
