@@ -74,42 +74,42 @@ void NetsysControllerTest::TearDown() {}
 
 HWTEST_F(NetsysControllerTest, EnableDistributedClientNetTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     const std::string virnicAddr = "virnicAddr";
     const std::string iif = "iif";
-    int32_t result = netsysController.EnableDistributedClientNet(virnicAddr, iif);
+    int32_t result = netsysController->EnableDistributedClientNet(virnicAddr, iif);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, EnableDistributedServerNetTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     const std::string iif = "iif";
     const std::string devIface = "devIface";
     const std::string dstAddr = "172.0.0.1";
-    int32_t result = netsysController.EnableDistributedServerNet(iif, devIface, dstAddr);
+    int32_t result = netsysController->EnableDistributedServerNet(iif, devIface, dstAddr);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, DisableDistributedNetTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     bool isServer = true;
-    int32_t result = netsysController.DisableDistributedNet(isServer);
+    int32_t result = netsysController->DisableDistributedNet(isServer);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, NetworkAddUidsTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     int32_t netId = 1;
     std::vector<int32_t> beginUids = {0, 1};
     std::vector<int32_t> endUids = {1};
-    int32_t result = netsysController.NetworkAddUids(netId, beginUids, endUids);
+    int32_t result = netsysController->NetworkAddUids(netId, beginUids, endUids);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -140,14 +140,14 @@ HWTEST_F(NetsysControllerTest, NetworkDelUidsTest001, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, BindNetworkServiceVpnTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     int32_t socketFd = 0;
-    int32_t result = netsysController.BindNetworkServiceVpn(socketFd);
+    int32_t result = netsysController->BindNetworkServiceVpn(socketFd);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     socketFd = 1;
-    result = netsysController.BindNetworkServiceVpn(socketFd);
+    result = netsysController->BindNetworkServiceVpn(socketFd);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -160,48 +160,48 @@ HWTEST_F(NetsysControllerTest, BindNetworkServiceVpnTest002, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, EnableVirtualNetIfaceCardTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     int32_t socketFd = 0;
     struct ifreq ifRequest = {};
     int32_t ifaceFd = 1;
-    int32_t result = netsysController.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
+    int32_t result = netsysController->EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     socketFd = 1;
-    result = netsysController.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
+    result = netsysController->EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, SetIpAddressTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     int32_t socketFd = 0;
     std::string ipAddress = "";
     int32_t prefixLen = 0;
     struct ifreq ifRequest = {};
-    int32_t result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    int32_t result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     socketFd = 1;
-    result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     ipAddress = "172.0.0.1.172.0.0.1.172.0.0.1.172.0.0.1";
-    result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     ipAddress = "172.0.0.1";
-    result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     prefixLen = 35; // prefixLen: 35
-    result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_ERR_VPN);
 
     prefixLen = 1;
-    result = netsysController.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    result = netsysController->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -234,21 +234,21 @@ HWTEST_F(NetsysControllerTest, SetIpCommandForResTest001, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, SetNicTrafficAllowedTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     const std::vector<std::string> ifaceNames = {"ifaceNames"};
     bool status = true;
-    int32_t result = netsysController.SetNicTrafficAllowed(ifaceNames, status);
+    int32_t result = netsysController->SetNicTrafficAllowed(ifaceNames, status);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, CloseSocketsUidTest001, TestSize.Level1)
 {
-    NetsysController netsysController;
-    netsysController.netsysService_ = nullptr;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_ = nullptr;
     const std::string ipAddr = "172.0.0.1";
     uint32_t uid = 1;
-    int32_t result = netsysController.CloseSocketsUid(ipAddr, uid);
+    int32_t result = netsysController->CloseSocketsUid(ipAddr, uid);
     EXPECT_EQ(result, NETSYS_NETSYSSERVICE_NULL);
 }
 

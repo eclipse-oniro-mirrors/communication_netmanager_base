@@ -149,6 +149,7 @@ ohos_static_library("netsys_controller_static") {
   defines = [
     "NETMGR_LOG_TAG = \"NetConnManager\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "NETMANAGER_TEST",
   ]
 
   if (enable_netmgr_debug) {
