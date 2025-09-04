@@ -36,6 +36,8 @@
 
 #define TCP_FLAGS_OFFSET 12
 #define TCP_FLAGS_SIZE 2
+#define VERSION_IPV4 4
+#define VERSION_OFFSET 4
 
 #define L3_NHOFF 0
 #define L4_NHOFF(ipv4) (L3_NHOFF + ((ipv4) ? sizeof(struct iphdr) : sizeof(struct ipv6hdr)))
@@ -50,6 +52,28 @@ union tcp_flags {
 };
 
 /**
+ * @brief judget given skb is ipv4 packet, even if its family is AF_INET6
+ *
+ * @param skb struct __sk_buff
+ * @return true if it is ipv4 packet, otherwise false
+ */
+static __always_inline bool is_ipv4_format_skb(struct __sk_buff *skb)
+{
+    if (!skb) {
+        return false;
+    }
+    if (skb->family == AF_INET) {
+        return true;
+    }
+    if (skb->family == AF_INET6) {
+        uint8_t version = { 0 };
+        bpf_skb_load_bytes(skb, 0, &version, sizeof(uint8_t));
+        return ((version >> VERSION_OFFSET) == VERSION_IPV4);
+    }
+    return false;
+}
+
+/**
  * @brief judget given skb is a layler 4 protocol or not
  *
  * @param skb struct __sk_buff
@@ -59,13 +83,12 @@ union tcp_flags {
  */
 static __always_inline bool is_l4_protocol(struct __sk_buff *skb, __u32 l3_nhoff, __u8 protocol)
 {
-    if (skb->family == AF_INET) {
+    if (is_ipv4_format_skb(skb)) {
         struct iphdr iph = { 0 };
         bpf_skb_load_bytes(skb, l3_nhoff, &iph, sizeof(struct iphdr));
 
         return iph.protocol == protocol;
-    }
-    if (skb->family == AF_INET6) {
+    } else if (skb->family == AF_INET6) {
         struct ipv6hdr ip6h = { 0 };
         bpf_skb_load_bytes(skb, l3_nhoff, &ip6h, sizeof(struct ipv6hdr));
 
@@ -96,7 +119,7 @@ static __always_inline __u32 get_l3_nhoff(struct __sk_buff *skb)
  */
 static __always_inline __u32 get_l4_nhoff(struct __sk_buff *skb)
 {
-    return L4_NHOFF(skb->family == AF_INET);
+    return L4_NHOFF(is_ipv4_format_skb(skb));
 }
 
 /**
@@ -122,7 +145,7 @@ static __always_inline int load_tcp_flags(struct __sk_buff *skb, __u32 l4_nhoff,
  */
 static __always_inline bool load_l4_protocol(const struct __sk_buff *skb, __u32 l3_nhoff, __u8 *protocol)
 {
-    if (skb->family == AF_INET) {
+    if (is_ipv4_format_skb(skb)) {
         struct iphdr iph = { 0 };
         bpf_skb_load_bytes(skb, l3_nhoff, &iph, sizeof(struct iphdr));
 
