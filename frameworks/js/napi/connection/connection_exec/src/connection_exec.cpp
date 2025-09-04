@@ -1149,11 +1149,6 @@ napi_value ConnectionExec::GetProxyModeCallback(ProxyModeContext *context)
 
 bool ConnectionExec::ExecSetPacFileUrl(SetPacFileUrlContext *context)
 {
-    if (context->pacUrl_.empty()) {
-        NETMANAGER_BASE_LOGE("pac Url is empty!");
-        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
-        return false;
-    }
     int32_t errorCode = NetConnClient::GetInstance().SetPacFileUrl(context->pacUrl_);
     if (errorCode != NET_CONN_SUCCESS) {
         NETMANAGER_BASE_LOGE("exec SetPacFileUrl failed errorCode: %{public}d", errorCode);
