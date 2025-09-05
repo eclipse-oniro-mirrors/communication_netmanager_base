@@ -230,7 +230,7 @@ static __always_inline enum sk_action match_dns_query(struct __sk_buff *skb)
 
     __u8 protocol = 0;
     __u32 l4_nhoff = 0;
-    if (skb->family == AF_INET) {
+    if (is_ipv4_format_skb(skb)) {
         struct iphdr iph = { 0 };
         bpf_skb_load_bytes(skb, 0, &iph, sizeof(struct iphdr));
         protocol = iph.protocol;
