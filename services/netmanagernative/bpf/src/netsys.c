@@ -300,20 +300,6 @@ static void process_traffic_notify(struct __sk_buff *skb, uint64_t ifindex)
     }
 }
 
-static uint8_t is_need_discard(void)
-{
-    uint8_t wifi_type = 0;
-    uint8_t cellular_type = 1;
-    uint8_t *wifi_status = bpf_map_lookup_elem(&net_status_map, &wifi_type);
-    uint8_t *cellular_status = bpf_map_lookup_elem(&net_status_map, &cellular_type);
-
-    if (wifi_status != NULL && *wifi_status == 0 &&
-        cellular_status != NULL && *cellular_status == 0) {
-        return 1;
-    }
-    return 0;
-}
-
 SEC("socket/iface/stats")
 int socket_iface_stats(struct __sk_buff *skb)
 {
@@ -322,10 +308,6 @@ int socket_iface_stats(struct __sk_buff *skb)
     }
 
     if (skb->pkt_type == PACKET_LOOPBACK) {
-        return 1;
-    }
-
-    if (is_need_discard() == 1) {
         return 1;
     }
 

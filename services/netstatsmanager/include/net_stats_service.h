@@ -150,8 +150,6 @@ private:
                                    uint64_t &monthlyMarkAvailable, uint64_t &dailyMarkAvailable);
     int32_t UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value);
     void ClearTrafficMapBySlotId(int32_t slotId, uint64_t ifIndex);
-    bool IsSameStateInTwoMap(int32_t simId);
-    void DeleteSimIdInTwoMap(int32_t simId);
     void AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex);
     void PrintTrafficBpfMapInfo(int32_t slotId);
     void PrintTrafficSettingsMapInfo(int32_t simId);
