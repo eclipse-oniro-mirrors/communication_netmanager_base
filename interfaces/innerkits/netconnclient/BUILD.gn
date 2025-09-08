@@ -259,6 +259,7 @@ ohos_static_library("net_conn_manager_if_static") {
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "samgr:samgr_proxy",
+    "ipc:ipc_single",
   ]
  
   defines = [
