@@ -33,7 +33,7 @@ enum NetDnsResultAddrType : uint32_t {
 };
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 
-struct NET_SYMBOL_VISIBLE NetDnsResultAddrInfo final : public Parcelable {
+struct NetDnsResultAddrInfo final : public Parcelable {
     uint32_t	    type_;
     std::string     addr_;
 
@@ -41,7 +41,7 @@ struct NET_SYMBOL_VISIBLE NetDnsResultAddrInfo final : public Parcelable {
     static bool Unmarshalling(Parcel &parcel, NetDnsResultAddrInfo &addrinfo);
 };
 
-struct NET_SYMBOL_VISIBLE NetDnsResultReport final : public Parcelable {
+struct NetDnsResultReport final : public Parcelable {
     uint32_t        netid_;
     uint32_t        uid_;
     uint32_t        pid_;
@@ -54,7 +54,7 @@ struct NET_SYMBOL_VISIBLE NetDnsResultReport final : public Parcelable {
     static bool Unmarshalling(Parcel &parcel, NetDnsResultReport &result);
 };
 
-struct NET_SYMBOL_VISIBLE NetDnsQueryResultAddrInfo final : public Parcelable {
+struct NetDnsQueryResultAddrInfo final : public Parcelable {
     uint16_t	    type_;
     std::string     addr_;
 
@@ -62,7 +62,7 @@ struct NET_SYMBOL_VISIBLE NetDnsQueryResultAddrInfo final : public Parcelable {
     static bool Unmarshalling(Parcel &parcel, NetDnsQueryResultAddrInfo &addrinfo);
 };
 
-struct NET_SYMBOL_VISIBLE NetDnsQueryResultReport final : public Parcelable {
+struct NetDnsQueryResultReport final : public Parcelable {
     uint32_t        uid_;
     uint32_t        pid_;
     std::string     srcAddr_;

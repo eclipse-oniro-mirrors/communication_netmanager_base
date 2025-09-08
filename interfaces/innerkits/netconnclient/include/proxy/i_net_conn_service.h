@@ -67,8 +67,6 @@ public:
     virtual int32_t NetDetection(int32_t netId) = 0;
     virtual int32_t GetDefaultNet(int32_t &netId) = 0;
     virtual int32_t HasDefaultNet(bool &flag) = 0;
-    virtual int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) = 0;
-    virtual int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) = 0;
     virtual int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) = 0;
     virtual int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
                                           std::list<int32_t> &netIdList) = 0;
@@ -76,7 +74,6 @@ public:
     virtual int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) = 0;
     virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
     virtual int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) = 0;
-    virtual int32_t BindSocket(int32_t socketFd, int32_t netId) = 0;
     virtual int32_t SetAirplaneMode(bool state) = 0;
     virtual int32_t IsDefaultNetMetered(bool &isMetered) = 0;
     virtual int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) = 0;

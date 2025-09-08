@@ -215,9 +215,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     ret = nativeClient->ClearDefaultNetWorkNetId();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = nativeClient->BindSocket(SOCKET_FD, NET_ID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
     ret = nativeClient->IpEnableForwarding(REQUESTOR);
     EXPECT_EQ(ret, 0);
 

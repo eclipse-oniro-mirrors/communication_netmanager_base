@@ -1420,16 +1420,10 @@ std::shared_ptr<NetActivate> NetConnService::CreateNetActivateRequest(const sptr
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
     std::shared_ptr<NetActivate> request = nullptr;
 #ifdef ENABLE_SET_APP_FROZENED
-    sptr<NetConnCallbackProxyWrapper> callbakWrapper = new (std::nothrow) NetConnCallbackProxyWrapper(callback);
-    if (callbakWrapper == nullptr) {
-        NETMGR_LOG_E("NetConnCallbackProxyWrapper ptr is null");
-        request = std::make_shared<NetActivate>(
-            netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-    } else {
-        request = std::make_shared<NetActivate>(
+    sptr<NetConnCallbackProxyWrapper> callbakWrapper = sptr<NetConnCallbackProxyWrapper>::MakeSptr(callback);
+    request = std::make_shared<NetActivate>(
         netSpecifier, callbakWrapper, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
-        callbakWrapper->SetNetActivate(request);
-    }
+    callbakWrapper->SetNetActivate(request);
 #else
     request = std::make_shared<NetActivate>(
         netSpecifier, callback, timeoutCb, timeoutMS, netConnEventHandler_, callingUid, registerType);
@@ -2068,25 +2062,6 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
-{
-    return NetManagerCenter::GetInstance().GetAddressesByName(host, static_cast<uint16_t>(netId), addrList);
-}
-
-int32_t NetConnService::GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr)
-{
-    std::vector<INetAddr> addrList;
-    int ret = GetAddressesByName(host, netId, addrList);
-    if (ret == NETMANAGER_SUCCESS) {
-        if (!addrList.empty()) {
-            addr = addrList[0];
-            return ret;
-        }
-        return NET_CONN_ERR_NO_ADDRESS;
-    }
-    return ret;
-}
-
 int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList)
 {
     if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
@@ -2486,12 +2461,6 @@ int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
         isMetered = true;
     }
     return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnService::BindSocket(int32_t socketFd, int32_t netId)
-{
-    NETMGR_LOG_D("Enter BindSocket.");
-    return NetsysController::GetInstance().BindSocket(socketFd, netId);
 }
 
 int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args)

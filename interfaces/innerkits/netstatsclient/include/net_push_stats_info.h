@@ -19,8 +19,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE_PUSH __attribute__((visibility("default")))
-struct NET_SYMBOL_VISIBLE_PUSH PushStatsInfo final : public Parcelable {
+struct PushStatsInfo final : public Parcelable {
     uint32_t uid_ = 0;
     std::string iface_ = "rmnet_push";
     uint32_t simId_ = 0;

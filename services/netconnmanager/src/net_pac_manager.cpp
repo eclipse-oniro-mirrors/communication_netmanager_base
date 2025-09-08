@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef NETMANAGER_ENABLE_PAC_PROXY
+
 #include <cstring>
 #include <string>
 #include <curl/curl.h>
@@ -274,4 +274,3 @@ std::string NetPACManager::ParseHost(const std::string &url)
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif

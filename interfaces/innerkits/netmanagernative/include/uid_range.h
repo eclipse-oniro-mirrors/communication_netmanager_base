@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct __attribute__ ((visibility("default"))) UidRange : public Parcelable {
+struct UidRange : public Parcelable {
     UidRange(int32_t begin, int32_t end);
     UidRange() = default;
     virtual ~UidRange(){};

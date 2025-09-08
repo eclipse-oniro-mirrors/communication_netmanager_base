@@ -72,8 +72,6 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION)] = {
         &NetConnServiceStub::OnNetDetection, {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET)] = {&NetConnServiceStub::OnBindSocket,
-                                                                                    {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetSupplierCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE)] = {
@@ -198,10 +196,6 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetConnectionProperties, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES)] = {
         &NetConnServiceStub::OnGetNetCapabilities, {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME)] = {
-        &NetConnServiceStub::OnGetAddressesByName, {Permission::INTERNET}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME)] = {
-        &NetConnServiceStub::OnGetAddressByName, {Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED)] = {
         &NetConnServiceStub::OnIsDefaultNetMetered, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)] = {
@@ -1178,88 +1172,6 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessageParcel &reply)
-{
-    std::string host;
-    if (!data.ReadString(host)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    int32_t netId;
-    if (!data.ReadInt32(netId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    NETMGR_LOG_D("stub execute GetAddressesByName");
-    std::vector<INetAddr> addrList;
-    int32_t ret = GetAddressesByName(host, netId, addrList);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        uint32_t size = static_cast<uint32_t>(addrList.size());
-        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteUint32(size)) {
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        uint32_t index = 0;
-        for (auto p = addrList.begin(); p != addrList.end(); ++p) {
-            if (++index > MAX_IFACE_NUM) {
-                break;
-            }
-            sptr<INetAddr> netaddr_ptr = (std::make_unique<INetAddr>(*p)).release();
-            if (!INetAddr::Marshalling(reply, netaddr_ptr)) {
-                NETMGR_LOG_E("proxy Marshalling failed");
-                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-            }
-        }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParcel &reply)
-{
-    std::string host;
-    if (!data.ReadString(host)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    int32_t netId;
-    if (!data.ReadInt32(netId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    NETMGR_LOG_D("stub execute GetAddressByName");
-    INetAddr addr;
-    int32_t ret = GetAddressByName(host, netId, addr);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (ret == NETMANAGER_SUCCESS) {
-        sptr<INetAddr> netaddr_ptr = (std::make_unique<INetAddr>(addr)).release();
-        if (!INetAddr::Marshalling(reply, netaddr_ptr)) {
-            NETMGR_LOG_E("proxy Marshalling failed");
-            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t socketFd;
-    if (!data.ReadInt32(socketFd)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    int32_t netId;
-    if (!data.ReadInt32(netId)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    NETMGR_LOG_D("stub execute BindSocket");
-
-    int32_t ret = BindSocket(socketFd, netId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }

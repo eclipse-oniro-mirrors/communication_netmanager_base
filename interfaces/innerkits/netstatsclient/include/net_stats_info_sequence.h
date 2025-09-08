@@ -21,8 +21,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE_SEQ __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE_SEQ NetStatsInfoSequence final : public Parcelable {
+struct NetStatsInfoSequence final : public Parcelable {
     uint64_t startTime_ = 0;
     uint64_t endTime_ = 0;
     NetStatsInfo info_;

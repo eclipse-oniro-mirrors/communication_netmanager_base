@@ -151,16 +151,6 @@ public:
         return 0;
     }
 
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override
-    {
-        return 0;
-    }
-
-    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override
-    {
-        return 0;
-    }
-
     int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
                                   SafeMap<std::string, std::string> &ifaceNameIdentMaps) override
     {
@@ -194,11 +184,6 @@ public:
     }
 
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override
-    {
-        return 0;
-    }
-
-    int32_t BindSocket(int32_t socketFd, int32_t netId) override
     {
         return 0;
     }

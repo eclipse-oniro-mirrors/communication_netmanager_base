@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetsysNative {
-class __attribute__((visibility("default"))) NetFirewallCallbackStub : public IRemoteStub<INetFirewallCallback> {
+class NetFirewallCallbackStub : public IRemoteStub<INetFirewallCallback> {
 public:
     NetFirewallCallbackStub();
     virtual ~NetFirewallCallbackStub() = default;

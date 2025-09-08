@@ -20,10 +20,9 @@
 
 #include "i_notify_callback.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace NetsysNative {
-class NET_SYMBOL_VISIBLE NotifyCallbackStub : public IRemoteStub<INotifyCallback> {
+class NotifyCallbackStub : public IRemoteStub<INotifyCallback> {
 public:
     NotifyCallbackStub();
     virtual ~NotifyCallbackStub();

@@ -896,17 +896,6 @@ int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
-{
-    NETMGR_LOG_D("NetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
 int32_t NetsysNativeClient::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("NetsysNativeClient IpEnableForwarding: requestor[%{public}s]", requestor.c_str());

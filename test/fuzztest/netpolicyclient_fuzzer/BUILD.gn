@@ -49,7 +49,7 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
-    "mock_net_policy_permission.cpp",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
     "net_policy_client_fuzzer.cpp",
   ]
 

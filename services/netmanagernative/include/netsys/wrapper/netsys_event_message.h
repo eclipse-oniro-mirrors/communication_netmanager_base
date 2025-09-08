@@ -20,10 +20,9 @@
 #include <string>
 #include <shared_mutex>
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class NET_SYMBOL_VISIBLE NetsysEventMessage {
+class NetsysEventMessage {
 public:
     NetsysEventMessage() = default;
     ~NetsysEventMessage() = default;

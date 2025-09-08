@@ -98,7 +98,6 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_UIDGETLIST_API);
     mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
     mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
-    mockApi_.insert(MOCK_BINDSOCKET_API);
     mockApi_.insert(MOCK_SHAREDNSSET_API);
     mockApi_.insert(MOCK_REGISTERNETSYSNOTIFYCALLBACK_API);
     mockApi_.insert(MOCK_BINDNETWORKSERVICEVPN_API);
@@ -526,12 +525,6 @@ int32_t MockNetsysNativeClient::ClearDefaultNetWorkNetId()
 {
     NETMGR_LOG_D("ClearDefaultNetWorkNetId");
     return 0;
-}
-
-int32_t MockNetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
-{
-    NETMGR_LOG_D("BindSocket: netId = [%{public}u]", netId);
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t MockNetsysNativeClient::ShareDnsSet(uint16_t netId)

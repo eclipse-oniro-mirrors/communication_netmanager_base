@@ -46,20 +46,8 @@ bool BroadcastManager::SendBroadcast(const BroadcastInfo &info, const std::map<s
     return SendBroadcastEx(info, param);
 }
 
-template <typename T>
-bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map<std::string, T> &param)
+bool BroadcastManager::DoSendBroadcast(const BroadcastInfo &info, AAFwk::Want &want)
 {
-    if (info.action.empty()) {
-        NETMGR_LOG_E("The parameter of action is empty");
-        return false;
-    }
-    NETMGR_LOG_I("Net Send broadcast: %{public}s", info.action.c_str());
-    AAFwk::Want want;
-    want.SetAction(info.action);
-    for (const auto &x : param) {
-        want.SetParam(x.first, x.second);
-    }
-
     EventFwk::CommonEventData eventData;
     eventData.SetWant(want);
     eventData.SetCode(info.code);
@@ -82,6 +70,23 @@ bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map
     }
 
     return publishResult;
+}
+
+template <typename T>
+bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map<std::string, T> &param)
+{
+    if (info.action.empty()) {
+        NETMGR_LOG_E("The parameter of action is empty");
+        return false;
+    }
+    NETMGR_LOG_I("Net Send broadcast: %{public}s", info.action.c_str());
+    AAFwk::Want want;
+    want.SetAction(info.action);
+    for (const auto &x : param) {
+        want.SetParam(x.first, x.second);
+    }
+
+    return DoSendBroadcast(info, want);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

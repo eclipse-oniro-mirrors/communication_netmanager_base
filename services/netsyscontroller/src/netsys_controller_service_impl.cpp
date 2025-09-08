@@ -454,15 +454,6 @@ int32_t NetsysControllerServiceImpl::ClearDefaultNetWorkNetId()
     return netsysClient_->ClearDefaultNetWorkNetId();
 }
 
-int32_t NetsysControllerServiceImpl::BindSocket(int32_t socketFd, uint32_t netId)
-{
-    NETMGR_LOG_D("BindSocket");
-    if (mockNetsysClient_.CheckMockApi(MOCK_BINDSOCKET_API)) {
-        return mockNetsysClient_.BindSocket(socketFd, netId);
-    }
-    return netsysClient_->BindSocket(socketFd, netId);
-}
-
 int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("IpEnableForwarding");

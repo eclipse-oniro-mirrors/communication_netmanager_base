@@ -25,8 +25,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE NetLinkInfo final : public Parcelable {
+struct NetLinkInfo final : public Parcelable {
     std::string ifaceName_;
     std::string domain_;
     std::list<INetAddr> netAddrList_;

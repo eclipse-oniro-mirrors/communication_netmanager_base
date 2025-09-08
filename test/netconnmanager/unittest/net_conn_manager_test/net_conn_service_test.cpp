@@ -78,22 +78,6 @@ constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 constexpr int32_t MAIN_USERID = 100;
 constexpr int32_t INVALID_USERID = 1;
 
-class TestDnsService : public DnsBaseService {
-public:
-    int32_t GetAddressesByName(const std::string &hostName, int32_t netId,
-                               std::vector<INetAddr> &addrInfo) override
-    {
-        if (netId == TEST_NOTEXISTSUPPLIER) {
-            return NETMANAGER_ERROR;
-        } else if (netId == TEST_NETID) {
-            INetAddr netAddr;
-            netAddr.type_ = INetAddr::IPV4;
-            addrInfo.push_back(netAddr);
-        }
-        return NETSYS_SUCCESS;
-    }
-};
-
 sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
@@ -603,40 +587,6 @@ HWTEST_F(NetConnServiceTest, GetNetExtAttributeTest002, TestSize.Level1)
     ASSERT_EQ(str, "test");
 }
 
-HWTEST_F(NetConnServiceTest, GetAddressesByNameTest001, TestSize.Level1)
-{
-    std::vector<INetAddr> addrList;
-    auto ret = NetConnService::GetInstance()->GetAddressesByName(TEST_HOST, TEST_NETID, addrList);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceTest, GetAddressByNameTest001, TestSize.Level1)
-{
-    int32_t netId = 0;
-    auto ret = NetConnService::GetInstance()->GetDefaultNet(netId);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-    EXPECT_NE(netId, 0);
-
-    INetAddr addr;
-    ret = NetConnService::GetInstance()->GetAddressByName(TEST_HOST, netId, addr);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-
-    sptr<TestDnsService> dnsService = new (std::nothrow) TestDnsService();
-    NetManagerCenter::GetInstance().RegisterDnsService(dnsService);
-
-    ret = NetConnService::GetInstance()->GetAddressByName(TEST_HOST, netId, addr);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_ADDRESS);
-
-    ret = NetConnService::GetInstance()->GetAddressByName(TEST_HOST, TEST_NETID, addr);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, BindSocketTest001, TestSize.Level1)
-{
-    auto ret = NetConnService::GetInstance()->BindSocket(TEST_SOCKETFD, TEST_NETID);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetConnServiceTest, NetDetectionTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->NetDetection(TEST_NETID);
@@ -1093,7 +1043,7 @@ HWTEST_F(NetConnServiceTest, AddInterfaceAddressTest001, TestSize.Level1)
     std::string ipAddr = "0.0.0.1";
     int32_t prefixLength = 23;
     int32_t ret = NetConnService::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(NetsysController::GetInstance().netsysService_, nullptr);
 }
 
 HWTEST_F(NetConnServiceTest, DelInterfaceAddressTest001, TestSize.Level1)

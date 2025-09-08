@@ -298,9 +298,13 @@ bool Network::DelayStartDetectionForIpUpdate(bool hasSameIpAddr)
     NETMGR_LOG_I("UpdateNetLinkInfo: delay start detection");
     if (eventHandler_) {
         eventHandler_->RemoveTask(taskName);
+        std::weak_ptr<Network> wp = shared_from_this();
         eventHandler_->PostAsyncTask(
-            [self = shared_from_this()] {
-                self->StartNetDetection(true);
+            [wp] {
+                auto sp = wp.lock();
+                if (sp != nullptr) {
+                    sp->StartNetDetection(true);
+                }
             }, taskName, DETECTION_RESULT_WAIT_MS);
     }
     return true;

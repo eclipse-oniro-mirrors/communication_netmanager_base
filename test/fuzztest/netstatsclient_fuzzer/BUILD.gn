@@ -47,7 +47,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   ldflags = [ "-flto" ]
 
   sources = [
-    "mock_net_permission.cpp",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
     "net_stats_client_fuzzer.cpp",
   ]
 

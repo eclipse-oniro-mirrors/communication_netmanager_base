@@ -415,15 +415,6 @@ public:
     int32_t ClearDefaultNetWorkNetId() override;
 
     /**
-     * Obtains the NIC list.
-     *
-     * @param socketFd
-     * @param netId
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t BindSocket(int32_t socketFd, uint32_t netId) override;
-
-    /**
      * Enable ip forwarding.
      *
      * @param requestor the requestor of forwarding

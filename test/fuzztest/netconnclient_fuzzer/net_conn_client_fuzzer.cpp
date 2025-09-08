@@ -220,20 +220,6 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS), dataParcel);
 }
 
-void BindSocketFuzzTest(const uint8_t *data, size_t size)
-{
-    NetManagerBaseAccessToken token;
-    int32_t socketFd = NetConnGetData<int32_t>();
-    int32_t netId = NetConnGetData<int32_t>();
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    dataParcel.WriteInt32(socketFd);
-    dataParcel.WriteInt32(netId);
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET), dataParcel);
-}
-
 void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -272,73 +258,6 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     MessageParcel dataParcelNoSupplierId;
     netSupplierInfo->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO), dataParcel);
-}
-
-void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
-{
-    NetManagerBaseAccessToken token;
-    std::string host = NetConnGetString(STR_LEN);
-    int32_t netId = NetConnGetData<int32_t>();
-
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        NETMGR_LOG_D("GetAddressByNameFuzzTest write token failed or invalid parameter.");
-        return;
-    }
-    dataParcel.WriteString(host);
-    dataParcel.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), dataParcel);
-
-    MessageParcel dataParcelNoHost;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoHost)) {
-        NETMGR_LOG_D("GetAddressByNameFuzzTest write token failed or invalid parameter.");
-        return;
-    }
-    dataParcelNoHost.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), dataParcelNoHost);
-
-    MessageParcel dataParcelNoNetId;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
-        NETMGR_LOG_D("GetAddressByNameFuzzTest write token failed or invalid parameter.");
-        return;
-    }
-    dataParcelNoNetId.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), dataParcelNoNetId);
-}
-
-void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
-{
-    NetManagerBaseAccessToken token;
-    std::string host = NetConnGetString(STR_LEN);
-    int32_t netId = NetConnGetData<int32_t>();
-
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    dataParcel.WriteString(host);
-    dataParcel.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), dataParcel);
-
-    MessageParcel dataParcelNoHost;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoHost)) {
-        return;
-    }
-    dataParcelNoHost.WriteInt32(netId);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), dataParcelNoHost);
-
-    MessageParcel dataParcelNoNetId;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
-        return;
-    }
-    dataParcelNoNetId.WriteString(host);
-
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), dataParcelNoNetId);
 }
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
@@ -1958,9 +1877,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetAllNetsFuzzTest(data, size);
     OHOS::NetManagerStandard::GetConnectionPropertiesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetCapabilitiesFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAddressesByNameFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAddressByNameFuzzTest(data, size);
-    OHOS::NetManagerStandard::BindSocketFuzzTest(data, size);
     OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
     OHOS::NetManagerStandard::IsDefaultNetMeteredFuzzTest(data, size);

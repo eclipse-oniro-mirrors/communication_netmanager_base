@@ -15,7 +15,6 @@
 
 #ifndef JERRY_NET_PAC_MANAGER_H
 #define JERRY_NET_PAC_MANAGER_H
-#ifdef NETMANAGER_ENABLE_PAC_PROXY
 #include <string>
 #include <memory>
 #include "mutex"
@@ -78,4 +77,3 @@ private:
 }  // namespace NetManagerStandard
 }  // namespace OHOS
 #endif
-#endif  // JERRY_NET_PAC_MANAGER_H

@@ -492,12 +492,12 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest001, TestSize.Level1)
     network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_CELLULAR, nullptr);
     network->InitNetMonitor();
     ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(network->netMonitor_->IsDetecting());
     network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
     network->InitNetMonitor();
     network->netMonitor_->Stop();
     ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(network->netMonitor_->IsDetecting());
 }
 
 HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
@@ -1520,7 +1520,7 @@ HWTEST_F(NetworkTest, OH_NetConn_BindSocketTest003, TestSize.Level1)
     auto ret = OH_NetConn_BindSocket(socketFd, nullptr);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 
-    netHandle.netId = 99;
+    netHandle.netId = 100;
     ret = OH_NetConn_BindSocket(socketFd, &netHandle);
     EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }

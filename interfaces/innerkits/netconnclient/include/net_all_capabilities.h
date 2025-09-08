@@ -60,8 +60,7 @@ enum NetBearType {
     BEARER_DEFAULT // The maximum value of NetBearType. Do not exceed the limit. No actual meaning.
 };
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE NetAllCapabilities final : public Parcelable {
+struct NetAllCapabilities final : public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;
     uint32_t linkDownBandwidthKbps_ = 0;
     std::set<NetCap> netCaps_;

@@ -39,8 +39,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-class NET_SYMBOL_VISIBLE NetPolicyService : public SystemAbility,
+class NetPolicyService : public SystemAbility,
                          public NetPolicyServiceStub,
                          public std::enable_shared_from_this<NetPolicyService> {
     DECLARE_DELAYED_SINGLETON(NetPolicyService)

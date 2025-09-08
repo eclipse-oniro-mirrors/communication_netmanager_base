@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "dns_base_service.h"
 #include "net_conn_base_service.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_types.h"
@@ -33,14 +32,6 @@ constexpr const char *TEST_IDENT = "testIdent";
 constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
-};
-
-class TestDnsService : public DnsBaseService {
-    inline int32_t GetAddressesByName(const std::string &hostName, int32_t netId,
-                                      std::vector<INetAddr> &addrInfo) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
 };
 
 class TestConnService : public NetConnBaseService {
@@ -150,7 +141,6 @@ void NetManagerCenterTest::SetUp()
     instance_.RegisterStatsService(nullptr);
     instance_.RegisterPolicyService(nullptr);
     instance_.RegisterEthernetService(nullptr);
-    instance_.RegisterDnsService(nullptr);
 }
 
 void NetManagerCenterTest::TearDown() {}
@@ -422,26 +412,6 @@ HWTEST_F(NetManagerCenterTest, ResetEthernetFactoryTest002, TestSize.Level1)
     sptr<NetEthernetBaseService> service = new (std::nothrow) TestNetEthernetService();
     instance_.RegisterEthernetService(service);
     int32_t ret = instance_.ResetEthernetFactory();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetManagerCenterTest, GetAddressesByNameTest001, TestSize.Level1)
-{
-    const std::string testHostName = "test_hostname";
-    int32_t testNetId = 111;
-    std::vector<INetAddr> addrInfo;
-    int32_t ret = instance_.GetAddressesByName(testHostName, testNetId, addrInfo);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetManagerCenterTest, GetAddressesByNameTest002, TestSize.Level1)
-{
-    sptr<DnsBaseService> service = new (std::nothrow) TestDnsService();
-    instance_.RegisterDnsService(service);
-    const std::string testHostName = "test_hostname";
-    int32_t testNetId = 111;
-    std::vector<INetAddr> addrInfo;
-    int32_t ret = instance_.GetAddressesByName(testHostName, testNetId, addrInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

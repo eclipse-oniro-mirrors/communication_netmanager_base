@@ -56,8 +56,8 @@ public:
     virtual std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> ObtainBundleInfoForActive() = 0;
     virtual std::optional<SampleBundleInfo> ObtainBundleInfoForUid(uint32_t uid) = 0;
 };
-extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
-extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
+extern "C" INetBundle *GetNetBundle();
+extern "C" bool IsAtomicService(std::string &bundleName);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE__H

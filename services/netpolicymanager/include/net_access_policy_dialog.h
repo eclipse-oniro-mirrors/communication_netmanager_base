@@ -26,7 +26,7 @@ public:
    virtual bool ConnectSystemUi(uint32_t uid) = 0;
 };
 
-extern "C" __attribute__((visibility("default"))) INetAccessPolicyDialog *GetNetAccessPolicyDialog();
+extern "C" INetAccessPolicyDialog *GetNetAccessPolicyDialog();
 } // namespace NetManagerStandard
 } // namespace OHOS
 

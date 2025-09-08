@@ -20,8 +20,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE_NETWORK __attribute__((visibility("default")))
-struct NET_SYMBOL_VISIBLE_NETWORK NetStatsNetwork final : public Parcelable {
+struct NetStatsNetwork final : public Parcelable {
     uint32_t type_ = 0;
     uint64_t startTime_ = 0;
     uint64_t endTime_ = 0;
