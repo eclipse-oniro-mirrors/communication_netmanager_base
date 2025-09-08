@@ -101,6 +101,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
     "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$INNERKITS_ROOT/netconnclient/include/proxy",
   ]
 
   version_script = "libnetconn_kits.map"
@@ -116,6 +117,7 @@ ohos_shared_library("net_conn_manager_if") {
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "samgr:samgr_proxy",
+    "ffrt:libffrt",
   ]
   public_external_deps = [ "ipc:ipc_core" ]
 
@@ -209,6 +211,72 @@ ohos_shared_library("net_security_config_if") {
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
   }
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_static_library("net_conn_manager_if_static") {
+  testonly = true
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  cflags = common_cflags
+ 
+  cflags_cc = common_cflags
+ 
+  branch_protector_ret = "pac_ret"
+ 
+  sources = [
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_conn_client.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_handle.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_callback_base.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_pac_proxy_helper.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_factoryreset_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_interface_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_supplier_callback_stub.cpp",
+  ]
+ 
+  include_dirs = [
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+  ]
+ 
+  public_configs = [ ":net_conn_manager_if_config" ]
+ 
+  deps = [
+    ":net_conn_parcel",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
+  ]
+ 
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "samgr:samgr_proxy",
+    "ipc:ipc_single",
+  ]
+ 
+  defines = [
+    "NETMGR_LOG_TAG = \"NetConnManager\"",
+    "LOG_DOMAIN = 0xD0015B0",
+    "NETMANAGER_TEST",
+  ]
+ 
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+ 
+  external_deps += [ "hilog:libhilog" ]
+ 
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
