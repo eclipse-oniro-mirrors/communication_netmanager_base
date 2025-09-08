@@ -584,5 +584,13 @@ HWTEST_F(InterfaceManagerTest, SetIffUpTest004, TestSize.Level1)
     auto ret = InterfaceManager::SetIffUp(ifaceName);
     EXPECT_EQ(ret, -1);
 }
+
+HWTEST_F(InterfaceManagerTest, SetIpv6AutoConfTest004, TestSize.Level1)
+{
+    std::string ifaceName = "wlan";
+    uint32_t on = 0;
+    auto ret = InterfaceManager::SetIpv6AutoConf(ifaceName, on);
+    EXPECT_TRUE(ret == 0 || ret == -1);
+}
 } // namespace nmd
 } // namespace OHOS

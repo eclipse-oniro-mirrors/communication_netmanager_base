@@ -555,6 +555,11 @@ public:
         return 0;
     }
 
+    int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
     int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
     {
         return 0;

@@ -989,6 +989,13 @@ int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, con
     return result;
 }
 
+int32_t NetsysNativeService::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetIpv6AutoConf(interfaceName, on);
+    NETNATIVE_LOG_D("SetIpv6AutoConf");
+    return result;
+}
+
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     if (bpfStats_ == nullptr) {

@@ -1590,6 +1590,17 @@ int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const 
     return netsysService_->SetEnableIpv6(interfaceName, on);
 }
 
+int32_t NetsysController::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
+{
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpv6AutoConf netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->SetIpv6AutoConf(interfaceName, on);
+}
+
 int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     // LCOV_EXCL_START This will never happen.

@@ -60,6 +60,9 @@ constexpr int32_t MAX_MTU_LEN = 11;
 constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
 constexpr int32_t MAC_SSCANF_SPACE = 3;
 const std::regex REGEX_CMD_MAC_ADDRESS("^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$");
+constexpr const char *IPV6_PROC_PATH = "/proc/sys/net/ipv6/conf/";
+constexpr const char *DISABLE_IPV6_AUTO_CONF = "0";
+constexpr const char *ENABLE_IPV6_AUTO_CONF = "1";
 
 bool CheckFilePath(const std::string &fileName, std::string &realPath)
 {
@@ -466,6 +469,15 @@ int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::str
     }
     close(inetSocket);
     return NETMANAGER_SUCCESS;
+}
+
+int32_t InterfaceManager::SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on)
+{
+    NETNATIVE_LOGI("SetIpv6AutoConf.");
+    std::string option = IPV6_PROC_PATH + ipAddr + "/autoconf";
+    std::string value = on ? ENABLE_IPV6_AUTO_CONF : DISABLE_IPV6_AUTO_CONF;
+    bool ipv6Success = WriteFile(option, value);
+    return ipv6Success ? 0 : -1;
 }
 
 int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::string &macAddr,

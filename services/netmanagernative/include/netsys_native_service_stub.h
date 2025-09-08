@@ -175,6 +175,7 @@ private:
 #endif
     int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6AutoConf(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply);

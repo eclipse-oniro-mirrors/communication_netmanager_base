@@ -806,6 +806,15 @@ HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetIpv6AutoConfTest001, TestSize.Level1)
+{
+    auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = instance->SetIpv6AutoConf(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
 {
     uint32_t uid = 0;

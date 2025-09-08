@@ -986,6 +986,8 @@ public:
 
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 
+    int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on);
+
     /**
      * Set the policy to access the network of the specified application.
      *

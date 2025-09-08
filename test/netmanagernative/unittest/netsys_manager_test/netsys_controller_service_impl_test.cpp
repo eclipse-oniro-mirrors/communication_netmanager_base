@@ -793,6 +793,18 @@ HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestS
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, SetIpv6AutoConfTest001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetsysService_, SetIpv6AutoConf(_, _)).WillRepeatedly(Return(0));
+    auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+
+    std::string interface = "wlan0";
+    uint32_t on = 1;
+    int32_t ret = netsysControllerServiceImpl->SetIpv6AutoConf(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;

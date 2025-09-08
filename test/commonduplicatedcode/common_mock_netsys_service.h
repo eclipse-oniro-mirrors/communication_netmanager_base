@@ -175,6 +175,7 @@ public:
     MOCK_METHOD(int32_t, UnRegisterNetsysTrafficCallback, (const sptr<INetsysTrafficCallback> &callback), (override));
     MOCK_METHOD(int32_t, SetIpv6PrivacyExtensions, (const std::string &interfaceName, const uint32_t on), (override));
     MOCK_METHOD(int32_t, SetEnableIpv6, (const std::string &interfaceName, const uint32_t on), (override));
+    MOCK_METHOD(int32_t, SetIpv6AutoConf, (const std::string &interfaceName, const uint32_t on), (override));
     MOCK_METHOD(int32_t, SetNetworkAccessPolicy, (uint32_t uid,
         NetworkAccessPolicy policy, bool reconfirmFlag), (override));
     MOCK_METHOD(int32_t, DeleteNetworkAccessPolicy, (uint32_t uid), (override));
