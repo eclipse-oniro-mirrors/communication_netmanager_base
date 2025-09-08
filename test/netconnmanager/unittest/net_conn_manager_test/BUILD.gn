@@ -26,6 +26,7 @@ ohos_unittest("net_conn_manager_test") {
   use_exceptions = true
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
     "net_common_event_test.cpp",
     "net_conn_callback_stub_test.cpp",
     "net_conn_callback_test.cpp",
@@ -82,6 +83,7 @@ ohos_unittest("net_conn_manager_test") {
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

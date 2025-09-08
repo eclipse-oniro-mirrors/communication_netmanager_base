@@ -17,11 +17,10 @@
 #define WRAPPER_LISTENER_H
 
 #include "ffrt.h"
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 
 namespace OHOS {
 namespace nmd {
-class NET_SYMBOL_VISIBLE WrapperListener {
+class WrapperListener {
 public:
     using RecvFunc = std::function<void(int32_t)>;
     WrapperListener(int32_t socketFd, RecvFunc recvFunc);

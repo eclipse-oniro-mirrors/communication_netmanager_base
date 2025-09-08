@@ -54,7 +54,6 @@ public:
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS):
-            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER):
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS):
                 reply.WriteUint32(NETMANAGER_SUCCESS);
@@ -83,12 +82,6 @@ public:
             case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES): {
                 NetAllCapabilities netCap;
                 netCap.Marshalling(reply);
-                break;
-            }
-
-            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME): {
-                INetAddr addr;
-                addr.Marshalling(reply);
                 break;
             }
 
@@ -519,32 +512,6 @@ HWTEST_F(NetConnServiceProxyTest, GetNetCapabilitiesTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAddressesByNameTest001
- * @tc.desc: Test NetConnServiceProxy GetAddressesByName.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, GetAddressesByNameTest001, TestSize.Level1)
-{
-    std::string host;
-    std::vector<INetAddr> addrList;
-    int32_t ret = instance_->GetAddressesByName(host, TEST_NETID, addrList);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: GetAddressesByNameTest001
- * @tc.desc: Test NetConnServiceProxy GetAddressesByName.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, GetAddresseByNameTest001, TestSize.Level1)
-{
-    std::string host;
-    INetAddr addr;
-    int32_t ret = instance_->GetAddressByName(host, TEST_NETID, addr);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
  * @tc.name: GetIfaceNameIdentMapsTest001
  * @tc.desc: Test NetConnServiceProxy GetIfaceNameIdentMaps.
  * @tc.type: FUNC
@@ -553,17 +520,6 @@ HWTEST_F(NetConnServiceProxyTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
 {
     SafeMap<std::string, std::string> data;
     int32_t ret = instance_->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, data);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: BindSocketTest001
- * @tc.desc: Test NetConnServiceProxy BindSocket.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, BindSocketTest001, TestSize.Level1)
-{
-    int32_t ret = instance_->BindSocket(TEST_SOCKETFD, TEST_NETID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

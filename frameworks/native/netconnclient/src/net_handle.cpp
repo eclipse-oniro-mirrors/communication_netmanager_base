@@ -25,24 +25,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetHandle::GetAddressesByName(const std::string &host, std::vector<INetAddr> &addrList)
-{
-    if (host.empty()) {
-        NETMGR_LOG_E("host is empty");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
-    }
-    return NetConnClient::GetInstance().GetAddressesByName(host, netId_, addrList);
-}
-
-int32_t NetHandle::GetAddressByName(const std::string &host, INetAddr &addr)
-{
-    if (host.empty()) {
-        NETMGR_LOG_E("host is empty");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
-    }
-    return NetConnClient::GetInstance().GetAddressByName(host, netId_, addr);
-}
-
 int32_t NetHandle::BindSocket(int32_t socketFd)
 {
     if (socketFd < 0) {

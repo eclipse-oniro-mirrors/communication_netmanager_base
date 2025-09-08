@@ -680,18 +680,6 @@ int32_t NetsysController::ClearDefaultNetWorkNetId()
     return netsysService_->ClearDefaultNetWorkNetId();
 }
 
-int32_t NetsysController::BindSocket(int32_t socketFd, uint32_t netId)
-{
-    NETMGR_LOG_D("NetsysController::BindSocket: netId = [%{public}u]", netId);
-    // LCOV_EXCL_START This will never happen.
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    // LCOV_EXCL_STOP
-    return netsysService_->BindSocket(socketFd, netId);
-}
-
 int32_t NetsysController::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_I("IpEnableForwarding: requestor[%{public}s]", requestor.c_str());

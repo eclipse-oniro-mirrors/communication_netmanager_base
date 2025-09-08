@@ -58,49 +58,5 @@ HWTEST_F(NetHandleTest, BindSocket002, TestSize.Level1)
     int32_t result = handler->BindSocket(socketFd);
     ASSERT_TRUE(result == NETMANAGER_ERR_PARAMETER_ERROR);
 }
-
-HWTEST_F(NetHandleTest, GetAddressesByName001, TestSize.Level1)
-{
-    std::string host = "www.baidu.com";
-    std::vector<INetAddr> addrList;
-    int32_t netId = 5;
-    auto handler = DelayedSingleton<NetHandle>::GetInstance();
-    handler->SetNetId(netId);
-    int32_t ret = handler->GetAddressesByName(host, addrList);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
-HWTEST_F(NetHandleTest, GetAddressesByName002, TestSize.Level1)
-{
-    std::string host;
-    std::vector<INetAddr> addrList;
-    int32_t netId = 5;
-    auto handler = DelayedSingleton<NetHandle>::GetInstance();
-    handler->SetNetId(netId);
-    int32_t ret = handler->GetAddressesByName(host, addrList);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
-}
-
-HWTEST_F(NetHandleTest, GetAddressByName001, TestSize.Level1)
-{
-    std::string host = "www.baidu.com";
-    INetAddr addr;
-    int32_t netId = 5;
-    auto handler = DelayedSingleton<NetHandle>::GetInstance();
-    handler->SetNetId(netId);
-    int32_t ret = handler->GetAddressByName(host, addr);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
-HWTEST_F(NetHandleTest, GetAddressByName002, TestSize.Level1)
-{
-    std::string host;
-    INetAddr addr;
-    int32_t netId = 5;
-    auto handler = DelayedSingleton<NetHandle>::GetInstance();
-    handler->SetNetId(netId);
-    int32_t ret = handler->GetAddressByName(host, addr);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

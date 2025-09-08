@@ -484,28 +484,6 @@ int32_t NetConnClient::GetNetCapabilities(const NetHandle &netHandle, NetAllCapa
     return proxy->GetNetCapabilities(netHandle.GetNetId(), netAllCap);
 }
 
-int32_t NetConnClient::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-
-    return proxy->GetAddressesByName(host, netId, addrList);
-}
-
-int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-
-    return proxy->GetAddressByName(host, netId, addr);
-}
-
 int32_t NetConnClient::GetIfaceNameIdentMaps(NetBearType bearerType,
                                              SafeMap<std::string, std::string> &ifaceNameIdentMaps)
 {

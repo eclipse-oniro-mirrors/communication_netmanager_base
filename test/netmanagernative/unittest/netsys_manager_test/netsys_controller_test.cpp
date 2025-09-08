@@ -329,10 +329,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest013, TestSize.Level1)
     netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
     netsysController->netsysService_ = netsysControllerServiceImpl;
 
-    int32_t ret = netsysController->BindSocket(SOCKET_FD, NET_ID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = netsysController->IpEnableForwarding(INTERFACE_NAME);
+    int32_t ret = netsysController->IpEnableForwarding(INTERFACE_NAME);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->IpDisableForwarding(INTERFACE_NAME);
@@ -743,9 +740,6 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr004, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->ClearDefaultNetWorkNetId();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = netsysController->BindSocket(0, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->IpEnableForwarding(iface);

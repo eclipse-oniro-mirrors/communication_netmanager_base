@@ -83,9 +83,6 @@ private:
     int32_t OnGetSpecificUidNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetConnectionProperties(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetCapabilities(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetAddressesByName(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetAddressByName(MessageParcel &data, MessageParcel &reply);
-    int32_t OnBindSocket(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);

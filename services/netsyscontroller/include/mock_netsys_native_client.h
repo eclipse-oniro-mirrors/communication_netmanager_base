@@ -62,7 +62,6 @@ constexpr const char *MOCK_GETIFACERXPACKETS_API = "GetIfaceRxPackets";
 constexpr const char *MOCK_GETIFACETXPACKETS_API = "GetIfaceTxPackets";
 constexpr const char *MOCK_SETDEFAULTNETWORK_API = "SetDefaultNetWork";
 constexpr const char *MOCK_CLEARDEFAULTNETWORK_API = "ClearDefaultNetWorkNetId";
-constexpr const char *MOCK_BINDSOCKET_API = "BindSocket";
 constexpr const char *MOCK_SHAREDNSSET_API = "ShareDnsSet";
 constexpr const char *MOCK_REGISTERNETSYSNOTIFYCALLBACK_API = "RegisterNetsysNotifyCallback";
 constexpr const char *MOCK_BINDNETWORKSERVICEVPN_API = "BindNetworkServiceVpn";
@@ -367,15 +366,6 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t  ClearDefaultNetWorkNetId();
-
-    /**
-     * @brief Obtains the NIC list.
-     *
-     * @param socketFd
-     * @param netId
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t BindSocket(int32_t socketFd, uint32_t netId);
 
     /**
      * Set tether dns.

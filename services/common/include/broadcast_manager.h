@@ -20,6 +20,10 @@
 #include <map>
 
 namespace OHOS {
+namespace AAFwk {
+class Want;
+}
+
 namespace NetManagerStandard {
 struct BroadcastInfo {
     std::string     action;
@@ -51,6 +55,7 @@ public:
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, std::string> &param);
 
 private:
+    bool DoSendBroadcast(const BroadcastInfo &info, AAFwk::Want &want);
     template <typename T>
     bool SendBroadcastEx(const BroadcastInfo &info, const std::map<std::string, T> &param);
 };

@@ -63,7 +63,7 @@ private:
     static std::string uiExtensionType_;
 };
 
-extern "C" __attribute__((visibility("default"))) INetAccessPolicyDialog *GetNetAccessPolicyDialog();
+extern "C" INetAccessPolicyDialog *GetNetAccessPolicyDialog();
 } // namespace NetManagerStandard
 } // namespace OHOS
 

@@ -25,7 +25,6 @@
       "OHOS::NetManagerStandard::NetsysController::BandwidthRemoveIfaceQuota(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::BandwidthSetIfaceQuota(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long)";
       "OHOS::NetManagerStandard::NetsysController::BandwidthSetIfaceQuota(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long long)";
-      "OHOS::NetManagerStandard::NetsysController::BindSocket(int, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::ClearDefaultNetWorkNetId()";
       "OHOS::NetManagerStandard::NetsysController::ClearFirewallAllRules()";
       "OHOS::NetManagerStandard::NetsysController::ClearFirewallRules(OHOS::NetManagerStandard::NetFirewallRuleType)";

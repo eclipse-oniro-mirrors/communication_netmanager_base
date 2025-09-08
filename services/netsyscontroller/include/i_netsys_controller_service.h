@@ -441,15 +441,6 @@ public:
     virtual int32_t ClearDefaultNetWorkNetId() = 0;
 
     /**
-     * Obtains the NIC list.
-     *
-     * @param socketFd Socket fd
-     * @param netId Net id
-     * @return Return the return value of the netsys interface call
-     */
-    virtual int32_t BindSocket(int32_t socketFd, uint32_t netId) = 0;
-
-    /**
      * Enable ip forwarding.
      *
      * @param requestor the requestor of forwarding

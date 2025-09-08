@@ -105,7 +105,6 @@ void NetsysControllerServiceImplTest::AddExtMockApi()
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_UIDGETLIST_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
-        instance_->mockNetsysClient_.mockApi_.insert(MOCK_BINDSOCKET_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_REGISTERNETSYSNOTIFYCALLBACK_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_BINDNETWORKSERVICEVPN_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_ENABLEVIRTUALNETIFACECARD_API);
@@ -261,10 +260,7 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
     ret = instance_->NetworkDelUids(5, uidRanges);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    auto ret32 = instance_->BindSocket(1, 2);
-    EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret32 = instance_->RegisterNetsysNotifyCallback(Callback);
+    auto ret32 = instance_->RegisterNetsysNotifyCallback(Callback);
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret32 = instance_->BindNetworkServiceVpn(5);
@@ -413,10 +409,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->ClearDefaultNetWorkNetId();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    int32_t socketFd = 0;
-    ret = instance_->BindSocket(socketFd, netId);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::string testString = "";
@@ -680,11 +672,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     result = instance_->GetIfaceTxPackets(interfaceName);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    int32_t socketFd = 0;
     int32_t netId = 0;
-    result = instance_->BindSocket(socketFd, netId);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
-
     result = instance_->ShareDnsSet(netId);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
 

@@ -30,8 +30,8 @@ enum NetConnState {
     NET_CONN_STATE_DISCONNECTING = 4,
     NET_CONN_STATE_DISCONNECTED = 5,
 };
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE NetSupplierInfo final : public Parcelable {
+
+struct NetSupplierInfo final : public Parcelable {
     bool isAvailable_ = false;
     bool isRoaming_ = false;
     int8_t strength_ = 0x00;

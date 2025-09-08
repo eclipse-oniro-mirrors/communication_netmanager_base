@@ -17,11 +17,9 @@
 #include "iremote_proxy.h"
 #include "i_netsys_traffic_callback.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-
 namespace OHOS {
 namespace NetsysNative {
-class __attribute__((visibility("default"))) NetsysTrafficCallbackProxy : public IRemoteProxy<INetsysTrafficCallback> {
+class NetsysTrafficCallbackProxy : public IRemoteProxy<INetsysTrafficCallback> {
 public:
     explicit NetsysTrafficCallbackProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetsysTrafficCallbackProxy() = default;

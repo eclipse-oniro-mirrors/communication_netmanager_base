@@ -33,8 +33,6 @@ public:
     ~NetHandle() override = default;
 
     int32_t BindSocket(int32_t socketFd);
-    int32_t GetAddressesByName(const std::string &host, std::vector<INetAddr> &addrList);
-    int32_t GetAddressByName(const std::string &host, INetAddr &addr);
 
     void SetNetId(int32_t netId)
     {

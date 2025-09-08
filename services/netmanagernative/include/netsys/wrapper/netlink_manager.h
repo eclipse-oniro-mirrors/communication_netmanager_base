@@ -22,10 +22,9 @@
 
 #include "i_notify_callback.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class NET_SYMBOL_VISIBLE NetlinkManager {
+class NetlinkManager {
 public:
     static constexpr uint32_t NFLOG_QUOTA_GROUP = 1;
     static constexpr uint32_t NETFILTER_STRICT_GROUP = 2;

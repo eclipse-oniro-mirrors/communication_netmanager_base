@@ -284,8 +284,6 @@ public:
     int32_t NetDetection(int32_t netId) override;
     int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
-    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
         std::list<int32_t> &netIdList) override;
@@ -294,7 +292,6 @@ public:
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
-    int32_t BindSocket(int32_t socketFd, int32_t netId) override;
     void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
@@ -654,8 +651,6 @@ private:
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
-    std::mutex pacFileUrlCbsMutex_;
-    std::shared_ptr<NetConnListener> subscriber_ = nullptr;
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;

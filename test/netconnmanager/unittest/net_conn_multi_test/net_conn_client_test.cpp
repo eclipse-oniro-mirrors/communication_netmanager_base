@@ -1091,36 +1091,6 @@ HWTEST_F(NetConnClientTest, GetConnectionPropertiesTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAddressesByNameTest002
- * @tc.desc: Test NetConnClient::GetAddressesByName
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, GetAddressesByNameTest002, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    const std::string host = "ipaddr";
-    int32_t netId = 1;
-    std::vector<INetAddr> addrList = {};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAddressesByName(host, netId, addrList);
-    EXPECT_EQ(ret, -1);
-}
-
-/**
- * @tc.name: GetAddressByNameTest002
- * @tc.desc: Test NetConnClient::GetAddressByName
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    std::string host = "ipaddr";
-    int32_t netId = 1;
-    INetAddr addr;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAddressByName(host, netId, addr);
-    EXPECT_EQ(ret, -1);
-}
-
-/**
  * @tc.name: GetIfaceNameIdentMapsTest001
  * @tc.desc: Test NetConnClient::GetIfaceNameIdentMaps
  * @tc.type: FUNC

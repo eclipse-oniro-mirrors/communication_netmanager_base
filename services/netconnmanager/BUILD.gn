@@ -124,11 +124,13 @@ ohos_shared_library("net_conn_manager") {
   ]
 
   if(netmanager_base_enable_pac_proxy){
-      defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
-      external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
-      sources += [ "src/pac_functions.cpp" ]
-      sources += [ "src/net_pac_local_proxy_server.cpp" ]
-      sources += [ "src/net_pac_manager.cpp" ]
+    defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
+    sources += [
+      "src/net_pac_local_proxy_server.cpp",
+      "src/net_pac_manager.cpp",
+      "src/pac_functions.cpp",
+    ]
   }
 
   if (enable_netmgr_debug) {
@@ -237,11 +239,13 @@ ohos_static_library("net_conn_manager_static") {
   ]
 
   if(netmanager_base_enable_pac_proxy){
-      defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
-      external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
-      sources += [ "src/pac_functions.cpp" ]
-      sources += [ "src/net_pac_local_proxy_server.cpp" ]
-      sources += [ "src/net_pac_manager.cpp" ]
+    defines += [ "NETMANAGER_ENABLE_PAC_PROXY" ]
+    external_deps += [ "jerryscript:jerryscript_shared_not_lite" ]
+    sources += [
+      "src/net_pac_local_proxy_server.cpp",
+      "src/net_pac_manager.cpp",
+      "src/pac_functions.cpp",
+    ]
   }
 
   if (enable_netmgr_debug) {

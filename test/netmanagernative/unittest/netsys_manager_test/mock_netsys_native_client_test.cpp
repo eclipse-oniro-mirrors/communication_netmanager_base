@@ -194,9 +194,6 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest004, TestSi
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     int32_t socketFd = 0;
-    ret = nativeClient_.BindSocket(socketFd, netId);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
     uint16_t id = 0;
     ret = nativeClient_.ShareDnsSet(id);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);

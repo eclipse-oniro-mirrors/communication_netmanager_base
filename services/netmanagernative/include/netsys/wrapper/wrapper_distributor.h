@@ -21,10 +21,9 @@
 #include "netsys_event_message.h"
 #include <mutex>
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class NET_SYMBOL_VISIBLE WrapperDistributor {
+class WrapperDistributor {
 public:
     WrapperDistributor(int32_t socket, const int32_t format, std::mutex& externMutex);
     ~WrapperDistributor() = default;

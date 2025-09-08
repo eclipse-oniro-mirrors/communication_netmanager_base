@@ -229,26 +229,6 @@ void RegisterEthernetServiceFuzzTest(const uint8_t *data, size_t size)
     g_netManagerCenter->RegisterEthernetService(service);
 }
 
-void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
-{
-    if (!IsCommonFuzzValidData(data, size)) {
-        return;
-    }
-    std::string hostName = NetCommonGetString(STR_LEN);
-    int32_t netId = NetCommonGetData<int32_t>();
-    std::vector<INetAddr> addrInfo;
-    g_netManagerCenter->GetAddressesByName(hostName, netId, addrInfo);
-}
-
-void RegisterDnsServiceFuzzTest(const uint8_t *data, size_t size)
-{
-    if (!IsCommonFuzzValidData(data, size)) {
-        return;
-    }
-    sptr<DnsBaseService> service = nullptr;
-    g_netManagerCenter->RegisterDnsService(service);
-}
-
 void RestrictBackgroundChangedFuzzTest(const uint8_t *data, size_t size)
 {
     if (!IsCommonFuzzValidData(data, size)) {
@@ -286,7 +266,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Run your code on data */
     OHOS::NetManagerStandard::RegisterConnServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterStatsServiceFuzzTest(data, size);
-    OHOS::NetManagerStandard::RegisterDnsServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterEthernetServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterPolicyServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::GetIfaceNamesFuzzTest(data, size);
@@ -298,7 +277,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::ResetPolicyFactoryFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetEthernetFactoryFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAddressesByNameFuzzTest(data, size);
     OHOS::NetManagerStandard::RestrictBackgroundChangedFuzzTest(data, size);
     OHOS::NetManagerStandard::IsUidNetAccessFuzzTest(data, size);
     OHOS::NetManagerStandard::IsUidNetAllowedFuzzTest(data, size);

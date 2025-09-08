@@ -22,11 +22,9 @@
 #include "iremote_stub.h"
 #include "netsys_net_dns_result_data.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-
 namespace OHOS {
 namespace NetsysNative {
-class NET_SYMBOL_VISIBLE NetDnsResultCallbackStub : public IRemoteStub<INetDnsResultCallback> {
+class NetDnsResultCallbackStub : public IRemoteStub<INetDnsResultCallback> {
 public:
     NetDnsResultCallbackStub();
     virtual ~NetDnsResultCallbackStub() = default;

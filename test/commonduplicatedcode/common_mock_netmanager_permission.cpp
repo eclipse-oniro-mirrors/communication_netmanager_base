@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,21 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-bool NetManagerPermission::CheckPermission(const std::string &permissionName)
+bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
-    NETMGR_LOG_D("Net stats client fuzzer permissionName: %{public}s", permissionName.c_str());
+    NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
     return true;
 }
 
-bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
+bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
-    NETMGR_LOG_D("Net stats client fuzzer permissionName: %{public}s", permissionName.c_str());
+    NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
+    return true;
+}
+
+bool NetManagerPermission::IsSystemCaller()
+{
+    NETMGR_LOG_D("Is conn caller.");
     return true;
 }
 } // namespace NetManagerStandard

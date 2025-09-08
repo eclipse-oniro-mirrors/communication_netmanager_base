@@ -267,30 +267,6 @@ public:
     int32_t GetNetCapabilities(const NetHandle &netHandle, NetAllCapabilities &netAllCap);
 
     /**
-     * The interface is to get addresses by network name
-     *
-     * @param host domain name
-     * @param netId network id
-     * @param addrList list of network addresses
-     * @return Returns 0 success. Otherwise fail.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     */
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList);
-
-    /**
-     * The interface is to get address by network name
-     *
-     * @param host domain name
-     * @param netId network
-     * @param addr network address
-     * @return Returns 0 success. Otherwise fail.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     */
-    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr);
-
-    /**
      * The interface is to get all iface and ident maps
      *
      * @param bearerType the type of network

@@ -22,8 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE INetAddr final : public Parcelable {
+struct INetAddr final : public Parcelable {
     typedef enum {
         UNKNOWN = 0x00,
         IPV4 = 0x01,

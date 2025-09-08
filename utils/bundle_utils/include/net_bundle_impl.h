@@ -32,8 +32,8 @@ public:
 private:
     int32_t GetActivatedOsAccountId(int32_t &userId);
 };
-extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
-extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
+extern "C" INetBundle *GetNetBundle();
+extern "C" bool IsAtomicService(std::string &bundleName);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE_IMPL_H

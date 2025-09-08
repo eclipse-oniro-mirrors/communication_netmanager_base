@@ -24,7 +24,7 @@
 #include "i_netsys_service.h"
 #include "net_dns_result_callback_stub.h"
 #include "netnative_log_wrapper.h"
-#include "netsys_native_service_stub.h"
+#include "mock_netsys_native_service_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -46,627 +46,6 @@ public:
         return 0;
     }
 };
-
-class TestNetsysNativeServiceStub : public NetsysNativeServiceStub {
-public:
-    TestNetsysNativeServiceStub() = default;
-    ~TestNetsysNativeServiceStub() override{};
-
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker) override
-    {
-        return 0;
-    }
-
-    int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-                              const std::vector<std::string> &servers, const std::vector<std::string> &domains) override
-    {
-        return 0;
-    }
-
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
-                              uint16_t &baseTimeoutMsec, uint8_t &retryCount) override
-    {
-        return 0;
-    }
-
-    int32_t CreateNetworkCache(uint16_t netId, bool isVpnNet) override
-    {
-        return 0;
-    }
-
-    int32_t DestroyNetworkCache(uint16_t netId, bool isVpnNet) override
-    {
-        return 0;
-    }
-
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
-                        uint16_t netId, std::vector<AddrInfo> &res) override
-    {
-        return 0;
-    }
-
-    int32_t SetInterfaceMtu(const std::string &interfaceName, int mtu) override
-    {
-        return 0;
-    }
-
-    int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) override
-    {
-        return 0;
-    }
-
-    int32_t GetInterfaceMtu(const std::string &interfaceName) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                            const std::string &nextHop, bool isExcludedRoute) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                               const std::string &nextHop) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkRemoveRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkSetDefault(int32_t netId) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkGetDefault() override
-    {
-        return 0;
-    }
-
-    int32_t NetworkClearDefault() override
-    {
-        return 0;
-    }
-
-    int32_t GetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
-                          std::string &value) override
-    {
-        return 0;
-    }
-
-    int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
-                          std::string &value) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
-    {
-        return 0;
-    }
-
-    int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                int32_t prefixLength) override
-    {
-        return 0;
-    }
-
-    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                int32_t prefixLength) override
-    {
-        return 0;
-    }
-
-    int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                int32_t prefixLength, const std::string &netCapabilities) override
-    {
-        return 0;
-    }
-
-    int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override
-    {
-        return 0;
-    }
-
-    int32_t InterfaceSetIffUp(const std::string &ifaceName) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override
-    {
-        return 0;
-    }
-
-    int32_t NetworkDestroy(int32_t netId, bool isVpnNet) override
-    {
-        return 0;
-    }
-
-    int32_t CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_t prefix,
-                       const std::set<int32_t> &uids) override
-    {
-        return 0;
-    }
-
-    int32_t DestroyVnic() override
-    {
-        return 0;
-    }
-
-    int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override
-    {
-        return 0;
-    }
-
-    int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                       const std::string &dstAddr) override
-    {
-        return 0;
-    }
-
-    int32_t DisableDistributedNet(bool isServer) override
-    {
-        return 0;
-    }
-
-    int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override
-    {
-        return 0;
-    }
-
-    int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) override
-    {
-        return 0;
-    }
-
-    int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) override
-    {
-        return 0;
-    }
-
-    int32_t InterfaceGetList(std::vector<std::string> &ifaces) override
-    {
-        return 0;
-    }
-
-    int32_t StartDhcpClient(const std::string &iface, bool bIpv6) override
-    {
-        return 0;
-    }
-
-    int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override
-    {
-        return 0;
-    }
-
-    int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) override
-    {
-        return 0;
-    }
-
-    int32_t StopDhcpService(const std::string &iface) override
-    {
-        return 0;
-    }
-
-    int32_t IpEnableForwarding(const std::string &requestor) override
-    {
-        return 0;
-    }
-
-    int32_t IpDisableForwarding(const std::string &requestor) override
-    {
-        return 0;
-    }
-
-    int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface) override
-    {
-        return 0;
-    }
-
-    int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) override
-    {
-        return 0;
-    }
-
-    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) override
-    {
-        return 0;
-    }
-
-    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthAddAllowedList(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthRemoveAllowedList(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthEnableDataSaver(bool enable) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthAddDeniedList(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthRemoveDeniedList(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override
-    {
-        return 0;
-    }
-
-    int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override
-    {
-        return 0;
-    }
-
-    int32_t FirewallEnableChain(uint32_t chain, bool enable) override
-    {
-        return 0;
-    }
-
-    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) override
-    {
-        return 0;
-    }
-
-    int32_t ShareDnsSet(uint16_t netId) override
-    {
-        return 0;
-    }
-
-    int32_t StartDnsProxyListen() override
-    {
-        return 0;
-    }
-
-    int32_t StopDnsProxyListen() override
-    {
-        return 0;
-    }
-
-    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-                                     NetworkSharingTraffic &traffic) override
-    {
-        return 0;
-    }
-
-    int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName) override
-    {
-        return 0;
-    }
-
-    int32_t GetTotalStats(uint64_t &stats, uint32_t type) override
-    {
-        return 0;
-    }
-
-    int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override
-    {
-        return 0;
-    }
-
-    int32_t GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
-    {
-        return 0;
-    }
-
-    int32_t DeleteSimStatsInfo(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
-    {
-        return 0;
-    }
-
-    int32_t DeleteStatsInfo(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t SetNetStateTrafficMap(uint8_t flag, uint64_t availableTraffic) override
-    {
-        return 0;
-    }
-
-    int32_t GetNetStateTrafficMap(uint8_t flag, uint64_t &availableTraffic) override
-    {
-        return 0;
-    }
-
-    int32_t ClearIncreaseTrafficMap() override
-    {
-        return 0;
-    }
-
-    int32_t DeleteIncreaseTrafficMap(uint64_t ifIndex) override
-    {
-        return 0;
-    }
-
-    int32_t UpdateIfIndexMap(int8_t key, uint64_t index) override
-    {
-        return 0;
-    }
-
-    int32_t SetNetStatusMap(uint8_t type, uint8_t value) override
-    {
-        return 0;
-    }
-
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType) override
-    {
-        return 0;
-    }
-
-    int32_t SetIpCommandForRes(const std::string &cmd, std::string &respond) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
-                                         bool add) override
-    {
-        return 0;
-    }
-
-    int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t AddStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t DelStaticIpv6Addr(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override
-    {
-        return 0;
-    }
-
-    int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override
-    {
-        return 0;
-    }
-
-    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override
-    {
-        return 0;
-    }
-    
-    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override
-    {
-        return 0;
-    }
-
-#ifdef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
-    int32_t EnableWearableDistributedNetForward(int32_t tcpPortId, int32_t udpPortId) override
-    {
-        return 0;
-    }
-
-    int32_t DisableWearableDistributedNetForward() override
-    {
-        return 0;
-    }
-#endif
-
-    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
-    {
-        return 0;
-    }
-
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
-    {
-        return 0;
-    }
-
-    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
-    {
-        return 0;
-    }
-
-    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override
-    {
-        return 0;
-    }
-
-    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override
-    {
-        return 0;
-    }
-
-    int32_t StopClat(const std::string &interfaceName) override
-    {
-        return 0;
-    }
-
-    int32_t ClearFirewallAllRules() override
-    {
-        return 0;
-    }
-
-    int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override
-    {
-        return 0;
-    }
-
-#ifdef SUPPORT_SYSVPN
-    int32_t ProcessVpnStage(NetsysNative::SysVpnStageCode stage, const std::string &message) override
-    {
-        return 0;
-    }
-
-    int32_t UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add) override
-    {
-        return 0;
-    }
-#endif // SUPPORT_SYSVPN
-
-    int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t SetBrokerUidAccessPolicyMap(const std::unordered_map<uint32_t, uint32_t> &uidMaps) override
-    {
-        return 0;
-    }
-
-    int32_t DelBrokerUidAccessPolicyMap(uint32_t uid) override
-    {
-        return 0;
-    }
-
-    int32_t SetUserDefinedServerFlag(uint16_t netId, bool flag) override
-    {
-        return 0;
-    }
-
-    int32_t FlushDnsCache(uint16_t netId) override
-    {
-        return 0;
-    }
-    
-    int32_t SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo) override
-    {
-        return 0;
-    }
-#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
-    int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override
-    {
-        return 0;
-    }
-#endif
-};
-
 class NetsysNativeServiceStubTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -760,25 +139,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig003, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-bool IsDataParemerVaild(MessageParcel &data)
-{
-    uint16_t netId = 1001;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return false;
-    }
-    if (!data.WriteUint16(netId)) {
-        return false;
-    }
-    return true;
-}
-
 HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    if (!IsDataParemerVaild(data)) {
-        return;
-    }
+    uint16_t netId = 1001;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
     int32_t ret = notifyStub_->CmdGetResolverConfig(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
@@ -786,9 +153,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdCreateNetworkCache001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!IsDataParemerVaild(data)) {
-        return;
-    }
+    uint16_t netId = 1001;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdCreateNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -797,9 +164,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCreateNetworkCache001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyNetworkCache001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!IsDataParemerVaild(data)) {
-        return;
-    }
+    uint16_t netId = 1001;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDestroyNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -837,18 +204,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo002, TestSize.Level1)
     uint16_t netId = 1001;
 
     MessageParcel data;
-    if (!data.WriteString(hostName)) {
-        return;
-    }
-    if (!data.WriteString(serverName)) {
-        return;
-    }
-    if (!data.WriteRawData(&addrInfo, sizeof(AddrInfo))) {
-        return;
-    }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(hostName));
+    EXPECT_TRUE(data.WriteString(serverName));
+    EXPECT_TRUE(data.WriteRawData(&addrInfo, sizeof(AddrInfo)));
+    EXPECT_TRUE(data.WriteUint16(netId));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetAddrInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -860,15 +219,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetInterfaceMtu001, TestSize.Level1)
     int32_t mtu = 0;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteUint32(mtu)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(ifName));
+    EXPECT_TRUE(data.WriteUint32(mtu));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetInterfaceMtu(data, reply);
@@ -880,12 +233,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceMtu001, TestSize.Level1)
     std::string ifName = "ifName";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(ifName));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetInterfaceMtu(data, reply);
@@ -897,12 +246,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Lev
     std::string ifName = "ifName";
     sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
@@ -938,21 +283,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkRouteParcel001, TestSize.Level1)
     std::string nextHop = "nextHop";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteString(destination)) {
-        return;
-    }
-    if (!data.WriteString(nextHop)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteString(ifName));
+    EXPECT_TRUE(data.WriteString(destination));
+    EXPECT_TRUE(data.WriteString(nextHop));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdNetworkAddRouteParcel(data, reply);
@@ -966,12 +301,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDefault001, TestSize.Level1)
 {
     uint16_t netId = 1001;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdNetworkSetDefault(data, reply);
@@ -992,30 +323,18 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdProcSysNet001, TestSize.Level1)
     std::string parameter = "TestParameter";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(family)) {
-        return;
-    }
-    if (!data.WriteUint32(which)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteString(parameter)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(family));
+    EXPECT_TRUE(data.WriteUint32(which));
+    EXPECT_TRUE(data.WriteString(ifName));
+    EXPECT_TRUE(data.WriteString(parameter));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetProcSysNet(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     std::string value = "TestValue";
-    if (!data.WriteString(value)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(value));
 
     ret = notifyStub_->CmdSetProcSysNet(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -1027,15 +346,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkCreatePhysical001, TestSize.Leve
     int32_t permission = 0;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
-    if (!data.WriteUint32(permission)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(netId));
+    EXPECT_TRUE(data.WriteUint32(permission));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdNetworkCreatePhysical(data, reply);
@@ -1049,18 +362,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceAddress001, TestSize.Level1)
     int32_t prefixLength = 10;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return;
-    }
-    if (!data.WriteUint32(prefixLength)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(interfaceName));
+    EXPECT_TRUE(data.WriteString(ipAddr));
+    EXPECT_TRUE(data.WriteUint32(prefixLength));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdAddInterfaceAddress(data, reply);
@@ -1076,15 +381,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceSetIpAddress001, TestSize.Leve
     std::string ipAddress = "testIpAddr";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return;
-    }
-    if (!data.WriteString(ipAddress)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(interfaceName));
+    EXPECT_TRUE(data.WriteString(ipAddress));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdInterfaceSetIpAddress(data, reply);
@@ -1096,12 +395,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceSetIffUp001, TestSize.Level1)
     std::string interfaceName = "testInterfaceName";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(interfaceName));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdInterfaceSetIffUp(data, reply);
@@ -1115,18 +410,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
     NetBearType bearerType = BEARER_DEFAULT;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return;
-    }
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
-    if (!data.WriteUint8(bearerType)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(interfaceName));
+    EXPECT_TRUE(data.WriteUint32(netId));
+    EXPECT_TRUE(data.WriteUint8(bearerType));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdNetworkAddInterface(data, reply);
@@ -1141,12 +428,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDestroy001, TestSize.Level1)
     int32_t netId = 1001;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(netId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdNetworkDestroy(data, reply);
@@ -1159,19 +442,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetFwmarkForNetwork001, TestSize.Level1
     int32_t mark = 0;
     int32_t mask = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
-    if (!data.WriteUint32(mark)) {
-        return;
-    }
-    if (!data.WriteUint32(mask)) {
-        return;
-    }
-
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(netId));
+    EXPECT_TRUE(data.WriteUint32(mark));
+    EXPECT_TRUE(data.WriteUint32(mask));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetFwmarkForNetwork(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -1215,15 +489,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpClient001, TestSize.Level1)
     std::string iface = "testIface";
     bool bIpv6 = true;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(iface)) {
-        return;
-    }
-    if (!data.WriteBool(bIpv6)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(iface));
+    EXPECT_TRUE(data.WriteBool(bIpv6));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdStartDhcpClient(data, reply);
@@ -1239,15 +507,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpService001, TestSize.Level1)
     std::string ipv4addr = "testIpv4addr";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(iface)) {
-        return;
-    }
-    if (!data.WriteString(ipv4addr)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(iface));
+    EXPECT_TRUE(data.WriteString(ipv4addr));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdStartDhcpService(data, reply);
@@ -1262,12 +524,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdIpForwarding001, TestSize.Level1)
     std::string requester = "testRequester";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(requester)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(requester));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdIpEnableForwarding(data, reply);
@@ -1283,15 +541,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNat001, TestSize.Level1)
     std::string upstreamIface = "testUpstreamIface";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(downstreamIface)) {
-        return;
-    }
-    if (!data.WriteString(upstreamIface)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(downstreamIface));
+    EXPECT_TRUE(data.WriteString(upstreamIface));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdEnableNat(data, reply);
@@ -1307,15 +559,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdIpfwdInterfaceForward001, TestSize.Leve
     std::string toIface = "testToIface";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(fromIface)) {
-        return;
-    }
-    if (!data.WriteString(toIface)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(fromIface));
+    EXPECT_TRUE(data.WriteString(toIface));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdIpfwdAddInterfaceForward(data, reply);
@@ -1330,12 +576,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthEnableDataSaver001, TestSize.L
     bool enable = true;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteBool(enable)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteBool(enable));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdBandwidthEnableDataSaver(data, reply);
@@ -1347,12 +589,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthIfaceQuota001, TestSize.Level1
     std::string ifName = "testIfName";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(ifName));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdBandwidthSetIfaceQuota(data, reply);
@@ -1367,12 +605,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthList001, TestSize.Level1)
     uint32_t uid = 1001;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(uid));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdBandwidthAddDeniedList(data, reply);
@@ -1395,15 +629,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidsListChain001, TestSize.L
     uint32_t uid = 1001;
 
     MessageParcel data;
-    if (!data.WriteUint32(chain)) {
-        return;
-    }
-    if (!data.WriteUint32(uidSize)) {
-        return;
-    }
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(chain));
+    EXPECT_TRUE(data.WriteUint32(uidSize));
+    EXPECT_TRUE(data.WriteUint32(uid));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFirewallSetUidsAllowedListChain(data, reply);
@@ -1419,15 +647,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallEnableChain001, TestSize.Level1
     bool enable = true;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(chain)) {
-        return;
-    }
-    if (!data.WriteBool(enable)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(chain));
+    EXPECT_TRUE(data.WriteBool(enable));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFirewallEnableChain(data, reply);
@@ -1441,18 +663,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidRule001, TestSize.Level1)
     uint32_t firewallRule = 1;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(chain)) {
-        return;
-    }
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
-    if (!data.WriteUint32(firewallRule)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(chain));
+    EXPECT_TRUE(data.WriteUint32(uid));
+    EXPECT_TRUE(data.WriteUint32(firewallRule));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFirewallSetUidRule(data, reply);
@@ -1465,9 +679,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdClearFirewallAllRules001, TestSize.Leve
     bool enable = true;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdClearFirewallAllRules(data, reply);
@@ -1479,12 +691,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdShareDnsSet001, TestSize.Level1)
     uint16_t netId = 0;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint16(netId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdShareDnsSet(data, reply);
@@ -1494,9 +702,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdShareDnsSet001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdDnsProxyListen001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdStartDnsProxyListen(data, reply);
@@ -1512,15 +718,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingTraffic001, TestSize.L
     std::string upIface = "testUpIface ";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(downIface)) {
-        return;
-    }
-    if (!data.WriteString(upIface)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(downIface));
+    EXPECT_TRUE(data.WriteString(upIface));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetNetworkSharingTraffic(data, reply);
@@ -1531,12 +731,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetTotalStats001, TestSize.Level1)
 {
     uint32_t type = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteInt32(type)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(type));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetTotalStats(data, reply);
@@ -1548,15 +744,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetUidStats001, TestSize.Level1)
     uint32_t type = 0;
     uint32_t uId = 2020;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteInt32(type)) {
-        return;
-    }
-    if (!data.WriteInt32(uId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(type));
+    EXPECT_TRUE(data.WriteInt32(uId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetUidStats(data, reply);
@@ -1569,15 +759,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetIfaceStats001, TestSize.Level1)
     std::string Iface = "wlan0";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteInt32(type)) {
-        return;
-    }
-    if (!data.WriteString(Iface)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(type));
+    EXPECT_TRUE(data.WriteString(Iface));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetIfaceStats(data, reply);
@@ -1809,15 +993,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdAddStaticArp001, TestSize.Level1)
     std::string ifName = "wlan0";
 
     MessageParcel data;
-    if (!data.WriteString(ipAddr)) {
-        return;
-    }
-    if (!data.WriteString(macAddr)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ipAddr));
+    EXPECT_TRUE(data.WriteString(macAddr));
+    EXPECT_TRUE(data.WriteString(ifName));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdAddStaticArp(data, reply);
@@ -1831,15 +1009,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDelStaticArp001, TestSize.Level1)
     std::string ifNameTest = "wlan0";
 
     MessageParcel data;
-    if (!data.WriteString(ipAddrTest)) {
-        return;
-    }
-    if (!data.WriteString(macAddrTest)) {
-        return;
-    }
-    if (!data.WriteString(ifNameTest)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ipAddrTest));
+    EXPECT_TRUE(data.WriteString(ifNameTest));
+    EXPECT_TRUE(data.WriteString(ifNameTest));
 
     MessageParcel reply;
     auto ret = notifyStub_->CmdDelStaticArp(data, reply);
@@ -1853,15 +1025,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdAddStaticIpv6Addr001, TestSize.Level1)
     std::string ifName = "chba0";
 
     MessageParcel data;
-    if (!data.WriteString(ipAddr)) {
-        return;
-    }
-    if (!data.WriteString(macAddr)) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ipAddr));
+    EXPECT_TRUE(data.WriteString(macAddr));
+    EXPECT_TRUE(data.WriteString(ifName));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdAddStaticIpv6Addr(data, reply);
@@ -1875,15 +1041,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDelStaticIpv6Addr001, TestSize.Level1)
     std::string ifNameTest = "chba0";
 
     MessageParcel data;
-    if (!data.WriteString(ipAddrTest)) {
-        return;
-    }
-    if (!data.WriteString(macAddrTest)) {
-        return;
-    }
-    if (!data.WriteString(ifNameTest)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ipAddrTest));
+    EXPECT_TRUE(data.WriteString(ifNameTest));
+    EXPECT_TRUE(data.WriteString(ifNameTest));
 
     MessageParcel reply;
     auto ret = notifyStub_->CmdDelStaticIpv6Addr(data, reply);
@@ -1894,15 +1054,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetCookieStats001, TestSize.Level1)
 {
     uint32_t type = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(type)) {
-        return;
-    }
-    if (!data.WriteUint64(TEST_COOKIE)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(type));
+    EXPECT_TRUE(data.WriteUint64(TEST_COOKIE));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetCookieStats(data, reply);
@@ -1912,17 +1066,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetCookieStats001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterDnsResultListener001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
     sptr<INetDnsResultCallback> callback = new (std::nothrow) TestNetDnsResultCallback();
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
     uint32_t timeStep = 1;
-    if (!data.WriteUint32(timeStep)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(timeStep));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdRegisterDnsResultListener(data, reply);
     EXPECT_EQ(ret, IPC_STUB_ERR);
@@ -1931,13 +1079,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterDnsResultListener001, TestSize.
 HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsResultListener001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
     sptr<INetDnsResultCallback> callback = new (std::nothrow) TestNetDnsResultCallback();
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUnregisterDnsResultListener(data, reply);
@@ -1947,9 +1091,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsResultListener001, TestSiz
 HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingType001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetNetworkSharingType(data, reply);
@@ -1961,15 +1103,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
     uint32_t type = 0;
     bool isOpen = true;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(type)) {
-        return;
-    }
-    if (!data.WriteBool(isOpen)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(type));
+    EXPECT_TRUE(data.WriteBool(isOpen));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
@@ -1981,15 +1117,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.L
     std::string interface = "wlan0";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-    return;
-    }
-    if (!data.WriteString(interface)) {
-    return;
-    }
-    if (!data.WriteUint32(0)) {
-    return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(interface));
+    EXPECT_TRUE(data.WriteUint32(0));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -2006,24 +1136,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Lev
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
-
-    if (!data.WriteUint8(netAccessPolicy.wifiAllow)) {
-        return;
-    }
-
-    if (!data.WriteUint8(netAccessPolicy.cellularAllow)) {
-        return;
-    }
-
-    if (!data.WriteBool(reconfirmFlag)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(uid));
+    EXPECT_TRUE(data.WriteUint8(netAccessPolicy.wifiAllow));
+    EXPECT_TRUE(data.WriteUint8(netAccessPolicy.cellularAllow));
+    EXPECT_TRUE(data.WriteBool(reconfirmFlag));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetNetworkAccessPolicy(data, reply);
@@ -2034,12 +1151,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteNetworkAccessPolicy001, TestSize.
 {
     uint32_t uid = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint32(uid)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint32(uid));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDelNetworkAccessPolicy(data, reply);
@@ -2054,14 +1167,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNotifyNetBearerTypeChange001, TestSize.
     MessageParcel data;
 
     uint32_t size = static_cast<uint32_t>(bearerTypes.size());
-    if (!data.WriteUint32(size)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(size));
 
     for (auto bearerType : bearerTypes) {
-        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
-            return;
-        }
+        EXPECT_TRUE(data.WriteUint32(static_cast<uint32_t>(bearerType)));
     }
 
     MessageParcel reply;
@@ -2077,26 +1186,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCreateVnic001, TestSize.Level1)
     int32_t prefix = 24;
     std::set<int32_t> uids;
 
-    if (!data.WriteUint16(mtu)) {
-        return;
-    }
- 
-    if (!data.WriteString(tunAddr)) {
-        return;
-    }
- 
-    if (!data.WriteInt32(prefix)) {
-        return;
-    }
- 
-    if (!data.WriteInt32(uids.size())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint16(mtu));
+    EXPECT_TRUE(data.WriteString(tunAddr));
+    EXPECT_TRUE(data.WriteInt32(prefix));
+    EXPECT_TRUE(data.WriteInt32(uids.size()));
  
     for (const auto &uid: uids) {
-        if (!data.WriteInt32(uid)) {
-            return;
-        }
+        EXPECT_TRUE(data.WriteInt32(uid));
     }
 
     MessageParcel reply;
@@ -2118,13 +1214,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCloseSocketsUid001, TestSize.Level1)
     std::string ipAddr = "192.168.1.100";
     uint32_t netId = 24;
 
-    if (!data.WriteString(ipAddr)) {
-        return;
-    }
-
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ipAddr));
+    EXPECT_TRUE(data.WriteUint32(netId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdCloseSocketsUid(data, reply);
@@ -2138,13 +1229,10 @@ HWTEST_F(NetsysNativeServiceStubTest, SetBrokerUidAccessPolicyMapTest001, TestSi
     params.emplace(TEST_UID_U32, TEST_UID_U32);
 
     uint32_t count = static_cast<uint32_t>(params.size());
-    if (!data.WriteUint32(count)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(count));
     for (auto iter = params.begin(); iter != params.end(); iter++) {
-        if (!data.WriteUint32(iter->first) || !data.WriteUint32(iter->second)) {
-            return;
-        }
+        EXPECT_TRUE(data.WriteUint32(iter->first));
+        EXPECT_TRUE(data.WriteUint32(iter->second));
     }
 
     MessageParcel reply;
@@ -2155,9 +1243,7 @@ HWTEST_F(NetsysNativeServiceStubTest, SetBrokerUidAccessPolicyMapTest001, TestSi
 HWTEST_F(NetsysNativeServiceStubTest, DelBrokerUidAccessPolicyMapTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteUint32(TEST_UID_U32)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(TEST_UID_U32));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDelBrokerUidAccessPolicyMap(data, reply);
@@ -2170,15 +1256,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdEnableWearableDistributedNetForward, Te
     uint32_t type = 0;
     uint32_t uId = 2020;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteInt32(type)) {
-        return;
-    }
-    if (!data.WriteInt32(uId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(type));
+    EXPECT_TRUE(data.WriteInt32(uId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdEnableWearableDistributedNetForward(data, reply);
@@ -2190,15 +1270,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDisableWearableDistributedNetForward, T
     uint32_t type = 0;
     uint32_t uId = 2020;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteInt32(type)) {
-        return;
-    }
-    if (!data.WriteInt32(uId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(type));
+    EXPECT_TRUE(data.WriteInt32(uId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDisableWearableDistributedNetForward(data, reply);
@@ -2259,10 +1333,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetStatusMapTest001, TestSize.Level1
 
 HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
 {
+    uint16_t netId = 1001;
     MessageParcel data;
-    if (!data.WriteUint32(TEST_UID_U32)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint16(netId));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFlushDnsCache(data, reply);
@@ -2272,23 +1345,15 @@ HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteUint64(0)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteUint64(0));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDeleteIncreaseTrafficMap(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     MessageParcel data2;
-    if (!data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data2.WriteUint8(0)) {
-        return;
-    }
+    EXPECT_TRUE(data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data2.WriteUint8(0));
     MessageParcel reply2;
     int32_t ret2 = notifyStub_->CmdDeleteIncreaseTrafficMap(data2, reply2);
     EXPECT_EQ(ret, ERR_NONE);
@@ -2300,17 +1365,9 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
     std::string testHost = "test";
     AddrInfo info;
     MessageParcel data;
-    if (!data.WriteUint32(netId)) {
-        return;
-    }
-
-    if (!data.WriteString(testHost)) {
-        return;
-    }
-
-    if (!data.WriteRawData(&info, sizeof(AddrInfo))) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint32(netId));
+    EXPECT_TRUE(data.WriteString(testHost));
+    EXPECT_TRUE(data.WriteRawData(&info, sizeof(AddrInfo)));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);

@@ -144,20 +144,6 @@ void NetManagerCenter::RegisterEthernetService(const sptr<NetEthernetBaseService
     ethernetService_ = service;
 }
 
-int32_t NetManagerCenter::GetAddressesByName(const std::string &hostName, int32_t netId,
-                                             std::vector<INetAddr> &addrInfo)
-{
-    if (dnsService_ == nullptr) {
-        return NETMANAGER_ERROR;
-    }
-    return dnsService_->GetAddressesByName(hostName, netId, addrInfo);
-}
-
-void NetManagerCenter::RegisterDnsService(const sptr<DnsBaseService> &service)
-{
-    dnsService_ = service;
-}
-
 int32_t NetManagerCenter::RestrictBackgroundChanged(bool isRestrictBackground)
 {
     if (connService_ == nullptr) {

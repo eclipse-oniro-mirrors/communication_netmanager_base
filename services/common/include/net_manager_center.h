@@ -18,7 +18,6 @@
 
 #include <set>
 
-#include "dns_base_service.h"
 #include "net_all_capabilities.h"
 #include "net_conn_base_service.h"
 #include "net_ethernet_base_service.h"
@@ -51,9 +50,6 @@ public:
     int32_t ResetEthernetFactory();
     void RegisterEthernetService(const sptr<NetEthernetBaseService> &service);
 
-    int32_t GetAddressesByName(const std::string &hostName, int32_t netId, std::vector<INetAddr> &addrInfo);
-    void RegisterDnsService(const sptr<DnsBaseService> &service);
-
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     bool IsUidNetAccess(uint32_t uid, bool metered);
     bool IsUidNetAllowed(uint32_t uid, bool metered);
@@ -67,7 +63,6 @@ private:
     sptr<NetStatsBaseService> statsService_ = nullptr;
     sptr<NetPolicyBaseService> policyService_ = nullptr;
     sptr<NetEthernetBaseService> ethernetService_ = nullptr;
-    sptr<DnsBaseService> dnsService_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
