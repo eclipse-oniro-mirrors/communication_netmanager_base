@@ -32,10 +32,12 @@
 #include "netmanager_base_test_security.h"
 #include "network.h"
 #include "network_security_config.h"
+#include "common_mock_net_conn_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+using namespace testing;
 using namespace testing::ext;
 
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
@@ -68,6 +70,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+    sptr<MockINetConnService> mockNetConnService = sptr<MockINetConnService>::MakeSptr();
 };
 
 void NetConnClientTest::SetUpTestCase() {}
@@ -805,10 +809,14 @@ HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetConnCallback001, TestSize.Level1)
 {
+    EXPECT_CALL(*mockNetConnService, RegisterNetConnCallback(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetConnService, UnregisterNetConnCallback(_)).WillRepeatedly(Return(0));
     NetManagerBaseAccessToken token;
-    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
-    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    int32_t ret = netConnClient->RegisterNetConnCallback(callback);
+    ret = netConnClient->UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -843,6 +851,28 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterNetConnCallback004
+ * @tc.desc: Test NetConnClient::RegisterNetConnCallback, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetConnCallback004, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, RegisterNetConnCallback(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetConnService, UnregisterNetConnCallback(_)).WillRepeatedly(Return(0));
+    auto netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    uint32_t timesOut = 1;
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    auto ret = netConnClient->RegisterNetConnCallback(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netConnClient->RegisterNetConnCallback(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: RegisterNetConnCallback001
  * @tc.desc: Test NetConnClient::RegisterNetConnCallback, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED
@@ -850,10 +880,18 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
 {
-    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
-    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_CALL(*mockNetConnService, RegisterNetConnCallback(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetConnService, UnregisterNetConnCallback(_)).WillRepeatedly(Return(0));
+    sptr<INetConnCallbackTest> callback1 = sptr<INetConnCallbackTest>::MakeSptr();
+    sptr<INetConnCallbackTest> callback2 = sptr<INetConnCallbackTest>::MakeSptr();
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    int32_t ret = netConnClient->UnregisterNetConnCallback(callback1);
+    ret = netConnClient->RegisterNetConnCallback(callback1);
+    ret = netConnClient->RegisterNetConnCallback(callback2);
+    ret = netConnClient->UnregisterNetConnCallback(callback1);
+    ret = netConnClient->UnregisterNetConnCallback(callback2);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -864,14 +902,18 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RequestNetConnection001, TestSize.Level1)
 {
+    EXPECT_CALL(*mockNetConnService, RequestNetConnection(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetConnService, UnregisterNetConnCallback(_)).WillRepeatedly(Return(0));
     NetManagerBaseAccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     uint32_t timesOut = 0;
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
-    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    auto ret = netConnClient->RequestNetConnection(netSpecifier, callback, timesOut);
+    ret = netConnClient->UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -920,7 +962,29 @@ HWTEST_F(NetConnClientTest, RequestNetConnection004, TestSize.Level1)
     uint32_t timesOut = 0;
     auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RequestNetConnection005
+ * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RequestNetConnection005, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, RequestNetConnection(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetConnService, UnregisterNetConnCallback(_)).WillRepeatedly(Return(0));
+    auto netSpecifier = sptr<NetSpecifier>::MakeSptr();
+    netSpecifier->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    uint32_t timesOut = 1;
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+    auto ret = netConnClient->RequestNetConnection(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = netConnClient->RequestNetConnection(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -1673,6 +1737,305 @@ HWTEST_F(NetConnClientTest, NetExtAttributeTest001, TestSize.Level1)
     std::string str;
     ret = NetConnClient::GetInstance().GetNetExtAttribute(handle, str);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy002, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->RecoverCallbackAndGlobalProxy();
+    EXPECT_TRUE(netConnClient->globalHttpProxy_.GetHost().empty());
+    EXPECT_EQ(netConnClient->preAirplaneCallback_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy003, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    HttpProxy httpProxy;
+    httpProxy.host_ = "127.0.0.1";
+    netConnClient->SetGlobalHttpProxy(httpProxy);
+    netConnClient->RecoverCallbackAndGlobalProxy();
+    EXPECT_FALSE(netConnClient->globalHttpProxy_.GetHost().empty());
+    EXPECT_EQ(netConnClient->preAirplaneCallback_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy004, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    HttpProxy httpProxy;
+    httpProxy.host_ = "127.0.0.1";
+    netConnClient->SetGlobalHttpProxy(httpProxy);
+    netConnClient->preAirplaneCallback_ = sptr<PreAirplaneCallbackTest>::MakeSptr();
+    netConnClient->RecoverCallbackAndGlobalProxy();
+    EXPECT_FALSE(netConnClient->globalHttpProxy_.GetHost().empty());
+}
+ 
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy005, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->preAirplaneCallback_ = sptr<PreAirplaneCallbackTest>::MakeSptr();
+    netConnClient->RecoverCallbackAndGlobalProxy();
+    EXPECT_TRUE(netConnClient->globalHttpProxy_.GetHost().empty());
+}
+ 
+HWTEST_F(NetConnClientTest, RecoverCallbackAndGlobalProxy006, TestSize.Level1)
+{
+    auto netConnClient = std::make_shared<NetConnClient>();
+    NetConnClient::NetConnCallbackManagerMap netConnCallbackManagerMap;
+    auto cb = sptr<NetConnClient::NetConnCallbackManager>::MakeSptr();
+    auto specifier1 = sptr<NetSpecifier>::MakeSptr();
+    specifier1->SetCapabilities({NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN});
+    EXPECT_FALSE(specifier1->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0);
+    netConnCallbackManagerMap.emplace(specifier1, cb);
+    auto specifier2 = sptr<NetSpecifier>::MakeSptr();
+    specifier2->SetCapabilities({NET_CAPABILITY_INTERNAL_DEFAULT, NET_CAPABILITY_NOT_VPN});
+    EXPECT_TRUE(specifier2->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0);
+    netConnCallbackManagerMap.emplace(specifier2, cb);
+    netConnClient->RecoverCallbackAndGlobalProxy(netConnCallbackManagerMap);
+    EXPECT_FALSE(netConnCallbackManagerMap.empty());
+}
+ 
+HWTEST_F(NetConnClientTest, NetAvailable001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetAvailable002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetCapabilitiesChange001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
+    netConnCallbackManager->NetCapabilitiesChange(netHandle, netAllCap);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetCapabilitiesChange002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
+    netConnCallbackManager->NetCapabilitiesChange(netHandle, netAllCap);
+    EXPECT_EQ(netHandle->GetNetId(), netConnCallbackManager->netHandle_->GetNetId());
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetCapabilitiesChange003, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
+    netConnCallbackManager->netHandle_->SetNetId(101);
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
+    netConnCallbackManager->NetCapabilitiesChange(netHandle, netAllCap);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    auto info = sptr<NetLinkInfo>::MakeSptr();
+    netConnCallbackManager->NetConnectionPropertiesChange(netHandle, info);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    auto info = sptr<NetLinkInfo>::MakeSptr();
+    netConnCallbackManager->NetConnectionPropertiesChange(netHandle, info);
+    EXPECT_EQ(netHandle->GetNetId(), netConnCallbackManager->netHandle_->GetNetId());
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetConnectionPropertiesChange003, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
+    netConnCallbackManager->netHandle_->SetNetId(101);
+    netConnCallbackManager->AddNetConnCallback(callback);
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    auto info = sptr<NetLinkInfo>::MakeSptr();
+    netConnCallbackManager->NetConnectionPropertiesChange(netHandle, info);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetLost001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+    netConnCallbackManager->NetLost(netHandle);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetLost002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    netConnCallbackManager->NetLost(netHandle);
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetLost003, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->netHandle_ = sptr<NetHandle>::MakeSptr();
+    netConnCallbackManager->netHandle_->SetNetId(101);
+    netConnCallbackManager->AddNetConnCallback(callback);
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    netConnCallbackManager->NetLost(netHandle);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetUnavailable001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    netConnCallbackManager->NetUnavailable();
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetUnavailable002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    netConnCallbackManager->NetUnavailable();
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetBlockStatusChange001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetBlockStatusChange(netHandle, true);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, NetBlockStatusChange002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetBlockStatusChange(netHandle, true);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+}
+ 
+HWTEST_F(NetConnClientTest, AddNetConnCallback001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, AddNetConnCallback002, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, AddNetConnCallback003, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netAllCap_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netLinkInfo_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, AddNetConnCallback004, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
+    netConnCallbackManager->NetCapabilitiesChange(netHandle, netAllCap);
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_NE(netConnCallbackManager->netAllCap_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netLinkInfo_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, AddNetConnCallback005, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    auto netHandle = sptr<NetHandle>::MakeSptr();
+    netHandle->SetNetId(100);
+    netConnCallbackManager->NetAvailable(netHandle);
+    auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
+    netConnCallbackManager->NetCapabilitiesChange(netHandle, netAllCap);
+    auto info = sptr<NetLinkInfo>::MakeSptr();
+    netConnCallbackManager->NetConnectionPropertiesChange(netHandle, info);
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 1);
+    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_NE(netConnCallbackManager->netAllCap_, nullptr);
+    EXPECT_NE(netConnCallbackManager->netLinkInfo_, nullptr);
+}
+ 
+HWTEST_F(NetConnClientTest, RemoveNetConnCallback001, TestSize.Level1)
+{
+    auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();
+    sptr<INetConnCallbackTest> callback = sptr<INetConnCallbackTest>::MakeSptr();
+    netConnCallbackManager->AddNetConnCallback(callback);
+    EXPECT_NE(netConnCallbackManager->netConnCallbackList_.size(), 0);
+    netConnCallbackManager->RemoveNetConnCallback(callback);
+    EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
 }
 
 } // namespace NetManagerStandard

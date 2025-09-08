@@ -59,7 +59,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
   ]
 
   deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if_static",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",

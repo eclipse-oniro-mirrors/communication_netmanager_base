@@ -32,6 +32,8 @@
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
 #include "safe_map.h"
+#include <shared_mutex>
+#include "net_conn_callback_stub.h"
 
 namespace OHOS {
 class ISystemAbilityStatusChange;
@@ -525,6 +527,27 @@ private:
         NetConnClient &client_;
     };
 
+    class NetConnCallbackManager : public NetConnCallbackStub {
+        friend NetConnClient;
+    public:
+        int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
+        int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
+        int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
+        int32_t NetLost(sptr<NetHandle> &netHandle) override;
+        int32_t NetUnavailable() override;
+        int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+ 
+        int32_t AddNetConnCallback(const sptr<INetConnCallback>& callback);
+        void RemoveNetConnCallback(const sptr<INetConnCallback>& callback);
+        bool HasExistCallback(const sptr<INetConnCallback>& callback);
+    private:
+        sptr<NetHandle> netHandle_ = nullptr;
+        sptr<NetAllCapabilities> netAllCap_ = nullptr;
+        sptr<NetLinkInfo> netLinkInfo_ = nullptr;
+        std::shared_mutex netConnCallbackListMutex_;
+        std::list<sptr<INetConnCallback>> netConnCallbackList_;
+    };
+
 private:
     NetConnClient& operator=(const NetConnClient&) = delete;
     NetConnClient(const NetConnClient&) = delete;
@@ -535,6 +558,13 @@ private:
     static std::optional<int32_t> ObtainTargetApiVersionForSelf();
     static std::optional<std::string> ObtainBundleNameFromBundleMgr();
     void SubscribeSystemAbility();
+    using NetConnCallbackManagerMap = std::map<sptr<NetSpecifier>, sptr<NetConnCallbackManager>>;
+    int32_t UnRegisterNetConnCallbackManager(const sptr<INetConnCallback>& callback,
+        NetConnCallbackManagerMap& netConnCallbackManagerMap);
+    void RecoverCallbackAndGlobalProxy(NetConnCallbackManagerMap& netConnCallbackManagerMap);
+    sptr<NetConnClient::NetConnCallbackManager> FindConnCallbackManager(NetConnCallbackManagerMap &managerMap,
+        const sptr<NetSpecifier> &netSpecifier);
+    bool IsCallbackExist(const sptr<INetConnCallback> &callback);
 
 private:
     std::mutex appHttpProxyCbMapMutex_;
@@ -548,6 +578,10 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
+    sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
+    std::shared_mutex netConnCallbackManagerMapMutex_;
+    NetConnCallbackManagerMap netConnCallbackManagerMap_;
+    NetConnCallbackManagerMap systemNetConnCallbackManagerMap_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
     std::mutex registerConnTupleListMutex_;

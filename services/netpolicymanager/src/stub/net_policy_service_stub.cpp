@@ -686,7 +686,7 @@ int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, Messag
 void NetPolicyServiceStub::HandleReportNetworkPolicy()
 {
 #ifndef UNITTEST_FORBID_FFRT
-    std::lock_guard<std::mutex> lock(setNetworkPolicyMutex_);
+    std::lock_guard<ffrt::mutex> lock(setNetworkPolicyMutex_);
 #endif
     if (appNetworkPolicyMap_.empty()) {
         return;
@@ -719,7 +719,7 @@ void NetPolicyServiceStub::HandleReportNetworkPolicy()
 void NetPolicyServiceStub::HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessPolicy &policy,
     uint32_t callingUid)
 {
-    std::lock_guard<std::mutex> lock(setNetworkPolicyMutex_);
+    std::lock_guard<ffrt::mutex> lock(setNetworkPolicyMutex_);
     if (appNetworkPolicyMap_.find(callingUid) == appNetworkPolicyMap_.end()) {
         std::map<uint32_t, uint32_t> policyMap;
         appNetworkPolicyMap_.emplace(callingUid, std::move(policyMap));

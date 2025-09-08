@@ -89,7 +89,7 @@ private:
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;
     std::once_flag onceFlag;
-    std::mutex setNetworkPolicyMutex_;
+    ffrt::mutex setNetworkPolicyMutex_;
     bool isPostDelaySetNetworkPolicy_ = false;
     std::map<uint32_t, std::map<uint32_t, uint32_t>> appNetworkPolicyMap_;
 };
