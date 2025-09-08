@@ -1387,30 +1387,6 @@ void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifInde
     }
 }
 
-bool NetStatsService::IsSameStateInTwoMap(int32_t simId)
-{
-    auto ifIndexItem = simIdToIfIndexMap_.find(simId);
-    auto settingsItem = settingsTrafficMap_.find(simId);
-    if (ifIndexItem == simIdToIfIndexMap_.end() &&
-        settingsItem == settingsTrafficMap_.end()) {
-        return true;
-    }
-    if (ifIndexItem != simIdToIfIndexMap_.end() &&
-        settingsItem != settingsTrafficMap_.end()) {
-        return true;
-    }
-    return false;
-}
-
-void NetStatsService::DeleteSimIdInTwoMap(int32_t simId)
-{
-    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end() &&
-        settingsTrafficMap_.find(simId) != settingsTrafficMap_.end()) {
-        simIdToIfIndexMap_.erase(simId);
-        settingsTrafficMap_.erase(simId);
-    }
-}
-
 void NetStatsService::AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex)
 {
     NETMGR_LOG_I("AddSimIdInTwoMap. simId:%{public}d, ifIndex:%{public}" PRIu64, simId, ifIndex);
