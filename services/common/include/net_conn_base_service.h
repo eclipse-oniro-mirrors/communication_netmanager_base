@@ -22,6 +22,7 @@
 #include "i_net_conn_callback.h"
 #include "refbase.h"
 #include "i_net_factoryreset_callback.h"
+#include "dual_stack_probe_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -40,6 +41,12 @@ public:
     virtual int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) = 0;
     virtual int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) = 0;
     virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
+    virtual int32_t RegisterDualStackProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback) = 0;
+    virtual int32_t UnRegisterDualStackProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback) = 0;
+    virtual int32_t DualStackProbe(int32_t netId) = 0;
+    virtual int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

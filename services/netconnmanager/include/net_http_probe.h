@@ -37,7 +37,8 @@ enum ProbeType : uint32_t {
 
 class NetHttpProbe {
 public:
-    NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo, ProbeType probeType);
+    NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
+        ProbeType probeType, std::string ipAddrList = "");
     ~NetHttpProbe();
 
     int32_t SendProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl);
@@ -96,6 +97,7 @@ private:
     std::string respHeader_;
     ProbeType probeType_;
     char errBuffer[CURL_ERROR_SIZE] = {0};
+    std::string ipAddrList_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

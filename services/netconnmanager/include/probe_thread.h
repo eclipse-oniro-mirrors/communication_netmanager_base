@@ -38,7 +38,7 @@ public:
 
     ProbeThread(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
         std::shared_ptr<TinyCountDownLatch> latch, std::shared_ptr<TinyCountDownLatch> latchAll,
-        ProbeType probeType, std::string httpUrl, std::string httpsUrl);
+        ProbeType probeType, std::string httpUrl, std::string httpsUrl, std::string ipAddrList = "");
 
     /**
      * Destroy the ProbeThread
@@ -103,6 +103,7 @@ private:
     std::atomic<bool> isDetecting_ = false;
     std::string httpProbeUrl_;
     std::string httpsProbeUrl_;
+    std::string ipAddrList_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

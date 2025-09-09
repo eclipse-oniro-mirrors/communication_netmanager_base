@@ -53,11 +53,11 @@ static void NetProbeThread(const std::shared_ptr<ProbeThread> &probeThread)
 
 ProbeThread::ProbeThread(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
     std::shared_ptr<TinyCountDownLatch> latch, std::shared_ptr<TinyCountDownLatch> latchAll,
-    ProbeType probeType, std::string httpUrl, std::string httpsUrl)
+    ProbeType probeType, std::string httpUrl, std::string httpsUrl, std::string ipAddrList)
     : netId_(netId), probeType_(probeType), latch_(latch), latchAll_(latchAll), httpProbeUrl_(httpUrl),
-    httpsProbeUrl_(httpsUrl)
+    httpsProbeUrl_(httpsUrl), ipAddrList_(ipAddrList)
 {
-    httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo, probeType);
+    httpProbe_ = std::make_unique<NetHttpProbe>(netId, bearType, netLinkInfo, probeType, ipAddrList);
 }
 
 ProbeThread::~ProbeThread()
@@ -110,10 +110,10 @@ void ProbeThread::SendHttpProbe(ProbeType probeType)
 
     if (IsConclusiveResult()) {
         isDetecting_ = false;
-        while (latch_->GetCount() > 0) {
+        while (latch_->GetCount() > 0 && ipAddrList_.empty()) {
             latch_->CountDown();
         }
-        while (latchAll_->GetCount() > 0) {
+        while (latchAll_->GetCount() > 0 && ipAddrList_.empty()) {
             latchAll_->CountDown();
         }
     }

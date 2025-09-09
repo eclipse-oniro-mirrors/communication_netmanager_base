@@ -34,6 +34,7 @@
 #include "net_interface_callback_stub.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_probe_callback_test.h"
 #include "netmanager_base_test_security.h"
 #include "netsys_controller.h"
 #include "parameters.h"
@@ -2098,6 +2099,85 @@ HWTEST_F(NetConnServiceTest, CancelRequestForSupplier001, TestSize.Level1)
     netActivate->SetServiceSupply(supplier);
     connService.CancelRequestForSupplier(netActivate, reqId);
     EXPECT_TRUE(connService.netSuppliers_.begin()->second->requestList_.size() == 0);
+}
+
+HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback001, TestSize.Level1)
+{
+    int32_t testNetId = 9999;
+    std::shared_ptr<IDualStackProbeCallback> cb = nullptr;
+    auto ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, false);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback002, TestSize.Level1)
+{
+    int32_t testNetId = 9999;
+    std::shared_ptr<IDualStackProbeCallback> cb = std::make_shared<NetProbeCallbackTest>();
+    auto ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, false);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback003, TestSize.Level1)
+{
+    int32_t testNetId = 999;
+    auto network = std::make_shared<Network>(testNetId, testNetId,
+        nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    NetConnService::GetInstance()->networks_[testNetId] = network;
+    std::shared_ptr<IDualStackProbeCallback> cb = std::make_shared<NetProbeCallbackTest>();
+    auto ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, false);
+    auto iter = NetConnService::GetInstance()->networks_.find(testNetId);
+    if (iter != NetConnService::GetInstance()->networks_.end()) {
+        NetConnService::GetInstance()->networks_.erase(iter);
+    }
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NetProbe001, TestSize.Level1)
+{
+    int32_t testNetId = 9999;
+    auto ret = NetConnService::GetInstance()->DualStackProbe(testNetId);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NetProbe002, TestSize.Level1)
+{
+    int32_t testNetId = 9999;
+    NetConnService::GetInstance()->networks_[testNetId] = nullptr;
+    auto ret = NetConnService::GetInstance()->DualStackProbe(testNetId);
+    auto networks = NetConnService::GetInstance()->networks_;
+    auto iter = networks.find(testNetId);
+    if (iter != networks.end()) {
+        NetConnService::GetInstance()->networks_.erase(iter);
+    }
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NetProbe003, TestSize.Level1)
+{
+    int32_t testNetId = 100;
+    auto ret = NetConnService::GetInstance()->DualStackProbe(testNetId);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NetProbe004, TestSize.Level1)
+{
+    int32_t netId;
+    NetConnService::GetInstance()->GetDefaultNet(netId);
+    auto ret = NetConnService::GetInstance()->DualStackProbe(netId);
+    EXPECT_NE(netId, 0);
+}
+
+HWTEST_F(NetConnServiceTest, UpdateNetProbeTime001, TestSize.Level1)
+{
+    int32_t testProbeTime = 5 * 1000;
+    int32_t testNetId = 9999;
+    auto netConnService = std::make_shared<NetConnService>();
+    netConnService->networks_[testNetId] = nullptr;
+    auto ret = netConnService->UpdateDualStackProbeTime(testProbeTime);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 } // namespace NetManagerStandard

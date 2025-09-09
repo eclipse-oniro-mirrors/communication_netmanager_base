@@ -118,5 +118,27 @@ int32_t NetConnServiceIface::GetConnectionProperties(int32_t netId, NetLinkInfo 
 {
     return NetConnService::GetInstance()->GetConnectionProperties(netId, info);
 }
+
+int32_t NetConnServiceIface::RegisterDualStackProbeCallback(
+    int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback)
+{
+    return NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(netId, callback, true);
+}
+
+int32_t NetConnServiceIface::UnRegisterDualStackProbeCallback(
+    int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback)
+{
+    return NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(netId, callback, false);
+}
+
+int32_t NetConnServiceIface::DualStackProbe(int32_t netId)
+{
+    return NetConnService::GetInstance()->DualStackProbe(netId);
+}
+
+int32_t NetConnServiceIface::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
+{
+    return NetConnService::GetInstance()->UpdateDualStackProbeTime(dualStackProbeTime);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

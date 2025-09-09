@@ -708,6 +708,7 @@ void Network::StopNetDetection()
     NETMGR_LOG_D("Enter StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
+        netMonitor_->StopDualStackProbe();
         lastDetectTime_ = netMonitor_->GetLastDetectTime();
         netMonitor_ = nullptr;
     }
@@ -728,6 +729,7 @@ void Network::InitNetMonitor()
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
     }
+    netMonitor_->UpdateDualStackProbeTime(dualStackProbeTime_);
     netMonitor_->Start();
 }
 
@@ -883,6 +885,15 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
     }
 }
 
+void Network::OnHandleDualStackProbeResult(DualStackProbeResultCode dualStackProbeResultCode)
+{
+    if (eventHandler_) {
+        auto network = shared_from_this();
+        eventHandler_->PostAsyncTask([dualStackProbeResultCode,
+            network]() { network->HandleNetProbeResult(dualStackProbeResultCode); }, 0);
+    }
+}
+
 bool Network::ResumeNetworkInfo()
 {
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
@@ -963,6 +974,69 @@ void Network::SetSleepMode(bool isSleep)
         return;
     }
     netMonitor_->SetSleepMode(isSleep);
+}
+
+int32_t Network::StartDualStackProbeThread()
+{
+    if (netMonitor_) {
+        return netMonitor_->StartDualStackProbeThread();
+    }
+    return NETMANAGER_ERR_INTERNAL;
+}
+
+int32_t Network::RegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback)
+{
+    NETMGR_LOG_I("Enter RNPCB");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter callback is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    for (const auto &iter : dualStackProbeCallback_) {
+        if (callback == iter) {
+            NETMGR_LOG_D("dualStackProbeCallback_ had this callback");
+            return NETMANAGER_SUCCESS;
+        }
+    }
+
+    dualStackProbeCallback_.emplace_back(callback);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t Network::UnRegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback)
+{
+    NETMGR_LOG_I("Enter URNPCB");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    for (auto iter = dualStackProbeCallback_.begin(); iter != dualStackProbeCallback_.end(); ++iter) {
+        if (callback == *iter) {
+            dualStackProbeCallback_.erase(iter);
+            return NETMANAGER_SUCCESS;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+void Network::HandleNetProbeResult(DualStackProbeResultCode DualStackProbeResultCode)
+{
+    for (const auto &callback : dualStackProbeCallback_) {
+        NETMGR_LOG_D("start DualStackProbe callback!");
+        if (callback) {
+            callback->OnHandleDualStackProbeResult(DualStackProbeResultCode);
+        }
+    }
+}
+
+void Network::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
+{
+    dualStackProbeTime_ = dualStackProbeTime;
+    if (netMonitor_) {
+        netMonitor_->UpdateDualStackProbeTime(dualStackProbeTime);
+    }
 }
 
 } // namespace NetManagerStandard

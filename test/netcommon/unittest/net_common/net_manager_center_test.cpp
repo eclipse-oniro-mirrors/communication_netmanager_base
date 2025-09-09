@@ -85,6 +85,24 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t RegisterDualStackProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
+    inline int32_t UnRegisterDualStackProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
+    inline int32_t DualStackProbe(int32_t netId) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
+    inline int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {
@@ -537,6 +555,58 @@ HWTEST_F(NetManagerCenterTest, UpdateUidLostDelay, TestSize.Level1)
     std::set<uint32_t> uidLostDelaySet;
     uidLostDelaySet.insert(1000);
     auto ret = instance_.UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, RegisterDualStackProbeCallback, TestSize.Level1)
+{
+    instance_.RegisterConnService(nullptr);
+    int32_t testNetId = 111;
+    auto ret = instance_.RegisterDualStackProbeCallback(testNetId, nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    ret = instance_.RegisterDualStackProbeCallback(testNetId, nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, UnRegisterDualStackProbeCallback, TestSize.Level1)
+{
+    instance_.RegisterConnService(nullptr);
+    int32_t testNetId = 111;
+    auto ret = instance_.UnRegisterDualStackProbeCallback(testNetId, nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    ret = instance_.UnRegisterDualStackProbeCallback(testNetId, nullptr);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, DualStackProbe, TestSize.Level1)
+{
+    instance_.RegisterConnService(nullptr);
+    int32_t testNetId = 111;
+    auto ret = instance_.DualStackProbe(testNetId);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    ret = instance_.DualStackProbe(testNetId);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, UpdateDualStackProbeTime, TestSize.Level1)
+{
+    instance_.RegisterConnService(nullptr);
+    int32_t testProbeTime = 5 * 1000;
+    auto ret = instance_.UpdateDualStackProbeTime(testProbeTime);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
+
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    ret = instance_.UpdateDualStackProbeTime(testProbeTime);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 } // namespace NetManagerStandard

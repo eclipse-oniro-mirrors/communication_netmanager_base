@@ -47,6 +47,11 @@ public:
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
+    int32_t RegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback) override;
+    int32_t UnRegisterDualStackProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback) override;
+    int32_t DualStackProbe(int32_t netId) override;
+    int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime) override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

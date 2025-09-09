@@ -26,6 +26,7 @@
 #include "probe_thread.h"
 #include "net_connection.h"
 #include "net_connection_adapter.h"
+#include "net_probe_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1595,6 +1596,89 @@ HWTEST_F(NetworkTest, SetSleepModeTest002, TestSize.Level1)
     network->netMonitor_ = nullptr;
     network->SetSleepMode(false);
     EXPECT_EQ(network->isSleep_, false);
+}
+
+HWTEST_F(NetworkTest, OnHandleNetProbeResultTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network->OnHandleDualStackProbeResult(DualStackProbeResultCode::PROBE_FAIL);
+    EXPECT_EQ(network->eventHandler_, nullptr);
+}
+
+HWTEST_F(NetworkTest, OnHandleNetProbeResultTest002, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto eventRunner = AppExecFwk::EventRunner::Create("TEST_THREAD");
+    auto eventHandle = std::make_shared<NetConnEventHandler>(eventRunner);
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, eventHandle);
+    network->OnHandleDualStackProbeResult(DualStackProbeResultCode::PROBE_FAIL);
+    EXPECT_NE(network->eventHandler_, nullptr);
+}
+
+HWTEST_F(NetworkTest, StartDualStackProbeThreadTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network->StartDualStackProbeThread();
+    EXPECT_EQ(network->netMonitor_, nullptr);
+    network->InitNetMonitor();
+    network->StartDualStackProbeThread();
+    EXPECT_NE(network->netMonitor_, nullptr);
+}
+
+HWTEST_F(NetworkTest, RegisterNetProbeCallbackTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    std::shared_ptr<IDualStackProbeCallback> probeCb = nullptr;
+    auto ret = network->RegisterDualStackProbeCallback(probeCb);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    probeCb = std::make_shared<NetProbeCallbackTest>();
+    ret = network->RegisterDualStackProbeCallback(probeCb);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = network->RegisterDualStackProbeCallback(probeCb);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, UnRegisterNetProbeCallbackTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    std::shared_ptr<IDualStackProbeCallback> probeCb = nullptr;
+    auto ret = network->UnRegisterDualStackProbeCallback(probeCb);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    probeCb = std::make_shared<NetProbeCallbackTest>();
+    ret = network->UnRegisterDualStackProbeCallback(probeCb);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = network->RegisterDualStackProbeCallback(probeCb);
+    ret = network->UnRegisterDualStackProbeCallback(probeCb);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetworkTest, HandleNetProbeResultTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network->HandleNetProbeResult(DualStackProbeResultCode::PROBE_FAIL);
+    EXPECT_EQ(network->dualStackProbeCallback_.size(), 0);
+    std::shared_ptr<IDualStackProbeCallback> probeCb = std::make_shared<NetProbeCallbackTest>();
+    network->RegisterDualStackProbeCallback(probeCb);
+    network->HandleNetProbeResult(DualStackProbeResultCode::PROBE_FAIL);
+    EXPECT_NE(network->dualStackProbeCallback_.size(), 0);
+}
+
+HWTEST_F(NetworkTest, UpdateNetProbeTimeTest001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    int32_t probeTime = 5 * 1000;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network->UpdateDualStackProbeTime(probeTime);
+    EXPECT_EQ(network->netMonitor_, nullptr);
+    
+    network->InitNetMonitor();
+    network->UpdateDualStackProbeTime(probeTime);
+    EXPECT_NE(network->netMonitor_, nullptr);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -114,6 +114,7 @@ bool WriteFile(const std::string &filePath, const std::string &fileContent);
 std::string GetHostnameFromURL(const std::string &url);
 int32_t GetTodayMidnightTimestamp(int hour, int min, int sec);
 void DeleteFile(const std::string &filePath);
+std::string ExtractDomainFormUrl(const std::string &url);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

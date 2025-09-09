@@ -24,6 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr int32_t TEST_NETID = 999;
 constexpr const char *TEST_IDENT = "test_ident";
 uint32_t g_supplierId = 0;
 } // namespace
@@ -91,6 +92,12 @@ HWTEST_F(NetConnServiceIfaceTest, RestrictBackgroundChangedTest001, TestSize.Lev
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetConnServiceIfaceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
+{
+    int32_t ret = instance_.RegisterNetConnCallback(nullptr);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceIfaceTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
 {
     sptr<INetFactoryResetCallback> callback = nullptr;
@@ -107,6 +114,40 @@ HWTEST_F(NetConnServiceIfaceTest, UpdateUidLostDelay, TestSize.Level1)
     std::set<uint32_t> uidLostDelaySet;
     uidLostDelaySet.insert(1000);
     int32_t ret = instance_.UpdateUidLostDelay(uidLostDelaySet);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, GetConnectionPropertiesTest001, TestSize.Level1)
+{
+    NetLinkInfo info;
+    int32_t ret = instance_.GetConnectionProperties(TEST_NETID, info);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, RegisterDualStackProbeCallbackTest001, TestSize.Level1)
+{
+    std::shared_ptr<IDualStackProbeCallback> cb = nullptr;
+    int32_t ret = instance_.RegisterDualStackProbeCallback(TEST_NETID, cb);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, UnRegisterDualStackProbeCallbackTest001, TestSize.Level1)
+{
+    std::shared_ptr<IDualStackProbeCallback> cb = nullptr;
+    int32_t ret = instance_.UnRegisterDualStackProbeCallback(TEST_NETID, cb);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, DualStackProbeTest001, TestSize.Level1)
+{
+    int32_t ret = instance_.DualStackProbe(TEST_NETID);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnServiceIfaceTest, UpdateDualStackProbeTimeTest001, TestSize.Level1)
+{
+    int32_t testProbeTime = 5 * 1000;
+    int32_t ret = instance_.UpdateDualStackProbeTime(testProbeTime);
     EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
