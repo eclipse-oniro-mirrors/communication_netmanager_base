@@ -62,6 +62,7 @@
 #endif // SUPPORT_NETWORK_SHARE
 #include "system_timer.h"
 #include "net_stats_subscriber.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -896,9 +897,10 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
                                                      const NetStatsNetwork &networkIpc)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
-    if (NetManagerPermission::IsSystemCaller() &&
-        !NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+    int32_t checkPermission = CheckNetManagerAvailable();
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    if (checkPermission != NETMANAGER_SUCCESS && uid != callingUid) {
+        return checkPermission;
     }
 
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
