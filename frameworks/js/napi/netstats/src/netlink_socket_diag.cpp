@@ -362,10 +362,15 @@ void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uin
         return;
     }
     auto needDestroy = [&] (const inet_diag_msg *msg) {
-        return msg != nullptr && uid == msg->idiag_uid && IsMatchNetwork(msg, ipAddr) && !IsLoopbackSocket(msg);
+        bool isMatchNetwork = true;
+        if (ipAddr != "") {
+            isMatchNetwork == IsMatchNetwork(msg, ipAddr);
+        }
+        return msg != nullptr && uid == msg->idiag_uid && isMatchNetwork && !IsLoopbackSocket(msg);
     };
     const int32_t proto = IPPROTO_TCP;
-    const uint32_t states = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV);
+    const uint32_t states = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV) | (1 << TCP_CLOSE_WAIT)
+             | (1 << TCP_FIN_WAIT1) | (1 << TCP_FIN_WAIT2) | (1 << TCP_TIME_WAIT) | (1 << TCP_LAST_ACK);
     for (const int family : {AF_INET, AF_INET6}) {
         int32_t ret = SendSockDiagDumpRequest(proto, family, states);
         if (ret != NETMANAGER_SUCCESS) {
@@ -379,35 +384,8 @@ void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uin
         }
     }
 
-    NETNATIVE_LOG_D("TCP-RST Destroyed %{public}d sockets", socketsDestroyed_);
+    NETNATIVE_LOGI("TCP-RST Destroyed %{public}d sockets for uid:%{public}d", socketsDestroyed_, uid);
 }
 
-void NetLinkSocketDiag::DestroyLiveSocketsWithUid(uint32_t uid)
-{
-    NETNATIVE_LOG_D("TCP-RST DestroyLiveSocketsWithUid, uid:%{public}d", uid);
-    if (!CreateNetlinkSocket()) {
-        NETNATIVE_LOGE("Create netlink diag socket failed.");
-        return;
-    }
-    auto needDestroy = [&] (const inet_diag_msg *msg) -> bool {
-        return msg != nullptr && uid == msg->idiag_uid && !IsLoopbackSocket(msg);
-    };
-    const int32_t proto = IPPROTO_TCP;
-    const uint32_t states = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV);
-    for (const int family : {AF_INET, AF_INET6}) {
-        int32_t ret = SendSockDiagDumpRequest(proto, family, states);
-        if (ret != NETMANAGER_SUCCESS) {
-            NETNATIVE_LOGE("Failed to dump %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
-            break;
-        }
-        ret = ProcessSockDiagUidDumpResponse(proto, needDestroy);
-        if (ret != NETMANAGER_SUCCESS) {
-            NETNATIVE_LOGE("Failed to destroy %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
-            break;
-        }
-    }
-
-    NETNATIVE_LOG_D("TCP-RST Destroyed %{public}d sockets", socketsDestroyed_);
-}
 } // namespace nmd
 } // namespace OHOS
