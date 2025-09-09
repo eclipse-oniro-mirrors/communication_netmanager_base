@@ -958,6 +958,12 @@ int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceN
     return netsysClient_->SetEnableIpv6(interfaceName, on);
 }
 
+int32_t NetsysControllerServiceImpl::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
+{
+    NETMGR_LOG_D("SetIpv6AutoConf: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
+    return netsysClient_->SetIpv6AutoConf(interfaceName, on);
+}
+
 int32_t NetsysControllerServiceImpl::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy,
                                                             bool reconfirmFlag)
 {

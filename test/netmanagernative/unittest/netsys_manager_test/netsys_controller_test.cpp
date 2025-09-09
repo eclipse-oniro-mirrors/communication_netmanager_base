@@ -1283,6 +1283,19 @@ HWTEST_F(NetsysControllerTest, SetEnableIpv6Test001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerTest, SetIpv6AutoConfTest001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = netsysController->SetIpv6AutoConf(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerTest, SetDnsCacheTest001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();

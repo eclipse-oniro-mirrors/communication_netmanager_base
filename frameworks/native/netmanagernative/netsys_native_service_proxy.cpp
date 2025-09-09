@@ -3331,6 +3331,28 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOG_D("Begin to SetIpv6AutoConf");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     NETNATIVE_LOGI("SetNetworkAccessPolicy");

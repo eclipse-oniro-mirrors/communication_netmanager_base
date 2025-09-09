@@ -128,6 +128,7 @@ public:
         const std::string &ifName);
     static int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName);
+    static int32_t SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on);
 
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);

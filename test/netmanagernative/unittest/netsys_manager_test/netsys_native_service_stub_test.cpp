@@ -1126,6 +1126,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.L
 
     ret = notifyStub_->CmdSetIpv6Enable(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdSetIpv6AutoConf(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Level1)

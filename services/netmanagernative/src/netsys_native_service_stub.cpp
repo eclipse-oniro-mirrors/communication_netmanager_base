@@ -127,6 +127,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdStartClat;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_STOP_CLAT)] =
         &NetsysNativeServiceStub::CmdStopClat;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF)] =
+        &NetsysNativeServiceStub::CmdSetIpv6AutoConf;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -2268,6 +2270,18 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessagePa
     int32_t result = SetEnableIpv6(interfaceName, on);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6AutoConf(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetIpv6AutoConf(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("SetIpv6AutoConf has recved result %{public}d", result);
 
     return result;
 }

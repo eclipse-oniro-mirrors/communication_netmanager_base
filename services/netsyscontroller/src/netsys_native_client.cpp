@@ -1910,6 +1910,16 @@ int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, cons
     return proxy->SetEnableIpv6(interfaceName, on);
 }
 
+int32_t NetsysNativeClient::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpv6AutoConf(interfaceName, on);
+}
+
 int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
 {
     auto proxy = GetProxy();

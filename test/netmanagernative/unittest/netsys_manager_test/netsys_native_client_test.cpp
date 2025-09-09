@@ -444,6 +444,15 @@ HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeClientTest, SetIpv6AutoConfTest001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = nativeClient->SetIpv6AutoConf(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeClientTest, SetNetworkAccessPolicy001, TestSize.Level1)
 {
     auto nativeClient = std::make_shared<NetsysNativeClient>();
