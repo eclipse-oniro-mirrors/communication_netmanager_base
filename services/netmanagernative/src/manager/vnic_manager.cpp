@@ -329,7 +329,7 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
     nmd::NetLinkSocketDiag socketDiag;
     for (auto const &uid : uidRanges) {
         NETNATIVE_LOG_D("CreateVnic uid %{public}d", (uint32_t)uid.begin_);
-        socketDiag.DestroyLiveSocketsWithUid((uint32_t)uid.begin_);
+        socketDiag.DestroyLiveSocketsWithUid("", (uint32_t)uid.begin_);
     }
 
     return NETMANAGER_SUCCESS;
@@ -344,7 +344,7 @@ int32_t VnicManager::DestroyVnic()
     DestroyVnicInterface();
     for (auto const &uid : uidRanges) {
         NETNATIVE_LOG_D("DestroyVnic uid %{public}d", (uint32_t)uid.begin_);
-        socketDiag.DestroyLiveSocketsWithUid((uint32_t)uid.begin_);
+        socketDiag.DestroyLiveSocketsWithUid("", (uint32_t)uid.begin_);
     }
     uidRanges.clear();
     return NETMANAGER_SUCCESS;
