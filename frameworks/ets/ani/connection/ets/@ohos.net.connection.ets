@@ -46,7 +46,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): NetHandle => {
         return getDefaultNetSync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as NetHandle);
     }, (err: Error): void => {
         callback(err as BusinessError, new NetHandleInner);
@@ -57,7 +57,7 @@ export default namespace connection {
       return new Promise<NetHandle>((resolve, reject) => {
           taskpool.execute((): NetHandle => {
               return getDefaultNetSync();
-          }).then((content: NullishType) => {
+          }).then((content: Any) => {
               resolve(content as NetHandle);
           }, (err: Error): void => {
               reject(err as BusinessError);
@@ -71,7 +71,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): Array<NetHandle> => {
         return getAllNetsSync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as Array<NetHandle>);
     }, (err: Error): void => {
         callback(err as BusinessError, new Array<NetHandle>());
@@ -82,7 +82,7 @@ export default namespace connection {
     return new Promise<Array<NetHandle>>((resolve, reject) => {
         taskpool.execute((): Array<NetHandle> => {
             return getAllNetsSync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as Array<NetHandle>);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -96,7 +96,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): ConnectionProperties => {
         return getConnectionPropertiesSync(netHandle);
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as ConnectionProperties);
     }, (err: Error): void => {
         callback(err as BusinessError, new ConnectionPropertiesInner());
@@ -107,7 +107,7 @@ export default namespace connection {
     return new Promise<ConnectionProperties>((resolve, reject) => {
         taskpool.execute((): ConnectionProperties => {
             return getConnectionPropertiesSync(netHandle);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as ConnectionProperties);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -121,7 +121,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): NetCapabilities => {
         return getNetCapabilitiesSync(netHandle);
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as NetCapabilities);
     }, (err: Error): void => {
         callback(err as BusinessError, new NetCapabilitiesInner);
@@ -132,7 +132,7 @@ export default namespace connection {
     return new Promise<NetCapabilities>((resolve, reject) => {
         taskpool.execute((): NetCapabilities => {
             return getNetCapabilitiesSync(netHandle);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as NetCapabilities);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -154,7 +154,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): boolean => {
         return isDefaultNetMeteredSync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as boolean);
     }, (err: Error): void => {
         callback(err as BusinessError, false);
@@ -165,7 +165,7 @@ export default namespace connection {
       return new Promise<boolean>((resolve, reject) => {
         taskpool.execute((): boolean => {
             return isDefaultNetMeteredSync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as boolean);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -179,7 +179,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): boolean => {
         return hasDefaultNetSync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as boolean);
     }, (err: Error): void => {
         callback(err as BusinessError, false);
@@ -190,7 +190,7 @@ export default namespace connection {
     return new Promise<boolean>((resolve, reject) => {
         taskpool.execute((): boolean => {
             return hasDefaultNetSync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as boolean);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -242,7 +242,7 @@ export default namespace connection {
     return new Promise<void>((resolve, reject) => {
         taskpool.execute(() => {
             disableAirplaneModeSync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -265,7 +265,7 @@ export default namespace connection {
     return new Promise<void>((resolve, reject) => {
         taskpool.execute(() => {
             reportNetConnectedSync(netHandle);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -290,7 +290,7 @@ export default namespace connection {
     return new Promise<void>((resolve, reject) => {
         taskpool.execute(() => {
             reportNetDisconnectedSync(netHandle);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(undefined);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -304,7 +304,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): Array<NetAddress> => {
         return getAddressesByNameSync(host);
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as Array<NetAddress>);
     }, (err: Error): void => {
         callback(err as BusinessError, undefined);
@@ -315,7 +315,7 @@ export default namespace connection {
     return new Promise<Array<NetAddress>>((resolve, reject) => {
         taskpool.execute((): Array<NetAddress> => {
             return getAddressesByNameSync(host);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -329,7 +329,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): NetHandle => {
         return getAppNetSync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as NetHandle );
     }, (err: Error): void => {
         callback(err as BusinessError, new NetHandleInner);
@@ -340,7 +340,7 @@ export default namespace connection {
     return new Promise<NetHandle>((resolve, reject) => {
       taskpool.execute((): NetHandle => {
           return getAppNetSync();
-      }).then((content: NullishType) => {
+      }).then((content: Any) => {
           resolve(content as NetHandle);
       }, (err: Error): void => {
           reject(err as BusinessError);
@@ -379,7 +379,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): HttpProxy => {
         return getDefaultHttpProxySync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as HttpProxy);
     }, (err: Error): void => {
         callback(err as BusinessError, new HttpProxyInner);
@@ -390,7 +390,7 @@ export default namespace connection {
     return new Promise<HttpProxy>((resolve, reject) => {
         taskpool.execute((): HttpProxy => {
             return getDefaultHttpProxySync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as HttpProxy);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -404,7 +404,7 @@ export default namespace connection {
     let p1 = taskpool.execute((): HttpProxy => {
         return getGlobalHttpProxySync();
     })
-    p1.then((content: NullishType) => {
+    p1.then((content: Any) => {
         callback(new BusinessError(), content as HttpProxy);
     }, (err: Error): void => {
         callback(err as BusinessError, new HttpProxyInner);
@@ -415,7 +415,7 @@ export default namespace connection {
     return new Promise<HttpProxy>((resolve, reject) => {
         taskpool.execute((): HttpProxy => {
             return getGlobalHttpProxySync();
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as HttpProxy);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -665,7 +665,7 @@ export default namespace connection {
       let p1 = taskpool.execute((): NetAddress => {
         return this.getAddressByNameSyncWithHandle(host);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as NetAddress);
       }, (err: Error): void => {
           callback(err as BusinessError, new NetAddressInner);
@@ -676,7 +676,7 @@ export default namespace connection {
       return new Promise<NetAddress>((resolve, reject) => {
         taskpool.execute((): NetAddress => {
             return this.getAddressByNameSyncWithHandle(host);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as NetAddress);
         }, (err: Error): void => {
             reject(err as BusinessError);
@@ -690,7 +690,7 @@ export default namespace connection {
       let p1 = taskpool.execute((): Array<NetAddress> => {
         return this.getAddressesByNameSyncWithHandle(host);
       })
-      p1.then((content: NullishType) => {
+      p1.then((content: Any) => {
           callback(new BusinessError(), content as Array<NetAddress>);
       }, (err: Error): void => {
           callback(err as BusinessError, undefined);
@@ -701,7 +701,7 @@ export default namespace connection {
       return new Promise<Array<NetAddress>>((resolve, reject) => {
         taskpool.execute((): Array<NetAddress> => {
             return this.getAddressesByNameSyncWithHandle(host);
-        }).then((content: NullishType) => {
+        }).then((content: Any) => {
             resolve(content as Array<NetAddress>);
         }, (err: Error): void => {
             reject(err as BusinessError);
