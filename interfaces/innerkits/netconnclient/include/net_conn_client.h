@@ -540,7 +540,11 @@ private:
         int32_t AddNetConnCallback(const sptr<INetConnCallback>& callback);
         void RemoveNetConnCallback(const sptr<INetConnCallback>& callback);
         bool HasExistCallback(const sptr<INetConnCallback>& callback);
+        void PostTriggerNetChange(const sptr<INetConnCallback>& callback,
+            const sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap,
+            const sptr<NetLinkInfo> &netLinkInfo);
     private:
+        std::mutex netHandlerMutex_;
         sptr<NetHandle> netHandle_ = nullptr;
         sptr<NetAllCapabilities> netAllCap_ = nullptr;
         sptr<NetLinkInfo> netLinkInfo_ = nullptr;
