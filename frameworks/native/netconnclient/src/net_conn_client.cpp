@@ -1330,11 +1330,13 @@ int32_t NetConnClient::SetNetExtAttribute(const NetHandle &netHandle, const std:
 
 int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &netHandle)
 {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle == nullptr) {
         netHandle_ = nullptr;
     } else {
         netHandle_ = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
     }
+    handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
@@ -1347,9 +1349,11 @@ int32_t NetConnClient::NetConnCallbackManager::NetAvailable(sptr<NetHandle> &net
 int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
     const sptr<NetAllCapabilities> &netAllCap)
 {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
         netAllCap_ = netAllCap;
     }
+    handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
@@ -1362,9 +1366,11 @@ int32_t NetConnClient::NetConnCallbackManager::NetCapabilitiesChange(sptr<NetHan
 int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
     const sptr<NetLinkInfo> &info)
 {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
         netLinkInfo_ = info;
     }
+    handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
@@ -1376,11 +1382,13 @@ int32_t NetConnClient::NetConnCallbackManager::NetConnectionPropertiesChange(spt
  
 int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandle)
 {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     if (netHandle_ != nullptr && netHandle->GetNetId() == netHandle_->GetNetId()) {
         netHandle_ = nullptr;
         netAllCap_ = nullptr;
         netLinkInfo_ = nullptr;
     }
+    handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
@@ -1392,7 +1400,9 @@ int32_t NetConnClient::NetConnCallbackManager::NetLost(sptr<NetHandle> &netHandl
  
 int32_t NetConnClient::NetConnCallbackManager::NetUnavailable()
 {
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     netHandle_ = nullptr;
+    handlerLock.unlock();
     std::shared_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     std::list<sptr<INetConnCallback>> tmpList(netConnCallbackList_);
     lock.unlock();
@@ -1412,6 +1422,22 @@ int32_t NetConnClient::NetConnCallbackManager::NetBlockStatusChange(sptr<NetHand
     }
     return NETMANAGER_SUCCESS;
 }
+
+void NetConnClient::NetConnCallbackManager::PostTriggerNetChange(const sptr<INetConnCallback>& callback,
+    const sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap,
+    const sptr<NetLinkInfo> &netLinkInfo)
+{
+    if (netHandle != nullptr) {
+        sptr<NetHandle> tempNetHandler = sptr<NetHandle>::MakeSptr(netHandle->GetNetId());
+        callback->NetAvailable(tempNetHandler);
+        if (netAllCap != nullptr) {
+            callback->NetCapabilitiesChange(tempNetHandler, netAllCap);
+        }
+        if (netLinkInfo != nullptr) {
+            callback->NetConnectionPropertiesChange(tempNetHandler, netLinkInfo);
+        }
+    }
+}
  
 int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback>& callback)
 {
@@ -1423,18 +1449,18 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     }
     netConnCallbackList_.push_back(callback);
     lock.unlock();
+    if (netHandle_ == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
+    std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
+    sptr<NetHandle> tempNetHandler(netHandle_);
+    sptr<NetAllCapabilities> tempNetAllCap(netAllCap_);
+    sptr<NetLinkInfo> tempNetLinkInfo(netLinkInfo_);
+    handlerLock.unlock();
 #ifndef NETMANAGER_TEST
-    ffrt::submit([this, callback] () {
+    ffrt::submit([this, callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo] () {
 #endif
-            if (netHandle_ != nullptr) {
-                callback->NetAvailable(netHandle_);
-                if (netAllCap_ != nullptr) {
-                    callback->NetCapabilitiesChange(netHandle_, netAllCap_);
-                }
-                if (netLinkInfo_ != nullptr) {
-                    callback->NetConnectionPropertiesChange(netHandle_, netLinkInfo_);
-                }
-            }
+            this->PostTriggerNetChange(callback, tempNetHandler, tempNetAllCap, tempNetLinkInfo);
 #ifndef NETMANAGER_TEST
         },
         {}, {}, ffrt::task_attr().name("AddNetConnCallback"));
