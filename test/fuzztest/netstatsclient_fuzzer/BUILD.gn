@@ -89,10 +89,16 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   ]
 
   if (netmanager_base_enable_traffic_statistic) {
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
     ]
+  }
+
+  if (netmanager_base_share_traffic_limit_enable) {
+    defines += [ "SUPPORT_NETWORK_SHARE" ]
+    external_deps += [ "netmanager_ext:net_tether_manager_if" ]
   }
 }
 
