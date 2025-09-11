@@ -44,6 +44,10 @@ public:
         (void)netDetectionState;
         (void)urlRedirect;
     }
+    inline void OnHandleDualStackProbeResult(DualStackProbeResultCode dualStackProbeResultCode) override
+    {
+        (void)dualStackProbeResultCode;
+    }
 };
 } // namespace
 
@@ -57,6 +61,7 @@ public:
     static inline NetMonitorInfo info = {true, 0, false};
     static inline std::shared_ptr<NetMonitor> instance_ =
         std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, info);
+    static std::shared_ptr<NetMonitor> CreateNetMonitorInstance();
 };
 
 void NetMonitorTest::SetUpTestCase()
@@ -72,6 +77,15 @@ void NetMonitorTest::TearDownTestCase()
 void NetMonitorTest::SetUp() {}
 
 void NetMonitorTest::TearDown() {}
+
+std::shared_ptr<NetMonitor> NetMonitorTest::CreateNetMonitorInstance()
+{
+    auto cb = std::make_shared<TestMonitorCallback>();
+    NetMonitorInfo info = {true, 0, false};
+    auto netMonitor = std::make_shared<NetMonitor>(
+        TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), cb, info);
+    return netMonitor;
+}
 
 HWTEST_F(NetMonitorTest, IsDetectingTest001, TestSize.Level1)
 {
@@ -313,5 +327,69 @@ HWTEST_F(NetMonitorTest, StartProbeTest001, TestSize.Level1)
     EXPECT_NO_THROW(instance_->Detection());
 }
 
+HWTEST_F(NetMonitorTest, UpdateNetProbeTimeTest001, TestSize.Level1)
+{
+    auto netMonitor = CreateNetMonitorInstance();
+    int32_t dualStackProbeTimeOut = 5 * 1000;
+    netMonitor->UpdateDualStackProbeTime(dualStackProbeTimeOut);
+    EXPECT_EQ(netMonitor->dualStackProbeTimeOut_, dualStackProbeTimeOut);
+    
+    dualStackProbeTimeOut = 0;
+    netMonitor->UpdateDualStackProbeTime(dualStackProbeTimeOut);
+    EXPECT_NE(netMonitor->dualStackProbeTimeOut_, dualStackProbeTimeOut);
+}
+
+HWTEST_F(NetMonitorTest, StopProbeTest001, TestSize.Level1)
+{
+    auto netMonitor = CreateNetMonitorInstance();
+    netMonitor->dualStackProbe_ = nullptr;
+    netMonitor->StopDualStackProbe();
+    EXPECT_EQ(netMonitor->dualStackProbe_, nullptr);
+    std::shared_ptr<TestMonitorCallback> sp;
+    std::weak_ptr<TestMonitorCallback> netMonitorCallback = sp;
+    std::string httpUrl = "";
+    std::string httpsUrl = "";
+    netMonitor->dualStackProbe_ = std::make_shared<NetDualStackProbe>(TEST_NETID, BEARER_DEFAULT,
+        NetLinkInfo(), httpUrl, httpsUrl, netMonitorCallback);
+    netMonitor->StopDualStackProbe();
+    EXPECT_EQ(netMonitor->dualStackProbe_, nullptr);
+}
+
+HWTEST_F(NetMonitorTest, StartDualStackProbeThreadTest001, TestSize.Level1)
+{
+    auto netMonitor = CreateNetMonitorInstance();
+    netMonitor->isDetecting_ = true;
+    auto result = netMonitor->StartDualStackProbeThread();
+    EXPECT_EQ(result, NETMANAGER_ERR_INTERNAL);
+
+    netMonitor->isDetecting_ = false;
+    netMonitor->dualStackProbe_ = nullptr;
+    result = netMonitor->StartDualStackProbeThread();
+    EXPECT_NE(result, NETMANAGER_ERR_INTERNAL);
+
+    EXPECT_NE(netMonitor->dualStackProbe_, nullptr);
+    netMonitor->dualStackProbe_->isDualStackProbing_ = true;
+    result = netMonitor->StartDualStackProbeThread();
+    EXPECT_EQ(result, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetMonitorTest, ExtractDomainFormUrlTest001, TestSize.Level1)
+{
+    std::string url = "";
+    std::string ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_EQ(ret, url);
+
+    url = "test.string";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_EQ(ret, url);
+
+    url = "test//string";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_NE(ret, url);
+
+    url = "/test//string";
+    ret = CommonUtils::ExtractDomainFormUrl(url);
+    EXPECT_NE(ret, url);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

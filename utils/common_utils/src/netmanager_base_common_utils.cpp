@@ -965,4 +965,26 @@ bool IsSameNaturalDay(uint32_t current, uint32_t another)
     return tempTm1.tm_year == tempTm2.tm_year &&
         tempTm1.tm_mon == tempTm2.tm_mon && tempTm1.tm_mday == tempTm2.tm_mday;
 }
+
+std::string ExtractDomainFormUrl(const std::string &url)
+{
+    if (url.empty()) {
+        return std::string();
+    }
+
+    size_t doubleSlashPos = url.find("//");
+    if (doubleSlashPos == std::string::npos) {
+        return url;
+    }
+
+    std::string domain;
+    size_t domainStartPos = doubleSlashPos + 2;
+    size_t domainEndPos = url.find('/', domainStartPos);
+    if (domainEndPos != std::string::npos) {
+        domain = url.substr(domainStartPos, domainEndPos - domainStartPos);
+    } else {
+        domain = url.substr(domainStartPos);
+    }
+    return domain;
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils

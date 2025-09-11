@@ -510,6 +510,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         bearerType, netConnEventHandler_);
     network->SetScreenState(isScreenOn_);
     network->SetNetCaps(netCaps);
+    network->UpdateDualStackProbeTime(dualStackProbeTime_);
     supplier->SetNetwork(network);
     supplier->SetUid(callingUid);
     // save supplier
@@ -4266,6 +4267,52 @@ int32_t NetConnService::GetNetExtAttribute(int32_t netId, std::string &netExtAtt
         return NETMANAGER_ERR_INTERNAL;
     }
     netExtAttribute = supplier->GetNetExtAttribute();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::RegUnRegisterNetProbeCallback(int32_t netId,
+    std::shared_ptr<IDualStackProbeCallback>& callback, bool isReg)
+{
+    NETMGR_LOG_I("Enter UnRegisterDualStackProbeCallback");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+        NETMGR_LOG_E("Could not find the corresponding network.");
+        return NET_CONN_ERR_NETID_NOT_FOUND;
+    }
+    if (isReg) {
+        iterNetwork->second->RegisterDualStackProbeCallback(callback);
+        return NETMANAGER_SUCCESS;
+    }
+    iterNetwork->second->UnRegisterDualStackProbeCallback(callback);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::DualStackProbe(uint32_t netId)
+{
+    NETMGR_LOG_I("Enter StartDualStackProbeThread, netId=[%{public}d]", netId);
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr) || !iterNetwork->second->IsConnected()) {
+        NETMGR_LOG_E("Could not find the corresponding network or network is not connected.");
+        return NET_CONN_ERR_NETID_NOT_FOUND;
+    }
+    int32_t ret = iterNetwork->second->StartDualStackProbeThread();
+    NETMGR_LOG_I("End StartDualStackProbeThread");
+    return ret;
+}
+
+int32_t NetConnService::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
+{
+    dualStackProbeTime_ = dualStackProbeTime;
+    for (const auto &network : networks_) {
+        if (network.second != nullptr) {
+            network.second->UpdateDualStackProbeTime(dualStackProbeTime);
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

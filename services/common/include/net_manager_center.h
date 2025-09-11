@@ -23,6 +23,7 @@
 #include "net_ethernet_base_service.h"
 #include "net_policy_base_service.h"
 #include "net_stats_base_service.h"
+#include "dual_stack_probe_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -57,6 +58,10 @@ public:
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
+    int32_t RegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);
+    int32_t UnRegisterDualStackProbeCallback(int32_t netId, std::shared_ptr<IDualStackProbeCallback>& callback);
+    int32_t DualStackProbe(int32_t netId);
+    int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut);
 
 private:
     sptr<NetConnBaseService> connService_ = nullptr;

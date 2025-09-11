@@ -28,6 +28,7 @@
 #include "route.h"
 #include "nat464_service.h"
 #include "netmanager_base_common_utils.h"
+#include "dual_stack_probe_callback.h"
 #include <shared_mutex>
 
 namespace OHOS {
@@ -69,7 +70,8 @@ public:
     void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
-    
+    void OnHandleDualStackProbeResult(DualStackProbeResultCode dualStackProbeResultCode) override;
+
     bool ResumeNetworkInfo();
     void CloseSocketsUid(uint32_t uid);
     void StopNetDetection();
@@ -78,6 +80,10 @@ public:
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
 #endif
+    int32_t StartDualStackProbeThread();
+    int32_t RegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback);
+    int32_t UnRegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback);
+    void UpdateDualStackProbeTime(int32_t dualStackProbeTime);
 
 private:
     bool CreateBasicNetwork();
@@ -86,6 +92,7 @@ private:
     bool ReleaseVirtualNetwork();
     void InitNetMonitor();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
+    void HandleNetProbeResult(DualStackProbeResultCode DualStackProbeResultCode);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
     NetDetectionResultCode NetDetectionResultConvert(int32_t internalRet);
     void SendConnectionChangedBroadcast(const NetConnState &netConnState) const;
@@ -111,6 +118,7 @@ private:
     NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
+    std::vector<std::shared_ptr<IDualStackProbeCallback>> dualStackProbeCallback_;
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
@@ -123,6 +131,7 @@ private:
     bool isNeedResume_ = false;
     bool isScreenOn_ = true;
     bool isSleep_ = false;
+    int32_t dualStackProbeTime_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

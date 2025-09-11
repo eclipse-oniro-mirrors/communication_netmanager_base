@@ -235,5 +235,12 @@ HWTEST_F(NetworkTest, ResumeNetworkInfoTest001, TestSize.Level1)
     auto result = instance_->ResumeNetworkInfo();
     EXPECT_EQ(result, true);
 }
+
+HWTEST_F(NetworkTest, OnHandleDualStackProbeResultTest001, TestSize.Level1)
+{
+    NetManagerStandard::DualStackProbeResultCode result = NetManagerStandard::DualStackProbeResultCode::PROBE_FAIL;
+    instance_->OnHandleDualStackProbeResult(result);
+    EXPECT_EQ(instance_->dualStackProbeCallback_.size(), 0);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

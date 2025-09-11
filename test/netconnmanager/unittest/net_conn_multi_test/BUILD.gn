@@ -32,6 +32,8 @@ ohos_unittest("net_conn_multi_test") {
     "net_conn_event_handler_test.cpp",
     "net_conn_hievent_test.cpp",
     "net_datashare_utils_test.cpp",
+    "net_dns_resolve_test.cpp",
+    "net_dual_stack_probe_test.cpp",
     "net_handle_test.cpp",
     "net_http_probe_test.cpp",
     "net_monitor_test.cpp",

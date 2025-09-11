@@ -17,6 +17,7 @@
 #define I_NET_MONITOR_CALLBACK_H
 
 #include "net_conn_types.h"
+#include "dual_stack_probe_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,6 +27,7 @@ public:
 
 public:
     virtual void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) = 0;
+    virtual void OnHandleDualStackProbeResult(DualStackProbeResultCode dualStackProbeResultCode);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

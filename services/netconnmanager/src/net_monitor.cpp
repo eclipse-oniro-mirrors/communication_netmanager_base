@@ -35,6 +35,7 @@
 #include "fwmark_client.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
+#include "net_dns_resolve.h"
 #include "net_http_proxy_tracker.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
@@ -49,10 +50,13 @@ constexpr int32_t PRIMARY_DETECTION_RESULT_WAIT_MS = 3 * 1000;
 constexpr int32_t ALL_DETECTION_RESULT_WAIT_MS = 10 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 15 * 1000;
 constexpr int32_t SCREENOFF_PORTAL_DETECTION_DELAY_MS = 5 * 60 * 1000;
+constexpr int32_t DNS_RESOLVE_RESULT_WAIT_MS = 5 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t ONE_URL_DETECT_NUM = 4;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 8;
+constexpr int32_t DNS_RESOLVE_THREAD_NUM = 2;
+constexpr int32_t NET_PROBE_THREAD_NUM = 4;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
@@ -481,6 +485,37 @@ void NetMonitor::SetSleepMode(bool isSleep)
 uint64_t NetMonitor::GetLastDetectTime()
 {
     return lastDetectTimestamp_;
+}
+
+void NetMonitor::StopDualStackProbe()
+{
+    if (dualStackProbe_) {
+        dualStackProbe_->StopDualStackProbe();
+    }
+    dualStackProbe_ = nullptr;
+}
+
+int32_t NetMonitor::StartDualStackProbeThread()
+{
+    NETMGR_LOG_D("Start net[%{public}d] probe in", netId_);
+    if (isDetecting_) {
+        NETMGR_LOG_W("StartDualStackProbeThread, is detecting");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    if (dualStackProbe_ == nullptr) {
+        dualStackProbe_ = std::make_shared<NetDualStackProbe>(netId_, netBearType_,
+            netLinkInfo_, httpUrl_, httpsUrl_, netMonitorCallback_);
+    }
+    std::string domain = CommonUtils::ExtractDomainFormUrl(httpUrl_);
+    std::string backDomain = CommonUtils::ExtractDomainFormUrl(fallbackHttpUrl_);
+    return dualStackProbe_->StartDualStackProbeThread(domain, backDomain, dualStackProbeTimeOut_);
+}
+
+void NetMonitor::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
+{
+    if (dualStackProbeTime > 0) {
+        dualStackProbeTimeOut_ = dualStackProbeTime;
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

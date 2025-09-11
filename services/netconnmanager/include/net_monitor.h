@@ -28,9 +28,11 @@
 #include "i_net_monitor_callback.h"
 #include "net_conn_types.h"
 #include "net_datashare_utils.h"
+#include "net_dual_stack_probe.h"
 #include "net_http_probe.h"
 #include "net_link_info.h"
 #include "probe_thread.h"
+#include "dual_stack_probe_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -100,6 +102,12 @@ public:
 
     uint64_t GetLastDetectTime();
 
+    int32_t StartDualStackProbeThread();
+
+    void StopDualStackProbe();
+
+    void UpdateDualStackProbeTime(int32_t dualStackProbeTime);
+
 private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
@@ -140,6 +148,8 @@ private:
     bool isScreenOn_ = true;
     bool isSleep_ = false;
     uint64_t lastDetectTimestamp_ = 0;
+    int32_t dualStackProbeTimeOut_ = 5 * 1000;
+    std::shared_ptr<NetDualStackProbe> dualStackProbe_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -90,6 +90,11 @@ HWTEST_F(NetHttpProbeTest, NetHttpProbeBranchTest001, TestSize.Level1)
 
     ret = instance_->SendDnsProbe(ProbeType::PROBE_HTTPS, TEST_STRING, TEST_STRING, useProxy);
     ASSERT_TRUE(ret);
+
+    instance_->ipAddrList_ = "192.168.1.1";
+    ret = instance_->SendDnsProbe(ProbeType::PROBE_HTTPS, TEST_STRING, TEST_STRING, useProxy);
+    instance_->ipAddrList_ = "";
+    ASSERT_TRUE(ret);
 }
 
 HWTEST_F(NetHttpProbeTest, CheckCurlGlobalInitState001, TestSize.Level1)

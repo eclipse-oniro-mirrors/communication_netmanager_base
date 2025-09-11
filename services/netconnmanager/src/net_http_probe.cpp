@@ -99,8 +99,10 @@ void NetHttpProbe::CurlGlobalCleanup()
     }
 }
 
-NetHttpProbe::NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo, ProbeType probeType)
-    : netId_(netId), netBearType_(bearType), netLinkInfo_(netLinkInfo), probeType_(probeType)
+NetHttpProbe::NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
+    ProbeType probeType, std::string ipAddrList)
+    : netId_(netId), netBearType_(bearType), netLinkInfo_(netLinkInfo),
+    probeType_(probeType), ipAddrList_(ipAddrList)
 {
     isCurlInit_ = NetHttpProbe::CurlGlobalInit();
 }
@@ -522,6 +524,11 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
     if (useProxy) {
         NETMGR_LOG_W("Net[%{public}d] probe use http proxy,no DNS detection required.", netId_);
         return true;
+    }
+    if (!ipAddrList_.empty()) {
+        return IsHttpDetect(probeType) ?
+            SetResolveOption(ProbeType::PROBE_HTTP, ExtractDomainFormUrl(httpUrl), ipAddrList_, DEFAULT_HTTP_PORT) :
+            SetResolveOption(ProbeType::PROBE_HTTPS, ExtractDomainFormUrl(httpsUrl), ipAddrList_, DEFAULT_HTTPS_PORT);
     }
 
     std::string httpDomain;

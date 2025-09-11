@@ -428,6 +428,10 @@ public:
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet);
+    int32_t RegUnRegisterNetProbeCallback(int32_t netId,
+        std::shared_ptr<IDualStackProbeCallback>& callback, bool isReg);
+    int32_t DualStackProbe(uint32_t netId);
+    int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -739,6 +743,7 @@ private:
     std::shared_ptr<NetConnListener> sleepSubscriberPtr_ = nullptr;
     bool isScreenOn_ = true;
     bool isSmartSleepMode_ = false;
+    int32_t dualStackProbeTime_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
