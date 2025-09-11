@@ -122,7 +122,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     auto rule = MoveToRuleBit(conditionValue & POLICY_TRANS_RULE_MASK);
     NETMGR_LOG_D("NetPolicyRule->uid:[%{public}u] policy:[%{public}u] rule:[%{public}u] policyCondition[%{public}u]",
                  uid, policy, rule, policyCondition);
-    auto policyRuleNetsys = uidPolicyRules_.find(uid)->second;
+    UidPolicyRule &policyRuleNetsys = uidPolicyRules_.find(uid)->second;
     auto netsys = conditionValue & POLICY_TRANS_NET_CTRL_MASK;
 
     if (policyRuleNetsys.netsys_ != netsys) {
