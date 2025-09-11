@@ -3584,8 +3584,15 @@ void NetConnService::SubscribeCommonEvent()
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
+        std::weak_ptr<NetConnService> self = shared_from_this();
         subscriberPtr_ = std::make_shared<NetConnListener>(subscribeInfo,
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+            [self](auto&& PH1) {
+                std::shared_ptr<NetConnService> netconnservice = self.lock();
+                if (netconnservice == nullptr) {
+                    return;
+                }
+                netconnservice->OnReceiveEvent(std::forward<decltype(PH1)>(PH1));
+            });
     }
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberPtr_)) {
         NETMGR_LOG_E("system event register fail.");
@@ -3600,8 +3607,15 @@ void NetConnService::SubscribeSleepEvent()
     sleepSubscribeInfo.SetPermission("ohos.permission.PERCEIVE_SMART_POWER_SCENARIO");
 
     if (sleepSubscriberPtr_ == nullptr) {
+        std::weak_ptr<NetConnService> self = shared_from_this();
         sleepSubscriberPtr_ = std::make_shared<NetConnListener>(sleepSubscribeInfo,
-            [this](auto && PH1) { OnReceiveEvent(std::forward<decltype(PH1)>(PH1)); });
+            [self](auto&& PH1) {
+                std::shared_ptr<NetConnService> netconnservice = self.lock();
+                if (netconnservice == nullptr) {
+                    return;
+                }
+                netconnservice->OnReceiveEvent(std::forward<decltype(PH1)>(PH1));
+            });
     }
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(sleepSubscriberPtr_)) {
         NETMGR_LOG_E("sleep state subscribe fail.");
