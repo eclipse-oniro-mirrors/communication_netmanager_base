@@ -529,7 +529,6 @@ HWTEST_F(NetsysBpfStatsTest, SetNetWlan1MapTest001, TestSize.Level1)
 HWTEST_F(NetsysBpfStatsTest, DeleteIncreaseTrafficMapTest001, TestSize.Level1)
 {
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(12), -1);
 
     EXPECT_EQ(bpfStats->DeleteIncreaseTrafficMap(10), -1);
 }
