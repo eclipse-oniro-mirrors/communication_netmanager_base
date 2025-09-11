@@ -3584,9 +3584,9 @@ void NetConnService::SubscribeCommonEvent()
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
     if (subscriberPtr_ == nullptr) {
-        std::weak_ptr <NetConnService> self = shared_from_this();
+        std::weak_ptr<NetConnService> self = shared_from_this();
         subscriberPtr_ = std::make_shared<NetConnListener>(subscribeInfo,
-            [self](auto && PH1) {
+            [self](auto&& PH1) {
                 std::shared_ptr<NetConnService> netconnservice = self.lock();
                 if (netconnservice == nullptr) {
                     return;
@@ -3609,7 +3609,7 @@ void NetConnService::SubscribeSleepEvent()
     if (sleepSubscriberPtr_ == nullptr) {
         std::weak_ptr<NetConnService> self = shared_from_this();
         sleepSubscriberPtr_ = std::make_shared<NetConnListener>(sleepSubscribeInfo,
-            [self](auto && PH1) {
+            [self](auto&& PH1) {
                 std::shared_ptr<NetConnService> netconnservice = self.lock();
                 if (netconnservice == nullptr) {
                     return;
