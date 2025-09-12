@@ -160,7 +160,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == off || ret == on);
+    EXPECT_TRUE(status == off || status == on);
 
     Uri usbUri(SHARING_USB_URI);
     ret = netDataShareHelperUtils_->Update(usbUri, KEY_SHARING_USB, on);
@@ -232,7 +232,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 
     ret = netDataShareHelperUtils_->Query(notExistTestUri, KEY_NOTEXIST_TEST, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == off || ret == on);
+    EXPECT_TRUE(status == off || status == on);
     std::cout << "Not Exist Test result: " << status << std::endl;
 }
 
