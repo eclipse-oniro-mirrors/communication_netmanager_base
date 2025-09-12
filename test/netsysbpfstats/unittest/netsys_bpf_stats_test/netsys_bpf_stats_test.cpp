@@ -381,7 +381,7 @@ HWTEST_F(NetsysBpfStatsTest, GetAllSimStatsInfo001, TestSize.Level1)
 
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
-    EXPECT_EQ(bpfStats->GetAllSimStatsInfo(stats), NETSYS_SUCCESS);
+    EXPECT_EQ(stats.size(), 3);
 }
 
 HWTEST_F(NetsysBpfStatsTest, SockNetnsMapTest001, TestSize.Level1)
