@@ -238,9 +238,9 @@ bool NetConnService::CheckIfSettingsDataReady()
     }
     std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
             DataShare::DataShareHelper::Create(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
-    NETMGR_LOG_I("create data_share helper, ret=%{public}d", ret.first);
+    NETMGR_LOG_D("create data_share helper, ret=%{public}d", ret.first);
     if (ret.first == DataShare::E_OK) {
-        NETMGR_LOG_I("create data_share helper success");
+        NETMGR_LOG_D("create data_share helper success");
         auto helper = ret.second;
         if (helper != nullptr) {
             bool releaseRet = helper->Release();
@@ -1014,7 +1014,7 @@ void NetConnService::DecreaseNetActivates(const uint32_t callingUid, const sptr<
 int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback,
                                                           bool isReg)
 {
-    NETMGR_LOG_I("Enter Async");
+    NETMGR_LOG_D("Enter Async");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
