@@ -453,9 +453,9 @@ macro_rules! impl_de {
                 if let Some(typed_array) = self.typed_array.take() {
                     let class = typed_array.ani_class(&self.env)?;
                     let byte_length =
-                        self.env.get_property::<f64>(&obj, signature::BYTE_LENGTH)? as usize;
+                        self.env.get_property::<i32>(&obj, signature::BYTE_LENGTH)? as usize;
                     let byte_offset =
-                        self.env.get_property::<f64>(&obj, signature::BYTE_OFFSET)? as usize;
+                        self.env.get_property::<i32>(&obj, signature::BYTE_OFFSET)? as usize;
                     let buffer = self
                         .env
                         .get_property::<AniRef<'local>>(&obj, signature::BUFFER)?;
