@@ -88,7 +88,7 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
     }
     auto ret = callback->second(want);
     if (ret != 0) {
-        NETMGR_LOG_E("Callback run failed");
+        NETMGR_LOG_D("Callback run failed");
     }
 }
 } // namespace NetManagerStandard

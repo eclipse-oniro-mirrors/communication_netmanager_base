@@ -137,7 +137,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &addr, 
 
 int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &ifName)
 {
-    NETNATIVE_LOGI("Proxy OnInterfaceAdded");
+    NETNATIVE_LOG_D("Proxy OnInterfaceAdded");
     MessageParcel data;
     if (!WriteInterfaceStateData(data, ifName)) {
         return false;
@@ -162,7 +162,7 @@ int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &ifName)
 
 int32_t NotifyCallbackProxy::OnInterfaceRemoved(const std::string &ifName)
 {
-    NETNATIVE_LOGI("Proxy OnInterfaceRemoved");
+    NETNATIVE_LOG_D("Proxy OnInterfaceRemoved");
     MessageParcel data;
     if (!WriteInterfaceStateData(data, ifName)) {
         return false;

@@ -1260,7 +1260,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
     }
     ret = reply.ReadInt32();
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("Fail to InterfaceGetList ret= %{public}d", ret);
+        NETNATIVE_LOG_D("Fail to InterfaceGetList ret= %{public}d", ret);
         return ret;
     }
     vSize = reply.ReadInt32();
