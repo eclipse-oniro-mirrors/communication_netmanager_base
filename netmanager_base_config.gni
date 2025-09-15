@@ -72,3 +72,102 @@ common_cflags = [
   "-Os",
   "-O2",
 ]
+
+From 429de897f4280cae969b82201469f16367dc595f Mon Sep 17 00:00:00 2001
+From: j00889228 <j00889228@notesmail.huawei.com/>
+Date: Mon, 15 Sep 2025 12:22:40 +0800
+Subject: [PATCH] TicketNo:DTS2025072214601 Description:HTTP cleartext optimize
+ Team:PDU_PTL Feature or Bugfix:Bugfix Binary Source:No PrivateCode(Yes/No):No
+
+Change-Id: I605bcef711ed88bb85aae28e1f1037994d78bc61
+---
+ .../src/network_security_config.cpp           | 26 ++++++++++++++++++-
+ .../network_security_config_test.cpp          | 21 +++++++++++++++
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+
+diff --git a/frameworks/native/netconnclient/src/network_security_config.cpp b/frameworks/native/netconnclient/src/network_security_config.cpp
+index 05956779c..75cc53a46 100644
+--- a/frameworks/native/netconnclient/src/network_security_config.cpp
++++ b/frameworks/native/netconnclient/src/network_security_config.cpp
+@@ -51,6 +51,9 @@ const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
+ const std::string TAG_DIGEST("digest");
+ const std::string TAG_CLEARTEXT_TRAFFIC_PERMITTED("cleartextTrafficPermitted");
+ const std::vector<std::string> SUPPORTED_COMPONENTS({"Network Kit", "ArkWeb"});
++constexpr uint8_t MATCH = 0;
++constexpr uint8_t NOT_MATCH = 1;
++constexpr uint8_t NEED_REGEX = 2;
+ 
+ const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
+ #ifdef WINDOWS_PLATFORM
+@@ -786,6 +789,20 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(bool &baseCleartextPermitted
+     return NETMANAGER_SUCCESS;
+ }
+ 
++static uint8_t isStrMatch(const std::string &str1, const std::string &str2) {
++    uint32_t len1 = str1.length();
++    uint32_t len2 = str2.length();
++    if (!str1.starts_with("*.") || (len1 - len2) > 2) {
++        return NEED_REGEX;
++    }
++    for (uint32_t i = 2; i <= len1 - 1; i++) {
++        if (str1[i] != str2[len2 - len1 + i]) {
++            return (std::isalnum(str1[i]) || str1[i] == '.') ? NOT_MATCH : NEED_REGEX;
++        }
++    }
++    return MATCH;
++}
++
+ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted)
+ {
+     if (!CommonUtils::HasInternetPermission()) {
+@@ -805,7 +822,14 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname,
+             if (hostname == domain.domainName_) {
+                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
+                 break;
+-            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
++            }
++            if (!domain.includeSubDomains_) {
++                break;
++            }
++            uint8_t matchRes = isStrMatch(domain.domainName_, hostname);
++            if (matchRes == NOT_MATCH) {
++                break;
++            } else if (matchRes == MATCH || CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
+                 break;
+             }
+diff --git a/test/netconnmanager/unittest/net_conn_multi_test/network_security_config_test.cpp b/test/netconnmanager/unittest/net_conn_multi_test/network_security_config_test.cpp
+index bc299e692..f17e902b7 100644
+--- a/test/netconnmanager/unittest/net_conn_multi_test/network_security_config_test.cpp
++++ b/test/netconnmanager/unittest/net_conn_multi_test/network_security_config_test.cpp
+@@ -622,6 +622,27 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest003, TestSize.Level1
+     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+ }
+ 
++HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest004, TestSize.Level1)
++{
++    NetworkSecurityConfig networksecurityconfig;
++    Domain domain1;
++    domain1.domainName_ = "*.example.com";
++    domain1.includeSubDomains_ = true;
++    Domain domain2;
++    domain2.domainName_ = "*.example2.com";
++    domain2.includeSubDomains_ = false;
++    DomainConfig config;
++    config.domains_.push_back(domain1);
++    config.cleartextTrafficPermitted_ = false;
++    networksecurityconfig.domainConfigs_.push_back(config);
++
++    bool isclearpermitted;
++    auto ret = networksecurityconfig.IsCleartextPermitted("www.example.com", isclearpermitted);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++    ret = networksecurityconfig.IsCleartextPermitted("www.example3.com", isclearpermitted);
++    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
++}
++
+ HWTEST_F(NetworkSecurityConfigTest, IsCleartextCfgByComponentTest001, TestSize.Level1)
+ {
+     NetworkSecurityConfig networksecurityconfig;
+-- 
+2.45.2.huawei.10
+
