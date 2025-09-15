@@ -48,6 +48,7 @@ enum NetStatsResultCode {
     STATS_ERR_WRITE_DATA_FAIL,
     STATS_ERR_READ_DATA_FAIL,
     STATS_ERR_WRITE_BPF_FAIL,
+    STATS_ERR_TIMESTAMP_ERROR,
 };
 
 enum NetStatsDataFlag {

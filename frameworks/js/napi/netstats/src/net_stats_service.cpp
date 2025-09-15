@@ -46,12 +46,12 @@
 #include "netmanager_hitrace.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
+#include "net_stats_utils.h"
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 #include "cellular_data_client.h"
 #include "core_service_client.h"
 #include "net_conn_client.h"
 #include "cellular_data_types.h"
-#include "net_stats_utils.h"
 #include "net_stats_notification.h"
 #include "net_stats_rdb.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
@@ -921,6 +921,12 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     uint32_t end = network->endTime_;
     NETMGR_LOG_D("GetTrafficStatsByUidNetwork param: "
         "uid=%{public}u, ident=%{public}s, start=%{public}u, end=%{public}u", uid, ident.c_str(), start, end);
+
+    if (!NetManagerPermission::IsSystemCaller() &&
+        (NetStatsUtils::IsLessThanOneMonthAgoPrecise(start) || NetStatsUtils::IsLessThanOneMonthAgoPrecise(end))) {
+        NETMGR_LOG_E("timestamp error");
+        return STATS_ERR_TIMESTAMP_ERROR;
+    }
 
     std::vector<NetStatsInfo> allInfo;
     int32_t ret = GetHistoryData(allInfo, ident, uid, start, end);

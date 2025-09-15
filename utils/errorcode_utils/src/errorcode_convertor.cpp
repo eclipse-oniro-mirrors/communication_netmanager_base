@@ -123,6 +123,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     {STATS_ERR_DATABASE_RECV_NO_DATA, "The data got from database doesnot exist"},
     {STATS_ERR_WRITE_DATA_FAIL, "Write data into database failed"},
     {STATS_ERR_READ_DATA_FAIL, "Read data from database failed"},
+    {STATS_ERR_TIMESTAMP_ERROR, "The timestamp in param is invalid"},
     /* Net connection Manager */
     {NET_CONN_ERR_INVALID_SUPPLIER_ID, "the supplier id is invalid"},
     {NET_CONN_ERR_NET_TYPE_NOT_FOUND, "the net type is not found"},

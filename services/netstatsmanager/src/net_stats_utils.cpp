@@ -17,14 +17,17 @@
 
 #include "net_stats_utils.h"
 #include "net_mgr_log_wrapper.h"
+#ifdef SUPPORT_TRAFFIC_STATISTIC
 #include "cellular_data_client.h"
 #include "core_service_client.h"
+#endif // SUPPORT_TRAFFIC_STATISTIC
 
 namespace OHOS {
 namespace NetManagerStandard {
 
 const int32_t TM_YEAR_START = 1900;
 static const int32_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+constexpr uint32_t ONE_MONTH_SECOND = 31 * 24 * 60 * 60;
 
 int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
 {
@@ -132,15 +135,18 @@ int32_t NetStatsUtils::GetDaysInMonth(int32_t year, int32_t month)
 bool NetStatsUtils::IsMobileDataEnabled()
 {
     bool dataEnabled = false;
+#ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t errorCode =
         DelayedRefSingleton<Telephony::CellularDataClient>::GetInstance().IsCellularDataEnabled(dataEnabled);
     NETMGR_LOG_I("errorCode: %{public}d, isEnabled: %{public}d", errorCode, dataEnabled);
+#endif // SUPPORT_TRAFFIC_STATISTIC
     return dataEnabled;
 }
 
 int32_t NetStatsUtils::IsDualCardEnabled()
 {
     int32_t actualSimNum = 0;
+#ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t simNum = Telephony::CoreServiceClient::GetInstance().GetMaxSimCount();
     for (int32_t i = 0; i < simNum; ++i) {
         bool hasSimCard;
@@ -149,6 +155,7 @@ int32_t NetStatsUtils::IsDualCardEnabled()
             actualSimNum++;
         }
     }
+#endif // SUPPORT_TRAFFIC_STATISTIC
     NETMGR_LOG_I("actualSimNum == %{public}d.", actualSimNum);
     return actualSimNum;
 }
@@ -156,10 +163,12 @@ int32_t NetStatsUtils::IsDualCardEnabled()
 int32_t NetStatsUtils::GetPrimarySlotId()
 {
     int primarySlotId = -1;
+#ifdef SUPPORT_TRAFFIC_STATISTIC
     int ret = Telephony::CoreServiceClient::GetInstance().GetPrimarySlotId(primarySlotId);
     if (primarySlotId == -1) {
         NETMGR_LOG_E("GetPrimarySlotId error, ret: %{public}d", ret);
     }
+#endif // SUPPORT_TRAFFIC_STATISTIC
     return primarySlotId;
 }
 
@@ -224,6 +233,18 @@ bool NetStatsUtils::ConvertToInt32(const std::string &str, int32_t &value)
     }
 
     return true;
+}
+
+bool NetStatsUtils::IsLessThanOneMonthAgoPrecise(time_t timestamp)
+{
+    auto now = std::chrono::system_clock::now();
+    time_t nowTimestamp = std::chrono::system_clock::to_time_t(now);
+    if (nowTimestamp < static_cast<time_t>(ONE_MONTH_SECOND)) {
+        return true;
+    }
+
+    time_t beforeOneMonthTimestamp = nowTimestamp - static_cast<time_t>(ONE_MONTH_SECOND);
+    return timestamp < beforeOneMonthTimestamp;
 }
 }
 }
