@@ -38,6 +38,7 @@ public:
     static int32_t GetPrimarySlotId();
     static bool ConvertToUint64(const std::string &str, uint64_t &value);
     static bool ConvertToInt32(const std::string &str, int32_t &value);
+    static bool IsLessThanOneMonthAgoPrecise(time_t timestamp);
 };
 }
 }
