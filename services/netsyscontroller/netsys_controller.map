@@ -93,7 +93,7 @@
       "OHOS::NetManagerStandard::NetsysController::NetworkDelUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&)";
       "OHOS::NetManagerStandard::NetsysController::NetworkDestroy(int, bool)";
       "OHOS::NetManagerStandard::NetsysController::NetworkRemoveInterface(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
-      "OHOS::NetManagerStandard::NetsysController::NetworkRemoveRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NetworkRemoveRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "OHOS::NetManagerStandard::NetsysController::NotifyNetBearerTypeChange(std::__h::set<OHOS::NetManagerStandard::NetBearType, std::__h::less<OHOS::NetManagerStandard::NetBearType>, std::__h::allocator<OHOS::NetManagerStandard::NetBearType>>)";
       "OHOS::NetManagerStandard::NetsysController::ProcessVpnStage(OHOS::NetsysNative::SysVpnStageCode, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::RegisterCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysControllerCallback>)";

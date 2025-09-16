@@ -42,7 +42,7 @@ public:
     MOCK_METHOD(int32_t, NetworkAddRoute, (int32_t netId, const std::string &interfaceName,
         const std::string &destination, const std::string &nextHop, bool isExcludedRoute), (override));
     MOCK_METHOD(int32_t, NetworkRemoveRoute, (int32_t netId, const std::string &interfaceName,
-        const std::string &destination, const std::string &nextHop), (override));
+        const std::string &destination, const std::string &nextHop, bool isExcludedRoute), (override));
     MOCK_METHOD(int32_t, NetworkAddRouteParcel, (int32_t netId, const RouteInfoParcel &routeInfo), (override));
     MOCK_METHOD(int32_t, NetworkRemoveRouteParcel, (int32_t netId, const RouteInfoParcel &routeInfo), (override));
     MOCK_METHOD(int32_t, NetworkSetDefault, (int32_t netId), (override));

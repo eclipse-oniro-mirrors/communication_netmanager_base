@@ -334,9 +334,10 @@ int32_t ConnManager::AddRoute(int32_t netId, NetworkRouteInfo networkRouteInfo, 
     return RouteManager::AddRoute(GetTableType(netId), networkRouteInfo, routeRepeat);
 }
 
-int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
+int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop,
+    bool isExcludedRoute)
 {
-    return RouteManager::RemoveRoute(GetTableType(netId), interfaceName, destination, nextHop);
+    return RouteManager::RemoveRoute(GetTableType(netId), interfaceName, destination, nextHop, isExcludedRoute);
 }
 
 int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)

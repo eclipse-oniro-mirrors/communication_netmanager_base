@@ -166,15 +166,17 @@ int32_t RouteManager::AddRoute(TableType tableType, NetworkRouteInfo networkRout
 }
 
 int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interfaceName,
-                                  const std::string &destinationName, const std::string &nextHop)
+    const std::string &destinationName, const std::string &nextHop, bool isExcludedRoute)
 {
-    NETNATIVE_LOGI("RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
-                   interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOGI("RemoveRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s,"
+        "isExcludedRoute:%{public}d", interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
 
     NetworkRouteInfo networkRouteInfo;
     networkRouteInfo.ifName = interfaceName;
     networkRouteInfo.destination = destinationName;
     networkRouteInfo.nextHop = nextHop;
+    networkRouteInfo.isExcludedRoute = isExcludedRoute;
     RouteInfo routeInfo;
     if (SetRouteInfo(tableType, networkRouteInfo, routeInfo) != 0) {
         return -1;

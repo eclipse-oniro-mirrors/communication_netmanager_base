@@ -466,16 +466,17 @@ int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &if
 }
 
 int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                                               const std::string &nextHop)
+    const std::string &nextHop, bool isExcludedRoute)
 {
-    NETMGR_LOG_D("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-                 netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETMGR_LOG_D("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s],"
+        "isExcludedRoute[%{public}d]", netId, ifName.c_str(), ToAnonymousIp(destination).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->NetworkRemoveRoute(netId, ifName, destination, nextHop);
+    return proxy->NetworkRemoveRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
 int32_t NetsysNativeClient::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)

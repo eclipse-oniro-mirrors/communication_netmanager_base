@@ -322,9 +322,9 @@ HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, RemoveRouteTest001, TestSize.Level1)
 {
-    int32_t ret = instance_->RemoveRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
+    int32_t ret = instance_->RemoveRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222", false);
     EXPECT_LE(ret, 0);
-    ret = instance_->RemoveRoute(NETID, INTERFACENAME, "192.168.113.0/24", "0.0.0.0");
+    ret = instance_->RemoveRoute(NETID, INTERFACENAME, "192.168.113.0/24", "0.0.0.0", false);
     EXPECT_LE(ret, 0);
 }
 

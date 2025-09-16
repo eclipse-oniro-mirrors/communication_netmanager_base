@@ -100,7 +100,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     ret = nativeClient->NetworkAddRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP, false);
     EXPECT_EQ(ret, INVALID_ARGUMENTS);
 
-    ret = nativeClient->NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
+    ret = nativeClient->NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP, false);
     EXPECT_EQ(ret, INVALID_ARGUMENTS);
 
     OHOS::nmd::InterfaceConfigurationParcel parcel;

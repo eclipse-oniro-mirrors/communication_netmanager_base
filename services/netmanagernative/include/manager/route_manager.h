@@ -87,10 +87,11 @@ public:
      * @param interfaceName Output network device name of the route item
      * @param destinationName Destination address of route item
      * @param nextHop Gateway address of the route item
+     * @param isExcludedRoute Is excluded route
      * @return Returns 0, remove route table successfully, otherwise it will fail
      */
     static int32_t RemoveRoute(TableType tableType, const std::string &interfaceName,
-                               const std::string &destinationName, const std::string &nextHop);
+        const std::string &destinationName, const std::string &nextHop, bool isExcludedRoute = false);
 
     /**
      * The interface is update route table

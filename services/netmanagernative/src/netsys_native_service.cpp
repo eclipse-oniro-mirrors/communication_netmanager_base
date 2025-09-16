@@ -264,9 +264,9 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
 }
 
 int32_t NetsysNativeService::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
-                                                const std::string &destination, const std::string &nextHop)
+    const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {
-    int32_t result = netsysService_->NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
+    int32_t result = netsysService_->NetworkRemoveRoute(netId, interfaceName, destination, nextHop, isExcludedRoute);
     NETNATIVE_LOG_D("NetworkRemoveRoute %{public}d", result);
     return result;
 }
