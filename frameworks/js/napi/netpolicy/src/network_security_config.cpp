@@ -51,6 +51,10 @@ const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
 const std::string TAG_CLEARTEXT_TRAFFIC_PERMITTED("cleartextTrafficPermitted");
 const std::vector<std::string> SUPPORTED_COMPONENTS({"Network Kit", "ArkWeb"});
+constexpr uint8_t MATCH = 0;
+constexpr uint8_t NOT_MATCH = 1;
+constexpr uint8_t NEED_REGEX = 2;
+constexpr uint8_t MIN_LEN = 2;
 
 const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
 #ifdef WINDOWS_PLATFORM
@@ -788,6 +792,21 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(bool &baseCleartextPermitted
     return NETMANAGER_SUCCESS;
 }
 
+static uint8_t IsStrMatch(const std::string &str1, const std::string &str2)
+{
+    uint32_t len1 = str1.length();
+    uint32_t len2 = str2.length();
+    if (str1[0] != '*' || str1[1] != '.' || (len1 - len2) > MIN_LEN) {
+        return NEED_REGEX;
+    }
+    for (uint32_t i = 2; i <= len1 - 1; i++) {
+        if (str1[i] != str2[len2 - len1 + i]) {
+            return (std::isalnum(str1[i]) || str1[i] == '.') ? NOT_MATCH : NEED_REGEX;
+        }
+    }
+    return MATCH;
+}
+
 int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname, bool &cleartextPermitted)
 {
     if (!CommonUtils::HasInternetPermission()) {
@@ -807,7 +826,14 @@ int32_t NetworkSecurityConfig::IsCleartextPermitted(const std::string &hostname,
             if (hostname == domain.domainName_) {
                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
                 break;
-            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
+            }
+            if (!domain.includeSubDomains_) {
+                break;
+            }
+            uint8_t matchRes = IsStrMatch(domain.domainName_, hostname);
+            if (matchRes == NOT_MATCH) {
+                break;
+            } else if (matchRes == MATCH || CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pCtTrafficPermitted = &domainConfig.cleartextTrafficPermitted_;
                 break;
             }

@@ -630,6 +630,26 @@ HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest003, TestSize.Level1
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetworkSecurityConfigTest, IsCleartextPermittedTest004, TestSize.Level1)
+{
+    NetworkSecurityConfig networksecurityconfig;
+    Domain domain1;
+    domain1.domainName_ = "*.example.com";
+    domain1.includeSubDomains_ = true;
+    Domain domain2;
+    domain2.domainName_ = "*.example2.com";
+    domain2.includeSubDomains_ = false;
+    DomainConfig config;
+    config.domains_.push_back(domain1);
+    config.cleartextTrafficPermitted_ = false;
+    networksecurityconfig.domainConfigs_.push_back(config);
+    bool isclearpermitted;
+    auto ret = networksecurityconfig.IsCleartextPermitted("www.example.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = networksecurityconfig.IsCleartextPermitted("www.example3.com", isclearpermitted);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetworkSecurityConfigTest, IsUserDnsCacheTest001, TestSize.Level1)
 {
     NetworkSecurityConfig networksecurityconfig;
