@@ -80,7 +80,7 @@ bool CheckPermission(uint64_t tokenId, rust::str permission);
 
 class NetCoonCallback : public NetManagerStandard::NetConnCallbackStub {
 public:
-    NetCoonCallback(rust::Box<ConnCallback> callback);
+    NetCoonCallback(ConnCallback &callback);
     ~NetCoonCallback() = default;
 
     int32_t NetAvailable(sptr<NetManagerStandard::NetHandle> &netHandle) override;
@@ -93,7 +93,7 @@ public:
     int32_t NetBlockStatusChange(sptr<NetManagerStandard::NetHandle> &netHandle, bool blocked) override;
 
 private:
-    rust::Box<ConnCallback> inner_;
+    ConnCallback &inner_;
 };
 
 class UnregisterHandle {
@@ -107,7 +107,7 @@ private:
     sptr<NetCoonCallback> callback_;
 };
 
-std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret);
+std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(ConnCallback &Connection, int32_t &ret);
 
 rust::String GetErrorCodeAndMessage(int32_t &errorCode);
 
