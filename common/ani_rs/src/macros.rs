@@ -23,7 +23,7 @@ macro_rules! bind {
             )*
         ];
 
-        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
+        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, "\0").as_bytes()) };
 
         let namespace = $en.find_namespace(path).unwrap();
         $en.bind_namespace_functions(namespace, &functions).unwrap();
@@ -39,7 +39,7 @@ macro_rules! bind {
             )*
         ];
 
-        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, ";\0").as_bytes()) };
+        let path = unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($path, "\0").as_bytes()) };
         let class = $en.find_class(path).unwrap();
         $en.bind_class_methods(class, &functions).unwrap();
     }};

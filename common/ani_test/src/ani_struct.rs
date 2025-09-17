@@ -13,14 +13,14 @@
 
 use ani_rs::business_error::BusinessError;
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/Action")]
+#[ani_rs::ani(path = "anirs.test.ani_test.Action")]
 #[derive(Debug)]
 pub enum Action {
     Download,
     Upload,
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/Config")]
+#[ani_rs::ani(path = "anirs.test.ani_test.Config")]
 #[derive(Debug)]
 pub struct Config {
     pub action: Action,

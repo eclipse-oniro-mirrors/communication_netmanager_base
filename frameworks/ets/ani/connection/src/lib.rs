@@ -22,7 +22,7 @@ pub mod wrapper;
 use ani_rs::ani_constructor;
 
 ani_constructor!(
-    namespace "L@ohos/net/connection/connection"
+    namespace "@ohos.net.connection.connection"
     [
         "createNetConnection": connection::create_net_connection,
         "getDefaultNetSync" : connection::get_default_net,
@@ -49,12 +49,12 @@ ani_constructor!(
         "addCustomDnsRuleSync" : connection::set_custom_dns_rule,
         "removeCustomDnsRuleSync" : connection::remove_custom_dns_rule,
     ]
-    class "L@ohos/net/connection/connection/NetHandleInner"
+    class "@ohos.net.connection.connection.NetHandleInner"
     [
         "getAddressByNameSyncWithHandle" : connection::get_address_by_name_with_handle,
         "getAddressesByNameSyncWithHandle": connection::get_addresses_by_name_with_handle,
     ]
-    class "L@ohos/net/connection/connection/NetConnectionInner"
+    class "@ohos.net.connection.connection.NetConnectionInner"
     [
         "onNetAvailable": connection::on_net_available,
         "onNetBlockStatusChange": connection::on_net_block_status_change,
@@ -65,7 +65,7 @@ ani_constructor!(
         "registerSync" : connection::register_network_change,
         "unregisterSync" : connection::unregister_network_change,
     ]
-    class "L@ohos/net/connection/connection/Cleaner"
+    class "@ohos.net.connection.connection.Cleaner"
     [
         "clean" : connection::connection_clean,
     ]

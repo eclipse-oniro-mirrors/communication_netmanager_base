@@ -1115,8 +1115,8 @@ impl AniExt for f32 {
             let class = env.find_class(signature::FLOAT)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"d:\0"),
-                (value as f64,),
+                CStr::from_bytes_with_nul_unchecked(b"f:\0"),
+                (value,),
             )
             .map(|obj| obj.into())
         }

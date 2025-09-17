@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnectionInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetConnectionInner")]
 pub struct NetConnection {
     pub native_ptr: i64,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/Cleaner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.Cleaner")]
 pub struct Cleaner {
     pub ptr: i64,
 }
@@ -28,18 +28,18 @@ pub struct NetSpecifier {
     pub bearer_private_identifier: Option<String>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetCapabilityInfoInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetCapabilityInfoInner")]
 pub struct NetCapabilityInfo {
     pub net_handle: NetHandle,
     pub net_cap: NetCapabilities,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetHandleInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetHandleInner")]
 pub struct NetHandle {
     pub net_id: i32,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetCapabilitiesInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetCapabilitiesInner")]
 pub struct NetCapabilities {
     pub link_up_bandwidth_kbps: Option<i32>,
 
@@ -50,19 +50,19 @@ pub struct NetCapabilities {
     pub bearer_types: Vec<NetBearType>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetConnectionPropertyInfoInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetConnectionPropertyInfoInner")]
 pub struct NetConnectionPropertyInfo {
     pub net_handle: NetHandle,
     pub connection_properties: ConnectionProperties,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetBlockStatusInfoInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetBlockStatusInfoInner")]
 pub struct NetBlockStatusInfo {
     pub net_handle: NetHandle,
     pub blocked: bool,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetCap")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetCap")]
 pub enum NetCap {
     NetCapabilityMms = 0,
     NetCapabilityNotMetered = 11,
@@ -73,7 +73,7 @@ pub enum NetCap {
     NetCapabilityCheckingConnectivity = 31,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetBearType")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetBearType")]
 pub enum NetBearType {
     BearerCellular = 0,
     BearerWifi = 1,
@@ -82,7 +82,7 @@ pub enum NetBearType {
     BearerVpn = 4,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/ConnectionPropertiesInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.ConnectionPropertiesInner")]
 pub struct ConnectionProperties {
     pub interface_name: String,
 
@@ -97,7 +97,7 @@ pub struct ConnectionProperties {
     pub mtu: i32,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/RouteInfoInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.RouteInfoInner")]
 pub struct RouteInfo {
     pub iface: String,
 
@@ -110,13 +110,13 @@ pub struct RouteInfo {
     pub is_default_route: bool,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/LinkAddressInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.LinkAddressInner")]
 pub struct LinkAddress {
     pub address: NetAddress,
     pub prefix_length: i32,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetAddressInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetAddressInner")]
 pub struct NetAddress {
     pub address: String,
 
@@ -125,7 +125,7 @@ pub struct NetAddress {
     pub port: Option<i32>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/HttpProxyInner")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.HttpProxyInner")]
 pub struct HttpProxy {
     pub host: String,
 

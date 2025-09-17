@@ -17,7 +17,7 @@ use ani_rs::ani;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[ani_rs::ani(path = "L@ohos/net/connection/connection/NetBearType")]
+#[ani_rs::ani(path = "@ohos.net.connection.connection.NetBearType")]
 #[derive(Debug, Copy, Clone)]
 pub enum NetBearType {
     BearerCellular = 0,
@@ -29,7 +29,7 @@ pub enum NetBearType {
     BearerDefault,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/NetworkInfo")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.NetworkInfo")]
 pub struct AniNetworkInfo {
     pub type_: NetBearType,
     pub start_time: i32,
@@ -42,27 +42,27 @@ pub struct AniUidNetStatsInfoPair {
     pub net_stats_info: NetStatsInfo,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/NetStatsInfoSequenceItemInner")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.NetStatsInfoSequenceItemInner")]
 pub struct AniNetStatsInfoSequenceItem {
     pub start_time: i32,
     pub end_time: i32,
     pub info: NetStatsInfo,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/NetStatsChangeInfo")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.NetStatsChangeInfo")]
 pub struct NetStatsChangeInfo {
     pub iface: String,
     pub uid: Option<i32>,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/IfaceInfo")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.IfaceInfo")]
 pub struct IfaceInfo {
     pub iface: String,
     pub start_time: i32,
     pub end_time: i32,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/NetStatsInfoInner")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.NetStatsInfoInner")]
 pub struct NetStatsInfo {
     pub rx_bytes: i64,
     pub tx_bytes: i64,
@@ -70,7 +70,7 @@ pub struct NetStatsInfo {
     pub tx_packets: i64,
 }
 
-#[ani_rs::ani(path = "L@ohos/net/statistics/statistics/UidInfo")]
+#[ani_rs::ani(path = "@ohos.net.statistics.statistics.UidInfo")]
 pub struct UidInfo {
     pub iface_info: IfaceInfo,
     pub uid: i32,
