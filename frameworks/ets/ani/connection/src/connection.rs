@@ -316,7 +316,8 @@ pub(crate) fn register_network_change(this: NetConnection) -> Result<(), Busines
     let mut callback = Box::new(ConnCallback::new());
     mem::swap(&mut connection.callback, &mut callback);
 
-    let unregister = NetConnClient::register_net_conn_callback(callback).map_err(|e| {
+    let callback_ref = &mut connection.callback;
+    let unregister = NetConnClient::register_net_conn_callback(callback_ref).map_err(|e| {
         BusinessError::new(e, format!("Failed to register network change callback"))
     })?;
     connection.unregister = Some(unregister);

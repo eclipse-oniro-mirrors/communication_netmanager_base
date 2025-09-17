@@ -258,7 +258,7 @@ impl NetConnClient {
     }
 
     pub fn register_net_conn_callback(
-        callback: Box<ConnCallback>,
+        callback: &mut ConnCallback,
     ) -> Result<ConnUnregisterHandle, i32> {
         let mut ret = 0;
         let unregister = ffi::RegisterNetConnCallback(callback, &mut ret);
@@ -643,7 +643,7 @@ pub mod ffi {
         fn CheckPermission(token_id: u64, permission: &str) -> bool;
 
         fn RegisterNetConnCallback(
-            connection: Box<ConnCallback>,
+            connection: &mut ConnCallback,
             ret: &mut i32,
         ) -> UniquePtr<UnregisterHandle>;
 

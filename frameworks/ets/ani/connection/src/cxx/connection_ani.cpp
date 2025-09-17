@@ -388,14 +388,14 @@ bool CheckPermission(uint64_t tokenId, rust::str permission)
     return true;
 }
 
-NetCoonCallback::NetCoonCallback(rust::Box<ConnCallback> callback) : inner_(std::move(callback)) {}
+NetCoonCallback::NetCoonCallback(ConnCallback &callback) : inner_(callback) {}
 
 int32_t NetCoonCallback::NetAvailable(sptr<NetManagerStandard::NetHandle> &netHandle)
 {
     NetHandle handle{
         .net_id = netHandle->GetNetId(),
     };
-    return inner_->on_net_available(handle);
+    return inner_.on_net_available(handle);
 }
 
 int32_t NetCoonCallback::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
@@ -420,7 +420,7 @@ int32_t NetCoonCallback::NetCapabilitiesChange(sptr<NetManagerStandard::NetHandl
                 .bearerTypes = bearerTypes,
             },
     };
-    return inner_->on_net_capabilities_change(info);
+    return inner_.on_net_capabilities_change(info);
 }
 
 int32_t NetCoonCallback::NetConnectionPropertiesChange(sptr<NetManagerStandard::NetHandle> &netHandle,
@@ -430,17 +430,17 @@ int32_t NetCoonCallback::NetConnectionPropertiesChange(sptr<NetManagerStandard::
         .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
         .connection_properties = ConvertConnectionProperties(*linkInfo),
     };
-    return inner_->on_net_connection_properties_change(info);
+    return inner_.on_net_connection_properties_change(info);
 }
 
 int32_t NetCoonCallback::NetLost(sptr<NetManagerStandard::NetHandle> &netHandle)
 {
-    return inner_->on_net_lost(NetHandle{.net_id = netHandle->GetNetId()});
+    return inner_.on_net_lost(NetHandle{.net_id = netHandle->GetNetId()});
 }
 
 int32_t NetCoonCallback::NetUnavailable()
 {
-    return inner_->on_net_unavailable();
+    return inner_.on_net_unavailable();
 }
 
 int32_t NetCoonCallback::NetBlockStatusChange(sptr<NetManagerStandard::NetHandle> &netHandle, bool blocked)
@@ -449,12 +449,12 @@ int32_t NetCoonCallback::NetBlockStatusChange(sptr<NetManagerStandard::NetHandle
         .net_handle = NetHandle{.net_id = netHandle->GetNetId()},
         .blocked = blocked,
     };
-    return inner_->on_net_block_status_change(info);
+    return inner_.on_net_block_status_change(info);
 }
 
-std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(rust::Box<ConnCallback> Connection, int32_t &ret)
+std::unique_ptr<UnregisterHandle> RegisterNetConnCallback(ConnCallback &Connection, int32_t &ret)
 {
-    auto callback = sptr<NetCoonCallback>::MakeSptr(std::move(Connection));
+    auto callback = sptr<NetCoonCallback>::MakeSptr(Connection);
     ret = NetManagerStandard::NetConnClient::GetInstance().RegisterNetConnCallback(callback);
     if (ret != 0) {
         return nullptr;
