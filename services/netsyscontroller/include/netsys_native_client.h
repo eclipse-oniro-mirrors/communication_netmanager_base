@@ -148,10 +148,11 @@ public:
      * @param ifName Network port device name
      * @param destination Target host ip
      * @param nextHop Next hop address
+     * @param isExcludedRoute Is Excluded Route
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                               const std::string &nextHop);
+                               const std::string &nextHop, bool isExcludedRoute);
 
     /**
      * @brief Get interface config

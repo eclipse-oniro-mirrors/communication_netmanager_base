@@ -82,25 +82,25 @@ HWTEST_F(RouteManagerTest, AddRouteTest004, TestSize.Level1)
 HWTEST_F(RouteManagerTest, RemoveRouteTest001, TestSize.Level1)
 {
     uint32_t testRouteType = 6;
-    auto ret = RouteManager::RemoveRoute(static_cast<RouteManager::TableType>(testRouteType), {}, {}, {});
+    auto ret = RouteManager::RemoveRoute(static_cast<RouteManager::TableType>(testRouteType), {}, {}, {}, false);
     EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(RouteManagerTest, RemoveRouteTest002, TestSize.Level1)
 {
-    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::INTERFACE, {}, {}, {});
+    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::INTERFACE, {}, {}, {}, false);
     EXPECT_LE(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, RemoveRouteTest003, TestSize.Level1)
 {
-    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::LOCAL_NETWORK, {}, {}, {});
+    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::LOCAL_NETWORK, {}, {}, {}, false);
     EXPECT_LE(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, RemoveRouteTest004, TestSize.Level1)
 {
-    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::VPN_NETWORK, {}, {}, {});
+    auto ret = RouteManager::RemoveRoute(RouteManager::TableType::VPN_NETWORK, {}, {}, {}, false);
     EXPECT_LE(ret, 0);
 }
 

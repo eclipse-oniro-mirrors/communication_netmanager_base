@@ -739,10 +739,12 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     std::string interfaceName = data.ReadString();
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
+    bool isExcludedRoute = data.ReadBool();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]", netId,
-                   interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
-    int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s],"
+        "isExcludedRoute[%{public}d]", netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
+    int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop, isExcludedRoute);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkRemoveRoute has recved result %{public}d", result);
 

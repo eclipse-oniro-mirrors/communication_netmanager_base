@@ -137,14 +137,15 @@ int32_t NetsysControllerServiceImpl::NetworkAddRoute(int32_t netId, const std::s
 }
 
 int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
-                                                        const std::string &destination, const std::string &nextHop)
+    const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {
-    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-                 netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s],"
+        "isExcludedRoute[%{public}d]", netId, ifName.c_str(), ToAnonymousIp(destination).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKREMOVEROUTE_API)) {
         return mockNetsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
     }
-    return netsysClient_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
+    return netsysClient_->NetworkRemoveRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
 int32_t NetsysControllerServiceImpl::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)

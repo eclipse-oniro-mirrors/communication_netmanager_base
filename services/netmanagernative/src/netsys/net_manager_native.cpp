@@ -208,9 +208,9 @@ int32_t NetManagerNative::UpdateEnterpriseRoute(const std::string &interfaceName
 #endif
 
 int32_t NetManagerNative::NetworkRemoveRoute(int32_t netId, std::string interfaceName, std::string destination,
-                                             std::string nextHop)
+                                             std::string nextHop, bool isExcludedRoute)
 {
-    return connManager_->RemoveRoute(netId, interfaceName, destination, nextHop);
+    return connManager_->RemoveRoute(netId, interfaceName, destination, nextHop, isExcludedRoute);
 }
 
 int32_t NetManagerNative::NetworkGetDefault()

@@ -224,17 +224,18 @@ int32_t NetsysController::NetworkAddRoute(int32_t netId, const std::string &ifNa
 }
 
 int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-                                             const std::string &nextHop)
+    const std::string &nextHop, bool isExcludedRoute)
 {
-    NETMGR_LOG_D("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-                 netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETMGR_LOG_D("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s] \
+        isExcludedRoute[%{public}d]", netId, ifName.c_str(), ToAnonymousIp(destination).c_str(),
+        ToAnonymousIp(nextHop).c_str(), isExcludedRoute);
     // LCOV_EXCL_START This will never happen.
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
     // LCOV_EXCL_STOP
-    return netsysService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
+    return netsysService_->NetworkRemoveRoute(netId, ifName, destination, nextHop, isExcludedRoute);
 }
 
 int32_t NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)

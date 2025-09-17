@@ -89,7 +89,7 @@ public:
     }
 
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                               const std::string &nextHop) override
+                               const std::string &nextHop, bool isExcludedRoute) override
     {
         return 0;
     }

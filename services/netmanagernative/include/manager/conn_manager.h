@@ -161,10 +161,12 @@ public:
      *                      This interface should be assigned to the netID
      * @param destination The destination of the route
      * @param nextHop The route's next hop address
+     * @param isExcludedRoute Is excluded route
      *
      * @return Returns 0, successfully remove a route for specific network, otherwise it will fail
      */
-    int32_t RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop);
+    int32_t RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop,
+        bool isExcludedRoute = false);
 
     /**
      * Update a route for specific network
