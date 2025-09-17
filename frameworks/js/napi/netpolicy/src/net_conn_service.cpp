@@ -196,7 +196,9 @@ bool NetConnService::Init()
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-    netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
+    }
 #ifdef ENABLE_SET_APP_FROZENED
     if (netConnEventHandler_) {
         int64_t delayTime = 3000;
