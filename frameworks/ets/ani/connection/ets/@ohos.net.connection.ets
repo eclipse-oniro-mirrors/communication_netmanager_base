@@ -300,14 +300,14 @@ export default namespace connection {
 
   export native function reportNetDisconnectedSync(netHandle: NetHandle): void;
 
-  export function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void{
+  export function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void {
     let p1 = taskpool.execute((): Array<NetAddress> => {
         return getAddressesByNameSync(host);
     })
     p1.then((content: NullishType) => {
         callback(new BusinessError(), content as Array<NetAddress>);
     }, (err: Error): void => {
-        callback(err as BusinessError, new Array<NetAddress>);
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -546,7 +546,7 @@ export default namespace connection {
   }
 
   export interface NetConnection {
-      on(type: string, callback: Object): void;
+      on(type: string, callback: Callback<Any>): void;
 
       register(callback: AsyncCallback<void>): void;
 
@@ -572,7 +572,7 @@ export default namespace connection {
         destroyRegister.unregister(unregisterToken);
     }
 
-    on(type: string, callback: Object): void {
+    on(type: string, callback: Callback<Any>): void {
       if (type == 'netAvailable') {
         this.onNetAvailable(callback as Callback<NetHandle>);
       } else if (type == 'netBlockStatusChange') {
@@ -633,6 +633,12 @@ export default namespace connection {
     netCap: NetCapabilities;
   }
 
+  export class NetCapabilityInfoInner implements NetCapabilityInfo {
+    netHandle: NetHandle;
+
+    netCap: NetCapabilities;
+  }
+
   export interface NetHandle {
     netId: int;
 
@@ -640,9 +646,9 @@ export default namespace connection {
 
     // bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
 
-    // getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
+    getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
 
-    // getAddressesByName(host: string): Promise<Array<NetAddress>>;
+    getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
     getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
 
@@ -653,11 +659,11 @@ export default namespace connection {
     netId: int;
     static { loadLibrary("connection_ani") }
 
-    native getAddressByNameSync(host:string): NetAddress;
+    native getAddressByNameSyncWithHandle(host:string): NetAddress;
 
     getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void {
       let p1 = taskpool.execute((): NetAddress => {
-        return this.getAddressByNameSync(host);
+        return this.getAddressByNameSyncWithHandle(host);
       })
       p1.then((content: NullishType) => {
           callback(new BusinessError(), content as NetAddress);
@@ -669,13 +675,38 @@ export default namespace connection {
     getAddressByName(host: string): Promise<NetAddress> {
       return new Promise<NetAddress>((resolve, reject) => {
         taskpool.execute((): NetAddress => {
-            return this.getAddressByNameSync(host);
+            return this.getAddressByNameSyncWithHandle(host);
         }).then((content: NullishType) => {
             resolve(content as NetAddress);
         }, (err: Error): void => {
             reject(err as BusinessError);
         });
-    });
+      });
+    }
+
+    native getAddressesByNameSyncWithHandle(host:string): Array<NetAddress>;
+
+    getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void {
+      let p1 = taskpool.execute((): Array<NetAddress> => {
+        return this.getAddressesByNameSyncWithHandle(host);
+      })
+      p1.then((content: NullishType) => {
+          callback(new BusinessError(), content as Array<NetAddress>);
+      }, (err: Error): void => {
+          callback(err as BusinessError, undefined);
+      });
+    }
+
+    getAddressesByName(host: string): Promise<Array<NetAddress>> {
+      return new Promise<Array<NetAddress>>((resolve, reject) => {
+        taskpool.execute((): Array<NetAddress> => {
+            return this.getAddressesByNameSyncWithHandle(host);
+        }).then((content: NullishType) => {
+            resolve(content as Array<NetAddress>);
+        }, (err: Error): void => {
+            reject(err as BusinessError);
+        });
+      });
     }
   }
 

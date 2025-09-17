@@ -43,6 +43,7 @@ ohos_static_library("ani_rs_static") {
   ]
 
   external_deps = [
+    "runtime_core:ani",
     "eventhandler:libeventhandler"
   ]
 

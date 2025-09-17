@@ -33,12 +33,13 @@ pub mod error;
 pub mod objects;
 pub mod signature;
 pub mod typed_array;
+pub mod global;
 
-mod global;
 mod iterator;
 mod macros;
 mod primitive;
 mod wrapper;
+pub use wrapper::send_event_from_closure;
 mod log;
 
 const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {

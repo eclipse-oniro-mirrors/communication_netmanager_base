@@ -14,6 +14,9 @@
 use std::ops::Deref;
 
 use ani_sys::{ani_object, ani_ref};
+use serde::{Deserialize, Serialize};
+
+use crate::{AniEnv, global::GlobalRef, error::AniError};
 
 use super::AniRef;
 
@@ -64,5 +67,29 @@ impl<'local> AniObject<'local> {
 
     pub fn into_raw(self) -> ani_object {
         self.0.into_raw() as _
+    }
+
+    pub fn into_global(self, env: &AniEnv) -> Result<GlobalRef<AniObject<'static>>, AniError> {
+        let ani_ref = env.create_global_ref(self.into())?;
+        let ani_object = AniObject::from(ani_ref);
+        Ok(GlobalRef(ani_object))
+    }
+}
+
+impl<'de> Deserialize<'de> for AniObject<'_> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+        let ani_ref = AniRef::deserialize(deserializer)?;
+        Ok(Self::from(ani_ref))
+    }
+}
+
+impl Serialize for AniObject<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        let ani_ref = AniRef::from(self.clone());
+        ani_ref.serialize(serializer)
     }
 }

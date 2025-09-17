@@ -15,6 +15,8 @@ use std::collections::HashMap;
 
 use ani_rs::business_error::BusinessError;
 
+use crate::ani_enum::ResponseCode;
+
 #[ani_rs::native]
 pub fn record_string<'local>(
     input: HashMap<String, String>,
@@ -24,5 +26,10 @@ pub fn record_string<'local>(
 
 #[ani_rs::native]
 pub fn record_long<'local>(input: HashMap<i64, i64>) -> Result<HashMap<i64, i64>, BusinessError> {
+    Ok(input)
+}
+
+#[ani_rs::native]
+pub fn record_struct(input: HashMap<i32, ResponseCode>) -> Result<HashMap<i32, ResponseCode>, BusinessError> {
     Ok(input)
 }

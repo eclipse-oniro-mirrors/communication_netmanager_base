@@ -12,8 +12,7 @@
 // limitations under the License.
 
 use std::{
-    ffi::CStr,
-    ops::{Deref, DerefMut},
+    ffi::CStr, fmt::Debug, ops::{Deref, DerefMut}
 };
 
 use serde::{Deserialize, Serialize};
@@ -61,7 +60,6 @@ macro_rules! impl_typed_array {
         #[serde(rename = $serde_name)]
         struct $helper_name<'local>(&'local [u8]);
 
-        #[derive(Clone)]
         pub struct $name {
             inner: ArrayBuffer,
         }
@@ -143,11 +141,10 @@ macro_rules! impl_typed_array {
                 D: serde::Deserializer<'de>,
             {
                 let value = $helper_name::deserialize(deserializer)?;
-                Ok(unsafe {
-                    $name {
+                Ok($name {
                         inner: ArrayBuffer::new_with_external_slice(value.0),
                     }
-                })
+                )
             }
         }
 
@@ -162,6 +159,18 @@ macro_rules! impl_typed_array {
             }
         }
 
+        impl Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{:?}", self.as_ref())
+            }
+        }
+
+        impl Clone for $name {
+            fn clone(&self) -> Self {
+                Self::new_with_vec(self.to_vec())
+            }
+        }
+
         unsafe impl Send for $name {}
         unsafe impl Sync for $name {}
     };
@@ -172,48 +181,47 @@ impl_typed_array!(
     Int8ArrayHelper,
     i8,
     TypedArray::Int8,
-    "Int8Array"
+    "@Int8Array"
 );
 impl_typed_array!(
     Int16Array,
     Int16ArrayHelper,
     i16,
     TypedArray::Int16,
-    "Int16Array"
+    "@Int16Array"
 );
 impl_typed_array!(
     Int32Array,
     Int32ArrayHelper,
     i32,
     TypedArray::Int32,
-    "Int32Array"
+    "@Int32Array"
 );
 impl_typed_array!(
     Uint8Array,
     Uint8ArrayHelper,
     u8,
     TypedArray::Uint8,
-    "Uint8Array"
+    "@Uint8Array"
 );
 impl_typed_array!(
     Uint16Array,
     Uint16ArrayHelper,
     u16,
     TypedArray::Uint16,
-    "Uint16Array"
+    "@Uint16Array"
 );
 impl_typed_array!(
     Uint32Array,
     Uint32ArrayHelper,
     u32,
     TypedArray::Uint32,
-    "Uint32Array"
+    "@Uint32Array"
 );
 
 #[derive(Serialize, Deserialize)]
 struct ArrayBufferHelper<'local>(&'local [u8]);
 
-#[derive(Clone)]
 pub struct ArrayBuffer {
     data_ptr: *mut u8,
     length: usize,
@@ -292,7 +300,7 @@ impl<'de> Deserialize<'de> for ArrayBuffer {
         D: serde::Deserializer<'de>,
     {
         let value = ArrayBufferHelper::deserialize(deserializer)?;
-        Ok(unsafe { ArrayBuffer::new_with_external_slice(value.0) })
+        Ok(ArrayBuffer::new_with_external_slice(value.0))
     }
 }
 
@@ -303,6 +311,18 @@ impl Drop for ArrayBuffer {
                 Vec::from_raw_parts(self.data_ptr, self.len(), cap)
             };
         }
+    }
+}
+
+impl Debug for ArrayBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.as_ref())
+    }
+}
+
+impl Clone for ArrayBuffer {
+    fn clone(&self) -> Self {
+        Self::new_with_vec(self.to_vec())
     }
 }
 
