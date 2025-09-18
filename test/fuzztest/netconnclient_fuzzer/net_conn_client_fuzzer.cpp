@@ -1852,9 +1852,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultHttpProxyFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetAppHttpProxyFuzzTest(data, size);
-    OHOS::NetManagerStandard::RegisterAppHttpProxyCallbackFuzzTest(data, size);
-    OHOS::NetManagerStandard::UnregisterAppHttpProxyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetInterfaceCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetInterfaceConfigurationFuzzTest(data, size);
