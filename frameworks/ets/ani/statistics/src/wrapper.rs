@@ -165,7 +165,7 @@ impl NetStatsClient {
 
         let ret = ffi::GetTrafficStatsByUidNetworkVec(
             &mut net_stats_info_sequence,
-            uid.try_into().unwrap(),
+            uid as u32,
             &mut network_info.into(),
         );
         if ret != 0 {
