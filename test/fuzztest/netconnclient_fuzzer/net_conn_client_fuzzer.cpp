@@ -560,37 +560,6 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED), dataParcel);
 }
 
-
-void SetAppHttpProxyFuzzTest(const uint8_t *data, size_t size)
-{
-    HttpProxy httpProxy = {NetConnGetString(STR_LEN), 0, {}};
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    DelayedSingleton<NetConnClient>::GetInstance()->SetAppHttpProxy(httpProxy);
-}
-
-void RegisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
-{
-    uint32_t callbackId = 0;
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    DelayedSingleton<NetConnClient>::GetInstance()->RegisterAppHttpProxyCallback(SetAppHttpProxyCallback, callbackId);
-}
-
-void UnregisterAppHttpProxyCallbackFuzzTest(const uint8_t *data, size_t size)
-{
-    int32_t callbackId = NetConnGetData<int32_t>();
-    MessageParcel dataParcel;
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
-    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterAppHttpProxyCallback(callbackId);
-}
-
 void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
