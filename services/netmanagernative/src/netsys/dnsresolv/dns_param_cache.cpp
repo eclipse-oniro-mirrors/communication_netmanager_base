@@ -32,19 +32,6 @@ void GetVectorData(const std::vector<std::string> &data, std::string &result)
     std::for_each(data.begin(), data.end(), [&result](const auto &str) { result.append(ToAnonymousIp(str) + ", "); });
     result.append("}\n");
 }
-
-std::vector<std::string> RemoveDuplicateNameservers(const std::vector<std::string> &servers)
-{
-    std::set<std::string> seen;
-    std::vector<std::string> res;
-    for (const auto& server : servers) {
-        if (seen.find(server) == seen.end()) {
-            seen.insert(server);
-            res.push_back(server);
-        }
-    }
-    return res;
-}
 constexpr int RES_TIMEOUT = 4000;    // min. milliseconds between retries
 constexpr int RES_DEFAULT_RETRY = 2; // Default
 } // namespace
@@ -62,6 +49,19 @@ std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std:
     std::vector<std::string> res = servers;
     if (res.size() > MAX_SERVER_NUM_EXT - 1) {
         res.resize(MAX_SERVER_NUM_EXT - 1);
+    }
+    return res;
+}
+
+std::vector<std::string> DnsParamCache::RemoveDuplicateNameservers(const std::vector<std::string> &servers)
+{
+    std::set<std::string> seen;
+    std::vector<std::string> res;
+    for (const auto& server : servers) {
+        if (seen.find(server) == seen.end()) {
+            seen.insert(server);
+            res.push_back(server);
+        }
     }
     return res;
 }
