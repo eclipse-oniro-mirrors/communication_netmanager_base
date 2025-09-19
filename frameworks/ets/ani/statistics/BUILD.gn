@@ -38,7 +38,6 @@ ohos_static_library("statistics_ani_static") {
   
   deps = [
     ":statistics_ani_cxx",
-    "//third_party/rust/crates/cxx:cxx_cppdeps",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
@@ -47,6 +46,7 @@ ohos_static_library("statistics_ani_static") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "rust_cxx:cxx_cppdeps",
   ]
 
   part_name = "netmanager_base"
@@ -67,12 +67,12 @@ ohos_rust_shared_library("statistics_ani") {
   external_deps = [
     "runtime_core:ani",
     "hilog:hilog_rust",
+    "rust_cxx:lib"
   ]
   deps = [
     ":statistics_ani_static",
     "../../../../common/ani_rs:ani_rs",
     "../../../../common/ani_sys:ani_sys",
-    "//third_party/rust/crates/cxx:lib",
     "//third_party/rust/crates/serde/serde:lib"
   ]
   clippy_lints = "none"

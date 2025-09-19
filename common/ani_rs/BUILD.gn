@@ -39,12 +39,13 @@ ohos_static_library("ani_rs_static") {
   
   deps = [
     ":ani_rs_cxx",
-    "//third_party/rust/crates/cxx:cxx_cppdeps",
   ]
 
   external_deps = [
     "runtime_core:ani",
-    "eventhandler:libeventhandler"
+    "eventhandler:libeventhandler",
+    "rust_cxx:cxx_cppdeps",
+    "c_utils:utils",
   ]
 
   part_name = "netmanager_base"
@@ -64,7 +65,6 @@ ohos_rust_static_library("ani_rs") {
   deps = [
     "../ani_sys:ani_sys",
     ":ani_rs_static",
-    "//third_party/rust/crates/cxx:lib",
     "../ani_rs_macros:ani_rs_macros(${host_toolchain})",
     "//third_party/rust/crates/serde/serde:lib",
   ]
@@ -73,6 +73,7 @@ ohos_rust_static_library("ani_rs") {
     "runtime_core:ani",
     "ylong_runtime:ylong_runtime",
     "hilog:hilog_rust",
+    "rust_cxx:lib"
   ]
 
   clippy_lints = "none"

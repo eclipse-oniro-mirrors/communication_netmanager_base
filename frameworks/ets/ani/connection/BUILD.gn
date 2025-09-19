@@ -38,7 +38,6 @@ ohos_static_library("connection_ani_static") {
   
   deps = [
     ":connection_ani_cxx",
-    "//third_party/rust/crates/cxx:cxx_cppdeps",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
@@ -49,6 +48,7 @@ ohos_static_library("connection_ani_static") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "rust_cxx:cxx_cppdeps",
   ]
 
   part_name = "netmanager_base"
@@ -71,13 +71,13 @@ ohos_rust_shared_library("connection_ani") {
     "hilog:hilog_rust",
     "hilog:libhilog",
     "ipc:ipc_rust",
+    "rust_cxx:lib"
   ]
 
   deps = [
     ":connection_ani_static",
     "../../../../common/ani_rs:ani_rs",
     "../../../../common/ani_sys:ani_sys",
-    "//third_party/rust/crates/cxx:lib",
     "//third_party/rust/crates/serde/serde:lib"
   ]
 
