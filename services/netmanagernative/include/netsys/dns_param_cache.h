@@ -130,6 +130,8 @@ private:
 
     static std::vector<std::string> SelectNameservers(const std::vector<std::string> &servers);
 
+    std::vector<std::string> RemoveDuplicateNameservers(const std::vector<std::string> &servers);
+
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t GetUserId(int32_t appUid);
 

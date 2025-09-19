@@ -53,6 +53,19 @@ std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std:
     return res;
 }
 
+std::vector<std::string> DnsParamCache::RemoveDuplicateNameservers(const std::vector<std::string> &servers)
+{
+    std::set<std::string> seen;
+    std::vector<std::string> res;
+    for (const auto& server : servers) {
+        if (seen.find(server) == seen.end()) {
+            seen.insert(server);
+            res.push_back(server);
+        }
+    }
+    return res;
+}
+
 int32_t DnsParamCache::CreateCacheForNet(uint16_t netId, bool isVpnNet)
 {
     NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
@@ -113,7 +126,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     auto oldDnsServers = it->second.GetServers();
     std::sort(oldDnsServers.begin(), oldDnsServers.end());
 
-    auto newDnsServers = servers;
+    auto newDnsServers = RemoveDuplicateNameservers(servers);
     std::sort(newDnsServers.begin(), newDnsServers.end());
 
     if (oldDnsServers != newDnsServers) {
@@ -121,7 +134,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     }
 
     it->second.SetNetId(netId);
-    it->second.SetServers(servers);
+    it->second.SetServers(newDnsServers);
     it->second.SetDomains(domains);
     if (retryCount == 0) {
         it->second.SetRetryCount(RES_DEFAULT_RETRY);
