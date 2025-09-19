@@ -370,12 +370,6 @@ bool NetConnClient::IsCallbackExist(const sptr<INetConnCallback> &callback)
 int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
     NETMGR_LOG_D("UnregisterNetConnCallback client in.");
-#ifndef NETMANAGER_TEST
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-        NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-#endif
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -383,6 +377,12 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     }
     std::unique_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
     if (!IsCallbackExist(callback)) {
+#ifndef NETMANAGER_TEST
+        if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+            NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        }
+#endif
         NETMGR_LOG_E("UnregisterNetConnCallback NET_CONN_ERR_CALLBACK_NOT_FOUND");
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
@@ -1488,12 +1488,6 @@ bool NetConnClient::NetConnCallbackManager::HasExistCallback(const sptr<INetConn
 int32_t NetConnClient::UnRegisterNetConnCallbackManager(const sptr<INetConnCallback>& callback,
     NetConnCallbackManagerMap& netConnCallbackManagerMap)
 {
-#ifndef NETMANAGER_TEST
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-        NETMGR_LOG_I("Permission deny: Request with INTERNAL_DEFAULT But not has CONNECTIVITY_INTERNAL");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-#endif
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("The parameter of proxy is nullptr");
