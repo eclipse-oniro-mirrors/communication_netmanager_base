@@ -381,5 +381,18 @@ HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest003, TestSize.Level1)
     int32_t ret = dnsParCache.FlushDnsCache(netId);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(DNSParamCacheTest, RemoveDuplicateNameserversTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("RemoveDuplicateNameserversTest enter");
+    DnsParamCache dnsParCache;
+    std::vector<std::string> servers;
+    servers.emplace_back("1.1.1.1");
+    servers.emplace_back("1.1.1.1");
+    servers.emplace_back("2.2.2.2");
+    servers.emplace_back("3.3.3.3");
+    std::vector<std::string> res = dnsParCache.RemoveDuplicateNameservers(servers);
+    EXPECT_FALSE(res.empty());
+}
 } // namespace NetsysNative
 } // namespace OHOS
