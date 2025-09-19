@@ -196,9 +196,9 @@ bool NetConnService::Init()
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 
-    netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
-#ifdef ENABLE_SET_APP_FROZENED
     if (netConnEventHandler_) {
+        netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
+#ifdef ENABLE_SET_APP_FROZENED
         int64_t delayTime = 3000;
         appStateAwareCallback_.OnForegroundAppChanged = [] (const uint32_t uid) {
             std::shared_ptr<NetConnService> netConnService = NetConnService::GetInstance();
@@ -210,8 +210,8 @@ bool NetConnService::Init()
             AppStateAwareManager::GetInstance().RegisterAppStateAwareCallback(appStateAwareCallback_);
         },
             delayTime);
-    }
 #endif
+    }
     NETMGR_LOG_I("Init end");
     return true;
 }
