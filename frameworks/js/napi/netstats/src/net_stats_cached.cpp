@@ -485,17 +485,21 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
+#ifndef UNITTEST_FORBID_FFRT
     std::function<void()> netCachedStats = [this] () {
+#endif
         isExec_ = true;
         CacheStats();
         WriteStats();
         isForce_ = false;
         LoadIfaceNameIdentMaps();
         isExec_ = false;
+#ifndef UNITTEST_FORBID_FFRT
     };
     if (!isExec_) {
         ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
     }
+#endif
 }
 
 void NetStatsCached::ForceUpdateStatsAndBackupDB(const std::string &sourceDb, const std::string &backupDb)
