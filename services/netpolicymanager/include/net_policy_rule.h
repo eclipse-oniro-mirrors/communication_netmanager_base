@@ -17,6 +17,7 @@
 #define NET_POLICY_RULE_H
 
 #include <map>
+#include <shared_mutex>
 
 #include "net_policy_base.h"
 #include "netmanager_base_common_utils.h"
@@ -210,6 +211,7 @@ private:
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> foregroundUidList_;
     std::mutex foregroundUidListMutex_;
+    std::shared_mutex uidPolicyRuleMutex_;
 
 private:
     /**

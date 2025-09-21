@@ -83,6 +83,8 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule001, TestSize.Level1)
 {
     int32_t result = g_netPolicyRule->TransPolicyToRule(10000, 1);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
+    result = g_netPolicyRule->TransPolicyToRule(10000, 1);  // set same policy
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 /**

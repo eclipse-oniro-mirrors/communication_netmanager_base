@@ -31,7 +31,6 @@ void NetPolicyRule::Init()
     for (const auto &i : uidsPolicies) {
         auto uid = CommonUtils::StrToUint(i.uid.c_str());
         auto policy = CommonUtils::StrToUint(i.policy.c_str());
-        uidPolicyRules_[uid] = {.policy_ = policy};
         TransPolicyToRule(uid, policy);
     }
 }
@@ -39,7 +38,10 @@ void NetPolicyRule::Init()
 void NetPolicyRule::TransPolicyToRule()
 {
     // When system status is changed,traverse uidPolicyRules_ to calculate the rule and netsys.
-    for (const auto &[uid, policy] : uidPolicyRules_) {
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
+    auto uidPolicyRulesBak = uidPolicyRules_;
+    lock.unlock();
+    for (const auto &[uid, policy] : uidPolicyRulesBak) {
         TransPolicyToRule(uid, policy.policy_);
     }
 }
@@ -47,12 +49,7 @@ void NetPolicyRule::TransPolicyToRule()
 void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 {
     uint32_t policy = 0;
-    const auto &itr = uidPolicyRules_.find(uid);
-    if (itr == uidPolicyRules_.end()) {
-        policy = NET_POLICY_NONE;
-    } else {
-        policy = itr->second.policy_;
-    }
+    GetPolicyByUid(uid, policy);
     NETMGR_LOG_D("TransPolicyToRule only with uid value: uid[%{public}u] policy[%{public}u]", uid, policy);
     TransPolicyToRule(uid, policy);
     return;
@@ -65,16 +62,21 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
         return POLICY_ERR_INVALID_POLICY;
     }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
+    std::unique_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
         uidPolicyRules_[uid] = {.policy_ = policy};
+        lock.unlock();
         GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
     } else {
         if (policyRule->second.policy_ != policy) {
             NETMGR_LOG_D("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
             policyRule->second.policy_ = policy;
+            lock.unlock();
             GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
+        } else {
+            lock.unlock();            
         }
     }
 
@@ -122,6 +124,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     auto rule = MoveToRuleBit(conditionValue & POLICY_TRANS_RULE_MASK);
     NETMGR_LOG_D("NetPolicyRule->uid:[%{public}u] policy:[%{public}u] rule:[%{public}u] policyCondition[%{public}u]",
                  uid, policy, rule, policyCondition);
+    std::unique_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     UidPolicyRule &policyRuleNetsys = uidPolicyRules_.find(uid)->second;
     auto netsys = conditionValue & POLICY_TRANS_NET_CTRL_MASK;
 
@@ -140,6 +143,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     }
 
     policyRuleNetsys.rule_ = rule;
+    lock.unlock();
     GetCbInst()->NotifyNetUidRuleChangeAsync(uid, rule);
 }
 
@@ -217,6 +221,7 @@ uint32_t NetPolicyRule::ChangePolicyToPolicyTransitionCondition(uint32_t policy)
 
 int32_t NetPolicyRule::GetPolicyByUid(uint32_t uid, uint32_t &policy)
 {
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Can't find uid:[%{public}u] and its policy, return default value.", uid);
@@ -233,6 +238,7 @@ int32_t NetPolicyRule::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &u
         return POLICY_ERR_INVALID_POLICY;
     }
     NETMGR_LOG_I("GetUidsByPolicy:policy:[%{public}u]", policy);
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     for (auto &iter : uidPolicyRules_) {
         if (iter.second.policy_ == policy) {
             uids.push_back(iter.first);
@@ -245,6 +251,7 @@ int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllow
 {
     NETMGR_LOG_D("IsUidNetAllowed:uid[%{public}u] metered:[%{public}d]", uid, metered);
     uint32_t rule = NetUidRule::NET_RULE_NONE;
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     auto iter = uidPolicyRules_.find(uid);
     if (iter != uidPolicyRules_.end()) {
         rule = iter->second.rule_;
@@ -326,7 +333,10 @@ int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgrou
 int32_t NetPolicyRule::ResetPolicies()
 {
     NETMGR_LOG_I("Reset uids-policies and backgroundpolicy");
-    for (auto iter : uidPolicyRules_) {
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
+    auto uidPolicyRulesBak = uidPolicyRules_;
+    lock.unlock();
+    for (auto iter : uidPolicyRulesBak) {
         TransPolicyToRule(iter.first, NetUidPolicy::NET_POLICY_NONE);
     }
     return SetBackgroundPolicy(true);
@@ -384,11 +394,13 @@ void NetPolicyRule::DeleteUid(uint32_t uid)
 {
     NETMGR_LOG_D("DeleteUid:uid[%{public}u]", uid);
 
+    std::unique_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     const auto &it = std::find_if(uidPolicyRules_.begin(), uidPolicyRules_.end(),
                                   [&uid](const auto &pair) { return pair.first == uid; });
     if (it != uidPolicyRules_.end()) {
         uidPolicyRules_.erase(it);
     }
+    lock.unlock();
     GetFileInst()->RemoveInexistentUid(uid);
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
@@ -456,6 +468,7 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
 {
     static const std::string TAB = "    ";
     message.append(TAB + "UidPolicy:\n");
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     std::for_each(uidPolicyRules_.begin(), uidPolicyRules_.end(), [&message](const auto &pair) {
         message.append(TAB + TAB + "Uid: " + std::to_string(pair.first) + TAB + "Rule: " +
                        std::to_string(pair.second.rule_) + TAB + "Policy:" + std::to_string(pair.second.policy_) + TAB +
