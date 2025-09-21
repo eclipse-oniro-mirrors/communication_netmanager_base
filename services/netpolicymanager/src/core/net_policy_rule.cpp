@@ -76,7 +76,7 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
             lock.unlock();
             GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
         } else {
-            lock.unlock();            
+            lock.unlock();
         }
     }
 
