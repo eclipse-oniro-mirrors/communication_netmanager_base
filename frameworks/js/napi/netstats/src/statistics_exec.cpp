@@ -291,23 +291,23 @@ napi_value StatisticsExec::GetGetTrafficStatsByUidNetworkCallback(GetTrafficStat
 napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContext *context)
 {
     auto list = context->GetNetStatsInfoSequence();
-    napi_value stats = NapiUtils::CreateArray(context->GetEnv(), list.size());
-    size_t index = 0;
+    int64_t rxByte = 0;
+    int64_t txByte = 0;
+    int64_t rxPackets = 0;
+    int64_t txPackets = 0;
     for (const auto &item : list) {
-        napi_value info = NapiUtils::CreateObject(context->GetEnv());
-        NapiUtils::SetInt64Property(context->GetEnv(), info, RX_BYTES, item.info_.rxBytes_);
-        NapiUtils::SetInt64Property(context->GetEnv(), info, TX_BYTES, item.info_.txBytes_);
-        NapiUtils::SetInt64Property(context->GetEnv(), info, RX_PACKETS, item.info_.rxPackets_);
-        NapiUtils::SetInt64Property(context->GetEnv(), info, TX_PACKETS, item.info_.txPackets_);
-
-        napi_value tmp = NapiUtils::CreateObject(context->GetEnv());
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, START_TIME, item.startTime_);
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, END_TIME, item.endTime_);
-        NapiUtils::SetNamedProperty(context->GetEnv(), tmp, NET_STATS_INFO, info);
-
-        NapiUtils::SetArrayElement(context->GetEnv(), stats, index++, tmp);
+        rxByte += item.info_.rxBytes_;
+        txByte += item.info_.txBytes_;
+        rxPackets += item.info_.rxPackets_;
+        txPackets += item.info_.txPackets_;
     }
-    return stats;
+
+    napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_BYTES, rxByte);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_BYTES, txByte);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_PACKETS, rxPackets);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_PACKETS, txPackets);
+    return netStatsInfo;
 }
 
 napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context)
