@@ -377,6 +377,8 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
     auto helper = std::make_unique<NetStatsDatabaseHelper>("");
     int32_t ret = helper->DeleteAndBackup(SQLITE_NOTADB);
     EXPECT_EQ(ret, SQLITE_NOTADB);
+    ret = helper->DeleteAndBackup(SQLITE_CORRUPT);
+    EXPECT_EQ(ret, SQLITE_CORRUPT);
     ret = helper->DeleteAndBackup(0);
     EXPECT_EQ(ret, 0);
     helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
@@ -385,6 +387,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
     auto helper2 = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
     ret = helper2->DeleteAndBackup(SQLITE_NOTADB);
 }
+
 HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionNormalTest001, TestSize.Level1)
 {
     NETMGR_LOG_I("GetTableVersionNormalTest001");
@@ -397,6 +400,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionNormalTest001, TestSize.Leve
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     EXPECT_EQ(version, NetStatsDatabaseHelper::Version_1);
 }
+
 HWTEST_F(NetStatsDatabaseHelperTest, GetTableVersionErrorHandlingTest001, TestSize.Level1)
 {
     NETMGR_LOG_I("GetTableVersionErrorHandlingTest001");

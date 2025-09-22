@@ -736,6 +736,29 @@ bool NetStatsDatabaseHelper::BackupNetStatsData(const std::string &sourceDb, con
     return (rc == SQLITE_DONE);
 }
 
+bool NetStatsDatabaseHelper::IntegrityCheck(sqlite3 *db)
+{
+    bool isIntegrated = false;
+    sqlite3_stmt *stmt = nullptr;
+ 
+    int32_t errorCode = sqlite3_prepare_v2(db, "PRAGMA integrity_check;", -1, &stmt, nullptr);
+    if (errorCode == SQLITE_OK && stmt != nullptr) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string result = std::string(reinterpret_cast<const char *>(
+                sqlite3_column_text(stmt, 0)));
+            if (result == "ok") {
+                NETMGR_LOG_I("IntegrityCheck ok");
+                isIntegrated = true;
+                break;
+            }
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        NETMGR_LOG_E("prepare SQL statement failed, errorCode:%{public}d", errorCode);
+    }
+    return isIntegrated;
+}
+
 bool NetStatsDatabaseHelper::BackupNetStatsDataDB(const std::string &sourceDb, const std::string &backupDb)
 {
     NETMGR_LOG_I("BackupNetStatsDataDB");
@@ -746,21 +769,24 @@ bool NetStatsDatabaseHelper::BackupNetStatsDataDB(const std::string &sourceDb, c
 
 int32_t NetStatsDatabaseHelper::DeleteAndBackup(int32_t errCode)
 {
-    if (errCode != SQLITE_NOTADB || (path_ != NET_STATS_DATABASE_BACK_PATH &&
+    if ((errCode != SQLITE_NOTADB && errCode != SQLITE_CORRUPT) || (path_ != NET_STATS_DATABASE_BACK_PATH &&
         path_ != NET_STATS_DATABASE_PATH)) {
         return errCode;
     }
+    bool backupRet = false;
     if (path_.find(NET_STATS_DATABASE_BACK_PATH) != std::string::npos) {
+        NETMGR_LOG_I("BACK_PATH is bad");
         CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
-        return errCode;
+        backupRet = BackupNetStatsData(NET_STATS_DATABASE_PATH, NET_STATS_DATABASE_BACK_PATH);
+    } else {
+        NETMGR_LOG_I("DATABASE_PATH is bad");
+        CommonUtils::DeleteFile(NET_STATS_DATABASE_PATH);
+        backupRet = BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
     }
 
-    CommonUtils::DeleteFile(NET_STATS_DATABASE_PATH);
-    bool backupRet = BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
     if (backupRet) {
         return SQLITE_OK;
     }
-    
     return errCode;
 }
 } // namespace NetManagerStandard
