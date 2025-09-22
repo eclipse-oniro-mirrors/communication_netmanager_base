@@ -738,12 +738,11 @@ bool NetStatsDatabaseHelper::BackupNetStatsData(const std::string &sourceDb, con
 
 bool NetStatsDatabaseHelper::IntegrityCheck(sqlite3 *db)
 {
-    NETMGR_LOG_I("IntegrityCheck");
     bool isIntegrated = false;
     sqlite3_stmt *stmt = nullptr;
  
     int32_t errorCode = sqlite3_prepare_v2(db, "PRAGMA integrity_check;", -1, &stmt, nullptr);
-    if (errorCode == SQLITE_OK) {
+    if (errorCode == SQLITE_OK && stmt != nullptr) {
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string result = std::string(reinterpret_cast<const char *>(
                 sqlite3_column_text(stmt, 0)));
