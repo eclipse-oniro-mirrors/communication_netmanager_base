@@ -362,6 +362,7 @@ int32_t NetStatsDataHandler::ClearData()
 int32_t NetStatsDataHandler::BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb)
 {
     sqlite3* backup = nullptr;
+    bool ret_back = true;
     int32_t ret_file = sqlite3_open(backupDb.c_str(), &backup);
     if (ret_file != SQLITE_OK) {
         NETMGR_LOG_E("Failed to open backup database: %s", sqlite3_errstr(ret_file));
@@ -369,7 +370,7 @@ int32_t NetStatsDataHandler::BackupNetStatsData(const std::string &sourceDb, con
     }
     auto helper_back = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
     if (backup != nullptr) {
-        bool ret_back = helper_back->IntegrityCheck(backup);
+        ret_back = helper_back->IntegrityCheck(backup);
     }
     if (!ret_back) {
         CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
