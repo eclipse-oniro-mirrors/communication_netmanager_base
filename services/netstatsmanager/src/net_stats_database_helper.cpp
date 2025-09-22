@@ -742,7 +742,7 @@ bool NetStatsDatabaseHelper::IntegrityCheck(sqlite3 *db)
     bool isIntegrated = false;
     sqlite3_stmt *stmt = nullptr;
  
-    int32_t errorCode = sqlite3_prepare_v2(&db, "PRAGMA integrity_check;", -1, &stmt, nullptr);
+    int32_t errorCode = sqlite3_prepare_v2(db, "PRAGMA integrity_check;", -1, &stmt, nullptr);
     if (errorCode == SQLITE_OK) {
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string result = std::string(reinterpret_cast<const char *>(
