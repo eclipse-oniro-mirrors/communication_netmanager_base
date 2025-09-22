@@ -736,7 +736,7 @@ bool NetStatsDatabaseHelper::BackupNetStatsData(const std::string &sourceDb, con
     return (rc == SQLITE_DONE);
 }
 
-bool NetStatsDatabaseHelper::IntegrityCheck(sqlite3 &db)
+bool NetStatsDatabaseHelper::IntegrityCheck(sqlite3 *db)
 {
     NETMGR_LOG_I("IntegrityCheck");
     bool isIntegrated = false;
