@@ -63,7 +63,7 @@ public:
     int32_t UpdateDataFlag(const std::string &tableName, uint32_t oldFlag, uint32_t newFlag);
     bool BackupNetStatsDataDB(const std::string &sourceDb, const std::string &backupDb);
     int32_t DeleteAndBackup(int32_t errCode);
-    bool IntegrityCheck(sqlite3 &db);
+    bool IntegrityCheck(sqlite3 *db);
     int32_t UpdateStatsFlagByUserId(const std::string &tableName, int32_t userId, uint32_t flag);
     int32_t UpdateStatsUserIdByUserId(const std::string &tableName, int32_t oldUserId, int32_t newUserId);
 
