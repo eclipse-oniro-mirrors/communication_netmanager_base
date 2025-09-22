@@ -370,7 +370,6 @@ HWTEST_F(NetStatsDatabaseHelperTest, BackupNetStatsDataTest001, TestSize.Level1)
     helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     ret = helper->BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
     EXPECT_EQ(ret, true);
-
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
