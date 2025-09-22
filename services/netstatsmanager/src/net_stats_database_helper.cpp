@@ -776,11 +776,11 @@ int32_t NetStatsDatabaseHelper::DeleteAndBackup(int32_t errCode)
     }
     bool backupRet = false;
     if (path_.find(NET_STATS_DATABASE_BACK_PATH) != std::string::npos) {
-        NETMGR_LOG_I("BACK_PATH_is bad");
+        NETMGR_LOG_I("BACK_PATH is bad");
         CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
         backupRet = BackupNetStatsData(NET_STATS_DATABASE_PATH, NET_STATS_DATABASE_BACK_PATH);
     } else {
-        NETMGR_LOG_I("DATABASE_PATH_is bad");
+        NETMGR_LOG_I("DATABASE_PATH is bad");
         CommonUtils::DeleteFile(NET_STATS_DATABASE_PATH);
         backupRet = BackupNetStatsData(NET_STATS_DATABASE_BACK_PATH, NET_STATS_DATABASE_PATH);
     }
