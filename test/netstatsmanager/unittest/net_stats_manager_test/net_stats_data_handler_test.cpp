@@ -305,6 +305,8 @@ HWTEST_F(NetStatsDataHandlerTest, BackupNetStatsDataTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = handler.BackupNetStatsData("xxxx/xxxx.db", NET_STATS_DATABASE_BACK_PATH);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    ret = handler.BackupNetStatsData(NET_STATS_DATABASE_PATH, "xxxx/xxxx.db");
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataByIdentAndUserIdTest001, TestSize.Level1)

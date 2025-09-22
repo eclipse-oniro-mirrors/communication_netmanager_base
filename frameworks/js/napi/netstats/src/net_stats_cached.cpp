@@ -48,6 +48,7 @@ NetStatsCached::NetStatsCached()
 
 int32_t NetStatsCached::StartCached()
 {
+    NETMGR_LOG_I("restart to create");
     auto retBackup = CreatNetStatsTables(NET_STATS_DATABASE_BACK_PATH);
     if (retBackup != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("CreatNetStatsTables error. ret: %{public}d", retBackup);

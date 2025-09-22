@@ -361,15 +361,29 @@ int32_t NetStatsDataHandler::ClearData()
 
 int32_t NetStatsDataHandler::BackupNetStatsData(const std::string &sourceDb, const std::string &backupDb)
 {
+    sqlite3* backup = nullptr;
+    int32_t ret_file = sqlite3_open(backupDb.c_str(), &backup);
+    if (ret_file != SQLITE_OK) {
+        NETMGR_LOG_E("Failed to open backup database: %s", sqlite3_errstr(ret_file));
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    auto helper_back = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
+    bool ret_back = helper_back->IntegrityCheck(*backup);
+    if (!ret_back) {
+        CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
+    }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     if (helper == nullptr) {
         NETMGR_LOG_E("db helper instance is nullptr");
+        sqlite3_close(backup);
         return NETMANAGER_ERR_INTERNAL;
     }
     bool ret = helper->BackupNetStatsDataDB(sourceDb, backupDb);
     if (!ret) {
+        sqlite3_close(backup);
         return NETMANAGER_ERROR;
     }
+    sqlite3_close(backup);
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
