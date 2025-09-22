@@ -19,6 +19,7 @@
 #include <atomic>
 #include <list>
 #include <shared_mutex>
+#include <functional>
 
 #include <uv.h>
 
@@ -54,6 +55,7 @@ public:
 
     napi_ref GetRef() const;
     void SetRef(napi_ref ref);
+    void RegisterObserverCallback(std::function<void(const std::string &type)> callback);
 
 private:
     std::shared_mutex mutexForListenersAndEmitByUv_;
@@ -61,6 +63,7 @@ private:
     std::list<EventListener> listeners_;
     void *data_ = nullptr;
     napi_ref ref_ = nullptr;
+    std::function<void(const std::string &type)> callback_;
 };
 
 struct UvWorkWrapper {
