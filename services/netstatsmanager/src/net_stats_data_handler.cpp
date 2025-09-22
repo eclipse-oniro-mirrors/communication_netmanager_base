@@ -368,7 +368,9 @@ int32_t NetStatsDataHandler::BackupNetStatsData(const std::string &sourceDb, con
         return NETMANAGER_ERR_INTERNAL;
     }
     auto helper_back = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_BACK_PATH);
-    bool ret_back = helper_back->IntegrityCheck(backup);
+    if (backup != nullptr) {
+        bool ret_back = helper_back->IntegrityCheck(backup);
+    }
     if (!ret_back) {
         CommonUtils::DeleteFile(NET_STATS_DATABASE_BACK_PATH);
     }
