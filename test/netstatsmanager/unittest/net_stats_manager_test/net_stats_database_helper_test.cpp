@@ -377,10 +377,8 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteAndBackupTest001, TestSize.Level1)
     auto helper = std::make_unique<NetStatsDatabaseHelper>("");
     int32_t ret = helper->DeleteAndBackup(SQLITE_NOTADB);
     EXPECT_EQ(ret, SQLITE_NOTADB);
-
     ret = helper->DeleteAndBackup(SQLITE_CORRUPT);
     EXPECT_EQ(ret, SQLITE_CORRUPT);
-
     ret = helper->DeleteAndBackup(0);
     EXPECT_EQ(ret, 0);
     helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
