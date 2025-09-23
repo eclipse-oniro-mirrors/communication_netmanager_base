@@ -35,7 +35,7 @@ ohos_static_library("statistics_ani_static") {
   ]
   sources = [ "src/cxx/statistics_ani.cpp" ]
   sources += get_target_outputs(":statistics_ani_cxx")
-  
+
   deps = [
     ":statistics_ani_cxx",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
@@ -63,17 +63,17 @@ ohos_rust_shared_library("statistics_ani") {
   }
 
   sources = [ "src/lib.rs" ]
-  
+
   external_deps = [
-    "runtime_core:ani",
     "hilog:hilog_rust",
-    "rust_cxx:lib"
+    "runtime_core:ani",
+    "rust_cxx:lib",
   ]
   deps = [
     ":statistics_ani_static",
     "../../../../common/ani_rs:ani_rs",
     "../../../../common/ani_sys:ani_sys",
-    "//third_party/rust/crates/serde/serde:lib"
+    "//third_party/rust/crates/serde/serde:lib",
   ]
   clippy_lints = "none"
   part_name = "netmanager_base"
@@ -84,9 +84,7 @@ ohos_rust_shared_library("statistics_ani") {
 generate_static_abc("statistics") {
   base_url = "./ets"
 
-  files = [ 
-    "ets/@ohos.net.statistics.d.ets",
-  ]
+  files = [ "ets/@ohos.net.statistics.d.ets" ]
 
   is_boot_abc = "True"
   device_dst_file = "/system/framework/statistics.abc"

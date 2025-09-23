@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 rust_cxx("ani_rs_cxx") {
-  sources = ["src/wrapper.rs"]
+  sources = [ "src/wrapper.rs" ]
 }
 
 ohos_static_library("ani_rs_static") {
@@ -36,16 +36,14 @@ ohos_static_library("ani_rs_static") {
 
   sources = [ "src/ani_rs_bind.cpp" ]
   sources += get_target_outputs(":ani_rs_cxx")
-  
-  deps = [
-    ":ani_rs_cxx",
-  ]
+
+  deps = [ ":ani_rs_cxx" ]
 
   external_deps = [
-    "runtime_core:ani",
-    "eventhandler:libeventhandler",
-    "rust_cxx:cxx_cppdeps",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "runtime_core:ani",
+    "rust_cxx:cxx_cppdeps",
   ]
 
   part_name = "netmanager_base"
@@ -63,17 +61,17 @@ ohos_rust_static_library("ani_rs") {
 
   sources = [ "src/lib.rs" ]
   deps = [
-    "../ani_sys:ani_sys",
     ":ani_rs_static",
     "../ani_rs_macros:ani_rs_macros(${host_toolchain})",
+    "../ani_sys:ani_sys",
     "//third_party/rust/crates/serde/serde:lib",
   ]
 
   external_deps = [
-    "runtime_core:ani",
-    "ylong_runtime:ylong_runtime",
     "hilog:hilog_rust",
-    "rust_cxx:lib"
+    "runtime_core:ani",
+    "rust_cxx:lib",
+    "ylong_runtime:ylong_runtime",
   ]
 
   clippy_lints = "none"

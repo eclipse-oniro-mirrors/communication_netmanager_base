@@ -35,7 +35,7 @@ ohos_static_library("connection_ani_static") {
   ]
   sources = [ "src/cxx/connection_ani.cpp" ]
   sources += get_target_outputs(":connection_ani_cxx")
-  
+
   deps = [
     ":connection_ani_cxx",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
@@ -65,20 +65,20 @@ ohos_rust_shared_library("connection_ani") {
   }
 
   sources = [ "src/lib.rs" ]
-  
+
   external_deps = [
-    "runtime_core:ani",
     "hilog:hilog_rust",
     "hilog:libhilog",
     "ipc:ipc_rust",
-    "rust_cxx:lib"
+    "runtime_core:ani",
+    "rust_cxx:lib",
   ]
 
   deps = [
     ":connection_ani_static",
     "../../../../common/ani_rs:ani_rs",
     "../../../../common/ani_sys:ani_sys",
-    "//third_party/rust/crates/serde/serde:lib"
+    "//third_party/rust/crates/serde/serde:lib",
   ]
 
   clippy_lints = "none"

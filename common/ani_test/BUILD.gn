@@ -25,14 +25,12 @@ ohos_rust_shared_library("ani_test") {
   }
 
   sources = [ "src/lib.rs" ]
-  
-  external_deps = [
-    "runtime_core:ani",
-  ]
+
+  external_deps = [ "runtime_core:ani" ]
 
   deps = [
     "../ani_rs:ani_rs",
-    "//third_party/rust/crates/serde/serde:lib"
+    "//third_party/rust/crates/serde/serde:lib",
   ]
 
   clippy_lints = "none"

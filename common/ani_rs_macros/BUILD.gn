@@ -21,12 +21,12 @@ ohos_rust_proc_macro("ani_rs_macros") {
 
   crate_name = "ani_rs_macros"
   edition = "2021"
-  
+
   clippy_lints = "none"
   deps = [
-    "//third_party/rust/crates/syn:lib",
     "//third_party/rust/crates/proc-macro2:lib",
     "//third_party/rust/crates/quote:lib",
+    "//third_party/rust/crates/syn:lib",
   ]
   sources = [ "src/lib.rs" ]
 }

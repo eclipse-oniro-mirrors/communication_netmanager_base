@@ -16,7 +16,8 @@ import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 rust_bindgen("ani_bindgen_h") {
-  header = "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani/ani.h"
+  header =
+      "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani/ani.h"
 }
 
 ohos_rust_static_library("ani_sys") {
@@ -29,14 +30,12 @@ ohos_rust_static_library("ani_sys") {
   }
   deps = [ ":ani_bindgen_h" ]
   sources = [ "src/lib.rs" ]
-  external_deps = [
-    "runtime_core:ani",
-  ]
+  external_deps = [ "runtime_core:ani" ]
 
   bindgen_output = get_target_outputs(":ani_bindgen_h")
   inputs = bindgen_output
   rustenv = [ "ANI_BINDGEN_RS_FILE=" + rebase_path(bindgen_output[0]) ]
-  
+
   clippy_lints = "none"
   part_name = "netmanager_base"
   subsystem_name = "communication"
