@@ -35,6 +35,13 @@ NetConnection *NetConnection::MakeNetConnection(std::shared_ptr<EventManager>& e
 {
     std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     auto netConnection = new NetConnection(eventManager);
+    if (eventManager) {
+        eventManager->RegisterObserverCallback([netConnection](const std::string &type) {
+            if (netConnection && netConnection->observer_) {
+                netConnection->observer_->OnAddListener(type);
+            }
+        });
+    }
     NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
     return netConnection;
 }
