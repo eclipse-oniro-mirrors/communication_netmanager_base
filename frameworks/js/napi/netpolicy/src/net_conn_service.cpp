@@ -2780,11 +2780,28 @@ void NetConnService::CheckProxyStatus()
     if (GetProxyMode(mode) != NETMANAGER_SUCCESS) {
         return;
     }
-    if (SetProxyMode(mode) == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_I("NetConnService CheckProxyStatus %{public}d sucess", mode);
-    } else {
-        NETMGR_LOG_E("NetConnService CheckProxyStatus %{public}d fail", mode);
+#ifdef NETMANAGER_ENABLE_PAC_PROXY
+    switch (mode) {
+        case PROXY_MODE_OFF: {
+            uint32_t ret = SetProxyOff();
+            if (ret == NETMANAGER_SUCCESS) {
+                NETMGR_LOG_I("NetConnService SetProxyOff %{public}d sucess", mode);
+            } else {
+                NETMGR_LOG_E("NetConnService SetProxyOff %{public}d fail", mode);
+            }
+            break;
+        }
+        case PROXY_MODE_AUTO: {
+            uint32_t ret = SetProxyAuto();
+            if (ret == NETMANAGER_SUCCESS) {
+                NETMGR_LOG_I("NetConnService SetProxyAuto %{public}d sucess", mode);
+            } else {
+                NETMGR_LOG_E("NetConnService SetProxyAuto %{public}d fail", mode);
+            }
+            break;
+        }
     }
+#endif
 }
 
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
@@ -2885,15 +2902,6 @@ int32_t NetConnService::SetProxyMode(const OHOS::NetManagerStandard::ProxyModeTy
         NETMGR_LOG_E("Update proxy mode fail %d", mode);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-#ifdef NETMANAGER_ENABLE_PAC_PROXY
-    switch (mode) {
-        case PROXY_MODE_OFF: {
-            return SetProxyOff();
-        }
-        case PROXY_MODE_AUTO:
-            return SetProxyAuto();
-    }
-#endif
     NETMGR_LOG_E("invalide proxy mode %{public}d", mode);
     return NETMANAGER_SUCCESS;
 }

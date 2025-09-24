@@ -568,7 +568,11 @@ static jerry_value_t JsDateRangeArg2NumStr(const jerry_value_t args[], struct tm
         struct tm *timeinfoGmt;
         time(&rawtimeGmt);
         timeinfoGmt = gmtime(&rawtimeGmt);
-        return jerry_create_boolean(timeinfoGmt->tm_mday == num);
+        if (timeinfoGmt == nullptr) {
+            return jerry_create_boolean(false);
+        } else {
+            return jerry_create_boolean(timeinfoGmt->tm_mday == num);
+        }
     } else {
         int mon = MonthAbbrToNumber((const char *)(str_buff));
         return jerry_create_boolean(mon == timeinfo->tm_mon && num == timeinfo->tm_mday);
@@ -654,7 +658,7 @@ jerry_value_t PacFunctions::JsDateRange(const jerry_value_t funcObjVal, const je
     }
     int useGmt = 0;
     timeinfo = localtime(&rawtime);
-    for (int i = 0; i < jsDateRangeCheckers.size(); i++) {
+    for (auto i = 0; i < jsDateRangeCheckers.size(); i++) {
         if (jsDateRangeCheckers[i](argsCnt, args)) {
             return jsDateRangeHandler[i](args, timeinfo);
         }

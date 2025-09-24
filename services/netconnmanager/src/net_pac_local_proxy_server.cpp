@@ -41,10 +41,10 @@ namespace NetManagerStandard {
 namespace {
 constexpr int HTTPS_PORT = 443;
 constexpr int HTTP_PORT = 80;
-constexpr int TIME_OUT = 30;
-constexpr int TIME_OUT_S = 10;
+constexpr int TIME_OUT = 5;
+constexpr int TIME_OUT_S = 5;
 constexpr int THREAD_COUNT = 4;
-constexpr int BUFFER_SIZE = 8192;
+constexpr int BUFFER_SIZE = 1024 * 64;
 constexpr int BACKLOG = 128;
 constexpr int MAX_HEADER_SIZE = 8192;
 constexpr int MS_1 = 1000;
@@ -85,7 +85,7 @@ ProxyServer::ProxyServer(int port, int numThreads)
     : port_(port), serverSocket_(-1), numThreads_(numThreads), running_(false)
 {
     if (numThreads_ <= 0) {
-        numThreads_ = static_cast<size_t>(std::thread::hardware_concurrency());
+        numThreads_ = static_cast<int>(std::thread::hardware_concurrency());
         if (numThreads_ <= 0) {
             numThreads_ = THREAD_COUNT;
         }
@@ -262,41 +262,43 @@ void ProxyServer::TunnelData(int client, int server)
     fds[1].fd = server;
     fds[1].events = POLLIN;
     char buffer[BUFFER_SIZE];
-    bool clientClosed = false;
-    bool serverClosed = false;
-    while (!clientClosed && !serverClosed && running_) {
-        int ret = poll(fds, 2, 1000);
+    auto lastActivity = std::chrono::steady_clock::now();
+    while (running_) {
+        int ret = poll(fds, 2, 100);
         if (ret < 0) {
             if (errno == EINTR)
                 continue;
             NETMGR_LOG_E("socket poll fail");
             break;
         }
-        if (ret == 0)
+        auto now = std::chrono::steady_clock::now();
+        if (ret == 0) {
+            if (now - lastActivity > std::chrono::seconds(TIME_OUT)) {
+                NETMGR_LOG_D("Connection idle timeout, closing");
+                break;
+            }
             continue;
+        }
+        lastActivity = now;
         if ((static_cast<unsigned short>(fds[0].revents) & (POLLHUP | POLLERR)) ||
                 (static_cast<unsigned short>(fds[1].revents) & (POLLHUP | POLLERR)))
             break;
-        if (fds[0].revents & POLLIN) {
+        if ((static_cast<unsigned short>(fds[0].revents) & POLLIN) {
             int n = recv(client, buffer, BUFFER_SIZE, 0);
             if (n <= 0) {
-                clientClosed = true;
-                continue;
+                break;
             }
             if (SendAll(server, buffer, n, 0) <= 0) {
-                serverClosed = true;
-                continue;
+                break;
             }
         }
         if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
             int n = recv(server, buffer, BUFFER_SIZE, 0);
             if (n <= 0) {
-                serverClosed = true;
-                continue;
+                break;
             }
             if (SendAll(client, buffer, n, 0) <= 0) {
-                clientClosed = true;
-                continue;
+                break;
             }
         }
     }
@@ -343,7 +345,11 @@ int ProxyServer::ConnectToServer(const std::string &host, int port)
     struct addrinfo *result;
     struct addrinfo *rp;
     int serverSocket = -1;
-    memset_s(&hints, sizeof(struct addrinfo), 0, sizeof(hints));
+    int ret = memset_s(&hints, sizeof(struct addrinfo), 0, sizeof(hints));
+    if (ret != 0) {
+        NETMGR_LOG_E("memset_s hints fail:");
+        return -1;
+    }
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
@@ -648,6 +654,7 @@ void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requ
     }
     TunnelData(clientSocket, serverSocket);
     close(serverSocket);
+    close(clientSocket);
 }
 
 void ProxyServer::ForwardData(int fromSocket, int toSocket)

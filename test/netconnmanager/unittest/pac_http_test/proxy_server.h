@@ -77,6 +77,7 @@ public:
     static int32_t proxServerPort;
     static std::map<std::string, std::string> pacScripts;
 private:
+    ssize_t SendAll(int sockfd, const void* buffer, size_t length, int32_t flag);
     bool IsPortAvailable(int32_t port);
     void ForwardResponseToClient(int32_t clientSocket, int32_t serverSocket);
     void SendErrorResponse(int32_t clientSocket, const char *response);
