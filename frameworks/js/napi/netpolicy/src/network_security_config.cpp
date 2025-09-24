@@ -796,14 +796,19 @@ static uint8_t IsStrMatch(const std::string &str1, const std::string &str2)
 {
     uint32_t len1 = str1.length();
     uint32_t len2 = str2.length();
-    if (str1[0] != '*' || str1[1] != '.' || (len1 - len2) > MIN_LEN) {
+    if (str1[0] != '*' || str1[1] != '.') {
         return NEED_REGEX;
     }
+    bool isNoRegex = true;
     for (uint32_t i = 2; i <= len1 - 1; i++) {
-        if (str1[i] != str2[len2 - len1 + i]) {
-            return (std::isalnum(str1[i]) || str1[i] == '.') ? NOT_MATCH : NEED_REGEX;
+        isNoRegex &= (std::isalnum(str1[i]) || str1[i] == '.');
+        if (i >= len1 - len2 && str1[i] != str2[len2 - len1 + i]) {
+            return isNoRegex ? NOT_MATCH : NEED_REGEX;
         }
     }
+    if (len1 - len2 > MIN_LEN) {
+       return isNoRegex ? NOT_MATCH : NEED_REGEX;
+    }    
     return MATCH;
 }
 
