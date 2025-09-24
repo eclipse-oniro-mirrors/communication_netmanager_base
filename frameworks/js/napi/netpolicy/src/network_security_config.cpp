@@ -807,7 +807,7 @@ static uint8_t IsStrMatch(const std::string &str1, const std::string &str2)
         }
     }
     if (len1 - len2 > MIN_LEN) {
-       return isNoRegex ? NOT_MATCH : NEED_REGEX;
+        return isNoRegex ? NOT_MATCH : NEED_REGEX;
     }    
     return MATCH;
 }
