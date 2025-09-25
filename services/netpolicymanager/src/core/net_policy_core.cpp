@@ -27,7 +27,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 using namespace AppExecFwk;
 namespace {
-constexpr const char *DEVICE_IDLE_MODE_KEY = "0";
+constexpr const char *DEVICE_IDLE_MODE_KEY = "sleeping";
 constexpr uint32_t AGAIN_REGISTER_CALLBACK_INTERVAL = 500;
 constexpr uint32_t CORE_EVENT_PRIORITY = 1;
 constexpr uint32_t MAX_RETRY_TIMES = 10;
