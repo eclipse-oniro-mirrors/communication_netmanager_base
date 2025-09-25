@@ -291,7 +291,7 @@ bool NetSupplier::GetRestrictBackground() const
     return restrictBackground_;
 }
 
-bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_t uid)
+bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest)
 {
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
@@ -304,9 +304,10 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_
     }
     NETMGR_LOG_D("execute ReleaseNetwork, supplierId[%{public}d]", supplierId_);
     NetRequest request;
-    request.uid = uid;
+    request.uid = netrequest.uid;
     request.ident = netSupplierIdent_;
     request.netCaps = netCaps;
+    request.registerType = netrequest.registerType;
     if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
         request.isRemoveUid = REMOVE_UID_ONLY;
     }
@@ -374,7 +375,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         return;
     }
     if (requestList_.empty() && HasNetCap(NET_CAPABILITY_INTERNET)) {
-        SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
+        SupplierDisconnection(netCaps_.ToSet(), netrequest);
         return;
     }
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
@@ -388,7 +389,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
     requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
-    SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
+    SupplierDisconnection(netCaps_.ToSet(), netrequest);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
@@ -400,7 +401,7 @@ int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
     requestList_.erase(netrequest.requestId);
     bestReqList_.erase(netrequest.requestId);
-    SupplierDisconnection(netCaps_.ToSet(), netrequest.uid);
+    SupplierDisconnection(netCaps_.ToSet(), netrequest);
     return NETMANAGER_SUCCESS;
 }
 
