@@ -1659,6 +1659,19 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest006, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest007, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr, TEST_UID);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+
+    sptr<NetSupplier> supplier = nullptr;
+    sptr<NetSupplier> newSupplier = nullptr;
+    NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
+
+    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0, 0, REQUEST);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, OnAddSystemAbilityTest002, TestSize.Level1)
 {
     int32_t systemAbilityId = COMM_NETSYS_NATIVE_SYS_ABILITY_ID;
