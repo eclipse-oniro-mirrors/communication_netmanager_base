@@ -167,6 +167,8 @@
       "OHOS::NetManagerStandard::HttpProxy::Unmarshalling(OHOS::Parcel&, OHOS::NetManagerStandard::HttpProxy&)";
       "OHOS::NetManagerStandard::HttpProxy::Marshalling(OHOS::Parcel&) const";
       "OHOS::NetManagerStandard::HttpProxy::GetExclusionList() const";
+      "OHOS::NetManagerStandard::HttpProxy::GetUsername() const";
+      "OHOS::NetManagerStandard::HttpProxy::GetPassword() const";
       "OHOS::NetManagerStandard::HttpProxy::HttpProxy(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, unsigned short, std::__h::list<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
       "OHOS::NetManagerStandard::NetConnServiceProxy::NetConnServiceProxy(OHOS::sptr<OHOS::IRemoteObject> const&)";
       VTT?for?OHOS::NetManagerStandard::NetInterfaceStateCallbackStub;
