@@ -92,12 +92,16 @@
                 "time_service",
                 "faultloggerd",
                 "hiappevent",
-                "config_policy"
+                "config_policy",
+                "ylong_runtime",
+                "rust_cxx"
             ]
         },
         "build": {
             "group_type": {
-                "base_group": [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection" ],
+                "base_group": [
+                    "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:net_connection"
+                ],
                 "fwk_group": [
                     "//foundation/communication/netmanager_base/frameworks/ets/ani:ani_package",
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
@@ -234,8 +238,7 @@
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/utils:net_data_share",
                     "header": {
-                        "header_files": [
-                        ],
+                        "header_files": [],
                         "header_base": "//foundation/communication/netmanager_base/utils/data_share/include"
                     }
                 },
@@ -243,8 +246,7 @@
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/utils:net_bundle_utils",
                     "header": {
-                        "header_files": [
-                        ],
+                        "header_files": [],
                         "header_base": "//foundation/communication/netmanager_base/utils/bundle_utils/include"
                     }
                 },
@@ -313,8 +315,7 @@
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection_if",
                     "header": {
-                        "header_files": [
-                        ],
+                        "header_files": [],
                         "header_base": "//foundation/communication/netmanager_base/frameworks/js/napi/connection"
                     }
                 },
@@ -325,6 +326,10 @@
                         ],
                         "header_base": "//foundation/communication/netmanager_base/frameworks/cj/connection/include"
                     }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/common/ani_rs:ani_rs"
                 }
             ],
             "test": [

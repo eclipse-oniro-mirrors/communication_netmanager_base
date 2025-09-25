@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,15 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-group("ani_package") {
+ohos_rust_proc_macro("ani_rs_macros") {
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+
+  crate_name = "ani_rs_macros"
+  edition = "2021"
+
+  clippy_lints = "none"
   deps = [
-    "connection:connection",
-    "connection:connection_ani",
-    "connection:connection_etc",
-    "statistics:statistics",
-    "statistics:statistics_ani",
-    "statistics:statistics_etc",
+    "//third_party/rust/crates/proc-macro2:lib",
+    "//third_party/rust/crates/quote:lib",
+    "//third_party/rust/crates/syn:lib",
   ]
+  sources = [ "src/lib.rs" ]
 }
