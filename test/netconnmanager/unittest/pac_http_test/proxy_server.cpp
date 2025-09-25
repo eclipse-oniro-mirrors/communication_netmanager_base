@@ -36,11 +36,13 @@
 #define PRINT_RED_FMT_LN(fmt, ...) printf("\033[31m" fmt "\n\033[0m", ##__VA_ARGS__)
 #define NUM_4 4
 #define NUM_10 10
-#define TIME_OUT 30
+#define TIME_OUT 5
 #define PORT_8080 8080
 #define PORT_80 80
 #define PORT_1080 1080
 #define PORT_443 443
+constexpr int BUFFER_SIZE = 1024 * 64;
+constexpr int MS_1 = 1000;
 using namespace OHOS::NetManagerStandard;
 
 std::map<std::string, std::string> ProxyServer::pacScripts;
@@ -281,38 +283,79 @@ static bool TransferData(int32_t srcFd, int32_t dstFd, char *buffer, size_t buff
     return false;
 }
 
-void ProxyServer::TunnelData(int32_t client, int32_t server)
+ssize_t ProxyServer::SendAll(int sockfd, const void* buffer, size_t length, int32_t flag)
+{
+    const char* ptr = static_cast<const char*>(buffer);
+    size_t totalSent = 0;
+    while (totalSent < length) {
+        ssize_t sent = send(sockfd, ptr + totalSent, length - totalSent, flag);
+        if (sent < 0) {
+            if (errno == EINTR) {
+                continue;
+            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                usleep(MS_1);
+                continue;
+            } else {
+                return -1;
+            }
+        } else if (sent == 0) {
+            break;
+        }
+        totalSent += static_cast<size_t>(sent);
+    }
+    return totalSent;
+}
+
+void ProxyServer::TunnelData(int client, int server)
 {
     struct pollfd fds[2];
     fds[0].fd = client;
     fds[0].events = POLLIN;
     fds[1].fd = server;
     fds[1].events = POLLIN;
-    char buffer[bufferSize];
-    bool clientClosed = false;
-    bool serverClosed = false;
-    while (!clientClosed && !serverClosed && running_) {
-        int32_t ret = poll(fds, 2, 1000);
-        if (HandlePollError(ret, errno)) {
+    char buffer[BUFFER_SIZE];
+    auto lastActivity = std::chrono::steady_clock::now();
+    while (running_) {
+        int ret = poll(fds, 2, 100);
+        if (ret < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
             break;
         }
+        auto now = std::chrono::steady_clock::now();
         if (ret == 0) {
+            if (now - lastActivity > std::chrono::seconds(TIME_OUT)) {
+                break;
+            }
             continue;
         }
-        if (CheckPollHupOrErr(fds)) {
+        lastActivity = now;
+        if ((static_cast<unsigned short>(fds[0].revents) & (POLLHUP | POLLERR)) ||
+                (static_cast<unsigned short>(fds[1].revents) & (POLLHUP | POLLERR))) {
             break;
         }
         if (fds[0].revents & POLLIN) {
-            clientClosed = TransferData(client, server, buffer, bufferSize, stats_);
-            if (clientClosed) {
-                continue;
+            int n = recv(client, buffer, BUFFER_SIZE, 0);
+            if (n <= 0) {
+                break;
+            }
+            if (SendAll(server, buffer, n, 0) <= 0) {
+                break;
             }
         }
-        if (fds[1].revents & POLLIN) {
-            serverClosed = TransferData(server, client, buffer, bufferSize, stats_);
+        if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
+            int n = recv(server, buffer, BUFFER_SIZE, 0);
+            if (n <= 0) {
+                break;
+            }
+            if (SendAll(client, buffer, n, 0) <= 0) {
+                break;
+            }
         }
     }
 }
+
 std::string ProxyServer::ReceiveResponseHeader(int32_t socket)
 {
     std::string header;
@@ -376,41 +419,46 @@ int ProxyServer::FindAvailablePort(int32_t startPort, int32_t endPort)
 
 int ProxyServer::ConnectToServer(const std::string &host, int port)
 {
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    struct addrinfo hints;
+    struct addrinfo *result;
+    struct addrinfo *rp;
+    int serverSocket = -1;
+    int ret = memset_s(&hints, sizeof(struct addrinfo), 0, sizeof(hints));
+    if (ret != 0) {
+        return -1;
+    }
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    std::string portStr = std::to_string(port);
+    int status = getaddrinfo(host.c_str(), portStr.c_str(), &hints, &result);
+    if (status != 0) {
+        return -1;
+    }
+    for (rp = result; rp != nullptr; rp = rp->ai_next) {
+        serverSocket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (serverSocket < 0) {
+            continue;
+        }
+        struct timeval timeout;
+        timeout.tv_sec = TIME_OUT;
+        timeout.tv_usec = 0;
+        if (setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
+            setsockopt(serverSocket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+            close(serverSocket);
+            serverSocket = -1;
+            continue;
+        }
+        if (connect(serverSocket, rp->ai_addr, rp->ai_addrlen) == 0) {
+            break;
+        }
+        close(serverSocket);
+        serverSocket = -1;
+    }
+    freeaddrinfo(result);
     if (serverSocket < 0) {
-        std::cerr << "无法创建socket" << std::endl;
         return -1;
     }
-
-    struct timeval timeout;
-    timeout.tv_sec = NUM_10;
-    timeout.tv_usec = 0;
-
-    if (setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
-        setsockopt(serverSocket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-        std::cerr << "设置socket超时选项失败" << std::endl;
-        close(serverSocket);
-        return -1;
-    }
-
-    struct hostent *server = gethostbyname(host.c_str());
-    if (server == nullptr) {
-        std::cerr << "无法解析主机: " << host << std::endl;
-        close(serverSocket);
-        return -1;
-    }
-
-    struct sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    memcpy_s(&serverAddr.sin_addr.s_addr, sizeof(serverAddr.sin_addr.s_addr), server->h_addr, server->h_length);
-
-    if (connect(serverSocket, reinterpret_cast<const sockaddr *>(&serverAddr), sizeof(serverAddr)) < 0) {
-        std::cerr << "无法连接到目标服务器 " << host << ":" << port << std::endl;
-        close(serverSocket);
-        return -1;
-    }
-
     return serverSocket;
 }
 
@@ -657,7 +705,7 @@ void ProxyServer::CleanupConnection(int32_t clientSocket)
     stats_->activeConnections--;
 }
 
-void ProxyServer::HandleConnectRequest(int clientSocket, const std::string &requestHeader, const std::string &url)
+void ProxyServer::HandleConnectRequest(int32_t clientSocket, const std::string &requestHeader, const std::string &url)
 {
     stats_->httpsRequests++;
     std::string host;
