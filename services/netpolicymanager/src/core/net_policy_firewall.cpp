@@ -219,9 +219,6 @@ void NetPolicyFirewall::HandleEvent(int32_t eventId, const std::shared_ptr<Polic
         case NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED:
             UpdatePowerSavePolicy(policyEvent->powerSaveMode);
             break;
-        case NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED:
-            UpdateDeviceIdlePolicy(policyEvent->deviceIdleMode);
-            break;
         default:
             break;
     }
