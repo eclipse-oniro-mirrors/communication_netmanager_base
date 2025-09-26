@@ -37,10 +37,6 @@ void EventManager::AddListener(napi_env env, const std::string &type, napi_value
         listeners_.erase(it, listeners_.end());
     }
     listeners_.emplace_back(EventListener(env, type, callback, once, asyncCallback));
-    lock.unlock();
-    if (callback_) {
-        callback_(type);
-    }
 }
 
 void EventManager::DeleteListener(const std::string &type, napi_value callback)
@@ -140,11 +136,6 @@ napi_ref EventManager::GetRef() const
 void EventManager::SetRef(napi_ref ref)
 {
     ref_ = ref;
-}
-
-void EventManager::RegisterObserverCallback(std::function<void(const std::string &type)> callback)
-{
-    callback_ = callback;
 }
 
 UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType,
