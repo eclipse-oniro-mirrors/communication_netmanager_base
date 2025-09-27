@@ -232,3 +232,16 @@ HWTEST_F(NetsysNetFirewallTest, NetsysNetFirewallTest005, TestSize.Level0)
     int32_t ret = bpfNetFirewall->SetFirewallIpRules(ruleList);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(NetsysNetFirewallTest, IpParamParserTest001, TestSize.Level0)
+{
+    std::vector<Ip4Data> list;
+    in_addr startAddr;
+    startAddr.s_addr = 2887802737;
+    in_addr endAddr;
+    endAddr.s_addr = 2887802770;
+    EXPECT_NE(IpParamParser::GetIp4AndMask(endAddr, startAddr, list), 0);
+    EXPECT_EQ(IpParamParser::GetIp4AndMask(startAddr, endAddr, list), 0);
+    EXPECT_EQ(IpParamParser::GetSuffixZeroLength(0), 0);
+    EXPECT_GE(IpParamParser::GetSuffixZeroLength(1000), 0);
+}

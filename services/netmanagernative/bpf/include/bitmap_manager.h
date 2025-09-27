@@ -191,6 +191,8 @@ public:
      * @return success:return NETFIREWALL_SUCCESS, otherwise return error code
      */
     static int32_t GetIp4AndMask(const in_addr &startAddr, const in_addr &endAddr, std::vector<Ip4Data> &list);
+    static uint32_t GetCidrBlockBits(uint32_t cidrSize);
+    static uint32_t GetSuffixZeroLength(uint32_t ip);
 
     /**
      * convert ip4 string to uint32_t of network byte order
@@ -212,45 +214,6 @@ public:
      */
 
     static void AddIp(uint32_t ip, uint32_t mask, std::vector<Ip4Data> &ip4Vec);
-
-    /**
-     * get biggest mask from startIp and endIp
-     *
-     * @param startIp start ip
-     * @param endIp end ip
-     * @return ip mask
-     */
-
-    static uint32_t GetMask(uint32_t startIp, uint32_t endIp);
-
-    /**
-     * find value of bit from ip4 uint32_t from right to left
-     *
-     * @param ip uint32_t of Network byte order
-     * @param start start index
-     * @param end  end index
-     * @param value find value 0 or 1
-     * @return if founded return bit index of ip, otherwise return IPV4_BIT_COUNT
-     */
-    static uint32_t Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value);
-
-    /**
-     * find value of bit from ip4 uint32_t from right to left
-     *
-     * @param ip uint32_t of Network byte order
-     * @param start start index
-     * @param value find value 0 or 1
-     * @return if founded return bit index of ip, otherwise return IPV4_BIT_COUNT
-     */
-    static uint32_t Find(uint32_t ip, uint32_t start, uint32_t value);
-
-    /**
-     * get broadcast ip from mask and ip, set ip to next ip of broadcast
-     *
-     * @param mask ip4 mask
-     * @param ip input and output
-     */
-    static void ChangeStart(uint32_t mask, uint32_t &ip);
 
     /**
      * convert ip6segment to ip6 and mask list

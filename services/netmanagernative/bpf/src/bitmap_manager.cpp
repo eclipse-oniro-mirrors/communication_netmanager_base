@@ -32,6 +32,7 @@ using namespace OHOS::NetsysNative;
 namespace OHOS {
 namespace NetManagerStandard {
 const uint32_t BITMAP_BIT_COUNT = (BITMAP_LEN * sizeof(uint32_t) * BIT_PER_BYTE);
+static constexpr const uint32_t IPV4_MAX_VAL = 0xFFFFFFFF;
 
 Bitmap::Bitmap()
 {
@@ -420,67 +421,26 @@ std::string IpParamParser::Ip4ToStr(uint32_t ip)
     return std::string(str);
 }
 
-uint32_t IpParamParser::GetMask(uint32_t startIp, uint32_t endIp)
+uint32_t IpParamParser::GetCidrBlockBits(uint32_t cidrSize)
 {
-    int32_t i = static_cast<int32_t>(IPV4_BIT_COUNT - 1);
-    for (; i >= 0; --i) {
-        if (((startIp >> i) & VALUE_ONE) != ((endIp >> i) & VALUE_ONE)) {
-            return IPV4_BIT_COUNT - static_cast<uint32_t>(i) - 1;
-        }
+    uint32_t count = 0;
+    while (cidrSize >>= 1) {
+        ++count;
     }
-    return IPV4_BIT_COUNT;
+    return count;
 }
-
-uint32_t IpParamParser::Rfind(uint32_t ip, uint32_t start, uint32_t end, uint32_t value)
+ 
+uint32_t IpParamParser::GetSuffixZeroLength(uint32_t ip)
 {
-    if (start > end || end >= IPV4_BIT_COUNT) {
+    if (ip == 0) {
         return IPV4_BIT_COUNT;
     }
-    uint32_t startIndex = IPV4_BIT_COUNT - end - 1;
-    uint32_t endIndex = IPV4_BIT_COUNT - start - 1;
-    for (uint32_t i = startIndex; i <= endIndex; ++i) {
-        if (((ip >> i) & VALUE_ONE) == value) {
-            return IPV4_BIT_COUNT - i - 1;
-        }
+    uint32_t count = 0;
+    while ((ip & 1) == 0) {
+        ++count;
+        ip >>= 1;
     }
-    return IPV4_BIT_COUNT;
-}
-
-uint32_t IpParamParser::Find(uint32_t ip, uint32_t start, uint32_t value)
-{
-    if (start >= IPV4_BIT_COUNT) {
-        return IPV4_BIT_COUNT;
-    }
-    int32_t i = static_cast<int32_t>(IPV4_BIT_COUNT - start - 1);
-    for (; i >= 0; --i) {
-        if (((ip >> i) & VALUE_ONE) == value) {
-            return IPV4_BIT_COUNT - static_cast<uint32_t>(i) - 1;
-        }
-    }
-    return IPV4_BIT_COUNT;
-}
-
-void IpParamParser::ChangeStart(uint32_t mask, uint32_t &ip)
-{
-    bool needSetZero = true;
-    if (mask > IPV4_MAX_PREFIXLEN || mask >= IPV4_BIT_COUNT) {
-        return;
-    } else if (mask == IPV4_MAX_PREFIXLEN) {
-        needSetZero = false;
-    }
-    for (uint32_t i = 0; i <= (IPV4_BIT_COUNT - 1); ++i) {
-        uint32_t byte = (1 << i);
-        if (needSetZero && (i <= (IPV4_BIT_COUNT - mask - 1))) {
-            ip &= (~byte);
-            continue;
-        }
-        if (ip & byte) {
-            ip &= (~byte);
-            continue;
-        }
-        ip |= byte;
-        return;
-    }
+    return count;
 }
 
 int32_t IpParamParser::GetIp4AndMask(const in_addr &startAddr, const in_addr &endAddr, std::vector<Ip4Data> &list)
@@ -489,38 +449,18 @@ int32_t IpParamParser::GetIp4AndMask(const in_addr &startAddr, const in_addr &en
     uint32_t endIpInt = ntohl(endAddr.s_addr);
     if (startIpInt > endIpInt) {
         return NETFIREWALL_ERR;
-    } else if (startIpInt == endIpInt) {
-        AddIp(startIpInt, IPV4_MAX_PREFIXLEN, list);
-        return NETFIREWALL_SUCCESS;
     }
-    uint32_t mask = GetMask(startIpInt, endIpInt);
-    uint32_t tmpStart = startIpInt;
-    uint32_t off = Rfind(tmpStart, mask, IPV4_BIT_COUNT - 1, 1);
-    if (off != IPV4_BIT_COUNT) {
-        AddIp(tmpStart, off + 1, list);
-        ChangeStart(off + 1, tmpStart);
-        off = Rfind(startIpInt, mask, off, 0);
-        while (off != IPV4_BIT_COUNT && off != mask) {
-            AddIp(tmpStart, off + 1, list);
-            ChangeStart(off + 1, tmpStart);
-            off = Rfind(startIpInt, mask, off - 1, 0);
-        }
-    } else if (Rfind(endIpInt, mask, IPV4_BIT_COUNT - 1, 0) == IPV4_BIT_COUNT) {
-        AddIp(startIpInt, mask, list);
-        return true;
-    }
-    off = Find(endIpInt, mask, 1);
-    if (off == IPV4_BIT_COUNT) {
-        return NETFIREWALL_ERR;
-    }
-    off = Find(endIpInt, off + 1, 1);
-    while (off != IPV4_BIT_COUNT) {
-        AddIp(tmpStart, off + 1, list);
-        ChangeStart(off + 1, tmpStart);
-        off = Find(endIpInt, off + 1, 1);
-    }
-    if (tmpStart == endIpInt) {
-        AddIp(tmpStart, IPV4_BIT_COUNT, list);
+    uint32_t suffixZeros = 0;
+    uint32_t maxCidrSize = 0;
+    uint32_t remainingCidrSize = 0;
+    uint32_t cidrBits = 0;
+    while (startIpInt <= endIpInt) {
+        suffixZeros = GetSuffixZeroLength(startIpInt);
+        maxCidrSize = (1 << suffixZeros);
+        remainingCidrSize = endIpInt - startIpInt + 1;
+        cidrBits = GetCidrBlockBits(std::min(maxCidrSize, remainingCidrSize));
+        AddIp(startIpInt, IPV4_BIT_COUNT - cidrBits, list);
+        startIpInt += (1 << cidrBits);
     }
     return NETFIREWALL_SUCCESS;
 }
