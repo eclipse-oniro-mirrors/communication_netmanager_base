@@ -100,6 +100,7 @@ void ProbeThread::SendHttpProbe(ProbeType probeType)
         return;
     }
 
+    probeDuration_ = CommonUtils::GetCurrentMilliSecond();
     if (httpProbe_->SendProbe(probeType, httpProbeUrl_, httpsProbeUrl_) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Net:[%{public}d] send probe failed.", netId_);
         isDetecting_ = false;
@@ -107,6 +108,7 @@ void ProbeThread::SendHttpProbe(ProbeType probeType)
         latchAll_->CountDown();
         return;
     }
+    probeDuration_ = CommonUtils::GetCurrentMilliSecond() - probeDuration_;
 
     if (IsConclusiveResult()) {
         isDetecting_ = false;
@@ -171,6 +173,11 @@ bool ProbeThread::IsDetecting()
 ProbeType ProbeThread::GetProbeType()
 {
     return probeType_;
+}
+
+uint64_t ProbeThread::GetProbeDurationTime()
+{
+    return probeDuration_;
 }
 
 }
