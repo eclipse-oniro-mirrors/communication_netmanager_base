@@ -193,10 +193,12 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
         }
     }
     // remove the iface quota that not metered.
-    std::shared_lock<std::shared_mutex> lock(meteredMutex_);
-    for (uint32_t i = 0; i < meteredIfaces_.size(); ++i) {
-        if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfaces_[i])) {
-            GetNetsysInst()->BandwidthRemoveIfaceQuota(meteredIfaces_[i]);
+    std::shared_lock<std::shared_mutex> meteredLock(meteredMutex_);
+    auto meteredIfacesBck = meteredIfaces_;
+    meteredLock.unlock();
+    for (uint32_t i = 0; i < meteredIfacesBck.size(); ++i) {
+        if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfacesBck[i])) {
+            GetNetsysInst()->BandwidthRemoveIfaceQuota(meteredIfacesBck[i]);
         }
     }
     return newMeteredIfaces;
