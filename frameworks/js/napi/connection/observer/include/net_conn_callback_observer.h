@@ -16,21 +16,12 @@
 #ifndef NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
 #define NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
 
-#include <bitset>
 #include "event_manager.h"
 #include "napi_utils.h"
 #include "net_all_capabilities.h"
 #include "net_conn_callback_stub.h"
 
 namespace OHOS::NetManagerStandard {
-static constexpr const int NOLISTENER_EVENT_NUMBER = 4;
-struct ListenState {
-    std::bitset<NOLISTENER_EVENT_NUMBER> callbackFlag; // 默认初始化为0
-    sptr<NetHandle> availState;
-    std::pair<sptr<NetHandle>, sptr<NetLinkInfo>> propertyState;
-    std::pair<sptr<NetHandle>, sptr<NetAllCapabilities>> capState;
-};
-
 class NetConnCallbackObserver : public NetConnCallbackStub {
 public:
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
@@ -45,7 +36,6 @@ public:
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
-    void OnAddListener(const std::string &type);
 private:
     static napi_value CreateNetHandle(napi_env env, NetHandle &netHandle);
 
@@ -66,11 +56,6 @@ private:
     static napi_value CreateNetUnavailableParam(napi_env env);
 
     static napi_value CreateNetBlockStatusChangeParam(napi_env env, NetHandle &netHandle, bool blocked);
-
-    void SetListenerState(const std::string &event, const bool &flag, const sptr<NetHandle> &network,
-        const sptr<NetLinkInfo> &info, const sptr<NetAllCapabilities> &netCap);
-private:
-    ListenState listenState_;
 };
 } // namespace OHOS::NetManagerStandard
 
