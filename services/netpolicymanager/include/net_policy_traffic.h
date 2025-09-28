@@ -223,6 +223,7 @@ private:
     std::vector<std::string> meteredIfaces_;
     sptr<NetsysControllerCallback> netsysCallback_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
+    std::shared_mutex meteredMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
