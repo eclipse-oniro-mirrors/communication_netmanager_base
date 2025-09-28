@@ -64,7 +64,7 @@ constexpr const char *EXTENSION_FAIL = "netpolicy extension fail";
 constexpr uint64_t DELAY_US = 30 * 1000 * 1000;
 constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
@@ -78,12 +78,12 @@ sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
         return nullptr;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-    if (bundleMgrProxy == nullptr) {
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return nullptr;
     }
-    return bundleMgrProxy;
+    return iBundleMgr;
 }
 const int32_t MAIN_USER_ID = 100;
 const int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
@@ -528,7 +528,7 @@ void NetPolicyService::OverwriteNetAccessPolicyToDBFromConfig()
         return;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return;
@@ -658,7 +658,7 @@ int32_t NetPolicyService::GetNetworkAccessPolicy(AccessPolicyParameter parameter
     NETMGR_LOG_I("GetNetworkAccessPolicy enter.");
     NetAccessPolicyRDB netAccessPolicy;
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return NETMANAGER_ERR_INTERNAL;
