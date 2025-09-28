@@ -399,11 +399,8 @@ bool DnsProxyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
     if (recLen < DNS_HEAD_LENGTH) {
         return false;
     }
-    uint8_t flagBuff;
     char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
-    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
-        return false;
-    }
+    uint8_t flagBuff = static_cast<uint8_t>(*recFlagBuff);
     int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
     if (reqFlag) {
         return false; // answer
@@ -417,11 +414,8 @@ bool DnsProxyListen::CheckDnsResponse(char *recBuff, size_t recLen)
     if (recLen < FLAG_BUFF_LEN + FLAG_BUFF_OFFSET) {
         return false;
     }
-    uint8_t flagBuff;
     char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
-    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
-        return false;
-    }
+    uint8_t flagBuff = static_cast<uint8_t>(*recFlagBuff);
     int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
     if (reqFlag) {
         return true; // answer

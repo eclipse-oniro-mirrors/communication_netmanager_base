@@ -30,6 +30,10 @@ void NetPolicyFirewall::Init()
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
     powerSaveFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_POWER_SAVE);
 
+    if (deviceIdleFirewallRule_ == nullptr || powerSaveFirewallRule_ == nullptr) {
+        return;
+    }
+
     GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
 

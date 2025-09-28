@@ -82,7 +82,7 @@ int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
     cmsgh->cmsg_len = CMSG_LEN(sizeof(fd));
     cmsgh->cmsg_level = SOL_SOCKET;
     cmsgh->cmsg_type = SCM_RIGHTS;
-    (void)memcpy_s(CMSG_DATA(cmsgh), sizeof(fd), &fd, sizeof(fd));
+    (void)memcpy_s(CMSG_DATA(cmsgh), CMSG_ALIGN(sizeof(fd)), &fd, sizeof(fd));
     int32_t ret = sendmsg(socketFd, &message, 0);
     if (ret < 0) {
         return HandleError(ret, ERROR_CODE_SENDMSG_FAILED, socketFd);

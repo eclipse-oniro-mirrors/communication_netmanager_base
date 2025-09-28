@@ -969,14 +969,16 @@ void NetConnService::DecreaseNetActivatesForUid(const uint32_t callingUid, const
 
 void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netActivate, uint32_t reqId)
 {
+    if (netActivate == nullptr) {
+        return;
+    }
     NetRequest netRequest(netActivate->GetUid(), reqId);
-    if (netActivate) {
-        sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
-        if (supplier) {
-            supplier->CancelRequest(netRequest);
-        }
+    sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+    if (supplier) {
+        supplier->CancelRequest(netRequest);
     }
     NET_SUPPLIER_MAP::iterator iterSupplier;
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second != nullptr) {
             iterSupplier->second->CancelRequest(netRequest);

@@ -40,7 +40,7 @@ NetlinkMsg::~NetlinkMsg() = default;
 void NetlinkMsg::AddRoute(uint16_t action, struct rtmsg msg)
 {
     netlinkMessage_->nlmsg_type = action;
-    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), maxBufLen_, &msg, sizeof(struct rtmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", result);
     }
@@ -51,7 +51,7 @@ void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
 {
     netlinkMessage_->nlmsg_type = action;
     int32_t result =
-        memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct fib_rule_hdr), &msg, sizeof(struct fib_rule_hdr));
+        memcpy_s(NLMSG_DATA(netlinkMessage_), maxBufLen_, &msg, sizeof(struct fib_rule_hdr));
     if (result != 0) {
         NETNATIVE_LOGE("[AddRule]: string copy failed result %{public}d", result);
     }
@@ -61,7 +61,7 @@ void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
 void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
 {
     netlinkMessage_->nlmsg_type = action;
-    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), maxBufLen_, &msg, sizeof(struct ifaddrmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
         return;
@@ -90,8 +90,10 @@ int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
     rta->rta_type = type;
     rta->rta_len = static_cast<uint16_t>(len);
 
+    size_t remainSize = maxBufLen_ > (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_LENGTH(0)) ?
+        (maxBufLen_ - (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_LENGTH(0))) : 0;
     if (data != nullptr) {
-        int32_t result = memcpy_s(RTA_DATA(rta), alen, data, alen);
+        int32_t result = memcpy_s(RTA_DATA(rta), remainSize, data, alen);
         if (result != 0) {
             NETNATIVE_LOGE("[get_addr_info]: string copy failed result %{public}d", result);
             return -1;
