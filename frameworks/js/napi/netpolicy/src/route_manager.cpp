@@ -1339,6 +1339,13 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
         return -ENOTUNIQ;
     }
 
+    if (action == RTM_NEWRULE) {
+        // delete rule before add, incase the old rules residue. Ignore the result of deleting rule.
+        for (const uint8_t family : {AF_INET, AF_INET6}) {
+            SendRuleToKernel(RTM_DELRULE, family, ruleType, ruleInfo, uidStart, uidEnd);
+        }
+    }
+
     // The main work is to assemble the structure required for rule.
     for (const uint8_t family : {AF_INET, AF_INET6}) {
         if (SendRuleToKernel(action, family, ruleType, ruleInfo, uidStart, uidEnd) < 0) {
