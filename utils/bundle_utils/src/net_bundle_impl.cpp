@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
@@ -37,12 +37,12 @@ sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
         NETMGR_LOG_E("fail to get bundle manager proxy.");
         return nullptr;
     }
-    return iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
 }
 
 int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return NETMANAGER_ERR_INTERNAL;
@@ -64,7 +64,7 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
 
 bool NetBundleImpl::IsAtomicService(std::string &bundleName)
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return false;
@@ -82,7 +82,7 @@ bool NetBundleImpl::IsAtomicService(std::string &bundleName)
 
 std::optional<std::string> NetBundleImpl::ObtainBundleNameForSelf()
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return std::nullopt;
@@ -100,7 +100,7 @@ std::optional<std::string> NetBundleImpl::ObtainBundleNameForSelf()
 std::optional<int32_t> NetBundleImpl::ObtainTargetApiVersionForSelf()
 {
     static constexpr int32_t API_VERSION_MOD = 1000;
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return std::nullopt;
@@ -119,7 +119,7 @@ std::optional<int32_t> NetBundleImpl::ObtainTargetApiVersionForSelf()
 
 std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> NetBundleImpl::ObtainBundleInfoForActive()
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("ObtainBundleInfoForActive Failed to get bundle manager proxy.");
         return std::nullopt;
@@ -150,7 +150,7 @@ std::optional<std::unordered_map<uint32_t, SampleBundleInfo>> NetBundleImpl::Obt
 
 std::optional<SampleBundleInfo> NetBundleImpl::ObtainBundleInfoForUid(uint32_t uid)
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("ObtainBundleInfoForUid Failed to get bundle manager proxy.");
         return std::nullopt;

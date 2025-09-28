@@ -29,7 +29,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 using namespace testing::ext;
 namespace {
-sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
@@ -41,11 +41,11 @@ sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
         return nullptr;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-    if (bundleMgrProxy == nullptr) {
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
         return nullptr;
     }
-    return bundleMgrProxy;
+    return iBundleMgr;
 }
 constexpr const char* POLICY_DATABASE_BACKUP_FILE_TEST =
     "/data/service/el1/public/netmanager/net_uid_access_policy_backup_test.txt";
@@ -69,7 +69,7 @@ void NetPolicyDBCloneTest::TearDown() {}
 
 HWTEST_F(NetPolicyDBCloneTest, OnBackupTest001, TestSize.Level1)
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         return;
     }
@@ -120,7 +120,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreTest001, TestSize.Level1)
 {
     std::string content;
     std::ostringstream ss;
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return;

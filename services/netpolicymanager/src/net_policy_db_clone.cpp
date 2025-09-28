@@ -37,7 +37,7 @@ namespace {
 constexpr int32_t MAIN_USER_ID = 100;
 constexpr int32_t NET_ACCESS_POLICY_ALLOW_VALUE = 1;
 constexpr uint64_t DAY_MICROSECONDS =  24ULL * 60ULL * 60ULL * 1000ULL * 1000ULL;
-sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
@@ -51,12 +51,12 @@ sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
         return nullptr;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-    if (bundleMgrProxy == nullptr) {
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return nullptr;
     }
-    return bundleMgrProxy;
+    return iBundleMgr;
 }
 }
 
@@ -74,7 +74,7 @@ int32_t NetPolicyDBClone::OnBackup(UniqueFd &fd, const std::string &backupInfo)
 
     std::string content;
     std::ostringstream ss;
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return NETMANAGER_ERR_INTERNAL;
@@ -118,7 +118,7 @@ int32_t NetPolicyDBClone::OnRestore(UniqueFd &fd, const std::string &backupInfo)
         return NETMANAGER_ERROR;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -165,7 +165,7 @@ int32_t NetPolicyDBClone::OnRestoreSingleApp(const std::string &bundleNameFromLi
 {
     NETMGR_LOG_I("Get OnRestoreSingleApp bundleName. [%{public}s]", bundleNameFromListen.c_str());
     std::lock_guard<ffrt::mutex> lock(mutex_);
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    auto bundleMgrProxy = GetBundleMgrProxy();
     if (bundleMgrProxy == nullptr) {
         NETMGR_LOG_E("Failed to get bundle manager proxy.");
         return NETMANAGER_ERR_INTERNAL;
