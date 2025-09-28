@@ -409,7 +409,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
                                     { "unitStyle", unitStyle } };
 
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << traffic; // 2: keep two decimal places
+    oss << std::fixed << std::setprecision(2) << traffic; // 2: 保持两位小数
     double value = std::stod(oss.str());
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
