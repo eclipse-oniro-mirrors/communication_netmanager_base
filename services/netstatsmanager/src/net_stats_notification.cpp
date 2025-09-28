@@ -196,7 +196,17 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
         NETMGR_LOG_E("simId does not exist:: simId %{public}d", simId);
         return "";
     }
-    std::string percent = "‪" + std::to_string(monUsedPercent) + "%" + "‬";
+    std::string style = "percent";
+    std::string unitStyle = "short";
+    std::map<std::string, std::string> mp = { { "style", style},
+                                    { "unitStyle", unitStyle } };
+
+    std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
+    std::vector<std::string> local{systemLocalStr};
+    std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
+    double monUsed = monUsedPercent / 100.0; // 100.0: converting a percentage to a decimal
+    std::string str = numFmt->Format(monUsed);
+    std::string percent = "‪" + str + "‬";
     outText = outText.replace(outText.find("%s"), TWO_CHAR, percent);
     NETMGR_LOG_I("GetMonthNotificationText outText [%{public}s]", outText.c_str());
     return outText;
@@ -385,20 +395,31 @@ void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNt
 std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 {
     const char* units[] = {"B", "KB", "MB", "GB", "TB"};
+    const char* unitFullNamesLower[] = {"byte", "kilobyte", "megabyte", "gigabyte", "terabyte"};
     int record = 0;
     while (traffic >= UNIT_CONVERT_1024 && record < 4) { // 4: units array max index
         traffic /= UNIT_CONVERT_1024;
         record++;
     }
- 
+    std::string style = "unit";
+    std::string unit = unitFullNamesLower[record];
+    std::string unitStyle = "short";
+    std::map<std::string, std::string> mp = { { "style", style},
+                                    { "unit", unit },
+                                    { "unitStyle", unitStyle } };
+
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << traffic << " " << units[record]; // 2: 保留两位小数
+    oss << std::fixed << std::setprecision(2) << traffic; // 2: keep two decimal places
+    double value = std::stod(oss.str());
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
+    std::vector<std::string> local{systemLocalStr};
+    std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
+    std::string str = numFmt->Format(value);
     auto ret = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
     if (ret) {
-        return "‪" + oss.str() + "‬";
+        return "‪" + str + "‬";
     }
-    return oss.str();
+    return str;
 }
 }  // namespace NetManagerStandard
 }  // namespace OHOS
