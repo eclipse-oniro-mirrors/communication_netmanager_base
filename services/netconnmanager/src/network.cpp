@@ -722,12 +722,14 @@ void Network::InitNetMonitor()
     NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
+    NetLinkInfo netLinkInfoBck = netLinkInfo_;
+    lock.unlock();
     NetMonitorInfo netMonitorInfo;
     netMonitorInfo.isScreenOn = isScreenOn_;
     netMonitorInfo.isSleep = isSleep_;
     netMonitorInfo.lastDetectTime = lastDetectTime_;
     netMonitor_ = std::make_shared<NetMonitor>(
-        netId_, netSupplierType_, netLinkInfo_, monitorCallback, netMonitorInfo);
+        netId_, netSupplierType_, netLinkInfoBck, monitorCallback, netMonitorInfo);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;

@@ -16,6 +16,7 @@
 #ifndef NET_POLICY_FIREWALL_H
 #define NET_POLICY_FIREWALL_H
 
+#include <shared_mutex>
 #include "firewall_rule.h"
 #include "net_policy_base.h"
 #include "net_policy_file.h"
@@ -104,6 +105,7 @@ private:
     std::set<uint32_t> deviceIdleDeniedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> powerSaveDeniedList_;
+    std::shared_mutex listMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

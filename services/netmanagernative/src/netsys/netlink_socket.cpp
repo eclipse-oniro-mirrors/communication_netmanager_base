@@ -197,7 +197,8 @@ int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
     }
     rtmsg msg;
     msg.rtm_family = AF_INET;
-    int32_t copeResult = memcpy_s(NLMSG_DATA(msghdr), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    int32_t copeResult = memcpy_s(
+        NLMSG_DATA(msghdr), NETLINKMESSAGE_MAX_LEN - NLMSG_HDRLEN, &msg, sizeof(struct rtmsg));
     if (copeResult != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
     }

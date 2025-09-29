@@ -193,9 +193,12 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
         }
     }
     // remove the iface quota that not metered.
-    for (uint32_t i = 0; i < meteredIfaces_.size(); ++i) {
-        if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfaces_[i])) {
-            GetNetsysInst()->BandwidthRemoveIfaceQuota(meteredIfaces_[i]);
+    std::shared_lock<std::shared_mutex> meteredLock(meteredMutex_);
+    auto meteredIfacesBck = meteredIfaces_;
+    meteredLock.unlock();
+    for (uint32_t i = 0; i < meteredIfacesBck.size(); ++i) {
+        if (!std::count(newMeteredIfaces.begin(), newMeteredIfaces.end(), meteredIfacesBck[i])) {
+            GetNetsysInst()->BandwidthRemoveIfaceQuota(meteredIfacesBck[i]);
         }
     }
     return newMeteredIfaces;
@@ -204,11 +207,13 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
 void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredIfaces)
 {
     NETMGR_LOG_D("UpdateMeteredIfaces size[%{public}zu]", newMeteredIfaces.size());
+    std::unique_lock<std::shared_mutex> lock(meteredMutex_);
     meteredIfaces_.clear();
     meteredIfaces_.reserve(newMeteredIfaces.size());
     for (auto &iface : newMeteredIfaces) {
         meteredIfaces_.push_back(iface);
     }
+    lock.unlock();
     // notify the callback of metered ifaces changed.
     GetCbInst()->NotifyNetMeteredIfacesChangeAsync(meteredIfaces_);
 }
@@ -357,8 +362,10 @@ int32_t NetPolicyTraffic::ResetPolicies()
 void NetPolicyTraffic::ReachedLimit(const std::string &iface)
 {
     NETMGR_LOG_D("ReachedLimit iface:%{public}s.", iface.c_str());
+    std::shared_lock<std::shared_mutex> lock(meteredMutex_);
     auto &ifaces = GetMeteredIfaces();
     if (std::find(ifaces.begin(), ifaces.end(), iface) != ifaces.end()) {
+        lock.unlock();
         UpdateQuotaPoliciesInner();
     }
 }

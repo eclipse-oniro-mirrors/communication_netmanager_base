@@ -29,7 +29,11 @@ void NetPolicyFirewall::Init()
 {
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
     powerSaveFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_POWER_SAVE);
-
+    if (deviceIdleFirewallRule_ == nullptr || powerSaveFirewallRule_ == nullptr) {
+        return;
+    }
+    
+    std::unique_lock<std::shared_mutex> lock(listMutex_);
     GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
 
@@ -39,6 +43,7 @@ void NetPolicyFirewall::Init()
 
 int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
+    std::unique_lock<std::shared_mutex> lock(listMutex_);
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -56,6 +61,7 @@ int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &u
 
 int32_t NetPolicyFirewall::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
+    std::unique_lock<std::shared_mutex> lock(listMutex_);
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Power save allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -188,6 +194,7 @@ void NetPolicyFirewall::ResetPolicies()
     powerSaveFirewallRule_->ClearAllowedList();
     powerSaveFirewallRule_->ClearDeniedList();
 
+    std::unique_lock<std::shared_mutex> lock(listMutex_);
     deviceIdleAllowedList_.clear();
     deviceIdleDeniedList_.clear();
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
