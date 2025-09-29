@@ -216,6 +216,50 @@ HWTEST_F(NetDualStackProbeTest, ProcessProbeResultTest001, TestSize.Level1)
     EXPECT_NE(ret, DualStackProbeResultCode::PROBE_FAIL);
 }
 
+HWTEST_F(NetDualStackProbeTest, ProcessProbeResultTest002, TestSize.Level1)
+{
+    auto netDualStackProbe = CreateNetDualStackProbeInstance();
+    auto httpThreadV4 = std::make_shared<ProbeThread>(
+        TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+        ProbeType::PROBE_HTTP, TEST_HTTP_URL, TEST_HTTPS_URL);
+    auto httpsThreadV4 = std::make_shared<ProbeThread>(
+        TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+        ProbeType::PROBE_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
+    auto httpThreadV6 = std::make_shared<ProbeThread>(
+        TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+        ProbeType::PROBE_HTTP, TEST_HTTP_URL, TEST_HTTPS_URL);
+    auto httpsThreadV6 = std::make_shared<ProbeThread>(
+        TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+        ProbeType::PROBE_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
+
+    httpThreadV4->isDetecting_ = false;
+    httpsThreadV4->isDetecting_ = false;
+    httpThreadV6->isDetecting_ = false;
+    httpsThreadV6->isDetecting_ = false;
+
+    httpThreadV4->probeDuration_ = 1 * 1000;
+    httpsThreadV4->probeDuration_ = 10 * 1000;
+    httpThreadV4->httpProbe_->httpProbeResult_.responseCode_ = 204;
+    httpThreadV6->httpProbe_->httpProbeResult_.responseCode_ = 0;
+    auto ret = netDualStackProbe->ProcessProbeResult(httpThreadV4, httpsThreadV4, httpThreadV6, httpsThreadV6);
+    EXPECT_NE(ret, DualStackProbeResultCode::PROBE_FAIL);
+
+    httpThreadV4->probeDuration_ = 1 * 1000;
+    ret = netDualStackProbe->ProcessProbeResult(httpThreadV4, httpsThreadV4, httpThreadV6, httpsThreadV6);
+    EXPECT_NE(ret, DualStackProbeResultCode::PROBE_FAIL);
+
+    httpThreadV6->probeDuration_ = 1 * 1000;
+    httpsThreadV6->probeDuration_ = 10 * 1000;
+    httpThreadV4->httpProbe_->httpProbeResult_.responseCode_ = 0;
+    httpThreadV6->httpProbe_->httpProbeResult_.responseCode_ = 204;
+    ret = netDualStackProbe->ProcessProbeResult(httpThreadV4, httpsThreadV4, httpThreadV6, httpsThreadV6);
+    EXPECT_NE(ret, DualStackProbeResultCode::PROBE_FAIL);
+
+    httpThreadV6->probeDuration_ = 1 * 1000;
+    ret = netDualStackProbe->ProcessProbeResult(httpThreadV4, httpsThreadV4, httpThreadV6, httpsThreadV6);
+    EXPECT_NE(ret, DualStackProbeResultCode::PROBE_FAIL);
+}
+
 HWTEST_F(NetDualStackProbeTest, GetThreadDetectResultTest001, TestSize.Level1)
 {
     auto netDualStackProbe = CreateNetDualStackProbeInstance();
@@ -241,6 +285,44 @@ HWTEST_F(NetDualStackProbeTest, GetThreadDetectResultTest001, TestSize.Level1)
     testThread->probeType_ = ProbeType::PROBE_HTTPS;
     ret = netDualStackProbe->GetThreadDetectResult(testThread);
     EXPECT_EQ(ret.GetCode(), 0);
+}
+
+HWTEST_F(NetDualStackProbeTest, GetProbeDurationTimeTest001, TestSize.Level1)
+{
+    auto netDualStackProbe = CreateNetDualStackProbeInstance();
+    std::shared_ptr<ProbeThread> httpThread = nullptr;
+    std::shared_ptr<ProbeThread> httpsThread = nullptr;
+    auto durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_EQ(durationTime, 0);
+
+    httpThread = std::make_shared<ProbeThread>(
+    TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+    ProbeType::PROBE_HTTP, TEST_HTTP_URL, TEST_HTTPS_URL);
+    durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_EQ(durationTime, 0);
+
+    httpsThread = std::make_shared<ProbeThread>(
+        TEST_NETID, NetBearType::BEARER_WIFI, NetLinkInfo(), nullptr, nullptr,
+        ProbeType::PROBE_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
+    durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_EQ(durationTime, 0);
+
+    httpThread->isDetecting_ = false;
+    httpsThread->isDetecting_ = false;
+
+    httpThread->httpProbe_->httpProbeResult_.responseCode_ = 204;
+    httpThread->probeDuration_ = 1 * 1000;
+    durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_NE(durationTime, 0);
+
+    httpsThread->httpProbe_->httpsProbeResult_.responseCode_ = 204;
+    httpsThread->probeDuration_ = 2 * 1000;
+    durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_NE(durationTime, 0);
+
+    httpThread->httpProbe_->httpProbeResult_.responseCode_ = 0;
+    durationTime = netDualStackProbe->GetProbeDurationTime(httpThread, httpsThread);
+    EXPECT_NE(durationTime, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

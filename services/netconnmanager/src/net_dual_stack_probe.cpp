@@ -26,6 +26,7 @@ namespace {
 constexpr int32_t DNS_RESOLVE_RESULT_WAIT_MS = 5 * 1000;
 constexpr int32_t DNS_RESOLVE_THREAD_NUM = 2;
 constexpr int32_t NET_PROBE_THREAD_NUM = 4;
+constexpr int32_t NET_PROBE_SUCCESS_DURATION_THRESHOLD = 2 * 1000;
 }
 
 NetDualStackProbe::NetDualStackProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
@@ -162,14 +163,16 @@ DualStackProbeResultCode NetDualStackProbe::ProcessProbeResult(std::shared_ptr<P
     DualStackProbeResultCode result = DualStackProbeResultCode::PROBE_FAIL;
     bool isV4Success = httpV4Result.IsSuccessful() || httpsV4Result.IsSuccessful();
     bool isV6Success = httpV6Result.IsSuccessful() || httpsV6Result.IsSuccessful();
+    uint64_t ipv4ProbeDuration = GetProbeDurationTime(httpThreadV4, httpsThreadV4);
+    uint64_t ipv6ProbeDuration = GetProbeDurationTime(httpThreadV6, httpsThreadV6);
     NETMGR_LOG_I("Probe result, v4:%{public}d, v6:%{public}d", isV4Success, isV6Success);
     if (isV4Success && isV6Success) {
         result = DualStackProbeResultCode::PROBE_SUCCESS;
     } else if (httpV4Result.IsNeedPortal() || httpV6Result.IsNeedPortal()) {
         result = DualStackProbeResultCode::PROBE_PORTAL;
-    } else if (isV4Success) {
+    } else if (isV4Success && ipv4ProbeDuration <= NET_PROBE_SUCCESS_DURATION_THRESHOLD) {
         result = DualStackProbeResultCode::PROBE_SUCCESS_IPV4;
-    } else if (isV6Success) {
+    } else if (isV6Success && ipv6ProbeDuration <= NET_PROBE_SUCCESS_DURATION_THRESHOLD) {
         result = DualStackProbeResultCode::PROBE_SUCCESS_IPV6;
     }
     return result;
@@ -190,6 +193,26 @@ NetHttpProbeResult NetDualStackProbe::GetThreadDetectResult(std::shared_ptr<Prob
         }
     }
     return result;
+}
+
+uint64_t NetDualStackProbe::GetProbeDurationTime(
+    std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread)
+{
+    if (httpThread == nullptr || httpsThread == nullptr) {
+        return 0;
+    }
+    uint64_t httpSuccessProbeTime = httpThread->GetProbeDurationTime();
+    uint64_t httpsSuccessProbeTime = httpsThread->GetProbeDurationTime();
+    bool isHttpProbeSuccess = GetThreadDetectResult(httpThread).IsSuccessful();
+    bool isHttpsProbeSuccess = GetThreadDetectResult(httpsThread).IsSuccessful();
+    if (isHttpProbeSuccess && isHttpsProbeSuccess) {
+        return httpSuccessProbeTime < httpsSuccessProbeTime ? httpSuccessProbeTime : httpsSuccessProbeTime;
+    } else if (isHttpProbeSuccess) {
+        return httpSuccessProbeTime;
+    } else if (isHttpsProbeSuccess) {
+        return httpsSuccessProbeTime;
+    }
+    return 0;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

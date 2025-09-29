@@ -93,6 +93,11 @@ public:
     */
     ProbeType GetProbeType();
 
+    /*
+     * get probe duration time
+    */
+    uint64_t GetProbeDurationTime();
+
 private:
     uint32_t netId_ = 0;
     std::unique_ptr<NetHttpProbe> httpProbe_;
@@ -104,6 +109,7 @@ private:
     std::string httpProbeUrl_;
     std::string httpsProbeUrl_;
     std::string ipAddrList_;
+    uint64_t probeDuration_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

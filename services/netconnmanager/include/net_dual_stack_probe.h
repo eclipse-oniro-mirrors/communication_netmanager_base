@@ -54,6 +54,7 @@ private:
         std::shared_ptr<ProbeThread>& httpsThreadV4, std::shared_ptr<ProbeThread>& httpThreadV6,
         std::shared_ptr<ProbeThread>& httpsThreadV6);
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread);
+    uint64_t GetProbeDurationTime(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread);
 
     uint32_t netId_ = 0;
     NetBearType netBearType_;
@@ -69,4 +70,4 @@ private:
 } // namespace NetManagerStandard
 } // namespace OHOS
 
-#endif // NET_DUAL_STACK_PROBE_H
+#endif // NET_DUAL_STACK_PROBE_H
