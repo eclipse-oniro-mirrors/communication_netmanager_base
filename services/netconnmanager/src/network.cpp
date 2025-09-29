@@ -519,6 +519,9 @@ void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
     int32_t ipv4DnsCnt = 0;
     int32_t ipv6DnsCnt = 0;
     for (const auto &dns : netLinkInfo.dnsList_) {
+        if (dns.address_ == "") {
+            continue;
+        }
         domains.emplace_back(dns.hostName_);
         auto dnsFamily = GetAddrFamily(dns.address_);
         if (dns.type_ == NetManagerStandard::INetAddr::IPV4 || dnsFamily == AF_INET) {

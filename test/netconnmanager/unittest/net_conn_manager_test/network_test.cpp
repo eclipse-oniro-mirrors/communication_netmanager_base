@@ -1680,5 +1680,21 @@ HWTEST_F(NetworkTest, UpdateNetProbeTimeTest001, TestSize.Level1)
     network->UpdateDualStackProbeTime(probeTime);
     EXPECT_NE(network->netMonitor_, nullptr);
 }
+
+HWTEST_F(NetworkTest, UpdateDnsTest003, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    EXPECT_NE(network, nullptr);
+    NetLinkInfo netLinkInfo;
+    EXPECT_TRUE(netLinkInfo.dnsList_.empty());
+    network->UpdateDns(netLinkInfo);
+    NetManagerStandard::INetAddr dns;
+    dns.address_ = "";
+    dns.type_ = NetManagerStandard::INetAddr::IPV4;
+    netLinkInfo.dnsList_.push_back(dns);
+    EXPECT_TRUE(!netLinkInfo.dnsList_.empty());
+    network->UpdateDns(netLinkInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
