@@ -49,7 +49,13 @@ pub const ENTRIES: &CStr = cstr(b"entries\0");
 pub const NEXT: &CStr = cstr(b"next\0");
 pub const VALUE: &CStr = cstr(b"value\0");
 pub const ANI_UNIONT: &CStr = cstr(b"ani_union\0");
-pub const UNBOX: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"unboxed\0") };
+pub const TOBOOLEAN: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toBoolean\0") };
+pub const TOCHAR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toChar\0") };
+pub const TOSHORT: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toShort\0") };
+pub const TOINT: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toInt\0") };
+pub const TOLONG: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toLong\0") };
+pub const TOFLOAT: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toFloat\0") };
+pub const TODOUBLE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toDouble\0") };
 
 
 pub const TYPED_ARRAY_CTOR: &CStr =
