@@ -190,5 +190,15 @@ std::string Route::ToString(const std::string &tab) const
 
     return str;
 }
+
+bool Route::IsIpv6Default() const
+{
+    return rtnType_ == RTN_UNICAST && destination_.prefixlen_ == 0 && destination_.type_ == INetAddr::IPV6;
+}
+
+bool Route::IsIpv4Default() const
+{
+    return rtnType_ == RTN_UNICAST && destination_.prefixlen_ == 0 && destination_.type_ == INetAddr::IPV4;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

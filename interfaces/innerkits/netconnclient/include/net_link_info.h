@@ -49,6 +49,11 @@ struct NetLinkInfo final : public Parcelable {
     void Initialize();
     bool HasNetAddr(const INetAddr &netAddr) const;
     bool HasRoute(const Route &route) const;
+    bool HasIpv6DefaultRoute() const;
+    bool HasIpv4DefaultRoute() const;
+    bool IsIpv4Provisioned() const;
+    bool HasIpv4Address() const;
+    bool HasIpv4DnsServer() const;
     std::string ToString(const std::string &tab) const;
     std::string ToStringAddr(const std::string &tab) const;
     std::string ToStringDns(const std::string &tab) const;

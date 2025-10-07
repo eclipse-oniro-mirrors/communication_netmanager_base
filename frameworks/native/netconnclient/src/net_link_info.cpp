@@ -244,6 +244,51 @@ bool NetLinkInfo::HasRoute(const Route &route) const
     return std::find(routeList_.begin(), routeList_.end(), route) != routeList_.end();
 }
 
+bool NetLinkInfo::HasIpv6DefaultRoute() const
+{
+    for (const auto &route: routeList_) {
+        if (route.IsIpv6Default()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NetLinkInfo::HasIpv4DefaultRoute() const
+{
+    for (const auto &route: routeList_) {
+        if (route.IsIpv4Default()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NetLinkInfo::IsIpv4Provisioned() const
+{
+    return HasIpv4DefaultRoute() && HasIpv4Address() && HasIpv4DnsServer();
+}
+
+bool NetLinkInfo::HasIpv4Address() const
+{
+    for (const auto &addr: netAddrList_) {
+        if (addr.type_ == INetAddr::IPV4) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NetLinkInfo::HasIpv4DnsServer() const
+{
+    for (const auto &addr: dnsList_) {
+        if (addr.type_ == INetAddr::IPV4) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::string NetLinkInfo::ToString(const std::string &tab) const
 {
     std::string str;

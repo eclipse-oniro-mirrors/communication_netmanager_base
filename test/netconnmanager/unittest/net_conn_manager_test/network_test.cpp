@@ -316,6 +316,30 @@ HWTEST_F(NetworkTest, UpdateRoutesTest009, TestSize.Level1)
     network->UpdateRoutes(newNetLinkInfo);
 }
 
+HWTEST_F(NetworkTest, UpdateRoutesTest010, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    ASSERT_NE(network, nullptr);
+    EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
+    Route route;
+    route.destination_.address_ = LOCAL_ROUTE_IPV6_DESTINATION;
+    route.destination_.type_ = INetAddr::IPV6;
+    network->netLinkInfo_.routeList_.push_back(route);
+
+    NetLinkInfo newNetLinkInfo;
+    route.destination_.address_ = "0.0.0.0";
+    route.destination_.type_ = INetAddr::IPV4;
+    newNetLinkInfo.routeList_.push_back(route);
+    INetAddr addr;
+    addr.address_ = "192.168.0.1";
+    addr.type_ = INetAddr::IPV4;
+    newNetLinkInfo.netAddrList_.push_back(addr);
+    newNetLinkInfo.dnsList_.push_back(addr);
+    network->UpdateRoutes(newNetLinkInfo);
+    EXPECT_FALSE(network->netLinkInfo_.routeList_.empty());
+}
+
 HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
 {
     int32_t netId = 1;

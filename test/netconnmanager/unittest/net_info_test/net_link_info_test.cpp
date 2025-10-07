@@ -23,6 +23,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
+constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
 } // namespace
 class NetLinkInfoTest : public testing::Test {
@@ -170,7 +172,7 @@ HWTEST_F(NetLinkInfoTest, InitializeTest, TestSize.Level1)
 HWTEST_F(NetLinkInfoTest, ToStringTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
-    EXPECT_NE(netLinkInfo, nullptr);
+    ASSERT_NE(netLinkInfo, nullptr);
     std::string str = netLinkInfo->ToString("testTab");
     int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
@@ -187,7 +189,7 @@ HWTEST_F(NetLinkInfoTest, ToStringTest, TestSize.Level1)
 HWTEST_F(NetLinkInfoTest, ToStringAddrTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
-    EXPECT_NE(netLinkInfo, nullptr);
+    ASSERT_NE(netLinkInfo, nullptr);
     std::string str = netLinkInfo->ToStringAddr("testAddrTab");
     int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
@@ -204,7 +206,7 @@ HWTEST_F(NetLinkInfoTest, ToStringAddrTest, TestSize.Level1)
 HWTEST_F(NetLinkInfoTest, ToStringDnsTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
-    EXPECT_NE(netLinkInfo, nullptr);
+    ASSERT_NE(netLinkInfo, nullptr);
     std::string str = netLinkInfo->ToStringDns("testDnsTab");
     int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
@@ -221,7 +223,7 @@ HWTEST_F(NetLinkInfoTest, ToStringDnsTest, TestSize.Level1)
 HWTEST_F(NetLinkInfoTest, ToStringRouteTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
-    EXPECT_NE(netLinkInfo, nullptr);
+    ASSERT_NE(netLinkInfo, nullptr);
     std::string str = netLinkInfo->ToStringRoute("testRouteTab");
     int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
@@ -240,7 +242,7 @@ HWTEST_F(NetLinkInfoTest, operatorAndMarshallingTest, TestSize.Level1)
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_TRUE(netLinkInfo != nullptr);
     NetLinkInfo netLinkInfoa = *netLinkInfo;
-    EXPECT_EQ(netLinkInfoa.domain_, "test");
+    ASSERT_EQ(netLinkInfoa.domain_, "test");
     Parcel data;
     bool bRet = netLinkInfo->Marshalling(data);
     ASSERT_TRUE(bRet == true);
@@ -296,5 +298,91 @@ HWTEST_F(NetLinkInfoTest, OversizeNetLinkinfoMarshallingTest02, TestSize.Level1)
     ASSERT_TRUE(netLinkInfo_ptr->routeList_.size() == 1024);
 }
 
+/**
+ * @tc.name: HasIpv6DefaultRoute
+ * @tc.desc: Test NetLinkInfo::HasIpv6DefaultRoute
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HasIpv6DefaultRouteTest001, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    Route route;
+    route.destination_.address_ = LOCAL_ROUTE_IPV6_DESTINATION;
+    route.destination_.type_ = INetAddr::IPV6;
+    netLinkInfo->routeList_.push_back(route);
+    ASSERT_FALSE(netLinkInfo->HasIpv4DefaultRoute());
+    ASSERT_TRUE(netLinkInfo->HasIpv6DefaultRoute());
+}
+
+/**
+ * @tc.name: HasIpv4DefaultRoute
+ * @tc.desc: Test NetLinkInfo::HasIpv4DefaultRoute
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HasIpv6DefaultRouteTest002, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    Route route;
+    route.destination_.address_ = "192.168.0.1";
+    route.destination_.type_ = INetAddr::IPV4;
+    netLinkInfo->routeList_.push_back(route);
+    ASSERT_TRUE(netLinkInfo->HasIpv4DefaultRoute());
+    ASSERT_FALSE(netLinkInfo->HasIpv6DefaultRoute());
+}
+
+/**
+ * @tc.name: HasIpv4Address
+ * @tc.desc: Test NetLinkInfo::HasIpv4Address
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HasIpv4AddressTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    INetAddr addr;
+    addr.address_ = "192.168.0.1";
+    addr.type_ = INetAddr::IPV4;
+    netLinkInfo->netAddrList_.push_back(addr);
+    ASSERT_TRUE(netLinkInfo->HasIpv4Address());
+}
+
+/**
+ * @tc.name: HasIpv4DnsServer
+ * @tc.desc: Test NetLinkInfo::HasIpv4DnsServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, HasIpv4DnsServerTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    INetAddr addr;
+    addr.address_ = "192.168.0.1";
+    addr.type_ = INetAddr::IPV4;
+    netLinkInfo->dnsList_.push_back(addr);
+    ASSERT_TRUE(netLinkInfo->HasIpv4DnsServer());
+}
+
+/**
+ * @tc.name: IsIpv4Provisioned
+ * @tc.desc: Test NetLinkInfo::IsIpv4Provisioned
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, IsIpv4ProvisionedTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    INetAddr addr;
+    addr.address_ = "192.168.0.1";
+    addr.type_ = INetAddr::IPV4;
+    netLinkInfo->dnsList_.push_back(addr);
+    netLinkInfo->netAddrList_.push_back(addr);
+    Route route;
+    route.destination_.address_ = "192.168.0.1";
+    route.destination_.type_ = INetAddr::IPV4;
+    netLinkInfo->routeList_.push_back(route);
+    ASSERT_TRUE(netLinkInfo->IsIpv4Provisioned());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

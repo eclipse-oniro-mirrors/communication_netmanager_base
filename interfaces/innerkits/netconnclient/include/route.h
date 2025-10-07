@@ -50,6 +50,8 @@ struct Route final : public Parcelable {
     static sptr<Route> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<Route> &object);
     std::string ToString(const std::string &tab) const;
+    bool IsIpv4Default() const;
+    bool IsIpv6Default() const;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
