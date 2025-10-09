@@ -22,7 +22,7 @@ extern "C" {
  
 void SetNetForApp(int netId);
 int GetNetForApp();
- 
+void SetProtectFromVpn();
 #ifdef __cplusplus
 }
 #endif

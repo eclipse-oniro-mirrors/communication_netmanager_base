@@ -909,6 +909,12 @@ int32_t NetConnClient::GetAppNet(int32_t &netId)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnClient::ProtectProcessNet()
+{
+    SetProtectFromVpn();
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnClient::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
     sptr<INetConnService> proxy = GetProxy();

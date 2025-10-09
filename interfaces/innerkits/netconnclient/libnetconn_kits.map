@@ -51,6 +51,7 @@
       "OHOS::NetManagerStandard::NetConnClient::QueryTraceRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAppNet(int&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
+      "OHOS::NetManagerStandard::NetConnClient::ProtectProcessNet()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterSlotType(unsigned int, int)";
       "OHOS::NetManagerStandard::NetConnClient::GetSlotType(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetDefaultNet(OHOS::NetManagerStandard::NetHandle&)";

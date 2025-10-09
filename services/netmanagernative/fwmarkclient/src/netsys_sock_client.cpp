@@ -29,6 +29,7 @@
 namespace {
 SocketDispatchType defaultSocketDispatchType;
 std::atomic_int g_netIdForApp(0);
+std::atomic_bool g_protectFromVpn(false);
 std::atomic<const SocketDispatchType*> g_dispatch(&defaultSocketDispatchType);
 std::atomic_bool g_hookFlag(false);
 std::once_flag g_onceFlag;
@@ -47,6 +48,13 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
 
     if (fd < 0) {
         return fd;
+    }
+
+    if (g_protectFromVpn && (domain == AF_INET || domain == AF_INET6)) {
+        NETNATIVE_LOGI("HookSocket ProtectFromVpn %{public}d", fd);
+        if (OHOS::nmd::FwmarkClient().ProtectFromVpn(fd) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
+            NETNATIVE_LOGE("ProtectFromVpn fd:%{public}d failed", fd);
+        }
     }
 
     if (g_netIdForApp > 0 && (domain == AF_INET || domain == AF_INET6)) {
@@ -98,4 +106,9 @@ void SetNetForApp(int netId)
 int GetNetForApp()
 {
     return g_netIdForApp;
+}
+
+void SetProtectFromVpn()
+{
+    g_protectFromVpn = true;
 }

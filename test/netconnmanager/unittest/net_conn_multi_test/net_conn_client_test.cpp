@@ -802,6 +802,18 @@ HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProtectProcessNet001
+ * @tc.desc: Test NetConnClient::ProtectProcessNet, return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, ProtectProcessNet001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    auto ret = NetConnClient::GetInstance().ProtectProcessNet();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: RegisterNetConnCallback001
  * @tc.desc: Test NetConnClient::RegisterNetConnCallback, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED

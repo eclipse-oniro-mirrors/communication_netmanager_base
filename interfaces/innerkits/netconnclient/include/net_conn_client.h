@@ -370,6 +370,14 @@ public:
     int32_t GetAppNet(int32_t &netId);
 
     /**
+     * protect net by process for vpn
+     *
+     * @return Returns 0 success. Otherwise fail.
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t ProtectProcessNet();
+
+    /**
      * Get network id by identifier
      *
      * @param ident identifier
