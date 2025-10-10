@@ -225,18 +225,26 @@ export default namespace statistics {
 
   export function on(type: 'netStatsChange', callback: Callback<NetStatsChangeInfo>): void {
     if (type == 'netStatsChange') {
-      onNetStatsChange(callback as Callback<NetStatsChangeInfo>);
+      onNetStatsChangeSync(callback as Callback<NetStatsChangeInfo>);
     }
   }
 
   export function off(type: 'netStatsChange', callback?: Callback<NetStatsChangeInfo>): void {
     if (type == 'netStatsChange') {
-      offNetStatsChange(callback as Callback<NetStatsChangeInfo> | undefined);
+      offNetStatsChangeSync(callback as Callback<NetStatsChangeInfo> | undefined);
     }
   }
 
-  export native function onNetStatsChange(callback: Callback<NetStatsChangeInfo>): void;
-  export native function offNetStatsChange(callback?: Callback<NetStatsChangeInfo>): void;
+  export native function onNetStatsChangeSync(callback: Callback<NetStatsChangeInfo>): void;
+  export native function offNetStatsChangeSync(callback?: Callback<NetStatsChangeInfo>): void;
+
+  export function onNetStatsChange(callback: Callback<NetStatsChangeInfo>): void {
+    onNetStatsChangeSync(callback as Callback<NetStatsChangeInfo>);
+  }
+
+  export function offNetStatsChange(callback?: Callback<NetStatsChangeInfo>): void {
+    offNetStatsChangeSync(callback as Callback<NetStatsChangeInfo> | undefined);
+  }
 
   export native function getTrafficStatsByIfaceSync(ifaceInfo: IfaceInfo): NetStatsInfo;
 
