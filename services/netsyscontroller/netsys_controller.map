@@ -142,12 +142,15 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::ClearInterfaceAddrs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::CreateNetworkCache(unsigned short, bool)";
       "OHOS::NetManagerStandard::NetsysNativeClient::DestroyNetworkCache(unsigned short, bool)";
+      "OHOS::NetManagerStandard::NetsysNativeClient::FlushDnsCache(unsigned short)";
       "OHOS::NetManagerStandard::NetsysNativeClient::GetAddrInfo(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, AddrInfo const&, unsigned short, std::__h::vector<AddrInfo, std::__h::allocator<AddrInfo>>&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::GetResolverConfig(unsigned short, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&, unsigned short&, unsigned char&)";
+      "OHOS::NetManagerStandard::NetsysNativeClient::Init()";
       "OHOS::NetManagerStandard::NetsysNativeClient::InterfaceGetList()";
       "OHOS::NetManagerStandard::NetsysNativeClient::IpEnableForwarding(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::NetsysNativeClient()";
+      "OHOS::NetManagerStandard::NetsysNativeClient::RegisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysNativeClient::SetDefaultNetWork(int)";
       "OHOS::NetManagerStandard::NetsysNativeClient::SetInterfaceDown(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::SetInterfaceUp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -155,6 +158,7 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::SetResolverConfig(unsigned short, unsigned short, unsigned char, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::ShareDnsSet(unsigned short)";
       "OHOS::NetManagerStandard::NetsysNativeClient::StartDnsProxyListen()";
+      "OHOS::NetManagerStandard::NetsysNativeClient::UnregisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&)";
     };
   local:
    *;
