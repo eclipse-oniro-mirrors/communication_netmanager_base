@@ -22,6 +22,7 @@
 #define private public
 #include "fwmark_client.h"
 #include "fwmark_network.cpp"
+#include "netsys_sock_client.h"
 #undef private
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
@@ -313,6 +314,19 @@ HWTEST_F(UnitTestFwmarkClient, RunForClientFdTest001, TestSize.Level1)
     int32_t socket = 32;
     RunForClientFd(socket);
     EXPECT_TRUE(socket == -1 || socket == 32);
+}
+
+/**
+ * @tc.name: HookSocketTest001
+ * @tc.desc: Test FwmarkNetwork HookSocketTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, HookSocketTest001, TestSize.Level1)
+{
+    SetProtectFromVpn();
+    int32_t tcpSocket1 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int32_t tcpSocket2 = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+    EXPECT_TRUE(tcpSocket1 != -1 && tcpSocket2 != -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS
