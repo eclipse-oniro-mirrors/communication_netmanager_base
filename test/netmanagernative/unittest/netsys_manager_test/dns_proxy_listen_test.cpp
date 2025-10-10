@@ -66,6 +66,7 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
     DnsProxyListen listener;
     listener.OnListen();
     listener.OffListen();
+    listener.clearResource();
     listener.SetParseNetId(0);
     EXPECT_EQ(listener.netId_, 0);
 }
@@ -75,6 +76,7 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
     DnsProxyListen listener;
     listener.proxySockFd_ = CLIENT_SOCKET;
     listener.OffListen();
+    listener.clearResource();
     EXPECT_EQ(listener.proxySockFd_, -1);
 }
 
@@ -147,6 +149,7 @@ HWTEST_F(DnsProxyListenTest, InitForListeningTest01, TestSize.Level1)
     EXPECT_FALSE(ret);
 
     instance_->OffListen();
+    instance_->clearResource();
     ret = instance_->InitForListening(proxyEvent, proxy6Event);
     EXPECT_FALSE(ret);
 }
@@ -179,6 +182,7 @@ HWTEST_F(DnsProxyListenTest, OffListenTest01, TestSize.Level1)
 {
     instance_->proxySockFd6_ = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     instance_->OffListen();
+    instance_->clearResource();
     EXPECT_EQ(instance_->proxySockFd6_, -1);
 }
 

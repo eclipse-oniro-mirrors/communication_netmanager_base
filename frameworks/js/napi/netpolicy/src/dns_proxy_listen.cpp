@@ -215,7 +215,7 @@ void DnsProxyListen::StartListen()
         return;
     }
     epoll_event eventsReceived[EPOLL_TASK_NUMBER];
-    while (true) {
+    while (DnsProxyListen::proxyListenSwitch_) {
         int32_t nfds =
             epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.empty() ? -1 : EPOLL_TIMEOUT);
         NETNATIVE_LOG_D("now socket num: %{public}zu", serverIdxOfSocket.size());
@@ -238,6 +238,7 @@ void DnsProxyListen::StartListen()
         }
         CollectSocks();
     }
+    clearResource();
 }
 void DnsProxyListen::GetRequestAndTransmit(int32_t family)
 {
@@ -432,13 +433,12 @@ void DnsProxyListen::OnListen()
 
 void DnsProxyListen::OffListen()
 {
+    DnsProxyListen::proxyListenSwitch_ = false;
     if (proxySockFd_ > 0) {
-        close(proxySockFd_);
-        proxySockFd_ = -1;
+        shutdown(proxySockFd_, SHUT_RDWR);
     }
     if (proxySockFd6_ > 0) {
-        close(proxySockFd6_);
-        proxySockFd6_ = -1;
+        shutdown(proxySockFd6_, SHUT_RDWR);
     }
     NETNATIVE_LOGI("DnsProxy OffListen");
 }
