@@ -108,12 +108,6 @@ void DnsManager::SetDefaultNetwork(uint16_t netId)
     DnsParamCache::GetInstance().SetDefaultNetwork(netId);
 }
 
-void StartProxyListen()
-{
-    NETNATIVE_LOG_D("begin StartProxyListen");
-    DnsProxyListen().StartListen();
-}
-
 void DnsManager::ShareDnsSet(uint16_t netId)
 {
     dnsProxyListen_->SetParseNetId(netId);
@@ -122,7 +116,11 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
-    std::thread t(StartProxyListen);
+    std::shared_ptr<DnsProxyListen> proxy = dnsProxyListen_;
+    std::thread t([proxy] () {
+        NETNATIVE_LOG_D("begin StartProxyListen");
+        proxy->StartListen();
+    });
     std::string threadName = "DnsPxyListen";
     pthread_setname_np(t.native_handle(), threadName.c_str());
     t.detach();
