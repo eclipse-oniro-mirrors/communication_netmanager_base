@@ -454,6 +454,18 @@ void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     }
 }
 
+static void HandleDeleteIpv6Route(const NetLinkInfo &netLinkInfoBck,
+    const NetLinkInfo &newNetLinkInfo, const int32_t netId)
+{
+    bool lostIPv6Router = netLinkInfoBck.HasIpv6DefaultRoute() && !newNetLinkInfo.HasIpv6DefaultRoute();
+    if (lostIPv6Router && newNetLinkInfo.IsIpv4Provisioned()) {
+        NETMGR_LOG_I("UpdateRoutes, Restart IPV6");
+        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 0);
+        NetsysController::GetInstance().FlushDnsCache(netId);
+        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 1);
+    }
+}
+
 void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
@@ -461,6 +473,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
+
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfoBck.ToStringRoute("").c_str());
     for (const auto &route : netLinkInfoBck.routeList_) {
         if (newNetLinkInfo.HasRoute(route)) {
@@ -482,12 +495,11 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);
         }
     }
-
+    
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : newNetLinkInfo.routeList_) {
         if (netLinkInfoBck.HasRoute(route)) {
-            NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is no need to add it again",
-                         CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
+            NETMGR_LOG_W("Same route:[%{public}s]", CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
         }
 
@@ -508,6 +520,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
     if (newNetLinkInfo.routeList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_ROUTES_FAILED);
     }
+    HandleDeleteIpv6Route(netLinkInfoBck, newNetLinkInfo, netId_);
 }
 
 void Network::UpdateDns(const NetLinkInfo &netLinkInfo)

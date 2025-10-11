@@ -83,5 +83,33 @@ HWTEST_F(RouteTest, ToStringTest, TestSize.Level1)
     std::string str = info->ToString("testTab");
     NETMGR_LOG_D("Route.ToString string is : [%{public}s]", str.c_str());
 }
+
+/**
+ * @tc.name: IsIpv6DefaultTest
+ * @tc.desc: Test Route::IsIpv6Default
+ * @tc.type: FUNC
+ */
+HWTEST_F(RouteTest, IsIpv6DefaultTest, TestSize.Level1)
+{
+    sptr<Route> info = new (std::nothrow) Route();
+    ASSERT_TRUE(info != nullptr);
+    info->destination_.type_ = INetAddr::IPV6;
+    EXPECT_TRUE(info->IsIpv6Default());
+    EXPECT_FALSE(info->IsIpv4Default());
+}
+
+/**
+ * @tc.name: IsIpv4DefaultTest
+ * @tc.desc: Test Route::IsIpv4Default
+ * @tc.type: FUNC
+ */
+HWTEST_F(RouteTest, IsIpv4DefaultTest, TestSize.Level1)
+{
+    sptr<Route> info = new (std::nothrow) Route();
+    ASSERT_TRUE(info != nullptr);
+    info->destination_.type_ = INetAddr::IPV4;
+    EXPECT_FALSE(info->IsIpv6Default());
+    EXPECT_TRUE(info->IsIpv4Default());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
