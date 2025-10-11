@@ -116,9 +116,10 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
-    std::thread t([&] () {
+    std::shared_ptr<DnsProxyListen> proxy = dnsProxyListen_;
+    std::thread t([proxy] () {
         NETNATIVE_LOG_D("begin StartProxyListen");
-        dnsProxyListen_->StartListen();
+        proxy->StartListen();
     });
     std::string threadName = "DnsPxyListen";
     pthread_setname_np(t.native_handle(), threadName.c_str());
