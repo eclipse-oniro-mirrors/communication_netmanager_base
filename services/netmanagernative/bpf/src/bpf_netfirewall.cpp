@@ -394,7 +394,7 @@ void NetsysBpfNetFirewall::GetDomainHashKey(const std::string &domain, DomainHas
             return;
         }
         i += strLen;
-        out.data[i++] = (uint8_t)strLen;
+        out.data[i++] = static_cast<uint8_t>(strLen);
     }
     out.prefixlen = static_cast<uint32_t>(i * BIT_PER_BYTE);
 }
