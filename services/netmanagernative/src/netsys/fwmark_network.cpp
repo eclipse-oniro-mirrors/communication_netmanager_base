@@ -111,6 +111,7 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
                 fwmark.permission = PERMISSION_NONE;
             } else {
                 fwmark.explicitlySelected = true;
+                fwmark.protectedFromVpn = true;
             }
             break;
         }
