@@ -186,6 +186,12 @@ public:
     {
         return 0;
     }
+
+    int32_t SetInternetAccessByIpForWifiShare(
+        const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override
+    {
+        return 0;
+    }
 };
 
 } // namespace
@@ -638,6 +644,33 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetNetworkAccessPolicy001, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetInternetAccessByIpForWifiShare001
+ * @tc.desc: Test NetPolicyServiceStub OnSetInternetAccessByIpForWifiShare.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
+        return;
+    }
+    std::string ip = "1.1.1.1";
+    uint8_t family = 2;
+    std::string ifname = "test";
+    data.WriteString(ip);
+    data.WriteUint8(family);
+    data.WriteBool(true);
+    data.WriteString(ifname);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

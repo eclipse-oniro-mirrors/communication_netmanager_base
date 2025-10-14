@@ -1292,5 +1292,17 @@ int32_t NetsysNativeService::UpdateEnterpriseRoute(const std::string &interfaceN
     return netsysService_->UpdateEnterpriseRoute(interfaceName, uid, add);
 }
 #endif
+
+int32_t NetsysNativeService::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    NETNATIVE_LOGI("SetInternetAccessByIpForWifiShare addr[%{public}s], access[%{public}d], IfName[%{public}s]",
+        NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr, true).c_str(), accessInternet, clientNetIfName.c_str());
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+}
 } // namespace NetsysNative
 } // namespace OHOS

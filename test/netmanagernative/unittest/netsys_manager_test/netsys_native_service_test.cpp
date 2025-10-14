@@ -966,6 +966,17 @@ HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    std::string iptest = "1.1.1.1";
+    uint8_t family = 2;
+    bool access = true;
+    std::string ifname = "test";
+
+    auto ret = instance_->SetInternetAccessByIpForWifiShare(iptest, family, access, ifname);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest002, TestSize.Level1)
 {
     uint16_t netId = 101;
@@ -974,6 +985,20 @@ HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest002, TestSize.Level1)
     auto backup = std::move(instance_->netsysService_);
     instance_->netsysService_ = nullptr;
     auto ret = instance_->SetDnsCache(netId, testHost, info);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    instance_->netsysService_ = std::move(backup);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetInternetAccessByIpForWifiShare002, TestSize.Level1)
+{
+    std::string iptest = "1.1.1.1";
+    uint8_t family = 2;
+    bool access = true;
+    std::string ifname = "test";
+
+    auto backup = std::move(instance_->netsysService_);
+    instance_->netsysService_ = nullptr;
+    auto ret = instance_->SetInternetAccessByIpForWifiShare(iptest, family, access, ifname);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     instance_->netsysService_ = std::move(backup);
 }

@@ -54,6 +54,8 @@ public:
     int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override;
     int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
+    int32_t SetInternetAccessByIpForWifiShare(
+        const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

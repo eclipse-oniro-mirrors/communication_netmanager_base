@@ -396,6 +396,34 @@ HWTEST_F(UtNetmanagerBaseCommon, ToAnonymousIpTest003, TestSize.Level1)
     ASSERT_TRUE(result.empty());
 }
 
+/*
+ * @tc.name: ToAnonymousIpTest004
+ * @tc.desc: Test UtNetmanagerBaseCommon ToAnonymousIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, ToAnonymousIpTest004, TestSize.Level1)
+{
+    std::string testIpv4 = "12.34.45.56";
+    auto result = CommonUtils::ToAnonymousIp(testIpv4, true);
+    EXPECT_EQ(result, "12.**.**.56");
+    auto result1 = CommonUtils::ToAnonymousIp(testIpv4);
+    EXPECT_EQ(result1, "12.34.**.**");
+    
+    std::string testIpv6 = "ab:56:df:66:ac6:783:bdb5:8902";
+    auto result2 = CommonUtils::ToAnonymousIp(testIpv6, true);
+    EXPECT_EQ(result2, "ab:**:**:**:***:***:***:8902");
+    auto result3 = CommonUtils::ToAnonymousIp(testIpv6);
+    EXPECT_EQ(result3, "ab:56:**:**:***:***:****:****");
+
+    std::string testIpv4Mask = "12.34.45.56/24";
+    result = CommonUtils::ToAnonymousIp(testIpv4Mask, true);
+    EXPECT_EQ(result, "12.**.**.56/24");
+    
+    std::string testIpv6Mask = "ab:56:df:66:ac6:783:bdb5:8902/64";
+    result2 = CommonUtils::ToAnonymousIp(testIpv6Mask, true);
+    EXPECT_EQ(result2, "ab:**:**:**:***:***:***:8902/64");
+}
+
 /**
  * @tc.name: StrToIntTest001
  * @tc.desc: Test UtNetmanagerBaseCommon StrToInt.

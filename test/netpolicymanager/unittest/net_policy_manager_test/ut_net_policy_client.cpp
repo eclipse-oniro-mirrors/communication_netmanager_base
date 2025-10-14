@@ -648,6 +648,21 @@ HWTEST_F(UtNetPolicyClient, SetNicTrafficAllowed006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetInternetAccessByIpForWifiShare001
+ * @tc.desc: Test NetPolicyClient SetInternetAccessByIpForWifiShare.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string ip = "1.1.1.1";
+    uint8_t family = 2;
+    int32_t result = g_netPolicyClient->SetInternetAccessByIpForWifiShare(ip, family, false, "");
+    std::cout << "NetPolicyClient034 SetInternetAccessByIpForWifiShare ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnRemoteDied001
  * @tc.desc: Test NetPolicyClient OnRemoteDied.
  * @tc.type: FUNC

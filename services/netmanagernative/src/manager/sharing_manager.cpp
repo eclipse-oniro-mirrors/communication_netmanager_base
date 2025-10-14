@@ -41,6 +41,7 @@ constexpr const int NEXT_LIST_CORRECT_DATA = 1;
 constexpr uint32_t NET_TRAFFIC_RESULT_INDEX_OFFSET = 2;
 const std::string CELLULAR_IFACE_NAME = "rmnet";
 const std::string WLAN_IFACE_NAME = "wlan";
+const std::string P2P_IFACE_NAME = "p2p-p2p0";
 
 // commands of create tables
 constexpr const char *CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
@@ -352,6 +353,11 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         Rollback();
         return result;
     }
+    if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
+        fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
+        wifiShareInterface_ = fromIface;
+        EnableShareUnreachableRoute();
+    }
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
 }
@@ -389,6 +395,12 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
 
     RouteManager::DisableSharing(fromIface, toIface);
 
+    if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
+        fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
+        ClearForbidIpRules();
+        DisableShareUnreachableRoute();
+        wifiShareInterface_ = "";
+    }
     return 0;
 }
 
@@ -567,6 +579,81 @@ void SharingManager::SetForwardRules(bool set, const std::string &cmds, std::str
 void SharingManager::CombineRestoreRules(const std::string &cmds, std::string &cmdSet)
 {
     cmdSet.append(cmds + "\n");
+}
+
+int32_t SharingManager::EnableShareUnreachableRoute()
+{
+    bool routeRepeat = false;
+    RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
+
+    NetworkRouteInfo networkRouteInfo;
+    networkRouteInfo.destination = "0.0.0.0/0";
+    networkRouteInfo.nextHop = "unreachable";
+
+    int32_t ret = RouteManager::AddRoute(tableType, networkRouteInfo, routeRepeat);
+    if (ret != 0 && !routeRepeat) {
+        NETNATIVE_LOGE("EnableShareUnreachableRoute fail, ret = %{public}d", ret);
+    }
+
+    NetworkRouteInfo networkRouteInfoV6;
+    networkRouteInfoV6.destination = "::/0";
+    networkRouteInfoV6.nextHop = "unreachable";
+
+    ret = RouteManager::AddRoute(tableType, networkRouteInfoV6, routeRepeat);
+    if (ret != 0 && !routeRepeat) {
+        NETNATIVE_LOGE("EnableShareUnreachableRoute v6 fail, ret = %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t SharingManager::DisableShareUnreachableRoute()
+{
+    RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
+    std::string interfaceName = "";
+    std::string destinationName = "0.0.0.0/0";
+    std::string nextHop = "unreachable";
+
+    int32_t ret = RouteManager::RemoveRoute(tableType, interfaceName, destinationName, nextHop);
+    if (ret != 0) {
+        NETNATIVE_LOGE("DisableShareUnreachableRoute fail, ret = %{public}d", ret);
+    }
+    
+    std::string destinationV6Name = "::/0";
+    ret = RouteManager::RemoveRoute(tableType, interfaceName, destinationV6Name, nextHop);
+    if (ret != 0) {
+        NETNATIVE_LOGE("DisableShareUnreachableRoute V6 fail, ret = %{public}d", ret);
+    }
+    return ret;
+}
+
+void SharingManager::ClearForbidIpRules()
+{
+    std::lock_guard<std::mutex> guard(forbidIpMutex_);
+    for (auto ip : forbidIpsMap_) {
+        RouteManager::SetSharingUnreachableIpRule(RTM_DELRULE, wifiShareInterface_, ip.first, ip.second);
+    }
+}
+
+int32_t SharingManager::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    if (wifiShareInterface_ == "") {
+        NETNATIVE_LOGE("wifi share network not enable");
+        return -1;
+    }
+    std::lock_guard<std::mutex> guard(forbidIpMutex_);
+    if (accessInternet && forbidIpsMap_.find(ipAddr) != forbidIpsMap_.end()) {
+        forbidIpsMap_.erase(ipAddr);
+    } else if (!accessInternet && forbidIpsMap_.find(ipAddr) == forbidIpsMap_.end()) {
+        forbidIpsMap_[ipAddr] = family;
+    } else {
+        NETNATIVE_LOGE("ip[%{public}s] set conflict, access[%{public}d]",
+            NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr, true).c_str(), accessInternet);
+        return -1;
+    }
+    uint16_t action = accessInternet ? RTM_DELRULE : RTM_NEWRULE;
+    int32_t res = RouteManager::SetSharingUnreachableIpRule(action, wifiShareInterface_, ipAddr, family);
+    return res;
 }
 } // namespace nmd
 } // namespace OHOS

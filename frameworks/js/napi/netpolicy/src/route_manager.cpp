@@ -48,6 +48,7 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace nmd {
 namespace {
+constexpr int32_t RULE_LEVEL_UNREACHABLE_NETWORK = 7000;
 constexpr int32_t RULE_LEVEL_CLAT_TUN = 8000;
 constexpr int32_t RULE_LEVEL_VPN_OUTPUT_TO_LOCAL = 9000;
 constexpr int32_t RULE_LEVEL_SECURE_VPN = 10000;
@@ -62,6 +63,7 @@ constexpr int32_t RULE_LEVEL_ENTERPRISE = 15000;
 #endif
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
 constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION = 16500;
+constexpr uint32_t ROUTE_UNREACHABLE_TABLE = 80;
 constexpr uint32_t ROUTE_DISTRIBUTE_TO_CLIENT_TABLE = 90;
 constexpr uint32_t ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE = 91;
 constexpr uint32_t ROUTE_VNIC_TABLE = 97;
@@ -69,6 +71,7 @@ constexpr uint32_t ROUTE_VPN_NETWORK_TABLE = 98;
 constexpr uint32_t ROUTE_LOCAL_NETWORK_TABLE = 99;
 constexpr uint32_t OUTPUT_MAX = 128;
 constexpr uint32_t BIT_32_LEN = 32;
+constexpr uint32_t BIT_128_LEN = 128;
 constexpr uint32_t BIT_MAX_LEN = 255;
 constexpr uint32_t DECIMAL_DIGITAL = 10;
 constexpr uint32_t BYTE_ALIGNMENT = 8;
@@ -1320,6 +1323,33 @@ int32_t RouteManager::ClearSharingRules(const std::string &inputInterface)
     return UpdateRuleInfo(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }
 
+int32_t RouteManager::SetSharingUnreachableIpRule(uint16_t action, const std::string &interfaceName,
+    const std::string &forbidIp, uint8_t family)
+{
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = ROUTE_UNREACHABLE_TABLE;
+    ruleInfo.rulePriority = RULE_LEVEL_UNREACHABLE_NETWORK;
+    ruleInfo.ruleFwmark = MARK_UNSET;
+    ruleInfo.ruleMask = MARK_UNSET;
+    ruleInfo.ruleIif = interfaceName;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+    ruleInfo.ruleSrcIp = forbidIp;
+    ruleInfo.ruleDstIp = RULEIP_NULL;
+    int32_t ret1 = SendSharingForbidIpRuleToKernel(action, family, FR_ACT_TO_TBL, ruleInfo);
+
+    ruleInfo.ruleIif = RULEIIF_NULL;
+    ruleInfo.ruleOif = interfaceName;
+    ruleInfo.ruleSrcIp = RULEIP_NULL;
+    ruleInfo.ruleDstIp = forbidIp;
+    int32_t ret2 = SendSharingForbidIpRuleToKernel(action, family, FR_ACT_TO_TBL, ruleInfo);
+    if (ret1 < 0 && ret2 < 0) {
+        NETNATIVE_LOGE("SetSharingUnreachableIpRule for ip %{public}s failed, ret1 = %{public}d, ret2 = %{public}d",
+            ToAnonymousIp(forbidIp, true).c_str(), ret1, ret2);
+        return ROUTEMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart, uid_t uidEnd)
 {
     NETNATIVE_LOG_D("UpdateRuleInfo");
@@ -1389,6 +1419,73 @@ uint16_t RouteManager::GetRuleFlag(uint32_t action)
 #endif // SUPPORT_SYSVPN
 }
 
+int32_t RouteManager::SetRuleMsgPriority(NetlinkMsg &nlmsg, RuleInfo &ruleInfo)
+{
+    return nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority);
+}
+
+int32_t RouteManager::SetRuleMsgTable(NetlinkMsg &nlmsg, RuleInfo &ruleInfo)
+{
+    if (ruleInfo.ruleTable != RT_TABLE_UNSPEC) {
+        if (int32_t ret = nlmsg.AddAttr32(FRA_TABLE, ruleInfo.ruleTable)) {
+            return ret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::SetRuleMsgFwmark(NetlinkMsg &nlmsg, RuleInfo &ruleInfo)
+{
+    if (ruleInfo.ruleMask != 0) {
+        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMARK, ruleInfo.ruleFwmark)) {
+            return ret;
+        }
+        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMASK, ruleInfo.ruleMask)) {
+            return ret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::SetRuleMsgUidRange(NetlinkMsg &nlmsg, uid_t uidStart, uid_t uidEnd)
+{
+    if (uidStart != INVALID_UID && uidEnd != INVALID_UID) {
+        FibRuleUidRange uidRange = {uidStart, uidEnd};
+        if (int32_t ret = nlmsg.AddAttr(FRA_UID_RANGE, &uidRange, sizeof(uidRange))) {
+            NETNATIVE_LOGE("SendRuleToKernel FRA_UID_RANGE is error.");
+            return ret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::SetRuleMsgIfName(NetlinkMsg &nlmsg, std::string &ifName, uint16_t type)
+{
+    if (ifName != RULEIIF_NULL) {
+        char ruleIfName[IFNAMSIZ] = {0};
+        size_t ruleIfLength = strlcpy(ruleIfName, ifName.c_str(), IFNAMSIZ) + 1;
+        if (int32_t ret = nlmsg.AddAttr(type, ruleIfName, ruleIfLength)) {
+            return ret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t RouteManager::SetRuleMsgIp(NetlinkMsg &nlmsg, std::string &ip, uint16_t type)
+{
+    if (ip != RULEIP_NULL) {
+        InetAddr addr = {0};
+        if (ReadAddrGw(ip, &addr) <= 0) {
+            NETNATIVE_LOGE("ip addr parse failed.");
+            return NETMANAGER_ERR_OPERATION_FAILED;
+        }
+        if (int32_t ret = nlmsg.AddAttr(type, addr.data, addr.bitlen / BYTE_ALIGNMENT)) {
+            return ret;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
                                        uid_t uidStart, uid_t uidEnd)
 {
@@ -1398,42 +1495,23 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t 
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
-    if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {
+    if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
         return ret;
     }
-    if (ruleInfo.ruleTable != RT_TABLE_UNSPEC) {
-        if (int32_t ret = nlmsg.AddAttr32(FRA_TABLE, ruleInfo.ruleTable)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgTable(nlmsg, ruleInfo)) {
+        return ret;
     }
-    if (ruleInfo.ruleMask != 0) {
-        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMARK, ruleInfo.ruleFwmark)) {
-            return ret;
-        }
-        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMASK, ruleInfo.ruleMask)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgFwmark(nlmsg, ruleInfo)) {
+        return ret;
     }
-    if ((uidStart != INVALID_UID) && (uidEnd != INVALID_UID)) {
-        FibRuleUidRange uidRange = {uidStart, uidEnd};
-        if (int32_t ret = nlmsg.AddAttr(FRA_UID_RANGE, &uidRange, sizeof(uidRange))) {
-            NETNATIVE_LOGE("SendRuleToKernel FRA_UID_RANGE is error.");
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgUidRange(nlmsg, uidStart, uidEnd)) {
+        return ret;
     }
-    if (ruleInfo.ruleIif != RULEIIF_NULL) {
-        char ruleIifName[IFNAMSIZ] = {0};
-        size_t ruleIifLength = strlcpy(ruleIifName, ruleInfo.ruleIif.c_str(), IFNAMSIZ) + 1;
-        if (int32_t ret = nlmsg.AddAttr(FRA_IIFNAME, ruleIifName, ruleIifLength)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleIif, FRA_IIFNAME)) {
+        return ret;
     }
-    if (ruleInfo.ruleOif != RULEOIF_NULL) {
-        char ruleOifName[IFNAMSIZ] = {0};
-        size_t ruleOifLength = strlcpy(ruleOifName, ruleInfo.ruleOif.c_str(), IFNAMSIZ) + 1;
-        if (int32_t ret = nlmsg.AddAttr(FRA_OIFNAME, ruleOifName, ruleOifLength)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleOif, FRA_OIFNAME)) {
+        return ret;
     }
 
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
@@ -1451,38 +1529,56 @@ int32_t RouteManager::SendRuleToKernelEx(uint32_t action, uint8_t family, uint8_
     uint16_t ruleFlag = GetRuleFlag(action);
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
-    if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {
+    if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
         return ret;
     }
-    if (ruleInfo.ruleTable != RT_TABLE_UNSPEC) {
-        if (int32_t ret = nlmsg.AddAttr32(FRA_TABLE, ruleInfo.ruleTable)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgTable(nlmsg, ruleInfo)) {
+        return ret;
     }
-    if (ruleInfo.ruleMask != 0) {
-        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMARK, ruleInfo.ruleFwmark)) {
-            return ret;
-        }
-        if (int32_t ret = nlmsg.AddAttr32(FRA_FWMASK, ruleInfo.ruleMask)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgFwmark(nlmsg, ruleInfo)) {
+        return ret;
     }
-    if (ruleInfo.ruleIif != RULEIIF_NULL) {
-        char ruleIifName[IFNAMSIZ] = {0};
-        size_t ruleIifLength = strlcpy(ruleIifName, ruleInfo.ruleIif.c_str(), IFNAMSIZ) + 1;
-        if (int32_t ret = nlmsg.AddAttr(FRA_IIFNAME, ruleIifName, ruleIifLength)) {
-            return ret;
-        }
+    if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleIif, FRA_IIFNAME)) {
+        return ret;
     }
+    if (int32_t ret = SetRuleMsgIp(nlmsg, ruleInfo.ruleDstIp, FRA_DST)) {
+        return ret;
+    }
+    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+}
+
+int32_t RouteManager::SendSharingForbidIpRuleToKernel(
+    uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo &ruleInfo)
+{
+    struct fib_rule_hdr msg = {0};
+    msg.action = ruleType;
+    msg.family = family;
     if (ruleInfo.ruleDstIp != RULEIP_NULL) {
-        InetAddr dst = {0};
-        if (ReadAddrGw(ruleInfo.ruleDstIp, &dst) <= 0) {
-            NETNATIVE_LOGE("dest addr parse failed.");
-            return NETMANAGER_ERR_OPERATION_FAILED;
-        }
-        if (int32_t ret = nlmsg.AddAttr(FRA_DST, dst.data, dst.bitlen / BYTE_ALIGNMENT)) {
-            return ret;
-        }
+        msg.dst_len = family == AF_INET? BIT_32_LEN : BIT_128_LEN;
+    }
+    if (ruleInfo.ruleSrcIp != RULEIP_NULL) {
+        msg.src_len = family == AF_INET? BIT_32_LEN : BIT_128_LEN;
+    }
+    uint16_t ruleFlag = GetRuleFlag(action);
+    NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
+    nlmsg.AddRule(action, msg);
+    if (int32_t ret = SetRuleMsgPriority(nlmsg, ruleInfo)) {
+        return ret;
+    }
+    if (int32_t ret = SetRuleMsgTable(nlmsg, ruleInfo)) {
+        return ret;
+    }
+    if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleIif, FRA_IIFNAME)) {
+        return ret;
+    }
+    if (int32_t ret = SetRuleMsgIfName(nlmsg, ruleInfo.ruleOif, FRA_OIFNAME)) {
+        return ret;
+    }
+    if (int32_t ret = SetRuleMsgIp(nlmsg, ruleInfo.ruleSrcIp, FRA_SRC)) {
+        return ret;
+    }
+    if (int32_t ret = SetRuleMsgIp(nlmsg, ruleInfo.ruleDstIp, FRA_DST)) {
+        return ret;
     }
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
@@ -1611,6 +1707,8 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
 #endif // SUPPORT_SYSVPN
         case RouteManager::INTERNAL_DEFAULT:
             return FindTableByInterfacename(interfaceName) % ROUTE_INTERNAL_DEFAULT_TABLE + 1;
+        case RouteManager::UNREACHABLE_NETWORK:
+            return ROUTE_UNREACHABLE_TABLE;
         default:
             NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
             return RT_TABLE_UNSPEC;

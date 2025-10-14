@@ -69,6 +69,7 @@ public:
         VPN_NETWORK,
         LOCAL_NETWORK,
         INTERNAL_DEFAULT,
+        UNREACHABLE_NETWORK,
     };
 
     /**
@@ -345,6 +346,9 @@ public:
     static int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add);
 #endif
 
+    static int32_t SetSharingUnreachableIpRule(uint16_t action,
+        const std::string &interfaceName, const std::string &forbidIp, uint8_t family);
+
 private:
     static std::mutex interfaceToTableLock_;
     static std::map<std::string, uint32_t> interfaceToTable_;
@@ -421,6 +425,14 @@ private:
                                             NetworkPermission permission, bool add);
     static int32_t AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface);
     static int32_t AddServerDownlinkRoute(const std::string &UplinkIif, const std::string &dstAddr);
+    static int32_t SetRuleMsgPriority(NetlinkMsg &nlmsg, RuleInfo &ruleInfo);
+    static int32_t SetRuleMsgTable(NetlinkMsg &nlmsg, RuleInfo &ruleInfo);
+    static int32_t SetRuleMsgFwmark(NetlinkMsg &nlmsg, RuleInfo &ruleInfo);
+    static int32_t SetRuleMsgUidRange(NetlinkMsg &nlmsg, uid_t uidStart, uid_t uidEnd);
+    static int32_t SetRuleMsgIfName(NetlinkMsg &nlmsg, std::string &ifName, uint16_t type);
+    static int32_t SetRuleMsgIp(NetlinkMsg &nlmsg, std::string &ip, uint16_t type);
+    static int32_t SendSharingForbidIpRuleToKernel(
+        uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo &ruleInfo);
 };
 } // namespace nmd
 } // namespace OHOS

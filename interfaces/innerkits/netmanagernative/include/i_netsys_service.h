@@ -228,6 +228,8 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
 #endif
+    virtual int32_t SetInternetAccessByIpForWifiShare(
+        const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

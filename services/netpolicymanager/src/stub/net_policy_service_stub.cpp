@@ -54,6 +54,8 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG),
      Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+     Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr int UID_EDM = 3057;
@@ -121,6 +123,8 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED)] =
         &NetPolicyServiceStub::OnSetNicTrafficAllowed;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE)] =
+        &NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare;
     return;
 }
 
@@ -877,6 +881,45 @@ int32_t NetPolicyServiceStub::OnSetNicTrafficAllowed(MessageParcel &data, Messag
     int32_t result = SetNicTrafficAllowed(ifaceNames, status);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write OnSetNicTrafficAllowed result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string ipAddr;
+    if (!data.ReadString(ipAddr)) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read ipAddr failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint8_t family = 0;
+    if (!data.ReadUint8(family)) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read family failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    bool accessInternet = false;
+    if (!data.ReadBool(accessInternet)) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read accessInternet failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string clientNetIfName;
+    if (!data.ReadString(clientNetIfName)) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read clientNetIfName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write OnSetInternetAccessByIpForWifiShare result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return NETMANAGER_SUCCESS;

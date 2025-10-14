@@ -67,7 +67,7 @@ int32_t Ipv4PrefixLen(const std::string &ip);
 int32_t Ipv6PrefixLen(const std::string &ip);
 bool ParseInt(const std::string &str, int32_t *value);
 int64_t ConvertToInt64(const std::string &str);
-std::string ToAnonymousIp(const std::string &input);
+std::string ToAnonymousIp(const std::string &input, bool maskMiddle = false);
 std::string AnonymizeIptablesCommand(const std::string &command);
 std::string AnonymousIpInStr(const std::string &input);
 int32_t StrToInt(const std::string &value, int32_t defaultErr = -1);

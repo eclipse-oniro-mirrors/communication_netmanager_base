@@ -844,5 +844,43 @@ int32_t NetPolicyServiceProxy::SetNicTrafficAllowed(const std::vector<std::strin
     return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED),
         data, reply, option);
 }
+
+int32_t NetPolicyServiceProxy::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ipAddr)) {
+        NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteString ipAddr failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(family)) {
+        NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteInt8 family failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(accessInternet)) {
+        NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteBool accessInternet failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(clientNetIfName)) {
+        NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteString clientNetIfName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote,
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

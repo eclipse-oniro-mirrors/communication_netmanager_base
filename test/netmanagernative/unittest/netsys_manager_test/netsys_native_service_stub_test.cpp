@@ -1376,5 +1376,23 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    std::string iptest = "1.1.1.1";
+    uint8_t family = 2;
+    bool access = true;
+    std::string ifname = "test";
+
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteString(iptest));
+    EXPECT_TRUE(data.WriteUint8(family));
+    EXPECT_TRUE(data.WriteBool(access));
+    EXPECT_TRUE(data.WriteString(ifname));
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
 } // namespace NetsysNative
 } // namespace OHOS

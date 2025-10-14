@@ -578,6 +578,30 @@ void SetNicTrafficAllowedFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), dataParcel);
 }
 
+void SetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetPolicyGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    uint8_t family = NetPolicyGetData<uint8_t>();
+    dataParcel.WriteUint8(family);
+    bool accessInternet = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    dataParcel.WriteBool(accessInternet);
+    std::string clientNetIfName = NetPolicyGetString(STR_LEN);
+    dataParcel.WriteString(clientNetIfName);
+    OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE), dataParcel);
+}
+
 void OnExtensionFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -732,5 +756,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UpdateNetworkAccessPolicyFromConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetNetAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::FactoryResetPoliciesFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetInternetAccessByIpForWifiShareFuzzTest(data, size);
     return 0;
 }

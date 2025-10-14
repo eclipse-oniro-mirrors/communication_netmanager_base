@@ -129,6 +129,14 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
+{
+    sharingManager->IpfwdAddInterfaceForward("wlantest0", "wlantest1");
+    EXPECT_EQ(sharingManager->wifiShareInterface_, "wlantest0");
+    sharingManager->IpfwdRemoveInterfaceForward("wlantest0", "wlantest1");
+    EXPECT_EQ(sharingManager->wifiShareInterface_, "");
+}
+
 HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward001, TestSize.Level1)
 {
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
@@ -246,6 +254,42 @@ HWTEST_F(SharingManagerTest, QueryCellularSharingTraffic004, TestSize.Level1)
         "        0        0 RETURN     all  --  wifi1   0.0.0.0/0            0.0.0.0/0 \n";
     auto res = sharingManager->QueryCellularSharingTraffic(traffic, result, ifaceName);
     EXPECT_EQ(res, -1);
+}
+
+HWTEST_F(SharingManagerTest, ClearForbidIpRules001, TestSize.Level1)
+{
+    std::string ip = "1.1.1.1";
+    uint8_t family = 2;
+    sharingManager->forbidIpsMap_.clear();
+    sharingManager->forbidIpsMap_[ip] = family;
+    sharingManager->ClearForbidIpRules();
+    EXPECT_TRUE(sharingManager->forbidIpsMap_.find(ip) == sharingManager->forbidIpsMap_.end());
+}
+
+HWTEST_F(SharingManagerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    std::string ip = "1.1.1.1";
+    uint8_t family = 2;
+    bool access = false;
+    std::string clientNetIfName = "test";
+
+    sharingManager->forbidIpsMap_.clear();
+    sharingManager->wifiShareInterface_ = "";
+    EXPECT_EQ(sharingManager->SetInternetAccessByIpForWifiShare(ip, family, access, clientNetIfName), -1);
+
+    sharingManager->wifiShareInterface_ = "up";
+    sharingManager->SetInternetAccessByIpForWifiShare(ip, family, access, clientNetIfName);
+    EXPECT_NE(sharingManager->forbidIpsMap_.size(), 0);
+
+    sharingManager->wifiShareInterface_ = "up";
+    access = true;
+    sharingManager->SetInternetAccessByIpForWifiShare(ip, family, access, clientNetIfName);
+    EXPECT_EQ(sharingManager->forbidIpsMap_.size(), 0);
+
+    sharingManager->wifiShareInterface_ = "up";
+    access = true;
+    int32_t ret = sharingManager->SetInternetAccessByIpForWifiShare(ip, family, access, clientNetIfName);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS

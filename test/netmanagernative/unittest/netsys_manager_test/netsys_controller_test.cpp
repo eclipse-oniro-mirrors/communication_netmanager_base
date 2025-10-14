@@ -44,7 +44,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace CommonUtils {
-std::string ToAnonymousIp(const std::string &input)
+std::string ToAnonymousIp(const std::string &input, bool maskMiddle)
 {
     return input;
 }
@@ -1866,6 +1866,30 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
     uint16_t netId = 101;
     int32_t ret = netsysController->FlushDnsCache(netId);
     EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+
+    std::string ipAddr = "1.1.1.1";
+    uint8_t family = 0;
+    bool accessInternet = true;
+    std::string clientNetIfName = "test";
+
+    int32_t res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETSYS_PARAM_ERROR);
+
+    family = 2;
+    netsysController->netsysService_ = nullptr;
+    res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+    res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

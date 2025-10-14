@@ -801,6 +801,14 @@ HWTEST_F(RouteManagerTest, GetRouteTableFromTypeTest005, TestSize.Level1)
     EXPECT_NE(ret, 1);
 }
 
+HWTEST_F(RouteManagerTest, GetRouteTableFromTypeTest006, TestSize.Level1)
+{
+    RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
+    std::string interfaceName = "eth0";
+    uint32_t ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
+    EXPECT_NE(ret, 80);
+}
+
 HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork002, TestSize.Level1)
 {
     uint16_t testNetId = 154;
@@ -882,5 +890,105 @@ HWTEST_F(RouteManagerTest, UpdateEnterpriseRoute003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 #endif
+
+HWTEST_F(RouteManagerTest, SetSharingUnreachableIpRule001, TestSize.Level1)
+{
+    std::string interfaceName = "123";
+    std::string ip = "1.1.1.1";
+    uint8_t family = 2;
+    auto ret = RouteManager::SetSharingUnreachableIpRule(RTM_NEWRULE, interfaceName, ip, family);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(RouteManagerTest, SetRuleMsgTable001, TestSize.Level1)
+{
+    NetlinkMsg nlmsg(NLM_F_CREATE, NETLINK_MAX_LEN, 1);
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = RT_TABLE_UNSPEC;
+    auto ret = RouteManager::SetRuleMsgTable(nlmsg, ruleInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ruleInfo.ruleTable = 80;
+    ret = RouteManager::SetRuleMsgTable(nlmsg, ruleInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetlinkMsg nlmsg1(NLM_F_CREATE, 1, 1);
+    ret = RouteManager::SetRuleMsgTable(nlmsg1, ruleInfo);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, SetRuleMsgFwmark001, TestSize.Level1)
+{
+    NetlinkMsg nlmsg(NLM_F_CREATE, NETLINK_MAX_LEN, 1);
+    RuleInfo ruleInfo;
+    ruleInfo.ruleMask = 0;
+    auto ret = RouteManager::SetRuleMsgFwmark(nlmsg, ruleInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ruleInfo.ruleMask = 1;
+    ret = RouteManager::SetRuleMsgFwmark(nlmsg, ruleInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetlinkMsg nlmsg1(NLM_F_CREATE, 1, 1);
+    ret = RouteManager::SetRuleMsgFwmark(nlmsg1, ruleInfo);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, SetRuleMsgUidRange001, TestSize.Level1)
+{
+    NetlinkMsg nlmsg(NLM_F_CREATE, NETLINK_MAX_LEN, 1);
+    uid_t uidStart = -1;
+    uid_t uidEnd = -1;
+    auto ret = RouteManager::SetRuleMsgUidRange(nlmsg, uidStart, uidEnd);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    uidStart = 1000;
+    uidEnd = 1000;
+    ret = RouteManager::SetRuleMsgUidRange(nlmsg, uidStart, uidEnd);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetlinkMsg nlmsg1(NLM_F_CREATE, 1, 1);
+    ret = RouteManager::SetRuleMsgUidRange(nlmsg1, uidStart, uidEnd);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, SetRuleMsgIfName001, TestSize.Level1)
+{
+    NetlinkMsg nlmsg(NLM_F_CREATE, NETLINK_MAX_LEN, 1);
+    uint16_t type = 1;
+    std::string ifNameNull = "";
+    auto ret = RouteManager::SetRuleMsgIfName(nlmsg, ifNameNull, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string ifName = "test";
+    ret = RouteManager::SetRuleMsgIfName(nlmsg, ifName, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetlinkMsg nlmsg1(NLM_F_CREATE, 1, 1);
+    ret = RouteManager::SetRuleMsgIfName(nlmsg1, ifName, type);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, SetRuleMsgIp001, TestSize.Level1)
+{
+    NetlinkMsg nlmsg(NLM_F_CREATE, NETLINK_MAX_LEN, 1);
+    uint16_t type = 1;
+    std::string ipNull = "";
+    auto ret = RouteManager::SetRuleMsgIp(nlmsg, ipNull, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string ip = "1.1.1.1";
+    ret = RouteManager::SetRuleMsgIp(nlmsg, ip, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetlinkMsg nlmsg1(NLM_F_CREATE, 1, 1);
+    ret = RouteManager::SetRuleMsgIp(nlmsg1, ip, type);
+    EXPECT_EQ(ret, -1);
+
+    std::string ipErr = "error";
+    ret = RouteManager::SetRuleMsgIp(nlmsg, ipErr, type);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace nmd
 } // namespace OHOS

@@ -1069,5 +1069,11 @@ int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &in
     return netsysClient_->UpdateEnterpriseRoute(interfaceName, uid, add);
 }
 #endif
+
+int32_t NetsysControllerServiceImpl::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    return netsysClient_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

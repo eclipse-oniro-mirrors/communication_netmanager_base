@@ -33,6 +33,7 @@ enum NetsysContrlResultCode {
     ERR_STOP_DHCPSERVICE_FAILED = (-3),
     NETSYS_NETSYSSERVICE_NULL = 2105001,
     NETSYS_ERR_VPN = 2105005,
+    NETSYS_PARAM_ERROR = 2105006,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

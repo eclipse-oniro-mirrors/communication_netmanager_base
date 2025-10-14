@@ -136,6 +136,7 @@
       "OHOS::NetManagerStandard::NetsysController::UnregisterDnsQueryResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsQueryReportCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::UnRegisterNetFirewallCallback(OHOS::sptr<OHOS::NetsysNative::INetFirewallCallback> const&)";
       "OHOS::NetManagerStandard::NetsysController::UpdateEnterpriseRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, bool)";
+      "OHOS::NetManagerStandard::NetsysController::SetInternetAccessByIpForWifiShare(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned char, bool, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::~NetsysNativeClient()";
       "OHOS::NetManagerStandard::NetsysNativeClient::AddInterfaceAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::NetManagerStandard::NetsysNativeClient::ClearDefaultNetWorkNetId()";
