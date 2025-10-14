@@ -37,7 +37,9 @@
 #define DNS_QRS_IPV4_LEN 4
 #define DNS_QRS_IPV6_TYPE 28
 #define DNS_QRS_IPV6_LEN 16
-#define DNS_DOMAIN_LEN 253
+#define DNS_DOMAIN_LEN_MIN 1
+#define BITS_PER_BYTE 8
+#define DNS_DOMAIN_LEN 128
 #define DNS_ANSWER_CNT 32
 #define PROTOCOL_SAT_EXPAK 64
 
@@ -76,6 +78,7 @@ enum debug_type {
 };
 
 struct domain_hash_key {
+    __u32 prefixlen;
     __u8 data[DNS_DOMAIN_LEN];
 };
 

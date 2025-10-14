@@ -83,4 +83,6 @@ HWTEST_F(NetsysBpfNetFirewallTest, ClearFirewallRules001, TestSize.Level0)
     ret = FIREWALL_ERR_INTERNAL;
     ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_DEFAULT_ACTION);
     EXPECT_EQ(ret, FIREWALL_SUCCESS);
+    ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_DOMAIN);
+    EXPECT_EQ(ret, FIREWALL_SUCCESS);
 }
