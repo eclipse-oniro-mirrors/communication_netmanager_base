@@ -556,7 +556,7 @@ int32_t NetConnServiceStub::OnUpdateNetCaps(MessageParcel &data, MessageParcel &
 
 int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t supplierId;
+    uint32_t supplierId = 0;
     if (!data.ReadUint32(supplierId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -571,7 +571,7 @@ int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t supplierId;
+    uint32_t supplierId = 0;
     data.ReadUint32(supplierId);
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {

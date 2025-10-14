@@ -33,6 +33,7 @@ static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
+constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -2950,6 +2951,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& shar
         return ERR_FLATTEN_OBJECT;
     }
     uint32_t tmp = ERR_NONE;
+    count = (count > MAX_SHARING_TYPE_SIZE) ? MAX_SHARING_TYPE_SIZE : count;
     for (size_t index = 0; index < count; ++index) {
         if (!reply.ReadUint32(tmp)) {
             NETNATIVE_LOGE("GetNetworkSharingType falil");

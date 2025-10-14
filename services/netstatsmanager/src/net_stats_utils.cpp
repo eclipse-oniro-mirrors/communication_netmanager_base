@@ -149,7 +149,7 @@ int32_t NetStatsUtils::IsDualCardEnabled()
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     int32_t simNum = Telephony::CoreServiceClient::GetInstance().GetMaxSimCount();
     for (int32_t i = 0; i < simNum; ++i) {
-        bool hasSimCard;
+        bool hasSimCard = false;
         Telephony::CoreServiceClient::GetInstance().HasSimCard(i, hasSimCard);
         if (hasSimCard) {
             actualSimNum++;
