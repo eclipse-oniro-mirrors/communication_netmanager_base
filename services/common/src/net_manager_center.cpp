@@ -155,7 +155,7 @@ int32_t NetManagerCenter::RestrictBackgroundChanged(bool isRestrictBackground)
 bool NetManagerCenter::IsUidNetAccess(uint32_t uid, bool metered)
 {
     if (policyService_ == nullptr) {
-        return NETMANAGER_ERROR;
+        return false;
     }
     return IsUidNetAllowed(uid, metered);
 }
@@ -163,7 +163,7 @@ bool NetManagerCenter::IsUidNetAccess(uint32_t uid, bool metered)
 bool NetManagerCenter::IsUidNetAllowed(uint32_t uid, bool metered)
 {
     if (policyService_ == nullptr) {
-        return NETMANAGER_ERROR;
+        return false;
     }
     return policyService_->IsUidNetAllowed(uid, metered);
 }
