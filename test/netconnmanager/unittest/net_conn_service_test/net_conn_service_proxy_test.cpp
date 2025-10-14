@@ -744,6 +744,13 @@ HWTEST_F(NetConnServiceProxyTest, GetDefaultSupplierId001, TestSize.Level1)
         supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, GetIpNeighTableTest001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

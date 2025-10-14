@@ -2050,5 +2050,12 @@ HWTEST_F(NetConnClientTest, RemoveNetConnCallback001, TestSize.Level1)
     EXPECT_EQ(netConnCallbackManager->netConnCallbackList_.size(), 0);
 }
 
+HWTEST_F(NetConnClientTest, GetIpNeighTable001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    auto ret = NetConnClient::GetInstance().GetIpNeighTable(ipMacInfo);
+    EXPECT_NE(ret, 0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

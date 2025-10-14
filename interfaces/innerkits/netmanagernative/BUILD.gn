@@ -123,6 +123,7 @@ ohos_shared_library("net_native_manager_if") {
 
   deps = [
     ":net_native_parcel",
+    "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
   ]
 

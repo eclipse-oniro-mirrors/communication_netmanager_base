@@ -46,6 +46,7 @@ ohos_static_library("net_conn_parcel") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_all_capabilities.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_interface_config.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_ip_mac_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_link_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_specifier.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_info.cpp",
@@ -56,6 +57,8 @@ ohos_static_library("net_conn_parcel") {
     cfi_cross_dso = true
     debug = false
   }
+
+  public_configs = [ ":net_conn_manager_if_config" ]
 
   branch_protector_ret = "pac_ret"
 

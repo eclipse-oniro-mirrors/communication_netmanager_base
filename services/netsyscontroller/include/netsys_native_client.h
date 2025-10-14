@@ -869,6 +869,7 @@ public:
         const std::string &ifName);
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName);
+    int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo);
 
         /**
      * Register Dns Result Callback Listener.

@@ -1376,5 +1376,13 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetIpNeighTable001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetIpNeighTable(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

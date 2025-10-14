@@ -26,9 +26,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-#ifdef SUPPORT_SYSVPN
 #include <net/if.h>
-#endif
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -39,17 +37,16 @@ namespace nmd {
 constexpr const char* XFRM_TYPE_NAME = "xfrm";
 #endif
 
-int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
+constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
+constexpr int32_t MAC_ADDRESS_INT_LEN = 6;
+constexpr int32_t MAC_BYTE_HEX_SIZE = 4;
+constexpr int32_t IF_NAME_SIZE = 16;
+constexpr const uint32_t FAMILY_INVALID = 0;
+constexpr const uint32_t FAMILY_V4 = 1;
+constexpr const uint32_t FAMILY_V6 = 2;
+
+static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket)
 {
-    if (msg == nullptr) {
-        NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
-        return -1;
-    }
-    int32_t kernelSocket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    if (kernelSocket == -1) {
-        NETNATIVE_LOGE("[NetlinkSocket] create socket failed: %{public}d", errno);
-        return -1;
-    }
     struct iovec ioVector;
     ioVector.iov_base = msg;
     ioVector.iov_len = msg->nlmsg_len;
@@ -78,6 +75,51 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         return -1;
     }
     NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
+    return msgState;
+}
+
+int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
+{
+    if (msg == nullptr) {
+        NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
+        return -1;
+    }
+    int32_t kernelSocket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (kernelSocket == -1) {
+        NETNATIVE_LOGE("[NetlinkSocket] create socket failed: %{public}d", errno);
+        return -1;
+    }
+    ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
+    /////////待改start
+    // struct iovec ioVector;
+    // ioVector.iov_base = msg;
+    // ioVector.iov_len = msg->nlmsg_len;
+
+    // struct msghdr msgHeader;
+    // (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
+
+    // struct sockaddr_nl kernel;
+    // (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
+    // kernel.nl_family = AF_NETLINK;
+    // kernel.nl_groups = 0;
+
+    // msgHeader.msg_name = &kernel;
+    // msgHeader.msg_namelen = sizeof(kernel);
+    // msgHeader.msg_iov = &ioVector;
+    // msgHeader.msg_iovlen = 1;
+
+    // ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
+    // if (msgState == -1) {
+    //     NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
+    //     close(kernelSocket);
+    //     return -1;
+    // } else if (msgState == 0) {
+    //     NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
+    //     close(kernelSocket);
+    //     return -1;
+    // }
+    // NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
+    ///待改end
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
@@ -261,6 +303,25 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
     SendNetlinkMsgToKernel(msg);
 }
 
+std::string MacArrayToString(const uint8_t *mac)
+{
+    if (mac == nullptr) {
+        NETNATIVE_LOGE("mac is nullptr");
+        return "";
+    }
+    std::vector<uint8_t> macArray(mac, mac + MAC_ADDRESS_INT_LEN);
+    std::string macString;
+    char buf[MAC_BYTE_HEX_SIZE] {};
+    for (const auto byte : macArray) {
+        if (sprintf_s(buf, sizeof(buf), "%02x:", byte) < 0) {
+            return "";
+        }
+        macString.append(buf);
+    }
+    macString.erase(macString.length() - 1);
+    return macString;
+}
+
 int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
 {
     if (nlmsgHeader == nullptr) {
@@ -276,6 +337,157 @@ int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
         }
     }
     return 0;
+}
+
+int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg)
+{
+    if (msg == nullptr || rcvMsg == nullptr) {
+        NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
+        return -1;
+    }
+    int32_t kernelSocket = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (kernelSocket == -1) {
+        NETNATIVE_LOGE("[NetlinkSocket] create socket failed: %{public}d", errno);
+        return -1;
+    }
+    ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
+    // struct iovec ioVector;
+    // ioVector.iov_base = msg;
+    // ioVector.iov_len = msg->nlmsg_len;
+
+    // struct msghdr msgHeader;
+    // (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
+
+    // struct sockaddr_nl kernel;
+    // (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
+    // kernel.nl_family = AF_NETLINK;
+    // kernel.nl_groups = 0;
+
+    // msgHeader.msg_name = &kernel;
+    // msgHeader.msg_namelen = sizeof(kernel);
+    // msgHeader.msg_iov = &ioVector;
+    // msgHeader.msg_iovlen = 1;
+
+    // ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
+    // if (msgState == -1) {
+    //     NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
+    //     close(kernelSocket);
+    //     return -1;
+    // } else if (msgState == 0) {
+    //     NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
+    //     close(kernelSocket);
+    //     return -1;
+    // }
+    // NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
+    if (msg->nlmsg_flags & NLM_F_DUMP) {
+        msgState = GetRcvMsgFromKernel(kernelSocket, msg->nlmsg_type, table, rcvMsg);
+    }
+    if (msgState != 0) {
+        NETNATIVE_LOGE("netlink read socket[%{public}d] failed, msgState=%{public}zd", kernelSocket, msgState);
+    }
+    close(kernelSocket);
+    return msgState;
+}
+
+int32_t GetRcvMsgFromKernel(int32_t sock, uint16_t msgType, uint32_t table, void* rcvMsg)
+{
+    if (rcvMsg == nullptr) {
+        return -1;
+    }
+    char readBuffer[KERNEL_BUFFER_SIZE] = {0};
+    // Read the information returned by the kernel through the socket.
+    ssize_t readedInfos = read(sock, readBuffer, sizeof(readBuffer));
+    if (readedInfos < 0) {
+        return -errno;
+    }
+    while (readedInfos > 0) {
+        uint32_t readLength = static_cast<uint32_t>(readedInfos);
+        // Traverse and read the information returned by the kernel for item by item processing.
+        for (nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr *>(readBuffer); NLMSG_OK(nlmsgHeader, readLength);
+             nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
+            if (nlmsgHeader->nlmsg_type == NLMSG_ERROR) {
+                nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlmsgHeader));
+                NETNATIVE_LOG_D("netlink read socket[%{public}d] failed error = %{public}d", sock, err->error);
+                return err->error;
+            } else if (nlmsgHeader->nlmsg_type == NLMSG_DONE) {
+                return 0;
+            } else {
+                DealRcvMsgFromKernel(nlmsgHeader, msgType, table, rcvMsg);
+            }
+        }
+        readedInfos = read(sock, readBuffer, sizeof(readBuffer));
+        if (readedInfos < 0) {
+            return -errno;
+        }
+    }
+    return 0;
+}
+
+void DealRcvMsgFromKernel(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table, void* rcvMsg)
+{
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("nlmsgHeader is nullptr");
+        return;
+    }
+    if (rcvMsg == nullptr) {
+        NETNATIVE_LOGE("rcvMsg is nullptr");
+        return;
+    }
+    if (msgType == RTM_GETNEIGH) {
+        std::vector<NetManagerStandard::NetIpMacInfo>* ipMacInfoVec =
+            reinterpret_cast<std::vector<NetManagerStandard::NetIpMacInfo>*>(rcvMsg);
+        DealNeighInfo(nlmsgHeader, msgType, table, *ipMacInfoVec);
+    }
+}
+
+void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
+    std::vector<NetManagerStandard::NetIpMacInfo>& ipMacInfoVec)
+{
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("nlmsgHeader is nullptr");
+        return;
+    }
+    char macStr[MAC_ADDRESS_STR_LEN] = {0};
+    uint32_t length = RTM_PAYLOAD(nlmsgHeader);
+    if (nlmsgHeader->nlmsg_type != RTM_NEWNEIGH && nlmsgHeader->nlmsg_type != RTM_DELNEIGH &&
+        nlmsgHeader->nlmsg_type != RTM_GETNEIGH) {
+        NETNATIVE_LOGE("not ip neigh info: %{public}d", nlmsgHeader->nlmsg_type);
+        return;
+    }
+    ndmsg *ndm = reinterpret_cast<ndmsg *>(NLMSG_DATA(nlmsgHeader));
+    if (ndm->ndm_type != RTN_UNICAST) {
+        NETNATIVE_LOGE("not unicast");
+        return;
+    }
+    NetManagerStandard::NetIpMacInfo info;
+    char ifIndexName[IF_NAME_SIZE] = {0};
+    if (if_indextoname(static_cast<unsigned>(ndm->ndm_ifindex), ifIndexName) == nullptr) {
+        NETNATIVE_LOGE("if_indextoname failed");///ndm->ndm_ifindex
+    }
+    info.iface_ = ifIndexName;
+    for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(ndm); RTA_OK(infoRta, length);
+        infoRta = RTA_NEXT(infoRta, length)) {
+        NETNATIVE_LOGI("info rtattr:%{public}d", static_cast<uint32_t>(infoRta->rta_type));
+        if (infoRta->rta_type == NDA_DST) {
+            void* ipAddr = RTA_DATA(infoRta);
+            if (ndm->ndm_family == AF_INET) {
+                char ipStr[INET_ADDRSTRLEN] = {0};
+                inet_ntop(AF_INET, ipAddr, ipStr, sizeof(ipStr));///这里加打印？
+                info.ipAddress_ = ipStr;
+                info.family_ = FAMILY_V4;
+            } else if (ndm->ndm_family == AF_INET6) {
+                char ip6Str[INET6_ADDRSTRLEN] = {0};
+                inet_ntop(AF_INET6, ipAddr, ip6Str, sizeof(ip6Str));
+                info.ipAddress_ = ip6Str;
+                info.family_ = FAMILY_V6;
+            } else {
+                NETNATIVE_LOGE("get ipv4 and ipv6 failed");
+            }
+        } else if (infoRta->rta_type == NDA_LLADDR) {
+            uint8_t* macAddr = reinterpret_cast<uint8_t *>(RTA_DATA(infoRta));
+            info.macAddress_ = MacArrayToString(macAddr);//len传进去加个判读，或者加个打印？
+        }
+    }
 }
 } // namespace nmd
 } // namespace OHOS

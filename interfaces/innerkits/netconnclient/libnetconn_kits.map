@@ -229,6 +229,9 @@
       "OHOS::NetManagerStandard::NetConnClient::FindProxyForURL(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       "OHOS::NetManagerStandard::NetConnClient::SetProxyMode(OHOS::NetManagerStandard::ProxyModeType)";
       "OHOS::NetManagerStandard::NetConnClient::GetProxyMode(OHOS::NetManagerStandard::ProxyModeType&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetIpNeighTable(std::__h::vector<OHOS::NetManagerStandard::NetIpMacInfo, std::__h::allocator<OHOS::NetManagerStandard::NetIpMacInfo>>&)";
+      "VTT for OHOS::NetManagerStandard::NetIpMacInfo";
+      "vtable for OHOS::NetManagerStandard::NetIpMacInfo";
     };
   local:
    *;

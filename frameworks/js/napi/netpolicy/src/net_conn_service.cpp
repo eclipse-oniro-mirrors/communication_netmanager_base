@@ -4325,5 +4325,13 @@ int32_t NetConnService::UpdateDualStackProbeTime(int32_t dualStackProbeTime)
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    if (NetsysController::GetInstance().GetIpNeighTable(ipMacInfo) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

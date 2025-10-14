@@ -1771,5 +1771,15 @@ int32_t NetsysController::UpdateEnterpriseRoute(const std::string &interfaceName
     return netsysService_->UpdateEnterpriseRoute(interfaceName, uid, add);
 }
 #endif
+
+int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETMGR_LOG_D("GetIpNeighTable");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetIpNeighTable(ipMacInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

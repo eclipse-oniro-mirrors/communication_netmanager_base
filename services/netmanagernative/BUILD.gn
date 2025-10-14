@@ -111,6 +111,7 @@ netsys_native_manager_sources = [
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+  "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
   "$INNERKITS_ROOT/netmanagernative:net_native_parcel",
   "$NETMANAGERNATIVE_ROOT:netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",

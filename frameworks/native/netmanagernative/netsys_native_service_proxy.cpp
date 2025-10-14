@@ -33,6 +33,7 @@ static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 static constexpr int32_t MAX_INTERFACE_SIZE = 65535;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
+constexpr uint32_t MAX_IP_NEIGH_TABLE_SIZE = 1024;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -2807,6 +2808,45 @@ int32_t NetsysNativeServiceProxy::DelStaticIpv6Addr(const std::string &ipv6Addr,
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("DelStaticIpv6Addr proxy read ret failed");
         return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE), data,
+        reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("GetIpNeighTable proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
+            NETNATIVE_LOGE("Read uint32 failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        size = (size > MAX_IP_NEIGH_TABLE_SIZE) ? MAX_IP_NEIGH_TABLE_SIZE : size;
+        ipMacInfo.reserve(size);
+
+        for (uint32_t i = 0; i <size; ++i) {
+            sptr<NetManagerStandard::NetIpMacInfo> infoPtr =  NetManagerStandard::NetIpMacInfo::Unmarshalling(reply);
+            if (infoPtr != nullptr) {
+                ipMacInfo.push_back(*infoPtr);
+            }
+        }
     }
     return ret;
 }

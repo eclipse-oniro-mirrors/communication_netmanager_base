@@ -1031,6 +1031,7 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
 #endif
+    virtual int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

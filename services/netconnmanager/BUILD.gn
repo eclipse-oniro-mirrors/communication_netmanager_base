@@ -74,6 +74,7 @@ ohos_shared_library("net_conn_manager") {
   configs = [ ":net_conn_manager_config" ]
 
   deps = [
+    "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
@@ -206,6 +207,7 @@ ohos_static_library("net_conn_manager_static") {
   configs = [ ":net_conn_manager_config" ]
 
   deps = [
+    "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",

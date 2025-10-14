@@ -38,6 +38,7 @@
 #include "uid_range.h"
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
+#include "net_ip_mac_info.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -228,6 +229,7 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
 #endif
+    virtual int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

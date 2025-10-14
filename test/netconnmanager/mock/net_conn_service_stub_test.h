@@ -421,6 +421,11 @@ public:
     {
         return 0;
     }
+
+    int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

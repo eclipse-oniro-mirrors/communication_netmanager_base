@@ -34,6 +34,7 @@
 #include "net_supplier_info.h"
 #include "conn_ipc_interface_code.h"
 #include "safe_map.h"
+#include "net_ip_mac_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -135,6 +136,7 @@ public:
         const std::string &ifName) = 0;
     virtual int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) = 0;
+    virtual int32_t GetIpNeighTable(std::vector<OHOS::NetManagerStandard::NetIpMacInfo> &ipMacInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -230,6 +230,9 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE)] = {
         &NetConnServiceStub::OnQueryTraceRoute,
         {Permission::INTERNET, Permission::GET_NETWORK_LOCATION, Permission::ACCESS_NET_TRACE_INFO}};
+
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE)] = {
+        &NetConnServiceStub::OnGetIpNeighTable, {Permission::INTERNET}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2115,6 +2118,31 @@ int32_t NetConnServiceStub::OnSetNetExtAttribute(MessageParcel &data, MessagePar
     int32_t ret = SetNetExtAttribute(netId, netExtAttribute);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetIpNeighTable(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("Enter OnGetIpNeighTable");
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = GetIpNeighTable(ipMacInfo);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        uint32_t size = static_cast<uint32_t>(ipMacInfo.size());
+        if (!reply.WriteUint32(size)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        uint32_t index = 0;
+        for (auto p = ipMacInfo.begin(); p != ipMacInfo.end(); ++p) {
+            sptr<NetIpMacInfo> info_ptr = (std::make_unique<NetIpMacInfo>(*p)).release();
+            if (!NetIpMacInfo::Marshalling(reply, info_ptr)) {
+                NETMGR_LOG_E("proxy Marshalling failed");
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+        }
     }
     return NETMANAGER_SUCCESS;
 }

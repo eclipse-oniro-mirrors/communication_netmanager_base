@@ -156,6 +156,7 @@ enum class NetsysInterfaceCode {
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     NETSYS_UPDATE_ENTERPRISE_ROUTE,
 #endif
+    NETSYS_GET_IP_NEIGH_TABLE,
 };
 
 enum class NotifyInterfaceCode {

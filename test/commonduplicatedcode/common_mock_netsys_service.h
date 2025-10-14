@@ -202,6 +202,7 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     MOCK_METHOD(int32_t, UpdateEnterpriseRoute, (const std::string &interfaceName, uint32_t uid, bool add), (override));
 #endif
+    MOCK_METHOD(int32_t, GetIpNeighTable, (std::vector<NetIpMacInfo> &ipMacInfo));
 };
 } // NetsysNative
 } // OHOS

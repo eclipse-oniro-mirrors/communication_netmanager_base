@@ -78,6 +78,10 @@ static constexpr const char *KEY_UP = "up";
 static constexpr const char *KEY_ROUTE = "route";
 static constexpr const char *KEY_UPDATED = "updated";
 
+static constexpr const char *KEY_IP_ADDRESS = "ipAddress";
+static constexpr const char *KEY_IFACE_NAME = "iface";
+static constexpr const char *KEY_MAC_ADDRESS = "macAddress";
+
 enum {
     ARG_NUM_0,
     ARG_NUM_1,

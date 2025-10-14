@@ -249,6 +249,17 @@ void ConnectionAsyncWork::SetInterfaceIpAddrCallback(napi_env env, napi_status s
                                                                                                             data);
 }
 
+void ConnectionAsyncWork::ExecGetIpNeighTable(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetIpNeighTableContext, ConnectionExec::ExecGetIpNeighTable>(env, data);
+}
+
+void ConnectionAsyncWork::GetIpNeighTableCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetIpNeighTableContext,
+        ConnectionExec::GetIpNeighTableCallback>(env, status, data);
+}
+
 void ConnectionAsyncWork::ExecAddNetworkRoute(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<AddNetworkRouteContext, ConnectionExec::ExecAddNetworkRoute>(env, data);

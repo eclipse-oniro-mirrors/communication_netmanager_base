@@ -186,6 +186,7 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) override;
 #endif
+    int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

@@ -737,5 +737,13 @@ HWTEST_F(NetsysNativeClientTest, FlushDnsCache001, TestSize.Level1)
     int32_t ret = nativeClient->FlushDnsCache(netId);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, GetIpNeighTable001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = nativeClient->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

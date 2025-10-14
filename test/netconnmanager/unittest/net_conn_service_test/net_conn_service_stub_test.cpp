@@ -1142,6 +1142,38 @@ HWTEST_F(NetConnServiceStubTest, PAC_OnFindProxyForURL, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+/**
+ * @tc.name: OnGetIpNeighTableTest001
+ * @tc.desc: Test NetConnServiceStub OnGetIpNeighTable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetIpNeighTableTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 
+/**
+ * @tc.name: OnGetIpNeighTableTest002
+ * @tc.desc: Test NetConnServiceStub OnGetIpNeighTable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetIpNeighTableTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnGetIpNeighTable(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

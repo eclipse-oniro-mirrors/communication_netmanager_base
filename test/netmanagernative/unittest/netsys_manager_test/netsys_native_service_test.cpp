@@ -1006,5 +1006,12 @@ HWTEST_F(NetsysNativeServiceTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceTest, GetIpNeighTableTest001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

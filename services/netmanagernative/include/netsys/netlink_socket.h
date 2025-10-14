@@ -22,6 +22,7 @@
 #include <memory>
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include "net_ip_mac_info.h"
 
 namespace OHOS {
 namespace nmd {
@@ -95,6 +96,64 @@ int32_t CreateVpnIfByNetlink(const char *name, uint32_t ifNameId, const char *ph
  */
 int32_t DeleteVpnIfByNetlink(const char *name);
 #endif
+
+/**
+ * Send netklink message to kernel and Get message from kernel
+ *
+ * @param msg nlmsghdr struct
+ * @param table If clear route，this is table number, otherwise it will is 0
+ * @param rcvMsg message from kernel
+ * @return Returns 0, send netklink message to kernel successfully, otherwise it will fail
+ */
+int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg);
+
+/**
+ * Receive netlink message from kernel
+ *
+ * @param sock Sock for read
+ * @param msgType for kernel nlmsg_type
+ * @param table Route property for RTA_TABLE
+ * @param rcvMsg message from kernel
+ * @return Returns 0, get info from kernel successfully, otherwise it will fail
+ */
+int32_t GetRcvMsgFromKernel(int32_t sock, uint16_t msgType, uint32_t table, void* rcvMsg);
+
+/**
+ * Deal receive message from kernel
+ *
+ * @param nlmsgHeader nlmsghdr
+ * @param msgType for kernel nlmsg_type
+ * @param table Route property for RTA_TABLE
+ * @param rcvMsg message from kernel
+ */
+void DealRcvMsgFromKernel(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table, void* rcvMsg);
+
+/**
+ * transfer mac from array to string
+ *
+ * @param mac array mac address
+ * @return Returns string mac address
+ */
+std::string MacArrayToString(const uint8_t *mac);
+
+/**
+ * deal ip neigh info from kernel
+ *
+ * @param nlmsgHeader nlmsghdr
+ * @param msgType for kernel nlmsg_type
+ * @param table Route property for RTA_TABLE
+ * @param ipMacInfoVec vector NetIpMacInfo
+ */
+void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
+    std::vector<NetManagerStandard::NetIpMacInfo>& ipMacInfoVec);
+
+/**
+ * create netlink msg and send to kernel
+ *
+ * @param nlmsgHeader nlmsghdr
+ * @param kernelSocket socket to kernel
+ */
+static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket);
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H

@@ -642,5 +642,20 @@ int32_t InterfaceManager::MacStringToBinary(const std::string &macAddr, uint8_t 
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t InterfaceManager::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETNATIVE_LOGI("GetIpNeighTable");
+    nmd::NetlinkMsg nlmsg(NLM_F_DUMP, nmd::NETLINK_MAX_LEN, getpid());
+    struct ndmsg ndm = {};
+    ndm.ndm_family = AF_UNSPEC;
+    nlmsg.AddNeighbor(RTM_GETNEIGH, ndm);
+    int32_t ret = ReceiveMsgFromKernel(nlmsg.GetNetLinkMessage(), 0, reinterpret_cast<void*>(&ipMacInfo));
+    if (ret != 0) {
+        NETNATIVE_LOGE("ReceiveMsgFromKernel fail");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    return ret;
+}
 } // namespace nmd
 } // namespace OHOS

@@ -771,5 +771,14 @@ HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest003, TestSize.Le
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 #endif
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetIpNeighTable001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = netsysNativeService->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

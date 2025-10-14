@@ -31,6 +31,7 @@ ohos_unittest("net_info_test") {
     "net_caps_test.cpp",
     "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
+    "net_ip_mac_info_test.cpp",
     "route_test.cpp",
   ]
 

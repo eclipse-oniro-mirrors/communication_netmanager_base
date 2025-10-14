@@ -1062,6 +1062,12 @@ int32_t NetsysControllerServiceImpl::SetDnsCache(uint16_t netId, const std::stri
     return netsysClient_->SetDnsCache(netId, hostName, addrInfo);
 }
 
+int32_t NetsysControllerServiceImpl::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETMGR_LOG_I("GetIpNeighTable");
+    return netsysClient_->GetIpNeighTable(ipMacInfo);
+}
+
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
 {

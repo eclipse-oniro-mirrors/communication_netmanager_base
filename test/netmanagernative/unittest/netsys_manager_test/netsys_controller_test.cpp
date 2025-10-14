@@ -1867,5 +1867,26 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
     int32_t ret = netsysController->FlushDnsCache(netId);
     EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, GetIpNeighTable001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = netsysController->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetIpNeighTable002, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
