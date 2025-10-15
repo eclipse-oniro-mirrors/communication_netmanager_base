@@ -71,6 +71,8 @@ typedef enum NetConn_NetCap {
     NETCONN_NET_CAPABILITY_IA = 3,
     /** XCAP */
     NETCONN_NET_CAPABILITY_XCAP = 4,
+    /** BIP */
+    NETCONN_NET_CAPABILITY_BIP = 5,
     /** Not Metered */
     NETCONN_NET_CAPABILITY_NOT_METERED = 11,
     /** Internet */
