@@ -667,6 +667,7 @@ private:
     std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
     uint32_t delaySupplierId_ = 0;
     std::recursive_mutex uidLostDelayMutex_;
+    ffrt::shared_mutex defaultNetSupplierMutex_;
     std::set<uint32_t> uidLostDelaySet_;
     SafeMap<int32_t, bool> notifyLostDelayCache_;
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
