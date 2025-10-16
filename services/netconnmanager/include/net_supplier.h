@@ -124,7 +124,7 @@ public:
      */
     int32_t GetRealScore();
     bool SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest = {});
-    bool SupplierDisconnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest);
+    bool SupplierDisconnection(const std::set<NetCap> &netCaps, uint32_t uid);
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
     bool RequestToConnect(const NetRequest &netrequest = {});
