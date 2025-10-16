@@ -673,12 +673,10 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
                      supplier->GetUid(), callingUid);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     NETMGR_LOG_I("Unregister supplier[%{public}d, %{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s]",
                  supplier->GetSupplierId(), supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(),
                  defaultNetSupplier_ ? defaultNetSupplier_->GetSupplierId() : 0,
                  defaultNetSupplier_ ? defaultNetSupplier_->GetNetSupplierIdent().c_str() : "null");
-    defaultNetSupplierLock.unlock();
 
     struct EventInfo eventInfo = {.bearerType = supplier->GetNetSupplierType(),
                                   .ident = supplier->GetNetSupplierIdent(),
@@ -693,13 +691,11 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId, bool ign
         networks_.erase(iterNetwork);
         locker.unlock();
     }
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierUniqueLock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ == supplier) {
         NETMGR_LOG_I("Set default net supplier to nullptr.");
         sptr<NetSupplier> newSupplier = nullptr;
         MakeDefaultNetWork(defaultNetSupplier_, newSupplier);
     }
-    defaultNetSupplierLock.unlock();
     NetSupplierInfo info;
     supplier->UpdateNetSupplierInfo(info);
     RemoveNetSupplierDeathRecipient(supplier->GetSupplierCallback());
@@ -758,14 +754,11 @@ void NetConnService::StartAllNetDetection()
             }
             pNetwork->UpdateForbidDetectionFlag(false);
         }
-        std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
         if ((defaultNetSupplier_ == nullptr)) {
             NETMGR_LOG_W("defaultNetSupplier_ is  null");
-            defaultNetSupplierLock.unlock();
             return;
         }
         std::shared_ptr<Network> pDefaultNetwork = defaultNetSupplier_->GetNetwork();
-        defaultNetSupplierLock.unlock();
         if (pDefaultNetwork == nullptr) {
             NETMGR_LOG_E("pDefaultNetwork is null");
             return;
@@ -1249,7 +1242,6 @@ void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const
     }
     bool isNeedDelay = (system::GetBoolParameter(PERSIST_WIFI_DELAY_ELEVATOR_ENABLE, false) ||
         system::GetBoolParameter(PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE, false));
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     if (supplier->GetNetSupplierType() == BEARER_WIFI && !supplier->IsNetValidated() &&
         defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR &&
         isNeedDelay) {
@@ -1549,7 +1541,6 @@ void NetConnService::FindBestNetworkForAllRequest()
                      bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null",
                      iterActive->second->GetRequestId());
         if (iterActive->second == defaultNetActivate_) {
-            std::unique_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
             MakeDefaultNetWork(defaultNetSupplier_, bestSupplier);
         }
         sptr<NetSupplier> oldSupplier = iterActive->second->GetServiceSupply();
@@ -1614,7 +1605,6 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
 
 void NetConnService::RequestAllNetworkExceptDefault()
 {
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())
         || (defaultNetSupplier_->IsNetAcceptUnavalidate())) {
         NETMGR_LOG_E("defaultNetSupplier_ is  null or IsNetValidated or AcceptUnavalidate");
@@ -1622,7 +1612,6 @@ void NetConnService::RequestAllNetworkExceptDefault()
     }
     NETMGR_LOG_I("Default supplier[%{public}d, %{public}s] is not valid,request to activate another network",
                  defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetSupplierIdent().c_str());
-    defaultNetSupplierLock.unlock();
     if (defaultNetActivate_ == nullptr) {
         NETMGR_LOG_E("Default net request is null");
         return;
@@ -1631,7 +1620,6 @@ void NetConnService::RequestAllNetworkExceptDefault()
     NetRequest netrequest(
         defaultNetActivate_->GetUid(), defaultNetActivate_->GetRequestId(), defaultNetActivate_->GetRegisterType());
     for (const auto &netSupplier : netSuppliers_) {
-        std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock1(defaultNetSupplierMutex_);
         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
             NETMGR_LOG_E("netSupplier is null or is defaultNetSupplier_");
             continue;
@@ -1639,7 +1627,6 @@ void NetConnService::RequestAllNetworkExceptDefault()
         if (netSupplier.second->GetNetScore() >= defaultNetSupplier_->GetNetScore()) {
             continue;
         }
-        defaultNetSupplierLock1.unlock();
         if (netSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
             NETMGR_LOG_I("Supplier[%{public}d] is internal, skip.", netSupplier.second->GetSupplierId());
             continue;
@@ -2015,10 +2002,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     locker.unlock();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     bool ifValid = netState == VERIFICATION_STATE;
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
-    bool isNeedRemoveDelayNetwork = defaultNetSupplier_ &&
-        defaultNetSupplier_->GetNetSupplierType() != BEARER_CELLULAR;
-    if (isNeedRemoveDelayNetwork) {
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetNetSupplierType() != BEARER_CELLULAR) {
         RemoveDelayNetwork();
     }
     if (delaySupplierId_ == supplierId &&
@@ -2027,10 +2011,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     } else {
         FindBestNetworkForAllRequest();
     }
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock1(defaultNetSupplierMutex_);
-    bool isNeedRequestAllNetworkExceptDefault = defaultNetSupplier_ &&
-        defaultNetSupplier_->GetSupplierId() == supplierId;
-    if (!ifValid && isNeedRequestAllNetworkExceptDefault) {
+    if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
     NETMGR_LOG_I("Enter HandleDetectionResult end");
@@ -2073,7 +2054,7 @@ sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType,
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         NETMGR_LOG_D("not found the netId");
         return NETMANAGER_SUCCESS;
@@ -2189,7 +2170,6 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
             return NETMANAGER_SUCCESS;
         }
     }
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ != nullptr) {
         netId = defaultNetSupplier_->GetNetId();
     }
@@ -2392,7 +2372,6 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         return NETMANAGER_SUCCESS;
     }
 
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
         auto endTime = std::chrono::steady_clock::now();
@@ -2428,7 +2407,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list
 void NetConnService::GetDumpMessage(std::string &message)
 {
     message.append("Net connect Info:\n");
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         message.append("\tSupplierId: " + std::to_string(defaultNetSupplier_->GetSupplierId()) + "\n");
         std::shared_ptr<Network> network = defaultNetSupplier_->GetNetwork();
@@ -2467,7 +2446,7 @@ void NetConnService::GetDumpMessage(std::string &message)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
         flag = false;
         return NETMANAGER_SUCCESS;
@@ -2478,7 +2457,7 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 
 int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
 {
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
+    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_) {
         isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     } else {
@@ -3520,7 +3499,6 @@ int32_t NetConnService::GetSlotType(std::string &type)
     int32_t result = NETMANAGER_SUCCESS;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, &type, &result]() {
-            std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
             if (defaultNetSupplier_ == nullptr) {
                 NETMGR_LOG_E("supplier is nullptr");
                 result =  NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -3728,12 +3706,10 @@ void NetConnService::RecoverNetSys()
         }
         iter->second->ResumeNetworkInfo();
     }
-    std::unique_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
     }
-    defaultNetSupplierLock.unlock();
     FindBestNetworkForAllRequest();
 }
 
@@ -3925,11 +3901,7 @@ int32_t NetConnService::UpdateSupplierScoreAsync(uint32_t supplierId, uint32_t d
     // Find best network because supplier score changed.
     FindBestNetworkForAllRequest();
     // Tell other suppliers to enable if current default supplier is not better than others.
-    std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLock(defaultNetSupplierMutex_);
-    bool isNeedRequestAllNetworkExceptDefault = defaultNetSupplier_ &&
-        defaultNetSupplier_->GetSupplierId() == supplierId;
-    defaultNetSupplierLock.lock();
-    if (isNeedRequestAllNetworkExceptDefault) {
+    if (defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
     return NETMANAGER_SUCCESS;
