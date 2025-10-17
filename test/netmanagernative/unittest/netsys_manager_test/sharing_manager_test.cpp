@@ -122,6 +122,13 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
+{
+    sharingManager->interfaceForwards_.insert("updown");
+    int32_t ret = sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward001, TestSize.Level1)
 {
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
@@ -163,8 +170,9 @@ HWTEST_F(SharingManagerTest, SetIpFwdEnable001, TestSize.Level1)
 {
     int32_t ret = sharingManager->SetIpFwdEnable();
     EXPECT_EQ(ret, 0);
-    ret = sharingManager->SetForwardRules(false, " tetherctrl_FORWARD -j DROP");
-    EXPECT_EQ(ret, 0);
+    std::string cmd = "";
+    sharingManager->SetForwardRules(false, " tetherctrl_FORWARD -j DROP", cmd);
+    EXPECT_NE(cmd, "");
 }
 
 HWTEST_F(SharingManagerTest, EnableNat003, TestSize.Level1)
