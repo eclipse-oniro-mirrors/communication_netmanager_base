@@ -74,11 +74,14 @@ public:
      * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t RunMutipleCommands(const IpType &ipType, const std::vector<std::string> &commands);
+    
+    int32_t RunRestoreCommands(const IpType &ipType, const std::string &command);
 
 private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
     void ExecuteCommandForTraffic(const std::string &command);
+    void ExecuteRestoreCommand(const std::string &command);
 private:
     std::mutex iptablesMutex_;
     std::condition_variable conditionVarLock_;
