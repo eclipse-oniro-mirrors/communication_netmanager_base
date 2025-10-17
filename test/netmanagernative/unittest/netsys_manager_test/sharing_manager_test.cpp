@@ -122,6 +122,13 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
+{
+    sharingManager->interfaceForwards_.insert("updown");
+    sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward001, TestSize.Level1)
 {
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
