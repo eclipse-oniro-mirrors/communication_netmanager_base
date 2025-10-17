@@ -114,11 +114,11 @@ HWTEST_F(IptablesWrapperTest, RunRestoreCommands001, TestSize.Level1)
     IpType ipType = IpType::IPTYPE_IPV4V6;
     std::string cmd = "*filter\n";
     cmd.append("-A FORWARD -j ACCEPT\n");
-    auto ret = wrapper->RunMutipleCommands(ipType, cmd);
+    auto ret = wrapper->RunRestoreCommands(ipType, cmd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
     wrapper->iptablesWrapperFfrtQueue_ = 0;
-    ret = wrapper->RunMutipleCommands(ipType, cmd);
+    ret = wrapper->RunRestoreCommands(ipType, cmd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 } // namespace NetsysNative
