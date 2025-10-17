@@ -43,6 +43,10 @@ void NetConnection::DeleteNetConnection(NetConnection *netConnection)
 {
     std::unique_lock<std::shared_mutex> lock(g_netConnectionsMutex);
     NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
+    auto manager = netConnection->GetEventManager();
+    if (manager != nullptr) {
+        manager->DeleteAllListener();
+    }
     delete netConnection;
 }
 
