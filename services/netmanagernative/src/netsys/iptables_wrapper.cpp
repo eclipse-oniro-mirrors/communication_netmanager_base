@@ -87,7 +87,7 @@ void IptablesWrapper::ExecuteRestoreCommand(const std::string &restoreCmd, const
         return;
     }
 
-    std::string cmdWithWait = command + " --wait=5 ";
+    std::string cmdWithWait = restoreCmd + " --wait=5 ";
     NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
     if (CommonUtils::ForkExec(cmdWithWait) == NETMANAGER_ERROR) {
