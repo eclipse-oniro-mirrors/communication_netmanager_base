@@ -81,7 +81,7 @@ private:
     void ExecuteCommand(const std::string &command);
     void ExecuteCommandForRes(const std::string &command);
     void ExecuteCommandForTraffic(const std::string &command);
-    void ExecuteRestoreCommand(const std::string &command);
+    void ExecuteRestoreCommand(const std::string &restoreCmd, const std::string &command);
 private:
     std::mutex iptablesMutex_;
     std::condition_variable conditionVarLock_;
