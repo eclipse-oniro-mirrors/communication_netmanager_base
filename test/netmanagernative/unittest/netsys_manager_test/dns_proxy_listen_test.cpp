@@ -39,6 +39,7 @@ using namespace OHOS::nmd;
 using namespace NetManagerStandard::NetConnManagerTestUtil;
 constexpr uint8_t RESPONSE_FLAG = 0x80;
 static constexpr const int32_t CLIENT_SOCKET = 99999;
+static constexpr const int32_t TEST_SOCKET = 123;
 static constexpr const uint32_t MAX_REQUESTDATA_LEN = 512;
 class DnsProxyListenTest : public testing::Test {
 public:
@@ -75,9 +76,11 @@ HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
 {
     DnsProxyListen listener;
     listener.proxySockFd_ = CLIENT_SOCKET;
+    listener.exitFd_ = TEST_SOCKET;
     listener.OffListen();
     listener.clearResource();
     EXPECT_EQ(listener.proxySockFd_, -1);
+    EXPECT_EQ(listener.exitFd_, -1);
 }
 
 HWTEST_F(DnsProxyListenTest, DnsProxyListenTest01, TestSize.Level1)
