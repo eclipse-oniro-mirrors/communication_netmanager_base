@@ -41,6 +41,7 @@ constexpr size_t FLAG_BUFF_LEN = 1;
 constexpr size_t FLAG_BUFF_OFFSET = 2;
 constexpr size_t DNS_HEAD_LENGTH = 12;
 constexpr int32_t EPOLL_TASK_NUMBER = 10;
+constexpr int32_t EPOLL_LOOP_EXIT = 1;
 DnsProxyListen::DnsProxyListen() : proxySockFd_(-1), proxySockFd6_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
@@ -55,6 +56,10 @@ DnsProxyListen::~DnsProxyListen()
     if (epollFd_ > 0) {
         close(epollFd_);
         epollFd_ = -1;
+    }
+    if (exitFd_ > 0) {
+        close(exitFd_);
+        exitFd_ = -1;
     }
     serverIdxOfSocket.clear();
 }
@@ -215,7 +220,8 @@ void DnsProxyListen::StartListen()
         return;
     }
     epoll_event eventsReceived[EPOLL_TASK_NUMBER];
-    while (DnsProxyListen::proxyListenSwitch_) {
+    while (true) {
+        bool end = false;
         int32_t nfds =
             epoll_wait(epollFd_, eventsReceived, EPOLL_TASK_NUMBER, serverIdxOfSocket.empty() ? -1 : EPOLL_TIMEOUT);
         NETNATIVE_LOG_D("now socket num: %{public}zu", serverIdxOfSocket.size());
@@ -232,9 +238,15 @@ void DnsProxyListen::StartListen()
             if (eventsReceived[i].data.fd == proxySockFd_ || eventsReceived[i].data.fd == proxySockFd6_) {
                 int32_t family = (eventsReceived[i].data.fd == proxySockFd_) ? AF_INET : AF_INET6;
                 GetRequestAndTransmit(family);
+            } else if (eventsReceived[i].data.fd == exitFd_) {
+                end = GetExitFlag();
+                break;
             } else {
                 SendDnsBack2Client(eventsReceived[i].data.fd);
             }
+        }
+        if (end) {
+            break;
         }
         CollectSocks();
     }
@@ -274,6 +286,16 @@ void DnsProxyListen::GetRequestAndTransmit(int32_t family)
         return;
     }
     DnsParseBySocket(recvBuff, clientAddr);
+}
+
+bool DnsProxyListen::GetExitFlag()
+{
+    uint64_t val;
+    read(exitFd_, &val, sizeof(val));
+    if (val == EPOLL_LOOP_EXIT) {
+        return true;
+    }
+    return false;
 }
 
 void DnsProxyListen::InitListenForIpv4()
@@ -327,6 +349,24 @@ void DnsProxyListen::InitListenForIpv6()
     }
 }
 
+bool DnsProxyListen::InitExitFdforListening()
+{
+    exitFd_ = eventfd(0, EFD_NONBLOCK);
+    if (exitFd_ < 0) {
+        NETNATIVE_LOGE("eventfd errno %{public}d: %{public}s", errno, strerror(errno));
+        return false;
+    } else {
+        epoll_event exitEvent;
+        exitEvent.data.fd = exitFd_;
+        exitEvent.events = EPOLLIN;
+        if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, exitFd_, &exitEvent) < 0) {
+            NETNATIVE_LOGE("EPOLL_CTL_ADD proxy errno %{public}d: %{public}s", errno, strerror(errno));
+            return false;
+        }
+    }
+    return true;
+}
+
 bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event)
 {
     InitListenForIpv4();
@@ -357,6 +397,10 @@ bool DnsProxyListen::InitForListening(epoll_event &proxyEvent, epoll_event &prox
     }
     if (proxySockFd_ < 0 && proxySockFd6_ < 0) {
         NETNATIVE_LOGE("InitForListening ipv4/ipv6 error!");
+        clearResource();
+        return false;
+    }
+    if (!InitExitFdforListening()) {
         clearResource();
         return false;
     }
@@ -435,10 +479,16 @@ void DnsProxyListen::OffListen()
 {
     DnsProxyListen::proxyListenSwitch_ = false;
     if (proxySockFd_ > 0) {
-        shutdown(proxySockFd_, SHUT_RDWR);
+        close(proxySockFd_);
+        proxySockFd_ = -1;
     }
     if (proxySockFd6_ > 0) {
-        shutdown(proxySockFd6_, SHUT_RDWR);
+        close(proxySockFd6_);
+        proxySockFd6_ = -1;
+    }
+    uint64_t val = EPOLL_LOOP_EXIT;
+    if (exitFd_ > 0) {
+        write(exitFd_, &val, sizeof(val));
     }
     NETNATIVE_LOGI("DnsProxy OffListen");
 }
@@ -462,6 +512,10 @@ void DnsProxyListen::clearResource()
     if (epollFd_ > 0) {
         close(epollFd_);
         epollFd_ = -1;
+    }
+    if (exitFd_ > 0) {
+        close(exitFd_);
+        exitFd_ = -1;
     }
     serverIdxOfSocket.clear();
 }
