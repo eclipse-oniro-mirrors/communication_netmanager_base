@@ -38,7 +38,6 @@
 #include "net_stats_utils.h"
 #include "core_service_client.h"
 
-
 namespace OHOS {
 namespace NetManagerStandard {
 
