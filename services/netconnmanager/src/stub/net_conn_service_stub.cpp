@@ -67,7 +67,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetDetectionCallback, {}};
+        &NetConnServiceStub::OnRegisterNetDetectionCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK)] = {
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION)] = {
@@ -187,7 +187,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)] = {
         &NetConnServiceStub::OnHasDefaultNet, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET)] = {
-        &NetConnServiceStub::OnGetSpecificNet, {}};
+        &NetConnServiceStub::OnGetSpecificNet, {Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS)] = {&NetConnServiceStub::OnGetAllNets,
                                                                                      {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET)] = {
@@ -203,7 +203,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY)] = {
         &NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER)] = {
-        &NetConnServiceStub::OnGetNetIdByIdentifier, {}};
+        &NetConnServiceStub::OnGetNetIdByIdentifier, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
         &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS)] = {
