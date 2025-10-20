@@ -38,6 +38,7 @@
 #include "net_stats_utils.h"
 #include "core_service_client.h"
 
+
 namespace OHOS {
 namespace NetManagerStandard {
 
@@ -206,7 +207,11 @@ std::string NetMgrNetStatsLimitNotification::GetMonthNotificationText()
     std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
     double monUsed = monUsedPercent / 100.0; // 100.0: converting a percentage to a decimal
     std::string str = numFmt->Format(monUsed);
-    std::string percent = "‪" + str + "‬";
+    std::string percent = str;
+    auto ret_order = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
+    if (ret_order) {
+        percent =  "‭" + str + "‬";
+    }
     outText = outText.replace(outText.find("%s"), TWO_CHAR, percent);
     NETMGR_LOG_I("GetMonthNotificationText outText [%{public}s]", outText.c_str());
     return outText;
@@ -417,7 +422,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     std::string str = numFmt->Format(value);
     auto ret = Global::I18n::LocaleConfig::IsRTL(systemLocalStr);
     if (ret) {
-        return "‪" + str + "‬";
+        return "‭" + str + "‬";
     }
     return str;
 }
