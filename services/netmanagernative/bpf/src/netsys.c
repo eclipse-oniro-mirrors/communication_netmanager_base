@@ -147,6 +147,26 @@ bpf_map_def SEC("maps") net_stats_ringbuf_map = {
     .max_entries = 256 * 1024 /* 256 KB */,
 };
 
+bpf_map_def SEC("maps") net_status_map = {
+    .type =BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(uint8_t),
+    .value_size = sizeof(uint8_t),
+    .max_entries = 3,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") net_wlan1_map = {
+    .type =BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(uint8_t),
+    .value_size = sizeof(uint64_t),
+    .max_entries = 1,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 static inline __u8 socket_ringbuf_net_stats_event_submit(__u8 flag)
 {
     uint8_t *e;
