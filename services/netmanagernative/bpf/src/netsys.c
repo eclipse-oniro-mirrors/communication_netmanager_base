@@ -503,8 +503,8 @@ static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
     __u32 ip = 0;
     if (skb->family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
         ip = skb->local_ip4;
-    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) {
-        ip = skb->local_ip6[3];
+    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
+        ip = skb->local_ip6[3]; // 3: the last 32 bit
     }
     if (ip != 0) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
@@ -528,8 +528,8 @@ static __u32 rgm_stats_tx_count(struct __sk_buff *skb, __u64 sock_uid)
     __u32 ip = 0;
     if (skb->family == AF_INET && filter_sim_stats(skb->local_ip4) == 1) {
         ip = skb->local_ip4;
-    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) {
-        ip = skb->local_ip6[3];
+    } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) { // 3: the last 32 bit
+        ip = skb->local_ip6[3]; // 3: the last 32 bit
     }
     if (ip != 0) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
