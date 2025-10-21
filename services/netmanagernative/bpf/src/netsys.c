@@ -498,23 +498,6 @@ static inline __u32 get_iface_type(__u32 ipv4)
     return 0;
 }
 
-static __u32 rgm_stats_rx_count_process(struct __sk_buff *skb, __u64 sock_uid, __u32 ip)
-{
-    app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
-                                     .ifType = get_iface_type(ip)};
-    app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-    if (value_uid_sim == NULL) {
-        app_uid_sim_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
-        value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-    }
-    if (value_uid_sim != NULL) {
-        __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
-        __sync_fetch_and_add(&value_uid_sim->rxBytes, get_data_len(skb));
-    }
-    return 0;
-}
-
 static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
 {
     __u32 ip = 0;
@@ -536,23 +519,6 @@ static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
             __sync_fetch_and_add(&value_uid_sim->rxPackets, 1);
             __sync_fetch_and_add(&value_uid_sim->rxBytes, get_data_len(skb));
         }
-    }
-    return 0;
-}
-
-static __u32 rgm_stats_tx_count_process(struct __sk_buff *skb, __u64 sock_uid, __u32 ip)
-{
-    app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
-                                     .ifType = get_iface_type(ip)};
-    app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-    if (value_uid_sim == NULL) {
-        app_uid_sim_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_sim_stats_map, &key_sim, &newValue, BPF_NOEXIST);
-        value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
-    }
-    if (value_uid_sim != NULL) {
-        __sync_fetch_and_add(&value_uid_sim->txPackets, 1);
-        __sync_fetch_and_add(&value_uid_sim->txBytes, get_data_len(skb));
     }
     return 0;
 }
