@@ -506,7 +506,7 @@ static __u32 rgm_stats_rx_count(struct __sk_buff *skb, __u64 sock_uid)
     } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) {
         ip = skb->local_ip6[3];
     }
-    if (filter_sim_stats(ip) == 1) {
+    if (ip != 0) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                      .ifType = get_iface_type(ip)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
@@ -531,7 +531,7 @@ static __u32 rgm_stats_tx_count(struct __sk_buff *skb, __u64 sock_uid)
     } else if (skb->family == AF_INET6 && filter_sim_stats(skb->local_ip6[3]) == 1) {
         ip = skb->local_ip6[3];
     }
-    if (filter_sim_stats(ip) == 1) {
+    if (ip != 0) {
         app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                      .ifType = get_iface_type(ip)};
         app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
