@@ -668,7 +668,8 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
             __sync_fetch_and_add(&value_uid_if->txBytes, get_data_len(skb));
         }
     } else {
-        if (filter_sim_stats(skb->local_ip4) == 1) {
+        __u32 ip = skb->local_ip4;
+        if (filter_sim_stats(ip) == 1) {
             app_uid_sim_stats_key key_sim = {.uId = sock_uid, .ifIndex = skb->ifindex,
                                              .ifType = get_iface_type(skb->local_ip4)};
             app_uid_sim_stats_value *value_uid_sim = bpf_map_lookup_elem(&app_uid_sim_stats_map, &key_sim);
