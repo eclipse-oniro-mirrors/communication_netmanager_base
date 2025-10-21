@@ -46,7 +46,6 @@ ohos_static_library("net_conn_parcel") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_all_capabilities.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_interface_config.cpp",
-    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_ip_mac_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_link_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_specifier.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_info.cpp",
@@ -109,10 +108,14 @@ ohos_shared_library("net_conn_manager_if") {
 
   version_script = "libnetconn_kits.map"
 
-  public_configs = [ ":net_conn_manager_if_config" ]
+  public_configs = [
+    ":net_conn_manager_if_config",
+    "$INNERKITS_ROOT/netmanagernative:net_native_manager_if_config",
+  ]
 
   deps = [
     ":net_conn_parcel",
+    "$INNERKITS_ROOT/netmanagernative:net_native_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
   ]
 
@@ -255,6 +258,7 @@ ohos_static_library("net_conn_manager_if_static") {
  
   deps = [
     ":net_conn_parcel",
+    "$INNERKITS_ROOT/netmanagernative:net_native_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
   ]
  

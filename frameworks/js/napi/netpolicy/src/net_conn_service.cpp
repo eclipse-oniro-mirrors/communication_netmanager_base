@@ -1377,7 +1377,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_I("New request [id:%{public}u]", reqId);
-    NetRequest netrequest(request->GetUid(), reqId, registerType);
+    NetRequest netrequest(request->GetUid(), reqId);
     {
         std::lock_guard<std::shared_mutex> guard(netActivatesMutex_);
         netActivates_[reqId] = request;

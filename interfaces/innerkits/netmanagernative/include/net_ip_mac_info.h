@@ -27,7 +27,7 @@ static constexpr const uint32_t FAMILY_INVALID = 0;
 static constexpr const uint32_t FAMILY_V4 = 1;
 static constexpr const uint32_t FAMILY_V6 = 2;
 
-struct NET_SYMBOL_VISIBLE NetIpMacInfo : public Parcelable {
+struct NetIpMacInfo : public Parcelable {
     std::string ipAddress_;
     std::string iface_;
     std::string macAddress_;

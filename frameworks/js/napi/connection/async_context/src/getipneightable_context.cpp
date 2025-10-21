@@ -38,8 +38,6 @@ void GetIpNeighTableContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
         NETMANAGER_BASE_LOGE("check params type failed");
-        SetNeedThrowException(true);
-        SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;
     }
     SetParseOK(true);

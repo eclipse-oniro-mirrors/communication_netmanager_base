@@ -35,6 +35,9 @@ using namespace NetManagerStandard;
 namespace {
 constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
 constexpr const char *IP6TABLES_CMD_PATH = "/system/bin/ip6tables";
+constexpr const char *IPTABLES_RESTORE_CMD_PATH = "/system/bin/iptables-restore";
+constexpr const char *IP6TABLES_RESTORE_CMD_PATH = "/system/bin/ip6tables-restore";
+constexpr const char *IPTABLES_RULE_PATH = "/data/service/el1/public/netsysnative/iptables.rule";
 constexpr const int32_t MAX_IPTABLES_FFRT_TASK_NUM = 200;
 constexpr const int32_t IPTABLES_PROCESS_PRIORITY = -20;
 constexpr const int32_t DEFAULT_PROCESS_PRIORITY = 0;
@@ -72,6 +75,22 @@ void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
     NETNATIVE_LOGI("ExecuteCommandForRes %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
     setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
     if (CommonUtils::ForkExec(cmdWithWait, &result_) == NETMANAGER_ERROR) {
+        NETNATIVE_LOGE("run exec faild");
+    }
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), DEFAULT_PROCESS_PRIORITY);
+}
+
+void IptablesWrapper::ExecuteRestoreCommand(const std::string &restoreCmd, const std::string &command)
+{
+    if (!CommonUtils::WriteFile(IPTABLES_RULE_PATH, command)) {
+        NETNATIVE_LOGE("iptables restore rule file write err");
+        return;
+    }
+
+    std::string cmdWithWait = restoreCmd + " --wait=5 ";
+    NETNATIVE_LOGI("ExecuteCommand %{public}s", CommonUtils::AnonymousIpInStr(cmdWithWait).c_str());
+    setpriority(PRIO_PROCESS, syscall(SYS_gettid), IPTABLES_PROCESS_PRIORITY);
+    if (CommonUtils::ForkExec(cmdWithWait) == NETMANAGER_ERROR) {
         NETNATIVE_LOGE("run exec faild");
     }
     setpriority(PRIO_PROCESS, syscall(SYS_gettid), DEFAULT_PROCESS_PRIORITY);
@@ -210,5 +229,38 @@ int32_t IptablesWrapper::RunMutipleCommands(const IpType &ipType, const std::vec
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
+int32_t IptablesWrapper::RunRestoreCommands(const IpType &ipType, const std::string &command)
+{
+    NETNATIVE_LOGI("IptablesWrapper::RunRestoreCommands, ipType:%{public}d, command:%{public}s",
+        ipType, CommonUtils::AnonymousIpInStr(command).c_str());
+    if (!iptablesWrapperFfrtQueue_) {
+        NETNATIVE_LOGE("FFRT Init Fail");
+        return NETMANAGER_ERROR;
+    }
+
+    if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IPTABLES_RESTORE_CMD_PATH) + " " + IPTABLES_RULE_PATH + " --noflush";
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteRestoreCommand(cmd, command);
+#else
+        std::function<void()> executeCommand =
+            std::bind(&IptablesWrapper::ExecuteRestoreCommand, shared_from_this(), cmd, command);
+        iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif // UNITTEST_FORBID_FFRT
+    }
+
+    if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IP6TABLES_RESTORE_CMD_PATH) + " " + IPTABLES_RULE_PATH + " --noflush";
+#if UNITTEST_FORBID_FFRT // Forbid FFRT for unittest, which will cause crash in destructor process
+        ExecuteRestoreCommand(cmd, command);
+#else
+        std::function<void()> executeCommand =
+            std::bind(&IptablesWrapper::ExecuteRestoreCommand, shared_from_this(), cmd, command);
+        iptablesWrapperFfrtQueue_->submit(executeCommand);
+#endif // UNITTEST_FORBID_FFRT
+    }
+
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace nmd
 } // namespace OHOS

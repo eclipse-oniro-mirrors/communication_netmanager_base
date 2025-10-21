@@ -79,6 +79,19 @@ static __always_inline __u16 parse_queries_name(struct __sk_buff *skb, __u16 dns
         return 0;
     }
 
+    __u8 len = (__u8)*key_len;
+    if (len > DNS_DOMAIN_LEN_MIN && len < DNS_DOMAIN_LEN) {
+        __u8 start = 0;
+        __u8 end = len - 1;
+        while (start < end) {
+            __u8 temp = key_data[start];
+            key_data[start] = key_data[end];
+            key_data[end] = temp;
+            start++;
+            end--;
+        }
+    }
+
     return offset;
 }
 
@@ -161,7 +174,7 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
         if (res == 0) {
             return 0;
         }
-
+        key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
         struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
 
         if (deny_value != NULL && match_domain_value(skb, deny_value)) {
@@ -186,19 +199,13 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
         if (offset == 0) {
             return 0;
         }
-
+        key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
         struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
         if (deny_value != NULL && match_domain_value(skb, deny_value)) {
             return 1;
         }
 
         struct domain_value *allow_value = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
-        __u32 current_uid = get_current_uid(skb);
-        struct defalut_action_value *default_value = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &current_uid);
-        enum sk_action sk_act = SK_PASS;
-        if (default_value) {
-            sk_act = default_value->outaction;
-        }
 
         if (allow_value != NULL && match_domain_value(skb, allow_value)) {
             is_in_pass = 1;

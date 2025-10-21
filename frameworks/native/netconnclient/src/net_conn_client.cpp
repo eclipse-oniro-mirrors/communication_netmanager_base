@@ -280,7 +280,7 @@ sptr<NetConnClient::NetConnCallbackManager> NetConnClient::FindConnCallbackManag
         std::string ident_ = pair.first->ident_;
         sptr<NetConnCallbackManager> connCallbackManager = pair.second;
         NetAllCapabilities netAllCapabilities = pair.first->netCapabilities_;
-        if (ident_ == netSpecifier->ident_ &&
+        if (netSpecifier != nullptr && ident_ == netSpecifier->ident_ &&
             netAllCapabilities.bearerTypes_ == netSpecifier->netCapabilities_.bearerTypes_ &&
             netAllCapabilities.netCaps_ == netSpecifier->netCapabilities_.netCaps_) {
                 return connCallbackManager;

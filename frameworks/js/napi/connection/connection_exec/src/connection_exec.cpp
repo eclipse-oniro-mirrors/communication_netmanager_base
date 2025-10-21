@@ -675,12 +675,11 @@ bool ConnectionExec::ExecGetIpNeighTable(GetIpNeighTableContext *context)
 
 napi_value ConnectionExec::GetIpNeighTableCallback(GetIpNeighTableContext *context)
 {
+    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->ipMacInfo_.size());
     if (context->ipMacInfo_.empty()) {
         NETMANAGER_BASE_LOGE("ip neighbor table is empty!");
-        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
-        return NapiUtils::GetUndefined(context->GetEnv());
+        return array;
     }
-    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->ipMacInfo_.size());
     uint32_t index = 0;
     std::for_each(context->ipMacInfo_.begin(), context->ipMacInfo_.end(),
         [array, &index, context](const NetIpMacInfo &ipMacInfo) {

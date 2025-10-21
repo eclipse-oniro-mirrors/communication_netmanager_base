@@ -136,7 +136,7 @@ public:
         const std::string &ifName) = 0;
     virtual int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) = 0;
-    virtual int32_t GetIpNeighTable(std::vector<OHOS::NetManagerStandard::NetIpMacInfo> &ipMacInfo) = 0;
+    virtual int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

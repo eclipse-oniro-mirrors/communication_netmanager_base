@@ -92,6 +92,7 @@ private:
     int32_t proxySockFd_;
     int32_t proxySockFd6_;
     int32_t epollFd_ = -1;
+    int32_t exitFd_ = -1;
     static uint16_t netId_;
     static std::atomic_bool proxyListenSwitch_;
     static std::mutex listenerMutex_;
@@ -102,7 +103,9 @@ private:
     void InitListenForIpv4();
     void InitListenForIpv6();
     bool InitForListening(epoll_event &proxyEvent, epoll_event &proxy6Event);
+    bool InitExitFdforListening();
     void GetRequestAndTransmit(int32_t family);
+    bool GetExitFlag();
 };
 } // namespace nmd
 } // namespace OHOS

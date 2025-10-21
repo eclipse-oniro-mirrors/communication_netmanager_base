@@ -116,7 +116,7 @@ int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg)
  * @param rcvMsg message from kernel
  * @return Returns 0, get info from kernel successfully, otherwise it will fail
  */
-int32_t GetRcvMsgFromKernel(int32_t sock, uint16_t msgType, uint32_t table, void* rcvMsg);
+int32_t GetRcvMsgFromKernel(int32_t &sock, uint16_t msgType, uint32_t table, void* rcvMsg);
 
 /**
  * Deal receive message from kernel

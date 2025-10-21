@@ -227,7 +227,7 @@ void NetPACManager::DownloadPACScript(const std::string &url)
     int responseCode;
     curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &responseCode);
     if (responseCode != HTTP_CODE_200) {
-        NETMGR_LOG_E("HTTP request failed with status code: %ld", responseCode);
+        NETMGR_LOG_E("HTTP request failed with status code: %d", responseCode);
         return;
     }
     if (data.empty()) {

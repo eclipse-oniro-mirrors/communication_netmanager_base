@@ -117,7 +117,8 @@ private:
     void InitChildChains();
     void CheckInited();
     int32_t SetIpFwdEnable();
-    int32_t SetForwardRules(bool set, const std::string &cmds);
+    void SetForwardRules(bool set, const std::string &cmds, std::string &cmdSet);
+    void CombineRestoreRules(const std::string &cmds, std::string &cmdSet);
     int32_t QueryCellularSharingTraffic(NetworkSharingTraffic &traffic,
         const std::string &result, std::string &ifaceName);
     void GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,

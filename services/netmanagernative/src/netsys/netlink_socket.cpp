@@ -90,36 +90,6 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         return -1;
     }
     ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
-    /////////待改start
-    // struct iovec ioVector;
-    // ioVector.iov_base = msg;
-    // ioVector.iov_len = msg->nlmsg_len;
-
-    // struct msghdr msgHeader;
-    // (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
-
-    // struct sockaddr_nl kernel;
-    // (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
-    // kernel.nl_family = AF_NETLINK;
-    // kernel.nl_groups = 0;
-
-    // msgHeader.msg_name = &kernel;
-    // msgHeader.msg_namelen = sizeof(kernel);
-    // msgHeader.msg_iov = &ioVector;
-    // msgHeader.msg_iovlen = 1;
-
-    // ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
-    // if (msgState == -1) {
-    //     NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
-    //     close(kernelSocket);
-    //     return -1;
-    // } else if (msgState == 0) {
-    //     NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
-    //     close(kernelSocket);
-    //     return -1;
-    // }
-    // NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
-    ///待改end
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
@@ -351,45 +321,18 @@ int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg)
         return -1;
     }
     ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
-    // struct iovec ioVector;
-    // ioVector.iov_base = msg;
-    // ioVector.iov_len = msg->nlmsg_len;
-
-    // struct msghdr msgHeader;
-    // (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
-
-    // struct sockaddr_nl kernel;
-    // (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
-    // kernel.nl_family = AF_NETLINK;
-    // kernel.nl_groups = 0;
-
-    // msgHeader.msg_name = &kernel;
-    // msgHeader.msg_namelen = sizeof(kernel);
-    // msgHeader.msg_iov = &ioVector;
-    // msgHeader.msg_iovlen = 1;
-
-    // ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
-    // if (msgState == -1) {
-    //     NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
-    //     close(kernelSocket);
-    //     return -1;
-    // } else if (msgState == 0) {
-    //     NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
-    //     close(kernelSocket);
-    //     return -1;
-    // }
-    // NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetRcvMsgFromKernel(kernelSocket, msg->nlmsg_type, table, rcvMsg);
     }
     if (msgState != 0) {
-        NETNATIVE_LOGE("netlink read socket[%{public}d] failed, msgState=%{public}zd", kernelSocket, msgState);
+        NETNATIVE_LOGE("ReceiveMsgFromKernel netlink read socket[%{public}d] failed, msgState=%{public}zd",
+            kernelSocket, msgState);
     }
     close(kernelSocket);
     return msgState;
 }
 
-int32_t GetRcvMsgFromKernel(int32_t sock, uint16_t msgType, uint32_t table, void* rcvMsg)
+int32_t GetRcvMsgFromKernel(int32_t &sock, uint16_t msgType, uint32_t table, void* rcvMsg)
 {
     if (rcvMsg == nullptr) {
         return -1;
@@ -462,7 +405,7 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
     NetManagerStandard::NetIpMacInfo info;
     char ifIndexName[IF_NAME_SIZE] = {0};
     if (if_indextoname(static_cast<unsigned>(ndm->ndm_ifindex), ifIndexName) == nullptr) {
-        NETNATIVE_LOGE("if_indextoname failed");///ndm->ndm_ifindex
+        NETNATIVE_LOGE("if_indextoname failed");
     }
     info.iface_ = ifIndexName;
     for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(ndm); RTA_OK(infoRta, length);
@@ -472,7 +415,7 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
             void* ipAddr = RTA_DATA(infoRta);
             if (ndm->ndm_family == AF_INET) {
                 char ipStr[INET_ADDRSTRLEN] = {0};
-                inet_ntop(AF_INET, ipAddr, ipStr, sizeof(ipStr));///这里加打印？
+                inet_ntop(AF_INET, ipAddr, ipStr, sizeof(ipStr));
                 info.ipAddress_ = ipStr;
                 info.family_ = FAMILY_V4;
             } else if (ndm->ndm_family == AF_INET6) {
@@ -485,9 +428,10 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
             }
         } else if (infoRta->rta_type == NDA_LLADDR) {
             uint8_t* macAddr = reinterpret_cast<uint8_t *>(RTA_DATA(infoRta));
-            info.macAddress_ = MacArrayToString(macAddr);//len传进去加个判读，或者加个打印？
+            info.macAddress_ = MacArrayToString(macAddr);
         }
     }
+    ipMacInfoVec.push_back(info);
 }
 } // namespace nmd
 } // namespace OHOS

@@ -41,6 +41,7 @@ constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
+constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -2013,7 +2014,7 @@ int32_t NetsysNativeServiceStub::CmdGetIpNeighTable(MessageParcel &data, Message
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         for (auto p = ipMacInfo.begin(); p != ipMacInfo.end(); ++p) {
-            sptr<NetIpMacInfo> info_ptr = sptr<NetIpMacInfo>::MakeSptr();
+            sptr<NetIpMacInfo> info_ptr = sptr<NetIpMacInfo>::MakeSptr(*p);
             if (!NetIpMacInfo::Marshalling(reply, info_ptr)) {
                 NETMGR_LOG_E("proxy Marshalling failed");
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -2108,6 +2109,10 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, M
     int32_t ret = GetNetworkSharingType(sharingTypeIsOn);
     if (!reply.WriteInt32(ret)) {
         NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (sharingTypeIsOn.size() > MAX_SHARING_TYPE_SIZE) {
+        NETNATIVE_LOGE("Write size error");
         return ERR_FLATTEN_OBJECT;
     }
     if (!reply.WriteUint32(sharingTypeIsOn.size())) {

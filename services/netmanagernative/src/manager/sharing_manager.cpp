@@ -53,15 +53,15 @@ constexpr const char *ENABLE_IPV6_VALUE = "0";
 constexpr const char *DISABLE_IPV6_VALUE = "1";
 
 // commands of set nat
-constexpr const char *APPEND_NAT_POSTROUTING = "-t nat -A POSTROUTING -j tetherctrl_nat_POSTROUTING";
-constexpr const char *APPEND_MANGLE_FORWARD = "-t mangle -A FORWARD -j tetherctrl_mangle_FORWARD";
+constexpr const char *APPEND_NAT_POSTROUTING = "-A POSTROUTING -j tetherctrl_nat_POSTROUTING";
+constexpr const char *APPEND_MANGLE_FORWARD = "-A FORWARD -j tetherctrl_mangle_FORWARD";
 constexpr const char *APPEND_TETHERCTRL_MANGLE_FORWARD =
-    "-t mangle -A tetherctrl_mangle_FORWARD "
+    "-A tetherctrl_mangle_FORWARD "
     "-p tcp -m tcp --tcp-flags SYN SYN -j TCPMSS --clamp-mss-to-pmtu";
-constexpr const char *CLEAR_TETHERCTRL_NAT_POSTROUTING = "-t nat -F tetherctrl_nat_POSTROUTING";
-constexpr const char *CLEAR_TETHERCTRL_MANGLE_FORWARD = "-t mangle -F tetherctrl_mangle_FORWARD";
-constexpr const char *DELETE_TETHERCTRL_NAT_POSTROUTING = "-t nat -D POSTROUTING -j tetherctrl_nat_POSTROUTING";
-constexpr const char *DELETE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -D FORWARD -j tetherctrl_mangle_FORWARD";
+constexpr const char *CLEAR_TETHERCTRL_NAT_POSTROUTING = "-F tetherctrl_nat_POSTROUTING";
+constexpr const char *CLEAR_TETHERCTRL_MANGLE_FORWARD = "-F tetherctrl_mangle_FORWARD";
+constexpr const char *DELETE_TETHERCTRL_NAT_POSTROUTING = "-D POSTROUTING -j tetherctrl_nat_POSTROUTING";
+constexpr const char *DELETE_TETHERCTRL_MANGLE_FORWARD = "-D FORWARD -j tetherctrl_mangle_FORWARD";
 
 constexpr const char *IPATBLES_RESTORE_CMD_PATH = "/system/bin/iptables-restore";
 constexpr const char *IPATBLES_SAVE_CMD_PATH = "/system/bin/iptables-save";
@@ -69,9 +69,14 @@ constexpr const char *IPATBLES_SAVE_CMD_PATH = "/system/bin/iptables-save";
 constexpr const char *IP6ATBLES_RESTORE_CMD_PATH = "/system/bin/ip6tables-restore";
 constexpr const char *IP6ATBLES_SAVE_CMD_PATH = "/system/bin/ip6tables-save";
 
+constexpr const char *FILTER_TABLE = "*filter";
+constexpr const char *MANGLE_TABLE = "*mangle";
+constexpr const char *NAT_TABLE = "*nat";
+constexpr const char *CMD_COMMIT = "COMMIT";
+
 const std::string EnableNatCmd(const std::string &down)
 {
-    return "-t nat -A tetherctrl_nat_POSTROUTING -o " + down + " -j MASQUERADE";
+    return "-A tetherctrl_nat_POSTROUTING -o " + down + " -j MASQUERADE";
 }
 
 // commands of set ipfwd, all commands with filter
@@ -186,19 +191,22 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
         NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
         return -1;
     }
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_MANGLE_FORWARD);
 
     NETNATIVE_LOGI("EnableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, EnableNatCmd(upstreamIface)) !=
-        NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("IptablesWrapper run command failed");
-        return -1;
-    }
+    std::string cmdSet = "";
+    CombineRestoreRules(NAT_TABLE, cmdSet);
+    CombineRestoreRules(APPEND_NAT_POSTROUTING, cmdSet);
+    CombineRestoreRules(EnableNatCmd(upstreamIface), cmdSet);
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    
+    CombineRestoreRules(MANGLE_TABLE, cmdSet);
+    CombineRestoreRules(APPEND_MANGLE_FORWARD, cmdSet);
+    CombineRestoreRules(APPEND_TETHERCTRL_MANGLE_FORWARD, cmdSet);
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_TETHERCTRL_MANGLE_FORWARD) !=
+    if (iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, cmdSet) !=
         NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
@@ -221,19 +229,22 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
     NETNATIVE_LOGI("DisableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CLEAR_TETHERCTRL_NAT_POSTROUTING) !=
-        NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("IptablesWrapper run command failed");
-        return -1;
-    }
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CLEAR_TETHERCTRL_MANGLE_FORWARD) !=
-        NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("IptablesWrapper run command failed");
-        return -1;
-    }
+    std::string cmdSet = "";
+    CombineRestoreRules(NAT_TABLE, cmdSet);
+    CombineRestoreRules(CLEAR_TETHERCTRL_NAT_POSTROUTING, cmdSet);
+    CombineRestoreRules(DELETE_TETHERCTRL_NAT_POSTROUTING, cmdSet);
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
+    
+    CombineRestoreRules(MANGLE_TABLE, cmdSet);
+    CombineRestoreRules(CLEAR_TETHERCTRL_MANGLE_FORWARD, cmdSet);
+    CombineRestoreRules(DELETE_TETHERCTRL_MANGLE_FORWARD, cmdSet);
+    CombineRestoreRules(CMD_COMMIT, cmdSet);
 
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, DELETE_TETHERCTRL_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, DELETE_TETHERCTRL_MANGLE_FORWARD);
+    if (iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, cmdSet) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
+    }
     return 0;
 }
 int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
@@ -284,61 +295,57 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     }
     NETNATIVE_LOGI("IpfwdAddInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
                    toIface.c_str());
-    if (interfaceForwards_.empty()) {
-        SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
-    }
 
     IpfwdExecSaveBak();
     int32_t result = 0;
 
+    std::string fwdCmdSet = "";
+    CombineRestoreRules(FILTER_TABLE, fwdCmdSet);
+    if (interfaceForwards_.empty()) {
+        SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
+    }
     /*
      * Add a forward rule, when the status of packets is RELATED,
      * ESTABLISED and from fromIface to toIface, goto tetherctrl_counters
      */
-    if (SetForwardRules(true, SetTetherctrlForward1(toIface, fromIface))) {
-        return result;
-    }
+    SetForwardRules(true, SetTetherctrlForward1(toIface, fromIface), fwdCmdSet);
 
     /*
      * Add a forward rule, when the status is INVALID and from toIface to fromIface, just drop
      */
-    if (SetForwardRules(true, SetTetherctrlForward2(toIface, fromIface))) {
-        Rollback();
-        return result;
-    }
+    SetForwardRules(true, SetTetherctrlForward2(toIface, fromIface), fwdCmdSet);
 
     /*
      * Add a forward rule, from toIface to fromIface, goto tetherctrl_counters
      */
-    if (SetForwardRules(true, SetTetherctrlForward3(toIface, fromIface))) {
-        Rollback();
-        return result;
-    }
+    SetForwardRules(true, SetTetherctrlForward3(toIface, fromIface), fwdCmdSet);
 
-    SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP);
+    if (!interfaceForwards_.empty()) {
+        // ensure only one drop rule
+        SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
+    }
 
     /*
      * Add a forward rule, drop others
      */
-    if (SetForwardRules(true, SET_TETHERCTRL_FORWARD_DROP)) {
-        Rollback();
-        return result;
-    }
+    SetForwardRules(true, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
 
     /*
      * Add a forward rule, if from toIface to fromIface return chain of father
      */
-    if (SetForwardRules(true, SetTetherctrlCounters1(fromIface, toIface))) {
-        Rollback();
-        return result;
-    }
+    SetForwardRules(true, SetTetherctrlCounters1(fromIface, toIface), fwdCmdSet);
 
     /*
      * Add a forward rule, if from fromIface to toIface return chain of father
      */
-    if (SetForwardRules(true, SetTetherctrlCounters2(fromIface, toIface))) {
+    SetForwardRules(true, SetTetherctrlCounters2(fromIface, toIface), fwdCmdSet);
+
+    CombineRestoreRules(CMD_COMMIT, fwdCmdSet);
+    if (iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, fwdCmdSet) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
         Rollback();
-        return result;
+        return -1;
     }
 
     if (RouteManager::EnableSharing(fromIface, toIface)) {
@@ -363,19 +370,24 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
     NETNATIVE_LOGI("IpfwdRemoveInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
                    toIface.c_str());
 
-    SetForwardRules(false, SetTetherctrlForward1(toIface, fromIface));
-    SetForwardRules(false, SetTetherctrlForward2(toIface, fromIface));
-    SetForwardRules(false, SetTetherctrlForward3(toIface, fromIface));
-    SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP);
-    SetForwardRules(false, SetTetherctrlCounters1(fromIface, toIface));
-    SetForwardRules(false, SetTetherctrlCounters2(fromIface, toIface));
-
-    RouteManager::DisableSharing(fromIface, toIface);
+    std::string fwdCmdSet = "";
+    CombineRestoreRules(FILTER_TABLE, fwdCmdSet);
+    SetForwardRules(false, SetTetherctrlForward1(toIface, fromIface), fwdCmdSet);
+    SetForwardRules(false, SetTetherctrlForward2(toIface, fromIface), fwdCmdSet);
+    SetForwardRules(false, SetTetherctrlForward3(toIface, fromIface), fwdCmdSet);
+    SetForwardRules(false, SetTetherctrlCounters1(fromIface, toIface), fwdCmdSet);
+    SetForwardRules(false, SetTetherctrlCounters2(fromIface, toIface), fwdCmdSet);
 
     interfaceForwards_.erase(fromIface + toIface);
     if (interfaceForwards_.empty()) {
-        SetForwardRules(false, FORWARD_JUMP_TETHERCTRL_FORWARD);
+        SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP, fwdCmdSet);
+        SetForwardRules(false, FORWARD_JUMP_TETHERCTRL_FORWARD, fwdCmdSet);
     }
+
+    CombineRestoreRules(CMD_COMMIT, fwdCmdSet);
+    iptablesWrapper_->RunRestoreCommands(IPTYPE_IPV4V6, fwdCmdSet);
+
+    RouteManager::DisableSharing(fromIface, toIface);
 
     return 0;
 }
@@ -546,16 +558,15 @@ void SharingManager::CheckInited()
     InitChildChains();
 }
 
-int32_t SharingManager::SetForwardRules(bool set, const std::string &cmds)
+void SharingManager::SetForwardRules(bool set, const std::string &cmds, std::string &cmdSet)
 {
     const std::string op = set ? "-A" : "-D";
+    cmdSet.append(op + cmds + "\n");
+}
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, "-t filter " + op + cmds) !=
-        NetManagerStandard::NETMANAGER_SUCCESS) {
-        NETNATIVE_LOGE("IptablesWrapper run command failed");
-        return -1;
-    }
-    return 0;
+void SharingManager::CombineRestoreRules(const std::string &cmds, std::string &cmdSet)
+{
+    cmdSet.append(cmds + "\n");
 }
 } // namespace nmd
 } // namespace OHOS

@@ -2199,7 +2199,7 @@ int32_t NetConnServiceProxy::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInf
             sptr<NetIpMacInfo> infoPtr =  NetIpMacInfo::Unmarshalling(reply);
             if (infoPtr == nullptr) {
                 ipMacInfo.clear();
-                return NETMANAGER_ERR_INVALID_PARAMETER;
+                return NETMANAGER_ERR_READ_REPLY_FAIL;
             }
             ipMacInfo.push_back(*infoPtr);
         }

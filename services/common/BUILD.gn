@@ -174,6 +174,8 @@ ohos_shared_library("net_service_common") {
     ":netstats_notification_ko",
     ":netstats_notification_ru",
     ":netstats_notification_vi",
+    ":netstats_notification_icon",
+    ":netstats_notification_locale",
     "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]

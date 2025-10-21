@@ -67,7 +67,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
         &NetConnServiceStub::OnUpdateNetStateForTest, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK)] = {
-        &NetConnServiceStub::OnRegisterNetDetectionCallback, {}};
+        &NetConnServiceStub::OnRegisterNetDetectionCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK)] = {
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION)] = {
@@ -187,7 +187,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)] = {
         &NetConnServiceStub::OnHasDefaultNet, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET)] = {
-        &NetConnServiceStub::OnGetSpecificNet, {}};
+        &NetConnServiceStub::OnGetSpecificNet, {Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS)] = {&NetConnServiceStub::OnGetAllNets,
                                                                                      {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET)] = {
@@ -203,7 +203,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY)] = {
         &NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER)] = {
-        &NetConnServiceStub::OnGetNetIdByIdentifier, {}};
+        &NetConnServiceStub::OnGetNetIdByIdentifier, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
         &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERFACE_IP_ADDRESS)] = {
@@ -232,7 +232,7 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         {Permission::INTERNET, Permission::GET_NETWORK_LOCATION, Permission::ACCESS_NET_TRACE_INFO}};
 
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE)] = {
-        &NetConnServiceStub::OnGetIpNeighTable, {Permission::INTERNET}};
+        &NetConnServiceStub::OnGetIpNeighTable, {Permission::GET_NETWORK_INFO, Permission::GET_IP_MAC_INFO}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -559,7 +559,7 @@ int32_t NetConnServiceStub::OnUpdateNetCaps(MessageParcel &data, MessageParcel &
 
 int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t supplierId;
+    uint32_t supplierId = 0;
     if (!data.ReadUint32(supplierId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -574,7 +574,7 @@ int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t supplierId;
+    uint32_t supplierId = 0;
     data.ReadUint32(supplierId);
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -2137,7 +2137,7 @@ int32_t NetConnServiceStub::OnGetIpNeighTable(MessageParcel &data, MessageParcel
         }
         uint32_t index = 0;
         for (auto p = ipMacInfo.begin(); p != ipMacInfo.end(); ++p) {
-            sptr<NetIpMacInfo> info_ptr = (std::make_unique<NetIpMacInfo>(*p)).release();
+            sptr<NetIpMacInfo> info_ptr = sptr<NetIpMacInfo>::MakeSptr(*p);
             if (!NetIpMacInfo::Marshalling(reply, info_ptr)) {
                 NETMGR_LOG_E("proxy Marshalling failed");
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
