@@ -53,11 +53,11 @@ napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 
     std::initializer_list<napi_property_descriptor> properties = {
         DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
-                              NetHandleInterface::GetAddressesByName),
+            NetHandleInterface::GetAddressesByName),
         DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
-                              NetHandleInterface::GetAddressByName),
+            NetHandleInterface::GetAddressByName),
         DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_BIND_SOCKET,
-                              NetHandleInterface::BindSocket),
+            NetHandleInterface::BindSocket),
     };
     NapiUtils::DefineProperties(env, netHandle, properties);
     NapiUtils::SetUint32Property(env, netHandle, NetHandleInterface::PROPERTY_NET_ID, handle->GetNetId());
