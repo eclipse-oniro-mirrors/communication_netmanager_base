@@ -96,6 +96,9 @@ std::string FirewallManager::ReadMaxUidConfig()
     oss << file.rdbuf();
     content = oss.str();
     auto index = content.find_last_of(' ');
+    if (index == std::string::npos) {
+        return std::to_string(DEFAULT_MAX_UID_RANGE);
+    }
     maxUid = content.substr(index + 1);
     // if unavailable value use default value
     if (maxUid.size() == 0) {
