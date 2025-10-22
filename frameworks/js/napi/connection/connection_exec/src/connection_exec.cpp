@@ -52,9 +52,9 @@ napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
     }
 
     std::initializer_list<napi_property_descriptor> properties = {
-        DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
+        DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
                               NetHandleInterface::GetAddressesByName),
-        DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
+        DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
                               NetHandleInterface::GetAddressByName),
         DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_BIND_SOCKET,
                               NetHandleInterface::BindSocket),
