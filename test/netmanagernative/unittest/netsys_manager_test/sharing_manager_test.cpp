@@ -131,9 +131,16 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
 
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
 {
-    sharingManager->IpfwdAddInterfaceForward("wlantest0", "wlantest1");
-    EXPECT_EQ(sharingManager->wifiShareInterface_, "wlantest0");
-    sharingManager->IpfwdRemoveInterfaceForward("wlantest0", "wlantest1");
+    sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
+    EXPECT_EQ(sharingManager->wifiShareInterface_, "wlan0");
+    sharingManager->IpfwdRemoveInterfaceForward("wlan0", "wlan1");
+    EXPECT_EQ(sharingManager->wifiShareInterface_, "");
+}
+
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward005, TestSize.Level1)
+{
+    sharingManager->IpfwdAddInterfaceForward("p2p-p2p0", "p2p-p2p1");
+    sharingManager->IpfwdRemoveInterfaceForward("p2p-p2p0", "p2p-p2p1");
     EXPECT_EQ(sharingManager->wifiShareInterface_, "");
 }
 
@@ -290,6 +297,16 @@ HWTEST_F(SharingManagerTest, SetInternetAccessByIpForWifiShare001, TestSize.Leve
     access = true;
     int32_t ret = sharingManager->SetInternetAccessByIpForWifiShare(ip, family, access, clientNetIfName);
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(SharingManagerTest, EnableShareUnreachableRoute001, TestSize.Level1)
+{
+    EXPECT_EQ(sharingManager->EnableShareUnreachableRoute(RouteManager::TABLE_TYPE_BUTT), -1);
+}
+
+HWTEST_F(SharingManagerTest, DisableShareUnreachableRoute001, TestSize.Level1)
+{
+    EXPECT_EQ(sharingManager->DisableShareUnreachableRoute(RouteManager::TABLE_TYPE_BUTT), -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS

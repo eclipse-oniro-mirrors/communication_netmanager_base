@@ -656,19 +656,37 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestS
 {
     MessageParcel data;
     data.WriteBool(true);
-    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor());
     std::string ip = "1.1.1.1";
     uint8_t family = 2;
     std::string ifname = "test";
-    data.WriteString(ip);
-    data.WriteUint8(family);
-    data.WriteBool(true);
-    data.WriteString(ifname);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    
+    data.WriteString(ip);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    
+    data.WriteUint8(family);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    
+    data.WriteBool(true);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
+        data, reply, option);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    
+    data.WriteString(ifname);
+    ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
         data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

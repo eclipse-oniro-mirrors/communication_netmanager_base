@@ -70,6 +70,7 @@ public:
         LOCAL_NETWORK,
         INTERNAL_DEFAULT,
         UNREACHABLE_NETWORK,
+        TABLE_TYPE_BUTT,
     };
 
     /**

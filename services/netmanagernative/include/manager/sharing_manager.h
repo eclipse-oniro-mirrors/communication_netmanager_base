@@ -25,6 +25,7 @@
 #include <map>
 #include "iptables_wrapper.h"
 #include "network_sharing.h"
+#include "route_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -129,8 +130,8 @@ private:
         const std::string &result, std::string &ifaceName);
     void GetTraffic(std::smatch &matches, std::string &ifaceName, NetworkSharingTraffic &traffic,
         bool &isFindTx, bool &isFindRx);
-    int32_t EnableShareUnreachableRoute();
-    int32_t DisableShareUnreachableRoute();
+    int32_t EnableShareUnreachableRoute(RouteManager::TableType tableType);
+    int32_t DisableShareUnreachableRoute(RouteManager::TableType tableType);
     void ClearForbidIpRules();
 };
 } // namespace nmd

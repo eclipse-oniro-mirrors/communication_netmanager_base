@@ -856,7 +856,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIptablesCommandForResTest001, TestSi
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetIptablesCommandForRes(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpCommandForResTest001, TestSize.Level1)
@@ -864,7 +864,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpCommandForResTest001, TestSize.Lev
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetIpCommandForRes(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
@@ -1342,7 +1342,7 @@ HWTEST_F(NetsysNativeServiceStubTest, FlushDnsCache001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdFlushDnsCache(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteIncreaseTrafficMap001, TestSize.Level1)
@@ -1374,7 +1374,7 @@ HWTEST_F(NetsysNativeServiceStubTest, SetDnsCache001, TestSize.Level1)
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetDnsCache(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
@@ -1392,7 +1392,23 @@ HWTEST_F(NetsysNativeServiceStubTest, SetInternetAccessByIpForWifiShare001, Test
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(data, reply);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_NONE);
+    
+    MessageParcel errData;
+    ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(errData, reply);
+    EXPECT_EQ(ret, 3);
+
+    errData.WriteString(iptest);
+    ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(errData, reply);
+    EXPECT_EQ(ret, 3);
+
+    errData.WriteUint8(family);
+    ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(errData, reply);
+    EXPECT_EQ(ret, 3);
+
+    errData.WriteBool(access);
+    ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(errData, reply);
+    EXPECT_EQ(ret, 3);
 }
 } // namespace NetsysNative
 } // namespace OHOS

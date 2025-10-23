@@ -24,7 +24,6 @@
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "route_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -356,7 +355,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         wifiShareInterface_ = fromIface;
-        EnableShareUnreachableRoute();
+        EnableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
     }
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
@@ -398,7 +397,7 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
     if (fromIface.find(WLAN_IFACE_NAME) != std::string::npos ||
         fromIface.find(P2P_IFACE_NAME) != std::string::npos) {
         ClearForbidIpRules();
-        DisableShareUnreachableRoute();
+        DisableShareUnreachableRoute(RouteManager::UNREACHABLE_NETWORK);
         wifiShareInterface_ = "";
     }
     return 0;
@@ -581,10 +580,9 @@ void SharingManager::CombineRestoreRules(const std::string &cmds, std::string &c
     cmdSet.append(cmds + "\n");
 }
 
-int32_t SharingManager::EnableShareUnreachableRoute()
+int32_t SharingManager::EnableShareUnreachableRoute(RouteManager::TableType tableType)
 {
     bool routeRepeat = false;
-    RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
 
     NetworkRouteInfo networkRouteInfo;
     networkRouteInfo.destination = "0.0.0.0/0";
@@ -606,9 +604,8 @@ int32_t SharingManager::EnableShareUnreachableRoute()
     return ret;
 }
 
-int32_t SharingManager::DisableShareUnreachableRoute()
+int32_t SharingManager::DisableShareUnreachableRoute(RouteManager::TableType tableType)
 {
-    RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
     std::string interfaceName = "";
     std::string destinationName = "0.0.0.0/0";
     std::string nextHop = "unreachable";
@@ -632,6 +629,7 @@ void SharingManager::ClearForbidIpRules()
     for (auto ip : forbidIpsMap_) {
         RouteManager::SetSharingUnreachableIpRule(RTM_DELRULE, wifiShareInterface_, ip.first, ip.second);
     }
+    forbidIpsMap_.clear();
 }
 
 int32_t SharingManager::SetInternetAccessByIpForWifiShare(

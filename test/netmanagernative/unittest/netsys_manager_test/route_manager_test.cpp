@@ -20,6 +20,7 @@
 #define protected public
 #endif
 
+#include "netlink_msg.h"
 #include "net_manager_constants.h"
 #include "route_manager.h"
 
@@ -806,7 +807,7 @@ HWTEST_F(RouteManagerTest, GetRouteTableFromTypeTest006, TestSize.Level1)
     RouteManager::TableType tableType = RouteManager::UNREACHABLE_NETWORK;
     std::string interfaceName = "eth0";
     uint32_t ret = RouteManager::GetRouteTableFromType(tableType, interfaceName);
-    EXPECT_NE(ret, 80);
+    EXPECT_EQ(ret, 80);
 }
 
 HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork002, TestSize.Level1)
@@ -909,6 +910,7 @@ HWTEST_F(RouteManagerTest, SetRuleMsgTable001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ruleInfo.ruleTable = 80;
+    nlmsg.netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     ret = RouteManager::SetRuleMsgTable(nlmsg, ruleInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -926,6 +928,7 @@ HWTEST_F(RouteManagerTest, SetRuleMsgFwmark001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ruleInfo.ruleMask = 1;
+    nlmsg.netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     ret = RouteManager::SetRuleMsgFwmark(nlmsg, ruleInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -944,6 +947,7 @@ HWTEST_F(RouteManagerTest, SetRuleMsgUidRange001, TestSize.Level1)
 
     uidStart = 1000;
     uidEnd = 1000;
+    nlmsg.netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     ret = RouteManager::SetRuleMsgUidRange(nlmsg, uidStart, uidEnd);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -961,6 +965,7 @@ HWTEST_F(RouteManagerTest, SetRuleMsgIfName001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::string ifName = "test";
+    nlmsg.netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     ret = RouteManager::SetRuleMsgIfName(nlmsg, ifName, type);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
@@ -978,6 +983,7 @@ HWTEST_F(RouteManagerTest, SetRuleMsgIp001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::string ip = "1.1.1.1";
+    nlmsg.netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     ret = RouteManager::SetRuleMsgIp(nlmsg, ip, type);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
