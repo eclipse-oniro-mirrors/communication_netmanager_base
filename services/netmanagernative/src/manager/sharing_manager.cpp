@@ -582,6 +582,7 @@ void SharingManager::CombineRestoreRules(const std::string &cmds, std::string &c
 
 int32_t SharingManager::EnableShareUnreachableRoute(RouteManager::TableType tableType)
 {
+    NETNATIVE_LOGI("EnableShareUnreachableRoute enter");
     bool routeRepeat = false;
 
     NetworkRouteInfo networkRouteInfo;
@@ -606,6 +607,7 @@ int32_t SharingManager::EnableShareUnreachableRoute(RouteManager::TableType tabl
 
 int32_t SharingManager::DisableShareUnreachableRoute(RouteManager::TableType tableType)
 {
+    NETNATIVE_LOGI("DisableShareUnreachableRoute enter");
     std::string interfaceName = "";
     std::string destinationName = "0.0.0.0/0";
     std::string nextHop = "unreachable";

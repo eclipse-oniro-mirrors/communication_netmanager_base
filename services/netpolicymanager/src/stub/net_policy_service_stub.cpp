@@ -61,6 +61,7 @@ constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr int UID_EDM = 3057;
 constexpr int UID_NET_MANAGER = 1099;
 constexpr int UID_IOT_NET_MANAGER = 7211;
+constexpr int UID_COLLABORATION = 5520;
 } // namespace
 
 NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
@@ -891,6 +892,12 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (uid != UID_COLLABORATION) {
+        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare CheckUidPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 

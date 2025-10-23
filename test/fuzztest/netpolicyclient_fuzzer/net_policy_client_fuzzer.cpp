@@ -586,10 +586,6 @@ void SetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     std::string ipAddr = NetPolicyGetString(STR_LEN);
     dataParcel.WriteString(ipAddr);
     uint8_t family = NetPolicyGetData<uint8_t>();

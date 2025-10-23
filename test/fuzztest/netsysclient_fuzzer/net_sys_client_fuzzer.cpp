@@ -1720,6 +1720,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdSetDnsCacheFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdAddStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetInternetAccessByIpForWifiShareFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
