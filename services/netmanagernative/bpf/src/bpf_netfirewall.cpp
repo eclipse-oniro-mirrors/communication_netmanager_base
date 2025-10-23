@@ -847,7 +847,7 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
 
 int NetsysBpfNetFirewall::HandleEvent(void *ctx, void *data, size_t len)
 {
-    if (data && len > 0) {
+    if (data != NULL && len > sizeof(Event)) {
         Event *ev = (Event *)data;
 
         switch (ev->type) {

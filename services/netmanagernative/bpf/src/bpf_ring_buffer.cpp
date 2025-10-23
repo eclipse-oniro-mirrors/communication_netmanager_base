@@ -55,6 +55,9 @@ int NetsysBpfRingBuffer::HandleNetworkPolicyEventCallback(void *ctx, void *data,
         NETNATIVE_LOGE("data error");
         return RING_BUFFER_ERR_INTERNAL;
     }
+    if (data_sz < sizeof(int32_t)) {
+        return 0;
+    }
     int32_t *e = (int32_t*)data;
 
     if (NetPolicyClient::GetInstance().NotifyNetAccessPolicyDiag(*e) != NETMANAGER_SUCCESS) {
