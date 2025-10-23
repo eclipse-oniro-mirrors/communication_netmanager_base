@@ -260,8 +260,9 @@ int32_t RouteManager::RemoveInterfaceFromDefaultNetwork(const std::string &inter
 int32_t RouteManager::AddInterfaceToPhysicalNetwork(uint16_t netId, const std::string &interfaceName,
                                                     NetworkPermission permission)
 {
-    NETNATIVE_LOGI("AddInterfaceToPhysicalNetwork, netId:%{public}d;interfaceName:%{public}s;permission:%{public}d;",
-                   netId, interfaceName.c_str(), permission);
+    HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
+        "AddInterfaceToPhysicalNetwork, netId:%{public}d;interfaceName:%{public}s;permission:%{public}d;",
+        netId, interfaceName.c_str(), permission);
     return UpdatePhysicalNetwork(netId, interfaceName, permission, ADD_CONTROL);
 }
 
