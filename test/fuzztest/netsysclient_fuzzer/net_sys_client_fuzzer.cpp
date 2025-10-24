@@ -1637,12 +1637,12 @@ void CmdSetDnsCacheFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
-void CmdSetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)	
-{	
-    MessageParcel dataParcel;	
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {	
-        return;	
-    }	
+void CmdSetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
 
     std::string ipAddr = NetSysGetString(STR_LEN);
     dataParcel.WriteString(ipAddr);
