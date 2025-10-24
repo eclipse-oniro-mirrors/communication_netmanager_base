@@ -426,6 +426,12 @@ int32_t NetManagerNative::IpfwdRemoveInterfaceForward(const std::string &fromIfa
     return sharingManager_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
+int32_t NetManagerNative::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    return sharingManager_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+}
+
 int32_t NetManagerNative::DnsSetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                                const std::vector<std::string> &servers,
                                                const std::vector<std::string> &domains)

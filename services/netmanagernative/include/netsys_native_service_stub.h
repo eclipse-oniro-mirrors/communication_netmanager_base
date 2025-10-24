@@ -201,6 +201,7 @@ private:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t CmdUpdateEnterpriseRoute(MessageParcel &data, MessageParcel &reply);
 #endif
+    int32_t CmdSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

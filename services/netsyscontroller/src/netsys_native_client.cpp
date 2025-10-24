@@ -2089,5 +2089,16 @@ int32_t NetsysNativeClient::UpdateEnterpriseRoute(const std::string &interfaceNa
     return proxy->UpdateEnterpriseRoute(interfaceName, uid, add);
 }
 #endif
+
+int32_t NetsysNativeClient::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

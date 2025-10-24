@@ -1637,6 +1637,26 @@ void CmdSetDnsCacheFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdSetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    uint8_t family = NetSysGetData<uint8_t>();
+    dataParcel.WriteUint8(family);
+    bool accessInternet = NetSysGetData<bool>();
+    dataParcel.WriteBool(accessInternet);
+    std::string clientNetIfName = NetSysGetString(STR_LEN);
+    dataParcel.WriteString(clientNetIfName);
+    OnRemoteRequest(
+        static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE),
+        dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1700,6 +1720,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdSetDnsCacheFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdAddStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetInternetAccessByIpForWifiShareFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

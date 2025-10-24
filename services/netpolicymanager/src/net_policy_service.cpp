@@ -763,6 +763,15 @@ int32_t NetPolicyService::SetNicTrafficAllowed(const std::vector<std::string> &i
     return netPolicyRule_->PolicySetNicTrafficAllowed(ifaceNames, status);
 }
 
+int32_t NetPolicyService::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    NETMGR_LOG_I("SetInternetAccessByIpForWifiShare addr[%{public}s], access[%{public}d]",
+        NetManagerStandard::CommonUtils::ToAnonymousIp(ipAddr, true).c_str(), accessInternet);
+    return NetsysController::GetInstance().SetInternetAccessByIpForWifiShare(
+        ipAddr, family, accessInternet, clientNetIfName);
+}
+
 void NetPolicyService::SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid)
 {
     NETMGR_LOG_I("SetBrokerUidAccessPolicyMap Enter. uid[%{public}u]", uid.has_value() ? uid.value() : 0);

@@ -72,7 +72,8 @@ constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 constexpr int32_t WAIT_FOR_PID_TIME_MS = 20;
 constexpr int32_t MAX_WAIT_PID_COUNT = 500;
 constexpr int32_t IPTABLES_READ_TIME_OUT = 10000; // 10s
-const std::string IPADDR_DELIMITER = ".";
+constexpr const char *IPADDR_DELIMITER = ".";
+constexpr const char *IP6ADDR_DELIMITER = ":";
 constexpr const char *CMD_SEP = " ";
 constexpr const char *DOMAIN_DELIMITER = ".";
 constexpr const char *TLDS_SPLIT_SYMBOL = "|";
@@ -359,8 +360,23 @@ int64_t ConvertToInt64(const std::string &str)
     return strtoll(str.c_str(), nullptr, DECIMAL_SYSTEM);
 }
 
-std::string MaskIpv4(std::string &maskedResult)
+std::string MaskIpMiddle(std::string &maskedResult, const std::string &delimiter)
 {
+    size_t start = maskedResult.find(delimiter);
+    size_t end = maskedResult.rfind(delimiter);
+    for (size_t i = start; i < end; i++) {
+        if (maskedResult[i] != delimiter[0] && maskedResult[i] != '/') {
+            maskedResult[i] = '*';
+        }
+    }
+    return maskedResult;
+}
+
+std::string MaskIpv4(std::string &maskedResult, bool maskMiddle)
+{
+    if (maskMiddle) {
+        return MaskIpMiddle(maskedResult, IPADDR_DELIMITER);
+    }
     int maxDisplayNum = MAX_DISPLAY_NUM;
     for (char &i : maskedResult) {
         if (i == '/') {
@@ -379,8 +395,11 @@ std::string MaskIpv4(std::string &maskedResult)
     return maskedResult;
 }
 
-std::string MaskIpv6(std::string &maskedResult)
+std::string MaskIpv6(std::string &maskedResult, bool maskMiddle)
 {
+    if (maskMiddle) {
+        return MaskIpMiddle(maskedResult, IP6ADDR_DELIMITER);
+    }
     size_t colonCount = 0;
     for (char &i : maskedResult) {
         if (i == '/') {
@@ -399,17 +418,17 @@ std::string MaskIpv6(std::string &maskedResult)
     return maskedResult;
 }
 
-std::string ToAnonymousIp(const std::string &input)
+std::string ToAnonymousIp(const std::string &input, bool maskMiddle)
 {
     std::lock_guard<std::mutex> lock(g_commonUtilsMutex);
     std::string maskedResult{input};
     // Mask ipv4 address.
     if (std::regex_match(maskedResult, IP_PATTERN) || std::regex_match(maskedResult, IP_MASK_PATTERN)) {
-        return MaskIpv4(maskedResult);
+        return MaskIpv4(maskedResult, maskMiddle);
     }
     // Mask ipv6 address.
     if (std::regex_match(maskedResult, IPV6_PATTERN) || std::regex_match(maskedResult, IPV6_MASK_PATTERN)) {
-        return MaskIpv6(maskedResult);
+        return MaskIpv6(maskedResult, maskMiddle);
     }
     return input;
 }
