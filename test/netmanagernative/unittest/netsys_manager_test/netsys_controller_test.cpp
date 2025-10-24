@@ -1868,6 +1868,29 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
+HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{	
+    auto netsysController = std::make_shared<NetsysController>();	
+    std::string ipAddr = "1.1.1.1";
+    uint8_t family = 0;
+    bool accessInternet = true;
+    std::string clientNetIfName = "test";
+
+    int32_t res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETSYS_PARAM_ERROR);
+
+    family = 2;
+    netsysController->netsysService_ = nullptr;
+    res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;	
+    res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    EXPECT_EQ(res, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerTest, GetIpNeighTable001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
