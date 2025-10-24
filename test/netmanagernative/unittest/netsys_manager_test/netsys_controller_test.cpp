@@ -1869,8 +1869,8 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
 }
 
 HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
-{	
-    auto netsysController = std::make_shared<NetsysController>();	
+{
+    auto netsysController = std::make_shared<NetsysController>();
     std::string ipAddr = "1.1.1.1";
     uint8_t family = 0;
     bool accessInternet = true;
@@ -1886,7 +1886,7 @@ HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Le
 
     auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
     netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
-    netsysController->netsysService_ = netsysControllerServiceImpl;	
+    netsysController->netsysService_ = netsysControllerServiceImpl;
     res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
     EXPECT_EQ(res, NetManagerStandard::NETMANAGER_SUCCESS);
 }
