@@ -1109,8 +1109,9 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     eventInfo.bearerType = supplier->GetNetSupplierType();
     eventInfo.netId = supplier->GetNetId();
     EventReport::SendSupplierBehaviorEvent(eventInfo);
-    NETMGR_LOG_I("Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
-                 supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
+    HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
+        "Update supplier[%{public}d, %{public}d, %{public}s], supplierInfo:[ %{public}s ]", supplierId,
+        supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
     bool isOldAvailable = supplier->IsAvailable();
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
     if (!netSupplierInfo->isAvailable_) {
@@ -1397,7 +1398,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
-        NETMGR_LOG_I(
+        HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
             "Match to optimal supplier:[%{public}d %{public}s] netId[%{public}d] score[%{public}d] "
             "reqId[%{public}u]",
             bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore, reqId);

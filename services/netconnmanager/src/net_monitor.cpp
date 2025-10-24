@@ -134,7 +134,8 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         result = VERIFICATION_STATE;
         detectionDelay_ = 0;
     } else if (probeResult.GetCode() == SIM_PORTAL_CODE && netBearType_ == BEARER_CELLULAR) {
-        NETMGR_LOG_E("Net[%{public}d] probe failed with 302 response on Cell", netId_);
+        HILOG_COMM_IMPL(LOG_ERROR, LOG_DOMAIN, LOG_TAG,
+            "Net[%{public}d] probe failed with 302 response on Cell", netId_);
         detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
         result = CAPTIVE_PORTAL_STATE;
     } else if (probeResult.IsNeedPortal()) {
