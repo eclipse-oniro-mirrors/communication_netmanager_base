@@ -772,6 +772,16 @@ HWTEST_F(NetsysNativeServiceProxyTest, UpdateEnterpriseRouteTest003, TestSize.Le
 }
 #endif
 
+HWTEST_F(NetsysNativeServiceProxyTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint8_t family = 2;
+    std::string ip = "1.1.1.1";
+    int32_t ret = netsysNativeService->SetInternetAccessByIpForWifiShare(ip, family, true, "");
+    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
+
 HWTEST_F(NetsysNativeServiceProxyTest, GetIpNeighTable001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
