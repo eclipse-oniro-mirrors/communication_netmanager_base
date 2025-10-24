@@ -80,6 +80,7 @@ private:
     int32_t OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNicTrafficAllowed(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply);
 
 private:
     void HandleStoreNetworkPolicy(uint32_t uid, NetworkAccessPolicy &policy,

@@ -840,8 +840,11 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
         context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
     }
-
-    int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
+    struct addrinfo hints = {};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    int status = getaddrinfo_ext(context->host_.c_str(), nullptr, &hints, &res, &param);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
                              status);

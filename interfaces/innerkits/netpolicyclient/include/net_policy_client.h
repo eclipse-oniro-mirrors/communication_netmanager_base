@@ -340,6 +340,17 @@ public:
      */
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status);
 
+    /**
+     * Set internet access policy by sta ip for wifi hotpot
+     *
+     * @param ipAddr sta ip addr
+     * @param family ipv4 or ipv6
+     * @param accessInternet true for allowed, false for disallowed
+     * @param clientNetIfName sta interface name, default as null
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetInternetAccessByIpForWifiShare(
+        const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName = "");
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

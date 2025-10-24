@@ -116,7 +116,11 @@ RetNetAddressArr CJ_GetAddressesByName(int32_t netId, const char *host)
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netId;
-    int status = getaddrinfo_ext(host, nullptr, nullptr, &res, &param);
+    struct addrinfo hints = {};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    int status = getaddrinfo_ext(host, nullptr, &hints, &res, &param);
     if (status < 0) {
         ret.code = TransErrorCode(errno);
         NETMANAGER_BASE_LOGE("getaddrinfo_ext errno %{public}d %{public}s", errno, strerror(errno));

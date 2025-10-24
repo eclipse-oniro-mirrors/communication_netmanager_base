@@ -23,6 +23,8 @@
 #include "net_stats_notification.h"
 #include "net_stats_utils.h"
 #include "net_stats_rdb.h"
+#include "net_stats_service.h"
+#include "net_stats_settings_observer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -122,6 +124,13 @@ HWTEST_F(NetStatsNotificationTest, GetMonthNotificationTextTest001, TestSize.Lev
     ret = notification.GetMonthNotificationText();
     EXPECT_TRUE(ret.empty());
     notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = temp;
+    ret = notification.GetMonthNotificationText();
+    EXPECT_TRUE(ret.empty());
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    notification.resourceMap[KEY_MONTH_NOTIFY_TEXT] = temp;
+    std::shared_ptr<TrafficDataObserver> observer = std::make_shared<TrafficDataObserver>(0);
+    std::shared_ptr<TrafficSettingsInfo> settingsInfo = std::make_shared<TrafficSettingsInfo>();
+    netStatsService->settingsTrafficMap_.insert(std::make_pair(0, std::make_pair(observer, settingsInfo)));
     ret = notification.GetMonthNotificationText();
     EXPECT_TRUE(ret.empty());
 }

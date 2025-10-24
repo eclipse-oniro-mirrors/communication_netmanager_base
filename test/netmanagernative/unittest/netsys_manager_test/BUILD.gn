@@ -24,6 +24,7 @@ ohos_unittest("netsys_native_manager_test") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
     "clat_manager_test.cpp",
     "dhcp_result_parcel_test.cpp",
     "dns_manager_test.cpp",

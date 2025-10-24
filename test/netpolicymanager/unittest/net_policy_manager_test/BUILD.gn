@@ -26,6 +26,7 @@ ohos_unittest("net_policy_manager_test") {
 
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode/common_mock_netmanager_permission.cpp",
     "net_policy_callback_proxy_test.cpp",
     "net_policy_callback_test.cpp",
     "net_policy_exception_service_test.cpp",

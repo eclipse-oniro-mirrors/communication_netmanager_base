@@ -35,5 +35,12 @@ bool NetManagerPermission::IsSystemCaller()
     NETMGR_LOG_D("Is conn caller.");
     return true;
 }
+
+bool NetManagerPermission::CheckNetSysInternalPermission(const std::string &permissionName)
+{
+    NETMGR_LOG_D("permissionName: %{public}s", permissionName.c_str());
+    return true;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

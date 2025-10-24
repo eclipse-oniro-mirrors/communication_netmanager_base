@@ -1045,6 +1045,8 @@ public:
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
     int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add);
 #endif
+    int32_t SetInternetAccessByIpForWifiShare(
+        const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);

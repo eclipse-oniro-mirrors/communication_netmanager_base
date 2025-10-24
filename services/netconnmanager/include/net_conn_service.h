@@ -670,6 +670,7 @@ private:
     std::recursive_mutex uidLostDelayMutex_;
     std::set<uint32_t> uidLostDelaySet_;
     SafeMap<int32_t, bool> notifyLostDelayCache_;
+    ffrt::shared_mutex defaultNetSupplierMutex_;
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
     std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> netPACManager_;
     std::mutex netPacManagerMutex_;

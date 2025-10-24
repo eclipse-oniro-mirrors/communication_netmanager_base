@@ -353,8 +353,9 @@ bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
 
 int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
 {
-    NETMGR_LOG_I("Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId,
-                 supplierId_, netSupplierIdent_.c_str());
+    HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
+        "Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId,
+        supplierId_, netSupplierIdent_.c_str());
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         requestList_.insert(netrequest.requestId);
     }

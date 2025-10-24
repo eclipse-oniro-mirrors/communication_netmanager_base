@@ -3960,5 +3960,60 @@ int32_t NetsysNativeServiceProxy::UpdateEnterpriseRoute(const std::string &inter
     return ret;
 }
 #endif
+
+int32_t NetsysNativeServiceProxy::SetInternetAccessByIpForWifiShare(
+    const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
+{
+    NETNATIVE_LOG_D("Begin to SetInternetAccessByIpForWifiShare");
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(ipAddr)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteString ipAddr failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(family)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteUint8 family failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(accessInternet)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteBool accessInternet failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(clientNetIfName)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteString clientNetIfName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in SetInternetAccessByIpForWifiShare");
+        return ERR_FLATTEN_OBJECT;
+    }
+    // LCOV_EXCL_STOP
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = Remote()->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare SendRequest failed, error code: [%{public}d]", err);
+        return IPC_INVOKER_ERR;
+    }
+ 
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare ReadInt32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -51,9 +51,13 @@ impl JsonValue<'_> {
     }
 
     pub fn stringify(&self, env: &AniEnv) -> Result<String, AniError> {
-        let cls = env.find_class(Self::TOOL_CLASS_NAME)?;
-        let stringify_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"stringifyNoThrow\0") };
-        let method = env.find_static_method(&cls, stringify_name)?;
+        const JSON_TOOL_CLASS_NAME: &'static CStr = unsafe {
+            CStr::from_bytes_with_nul_unchecked(b"escompat.JSON\0")
+        };
+        let cls = env.find_class(JSON_TOOL_CLASS_NAME)?;
+        let stringify_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"stringify\0") };
+        let stringify_signature = unsafe { CStr::from_bytes_with_nul_unchecked(b"C{std.core.Object}:C{std.core.String}\0") };
+        let method = env.find_static_method_with_signature(&cls, stringify_name, stringify_signature)?;
 
         let param = self.0.as_raw();
         let res = env.call_static_method_ref(&cls, &method, (param,))?;

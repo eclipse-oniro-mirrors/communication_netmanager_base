@@ -214,6 +214,8 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NET_FIREWALL_UNREGISTER)] =
         &NetsysNativeServiceStub::CmdUnRegisterNetFirewallCallback;
 #endif
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE)] =
+        &NetsysNativeServiceStub::CmdSetInternetAccessByIpForWifiShare;
 }
 
 #ifdef SUPPORT_SYSVPN
@@ -2740,5 +2742,46 @@ int32_t NetsysNativeServiceStub::CmdUpdateEnterpriseRoute(MessageParcel &data, M
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 #endif
+
+int32_t NetsysNativeServiceStub::CmdSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetInternetAccessByIpForWifiShare CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string ipAddr;
+    if (!data.ReadString(ipAddr)) {
+        NETNATIVE_LOGE("CmdSetInternetAccessByIpForWifiShare read ipAddr failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint8_t family = 0;
+    if (!data.ReadUint8(family)) {
+        NETNATIVE_LOGE("CmdSetInternetAccessByIpForWifiShare read family failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    bool accessInternet = 0;
+    if (!data.ReadBool(accessInternet)) {
+        NETNATIVE_LOGE("CmdSetInternetAccessByIpForWifiShare read accessInternet failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string clientNetIfName;
+    if (!data.ReadString(clientNetIfName)) {
+        NETNATIVE_LOGE("CmdSetInternetAccessByIpForWifiShare read clientNetIfName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetInternetAccessByIpForWifiShare result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+ 
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace NetsysNative
 } // namespace OHOS

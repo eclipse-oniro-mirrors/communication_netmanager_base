@@ -44,7 +44,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace CommonUtils {
-std::string ToAnonymousIp(const std::string &input)
+std::string ToAnonymousIp(const std::string &input, bool maskMiddle)
 {
     return input;
 }
