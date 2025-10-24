@@ -1772,18 +1772,18 @@ int32_t NetsysController::UpdateEnterpriseRoute(const std::string &interfaceName
 }
 #endif
 
-int32_t NetsysController::SetInternetAccessByIpForWifiShare(	
+int32_t NetsysController::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
-{	
-    if (family != AF_INET && family != AF_INET6) {	
+{
+    if (family != AF_INET && family != AF_INET6) {
         NETMGR_LOG_E("family not support %{public}d", family);
         return NETSYS_PARAM_ERROR;
     }
-    if (netsysService_ == nullptr) {	
-        NETMGR_LOG_E("netsysService_ is null");	
-        return NETSYS_NETSYSSERVICE_NULL;	
-    }	
-    return netsysService_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);	
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
 
 int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
