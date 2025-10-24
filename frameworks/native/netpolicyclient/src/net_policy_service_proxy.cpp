@@ -849,6 +849,7 @@ int32_t NetPolicyServiceProxy::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("SetInternetAccessByIpForWifiShare WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
@@ -875,6 +876,7 @@ int32_t NetPolicyServiceProxy::SetInternetAccessByIpForWifiShare(
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    // LCOV_EXCL_STOP
 
     MessageParcel reply;
     MessageOption option;

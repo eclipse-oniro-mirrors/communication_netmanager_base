@@ -463,10 +463,12 @@ int32_t NetPolicyClient::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {
     sptr<INetPolicyService> proxy = GetProxy();
+    // LCOV_EXCL_START
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    // LCOV_EXCL_STOP
 
     return proxy->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }

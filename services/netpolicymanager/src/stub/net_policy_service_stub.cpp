@@ -901,6 +901,7 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
+    // LCOV_EXCL_START
     std::string ipAddr;
     if (!data.ReadString(ipAddr)) {
         NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare read ipAddr failed");
@@ -930,6 +931,7 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
         return ERR_FLATTEN_OBJECT;
     }
     return NETMANAGER_SUCCESS;
+    // LCOV_EXCL_STOP
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

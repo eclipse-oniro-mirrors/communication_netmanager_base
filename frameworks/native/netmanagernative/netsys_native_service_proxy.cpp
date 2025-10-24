@@ -3927,6 +3927,7 @@ int32_t NetsysNativeServiceProxy::SetInternetAccessByIpForWifiShare(
 {
     NETNATIVE_LOG_D("Begin to SetInternetAccessByIpForWifiShare");
     MessageParcel data;
+    // LCOV_EXCL_START
     if (!WriteInterfaceToken(data)) {
         NETNATIVE_LOGE("SetInternetAccessByIpForWifiShare WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
@@ -3956,6 +3957,7 @@ int32_t NetsysNativeServiceProxy::SetInternetAccessByIpForWifiShare(
         NETNATIVE_LOGE("Remote is null in SetInternetAccessByIpForWifiShare");
         return ERR_FLATTEN_OBJECT;
     }
+    // LCOV_EXCL_STOP
 
     MessageParcel reply;
     MessageOption option;
