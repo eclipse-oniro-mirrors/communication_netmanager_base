@@ -45,6 +45,10 @@
 #include "netextattribute_context.h"
 #include "getipneightable_context.h"
 
+#define DECLARE_WRITABLE_NAPI_FUNCTION(name, func)                                  \
+    {                                                                               \
+        (name), nullptr, (func), nullptr, nullptr, nullptr, napi_writable, nullptr  \
+    }
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
 static constexpr size_t MAX_ROUTE_LENGTH = 1024;
