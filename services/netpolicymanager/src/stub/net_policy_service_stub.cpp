@@ -158,6 +158,14 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             return NETMANAGER_ERR_INTERNAL;
         }
     }
+    
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE) &&
+        uid != UID_COLLABORATION) {
+        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         int32_t checkPermissionResult = CheckPolicyPermission(code);
@@ -892,12 +900,6 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare CheckNetSysInternalPermission failed");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (uid != UID_COLLABORATION) {
-        NETMGR_LOG_E("OnSetInternetAccessByIpForWifiShare CheckUidPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
