@@ -230,7 +230,7 @@ public:
     virtual int32_t UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add) = 0;
 #endif
     virtual int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo) = 0;
-    virtual int32_t SetInternetAccessByIpForWifiShare(	
+    virtual int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
