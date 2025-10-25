@@ -374,6 +374,8 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
         &NetsysNativeServiceStub::CmdUpdateIfIndexMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NET_STATUS_MAP)] =
         &NetsysNativeServiceStub::CmdSetNetStatusMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE)] =
+        &NetsysNativeServiceStub::CmdGetIpNeighTable;
 }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
@@ -1997,6 +1999,30 @@ int32_t NetsysNativeServiceStub::CmdDelStaticIpv6Addr(MessageParcel &data, Messa
     }
     NETNATIVE_LOG_D("CmdDelStaticIpv6Addr has recved result %{public}d", result);
 
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetIpNeighTable(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<OHOS::NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    int32_t result = GetIpNeighTable(ipMacInfo);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        uint32_t size = static_cast<uint32_t>(ipMacInfo.size());
+        if (!reply.WriteUint32(size)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        for (auto p = ipMacInfo.begin(); p != ipMacInfo.end(); ++p) {
+            sptr<NetIpMacInfo> info_ptr = sptr<NetIpMacInfo>::MakeSptr(*p);
+            if (!NetIpMacInfo::Marshalling(reply, info_ptr)) {
+                NETMGR_LOG_E("proxy Marshalling failed");
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
+        }
+    }
     return result;
 }
 

@@ -1410,5 +1410,13 @@ HWTEST_F(NetsysNativeServiceStubTest, SetInternetAccessByIpForWifiShare001, Test
     ret = notifyStub_->CmdSetInternetAccessByIpForWifiShare(errData, reply);
     EXPECT_EQ(ret, 3);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetIpNeighTable001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetIpNeighTable(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

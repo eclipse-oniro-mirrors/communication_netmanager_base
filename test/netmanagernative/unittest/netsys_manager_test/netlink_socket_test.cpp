@@ -21,7 +21,8 @@
 #endif
 
 #include "net_manager_constants.h"
-#include "netlink_socket.cpp"
+#include "netlink_socket.h"
+#include "netlink_msg.h"
 
 namespace OHOS {
 namespace nmd {
@@ -99,6 +100,166 @@ HWTEST_F(NetlinkSocketTest, GetRoutePropertyTest001, TestSize.Level1)
     int32_t property = 0;
     auto ret = GetRouteProperty(nullptr, property);
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, MacArrayToStringTest001, TestSize.Level1)
+{
+    uint8_t macArray[] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
+    std::string result = MacArrayToString(macArray);
+    EXPECT_EQ(result, "00:11:22:33:44:55");
+}
+
+HWTEST_F(NetlinkSocketTest, MacArrayToStringTest002, TestSize.Level1)
+{
+    uint8_t* macArray = nullptr;
+    std::string result = MacArrayToString(macArray);
+    EXPECT_EQ(result, "");
+}
+
+HWTEST_F(NetlinkSocketTest, MacArrayToStringTest003, TestSize.Level1)
+{
+    const uint8_t mac[] = {};
+    std::string result = MacArrayToString(mac);
+    EXPECT_EQ(result, "00:00:00:00:00:00");
+}
+
+HWTEST_F(NetlinkSocketTest, MacArrayToStringTest004, TestSize.Level1)
+{
+    const uint8_t mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    std::string result = MacArrayToString(mac);
+    EXPECT_EQ(result, "00:00:00:00:00:00");
+}
+
+HWTEST_F(NetlinkSocketTest, MacArrayToStringTest005, TestSize.Level1)
+{
+    const uint8_t mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    std::string result = MacArrayToString(mac);
+    EXPECT_EQ(result, "00:00:00:00:00:00");
+}
+
+HWTEST_F(NetlinkSocketTest, ReceiveMsgFromKernelTest001, TestSize.Level1)
+{
+    uint32_t table = 0;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    auto ret = ReceiveMsgFromKernel(nullptr, table, reinterpret_cast<void*>(&ipMacInfo));
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, ReceiveMsgFromKernelTest002, TestSize.Level1)
+{
+    uint32_t table = 0;
+    struct nlmsghdr netlinkMessage;
+    auto ret = ReceiveMsgFromKernel(&netlinkMessage, table, nullptr);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, ReceiveMsgFromKernelTest003, TestSize.Level1)
+{
+    uint32_t table = 0;
+    auto ret = ReceiveMsgFromKernel(nullptr, table, nullptr);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, ReceiveMsgFromKernelTest004, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nmd::NetlinkMsg nlmsg(NLM_F_ACK, nmd::NETLINK_MAX_LEN, 0);
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    auto ret = ReceiveMsgFromKernel(nlmsg.GetNetLinkMessage(), table, reinterpret_cast<void*>(&ipMacInfo));
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, DealRcvMsgFromKernelTest001, TestSize.Level1)
+{
+    uint16_t type = 0;
+    uint32_t table = 0;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    DealRcvMsgFromKernel(nullptr, type, table, reinterpret_cast<void*>(&ipMacInfo));
+    EXPECT_EQ(type, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealRcvMsgFromKernelTest002, TestSize.Level1)
+{
+    uint16_t type = 0;
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    DealRcvMsgFromKernel(&nlmsgHeader, type, table, nullptr);
+    EXPECT_EQ(type, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealRcvMsgFromKernelTest003, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    nlmsgHeader.nlmsg_type = RTM_GETRULE;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfo;
+    DealRcvMsgFromKernel(&nlmsgHeader, RTM_GETRULE, table, reinterpret_cast<void*>(&ipMacInfo));
+    EXPECT_EQ(table, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest001, TestSize.Level1)
+{
+    uint16_t type = 0;
+    uint32_t table = 0;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(nullptr, type, table, ipMacInfoVec);
+    EXPECT_EQ(type, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest002, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    nlmsgHeader.nlmsg_type = RTM_GETRULE;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(&nlmsgHeader, nlmsgHeader.nlmsg_type, table, ipMacInfoVec);
+    EXPECT_EQ(table, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest003, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    nlmsgHeader.nlmsg_type = RTM_NEWNEIGH;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(&nlmsgHeader, nlmsgHeader.nlmsg_type, table, ipMacInfoVec);
+    EXPECT_EQ(table, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest004, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    nlmsgHeader.nlmsg_type = RTM_DELNEIGH;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(&nlmsgHeader, nlmsgHeader.nlmsg_type, table, ipMacInfoVec);
+    EXPECT_EQ(table, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest005, TestSize.Level1)
+{
+    uint32_t table = 0;
+    nlmsghdr nlmsgHeader;
+    nlmsgHeader.nlmsg_type = RTM_GETNEIGH;
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(&nlmsgHeader, nlmsgHeader.nlmsg_type, table, ipMacInfoVec);
+    EXPECT_EQ(table, 0);
+}
+
+HWTEST_F(NetlinkSocketTest, DealNeighInfoTest006, TestSize.Level1)
+{
+    uint32_t table = 0;
+    const size_t bufferSize = NLMSG_SPACE(sizeof(struct ndmsg));
+    char buffer[bufferSize] = {0};
+    nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr*>(buffer);
+    nlmsgHeader->nlmsg_type = RTM_GETNEIGH;
+    ndmsg *ndm = reinterpret_cast<ndmsg *>(NLMSG_DATA(&nlmsgHeader));
+    ndm->ndm_type = RTN_UNICAST;
+
+    std::vector<NetManagerStandard::NetIpMacInfo> ipMacInfoVec;
+    DealNeighInfo(nlmsgHeader, nlmsgHeader->nlmsg_type, table, ipMacInfoVec);
+    EXPECT_EQ(table, 0);
 }
 } // namespace nmd
 } // namespace OHOS

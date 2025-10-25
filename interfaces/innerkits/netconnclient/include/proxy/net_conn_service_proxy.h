@@ -116,6 +116,7 @@ public:
         const std::string &ifName) override;
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
+    int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);

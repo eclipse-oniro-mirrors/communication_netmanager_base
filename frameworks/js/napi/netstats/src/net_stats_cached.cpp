@@ -884,6 +884,7 @@ void NetStatsCached::CacheIptablesStats()
         NETMGR_LOG_I("GetTrafficBytes err, ret[%{public}d]", ret);
         return;
     }
+    NETMGR_LOG_I("CacheIptablesStats traffic all=%{public}" PRId64, traffic.all);
     CacheIptablesStatsService(traffic, ifaceName);
 }
 

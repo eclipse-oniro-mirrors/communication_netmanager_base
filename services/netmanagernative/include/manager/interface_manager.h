@@ -22,6 +22,7 @@
 #include <vector>
 #include "net/if_arp.h"
 #include "netlink_msg.h"
+#include "net_ip_mac_info.h"
 
 namespace OHOS {
 namespace nmd {
@@ -129,6 +130,7 @@ public:
     static int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName);
     static int32_t SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on);
+    static int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo);
 
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);

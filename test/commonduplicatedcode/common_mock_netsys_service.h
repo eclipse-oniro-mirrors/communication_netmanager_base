@@ -205,6 +205,7 @@ public:
     MOCK_METHOD(int32_t, SetInternetAccessByIpForWifiShare,
         (const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName),
         (override));
+    MOCK_METHOD(int32_t, GetIpNeighTable, (std::vector<NetIpMacInfo> &ipMacInfo));
 };
 } // NetsysNative
 } // OHOS

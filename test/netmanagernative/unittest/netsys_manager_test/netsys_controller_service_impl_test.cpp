@@ -992,5 +992,12 @@ HWTEST_F(NetsysControllerServiceImplTest, CreateVnic001, TestSize.Level1)
     int32_t ret = netsysControllerServiceImpl->CreateVnic(1400, tunAddr, 0, uids);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, GetIpNeighTableTest001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
+    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

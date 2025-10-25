@@ -1785,5 +1785,15 @@ int32_t NetsysController::SetInternetAccessByIpForWifiShare(
     }
     return netsysService_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
+
+int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETMGR_LOG_D("GetIpNeighTable");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetIpNeighTable(ipMacInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

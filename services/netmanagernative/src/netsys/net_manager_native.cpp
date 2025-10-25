@@ -647,6 +647,17 @@ int32_t NetManagerNative::DelStaticIpv6Addr(const std::string &ipAddr, const std
     return interfaceManager_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
 }
 
+int32_t NetManagerNative::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETNATIVE_LOGI("GetIpNeighTable");
+    if (interfaceManager_ == nullptr) {
+        NETNATIVE_LOGE("interfaceManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return interfaceManager_->GetIpNeighTable(ipMacInfo);
+}
+
 int32_t NetManagerNative::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return dnsManager_->RegisterDnsResultCallback(callback, timeStep);

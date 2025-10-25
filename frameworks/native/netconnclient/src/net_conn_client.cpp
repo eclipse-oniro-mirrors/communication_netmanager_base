@@ -1534,5 +1534,15 @@ void NetConnClient::RecoverCallbackAndGlobalProxy(NetConnCallbackManagerMap& net
         NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
     }
 }
+
+int32_t NetConnClient::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetIpNeighTable(ipMacInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

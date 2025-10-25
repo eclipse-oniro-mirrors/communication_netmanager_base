@@ -43,6 +43,7 @@
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
 #include "netextattribute_context.h"
+#include "getipneightable_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -60,6 +61,8 @@ public:
     static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
 
     static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
+
+    static napi_value CreateIpNeighTable(napi_env env, const NetIpMacInfo &ipNeighTable);
 
     static bool ExecGetDefaultNet(GetDefaultNetContext *context);
 
@@ -205,6 +208,10 @@ public:
 
     static napi_value FindProxyForUrlCallback(FindPacFileUrlContext *context);
 
+    static bool ExecGetIpNeighTable(GetIpNeighTableContext *context);
+
+    static napi_value GetIpNeighTableCallback(GetIpNeighTableContext *context);
+
     class NetHandleExec final {
     public:
         NetHandleExec() = delete;
@@ -265,6 +272,8 @@ private:
     static void FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 
     static void FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
+
+    static void FillNetAddressInfo(napi_env env, napi_value jsNetAddress, const NetIpMacInfo &ipNeighTable);
 };
 
 extern std::mutex g_predefinedHostMtx;

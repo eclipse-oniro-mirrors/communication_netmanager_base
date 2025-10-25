@@ -1694,6 +1694,17 @@ int32_t NetsysNativeClient::DelStaticIpv6Addr(const std::string &ipAddr, const s
     return proxy->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
 }
 
+int32_t NetsysNativeClient::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    NETMGR_LOG_D("get ip neigh table");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetIpNeighTable(ipMacInfo);
+}
+
 int32_t NetsysNativeClient::RegisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
 {

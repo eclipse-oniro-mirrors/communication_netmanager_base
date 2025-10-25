@@ -432,6 +432,7 @@ public:
         std::shared_ptr<IDualStackProbeCallback>& callback, bool isReg);
     int32_t DualStackProbe(uint32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
+    int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

@@ -24,6 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_IFACE_NUM = 16;
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+static constexpr uint32_t MAX_IP_NEIGH_TABLE_SIZE = 1024;
 
 NetConnServiceProxy::NetConnServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetConnService>(impl) {}
 
@@ -2167,6 +2168,43 @@ int32_t NetConnServiceProxy::SetNetExtAttribute(int32_t netId, const std::string
     }
 
     return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        uint32_t size;
+        if (!reply.ReadUint32(size)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        size = (size > MAX_IP_NEIGH_TABLE_SIZE) ? MAX_IP_NEIGH_TABLE_SIZE : size;
+        for (uint32_t i = 0; i <size; ++i) {
+            sptr<NetIpMacInfo> infoPtr =  NetIpMacInfo::Unmarshalling(reply);
+            if (infoPtr == nullptr) {
+                ipMacInfo.clear();
+                return NETMANAGER_ERR_READ_REPLY_FAIL;
+            }
+            ipMacInfo.push_back(*infoPtr);
+        }
+    }
+    return ret;
 }
 
 } // namespace NetManagerStandard

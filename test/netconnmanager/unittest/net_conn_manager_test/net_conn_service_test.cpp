@@ -2180,5 +2180,12 @@ HWTEST_F(NetConnServiceTest, UpdateNetProbeTime001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetIpNeighTableTest001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    auto ret = NetConnService::GetInstance()->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

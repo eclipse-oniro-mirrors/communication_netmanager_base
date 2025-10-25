@@ -592,5 +592,12 @@ HWTEST_F(InterfaceManagerTest, SetIpv6AutoConfTest004, TestSize.Level1)
     auto ret = InterfaceManager::SetIpv6AutoConf(ifaceName, on);
     EXPECT_TRUE(ret == 0 || ret == -1);
 }
+
+HWTEST_F(InterfaceManagerTest, GetIpNeighTableTest003, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = InterfaceManager::GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS

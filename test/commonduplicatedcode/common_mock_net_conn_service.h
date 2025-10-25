@@ -124,6 +124,7 @@ public:
         const std::string &ifName));
     MOCK_METHOD(int32_t, DelStaticIpv6Addr, (const std::string &ipAddr, const std::string &macAddr,
         const std::string &ifName));
+    MOCK_METHOD(int32_t, GetIpNeighTable, (std::vector<NetIpMacInfo> &ipMacInfo));
 };
  
 }  // namespace NetManagerStandard

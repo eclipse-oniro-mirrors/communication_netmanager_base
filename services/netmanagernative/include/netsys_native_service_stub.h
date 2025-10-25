@@ -202,6 +202,7 @@ private:
     int32_t CmdUpdateEnterpriseRoute(MessageParcel &data, MessageParcel &reply);
 #endif
     int32_t CmdSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetIpNeighTable(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

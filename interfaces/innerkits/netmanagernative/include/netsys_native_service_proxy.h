@@ -188,6 +188,7 @@ public:
 #endif
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
+    int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

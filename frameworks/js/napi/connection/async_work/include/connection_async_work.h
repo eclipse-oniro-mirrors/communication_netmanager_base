@@ -146,6 +146,10 @@ public:
 
     static void SetNetExtAttributeCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetIpNeighTable(napi_env env, void *data);
+
+    static void GetIpNeighTableCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

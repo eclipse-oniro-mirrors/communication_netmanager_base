@@ -157,6 +157,7 @@ enum class NetsysInterfaceCode {
     NETSYS_UPDATE_ENTERPRISE_ROUTE,
 #endif
     NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE,
+    NETSYS_GET_IP_NEIGH_TABLE,
 };
 
 enum class NotifyInterfaceCode {

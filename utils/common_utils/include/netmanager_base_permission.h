@@ -35,6 +35,7 @@ static constexpr const char *SET_PAC_URL = "ohos.permission.SET_PAC_URL";
 static constexpr const char *SET_NET_EXT_ATTRIBUTE = "ohos.permission.SET_NET_EXT_ATTRIBUTE";
 static constexpr const char *GET_NETWORK_LOCATION = "ohos.permission.LOCATION";
 static constexpr const char *ACCESS_NET_TRACE_INFO = "ohos.permission.ACCESS_TRACE_ROUTE_INFO";
+static constexpr const char *GET_IP_MAC_INFO = "ohos.permission.GET_IP_MAC_INFO";
 } // namespace Permission
 
 class NetManagerPermission {

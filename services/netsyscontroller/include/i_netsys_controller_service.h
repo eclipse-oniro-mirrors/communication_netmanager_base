@@ -1033,6 +1033,7 @@ public:
 #endif
     virtual int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) = 0;
+    virtual int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

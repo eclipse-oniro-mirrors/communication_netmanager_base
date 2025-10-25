@@ -257,6 +257,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE, GetNetExtAttribute),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
         DEFINE_PAC_FUNCTIONS
     };
     return functions;
@@ -553,6 +554,12 @@ napi_value ConnectionModule::SetNetInterfaceIpAddress(napi_env env, napi_callbac
     return ModuleTemplate::Interface<SetInterfaceIpAddrContext>(env, info, FUNCTION_SET_INTERFACE_IP_ADDRESS, nullptr,
                                                                 ConnectionAsyncWork::ExecSetInterfaceIpAddr,
                                                                 ConnectionAsyncWork::SetInterfaceIpAddrCallback);
+}
+
+napi_value ConnectionModule::GetIpNeighTable(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetIpNeighTableContext>(env, info, FUNCTION_GET_IP_NEIGH_TABLE, nullptr,
+        ConnectionAsyncWork::ExecGetIpNeighTable, ConnectionAsyncWork::GetIpNeighTableCallback);
 }
 
 napi_value ConnectionModule::AddNetworkRoute(napi_env env, napi_callback_info info)

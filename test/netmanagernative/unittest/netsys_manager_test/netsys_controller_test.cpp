@@ -1871,7 +1871,6 @@ HWTEST_F(NetsysControllerTest, FlushDnsCache002, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
-
     std::string ipAddr = "1.1.1.1";
     uint8_t family = 0;
     bool accessInternet = true;
@@ -1890,6 +1889,27 @@ HWTEST_F(NetsysControllerTest, SetInternetAccessByIpForWifiShare001, TestSize.Le
     netsysController->netsysService_ = netsysControllerServiceImpl;
     res = netsysController->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
     EXPECT_EQ(res, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetIpNeighTable001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = netsysController->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetIpNeighTable002, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -782,5 +782,13 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetInternetAccessByIpForWifiShare001, Tes
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, GetIpNeighTable001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::vector<NetIpMacInfo> ipMacInfo;
+    int32_t ret = netsysNativeService->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

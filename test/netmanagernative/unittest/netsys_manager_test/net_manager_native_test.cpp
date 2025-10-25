@@ -272,5 +272,20 @@ HWTEST_F(NetManagerNativeTest, DelStaticIpv6AddrTest002, TestSize.Level1)
     auto ret = instance_->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetManagerNativeTest, GetIpNeighTable001, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, GetIpNeighTable002, TestSize.Level1)
+{
+    std::vector<NetIpMacInfo> ipMacInfo;
+    auto ret = instance_->GetIpNeighTable(ipMacInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS

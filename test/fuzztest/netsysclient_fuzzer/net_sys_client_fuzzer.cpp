@@ -1657,6 +1657,15 @@ void CmdSetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t si
         dataParcel);
 }
 
+void CmdGetIpNeighTableFuzzTest(data, size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1721,6 +1730,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdAddStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdSetInternetAccessByIpForWifiShareFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdGetIpNeighTableFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

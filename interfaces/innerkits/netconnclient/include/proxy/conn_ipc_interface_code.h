@@ -99,6 +99,7 @@ enum class ConnInterfaceCode {
     CMD_NM_QUERY_TRACEROUTE,
     CMD_NM_ADD_STATIC_IPV6,
     CMD_NM_DEL_STATIC_IPV6,
+    CMD_NM_GET_IP_NEIGH_TABLE,
 };
 
 enum class AdjCallbackInterfaceCode {

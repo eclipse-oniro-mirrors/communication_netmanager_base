@@ -521,6 +521,7 @@ public:
     int32_t SetNetExtAttribute(const NetHandle &netHandle, const std::string &netExtAttribute);
     int32_t AddStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr, const std::string &ifName);
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr, const std::string &ifName);
+    int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo);
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
