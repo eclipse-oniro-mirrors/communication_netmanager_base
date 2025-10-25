@@ -649,10 +649,10 @@ public:
         return 0;
     }
 #endif
-    int32_t SetInternetAccessByIpForWifiShare(	
+    int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override
-    {	
-        return 0;	
+    {
+        return 0;
     }
 
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override
