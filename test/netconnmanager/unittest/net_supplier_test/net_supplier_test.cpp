@@ -96,6 +96,20 @@ HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
     EXPECT_TRUE(supplier->network_ != nullptr);
 }
 
+HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest002, TestSize.Level1)
+{
+    NetSupplierInfo netSupplierInfo{};
+    netSupplierInfo.isMetered_ = true;
+    supplier->network_ = std::make_shared<Network>(0, 0, nullptr, BEARER_CELLULAR, nullptr);
+    netSupplierInfo.isAvailable_ = !(supplier->netSupplierInfo_.isAvailable_);
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+    EXPECT_FALSE(supplier->HasNetCap(NET_CAPABILITY_NOT_METERED));
+    netSupplierInfo.isMetered_ = false;
+    netSupplierInfo.isAvailable_ = !(supplier->netSupplierInfo_.isAvailable_);
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+    EXPECT_TRUE(supplier->HasNetCap(NET_CAPABILITY_NOT_METERED));
+}
+
 HWTEST_F(NetSupplierTest, UpdateNetLinkInfoTest001, TestSize.Level1)
 {
     NetLinkInfo netLinkInfo{};
