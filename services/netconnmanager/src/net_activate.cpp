@@ -309,6 +309,11 @@ void NetActivate::SetNotifyLostDelay(bool isNotifyLostDelay)
     isNotifyLostDelay_ = isNotifyLostDelay;
 }
 
+void NetActivate::SetFrozenedNotifyLostDelay(bool isNotifyLostDelay)
+{
+    isFrozenedNotifyLostDelay_ = isNotifyLostDelay;
+}
+
 void NetActivate::SetNotifyLostNetId(int32_t notifyLostNetId)
 {
     std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
@@ -325,6 +330,11 @@ bool NetActivate::GetNotifyLostDelay()
 {
     std::unique_lock<std::recursive_mutex> lock(notifyLostMutex_);
     return isNotifyLostDelay_;
+}
+
+bool NetActivate::GetFrozenedNotifyLostDelay()
+{
+    return isFrozenedNotifyLostDelay_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1442,11 +1442,16 @@ void NetConnClient::NetConnCallbackManager::PostTriggerNetChange(const sptr<INet
         if (netLinkInfo != nullptr) {
             callback->NetConnectionPropertiesChange(tempNetHandler, netLinkInfo);
         }
+    } else {
+        callback->NetUnavailable();
     }
 }
  
 int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INetConnCallback>& callback)
 {
+    if (callback == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     std::unique_lock<std::shared_mutex> lock(netConnCallbackListMutex_);
     for (auto& cb : netConnCallbackList_) {
         if (cb == callback) {
@@ -1455,9 +1460,6 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
     }
     netConnCallbackList_.push_back(callback);
     lock.unlock();
-    if (netHandle_ == nullptr) {
-        return NETMANAGER_SUCCESS;
-    }
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     sptr<NetHandle> tempNetHandler(netHandle_);
     sptr<NetAllCapabilities> tempNetAllCap(netAllCap_);

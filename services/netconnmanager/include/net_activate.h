@@ -69,6 +69,8 @@ public:
     void SetLastNetid(const int32_t netid);
     void SetNotifyLostDelay(bool isNotifyLostDelay);
     void SetNotifyLostNetId(int32_t notifyLostNetId);
+    void SetFrozenedNotifyLostDelay(bool isNotifyLostDelay);
+    bool GetFrozenedNotifyLostDelay();
     int32_t GetNotifyLostNetId();
     bool GetNotifyLostDelay();
 private:
@@ -96,6 +98,7 @@ private:
     int32_t lastNetId_ = 0;
     std::recursive_mutex notifyLostMutex_;
     std::atomic<bool> isNotifyLostDelay_ = false;
+    std::atomic<bool> isFrozenedNotifyLostDelay_ = false;
     std::atomic<int32_t> notifyLostNetId_ = 0;
 };
 } // namespace NetManagerStandard

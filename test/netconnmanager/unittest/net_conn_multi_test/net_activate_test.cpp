@@ -462,5 +462,10 @@ HWTEST_F(NetActivateTest, NotifyLostDelay, TestSize.Level1)
     EXPECT_EQ(instance_->notifyLostNetId_, 0);
 }
 
+HWTEST_F(NetActivateTest, SetFrozenedNotifyLostDelayTest, TestSize.Level1)
+{
+    instance_->SetFrozenedNotifyLostDelay(true);
+    EXPECT_TRUE(instance_->GetFrozenedNotifyLostDelay());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
