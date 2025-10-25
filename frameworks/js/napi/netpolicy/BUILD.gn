@@ -65,6 +65,7 @@ ohos_shared_library("policy") {
     "src/set_policy_by_uid_context.cpp",
     "src/set_power_save_allow_list_context.cpp",
     "src/update_remind_policy_context.cpp",
+    "src/show_app_net_policy_settings.cpp",
   ]
 
   configs = [ ":policy_config" ]
@@ -80,6 +81,14 @@ ohos_shared_library("policy") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:napi_base_context",
+    "ability_runtime:runtime",
+    "ability_runtime:ui_extension",
+    "ace_engine:ace_uicontent",
   ]
   relative_install_dir = "module/net"
   part_name = "netmanager_base"
