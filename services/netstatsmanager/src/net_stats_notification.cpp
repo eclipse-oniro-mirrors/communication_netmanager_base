@@ -416,8 +416,7 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
     std::string strt = oss.str();
     char* end;
-    double value;
-    value = std::strtod(strt.c_str(), &end);
+    double value = std::strtod(strt.c_str(), &end);
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
     std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
