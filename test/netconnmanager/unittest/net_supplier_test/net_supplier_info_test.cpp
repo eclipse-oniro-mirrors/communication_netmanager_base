@@ -102,6 +102,25 @@ HWTEST_F(NetSupplierInfoTest, UnmarshallingTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UnmarshallingTest001
+ * @tc.desc: Test NetSupplierInfo::UnmarshallingTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSupplierInfoTest, UnmarshallingTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    NetSupplierInfo info;
+    bool isAvailable = false;
+    bool isRoaming = false;
+    uint32_t errMetered = 10;
+    EXPECT_TRUE(data.WriteBool(isAvailable));
+    EXPECT_TRUE(data.WriteBool(isRoaming));
+    EXPECT_TRUE(data.WriteUint32(errMetered));
+
+    EXPECT_EQ(info.Unmarshalling(data), nullptr);
+}
+
+/**
  * @tc.name: ToStringTest
  * @tc.desc: Test NetSupplierInfo::ToString
  * @tc.type: FUNC

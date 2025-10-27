@@ -118,6 +118,11 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
         NETMGR_LOG_E("network_ is nullptr!");
         return;
     }
+    if (netSupplierInfo.isMetered_ == false) {
+        netCaps_.InsertNetCap(NET_CAPABILITY_NOT_METERED);
+    } else {
+        netCaps_.RemoveNetCap(NET_CAPABILITY_NOT_METERED);
+    }
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
