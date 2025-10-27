@@ -37,6 +37,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_utils.h"
 #include "core_service_client.h"
+#include <charconv>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -396,6 +397,11 @@ void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNt
     g_NetMgrStatsLimitNtfCallback = callback;
 }
 
+bool convertToDouble(const std::string& str, double& value) {
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
+}
+
 std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 {
     const char* units[] = {"B", "KB", "MB", "GB", "TB"};
@@ -414,7 +420,9 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
 
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
-    double value = strtoll(oss.str().c_str(), nullptr, 10);
+    std::string strt = oss.str();
+    double value;
+    convertToDouble(strt, value)
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
     std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
