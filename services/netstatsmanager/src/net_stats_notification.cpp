@@ -411,7 +411,6 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     std::map<std::string, std::string> mp = { { "style", style},
                                     { "unit", unit },
                                     { "unitStyle", unitStyle } };
-
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
     std::string strt = oss.str();
