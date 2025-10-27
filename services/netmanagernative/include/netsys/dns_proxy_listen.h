@@ -66,12 +66,12 @@ public:
     auto end() { return DnsSocketHolderBase::end(); }
     auto cbegin() { return DnsSocketHolderBase::cbegin(); }
     auto cend() { return DnsSocketHolderBase::cend(); }
-    auto clear() { return DnsSocketHolderBase::clear(); }
     auto size() { return DnsSocketHolderBase::size(); }
     auto empty() { return DnsSocketHolderBase::empty(); }
     template<typename... Args>
     auto emplace(Args&&... args) -> decltype(DnsSocketHolderBase::emplace(std::forward<Args>(args)...));
     auto erase(iterator position) -> decltype(DnsSocketHolderBase::erase(position));
+    auto clear() -> decltype(DnsSocketHolderBase::clear());
 private:
     constexpr static uint32_t MAX_SOCKET_CAPACITY = 300;
     std::list<iterator> lruCache;
