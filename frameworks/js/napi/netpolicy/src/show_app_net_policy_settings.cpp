@@ -221,7 +221,7 @@ napi_value ShowAppNetPolicySettings(napi_env env, napi_callback_info info)
     want.SetElementName(std::string(SETTINGS_PACKAGE_NAME), std::string(SETTINGS_ABILITY_NAME));
     want.SetParam(std::string(UIEXTENSION_TYPE_KEY), std::string(UIEXTENSION_TYPE_VALUE));
     want.SetParam(std::string(CONTEXT_TYPE_KEY),
-        loadProductContext->uiExtensionContext != nullptr ? 
+        loadProductContext->uiExtensionContext != nullptr ?
         std::string((UI_EXTENSION_CONTEXT_VALUE)) : std::string(UI_ABILITY_CONTEXT_VALUE));
     want.SetParam(std::string(APP_UID), static_cast<long>(currentUid));
     if (!StartUiExtensionAbility(want, loadProductContext)) {
