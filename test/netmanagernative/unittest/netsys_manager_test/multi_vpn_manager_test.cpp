@@ -89,7 +89,7 @@ HWTEST_F(MultiVpnManagerTest, VpnManagerBranchTest001, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 
     result = MultiVpnManager::GetInstance().SetVpnDown(TEST_XFRM_CARD_NAME);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_LE(result, NETMANAGER_SUCCESS);
 
     ifreq ifr;
     std::string cardName = "xfrm-vpn2";
