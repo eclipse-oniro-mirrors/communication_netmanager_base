@@ -397,7 +397,7 @@ void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNt
     g_netMgrStatsLimitNtfCallback = callback;
 }
 
-bool convertToDouble(const std::string& str, double& value)
+bool ConvertToDouble(const std::string& str, double& value)
 {
     auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
     return ec == std::errc{} && ptr == str.data() + str.size();
@@ -423,8 +423,8 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
     std::string strt = oss.str();
     double value;
-    if (!convertToDouble(strt, value)) {
-        NETMGR_LOG_E("convertToDouble error");
+    if (!ConvertToDouble(strt, value)) {
+        NETMGR_LOG_E("ConvertToDouble error");
     }
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
