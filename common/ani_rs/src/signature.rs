@@ -30,7 +30,7 @@ pub const CHAR: &CStr = cstr(b"std.core.Char\0");
 pub const MAP: &CStr = cstr(b"escompat.ReadonlyMap\0");
 pub const ARRAY: &CStr = cstr(b"escompat.Array\0");
 pub const ARRAY_BUFFER: &CStr = cstr(b"std.core.ArrayBuffer\0");
-pub const RECORD: &CStr = cstr(b"escompat.Record\0");
+pub const RECORD: &CStr = cstr(b"std.core.Record\0");
 pub const ITERATOR: &CStr = cstr(b"std.core.Iterator\0");
 
 pub const INT8_ARRAY: &CStr = cstr(b"escompat.Int8Array\0");
