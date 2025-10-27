@@ -1,0 +1,67 @@
+{
+    "string":[
+        {
+            "name":"netstats_excess_daymark_notofication_title",
+            "value":"နေ့စဉ်အမှတ်အထက်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_limit_message",
+            "value":"လစဉ် ဒေတာ အကန့်အသတ်သို့ ရောက်သွားပါပြီ (%s)",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title",
+            "value":"လစဉ် အကန့်အသတ်အား ကျော်သွားပါပြီ",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_daily_notify_message",
+            "value":"ယနေ့သတ်မှတ်ထားသည့် ဒေတာအသုံးပြုမှု (%s)",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title_sub",
+            "value":"SIM %d ဒေတာ သုံးစွဲမှု သတိပေးချက်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title_sub",
+            "value":"SIM %d ဒေတာ သုံးစွဲမှု သတိပေးချက်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_daymark_notofication_title_sub",
+            "value":"SIM %d ဒေတာ သုံးစွဲမှု သတိပေးချက်",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_notify_message",
+            "value":"ကန့်သတ်ချက် %s အရ လစဉ်ဒေတာအသုံးပြုမှု",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title",
+            "value":"လအလိုက်ကန့်သတ်မှု အထက်",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

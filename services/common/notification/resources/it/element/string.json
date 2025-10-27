@@ -1,0 +1,67 @@
+{
+    "string":[
+        {
+            "name":"netstats_excess_daymark_notofication_title",
+            "value":"Sopra contrassegno giorno",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_limit_message",
+            "value":"(%s) Limite mensile di dati raggiunto",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title",
+            "value":"Superato il limite mensile",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_daily_notify_message",
+            "value":"Limite utilizzo dati del giorno (%s)",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthmark_notofication_title_sub",
+            "value":"Avviso utilizzo dati SIM %d",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title_sub",
+            "value":"Avviso utilizzo dati SIM %d",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_daymark_notofication_title_sub",
+            "value":"Avviso utilizzo dati SIM %d",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_month_notify_message",
+            "value":"Utilizzo dati del mese ha raggiunto %s del limite",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"netstats_excess_monthlimit_notofication_title",
+            "value":"Sopra il limite mensile",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}
