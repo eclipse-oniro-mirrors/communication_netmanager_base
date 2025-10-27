@@ -82,7 +82,7 @@ static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH =
 static constexpr const char *LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
 
 static std::mutex g_callbackMutex {};
-static NetMgrStatsLimitNtfCallback g_NetMgrStatsLimitNtfCallback = nullptr;
+static NetMgrStatsLimitNtfCallback g_netMgrStatsLimitNtfCallback = nullptr;
 
 void NetMgrNetStatsLimitNotification::ParseJSONFile(
     const std::string& filePath, std::map<std::string, std::string>& container)
@@ -394,10 +394,11 @@ void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notif
 void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNtfCallback callback)
 {
     std::lock_guard<std::mutex> lock(g_callbackMutex);
-    g_NetMgrStatsLimitNtfCallback = callback;
+    g_netMgrStatsLimitNtfCallback = callback;
 }
 
-bool convertToDouble(const std::string& str, double& value) {
+bool convertToDouble(const std::string& str, double& value)
+{
     auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
     return ec == std::errc{} && ptr == str.data() + str.size();
 }
