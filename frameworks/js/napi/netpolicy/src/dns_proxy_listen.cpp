@@ -251,6 +251,7 @@ void DnsProxyListen::StartListen()
         CollectSocks();
     }
     clearResource();
+    NETNATIVE_LOGI("DnsProxyListen stop");
 }
 void DnsProxyListen::GetRequestAndTransmit(int32_t family)
 {
@@ -538,6 +539,12 @@ auto DnsProxyListen::DnsSocketHolder::erase(iterator position) -> decltype(DnsSo
 {
     lruCache.erase(position->second.GetLruIterator());
     return DnsSocketHolderBase::erase(position);
+}
+
+auto DnsProxyListen::DnsSocketHolder::clear() -> decltype(DnsSocketHolderBase::clear())
+{
+    lruCache.clear();
+    return DnsSocketHolderBase::clear();
 }
 } // namespace nmd
 } // namespace OHOS
