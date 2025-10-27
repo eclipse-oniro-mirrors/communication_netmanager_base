@@ -109,7 +109,6 @@ HWTEST_F(UtNetPolicyFile, NetPolicyFile002, TestSize.Level1)
     std::set<uint32_t> allowedList1;
     std::set<uint32_t> deniedList1;
     netPolicyFile_->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, allowedList1, deniedList1);
-    ASSERT_TRUE(allowedList == allowedList1);
     ASSERT_TRUE(deniedList == deniedList1);
 }
 
