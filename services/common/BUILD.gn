@@ -98,6 +98,72 @@ ohos_prebuilt_etc("netstats_notification_vi") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+ohos_prebuilt_etc("netstats_notification_de") {
+  source = "notification/resources/de/element/string.json"
+  relative_install_dir = "netmanager_base/resources/de/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_en_GB") {
+  source = "notification/resources/en_GB/element/string.json"
+  relative_install_dir = "netmanager_base/resources/en_GB/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_id") {
+  source = "notification/resources/id/element/string.json"
+  relative_install_dir = "netmanager_base/resources/id/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_it") {
+  source = "notification/resources/it/element/string.json"
+  relative_install_dir = "netmanager_base/resources/it/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_lo") {
+  source = "notification/resources/lo/element/string.json"
+  relative_install_dir = "netmanager_base/resources/lo/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_ms") {
+  source = "notification/resources/ms/element/string.json"
+  relative_install_dir = "netmanager_base/resources/ms/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_my") {
+  source = "notification/resources/my/element/string.json"
+  relative_install_dir = "netmanager_base/resources/my/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_pl") {
+  source = "notification/resources/pl/element/string.json"
+  relative_install_dir = "netmanager_base/resources/pl/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_pt_PT") {
+  source = "notification/resources/pt_PT/element/string.json"
+  relative_install_dir = "netmanager_base/resources/pt_PT/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_th") {
+  source = "notification/resources/th/element/string.json"
+  relative_install_dir = "netmanager_base/resources/th/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+ohos_prebuilt_etc("netstats_notification_tr") {
+  source = "notification/resources/tr/element/string.json"
+  relative_install_dir = "netmanager_base/resources/tr/element"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
 
 ohos_prebuilt_etc("netstats_notification_icon") {
   source = "notification/resources/network_ic.png"
