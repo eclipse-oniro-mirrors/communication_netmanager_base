@@ -1923,9 +1923,9 @@ void NetConnService::PostDelayLostCallbackTask(std::shared_ptr<NetActivate> acti
     if (!netConnEventHandler_ || !activate) {
         return;
     }
-    int32_t reqId = activate->GetRequestId();
+    uint32_t reqId = activate->GetRequestId();
     int32_t netId = activate->GetLastNetid();
-    NETMGR_LOG_I("Post DelayLostCallbackByFrozened Task uid: %{public}u, reqId: %{public}d,"
+    NETMGR_LOG_I("Post DelayLostCallbackByFrozened Task uid: %{public}u, reqId: %{public}u,"
         "netId:%{public}d", activate->GetUid(), reqId, netId);
     auto taskName = "HandleDelayLostCallback" + std::to_string(reqId);
     netConnEventHandler_->RemoveTask(taskName);
