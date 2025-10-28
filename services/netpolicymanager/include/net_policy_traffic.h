@@ -76,11 +76,11 @@ public:
     void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
 
     /**
-     * Get the metered ifaces.
+     * Is metered ifaces.
      *
-     * @return const std::vector<std::string>& The vector of metered ifaces
+     * @return bool The vector of metered ifaces
      */
-    const std::vector<std::string> &GetMeteredIfaces();
+    bool IsMeteredIfaces(const std::string& ifaceName);
 
     /**
      * Reset network policies\rules\quota policies\firewall rules.

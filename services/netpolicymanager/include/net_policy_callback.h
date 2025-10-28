@@ -16,14 +16,11 @@
 #ifndef NET_POLICY_CALLBACK_H
 #define NET_POLICY_CALLBACK_H
 
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
 #include "singleton.h"
-
-#include "ffrt.h"
-#include "event_handler.h"
 #include "i_net_policy_callback.h"
 #include "net_quota_policy.h"
 
@@ -38,14 +35,14 @@ public:
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t RegisterNetPolicyCallbackAsync(const sptr<INetPolicyCallback> &callback);
+    int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
     /**
      * Unregister net policy callback.
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t UnregisterNetPolicyCallbackAsync(const sptr<INetPolicyCallback> &callback);
+    int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
     /**
      * Notify this uid's policy is changed.
@@ -53,7 +50,7 @@ public:
      * @param policy See {@link NetUidPolicy}.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t NotifyNetUidPolicyChangeAsync(uint32_t uid, uint32_t policy);
+    int32_t NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy);
 
     /**
      * Notify this uid's rule is changed.
@@ -61,21 +58,21 @@ public:
      * @param rule See {@link NetUidRule}.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t rule);
+    int32_t NotifyNetUidRuleChange(uint32_t uid, uint32_t rule);
 
     /**
      * Notify the quota policy is changed.
      * @param quotaPolicies The struct vector of quotaPolicies.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t NotifyNetQuotaPolicyChangeAsync(const std::vector<NetQuotaPolicy> &quotaPolicies);
+    int32_t NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
      * Notify when metered ifaces is changed.
      * @param ifaces The string vector of ifaces.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t NotifyNetMeteredIfacesChangeAsync(std::vector<std::string> &ifaces);
+    int32_t NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces);
 
     /**
      * Notify when background policy is changed.
@@ -83,20 +80,11 @@ public:
      * when isAllow is false,it means background policy is false.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t NotifyNetBackgroundPolicyChangeAsync(bool isAllowed);
-
-private:
-    int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
-    int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
-    int32_t NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy);
-    int32_t NotifyNetUidRuleChange(uint32_t uid, uint32_t rule);
-    int32_t NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies);
-    int32_t NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces);
     int32_t NotifyNetBackgroundPolicyChange(bool isAllowed);
 
 private:
+    std::shared_mutex callbacksMutex_;
     std::vector<sptr<INetPolicyCallback>> callbacks_;
-    std::shared_ptr<ffrt::queue> netPolicyCallbackFfrtQueue_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
