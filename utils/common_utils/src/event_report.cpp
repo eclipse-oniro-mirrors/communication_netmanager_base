@@ -111,6 +111,8 @@ void EventReport::SendPortalDetectInfoEvent(const PortalDetectInfo &eventInfo)
     }
     HiSysEventWrite(HiSysEvent::Domain::COMMUNICATION, "WIFI_CHR_EVENT", HiSysEvent::EventType::STATISTIC,
         "EVENT_NAME", "NETMANGR_PORTAL_INFO", "EVENT_VALUE", std::string(jsonStr));
+    free(jsonStr);
+    cJSON_Delete(root);
 }
 
 } // namespace NetManagerStandard
