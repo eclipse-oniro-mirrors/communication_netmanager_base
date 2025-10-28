@@ -313,9 +313,6 @@ pub(crate) fn on_net_unavailable(
 pub(crate) fn register_network_change(this: NetConnection) -> Result<(), BusinessError> {
     let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
 
-    let mut callback = Box::new(ConnCallback::new());
-    mem::swap(&mut connection.callback, &mut callback);
-
     let callback_ref = &mut connection.callback;
     let unregister = NetConnClient::register_net_conn_callback(callback_ref).map_err(|e| {
         BusinessError::new(e, format!("Failed to register network change callback"))
