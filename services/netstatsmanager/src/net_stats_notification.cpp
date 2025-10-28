@@ -81,7 +81,7 @@ static constexpr const char *LANGUAGE_RESOURCE_PARENT_PATH =
 static constexpr const char *LANGUAGE_RESOURCE_CHILD_PATH = "/element/string.json";
 
 static std::mutex g_callbackMutex {};
-static NetMgrStatsLimitNtfCallback g_NetMgrStatsLimitNtfCallback = nullptr;
+static NetMgrStatsLimitNtfCallback g_netMgrStatsLimitNtfCallback = nullptr;
 
 void NetMgrNetStatsLimitNotification::ParseJSONFile(
     const std::string& filePath, std::map<std::string, std::string>& container)
@@ -393,7 +393,7 @@ void NetMgrNetStatsLimitNotification::PublishNetStatsLimitNotification(int notif
 void NetMgrNetStatsLimitNotification::RegNotificationCallback(NetMgrStatsLimitNtfCallback callback)
 {
     std::lock_guard<std::mutex> lock(g_callbackMutex);
-    g_NetMgrStatsLimitNtfCallback = callback;
+    g_netMgrStatsLimitNtfCallback = callback;
 }
 
 std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
@@ -411,10 +411,11 @@ std::string NetMgrNetStatsLimitNotification::GetTrafficNum(double traffic)
     std::map<std::string, std::string> mp = { { "style", style},
                                     { "unit", unit },
                                     { "unitStyle", unitStyle } };
-
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << traffic; // 2: 保留两位小数
-    double value = std::stod(oss.str());
+    std::string strt = oss.str();
+    char* end = NULL;
+    double value = std::strtod(strt.c_str(), &end);
     std::string systemLocalStr = Global::I18n::LocaleConfig::GetSystemLocale();
     std::vector<std::string> local{systemLocalStr};
     std::unique_ptr<Global::I18n::NumberFormat> numFmt = std::make_unique<Global::I18n::NumberFormat>(local, mp);
