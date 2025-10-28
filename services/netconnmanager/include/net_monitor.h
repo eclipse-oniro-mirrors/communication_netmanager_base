@@ -121,7 +121,6 @@ private:
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
-    NetHttpProbeResult SendProbeBack();
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
