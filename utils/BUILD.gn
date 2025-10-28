@@ -78,6 +78,7 @@ ohos_shared_library("net_manager_common") {
   public_configs = [ ":netmgr_common_config" ]
 
   external_deps = [
+    "cJSON:cjson",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "init:libbegetutil",

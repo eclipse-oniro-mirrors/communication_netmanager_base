@@ -32,6 +32,7 @@
 #include "net_http_probe.h"
 #include "net_link_info.h"
 #include "probe_thread.h"
+#include "event_report.h"
 #include "dual_stack_probe_callback.h"
 
 namespace OHOS {
@@ -120,6 +121,7 @@ private:
     NetHttpProbeResult GetThreadDetectResult(std::shared_ptr<ProbeThread>& probeThread, ProbeType probeType);
     void GetHttpProbeUrlFromConfig();
     void GetDetectUrlConfig();
+    NetHttpProbeResult SendProbeBack();
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
@@ -150,6 +152,7 @@ private:
     uint64_t lastDetectTimestamp_ = 0;
     int32_t dualStackProbeTimeOut_ = 5 * 1000;
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;
+    PortalDetectInfo portalDetectInfo_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
