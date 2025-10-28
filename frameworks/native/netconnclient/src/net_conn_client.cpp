@@ -1459,6 +1459,9 @@ int32_t NetConnClient::NetConnCallbackManager::AddNetConnCallback(const sptr<INe
         }
     }
     netConnCallbackList_.push_back(callback);
+    if (netConnCallbackList_.size() == 1) {
+        return NETMANAGER_SUCCESS;
+    }
     lock.unlock();
     std::unique_lock<std::mutex> handlerLock(netHandlerMutex_);
     sptr<NetHandle> tempNetHandler(netHandle_);
