@@ -140,7 +140,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
     }
     // notify the the quota policy change.
     std::shared_lock<std::shared_mutex> lock(quotaMutex_);
-    GetCbInst()->NotifyNetQuotaPolicyChangeAsync(quotaPolicies_);
+    GetCbInst()->NotifyNetQuotaPolicyChange(quotaPolicies_);
     NETMGR_LOG_I("End UpdateQuotaPoliciesInner.");
     return NETMANAGER_SUCCESS;
 }
@@ -213,9 +213,8 @@ void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredI
     for (auto &iface : newMeteredIfaces) {
         meteredIfaces_.push_back(iface);
     }
-    lock.unlock();
     // notify the callback of metered ifaces changed.
-    GetCbInst()->NotifyNetMeteredIfacesChangeAsync(meteredIfaces_);
+    GetCbInst()->NotifyNetMeteredIfacesChange(meteredIfaces_);
 }
 
 void NetPolicyTraffic::UpdateQuotaNotify()
@@ -331,9 +330,13 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
     return NETMANAGER_SUCCESS;
 }
 
-const std::vector<std::string> &NetPolicyTraffic::GetMeteredIfaces()
+bool NetPolicyTraffic::IsMeteredIfaces(const std::string& ifaceName)
 {
-    return meteredIfaces_;
+    std::shared_lock<std::shared_mutex> lock(meteredMutex_);
+    if (std::find(meteredIfaces_.begin(), meteredIfaces_.end(), ifaceName) != meteredIfaces_.end()) {
+        return true;
+    }
+    return false;
 }
 
 int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
@@ -362,10 +365,7 @@ int32_t NetPolicyTraffic::ResetPolicies()
 void NetPolicyTraffic::ReachedLimit(const std::string &iface)
 {
     NETMGR_LOG_D("ReachedLimit iface:%{public}s.", iface.c_str());
-    std::shared_lock<std::shared_mutex> lock(meteredMutex_);
-    auto &ifaces = GetMeteredIfaces();
-    if (std::find(ifaces.begin(), ifaces.end(), iface) != ifaces.end()) {
-        lock.unlock();
+    if (IsMeteredIfaces(iface)) {
         UpdateQuotaPoliciesInner();
     }
 }
@@ -515,8 +515,10 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
 {
     static const std::string TAB = "    ";
     message.append(TAB + "MeteredIfaces: {");
+    std::shared_lock<std::shared_mutex> meteredlock(meteredMutex_);
     std::for_each(meteredIfaces_.begin(), meteredIfaces_.end(),
                   [&message](const std::string &item) { message.append(item + ", "); });
+    meteredlock.unlock();
     message.append("}\n");
     message.append(TAB + "QuotaPolicies:\n");
     std::shared_lock<std::shared_mutex> lock(quotaMutex_);

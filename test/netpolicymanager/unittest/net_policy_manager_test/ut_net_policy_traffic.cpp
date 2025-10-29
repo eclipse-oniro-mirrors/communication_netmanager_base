@@ -233,22 +233,6 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEvent001
- * @tc.desc: Test NetPolicyTraffic HandleEvent
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, HandleEvent001, TestSize.Level1)
-{
-    int32_t eventId = 0;
-    std::shared_ptr<PolicyEvent> policyEvent = nullptr;
-    g_netPolicyTraffic->HandleEvent(eventId, policyEvent);
-
-    // Test NetPolicyTraffic GetMeteredIfaces
-    auto &ifaces = g_netPolicyTraffic->GetMeteredIfaces();
-    ASSERT_GE(ifaces.size(), NO_DATA_SIZE);
-}
-
-/**
  * @tc.name: ResetPolicies001
  * @tc.desc: Test NetPolicyTraffic ResetPolicies.
  * @tc.type: FUNC

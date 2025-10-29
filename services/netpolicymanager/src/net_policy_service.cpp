@@ -239,8 +239,7 @@ int32_t NetPolicyService::IsUidNetAllowed(uint32_t uid, const std::string &iface
     if (netPolicyTraffic_ == nullptr) {
         return 0;
     }
-    const auto &vec = netPolicyTraffic_->GetMeteredIfaces();
-    if (std::find(vec.begin(), vec.end(), ifaceName) != vec.end()) {
+    if (netPolicyTraffic_->IsMeteredIfaces(ifaceName)) {
         return IsUidNetAllowed(uid, true, isAllowed);
     }
     return IsUidNetAllowed(uid, false, isAllowed);
@@ -259,7 +258,7 @@ int32_t NetPolicyService::RegisterNetPolicyCallback(const sptr<INetPolicyCallbac
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    return netPolicyCallback_->RegisterNetPolicyCallbackAsync(callback);
+    return netPolicyCallback_->RegisterNetPolicyCallback(callback);
 }
 
 int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -274,7 +273,7 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
         NETMGR_LOG_E("netPolicyCallback_ is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return netPolicyCallback_->UnregisterNetPolicyCallbackAsync(callback);
+    return netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 
 int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
