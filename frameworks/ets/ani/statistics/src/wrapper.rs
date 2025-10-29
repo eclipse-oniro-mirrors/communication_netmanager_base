@@ -12,7 +12,7 @@
 // limitations under the License.
 
 use crate::bridge;
-use crate::register::StatisticsCallback;
+use crate::register::*;
 use cxx::let_cxx_string;
 use cxx::UniquePtr;
 use ffi::NetStatsChangeInfo;
@@ -178,34 +178,18 @@ impl NetStatsClient {
             .collect())
     }
 
-    pub fn register_statis_callback(
-        callback: StatisticsCallback,
-    ) -> Result<StatisCallbackUnregister, i32> {
-        let mut ret = 0;
-        let unregister = ffi::RegisterStatisCallback(Box::new(callback), &mut ret);
-        if ret != 0 {
-            return Err(ret);
+    pub fn register_net_statis_observer() -> Result<(), i32> {
+        let res = ffi::RegisterNetStatisObserver();
+        if res != 0 {
+            return Err(res);
         }
-        Ok(StatisCallbackUnregister::new(unregister))
-    }
-}
-
-pub struct StatisCallbackUnregister {
-    inner: UniquePtr<ffi::StatisCallbackUnregister>,
-}
-
-unsafe impl Send for StatisCallbackUnregister {}
-unsafe impl Sync for StatisCallbackUnregister {}
-
-impl StatisCallbackUnregister {
-    fn new(inner: UniquePtr<ffi::StatisCallbackUnregister>) -> Self {
-        Self { inner }
+        Ok(())
     }
 
-    pub fn unregister(&mut self) -> Result<(), i32> {
-        let ret = self.inner.pin_mut().Unregister();
-        if ret != 0 {
-            return Err(ret);
+    pub fn unregister_net_statis_observer() -> Result<(), i32> {
+        let res = ffi::UnRegisterNetStatisObserver();
+        if res != 0 {
+            return Err(res);
         }
         Ok(())
     }
@@ -376,9 +360,8 @@ pub mod ffi {
     }
 
     extern "Rust" {
-        type StatisticsCallback;
-        pub fn net_iface_stats_changed(self: &StatisticsCallback, info: NetStatsChangeInfo) -> i32;
-        pub fn net_uid_stats_changed(self: &StatisticsCallback, info: NetStatsChangeInfo) -> i32;
+        pub fn execute_net_iface_stats_changed(info: NetStatsChangeInfo);
+        pub fn execute_net_uid_stats_changed(info: NetStatsChangeInfo);
     }
 
     unsafe extern "C++" {
@@ -389,14 +372,6 @@ pub mod ffi {
         type NetStatsClient;
         #[namespace = "OHOS::NetManagerStandard"]
         type NetStatsInfo;
-        type StatisCallbackUnregister;
-
-        fn RegisterStatisCallback(
-            callback: Box<StatisticsCallback>,
-            ret: &mut i32,
-        ) -> UniquePtr<StatisCallbackUnregister>;
-
-        fn Unregister(self: &StatisCallbackUnregister) -> i32;
 
         fn GetNetStatsClient(_: &mut i32) -> Pin<&'static mut NetStatsClient>;
 
@@ -447,5 +422,8 @@ pub mod ffi {
         ) -> i32;
 
         fn GetErrorCodeAndMessage(error_code: &mut i32) -> String;
+
+        fn RegisterNetStatisObserver() -> i32;
+        fn UnRegisterNetStatisObserver() -> i32;
     }
 }

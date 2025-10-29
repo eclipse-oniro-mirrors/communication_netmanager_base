@@ -35,28 +35,15 @@ struct UidInfo;
 NetManagerStandard::NetStatsClient &GetNetStatsClient(int32_t &nouse);
 rust::String GetErrorCodeAndMessage(int32_t &errorCode);
 
-class StatisEventCallback : public NetManagerStandard::NetStatsCallbackStub {
+class StatisEventCallbackObserverAni : public NetManagerStandard::NetStatsCallbackStub {
 public:
-    StatisEventCallback(rust::Box<StatisticsCallback> &&callback);
-    ~StatisEventCallback() = default;
     int32_t NetIfaceStatsChanged(const std::string &iface);
     int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid);
-
-private:
-    rust::Box<StatisticsCallback> callback_;
 };
 
-class StatisCallbackUnregister {
-public:
-    StatisCallbackUnregister(sptr<StatisEventCallback> eventCallback);
-    ~StatisCallbackUnregister() = default;
-    int32_t Unregister() const;
+int32_t RegisterNetStatisObserver();
+int32_t UnRegisterNetStatisObserver();
 
-private:
-    sptr<StatisEventCallback> eventCallback_;
-};
-
-std::unique_ptr<StatisCallbackUnregister> RegisterStatisCallback(rust::Box<StatisticsCallback> callback, int32_t &ret);
 NetStatsInfoInner GetTrafficStatsByIface(IfaceInfo &info, int32_t &ret);
 NetStatsInfoInner GetTrafficStatsByUid(UidInfo &info, int32_t &ret);
 int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUidNetStatsInfoPair> &netStatsInfos);

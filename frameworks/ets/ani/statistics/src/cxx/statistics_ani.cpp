@@ -21,6 +21,11 @@
 namespace OHOS {
 namespace NetManagerAni {
 
+sptr<StatisEventCallbackObserverAni> g_statisEventCallbackObserverAni =
+    sptr<StatisEventCallbackObserverAni>(new (std::nothrow) StatisEventCallbackObserverAni());
+
+std::atomic_bool g_isStatisObserverRegistered = false;
+
 rust::String GetErrorCodeAndMessage(int32_t &errorCode)
 {
     NetManagerStandard::NetBaseErrorCodeConvertor convertor;
@@ -32,40 +37,53 @@ NetManagerStandard::NetStatsClient &GetNetStatsClient(int32_t &nouse)
     return NetManagerStandard::NetStatsClient::GetInstance();
 }
 
-StatisEventCallback::StatisEventCallback(rust::Box<StatisticsCallback> &&callback) : callback_(std::move(callback)) {}
-
-int32_t StatisEventCallback::NetIfaceStatsChanged(const std::string &iface)
+int32_t StatisEventCallbackObserverAni::NetIfaceStatsChanged(const std::string &iface)
 {
     NetStatsChangeInfo info{
         .iface = rust::string(iface),
     };
-    return callback_->net_iface_stats_changed(info);
+    execute_net_iface_stats_changed(info);
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-int32_t StatisEventCallback::NetUidStatsChanged(const std::string &iface, uint32_t uid)
+int32_t StatisEventCallbackObserverAni::NetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
     NetStatsChangeInfo info{
         .iface = rust::string(iface),
         .uid = uid,
     };
-    return callback_->net_uid_stats_changed(info);
+    execute_net_uid_stats_changed(info);
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
-std::unique_ptr<StatisCallbackUnregister> RegisterStatisCallback(rust::Box<StatisticsCallback> callback, int32_t &ret)
+int32_t RegisterNetStatisObserver()
 {
-    auto eventCallback = sptr<StatisEventCallback>::MakeSptr(std::move(callback));
-    ret = NetManagerStandard::NetStatsClient::GetInstance().RegisterNetStatsCallback(eventCallback);
-    return std::make_unique<StatisCallbackUnregister>(eventCallback);
+    if (g_isStatisObserverRegistered) {
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+    if (g_statisEventCallbackObserverAni == nullptr) {
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    int32_t ret =
+        NetManagerStandard::NetStatsClient::GetInstance().RegisterNetStatsCallback(g_statisEventCallbackObserverAni);
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        g_isStatisObserverRegistered = true;
+    }
+    return ret;
 }
 
-StatisCallbackUnregister::StatisCallbackUnregister(sptr<StatisEventCallback> eventCallback)
-    : eventCallback_(eventCallback)
+int32_t UnRegisterNetStatisObserver()
 {
-}
-
-int32_t StatisCallbackUnregister::Unregister() const
-{
-    auto ret = NetManagerStandard::NetStatsClient::GetInstance().UnregisterNetStatsCallback(eventCallback_);
+    if (g_statisEventCallbackObserverAni == nullptr) {
+        return NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    auto ret =
+        NetManagerStandard::NetStatsClient::GetInstance().UnregisterNetStatsCallback(g_statisEventCallbackObserverAni);
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        g_isStatisObserverRegistered = false;
+    }
     return ret;
 }
 
@@ -74,7 +92,7 @@ NetStatsInfoInner GetTrafficStatsByIface(IfaceInfo &info, int32_t &ret)
     NetStatsInfo netStatsInfo;
     ret = NetManagerStandard::NetStatsClient::GetInstance().GetIfaceStatsDetail(
         std::string(info.iface), info.start_time, info.end_time, netStatsInfo);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return NetStatsInfoInner{};
     }
     return NetStatsInfoInner{.rx_bytes = netStatsInfo.rxBytes_,
@@ -89,7 +107,7 @@ NetStatsInfoInner GetTrafficStatsByUid(UidInfo &info, int32_t &ret)
     ret = NetManagerStandard::NetStatsClient::GetInstance().GetUidStatsDetail(std::string(info.iface_info.iface),
                                                                               info.uid, info.iface_info.start_time,
                                                                               info.iface_info.end_time, netStatsInfo);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return NetStatsInfoInner{};
     }
     return NetStatsInfoInner{.rx_bytes = netStatsInfo.rxBytes_,
@@ -108,7 +126,7 @@ int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUi
     networkPtr->simId_ = static_cast<uint32_t>(networkInfo.sim_id);
     int32_t ret = DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(
         map_infos, networkPtr);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return ret;
     }
     for (auto &item : map_infos) {
@@ -120,7 +138,7 @@ int32_t GetTrafficStatsByNetworkVec(AniNetworkInfo &networkInfo, rust::Vec<AniUi
                                                 .tx_packets = item.second.rxPackets_}});
     }
 
-    return 0;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &netStatsInfosSequence, uint32_t uid,
@@ -134,7 +152,7 @@ int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &n
     networkPtr->simId_ = static_cast<uint32_t>(networkInfo.sim_id);
     int32_t ret = DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(
         netStatsInfosSequenceVec, uid, networkPtr);
-    if (ret != 0) {
+    if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
         return ret;
     }
 
@@ -147,7 +165,7 @@ int32_t GetTrafficStatsByUidNetworkVec(rust::Vec<AniNetStatsInfoSequenceItem> &n
                                                                   .rx_packets = item.info_.rxPackets_,
                                                                   .tx_packets = item.info_.txPackets_}});
     }
-    return 0;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerAni
 } // namespace OHOS

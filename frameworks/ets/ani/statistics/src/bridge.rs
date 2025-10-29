@@ -50,6 +50,7 @@ pub struct AniNetStatsInfoSequenceItem {
 }
 
 #[ani_rs::ani(path = "@ohos.net.statistics.statistics.NetStatsChangeInfo")]
+#[derive(Clone)]
 pub struct NetStatsChangeInfo {
     pub iface: String,
     pub uid: Option<i32>,
