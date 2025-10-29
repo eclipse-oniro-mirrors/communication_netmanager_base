@@ -243,7 +243,7 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
 HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
 {
     std::vector<UidRange> uidRanges;
-    UidRange uidRang(1, 2);
+    UidRange uidRang(1, 2, 0, 0);
     uidRanges.emplace_back(uidRang);
     int32_t ifaceFd = 5;
     std::string ipAddr = "172.17.5.245";

@@ -249,7 +249,8 @@ int32_t MultiVpnManager::CreateVpnInterface(const std::string &ifName)
         ret = nmd::CreateVpnIfByNetlink(ifName.c_str(), ifNameId, phyName_.c_str(), DEFAULT_MTU);
     } else if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
         ret = CreatePppInterface(ifName);
-    } else if (strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) {
+    } else if ((strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) ||
+        (strstr(ifName.c_str(), INNER_CHL_NAME) != NULL)) {
         ret = CreateMultiTunInterface(ifName);
     } else {
         NETNATIVE_LOGE("CreateVpnInterface failed, invalid ifName");
@@ -264,13 +265,14 @@ int32_t MultiVpnManager::DestroyVpnInterface(const std::string &ifName)
     bool isXfrm = strstr(ifName.c_str(), XFRM_CARD_NAME) != NULL;
     bool isPpp = strstr(ifName.c_str(), PPP_CARD_NAME) != NULL;
     bool isMultiTun = strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL;
-    if (!isXfrm && !isPpp && !isMultiTun) {
+    bool isVic = strstr(ifName.c_str(), INNER_CHL_NAME) != NULL;
+    if (!isXfrm && !isPpp && !isMultiTun && !isVic) {
         NETNATIVE_LOGE("DestroyVpnInterface failed, invalid ifName");
         return NETMANAGER_ERROR;
     }
     SetVpnDown(ifName);
     nmd::DeleteVpnIfByNetlink(ifName.c_str());
-    if (isPpp || isMultiTun) {
+    if (isPpp || isMultiTun || isVic) {
         DestroyMultiVpnFd(ifName);
     }
     return NETMANAGER_SUCCESS;
@@ -363,7 +365,8 @@ int32_t MultiVpnManager::GetMultiVpnFd(const std::string &ifName, int32_t &multi
     }
     if (strstr(ifName.c_str(), PPP_CARD_NAME) != NULL) {
         multiVpnFd = open(PPP_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-    } else if (strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) {
+    } else if ((strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) != NULL) ||
+        (strstr(ifName.c_str(), INNER_CHL_NAME) != NULL)) {
         multiVpnFd = open(TUN_DEVICE_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     } else {
         NETNATIVE_LOGE("GetMultiVpnFd faild, IfName err");
@@ -385,7 +388,9 @@ void MultiVpnManager::SetVpnRemoteAddress(const std::string &remoteIp)
 int32_t MultiVpnManager::DestroyMultiVpnFd(const std::string &ifName)
 {
     std::lock_guard<std::mutex> autoLock(mutex_);
-    if (strstr(ifName.c_str(), PPP_CARD_NAME) == NULL && strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) == NULL) {
+    if (strstr(ifName.c_str(), PPP_CARD_NAME) == NULL &&
+        strstr(ifName.c_str(), MULTI_TUN_CARD_NAME) == NULL &&
+        strstr(ifName.c_str(), INNER_CHL_NAME) == NULL) {
         NETNATIVE_LOGE("DestroyMultiVpnFd faild, IfName err");
         return NETMANAGER_ERROR;
     }

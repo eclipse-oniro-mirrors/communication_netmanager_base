@@ -278,7 +278,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest006, TestSize.Level1)
     beginUids.push_back(STATRUID);
     endUids.push_back(ENDUID);
     for (size_t i = 0; i < beginUids.size(); i++) {
-        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i], 0, 0));
     }
     nativeClient->NetworkAddUids(NET_ID, uidRanges);
     nativeClient->NetworkDelUids(NET_ID, uidRanges);

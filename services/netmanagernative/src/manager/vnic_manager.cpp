@@ -305,7 +305,7 @@ int32_t VnicManager::CreateVnic(uint16_t mtu, const std::string &tunAddr, int32_
     
     uidRanges.clear();
     for (const auto &uid: uids) {
-        uidRanges.push_back({uid, uid});
+        uidRanges.push_back({uid, uid, 0, 0});
     }
 
     if (CreateVnicInterface() != NETMANAGER_SUCCESS) {

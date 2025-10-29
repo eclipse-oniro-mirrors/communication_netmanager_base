@@ -163,7 +163,8 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
 #ifdef SUPPORT_SYSVPN
     if ((strncmp(ifName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
         (strncmp(ifName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0) ||
-        (strncmp(ifName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0)) {
+        (strncmp(ifName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0) ||
+        (strncmp(ifName.c_str(), INNER_CHL_NAME, strlen(INNER_CHL_NAME)) == 0)) {
         return MultiVpnManager::GetInstance().SetVpnAddress(ifName, addrString, prefixLength);
     }
 #endif // SUPPORT_SYSVPN
@@ -261,7 +262,8 @@ int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
 #ifdef SUPPORT_SYSVPN
     if ((strncmp(ifName.c_str(), XFRM_CARD_NAME, strlen(XFRM_CARD_NAME)) == 0) ||
         (strncmp(ifName.c_str(), PPP_CARD_NAME, strlen(PPP_CARD_NAME)) == 0) ||
-        (strncmp(ifName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0)) {
+        (strncmp(ifName.c_str(), MULTI_TUN_CARD_NAME, strlen(MULTI_TUN_CARD_NAME)) == 0) ||
+        (strncmp(ifName.c_str(), INNER_CHL_NAME, strlen(INNER_CHL_NAME)) == 0)) {
         return MultiVpnManager::GetInstance().SetVpnMtu(ifName, mtuValue);
     }
 #endif

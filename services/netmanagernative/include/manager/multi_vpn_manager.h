@@ -26,6 +26,7 @@ namespace NetManagerStandard {
 constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
 constexpr const char *PPP_CARD_NAME = "ppp-vpn";
 constexpr const char *MULTI_TUN_CARD_NAME = "multitun-vpn";
+constexpr const char *INNER_CHL_NAME = "inner-chl";
 constexpr const char *PPP_DEVICE_PATH = "/dev/ppp";
 constexpr const char *TUN_DEVICE_PATH = "/dev/tun";
 

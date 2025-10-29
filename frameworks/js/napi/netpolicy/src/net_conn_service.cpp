@@ -2188,6 +2188,10 @@ int32_t NetConnService::GetAllNetsAsync(std::list<int32_t> &netIdList)
                 NETMGR_LOG_D("Network [%{public}d] is internal, uid [%{public}d] skips.", netId, currentUid);
                 continue;
             }
+            if (curSupplier != nullptr && curSupplier->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_CHANNEL)) {
+                NETMGR_LOG_D("Network inner channel, skips.");
+                continue;
+            }
 #ifdef SUPPORT_SYSVPN
             if (!IsCallingUserSupplier(curSupplier->GetSupplierId())) {
                 continue;

@@ -118,7 +118,7 @@ private:
 
     std::vector<NetManagerStandard::UidRange> vpnUidRanges_;
 
-    int32_t vpnNetId_;
+    std::list<int32_t> vpnNetId_;
 
     ffrt::mutex cacheMutex_;
 
@@ -132,6 +132,11 @@ private:
 
     std::vector<std::string> RemoveDuplicateNameservers(const std::vector<std::string> &servers);
 
+    int32_t GetVpnResolverConfig(uint32_t uid, std::vector<std::string> &servers,
+                                std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
+                                uint8_t &retryCount);
+
+    int32_t GetUserDefinedVpnServerFlag(uint32_t uid, bool &flag);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t GetUserId(int32_t appUid);
 

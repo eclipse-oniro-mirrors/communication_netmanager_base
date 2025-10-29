@@ -142,7 +142,7 @@ int32_t NetsysController::DisableDistributedNet(bool isServer)
 }
 
 int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids,
-                                         const std::vector<int32_t> &endUids)
+                                         const std::vector<int32_t> &endUids, uint32_t priorityId)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     // LCOV_EXCL_START This will never happen.
@@ -157,13 +157,13 @@ int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_
     }
     std::vector<UidRange> uidRanges;
     for (size_t i = 0; i < beginUids.size(); i++) {
-        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i], priorityId, netId));
     }
     return netsysService_->NetworkAddUids(netId, uidRanges);
 }
 
 int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_t> &beginUids,
-                                         const std::vector<int32_t> &endUids)
+                                         const std::vector<int32_t> &endUids, uint32_t priorityId)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     // LCOV_EXCL_START This will never happen.
@@ -178,7 +178,7 @@ int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_
     }
     std::vector<UidRange> uidRanges;
     for (size_t i = 0; i < beginUids.size(); i++) {
-        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i], priorityId, netId));
     }
     return netsysService_->NetworkDelUids(netId, uidRanges);
 }
