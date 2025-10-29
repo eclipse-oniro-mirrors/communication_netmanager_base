@@ -113,6 +113,7 @@ private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
     NetHttpProbeResult SendProbe();
+    void SendPortalInfo(PortalDetectInfo& info);
     NetHttpProbeResult ProcessThreadDetectResult(std::shared_ptr<ProbeThread>& httpProbeThread,
         std::shared_ptr<ProbeThread>& httpsProbeThread, std::shared_ptr<ProbeThread>& backHttpThread,
         std::shared_ptr<ProbeThread>& backHttpsThread);
