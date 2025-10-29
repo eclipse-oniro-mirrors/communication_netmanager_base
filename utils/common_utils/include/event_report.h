@@ -99,7 +99,7 @@ public:
     static void SendRequestBehaviorEvent(const EventInfo &eventInfo);
     static void SendMonitorFaultEvent(const EventInfo &eventInfo);
     static void SendMonitorBehaviorEvent(const EventInfo &eventInfo);
-    static void SendPortalDetectInfoEvent(const PortalDetectInfo &eventInfo);
+    static void SendPortalDetectInfoEvent(const std::string &ret);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

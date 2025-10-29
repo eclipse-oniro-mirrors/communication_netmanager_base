@@ -39,6 +39,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
+#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -146,7 +147,7 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
         }
         result = CAPTIVE_PORTAL_STATE;
         portalDetectInfo_.finalRespCode = probeResult.GetCode();
-        EventReport::SendPortalDetectInfoEvent(portalDetectInfo_);
+        SendPortalInfo(portalDetectInfo_);
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
         detectionDelay_ *= DOUBLE;
@@ -183,6 +184,34 @@ void NetMonitor::Detection()
         NetDetectionStatus result = UNKNOWN_STATE;
         ProcessDetection(probeResult, result);
     }
+}
+
+void NetMonitor::SendPortalInfo(PortalDetectInfo& info)
+{
+    cJSON *root = cJSON_CreateObject();
+    // LCOV_EXCL_START
+    if (root == nullptr) {
+        return;
+    }
+    // LCOV_EXCL_STOP
+    cJSON_AddNumberToObject(root, "RESP_CODE", info.httpRespCode);
+    cJSON_AddNumberToObject(root, "HTTPS_RESP_CODE", info.httpsRespCode);
+    cJSON_AddNumberToObject(root, "BACKUP_RESP_CODE", info.httpBackupRespCode);
+    cJSON_AddNumberToObject(root, "BACKUP_HTTPS_RESP_CODE", info.httpsBackupRespCode);
+    cJSON_AddNumberToObject(root, "FIANL_RESP_CODE", info.finalRespCode);
+    cJSON_AddNumberToObject(root, "MAIN_DETECT_MS", info.httpDetectTime);
+    cJSON_AddNumberToObject(root, "BACKUP_DETECT_MS", info.httpBackupDetectTime);
+    char *jsonStr = cJSON_PrintUnformatted(root);
+    // LCOV_EXCL_START
+    if (jsonStr == nullptr) {
+        cJSON_Delete(root);
+        return;
+    }
+    // LCOV_EXCL_STOP
+    std::string ret = std::string(jsonStr);
+    EventReport::SendPortalDetectInfoEvent(ret);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
 }
 
 NetHttpProbeResult NetMonitor::SendProbe()

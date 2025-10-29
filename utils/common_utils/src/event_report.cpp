@@ -91,32 +91,10 @@ void EventReport::SendMonitorBehaviorEvent(const EventInfo &eventInfo)
         EVENT_KEY_NET_MONITOR_STATUS, eventInfo.monitorStatus);
 }
 
-void EventReport::SendPortalDetectInfoEvent(const PortalDetectInfo &eventInfo)
+void EventReport::SendPortalDetectInfoEvent(const std::string &ret)
 {
-    cJSON *root = cJSON_CreateObject();
-    // LCOV_EXCL_START
-    if (root == nullptr) {
-        return;
-    }
-    // LCOV_EXCL_STOP
-    cJSON_AddNumberToObject(root, "RESP_CODE", eventInfo.httpRespCode);
-    cJSON_AddNumberToObject(root, "HTTPS_RESP_CODE", eventInfo.httpsRespCode);
-    cJSON_AddNumberToObject(root, "BACKUP_RESP_CODE", eventInfo.httpBackupRespCode);
-    cJSON_AddNumberToObject(root, "BACKUP_HTTPS_RESP_CODE", eventInfo.httpsBackupRespCode);
-    cJSON_AddNumberToObject(root, "FIANL_RESP_CODE", eventInfo.finalRespCode);
-    cJSON_AddNumberToObject(root, "MAIN_DETECT_MS", eventInfo.httpDetectTime);
-    cJSON_AddNumberToObject(root, "BACKUP_DETECT_MS", eventInfo.httpBackupDetectTime);
-    char *jsonStr = cJSON_PrintUnformatted(root);
-    // LCOV_EXCL_START
-    if (jsonStr == nullptr) {
-        cJSON_Delete(root);
-        return;
-    }
-    // LCOV_EXCL_STOP
     HiSysEventWrite(HiSysEvent::Domain::COMMUNICATION, "WIFI_CHR_EVENT", HiSysEvent::EventType::STATISTIC,
-        "EVENT_NAME", "NETMANGR_PORTAL_INFO", "EVENT_VALUE", std::string(jsonStr));
-    cJSON_free(jsonStr);
-    cJSON_Delete(root);
+        "EVENT_NAME", "NETMANGR_PORTAL_INFO", "EVENT_VALUE", ret);
 }
 
 } // namespace NetManagerStandard
