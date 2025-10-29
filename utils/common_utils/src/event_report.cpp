@@ -14,7 +14,6 @@
  */
 
 #include "event_report.h"
-#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
