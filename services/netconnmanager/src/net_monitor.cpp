@@ -31,7 +31,6 @@
 
 #include "net_monitor.h"
 #include "dns_config_client.h"
-#include "event_report.h"
 #include "fwmark_client.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
@@ -40,6 +39,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
+#include "cJSON.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -146,6 +146,8 @@ void NetMonitor::ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionS
             detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
         }
         result = CAPTIVE_PORTAL_STATE;
+        portalDetectInfo_.finalRespCode = probeResult.GetCode();
+        SendPortalInfo(portalDetectInfo_);
     } else {
         NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
         detectionDelay_ *= DOUBLE;
@@ -184,6 +186,34 @@ void NetMonitor::Detection()
     }
 }
 
+void NetMonitor::SendPortalInfo(PortalDetectInfo& info)
+{
+    cJSON *root = cJSON_CreateObject();
+    // LCOV_EXCL_START
+    if (root == nullptr) {
+        return;
+    }
+    // LCOV_EXCL_STOP
+    cJSON_AddNumberToObject(root, "RESP_CODE", info.httpRespCode);
+    cJSON_AddNumberToObject(root, "HTTPS_RESP_CODE", info.httpsRespCode);
+    cJSON_AddNumberToObject(root, "BACKUP_RESP_CODE", info.httpBackupRespCode);
+    cJSON_AddNumberToObject(root, "BACKUP_HTTPS_RESP_CODE", info.httpsBackupRespCode);
+    cJSON_AddNumberToObject(root, "FIANL_RESP_CODE", info.finalRespCode);
+    cJSON_AddNumberToObject(root, "MAIN_DETECT_MS", info.httpDetectTime);
+    cJSON_AddNumberToObject(root, "BACKUP_DETECT_MS", info.httpBackupDetectTime);
+    char *jsonStr = cJSON_PrintUnformatted(root);
+    // LCOV_EXCL_START
+    if (jsonStr == nullptr) {
+        cJSON_Delete(root);
+        return;
+    }
+    // LCOV_EXCL_STOP
+    std::string ret = std::string(jsonStr);
+    EventReport::SendPortalDetectInfoEvent(ret);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+}
+
 NetHttpProbeResult NetMonitor::SendProbe()
 {
     NETMGR_LOG_D("start net detection");
@@ -196,8 +226,11 @@ NetHttpProbeResult NetMonitor::SendProbe()
     std::shared_ptr<ProbeThread> backHttpsProxyThread = nullptr;
     CreateProbeThread(httpProxyThread, httpsProxyThread, latch, latchAll, true);
     CreateProbeThread(backHttpProxyThread, backHttpsProxyThread, latch, latchAll, false);
+    auto start = std::chrono::high_resolution_clock::now();
     StartProbe(httpProxyThread, httpsProxyThread, backHttpProxyThread, backHttpsProxyThread, true);
     latch->Await(std::chrono::milliseconds(PRIMARY_DETECTION_RESULT_WAIT_MS));
+    portalDetectInfo_.httpDetectTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - start).count();
     NetHttpProbeResult proxyResult = ProcessThreadDetectResult(httpProxyThread, httpsProxyThread, backHttpProxyThread,
         backHttpsProxyThread);
     if (proxyResult.IsNeedPortal() || proxyResult.IsSuccessful()) {
@@ -210,7 +243,10 @@ NetHttpProbeResult NetMonitor::SendProbe()
     std::shared_ptr<ProbeThread> backHttpsNoProxyThread = nullptr;
     CreateProbeThread(httpNoProxyThread, httpsNoProxyThread, latch, latchAll, true);
     CreateProbeThread(backHttpNoProxyThread, backHttpsNoProxyThread, latch, latchAll, false);
+    start = std::chrono::high_resolution_clock::now();
     StartProbe(httpNoProxyThread, httpsNoProxyThread, backHttpNoProxyThread, backHttpsNoProxyThread, false);
+    portalDetectInfo_.httpBackupDetectTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - start).count();
     latchAll->Await(std::chrono::milliseconds(ALL_DETECTION_RESULT_WAIT_MS));
     proxyResult = ProcessThreadDetectResult(httpProxyThread, httpsProxyThread, backHttpProxyThread,
         backHttpsProxyThread);
@@ -317,6 +353,10 @@ NetHttpProbeResult NetMonitor::ProcessThreadDetectResult(std::shared_ptr<ProbeTh
     NetHttpProbeResult httpsResult = GetThreadDetectResult(httpsProbeThread, ProbeType::PROBE_HTTPS);
     NetHttpProbeResult backHttpResult = GetThreadDetectResult(backHttpThread, ProbeType::PROBE_HTTP_FALLBACK);
     NetHttpProbeResult backHttpsResult = GetThreadDetectResult(backHttpsThread, ProbeType::PROBE_HTTPS_FALLBACK);
+    portalDetectInfo_.httpRespCode = httpResult.GetCode();
+    portalDetectInfo_.httpsRespCode = httpsResult.GetCode();
+    portalDetectInfo_.httpBackupRespCode = backHttpResult.GetCode();
+    portalDetectInfo_.httpsBackupRespCode = backHttpsResult.GetCode();
     if (httpResult.IsNeedPortal()) {
         NETMGR_LOG_I("primary http detect result: portal");
         return httpResult;

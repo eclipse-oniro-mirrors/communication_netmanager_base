@@ -32,6 +32,7 @@
 #include "net_http_probe.h"
 #include "net_link_info.h"
 #include "probe_thread.h"
+#include "event_report.h"
 #include "dual_stack_probe_callback.h"
 
 namespace OHOS {
@@ -112,6 +113,7 @@ private:
     void LoadGlobalHttpProxy();
     void ProcessDetection(NetHttpProbeResult& probeResult, NetDetectionStatus& result);
     NetHttpProbeResult SendProbe();
+    void SendPortalInfo(PortalDetectInfo& info);
     NetHttpProbeResult ProcessThreadDetectResult(std::shared_ptr<ProbeThread>& httpProbeThread,
         std::shared_ptr<ProbeThread>& httpsProbeThread, std::shared_ptr<ProbeThread>& backHttpThread,
         std::shared_ptr<ProbeThread>& backHttpsThread);
@@ -150,6 +152,7 @@ private:
     uint64_t lastDetectTimestamp_ = 0;
     int32_t dualStackProbeTimeOut_ = 5 * 1000;
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;
+    PortalDetectInfo portalDetectInfo_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

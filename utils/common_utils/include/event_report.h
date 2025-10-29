@@ -81,6 +81,16 @@ struct EventInfo {
     std::string errorMsg;
 };
 
+struct PortalDetectInfo {
+    int httpRespCode = -1;
+    int httpBackupRespCode = -1;
+    int httpsRespCode = -1;
+    int httpsBackupRespCode = -1;
+    int finalRespCode = -1;
+    long httpDetectTime = -1;
+    long httpBackupDetectTime = -1;
+};
+
 class EventReport {
 public:
     static void SendSupplierFaultEvent(const EventInfo &eventInfo);
@@ -89,6 +99,7 @@ public:
     static void SendRequestBehaviorEvent(const EventInfo &eventInfo);
     static void SendMonitorFaultEvent(const EventInfo &eventInfo);
     static void SendMonitorBehaviorEvent(const EventInfo &eventInfo);
+    static void SendPortalDetectInfoEvent(const std::string &ret);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

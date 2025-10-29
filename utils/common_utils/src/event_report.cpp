@@ -89,5 +89,12 @@ void EventReport::SendMonitorBehaviorEvent(const EventInfo &eventInfo)
     HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_MONITOR_STAT, HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_NET_MONITOR_STATUS, eventInfo.monitorStatus);
 }
+
+void EventReport::SendPortalDetectInfoEvent(const std::string &ret)
+{
+    HiSysEventWrite(HiSysEvent::Domain::COMMUNICATION, "WIFI_CHR_EVENT", HiSysEvent::EventType::STATISTIC,
+        "EVENT_NAME", "NETMANGR_PORTAL_INFO", "EVENT_VALUE", ret);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
