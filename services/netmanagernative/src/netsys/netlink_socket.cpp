@@ -67,11 +67,9 @@ static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket)
     ssize_t msgState = sendmsg(kernelSocket, &msgHeader, 0);
     if (msgState == -1) {
         NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
-        close(kernelSocket);
         return -1;
     } else if (msgState == 0) {
         NETNATIVE_LOGE("[NetlinkSocket] 0 bytes send.");
-        close(kernelSocket);
         return -1;
     }
     NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
@@ -90,6 +88,11 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         return -1;
     }
     ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
+    if (msgState <= 0) {
+        NETNATIVE_LOGE("[NetlinkSocket] send msg failed");
+        close(kernelSocket);
+        return -1;
+    }
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
@@ -321,6 +324,11 @@ int32_t ReceiveMsgFromKernel(struct nlmsghdr *msg, uint32_t table, void* rcvMsg)
         return -1;
     }
     ssize_t msgState = SendMsgToKernel(msg, kernelSocket);
+    if (msgState <= 0) {
+        NETNATIVE_LOGE("[NetlinkSocket] send msg failed");
+        close(kernelSocket);
+        return -1;
+    }
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetRcvMsgFromKernel(kernelSocket, msg->nlmsg_type, table, rcvMsg);
     }
@@ -344,7 +352,7 @@ int32_t GetRcvMsgFromKernel(int32_t &sock, uint16_t msgType, uint32_t table, voi
         return -errno;
     }
     while (readedInfos > 0) {
-        uint32_t readLength = static_cast<uint32_t>(readedInfos);
+        int32_t readLength = static_cast<int32_t>(readedInfos);
         // Traverse and read the information returned by the kernel for item by item processing.
         for (nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr *>(readBuffer); NLMSG_OK(nlmsgHeader, readLength);
              nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
@@ -391,7 +399,7 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
         return;
     }
     char macStr[MAC_ADDRESS_STR_LEN] = {0};
-    uint32_t length = RTM_PAYLOAD(nlmsgHeader);
+    int32_t length = static_cast<int32_t>(RTM_PAYLOAD(nlmsgHeader));
     if (nlmsgHeader->nlmsg_type != RTM_NEWNEIGH && nlmsgHeader->nlmsg_type != RTM_DELNEIGH &&
         nlmsgHeader->nlmsg_type != RTM_GETNEIGH) {
         NETNATIVE_LOGE("not ip neigh info: %{public}d", nlmsgHeader->nlmsg_type);

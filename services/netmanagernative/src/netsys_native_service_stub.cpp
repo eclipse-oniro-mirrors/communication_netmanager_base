@@ -2018,7 +2018,7 @@ int32_t NetsysNativeServiceStub::CmdGetIpNeighTable(MessageParcel &data, Message
         for (auto p = ipMacInfo.begin(); p != ipMacInfo.end(); ++p) {
             sptr<NetIpMacInfo> info_ptr = sptr<NetIpMacInfo>::MakeSptr(*p);
             if (!NetIpMacInfo::Marshalling(reply, info_ptr)) {
-                NETMGR_LOG_E("proxy Marshalling failed");
+                NETNATIVE_LOGE("proxy Marshalling failed");
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
