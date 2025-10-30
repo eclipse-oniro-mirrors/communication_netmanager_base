@@ -873,7 +873,10 @@ function business_test()
     try {
         ani_test.businessErrorTest();
         assertEQ(true, false);
-    } catch (err: BusinessError) {
+    } catch (err) {
+        if (!(err instanceof BusinessError)) {
+            throw err;
+        }
         assertEQ(err.code, 201);
         assertEQ(err.message, 'Permission denied');
     }
