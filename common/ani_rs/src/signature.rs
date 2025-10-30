@@ -27,10 +27,10 @@ pub const DOUBLE: &CStr = cstr(b"std.core.Double\0");
 pub const STRING: &CStr = cstr(b"std.core.String\0");
 pub const CHAR: &CStr = cstr(b"std.core.Char\0");
 
-pub const MAP: &CStr = cstr(b"escompat.ReadonlyMap\0");
+pub const MAP: &CStr = cstr(b"std.core.ReadonlyMap\0");
 pub const ARRAY: &CStr = cstr(b"escompat.Array\0");
 pub const ARRAY_BUFFER: &CStr = cstr(b"std.core.ArrayBuffer\0");
-pub const RECORD: &CStr = cstr(b"escompat.Record\0");
+pub const RECORD: &CStr = cstr(b"std.core.Record\0");
 pub const ITERATOR: &CStr = cstr(b"std.core.Iterator\0");
 
 pub const INT8_ARRAY: &CStr = cstr(b"escompat.Int8Array\0");
@@ -49,6 +49,7 @@ pub const ENTRIES: &CStr = cstr(b"entries\0");
 pub const NEXT: &CStr = cstr(b"next\0");
 pub const VALUE: &CStr = cstr(b"value\0");
 pub const ANI_UNIONT: &CStr = cstr(b"ani_union\0");
+pub const TOBYTE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toByte\0") };
 pub const TOBOOLEAN: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toBoolean\0") };
 pub const TOCHAR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toChar\0") };
 pub const TOSHORT: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"toShort\0") };

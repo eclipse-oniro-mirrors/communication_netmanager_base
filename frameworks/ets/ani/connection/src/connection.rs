@@ -15,8 +15,8 @@ use std::{ffi::CStr, mem};
 
 use ani_rs::{
     business_error::BusinessError,
-    objects::{AniFnObject, AniRef, GlobalRefCallback},
-    AniEnv,
+    objects::{AniFnObject, AniRef, GlobalRefCallback, AniObject},
+    AniEnv, error::AniError,
 };
 
 use crate::{
@@ -25,10 +25,11 @@ use crate::{
         NetCapabilityInfo, NetConnection, NetConnectionPropertyInfo, NetHandle, NetSpecifier,
     },
     error_code::convert_to_business_error,
-    wrapper::{check_permission, ConnUnregisterHandle, NetConnClient},
+    wrapper::{check_permission, ConnUnregisterHandle, NetConnClient}, connection_info,
 };
 
 const INTERNET_PERMISSION: &str = "ohos.permission.INTERNET";
+const NATIVE_PTR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"nativePtr\0") };
 
 #[ani_rs::native]
 pub(crate) fn get_default_net() -> Result<NetHandle, BusinessError> {
@@ -218,35 +219,23 @@ impl Connection {
 }
 
 #[ani_rs::native]
-pub(crate) fn create_net_connection<'local>(
-    env: &AniEnv<'local>,
+pub(crate) fn create_net_connection_ptr(
     net_specifier: Option<NetSpecifier>,
     timeout: Option<i32>,
-) -> Result<AniRef<'local>, BusinessError> {
-    static CONNECTION_CLASS: &CStr = unsafe {
-        CStr::from_bytes_with_nul_unchecked(
-            b"@ohos.net.connection.connection.NetConnectionInner\0",
-        )
-    };
-    static CTOR_SIGNATURE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"l:\0") };
-
-    let connection = Box::new(Connection::new(None, None));
-
+) -> Result<i64, BusinessError> {
+    let connection = Box::new(Connection::new(net_specifier, timeout));
     let ptr = Box::into_raw(connection);
-    let class = env.find_class(CONNECTION_CLASS).unwrap();
-    let obj = env
-        .new_object_with_signature(&class, CTOR_SIGNATURE, (ptr as i64,))
-        .unwrap();
-    Ok(obj.into())
+    Ok(ptr as i64)
 }
 
 #[ani_rs::native]
 pub(crate) fn on_net_available(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_available = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
@@ -254,10 +243,11 @@ pub(crate) fn on_net_available(
 #[ani_rs::native]
 pub(crate) fn on_net_block_status_change(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_block_status_change =
         Some(callback.into_global_callback(env).unwrap());
     Ok(())
@@ -266,10 +256,11 @@ pub(crate) fn on_net_block_status_change(
 #[ani_rs::native]
 pub(crate) fn on_net_capabilities_change(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_capabilities_change =
         Some(callback.into_global_callback(env).unwrap());
     Ok(())
@@ -278,10 +269,11 @@ pub(crate) fn on_net_capabilities_change(
 #[ani_rs::native]
 pub(crate) fn on_net_connection_properties_change(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_connection_properties_change =
         Some(callback.into_global_callback(env).unwrap());
     Ok(())
@@ -290,10 +282,11 @@ pub(crate) fn on_net_connection_properties_change(
 #[ani_rs::native]
 pub(crate) fn on_net_lost(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_lost = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
@@ -301,17 +294,19 @@ pub(crate) fn on_net_lost(
 #[ani_rs::native]
 pub(crate) fn on_net_unavailable(
     env: &AniEnv,
-    this: NetConnection,
+    obj: AniObject,
     callback: AniFnObject,
 ) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
     connection.callback.on_net_unavailable = Some(callback.into_global_callback(env).unwrap());
     Ok(())
 }
 
 #[ani_rs::native]
-pub(crate) fn register_network_change(this: NetConnection) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+pub(crate) fn register_network_change(env: &AniEnv, obj: AniObject) -> Result<(), BusinessError> {
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
 
     let callback_ref = &mut connection.callback;
     let unregister = NetConnClient::register_net_conn_callback(callback_ref).map_err(|e| {
@@ -323,8 +318,9 @@ pub(crate) fn register_network_change(this: NetConnection) -> Result<(), Busines
 }
 
 #[ani_rs::native]
-pub(crate) fn unregister_network_change(this: NetConnection) -> Result<(), BusinessError> {
-    let connection = unsafe { &mut *(this.native_ptr as *mut Connection) };
+pub(crate) fn unregister_network_change(env: &AniEnv, obj: AniObject) -> Result<(), BusinessError> {
+    let native_ptr = env.get_field::<i64>(&obj, NATIVE_PTR)?;
+    let connection = unsafe { &mut *(native_ptr as *mut Connection) };
 
     if let Some(unregister) = connection.unregister.as_mut() {
         if let Err(e) = unregister.unregister() {

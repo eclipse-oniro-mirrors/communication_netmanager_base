@@ -40,7 +40,12 @@ export default namespace connection {
 
   // type UDPSocket = socket.UDPSocket;
 
-  export native function createNetConnection(netSpecifier?: NetSpecifier, timeout?: int): NetConnection;
+  export native function createNetConnectionPtr(netSpecifier?: NetSpecifier, timeout?: int): long;
+
+  export function createNetConnection(netSpecifier?: NetSpecifier, timeout?: int): NetConnection {
+    let ptr = createNetConnectionPtr(netSpecifier, timeout);
+    return new NetConnectionInner(ptr);
+  }
 
   export function getDefaultNet(callback: AsyncCallback<NetHandle>): void {
     let p1 = taskpool.execute((): NetHandle => {
