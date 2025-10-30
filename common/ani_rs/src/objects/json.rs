@@ -52,7 +52,7 @@ impl JsonValue<'_> {
 
     pub fn stringify(&self, env: &AniEnv) -> Result<String, AniError> {
         const JSON_TOOL_CLASS_NAME: &'static CStr = unsafe {
-            CStr::from_bytes_with_nul_unchecked(b"escompat.JSON\0")
+            CStr::from_bytes_with_nul_unchecked(b"std.core.JSON\0")
         };
         let cls = env.find_class(JSON_TOOL_CLASS_NAME)?;
         let stringify_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"stringify\0") };
