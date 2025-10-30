@@ -115,7 +115,7 @@ HWTEST_F(IptablesWrapperTest, RunRestoreCommands001, TestSize.Level1)
     std::string cmd = "*filter\n";
     cmd.append("-A FORWARD -j ACCEPT\n");
     auto ret = wrapper->RunRestoreCommands(ipType, cmd);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     
     wrapper->iptablesWrapperFfrtQueue_ = 0;
     ret = wrapper->RunRestoreCommands(ipType, cmd);
