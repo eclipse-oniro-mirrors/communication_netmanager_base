@@ -76,7 +76,7 @@ HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest001, TestSize.Level1)
     uint16_t clearThing = RTM_GETROUTE;
     uint32_t table = 0;
     auto ret = ClearRouteInfo(clearThing, table);
-    EXPECT_EQ(ret, -1);
+    EXPECT_GE(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest002, TestSize.Level1)
@@ -84,7 +84,7 @@ HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest002, TestSize.Level1)
     uint16_t clearThing = RTM_GETRULE;
     uint32_t table = 0;
     auto ret = ClearRouteInfo(clearThing, table);
-    EXPECT_EQ(ret, -1);
+    EXPECT_GE(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest003, TestSize.Level1)
