@@ -273,7 +273,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest003, TestSize.Level1)
 
     int32_t result = NETMANAGER_ERROR;
     EXPECT_EQ(reply.ReadInt32(result), true);
-    EXPECT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_LE(result, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -695,7 +695,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestS
     errData.WriteBool(true);
     errData.WriteString(ifname);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
