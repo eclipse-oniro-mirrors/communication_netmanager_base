@@ -666,7 +666,6 @@ bool ConnectionExec::ExecGetIpNeighTable(GetIpNeighTableContext *context)
     NETMANAGER_BASE_LOGI("ExecGetIpNeighTable");
     int32_t errorCode = NetConnClient::GetInstance().GetIpNeighTable(context->ipMacInfo_);
     if (errorCode != NET_CONN_SUCCESS) {
-        NETMANAGER_BASE_LOGE("errorCode: %{public}d", errorCode);
         context->SetErrorCode(errorCode);
         return false;
     }
