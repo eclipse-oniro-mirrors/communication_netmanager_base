@@ -24,7 +24,7 @@ use ani_rs::ani_constructor;
 ani_constructor!(
     namespace "@ohos.net.connection.connection"
     [
-        "createNetConnection": connection::create_net_connection,
+        "createNetConnectionPtr": connection::create_net_connection_ptr,
         "getDefaultNetSync" : connection::get_default_net,
         "getAllNetsSync" : connection::get_all_nets,
         "hasDefaultNetSync" : connection::has_default_net,

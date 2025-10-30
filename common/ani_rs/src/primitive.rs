@@ -375,7 +375,7 @@ impl AniExt for i8 {
             (**env.inner).Object_CallMethodByName_Byte.unwrap()(
                 env.inner,
                 ani_ref.as_raw(),
-                signature::TOINT.as_ptr(),
+                signature::TOBYTE.as_ptr(),
                 null_mut(),
                 &mut value as *mut _,
             )
@@ -1115,8 +1115,8 @@ impl AniExt for f32 {
             let class = env.find_class(signature::FLOAT)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"f:\0"),
-                (value,),
+                CStr::from_bytes_with_nul_unchecked(b"d:\0"),
+                (value as f64,),
             )
             .map(|obj| obj.into())
         }
