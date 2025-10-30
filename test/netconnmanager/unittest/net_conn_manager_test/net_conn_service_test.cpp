@@ -1320,6 +1320,19 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest007, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr, TEST_UID);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+
+    sptr<NetSupplier> supplier = nullptr;
+    sptr<NetSupplier> newSupplier = nullptr;
+    NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
+
+    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0, 0, REQUEST);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, FindSupplierWithInternetByBearerType001, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
