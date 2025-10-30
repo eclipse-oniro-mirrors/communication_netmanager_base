@@ -654,7 +654,7 @@ jerry_value_t PacFunctions::JsDateRange(const jerry_value_t funcObjVal, const je
     }
     int useGmt = 0;
     timeinfo = localtime(&rawtime);
-    for (int i = 0; i < jsDateRangeCheckers.size(); i++) {
+    for (size_t i = 0; i < jsDateRangeCheckers.size(); i++) {
         if (jsDateRangeCheckers[i](argsCnt, args)) {
             return jsDateRangeHandler[i](args, timeinfo);
         }
