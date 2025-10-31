@@ -34,8 +34,7 @@ const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode:
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PROXY_MODE),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE),
-                                        };
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
