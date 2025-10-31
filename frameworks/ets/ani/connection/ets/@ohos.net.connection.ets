@@ -129,7 +129,7 @@ export default namespace connection {
     p1.then((content: Any) => {
         callback(new BusinessError(), content as NetCapabilities);
     }, (err: Error): void => {
-        callback(err as BusinessError, new NetCapabilitiesInner);
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -733,6 +733,13 @@ export default namespace connection {
     networkCap?: Array<NetCap>;
 
     bearerTypes: Array<NetBearType>;
+
+    constructor(linkUpBandwidthKbps: int, linkDownBandwidthKbps: int, networkCap: Array<NetCap>, bearerTypes: Array<NetBearType>) {
+      this.linkUpBandwidthKbps = linkUpBandwidthKbps;
+      this.linkDownBandwidthKbps = linkDownBandwidthKbps;
+      this.networkCap = networkCap;
+      this.bearerTypes = bearerTypes;
+    }
   }
 
   export interface NetConnectionPropertyInfo {

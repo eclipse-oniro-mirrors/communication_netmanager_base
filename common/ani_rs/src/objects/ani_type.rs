@@ -15,7 +15,7 @@ use std::ops::Deref;
 
 use ani_sys::{ani_object, ani_type};
 
-use super::AniObject;
+use super::{AniObject, AniRef};
 
 #[repr(transparent)]
 #[derive(Debug, Clone)]
@@ -50,6 +50,18 @@ impl<'local> From<AniType<'local>> for AniObject<'local> {
 impl<'local> From<AniObject<'local>> for AniType<'local> {
     fn from(value: AniObject<'local>) -> Self {
         Self::from_raw(value.into_raw())
+    }
+}
+
+impl<'local> From<AniType<'local>> for AniRef<'local> {
+    fn from(value: AniType<'local>) -> Self {
+        AniRef::from(value.0)
+    }
+}
+
+impl<'local> From<AniRef<'local>> for AniType<'local> {
+    fn from(value: AniRef<'local>) -> Self {
+        AniType::from(AniObject::from(value))
     }
 }
 

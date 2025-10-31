@@ -73,26 +73,22 @@ bool HasDefaultNet(int32_t &ret)
     return hasDefaultNet;
 }
 
-NetCapabilities GetNetCapabilities(NetHandle const &netHandle, int32_t &ret)
+int32_t GetNetCapabilities(NetHandle const &netHandle, NetCapabilities &rustNetCapabilities)
 {
     NetManagerStandard::NetHandle nativeNethandle;
     nativeNethandle.SetNetId(netHandle.net_id);
     NetManagerStandard::NetAllCapabilities nativeNetCapabilities;
-    ret = NetManagerStandard::NetConnClient::GetInstance().GetNetCapabilities(nativeNethandle, nativeNetCapabilities);
-    auto networkCap = rust::Vec<NetManagerStandard::NetCap>();
+    int32_t ret = NetManagerStandard::NetConnClient::GetInstance()
+        .GetNetCapabilities(nativeNethandle, nativeNetCapabilities);
     for (auto &cap : nativeNetCapabilities.netCaps_) {
-        networkCap.push_back(cap);
+        rustNetCapabilities.networkCap.push_back(cap);
     }
-    auto bearerTypes = rust::vec<NetManagerStandard::NetBearType>();
     for (auto &bearerType : nativeNetCapabilities.bearerTypes_) {
-        bearerTypes.push_back(bearerType);
+        rustNetCapabilities.bearerTypes.push_back(bearerType);
     }
-    return NetCapabilities{
-        .linkUpBandwidthKbps = nativeNetCapabilities.linkUpBandwidthKbps_,
-        .linkDownBandwidthKbps = nativeNetCapabilities.linkDownBandwidthKbps_,
-        .networkCap = networkCap,
-        .bearerTypes = bearerTypes,
-    };
+    rustNetCapabilities.linkUpBandwidthKbps = nativeNetCapabilities.linkUpBandwidthKbps_;
+    rustNetCapabilities.linkDownBandwidthKbps = nativeNetCapabilities.linkDownBandwidthKbps_;
+    return ret;
 }
 
 HttpProxy GetDefaultHttpProxy(int32_t &ret)

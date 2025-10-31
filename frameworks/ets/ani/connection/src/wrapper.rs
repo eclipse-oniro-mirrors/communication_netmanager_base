@@ -55,8 +55,14 @@ impl NetConnClient {
     }
 
     pub fn get_net_capabilities(handle: bridge::NetHandle) -> Result<bridge::NetCapabilities, i32> {
-        let mut ret = 0;
-        let net_capabilities = ffi::GetNetCapabilities(&handle.into(), &mut ret);
+        let mut net_capabilities = ffi::NetCapabilities {
+            linkUpBandwidthKbps: 0,
+            linkDownBandwidthKbps: 0,
+            networkCap: Vec::new(),
+            bearerTypes: Vec::new(),
+        };
+
+        let ret = ffi::GetNetCapabilities(&handle.into(), &mut net_capabilities);
         if ret != 0 {
             return Err(ret);
         }
@@ -607,7 +613,7 @@ pub mod ffi {
         fn GetDefaultNetHandle(ret: &mut i32) -> NetHandle;
         fn GetAllNets(ret: &mut i32) -> Vec<NetHandle>;
         fn HasDefaultNet(ret: &mut i32) -> bool;
-        fn GetNetCapabilities(handle: &NetHandle, ret: &mut i32) -> NetCapabilities;
+        fn GetNetCapabilities(handle: &NetHandle, capabilities: &mut NetCapabilities) -> i32;
 
         fn GetDefaultHttpProxy(ret: &mut i32) -> HttpProxy;
         fn GetGlobalHttpProxy(ret: &mut i32) -> HttpProxy;
