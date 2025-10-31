@@ -981,7 +981,7 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
     NetRequest netRequest(netActivate->GetUid(), reqId);
     sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
     if (supplier) {
-        NetBearType defaultNetBearType = 
+        NetBearType defaultNetBearType =
             defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
         supplier->CancelRequest(netRequest, defaultNetBearType);
     }
@@ -989,7 +989,7 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second != nullptr) {
-            NetBearType defaultNetBearType = 
+            NetBearType defaultNetBearType =
             defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
             iterSupplier->second->CancelRequest(netRequest, defaultNetBearType);
         }
@@ -1464,7 +1464,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
                 netrequest.uid = iterActivate->second->GetUid();
                 if (pNetService) {
-                    NetBearType defaultNetBearType = 
+                    NetBearType defaultNetBearType =
                         defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
                     pNetService->CancelRequest(netrequest, defaultNetBearType);
                 }
@@ -1476,7 +1476,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 if (iterSupplier->second == nullptr) {
                     continue;
                 }
-                NetBearType defaultNetBearType = 
+                NetBearType defaultNetBearType =
                     defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
                 iterSupplier->second->CancelRequest(netrequest, defaultNetBearType);
             }
