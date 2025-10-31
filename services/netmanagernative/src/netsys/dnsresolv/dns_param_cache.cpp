@@ -214,6 +214,39 @@ int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string
     return 0;
 }
 
+int32_t DnsParamCache::GetVpnResolverConfig(uint32_t uid, std::vector<std::string> &servers,
+                                            std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
+                                            uint8_t &retryCount)
+{
+    std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
+    if (vpnNetId_.empty()) {
+        return -1;
+    }
+    for (auto mem : vpnUidRanges_) {
+        if (static_cast<int64_t>(uid) >= mem.begin_ && static_cast<int64_t>(uid) <= mem.end_) {
+            std::lock_guard<ffrt::mutex> lock(cacheMutex_);
+            auto it = serverConfigMap_.find(mem.netId_);
+            if (it == serverConfigMap_.end()) {
+                NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
+                return -1;
+            }
+            servers = it->second.GetServers();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            std::vector<std::string> dns;
+            if (GetDnsServersByAppUid(GetCallingUid(), dns)) {
+                DNS_CONFIG_PRINT("GetResolverConfig hit netfirewall");
+                servers.assign(dns.begin(), dns.end());
+            }
+#endif
+            domains = it->second.GetDomains();
+            baseTimeoutMsec = it->second.GetTimeoutMsec();
+            retryCount = it->second.GetRetryCount();
+            return 0;
+        }
+    }
+    return -1;
+}
+
 int32_t DnsParamCache::GetResolverConfig(uint16_t netId, uint32_t uid, std::vector<std::string> &servers,
                                          std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                          uint8_t &retryCount)
@@ -223,33 +256,11 @@ int32_t DnsParamCache::GetResolverConfig(uint16_t netId, uint32_t uid, std::vect
         netId = defaultNetId_;
         NETNATIVE_LOG_D("defaultNetId_ = [%{public}u]", netId);
     }
-    
-    {
-        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-        for (auto mem : vpnUidRanges_) {
-            if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
-                NETNATIVE_LOG_D("is vpn hap");
-                auto it = serverConfigMap_.find(vpnNetId_);
-                if (it == serverConfigMap_.end()) {
-                    NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", vpnNetId_);
-                    break;
-                }
-                servers = it->second.GetServers();
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-                std::vector<std::string> dns;
-                if (GetDnsServersByAppUid(GetCallingUid(), dns)) {
-                    DNS_CONFIG_PRINT("GetResolverConfig hit netfirewall");
-                    servers.assign(dns.begin(), dns.end());
-                }
-#endif
-                domains = it->second.GetDomains();
-                baseTimeoutMsec = it->second.GetTimeoutMsec();
-                retryCount = it->second.GetRetryCount();
-                return 0;
-            }
-        }
+
+    if (GetVpnResolverConfig(uid, servers, domains, baseTimeoutMsec, retryCount) != 0) {
+        return GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
     }
-    return GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    return 0;
 }
 
 int32_t DnsParamCache::GetDefaultNetwork() const
@@ -341,7 +352,12 @@ int32_t DnsParamCache::AddUidRange(uint32_t netId, const std::vector<NetManagerS
 {
     std::lock_guard<ffrt::mutex> guard(uidRangeMutex_);
     NETNATIVE_LOG_D("DnsParamCache::AddUidRange size = [%{public}zu]", uidRanges.size());
-    vpnNetId_ = netId;
+    vpnNetId_.push_back(netId);
+    for (auto mem : uidRanges) {
+        NETNATIVE_LOG_D(
+            "GetResolverConfig AddUidRange begin %{public}d end %{public}d netId %{public}d priority %{public}d",
+            mem.begin_, mem.end_, mem.netId_, mem.priorityId_);
+    }
     auto middle = vpnUidRanges_.insert(vpnUidRanges_.end(), uidRanges.begin(), uidRanges.end());
     std::inplace_merge(vpnUidRanges_.begin(), middle, vpnUidRanges_.end());
     return 0;
@@ -351,7 +367,10 @@ int32_t DnsParamCache::DelUidRange(uint32_t netId, const std::vector<NetManagerS
 {
     std::lock_guard<ffrt::mutex> guard(uidRangeMutex_);
     NETNATIVE_LOG_D("DnsParamCache::DelUidRange size = [%{public}zu]", uidRanges.size());
-    vpnNetId_ = 0;
+    auto it = std::find(vpnNetId_.begin(), vpnNetId_.end(), netId);
+    if (it != vpnNetId_.end()) {
+        vpnNetId_.erase(it);
+    }
     auto end = std::set_difference(vpnUidRanges_.begin(), vpnUidRanges_.end(), uidRanges.begin(),
                                    uidRanges.end(), vpnUidRanges_.begin());
     vpnUidRanges_.erase(end, vpnUidRanges_.end());
@@ -760,40 +779,48 @@ int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag)
     return 0;
 }
 
+int32_t DnsParamCache::GetUserDefinedVpnServerFlag(uint32_t uid, bool &flag)
+{
+    std::lock_guard<ffrt::mutex> uidLock(uidRangeMutex_);
+    if (vpnNetId_.empty()) {
+        return -1;
+    }
+
+    for (auto mem : vpnUidRanges_) {
+        if (static_cast<int64_t>(uid) >= mem.begin_ && static_cast<int64_t>(uid) <= mem.end_) {
+            NETNATIVE_LOG_D("is vpn hap");
+            std::lock_guard<ffrt::mutex> lock(cacheMutex_);
+            auto it = serverConfigMap_.find(mem.netId_);
+            if (it == serverConfigMap_.end()) {
+                NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", mem.netId_);
+                return -1;
+            }
+            flag = it->second.IsUserDefinedServer();
+            return 0;
+        }
+    }
+    return -1;
+}
+
 int32_t DnsParamCache::GetUserDefinedServerFlag(uint16_t netId, bool &flag, uint32_t uid)
 {
     if (netId == 0) {
         netId = defaultNetId_;
         NETNATIVE_LOG_D("defaultNetId_ = [%{public}u]", netId);
     }
-    {
-        std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-        for (auto mem : vpnUidRanges_) {
-            if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
-                NETNATIVE_LOG_D("is vpn hap");
-                auto it = serverConfigMap_.find(vpnNetId_);
-                if (it == serverConfigMap_.end()) {
-                    NETNATIVE_LOG_D("vpn get Config failed: not have vpnnetid:%{public}d,", vpnNetId_);
-                    break;
-                }
-                flag = it->second.IsUserDefinedServer();
-                return 0;
-            }
-        }
-        auto it = serverConfigMap_.find(netId);
-        if (it == serverConfigMap_.end()) {
-            DNS_CONFIG_PRINT("GetUserDefinedServerFlag failed: netid is not have netid:%{public}d,", netId);
-            return -ENOENT;
-        }
+
+    if (GetUserDefinedVpnServerFlag(uid, flag) != 0) {
+        return GetUserDefinedServerFlag(netId, flag);
     }
-    return GetUserDefinedServerFlag(netId, flag);
+
+    return 0;
 }
 
 bool DnsParamCache::IsUseVpnDns(uint32_t uid)
 {
     for (auto mem : vpnUidRanges_) {
         if (static_cast<int32_t>(uid) >= mem.begin_ && static_cast<int32_t>(uid) <= mem.end_) {
-            auto it = serverConfigMap_.find(vpnNetId_);
+            auto it = serverConfigMap_.find(mem.netId_);
             if (it == serverConfigMap_.end()) {
                 return false;
             }

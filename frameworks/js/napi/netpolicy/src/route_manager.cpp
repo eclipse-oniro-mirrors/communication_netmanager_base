@@ -85,6 +85,7 @@ constexpr const char *XFRM_CARD_NAME = "xfrm-vpn";
 constexpr const char *PPP_CARD_NAME = "ppp-vpn";
 constexpr const char *TUN_CARD_NAME = "vpn-tun";
 constexpr const char *MULTI_TUN_CARD_NAME = "multitun-vpn";
+constexpr const char *INNER_CHL_NAME = "inner-chl";
 const std::string LOCAL_MANGLE_OUTPUT = "routectrl_mangle_OUTPUT";
 #endif // SUPPORT_SYSVPN
 constexpr uid_t UID_ROOT = 0;
@@ -462,6 +463,8 @@ uint32_t RouteManager::GetVpnInterffaceToId(const std::string &ifName)
         return CommonUtils::StrToUint(ifName.substr(strlen(PPP_CARD_NAME)));
     } else if (ifName.find(MULTI_TUN_CARD_NAME) != std::string::npos) {
         return CommonUtils::StrToUint(ifName.substr(strlen(MULTI_TUN_CARD_NAME)));
+    } else if (ifName.find(INNER_CHL_NAME) != std::string::npos) {
+        return CommonUtils::StrToUint(ifName.substr(strlen(INNER_CHL_NAME)));
     }
     return 0;
 }

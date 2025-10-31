@@ -25,7 +25,7 @@
       "OHOS::NetManagerStandard::NetFirewallIpParam::GetStartIp() const";
       "OHOS::NetManagerStandard::NetFirewallRule::Marshalling(OHOS::Parcel&) const";
       "OHOS::NetManagerStandard::NetFirewallRule::Unmarshalling(OHOS::Parcel&)";
-      "OHOS::NetManagerStandard::UidRange::UidRange(int, int)";
+      "OHOS::NetManagerStandard::UidRange::UidRange(int, int, unsigned int, unsigned int)";
       "OHOS::NetsysNative::NotifyCallbackStub::~NotifyCallbackStub()";
       "OHOS::NetsysNative::NotifyCallbackStub::NotifyCallbackStub()";
       "OHOS::NetsysNative::NotifyCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";

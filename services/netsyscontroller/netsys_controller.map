@@ -87,10 +87,10 @@
       "OHOS::NetManagerStandard::NetsysController::IpfwdRemoveInterfaceForward(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddInterface(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::NetManagerStandard::NetBearType)";
       "OHOS::NetManagerStandard::NetsysController::NetworkAddRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
-      "OHOS::NetManagerStandard::NetsysController::NetworkAddUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NetworkAddUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::NetworkCreatePhysical(int, int)";
       "OHOS::NetManagerStandard::NetsysController::NetworkCreateVirtual(int, bool)";
-      "OHOS::NetManagerStandard::NetsysController::NetworkDelUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NetworkDelUids(int, std::__h::vector<int, std::__h::allocator<int>> const&, std::__h::vector<int, std::__h::allocator<int>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::NetworkDestroy(int, bool)";
       "OHOS::NetManagerStandard::NetsysController::NetworkRemoveInterface(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::NetworkRemoveRoute(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";

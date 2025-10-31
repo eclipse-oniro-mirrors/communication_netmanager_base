@@ -23,7 +23,8 @@ namespace {
 constexpr int32_t INVLID_VALUE = -1;
 }
 
-UidRange::UidRange(int32_t begin, int32_t end) : begin_(begin), end_(end) {}
+UidRange::UidRange(int32_t begin, int32_t end, uint32_t priorityId, uint32_t netId)
+    : begin_(begin), end_(end), priorityId_(priorityId), netId_(netId) {}
 
 uint32_t UidRange::Size() const
 {
@@ -35,7 +36,8 @@ uint32_t UidRange::Size() const
 
 bool UidRange::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteInt32(begin_) && parcel.WriteInt32(end_);
+    return parcel.WriteInt32(begin_) && parcel.WriteInt32(end_) &&
+        parcel.WriteUint32(priorityId_) && parcel.WriteUint32(netId_);
 }
 
 sptr<UidRange> UidRange::Unmarshalling(Parcel &parcel)
@@ -46,7 +48,8 @@ sptr<UidRange> UidRange::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
 
-    bool allOK = parcel.ReadInt32(ptr->begin_) && parcel.ReadInt32(ptr->end_);
+    bool allOK = parcel.ReadInt32(ptr->begin_) && parcel.ReadInt32(ptr->end_) &&
+        parcel.ReadUint32(ptr->priorityId_) && parcel.ReadUint32(ptr->netId_);
     return allOK ? ptr : nullptr;
 }
 } // namespace NetManagerStandard

@@ -577,10 +577,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
     ret = netsysController->NetworkDestroy(0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = netsysController->NetworkAddUids(0, beginUids, endUids);
+    ret = netsysController->NetworkAddUids(0, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = netsysController->NetworkDelUids(0, beginUids, endUids);
+    ret = netsysController->NetworkDelUids(0, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->NetworkAddInterface(0, iface, BEARER_DEFAULT);
@@ -1146,17 +1146,17 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest001, TestSize.Level1)
 
     netsysController->NetworkCreateVirtual(netId, false);
 
-    auto ret = netsysController->NetworkAddUids(netId, beginUids, endUids);
+    auto ret = netsysController->NetworkAddUids(netId, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = netsysController->NetworkDelUids(netId, beginUids, endUids);
+    ret = netsysController->NetworkDelUids(netId, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     endUids = {1, 2};
-    ret = netsysController->NetworkAddUids(netId, beginUids, endUids);
+    ret = netsysController->NetworkAddUids(netId, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 
-    ret = netsysController->NetworkDelUids(netId, beginUids, endUids);
+    ret = netsysController->NetworkDelUids(netId, beginUids, endUids, 0);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 

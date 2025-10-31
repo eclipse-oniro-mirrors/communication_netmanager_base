@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 struct UidRange : public Parcelable {
-    UidRange(int32_t begin, int32_t end);
+    UidRange(int32_t begin, int32_t end, uint32_t priorityId, uint32_t netId);
     UidRange() = default;
     virtual ~UidRange(){};
 
@@ -31,12 +31,17 @@ struct UidRange : public Parcelable {
 
     friend bool operator<(const UidRange &lhs, const UidRange &rhs)
     {
-        return lhs.begin_ != rhs.begin_ ? (lhs.begin_ < rhs.begin_) : (lhs.end_ < rhs.end_);
+        if (lhs.priorityId_ == rhs.priorityId_) {
+            return lhs.begin_ != rhs.begin_ ? (lhs.begin_ < rhs.begin_) : (lhs.end_ < rhs.end_);
+        } else {
+            return lhs.priorityId_ > rhs.priorityId_;
+        }
     }
 
     friend bool operator==(const UidRange &lhs, const UidRange &rhs)
     {
-        return (lhs.begin_ == rhs.begin_ && lhs.end_ == rhs.end_);
+        return (lhs.begin_ == rhs.begin_ && lhs.end_ == rhs.end_ &&
+            lhs.priorityId_ == rhs.priorityId_ && lhs.netId_ == rhs.netId_);
     }
 
     friend bool operator!=(const UidRange &lhs, const UidRange &rhs)
@@ -49,6 +54,8 @@ struct UidRange : public Parcelable {
 
     int32_t begin_ = -1;
     int32_t end_ = -1;
+    uint32_t priorityId_ = 0;
+    uint32_t netId_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
