@@ -398,7 +398,7 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId,
     requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
-    SupplierDisconnection(netCaps_.ToSet(), netrequest, supplier);
+    SupplierDisconnection(netCaps_.ToSet(), netrequest, supplierType);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest, NetBearType supplierType)
