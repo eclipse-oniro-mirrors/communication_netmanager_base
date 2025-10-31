@@ -519,7 +519,8 @@ private:
     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
                                            sptr<NetSupplier> &supplier);
     void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
-    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid);
+    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId,
+                                 NetBearType supplierType, uint32_t uid);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
