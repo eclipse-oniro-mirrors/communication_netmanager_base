@@ -55,7 +55,7 @@ rust::vec<NetHandle> GetAllNets(int32_t &ret);
 
 bool HasDefaultNet(int32_t &ret);
 
-NetCapabilities GetNetCapabilities(NetHandle const &netHandle, int32_t &ret);
+int32_t GetNetCapabilities(NetHandle const &netHandle, NetCapabilities &rustNetCapabilities);
 
 HttpProxy GetDefaultHttpProxy(int32_t &ret);
 

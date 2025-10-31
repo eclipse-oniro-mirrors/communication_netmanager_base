@@ -64,3 +64,4 @@ pub const TYPED_ARRAY_CTOR: &CStr =
 pub const BYTE_LENGTH: &CStr = cstr(b"byteLength\0");
 pub const BYTE_OFFSET: &CStr = cstr(b"byteOffset\0");
 pub const BUFFER: &CStr = cstr(b"buffer\0");
+pub const VOID_CTOR: &CStr = cstr(b":\0");

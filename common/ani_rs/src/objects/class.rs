@@ -15,7 +15,9 @@ use std::ops::Deref;
 
 use ani_sys::{ani_class, ani_type};
 
-use super::AniType;
+use crate::{global::GlobalRef, error::AniError, AniEnv};
+
+use super::{AniType, AniRef};
 
 #[repr(transparent)]
 #[derive(Debug, Clone)]
@@ -53,6 +55,18 @@ impl<'local> From<AniType<'local>> for AniClass<'local> {
     }
 }
 
+impl<'local> From<AniClass<'local>> for AniRef<'local> {
+    fn from(value: AniClass<'local>) -> Self {
+        AniRef::from(value.0)
+    }
+}
+
+impl<'local> From<AniRef<'local>> for AniClass<'local> {
+    fn from(value: AniRef<'local>) -> Self {
+        AniClass::from(AniType::from(value))
+    }
+}
+
 impl<'local> AniClass<'local> {
     pub fn from_raw(ptr: ani_class) -> Self {
         Self(AniType::from_raw(ptr as ani_type))
@@ -64,5 +78,10 @@ impl<'local> AniClass<'local> {
 
     pub fn into_raw(self) -> ani_class {
         self.0.into_raw() as _
+    }
+    pub fn into_global(self, env: &AniEnv) -> Result<GlobalRef<AniClass<'static>>, AniError> {
+        let ani_ref = env.create_global_ref(self.into())?;
+        let ani_class = AniClass::from(ani_ref);
+        Ok(GlobalRef(ani_class))
     }
 }

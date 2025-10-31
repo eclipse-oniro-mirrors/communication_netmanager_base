@@ -485,7 +485,7 @@ impl<'a, 'local> serde::ser::Serializer for &'a mut AniSer<'local> {
         let class_name = CStr::from_bytes_with_nul(name.as_bytes())?;
         let class = self.env.find_class(&class_name)?;
 
-        let obj = self.env.new_object(&class, ())?;
+        let obj = self.env.new_object_with_signature(&class, signature::VOID_CTOR, ())?;
         Ok(StructSer::new(self.env.clone(), obj, class_name, self))
     }
 }
@@ -537,7 +537,7 @@ impl<'a, 'recur, 'local> serde::ser::Serializer for &'a mut StructSer<'recur, 'l
         let class_name = CStr::from_bytes_with_nul(name.as_bytes())?;
         let class = self.env.find_class(&class_name)?;
 
-        let obj = self.env.new_object(&class, ())?;
+        let obj = self.env.new_object_with_signature(&class, signature::VOID_CTOR, ())?;
         Ok(StructSer::new(self.env.clone(), obj, class_name, self))
     }
 }
@@ -600,7 +600,7 @@ impl<'a, 'recur, 'local> serde::ser::Serializer for &'a mut ArraySer<'recur, 'lo
     ) -> Result<Self::SerializeStruct, Self::Error> {
         let class_name = CStr::from_bytes_with_nul(name.as_bytes())?;
         let class = self.env.find_class(&class_name)?;
-        let obj = self.env.new_object(&class, ())?;
+        let obj = self.env.new_object_with_signature(&class, signature::VOID_CTOR, ())?;
         self.ref_class = Some(class);
 
         Ok(StructSer::new(self.env.clone(), obj, class_name, self))

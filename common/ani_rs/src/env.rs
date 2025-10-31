@@ -315,6 +315,24 @@ impl<'local> AniEnv<'local> {
         }
     }
 
+    pub fn new_object_with_ctor_method<T: Input>(
+        &self,
+        class: &AniClass,
+        method: &AniMethod,
+        input: T,
+    ) -> Result<AniObject<'local>, AniError> {
+        unsafe {
+            let mut obj = null_mut() as ani_object;
+            let res = T::object_new(input, &self, class, method, &mut obj as _);
+            if res != 0 {
+                let msg = String::from("Failed to create a new object with signature");
+                Err(AniError::from_code(msg, res))
+            } else {
+                Ok(AniObject::from_raw(obj))
+            }
+        }
+    }
+
     pub fn new_enum_item(
         &self,
         ani_enum: &AniEnum<'local>,
