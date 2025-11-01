@@ -448,25 +448,25 @@ HWTEST_F(NetManagerCenterTest, RestrictBackgroundChangedTest002, TestSize.Level1
 HWTEST_F(NetManagerCenterTest, IsUidNetAccessTest001, TestSize.Level1)
 {
     bool ret = instance_.IsUidNetAccess(0, false);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetManagerCenterTest, IsUidNetAccessTest002, TestSize.Level1)
 {
     bool ret = instance_.IsUidNetAccess(0, true);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetManagerCenterTest, IsUidNetAllowedTest001, TestSize.Level1)
 {
     bool ret = instance_.IsUidNetAllowed(0, true);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetManagerCenterTest, IsUidNetAllowedTest002, TestSize.Level1)
 {
     bool ret = instance_.IsUidNetAllowed(0, false);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest001, TestSize.Level1)

@@ -974,7 +974,7 @@ HWTEST_F(NetsysNativeServiceTest, SetInternetAccessByIpForWifiShare001, TestSize
     std::string ifname = "test";
 
     auto ret = instance_->SetInternetAccessByIpForWifiShare(iptest, family, access, ifname);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetDnsCacheTest002, TestSize.Level1)

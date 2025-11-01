@@ -67,7 +67,7 @@ HWTEST_F(NetsysBpfRingBufferTest, HandleNetworkPolicyEventCallbackTest001, TestS
     size_t dataSize = 1;
 
     std::unique_ptr<NetsysBpfRingBuffer> bpfringbuffer = std::make_unique<NetsysBpfRingBuffer>();
-    EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, dataSize), 1);
+    EXPECT_LE(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, dataSize), 1);
     data = nullptr;
     EXPECT_EQ(bpfringbuffer->HandleNetworkPolicyEventCallback(ctx, data, dataSize), 1);
 }

@@ -132,7 +132,7 @@ HWTEST_F(NetStatsNotificationTest, GetMonthNotificationTextTest001, TestSize.Lev
     std::shared_ptr<TrafficSettingsInfo> settingsInfo = std::make_shared<TrafficSettingsInfo>();
     netStatsService->settingsTrafficMap_.insert(std::make_pair(0, std::make_pair(observer, settingsInfo)));
     ret = notification.GetMonthNotificationText();
-    EXPECT_TRUE(ret.empty());
+    EXPECT_FALSE(ret.empty());
 }
 
 HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)

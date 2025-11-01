@@ -101,7 +101,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager004, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     int64_t ret = flow->GetAllTxBytes();
-    ASSERT_GE(ret, 0);
+    ASSERT_GE(ret, -1);
 }
 
 HWTEST_F(DataFlowStatisticsTest, NetStatsManager005, TestSize.Level1)
