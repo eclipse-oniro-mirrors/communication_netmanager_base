@@ -50,7 +50,8 @@ const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
 const std::string TAG_CLEARTEXT_TRAFFIC_PERMITTED("cleartextTrafficPermitted");
-const std::vector<std::string> SUPPORTED_COMPONENTS({"Network Kit", "ArkWeb"});
+const std::vector<std::string> SUPPORTED_COMPONENTS({"Network Kit", "Request", "Remote Communication Kit",
+                                                     "Media Kit", "ArkWeb"});
 constexpr uint8_t MATCH = 0;
 constexpr uint8_t NOT_MATCH = 1;
 constexpr uint8_t NEED_REGEX = 2;
