@@ -33,7 +33,6 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -46,7 +45,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
         NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_AVAILABLE);
         return 0;
     }
-
+    lock.unlock();
     auto network = *netHandle;
     auto handler = [network, manager](napi_env env) {
         auto obj = CreateNetAvailableParam(env, const_cast<NetHandle &>(network));
@@ -70,7 +69,6 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -83,6 +81,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_CAPABILITIES_CHANGE);
         return 0;
     }
+    lock.unlock();
     auto network = *netHandle;
     auto caps = *netAllCap;
     auto handler = [network, caps, manager](napi_env env) {
@@ -108,7 +107,6 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -121,6 +119,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
         NETMANAGER_BASE_LOGD("no %{public}s listener", EVENT_NET_CONNECTION_PROPERTIES_CHANGE);
         return 0;
     }
+    lock.unlock();
     auto network = *netHandle;
     auto linkInfo = *info;
     auto handler = [network, linkInfo, manager](napi_env env) {
@@ -145,7 +144,6 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -158,6 +156,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_LOST);
         return 0;
     }
+    lock.unlock();
     auto network = *netHandle;
     auto handler = [network, manager](napi_env env) {
         auto obj = CreateNetLostParam(env, const_cast<NetHandle &>(network));
@@ -177,7 +176,6 @@ int32_t NetConnCallbackObserver::NetUnavailable()
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -190,6 +188,7 @@ int32_t NetConnCallbackObserver::NetUnavailable()
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_UNAVAILABLE);
         return 0;
     }
+    lock.unlock();
     auto handler = [manager](napi_env env) {
         auto obj = CreateNetUnavailableParam(env);
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(env), obj};
@@ -211,7 +210,6 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
         return 0;
     }
     auto netConnection = *iter;
-    lock.unlock();
     if (netConnection.second == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -224,6 +222,7 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
         NETMANAGER_BASE_LOGI("no event listener find %{public}s", EVENT_NET_BLOCK_STATUS_CHANGE);
         return 0;
     }
+    lock.unlock();
     auto network = *netHandle;
     auto handler = [network, blocked, manager](napi_env env) {
         auto obj = CreateNetBlockStatusChangeParam(env, const_cast<NetHandle &>(network), blocked);
