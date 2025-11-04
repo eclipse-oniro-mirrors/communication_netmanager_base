@@ -104,7 +104,7 @@ export default namespace connection {
     p1.then((content: Any) => {
         callback(new BusinessError(), content as ConnectionProperties);
     }, (err: Error): void => {
-        callback(err as BusinessError, new ConnectionPropertiesInner());
+        callback(err as BusinessError, undefined);
     });
   }
 
@@ -673,7 +673,7 @@ export default namespace connection {
       p1.then((content: Any) => {
           callback(new BusinessError(), content as NetAddress);
       }, (err: Error): void => {
-          callback(err as BusinessError, new NetAddressInner);
+          callback(err as BusinessError, undefined);
       });
     }
 
@@ -805,12 +805,19 @@ export default namespace connection {
     interfaceName: string;
     domains: string;
     linkAddresses: Array<LinkAddress>;
-
     dnses: Array<NetAddress>;
-
     routes: Array<RouteInfo>;
-
     mtu: int;
+
+    constructor(interfaceName: string, domains: string, linkAddresses: Array<LinkAddress>,
+                dnses: Array<NetAddress>, routes: Array<RouteInfo>, mtu: int) {
+      this.interfaceName = interfaceName;
+      this.domains = domains;
+      this.linkAddresses = linkAddresses;
+      this.dnses = dnses;
+      this.routes = routes;
+      this.mtu = mtu;
+    }
   }
 
   export interface RouteInfo {
@@ -828,13 +835,21 @@ export default namespace connection {
   class RouteInfoInner implements RouteInfo {
     iface: string;
 
-    destination: LinkAddress = new LinkAddressInner;
+    destination: LinkAddress;
 
-    gateway: NetAddress = new NetAddressInner;
+    gateway: NetAddress;
 
     hasGateway: boolean;
 
     isDefaultRoute: boolean;
+
+    constructor(iface: string, destination: LinkAddress, gateway: NetAddress, hasGateway: boolean, isDefaultRoute: boolean) {
+     this.iface = iface;
+     this.destination = destination;
+     this.gateway = gateway;
+     this.hasGateway = hasGateway;
+     this.isDefaultRoute = isDefaultRoute;
+    }
   }
 
   export interface LinkAddress {
@@ -843,8 +858,13 @@ export default namespace connection {
   }
 
   class LinkAddressInner implements LinkAddress {
-    address: NetAddress = new NetAddressInner;
+    address: NetAddress;
     prefixLength: int;
+
+    constructor(address: NetAddress, prefixLength: int) {
+      this.address = address;
+      this.prefixLength = prefixLength
+    }
   }
 
   export interface NetAddress {
@@ -861,6 +881,12 @@ export default namespace connection {
     family?: int;
 
     port?: int;
+
+    constructor(address: string, family: int, port: int) {
+      this.address = address;
+      this.family = family;
+      this.port = port;
+    }
   }
 
   export interface HttpProxy {

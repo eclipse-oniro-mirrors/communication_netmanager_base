@@ -60,3 +60,23 @@ macro_rules! ani_constructor {
         }
     };
 }
+
+#[macro_export]
+macro_rules! ani_constructor_with_init_func {
+    (init_func = [$($init_func: path),* $(,)?]; $($type:tt $path:literal [$($func_path:literal : $func:path ),* $(,)?])*) => {
+        #[no_mangle]
+        pub extern "C" fn ANI_Constructor(vm: ani_rs::AniVm, result: *mut u32) -> std::ffi::c_uint {
+            let env = vm.get_env().unwrap();
+            ani_rs::AniVm::init(vm);
+            $(
+                ani_rs::bind!($type env $path [$($func_path : $func),*]);
+            )*
+ 
+            $(
+                $init_func(&env);
+            )*
+            unsafe {*result = 1;}
+            0
+        }
+    };
+}

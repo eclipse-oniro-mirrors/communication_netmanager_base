@@ -348,8 +348,33 @@ impl<'local> AniEnv<'local> {
             );
             if res != 0 {
                 let msg = format!(
-                    "Failed to create a new enum item {}",
+                    "Failed to create a new enum item by name {}",
                     name.to_string_lossy()
+                );
+                Err(AniError::from_code(msg, res))
+            } else {
+                Ok(AniEnumItem::from_raw(enum_item))
+            }
+        }
+    }
+
+    pub fn new_enum_item_by_index(
+        &self,
+        ani_enum: &AniEnum<'local>,
+        index: usize,
+    ) -> Result<AniEnumItem<'local>, AniError> {
+        unsafe {
+            let mut enum_item = null_mut() as ani_enum_item;
+            let res = (**self.inner).Enum_GetEnumItemByIndex.unwrap()(
+                self.inner,
+                ani_enum.as_raw(),
+                index,
+                &mut enum_item as _,
+            );
+            if res != 0 {
+                let msg = format!(
+                    "Failed to create a new enum item by index {}",
+                    index
                 );
                 Err(AniError::from_code(msg, res))
             } else {
@@ -1087,6 +1112,8 @@ single_tuple_impl!((0 A), (1 B));
 single_tuple_impl!((0 A), (1 B), (2 C));
 single_tuple_impl!((0 A), (1 B), (2 C), (3 D));
 single_tuple_impl!((0 A), (1 B), (2 C), (3 D), (4 E));
+single_tuple_impl!((0 A), (1 B), (2 C), (3 D), (4 E), (5 F));
+single_tuple_impl!((0 A), (1 B), (2 C), (3 D), (4 E), (5 F), (6 G));
 
 pub trait AniExt: Sized {
     fn get_field<'local>(

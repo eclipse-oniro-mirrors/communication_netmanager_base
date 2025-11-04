@@ -11,43 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ffi::CStr, mem, sync::{OnceLock, Arc}};
+use std::ffi::CStr;
 
 use ani_rs::{
     business_error::BusinessError,
-    error::AniError,
-    objects::{AniFnObject, AniObject, AniRef, GlobalRefCallback, AniClass, AniMethod},
-    signature, AniEnv, global::GlobalRef,
+    objects::{AniFnObject, AniObject, GlobalRefCallback},
+    AniEnv,
 };
 
 use crate::{
     bridge::{
         Cleaner, ConnectionProperties, HttpProxy, NetAddress, NetBlockStatusInfo, NetCapabilities,
         NetCapabilityInfo, NetConnection, NetConnectionPropertyInfo, NetHandle, NetSpecifier,
+        ToAniValue,
     },
-    connection_info,
     error_code::convert_to_business_error,
     wrapper::{check_permission, ConnUnregisterHandle, NetConnClient},
 };
 
 const INTERNET_PERMISSION: &str = "ohos.permission.INTERNET";
 const NATIVE_PTR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"nativePtr\0") };
-const NETHANDLE_ID: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"netId\0") };
-const NETCAPABILITIES_CLASS_NAME: &CStr = unsafe {
-    CStr::from_bytes_with_nul_unchecked(b"@ohos.net.connection.connection.NetCapabilitiesInner\0")
-};
-const NETCAPABILITIES_CTOR_SIG: &CStr =
-    unsafe { CStr::from_bytes_with_nul_unchecked(b"iiC{escompat.Array}C{escompat.Array}:\0") };
-
-pub struct NetCapabilitiesClassCache {
-    class_ref: GlobalRef<AniClass<'static>>,
-    raw_ctor_method: ani_sys::ani_method,
-}
-
-unsafe impl Send for NetCapabilitiesClassCache {}
-unsafe impl Sync for NetCapabilitiesClassCache {}
-
-static G_NETCAPABILITIES_CLASS_CACHE: OnceLock<NetCapabilitiesClassCache> = OnceLock::new();
 
 #[ani_rs::native]
 pub(crate) fn get_default_net() -> Result<NetHandle, BusinessError> {
@@ -67,31 +50,11 @@ pub(crate) fn has_default_net() -> Result<bool, BusinessError> {
 #[ani_rs::native]
 pub(crate) fn get_net_capabilities<'local>(
     env: &AniEnv<'local>,
-    obj: AniObject<'local>,
+    net_handle: NetHandle,
 ) -> Result<AniObject<'local>, BusinessError> {
-    let net_id = env.get_property::<i32>(&obj, NETHANDLE_ID)?;
-    let net_handle = NetHandle { net_id };
-
     let net_cap =
         NetConnClient::get_net_capabilities(net_handle).map_err(convert_to_business_error)?;
-    let param1 = net_cap.link_up_bandwidth_kbps.unwrap_or(0);
-    let param2 = net_cap.link_down_bandwidth_kbps.unwrap_or(0);
-    let param3 = env.serialize(&net_cap.network_cap.unwrap_or(Vec::new()))?;
-    let param4 = env.serialize(&net_cap.bearer_types)?;
-
-    let class_cache = G_NETCAPABILITIES_CLASS_CACHE.get_or_init(|| {
-        let class = env.find_class(NETCAPABILITIES_CLASS_NAME).unwrap();
-        let ctor_method = env.find_method_with_signature(&class, signature::CTOR, NETCAPABILITIES_CTOR_SIG).unwrap();
-        let class_ref = class.into_global(env).unwrap();
-        let raw_ctor_method = ctor_method.as_raw();
-        NetCapabilitiesClassCache {
-            class_ref,
-            raw_ctor_method,
-        }
-    });
-
-    let method = AniMethod::from_raw(class_cache.raw_ctor_method);
-    let obj = env.new_object_with_ctor_method(&class_cache.class_ref, &method, (param1, param2, param3, param4))?;
+    let obj = NetCapabilities::to_ani_value(env, net_cap)?;
     Ok(obj)
 }
 
@@ -148,10 +111,14 @@ pub(crate) fn is_default_net_metered() -> Result<bool, BusinessError> {
 }
 
 #[ani_rs::native]
-pub(crate) fn get_connection_properties(
+pub(crate) fn get_connection_properties<'local>(
+    env: &AniEnv<'local>,
     net_handle: NetHandle,
-) -> Result<ConnectionProperties, BusinessError> {
-    NetConnClient::get_connection_properties(net_handle.net_id).map_err(convert_to_business_error)
+) -> Result<AniObject<'local>, BusinessError> {
+    let properties = NetConnClient::get_connection_properties(net_handle.net_id)
+        .map_err(convert_to_business_error)?;
+    let obj = ConnectionProperties::to_ani_value(env, properties)?;
+    Ok(obj)
 }
 
 #[ani_rs::native]
