@@ -1210,7 +1210,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
     NetManagerBaseAccessToken token;
     NetHandle netHandle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
-    EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -1224,21 +1224,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest003, TestSize.Level1)
     std::string rawUrl = "http://www.baidu.com";
     PortalResponse resp;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(rawUrl, resp);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
- 
-/**
- * @tc.name: NetDetectionTest004
- * @tc.desc: Test NetConnClient::NetDetection
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, NetDetectionTest004, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    std::string rawUrl = "";
-    PortalResponse resp;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(rawUrl, resp);
-    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)

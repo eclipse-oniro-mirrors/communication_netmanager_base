@@ -553,7 +553,6 @@ void NetDetectionFuzzTest1(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken tokenInternetInfo;
     std::string rawUrl = NetConnGetString(STR_LEN);
-    PortalResponse resp;
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;

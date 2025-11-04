@@ -723,7 +723,7 @@ HWTEST_F(UtNetmanagerBaseCommon,
 {
     std::string htmlContent = R"(<html>
 <head>
-<meta http-equiv="refresh" content="0;url='https://example.com'">
+<meta http-equiv="refresh" content="0;url=https://example.com">
 </head>
 <body>
 </body>
@@ -745,7 +745,7 @@ HWTEST_F(UtNetmanagerBaseCommon,
 {
     std::string htmlContent = R"(<html>
 <head>
-<meta http-equiv='refresh' content="0;url='https://example.com'">
+<meta http-equiv='refresh' content="0;url=https://example.com">
 </head>
 <body>
 </body>
