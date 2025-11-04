@@ -713,7 +713,6 @@ HWTEST_F(UtNetmanagerBaseCommon, CheckIfaceName001, TestSize.Level2)
     EXPECT_FALSE(result);
 }
 
-
 /**
  * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnUrl_WhenHttpEquivRefreshFound
  * @tc.number: ExtractMetaRefreshUrlTest_001
