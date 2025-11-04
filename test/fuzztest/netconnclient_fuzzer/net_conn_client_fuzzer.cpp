@@ -1882,6 +1882,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetConnectionPropertiesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetCapabilitiesFuzzTest(data, size);
     OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDetectionFuzzTest1(data, size);
     OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
     OHOS::NetManagerStandard::IsDefaultNetMeteredFuzzTest(data, size);
     OHOS::NetManagerStandard::SetGlobalHttpProxyFuzzTest(data, size);
