@@ -1714,7 +1714,7 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
         case RouteManager::UNREACHABLE_NETWORK:
             return ROUTE_UNREACHABLE_TABLE;
         default:
-            NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
+            NETNATIVE_LOGE("tableType [%{public}d] is error", tableType);
             return RT_TABLE_UNSPEC;
     }
 }
