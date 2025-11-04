@@ -124,17 +124,15 @@ public:
      */
     int32_t GetRealScore();
     bool SupplierConnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest = {});
-    bool SupplierDisconnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest,
-                               NetBearType supplierType = NetBearType::BEARER_DEFAULT);
+    bool SupplierDisconnection(const std::set<NetCap> &netCaps, const NetRequest &netrequest);
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
     bool RequestToConnect(const NetRequest &netrequest = {});
     void AddRequest(const NetRequest &netrequest);
     void RemoveRequest(const NetRequest &netrequest);
     int32_t SelectAsBestNetwork(const NetRequest &netrequest);
-    void ReceiveBestScore(int32_t bestScore, uint32_t supplierId,
-                          NetBearType supplierType, const NetRequest &netrequest);
-    int32_t CancelRequest(const NetRequest &netrequest, NetBearType supplierType = NetBearType::BEARER_DEFAULT);
+    void ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const NetRequest &netrequest);
+    int32_t CancelRequest(const NetRequest &netrequest);
     void RemoveBestRequest(uint32_t reqId);
     std::set<uint32_t> &GetBestRequestList();
     void SetDefault();
