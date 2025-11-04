@@ -1213,6 +1213,34 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 }
 
+/**
+ * @tc.name: NetDetectionTest003
+ * @tc.desc: Test NetConnClient::NetDetection
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, NetDetectionTest003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string rawUrl = "http://www.baidu.com";
+    PortalResponse resp;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(rawUrl, resp);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+ 
+/**
+ * @tc.name: NetDetectionTest004
+ * @tc.desc: Test NetConnClient::NetDetection
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, NetDetectionTest004, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::string rawUrl = "";
+    PortalResponse resp;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(rawUrl, resp);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
 HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;

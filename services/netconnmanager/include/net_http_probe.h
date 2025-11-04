@@ -39,6 +39,7 @@ class NetHttpProbe {
 public:
     NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,
         ProbeType probeType, std::string ipAddrList = "");
+    NetHttpProbe();
     ~NetHttpProbe();
 
     int32_t SendProbe(ProbeType probeType, const std::string &httpUrl, const std::string &httpsUrl);
@@ -49,6 +50,7 @@ public:
     bool IsHttpDetect(ProbeType probeType);
     bool IsHttpsDetect(ProbeType probeType);
     void ProbeWithoutGlobalHttpProxy();
+    bool NetDetection(const std::string& portalUrl, PortalResponse& resp);
 
 private:
     static bool CurlGlobalInit();

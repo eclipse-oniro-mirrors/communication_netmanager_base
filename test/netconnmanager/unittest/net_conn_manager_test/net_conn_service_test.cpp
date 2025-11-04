@@ -597,6 +597,22 @@ HWTEST_F(NetConnServiceTest, NetDetectionTest001, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 }
 
+HWTEST_F(NetConnServiceTest, NetDetectionTest002, TestSize.Level1)
+{
+    std::string rawUrl = "http://www.baidu.com";
+    PortalResponse resp;
+    auto ret = NetConnService::GetInstance()->NetDetection(rawUrl, resp);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+ 
+HWTEST_F(NetConnServiceTest, NetDetectionTest003, TestSize.Level1)
+{
+    std::string rawUrl = "";
+    PortalResponse resp;
+    auto ret = NetConnService::GetInstance()->NetDetection(rawUrl, resp);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
 HWTEST_F(NetConnServiceTest, GetNetIdByIdentifierTest001, TestSize.Level1)
 {
     std::list<int32_t> netIdList;

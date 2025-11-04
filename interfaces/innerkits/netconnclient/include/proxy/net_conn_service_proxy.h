@@ -57,6 +57,7 @@ public:
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t NetDetection(int32_t netId) override;
+    int32_t NetDetection(const std::string &rawUrl, PortalResponse &resp) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
     int32_t GetSpecificNetByIdent(NetBearType bearerType, const std::string &ident,
                                   std::list<int32_t> &netIdList) override;

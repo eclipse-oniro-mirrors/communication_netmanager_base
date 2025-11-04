@@ -530,6 +530,35 @@ bool CheckIfaceName(const std::string &name)
     return true;
 }
 
+std::string ExtractMetaRefreshUrl(const std::string& htmlContent)
+{
+    std::string lowerContent = htmlContent;
+    std::transform(lowerContent.begin(), lowerContent.end(), lowerContent.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+ 
+    size_t metaPos = lowerContent.find("http-equiv=\"refresh\"");
+    if (metaPos == std::string::npos) {
+        metaPos = lowerContent.find("http-equiv='refresh'");
+    }
+    if (metaPos == std::string::npos) {
+        return "";
+    }
+    size_t contentPos = lowerContent.find("content=", metaPos);
+    if (contentPos == std::string::npos) {
+        return "";
+    }
+    size_t urlPos = lowerContent.find("url=", contentPos);
+    if (urlPos == std::string::npos) {
+        return "";
+    }
+    size_t urlStart = urlPos + 4; // 跳过"url="
+    size_t urlEnd = htmlContent.find_first_of("'\"", urlStart);
+    if (urlEnd != std::string::npos) {
+        return htmlContent.substr(urlStart, urlEnd - urlStart);
+    }
+    return "";
+}
+
 std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 {
     std::vector<const char *> res;

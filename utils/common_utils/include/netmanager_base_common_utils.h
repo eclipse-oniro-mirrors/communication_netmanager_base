@@ -95,6 +95,7 @@ bool IsSim2Anco(const std::string &bundleName);
 std::string GetGatewayAddr(const std::string& ipAddr, const std::string& subnetMask);
 bool IpToInt(const std::string& ipAddr, uint32_t &ipIntAddr);
 bool IpToString(uint32_t ipAddr, std::string &ipStrAddr);
+std::string ExtractMetaRefreshUrl(const std::string& htmlContent);
 int32_t ReadFromChildProcess(const int32_t *pipeFd, pid_t childPid, std::string *out);
 
 inline uint64_t GetCurrentSecond()

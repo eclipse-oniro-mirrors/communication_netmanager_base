@@ -107,6 +107,10 @@ NetHttpProbe::NetHttpProbe(uint32_t netId, NetBearType bearType, const NetLinkIn
     isCurlInit_ = NetHttpProbe::CurlGlobalInit();
 }
 
+NetHttpProbe::NetHttpProbe()
+    : netId_(0), netBearType_(BEARER_WIFI), probeType_(ProbeType::PROBE_HTTP)
+{}
+
 NetHttpProbe::~NetHttpProbe()
 {
     NetHttpProbe::CurlGlobalCleanup();
@@ -407,6 +411,50 @@ bool NetHttpProbe::SetHttpOptions(ProbeType probeType, CURL *curl, const std::st
         return false;
     }
     return true;
+}
+
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response)
+{
+    size_t totalSize = size * nmemb;
+    response->append((char*)contents, totalSize);
+    return totalSize;
+}
+
+bool NetHttpProbe::NetDetection(const std::string& portalUrl, PortalResponse& resp)
+{
+    if (portalUrl.size() > MAX_URL_LEN || portalUrl.empty()) {
+        NETMGR_LOG_E("rawUrl too long or empty");
+        return false;
+    }
+    CURL* curl = curl_easy_init();
+    if (curl) {
+        std::string htmlResponse;
+        long http_code;
+        curl_easy_setopt(curl, CURLOPT_URL, portalUrl.c_str());
+        curl_easy_setopt(curl, CURLOPT_INTERFACE, "wlan0");
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &htmlResponse);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1L);
+        CURLcode res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            NETMGR_LOG_E("curl_easy_perform failed");
+            curl_easy_cleanup(curl);
+            return false;
+        }
+        // LCOV_EXCL_START
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        resp.respCode = static_cast<int>(http_code);
+        std::string respUrl = CommonUtils::ExtractMetaRefreshUrl(htmlResponse);
+        curl_easy_cleanup(curl);
+        if (strcpy_s(resp.url, MAX_URL_LEN - 1, respUrl.c_str()) != 0) {
+            NETMGR_LOG_E("url copy failed");
+            return false;
+        }
+        return true;
+        // LCOV_EXCL_STOP
+    }
+    return false;
 }
 
 bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)

@@ -66,6 +66,7 @@ public:
     virtual int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t NetDetection(int32_t netId) = 0;
+    virtual int32_t NetDetection(const std::string &rawUrl, PortalResponse &resp) = 0;
     virtual int32_t GetDefaultNet(int32_t &netId) = 0;
     virtual int32_t HasDefaultNet(bool &flag) = 0;
     virtual int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) = 0;

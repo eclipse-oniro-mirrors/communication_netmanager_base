@@ -358,6 +358,18 @@ int32_t NetConnService::RegisterNetDetectionCallback(int32_t netId, const sptr<I
     return RegUnRegNetDetectionCallback(netId, callback, true);
 }
 
+int32_t NetConnService::NetDetection(const std::string &rawUrl, PortalResponse &resp)
+{
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    NETMGR_LOG_D("NetDetection response, call uid [%{public}d]", callingUid);
+    NetHttpProbe netHttpProbe;
+    bool result = netHttpProbe.NetDetection(rawUrl, resp);
+    if (result) {
+        return NETMANAGER_SUCCESS;
+    }
+    return NETMANAGER_ERR_OPERATION_FAILED;
+}
+
 int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
 {
     int32_t result = NETMANAGER_ERROR;

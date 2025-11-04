@@ -713,6 +713,158 @@ HWTEST_F(UtNetmanagerBaseCommon, CheckIfaceName001, TestSize.Level2)
     EXPECT_FALSE(result);
 }
 
+
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnUrl_WhenHttpEquivRefreshFound
+ * @tc.number: ExtractMetaRefreshUrlTest_001
+ * @tc.desc  : 测试当 HTML 内容中包含 `http-equiv="refresh"` 时,函数应返回正确的 URL
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnUrl_WhenHttpEquivRefreshFound, TestSize.Level2)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="refresh" content="0;url='https://example.com'">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "https://example.com";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnUrl_WhenHttpEquivRefreshFoundWithDifferentCase
+ * @tc.number: ExtractMetaRefreshUrlTest_002
+ * @tc.desc  : 测试当 HTML 内容中包含 `http-equiv='refresh'` 时,函数应返回正确的 URL
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnUrl_WhenHttpEquivRefreshFoundWithDifferentCase, TestSize.Level2)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv='refresh' content="0;url='https://example.com'">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "https://example.com";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenHttpEquivNotFound
+ * @tc.number: ExtractMetaRefreshUrlTest_003
+ * @tc.desc  : 测试当 HTML 内容中不包含 `http-equiv="refresh"` 或 `http-equiv='refresh'` 时,函数应返回空字符串
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenHttpEquivNotFound, TestSize.Level2)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="other" content="0">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenContentNotFound
+ * @tc.number: ExtractMetaRefreshUrlTest_004
+ * @tc.desc  : 测试当 HTML 内容中不包含 `content=` 时,函数应返回空字符串
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenContentNotFound, TestSize.Level0)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="refresh" content="0">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenContentNotFound
+ * @tc.number: ExtractMetaRefreshUrlTest_005
+ * @tc.desc  : 测试当 HTML 内容中不包含 `content=` 时,函数应返回空字符串
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenContentNotFound1, TestSize.Level0)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="refresh" other="0">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenUrlNotFound
+ * @tc.number: ExtractMetaRefreshUrlTest_006
+ * @tc.desc  : 测试当 HTML 内容中不包含 `url=` 时,函数应返回空字符串
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenUrlNotFound, TestSize.Level0)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="refresh" content="0;other='https://example.com'">
+</head>
+<body>
+</body>
+</html>)";
+ 
+    std::string expectedUrl = "";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+ 
+/**
+ * @tc.name  : ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenUrlNotFound
+ * @tc.number: ExtractMetaRefreshUrlTest_007
+ * @tc.desc  : 测试当 HTML 内容中不包含 `'"` 时,函数应返回空字符串
+ */
+HWTEST_F(UtNetmanagerBaseCommon,
+    ATC_ExtractMetaRefreshUrl_ShouldReturnEmptyString_WhenUrlNotFound1, TestSize.Level0)
+{
+    std::string htmlContent = R"(<html>
+<head>
+<meta http-equiv="refresh" content=0;url=https://example.com)";
+ 
+    std::string expectedUrl = "";
+    std::string actualUrl = CommonUtils::ExtractMetaRefreshUrl(htmlContent);
+ 
+    EXPECT_EQ(actualUrl, expectedUrl);
+}
+
 HWTEST_F(UtNetmanagerBaseCommon, GetHostnameFromURL01, TestSize.Level2)
 {
     std::string hostname = CommonUtils::GetHostnameFromURL("https:////www.example.com?data_string");

@@ -233,6 +233,59 @@ HWTEST_F(NetConnServiceStubTest, OnNetDetectionTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnNetDetectionResponseTest001
+ * @tc.desc: Test NetConnServiceStub OnNetDetectionResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnNetDetectionResponseTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    MessageParcel reply;
+    std::string rawUrl = "http://www.baidu.com";
+    PortalResponse resp;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(rawUrl));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnNetDetectionResponseTest002
+ * @tc.desc: Test NetConnServiceStub OnNetDetectionResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnNetDetectionResponseTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string rawUrl = "http://www.baidu.com";
+    PortalResponse resp;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(rawUrl));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL);
+}
+
+/**
+ * @tc.name: OnNetDetectionResponseTest003
+ * @tc.desc: Test NetConnServiceStub OnNetDetectionResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnNetDetectionResponseTest003, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    MessageParcel reply;
+    std::string rawUrl = "";
+    PortalResponse resp;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(rawUrl));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
  * @tc.name: OnGetIfaceNamesTest001
  * @tc.desc: Test NetConnServiceStub OnGetIfaceNames.
  * @tc.type: FUNC
