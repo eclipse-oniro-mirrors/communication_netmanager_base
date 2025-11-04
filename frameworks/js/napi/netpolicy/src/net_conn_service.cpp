@@ -983,15 +983,19 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
     if (supplier) {
         NetBearType defaultNetBearType =
             defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+        netRequest.bearTypes.insert(defaultNetBearType);
         supplier->CancelRequest(netRequest, defaultNetBearType);
+        netRequest.bearTypes.erase(defaultNetBearType);
     }
     NET_SUPPLIER_MAP::iterator iterSupplier;
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second != nullptr) {
             NetBearType defaultNetBearType =
-            defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+                defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+            netRequest.bearTypes.insert(defaultNetBearType);
             iterSupplier->second->CancelRequest(netRequest, defaultNetBearType);
+            netRequest.bearTypes.erase(defaultNetBearType);
         }
     }
 }
@@ -1466,7 +1470,9 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 if (pNetService) {
                     NetBearType defaultNetBearType =
                         defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+                    netrequest.bearTypes.insert(defaultNetBearType);
                     pNetService->CancelRequest(netrequest, defaultNetBearType);
+                    netrequest.bearTypes.erase(defaultNetBearType);
                 }
             }
             lock.unlock();
@@ -1478,7 +1484,9 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 }
                 NetBearType defaultNetBearType =
                     defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+                netrequest.bearTypes.insert(defaultNetBearType);
                 iterSupplier->second->CancelRequest(netrequest, defaultNetBearType);
+                netrequest.bearTypes.erase(defaultNetBearType);
             }
         });
     }
