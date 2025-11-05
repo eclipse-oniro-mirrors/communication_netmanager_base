@@ -984,7 +984,7 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
         NetBearType defaultNetBearType =
             defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
         netRequest.bearTypes.insert(defaultNetBearType);
-        supplier->CancelRequest(netRequest, defaultNetBearType);
+        supplier->CancelRequest(netRequest);
         netRequest.bearTypes.erase(defaultNetBearType);
     }
     NET_SUPPLIER_MAP::iterator iterSupplier;
@@ -994,7 +994,7 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
             NetBearType defaultNetBearType =
                 defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
             netRequest.bearTypes.insert(defaultNetBearType);
-            iterSupplier->second->CancelRequest(netRequest, defaultNetBearType);
+            iterSupplier->second->CancelRequest(netRequest);
             netRequest.bearTypes.erase(defaultNetBearType);
         }
     }
@@ -1471,7 +1471,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                     NetBearType defaultNetBearType =
                         defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
                     netrequest.bearTypes.insert(defaultNetBearType);
-                    pNetService->CancelRequest(netrequest, defaultNetBearType);
+                    pNetService->CancelRequest(netrequest);
                     netrequest.bearTypes.erase(defaultNetBearType);
                 }
             }
@@ -1485,7 +1485,7 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 NetBearType defaultNetBearType =
                     defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
                 netrequest.bearTypes.insert(defaultNetBearType);
-                iterSupplier->second->CancelRequest(netrequest, defaultNetBearType);
+                iterSupplier->second->CancelRequest(netrequest);
                 netrequest.bearTypes.erase(defaultNetBearType);
             }
         });
@@ -1801,7 +1801,9 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
         NetRequest netrequest;
         netrequest.uid = uid;
         netrequest.requestId = reqId;
-        iter->second->ReceiveBestScore(bestScore, supplierId, supplierType, netrequest);
+        netrequest.bearTypes.insert(supplierType);
+        iter->second->ReceiveBestScore(bestScore, supplierId, netrequest);
+        netrequest.bearTypes.erase(supplierType);
     }
 }
 
