@@ -656,14 +656,6 @@ int32_t NetConnServiceProxy::NetDetection(const std::string &rawUrl, PortalRespo
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    size_t readSize = replyParcel.GetRawDataSize();
-    // LCOV_EXCL_START
-    if (readSize != sizeof(PortalResponse)) {
-        NETMGR_LOG_E("%{public}s, ReadRawData size mismatch, expected: %zu, actual: %zu", __FUNCTION__,
-            sizeof(PortalResponse), readSize);
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    // LCOV_EXCL_STOP
     const void *rawData = replyParcel.ReadRawData(sizeof(PortalResponse));
     // LCOV_EXCL_START
     if (rawData == nullptr) {
