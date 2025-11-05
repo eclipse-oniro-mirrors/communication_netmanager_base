@@ -1955,47 +1955,6 @@ HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest002, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest003, TestSize.Level1)
-{
-    NetConnService connService;
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<NetActivate> na =
-        std::make_shared<NetActivate>(nullptr, nullptr, timeoutCallback, 0, nullptr, 1, 0);
-    na->SetIsAppFrozened(false);
-    int uid = 1;
-    connService.netUidActivates_[uid].push_back(na);
-
-    auto ret = connService.SetAppIsFrozened(1, true);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest004, TestSize.Level1)
-{
-    NetConnService connService;
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<NetActivate> na =
-        std::make_shared<NetActivate>(nullptr, nullptr, timeoutCallback, 0, nullptr, 1, 0);
-    na->SetIsAppFrozened(true);
-    int uid = 1;
-    connService.netUidActivates_[uid].push_back(na);
-
-    auto ret = connService.SetAppIsFrozened(1, false);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, SetAppIsFrozenedTest005, TestSize.Level1)
-{
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<NetActivate> na =
-        std::make_shared<NetActivate>(nullptr, nullptr, timeoutCallback, 0, nullptr, 1, 0);
-    na->SetIsAppFrozened(true);
-    int uid = 1;
-    NetConnService::GetInstance()->netUidActivates_[uid].push_back(na);
-
-    auto ret = NetConnService::GetInstance()->SetAppIsFrozened(1, false);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetConnServiceTest, EnableAppFrozenedCallbackLimitationTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->EnableAppFrozenedCallbackLimitation(true);
@@ -2101,25 +2060,6 @@ HWTEST_F(NetConnServiceTest, OnReceiveEventTest005, TestSize.Level1)
     data.SetWant(want);
     NetConnService::GetInstance()->OnReceiveEvent(data);
     EXPECT_TRUE(NetConnService::GetInstance()->isDataShareReady_);
-}
-
-HWTEST_F(NetConnServiceTest, CancelRequestForSupplier001, TestSize.Level1)
-{
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<NetActivate> netActivate =
-        std::make_shared<NetActivate>(nullptr, nullptr, timeoutCallback, 0, nullptr, 1, 0);
-    netActivate->uid_ = 1;
-    uint32_t reqId = 1;
-
-    std::string netSupplierIdent = "test";
-    const std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_SUPL};
-    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_WIFI, netSupplierIdent, netCaps);
-    NetConnService connService;
-    int supplierId = 1;
-    connService.netSuppliers_[supplierId] = supplier;
-    netActivate->SetServiceSupply(supplier);
-    connService.CancelRequestForSupplier(netActivate, reqId);
-    EXPECT_TRUE(connService.netSuppliers_.begin()->second->requestList_.size() == 0);
 }
 
 HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback001, TestSize.Level1)

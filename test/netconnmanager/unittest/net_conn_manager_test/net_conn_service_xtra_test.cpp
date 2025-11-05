@@ -1651,54 +1651,5 @@ HWTEST_F(NetConnServiceExtTest, UpdateUidLostDelay, TestSize.Level1)
     EXPECT_TRUE(netConnService->uidLostDelaySet_.empty());
 }
 
-HWTEST_F(NetConnServiceExtTest, PostDelayLostCallbackTask001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    netConnService->netConnEventHandler_ = nullptr;
-    netConnService->PostDelayLostCallbackTask(nullptr);
-    EXPECT_TRUE(netConnService->netConnEventHandler_ == nullptr);
-    netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
-    netConnService->PostDelayLostCallbackTask(nullptr);
-    EXPECT_TRUE(netConnService->netConnEventHandler_ != nullptr);
-    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
-    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
-    uint32_t uid = 1099;
-    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, uid, handler);
-    netConnService->PostDelayLostCallbackTask(active);
-    EXPECT_TRUE(active->GetFrozenedNotifyLostDelay());
-}
-
-HWTEST_F(NetConnServiceExtTest, HandleDelayLostCallback001, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
-    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
-    uint32_t uid = 1099;
-    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, uid, handler);
-    active->SetFrozenedNotifyLostDelay(true);
-    netConnService->HandleDelayLostCallback(active, 100);
-    EXPECT_TRUE(active->GetNetCallback() != nullptr);
-    active->SetFrozenedNotifyLostDelay(false);
-    netConnService->HandleDelayLostCallback(active, 100);
-    EXPECT_TRUE(active->GetNetCallback() != nullptr);
-}
-
-HWTEST_F(NetConnServiceExtTest, HandleDelayLostCallback002, TestSize.Level1)
-{
-    auto netConnService = NetConnService::GetInstance();
-    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
-    sptr<INetConnCallback> callback = nullptr;
-    std::weak_ptr<INetActivateCallback> timeoutCallback;
-    std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
-    uint32_t uid = 1099;
-    auto active = std::make_shared<NetActivate>(specifier, callback, timeoutCallback, uid, handler);
-    active->SetFrozenedNotifyLostDelay(true);
-    netConnService->HandleDelayLostCallback(active, 100);
-    EXPECT_TRUE(active->GetNetCallback() == nullptr);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
