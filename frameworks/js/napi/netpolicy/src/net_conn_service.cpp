@@ -1598,7 +1598,6 @@ void NetConnService::FindBestNetworkForAllRequest()
             oldSupplier->RemoveBestRequest(iterActive->first);
         }
         iterActive->second->SetServiceSupply(bestSupplier);
-        iterActive->second->SetFrozenedNotifyLostDelay(false);
         CallbackForAvailable(bestSupplier, callback);
         NetRequest netRequest(iterActive->second->GetUid(), iterActive->first);
         bestSupplier->SelectAsBestNetwork(netRequest);
