@@ -68,6 +68,7 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
     listener.OnListen();
     listener.OffListen();
     listener.clearResource();
+
     listener.SetParseNetId(0);
     EXPECT_EQ(listener.netId_, 0);
 }
