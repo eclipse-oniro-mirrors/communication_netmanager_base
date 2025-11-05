@@ -549,6 +549,25 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION), dataParcelNoNetId);
 }
 
+void NetDetectionFuzzTest1(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken tokenInternetInfo;
+    std::string rawUrl = NetConnGetString(STR_LEN);
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(rawUrl);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE), dataParcel);
+ 
+    MessageParcel dataParcelNoNetId;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcelNoNetId)) {
+        return;
+    }
+    dataParcelNoNetId.WriteString(rawUrl);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE), dataParcelNoNetId);
+}
+
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -1862,6 +1881,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetConnectionPropertiesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetCapabilitiesFuzzTest(data, size);
     OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDetectionFuzzTest1(data, size);
     OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
     OHOS::NetManagerStandard::IsDefaultNetMeteredFuzzTest(data, size);
     OHOS::NetManagerStandard::SetGlobalHttpProxyFuzzTest(data, size);

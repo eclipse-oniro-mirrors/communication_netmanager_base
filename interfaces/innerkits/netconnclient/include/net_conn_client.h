@@ -301,6 +301,17 @@ public:
     int32_t NetDetection(const NetHandle &netHandle);
 
     /**
+     * The interface of network detection called by the application
+     *
+     * @param rawUrl detection url
+     * @param resp detection result
+     * @return int32_t Whether the network probe is successful
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t NetDetection(const std::string &rawUrl, PortalResponse &resp);
+
+    /**
      * set air plane mode on or off
      *
      * @param state air plane mode on or not

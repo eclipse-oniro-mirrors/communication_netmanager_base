@@ -151,6 +151,11 @@ public:
         return 0;
     }
 
+    int32_t NetDetection(const std::string& portalUrl, PortalResponse& resp) override
+    {
+        return 0;
+    }
+
     int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
                                   SafeMap<std::string, std::string> &ifaceNameIdentMaps) override
     {

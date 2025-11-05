@@ -566,6 +566,18 @@ int32_t NetConnClient::NetDetection(const NetHandle &netHandle)
     return proxy->NetDetection(netHandle.GetNetId());
 }
 
+int32_t NetConnClient::NetDetection(const std::string &rawUrl, PortalResponse &resp)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->NetDetection(rawUrl, resp);
+}
+
 sptr<INetConnService> NetConnClient::GetProxy()
 {
     std::lock_guard lock(mutex_);

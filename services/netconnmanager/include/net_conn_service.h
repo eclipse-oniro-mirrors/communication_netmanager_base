@@ -282,6 +282,7 @@ public:
      * @return int32_t Whether the network probe is successful
      */
     int32_t NetDetection(int32_t netId) override;
+    int32_t NetDetection(const std::string &rawUrl, PortalResponse &resp) override;
     int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;

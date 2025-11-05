@@ -25,6 +25,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int32_t MAX_URL_LEN = 512;
+ 
+struct PortalResponse {
+    int respCode = 0;
+    char url[MAX_URL_LEN] = "";
+};
+
 struct NetLinkInfo final : public Parcelable {
     std::string ifaceName_;
     std::string domain_;

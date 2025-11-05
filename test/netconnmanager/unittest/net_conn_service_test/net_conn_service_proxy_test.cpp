@@ -363,6 +363,19 @@ HWTEST_F(NetConnServiceProxyTest, NetDetectionTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NetDetectionTest002
+ * @tc.desc: Test NetConnServiceProxy NetDetection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, NetDetectionTest002, TestSize.Level1)
+{
+    std::string rawUrl = "";
+    PortalResponse resp;
+    int32_t ret = instance_->NetDetection(rawUrl, resp);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+/**
  * @tc.name: GetIfaceNamesTest001
  * @tc.desc: Test NetConnServiceProxy GetIfaceNames.
  * @tc.type: FUNC

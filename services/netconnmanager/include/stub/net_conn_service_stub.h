@@ -77,6 +77,7 @@ private:
     int32_t OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetDetection(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNetDetectionResponse(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSpecificNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetSpecificNetByIdent(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAllNets(MessageParcel &data, MessageParcel &reply);

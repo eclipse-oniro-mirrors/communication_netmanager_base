@@ -76,6 +76,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnNetDetection, {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetSupplierCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE)] = {
+        &NetConnServiceStub::OnNetDetectionResponse, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE)] = {
         &NetConnServiceStub::OnSetAirplaneMode, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY)] = {
@@ -853,6 +855,30 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnNetDetectionResponse(MessageParcel &data, MessageParcel &reply)
+{
+    std::string rawUrl;
+    // LCOV_EXCL_START
+    if (!data.ReadString(rawUrl)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    PortalResponse resp;
+    int32_t ret = NetDetection(rawUrl, resp);
+    // LCOV_EXCL_START
+    if (ret != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteRawData(static_cast<const void *>(&resp), sizeof(PortalResponse))) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    // LCOV_EXCL_STOP
     return NETMANAGER_SUCCESS;
 }
 

@@ -627,6 +627,46 @@ int32_t NetConnServiceProxy::NetDetection(int32_t netId)
     return replyParcel.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::NetDetection(const std::string &rawUrl, PortalResponse &resp)
+{
+    MessageParcel dataParcel;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!dataParcel.WriteString(rawUrl)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    MessageParcel replyParcel;
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE),
+                                      dataParcel, replyParcel);
+    // LCOV_EXCL_START
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+    // LCOV_EXCL_STOP
+    int32_t ret = NETMANAGER_SUCCESS;
+    // LCOV_EXCL_START
+    if (!replyParcel.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    const void *rawData = replyParcel.ReadRawData(sizeof(PortalResponse));
+    // LCOV_EXCL_START
+    if (rawData == nullptr) {
+        NETMGR_LOG_E("%{public}s, ReadRawData failed", __FUNCTION__);
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    resp = *static_cast<const PortalResponse *>(rawData);
+    return ret;
+}
+
 int32_t NetConnServiceProxy::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
 {
     MessageParcel data;

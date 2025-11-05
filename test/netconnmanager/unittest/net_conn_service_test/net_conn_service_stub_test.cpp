@@ -233,6 +233,24 @@ HWTEST_F(NetConnServiceStubTest, OnNetDetectionTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnNetDetectionResponseTest001
+ * @tc.desc: Test NetConnServiceStub OnNetDetectionResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnNetDetectionResponseTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    MessageParcel reply;
+    std::string rawUrl = "http://www.baidu.com";
+    PortalResponse resp;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteString(rawUrl));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_NET_DETECTION_RESPONSE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnGetIfaceNamesTest001
  * @tc.desc: Test NetConnServiceStub OnGetIfaceNames.
  * @tc.type: FUNC
