@@ -168,13 +168,14 @@ HWTEST_F(NetSupplierTest, ReceiveBestScoreTest001, TestSize.Level1)
     supplier->supplierId_ = 0;
     NetBearType supplierType = NetBearType::BEARER_DEFAULT;
     NetRequest netrequest;
+    netrequest.bearTypes.insert(supplierType);
     supplier->InitNetScore();
-    supplier->ReceiveBestScore(bestScore, supplierId, supplierType, netrequest);
+    supplier->ReceiveBestScore(bestScore, supplierId, netrequest);
     EXPECT_TRUE(supplierId == supplier->supplierId_);
 
     supplierId = 1;
     supplier->requestList_.insert(1);
-    supplier->ReceiveBestScore(bestScore, supplierId, supplierType, netrequest);
+    supplier->ReceiveBestScore(bestScore, supplierId, netrequest);
     EXPECT_FALSE(supplier->requestList_.empty());
 }
 
