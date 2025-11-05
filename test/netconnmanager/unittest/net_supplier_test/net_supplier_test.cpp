@@ -166,7 +166,9 @@ HWTEST_F(NetSupplierTest, ReceiveBestScoreTest001, TestSize.Level1)
     int32_t bestScore = 1;
     uint32_t supplierId = 0;
     supplier->supplierId_ = 0;
+    NetBearType supplierType = NetBearType::BEARER_DEFAULT;
     NetRequest netrequest;
+    netrequest.bearTypes.insert(supplierType);
     supplier->InitNetScore();
     supplier->ReceiveBestScore(bestScore, supplierId, netrequest);
     EXPECT_TRUE(supplierId == supplier->supplierId_);

@@ -981,13 +981,21 @@ void NetConnService::CancelRequestForSupplier(std::shared_ptr<NetActivate> &netA
     NetRequest netRequest(netActivate->GetUid(), reqId);
     sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
     if (supplier) {
+        NetBearType defaultNetBearType =
+            defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+        netRequest.bearTypes.insert(defaultNetBearType);
         supplier->CancelRequest(netRequest);
+        netRequest.bearTypes.erase(defaultNetBearType);
     }
     NET_SUPPLIER_MAP::iterator iterSupplier;
     std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (iterSupplier->second != nullptr) {
+            NetBearType defaultNetBearType =
+                defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+            netRequest.bearTypes.insert(defaultNetBearType);
             iterSupplier->second->CancelRequest(netRequest);
+            netRequest.bearTypes.erase(defaultNetBearType);
         }
     }
 }
@@ -1460,7 +1468,11 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
                 netrequest.uid = iterActivate->second->GetUid();
                 if (pNetService) {
+                    NetBearType defaultNetBearType =
+                        defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+                    netrequest.bearTypes.insert(defaultNetBearType);
                     pNetService->CancelRequest(netrequest);
+                    netrequest.bearTypes.erase(defaultNetBearType);
                 }
             }
             lock.unlock();
@@ -1470,7 +1482,11 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 if (iterSupplier->second == nullptr) {
                     continue;
                 }
+                NetBearType defaultNetBearType =
+                    defaultNetSupplier_ == nullptr ? BEARER_DEFAULT : defaultNetSupplier_->GetNetSupplierType();
+                netrequest.bearTypes.insert(defaultNetBearType);
                 iterSupplier->second->CancelRequest(netrequest);
+                netrequest.bearTypes.erase(defaultNetBearType);
             }
         });
     }
@@ -1560,7 +1576,8 @@ void NetConnService::FindBestNetworkForAllRequest()
             NotFindBestSupplier(iterActive->first, iterActive->second, oldSupplier, callback);
             continue;
         }
-        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId(), iterActive->second->GetUid());
+        SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId(),
+                                bestSupplier->GetNetSupplierType(), iterActive->second->GetUid());
         if (bestSupplier == oldSupplier) {
             NETMGR_LOG_D("bestSupplier is equal with oldSupplier.");
             continue;
@@ -1768,7 +1785,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
     }
 }
 
-void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId, uint32_t uid)
+void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId,
+                                             NetBearType supplierType, uint32_t uid)
 {
     NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
     NET_SUPPLIER_MAP::iterator iter;
@@ -1783,7 +1801,9 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
         NetRequest netrequest;
         netrequest.uid = uid;
         netrequest.requestId = reqId;
+        netrequest.bearTypes.insert(supplierType);
         iter->second->ReceiveBestScore(bestScore, supplierId, netrequest);
+        netrequest.bearTypes.erase(supplierType);
     }
 }
 

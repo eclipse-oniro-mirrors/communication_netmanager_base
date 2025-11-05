@@ -316,6 +316,7 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps, const N
     if (!netSupplierInfo_.isAvailable_ && !isInternal && !isXcap && !isMms) {
         request.isRemoveUid = REMOVE_UID_ONLY;
     }
+    request.bearTypes = netrequest.bearTypes;
     int32_t errCode = netController_->ReleaseNetwork(request);
     NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
