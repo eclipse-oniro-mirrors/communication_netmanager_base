@@ -15,10 +15,12 @@ use std::ops::Deref;
 
 use ani_sys::{ani_enum, ani_type};
 
-use super::{AniClass, AniType};
+use crate::{AniEnv, global::GlobalRef, error::AniError};
+
+use super::{AniClass, AniType, AniRef};
 
 #[repr(transparent)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AniEnum<'local>(AniType<'local>);
 
 impl<'local> AsRef<AniEnum<'local>> for AniEnum<'local> {
@@ -59,6 +61,18 @@ impl<'local> From<AniType<'local>> for AniEnum<'local> {
     }
 }
 
+impl<'local> From<AniEnum<'local>> for AniRef<'local> {
+    fn from(value: AniEnum<'local>) -> Self {
+        AniRef::from(value.0)
+    }
+}
+
+impl<'local> From<AniRef<'local>> for AniEnum<'local> {
+    fn from(value: AniRef<'local>) -> Self {
+        AniEnum::from(AniType::from(value))
+    }
+}
+
 impl<'local> AniEnum<'local> {
     pub fn from_raw(ptr: ani_enum) -> Self {
         Self(AniType::from_raw(ptr as ani_type))
@@ -70,5 +84,11 @@ impl<'local> AniEnum<'local> {
 
     pub fn into_raw(self) -> ani_enum {
         self.0.into_raw() as _
+    }
+
+    pub fn into_global(self, env: &AniEnv) -> Result<GlobalRef<AniEnum<'static>>, AniError> {
+        let ani_ref = env.create_global_ref(self.into())?;
+        let ani_enum = AniEnum::from(ani_ref);
+        Ok(GlobalRef(ani_enum))
     }
 }

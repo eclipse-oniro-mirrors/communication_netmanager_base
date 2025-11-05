@@ -79,6 +79,7 @@ impl<'local> AniClass<'local> {
     pub fn into_raw(self) -> ani_class {
         self.0.into_raw() as _
     }
+    
     pub fn into_global(self, env: &AniEnv) -> Result<GlobalRef<AniClass<'static>>, AniError> {
         let ani_ref = env.create_global_ref(self.into())?;
         let ani_class = AniClass::from(ani_ref);
