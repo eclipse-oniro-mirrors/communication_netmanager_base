@@ -1569,7 +1569,7 @@ void NetConnService::FindBestNetworkForAllRequest()
     NET_ACTIVATE_MAP::iterator iterActive;
     sptr<NetSupplier> bestSupplier = nullptr;
     for (iterActive = netActivatesBck.begin(); iterActive != netActivatesBck.end(); ++iterActive) {
-        if (!iterActive->second || iterActive->second->IsAppFrozened()) {
+        if (!iterActive->second) {
             continue;
         }
         int score = static_cast<int>(FindBestNetworkForRequest(bestSupplier, iterActive->second));
@@ -1598,7 +1598,6 @@ void NetConnService::FindBestNetworkForAllRequest()
             oldSupplier->RemoveBestRequest(iterActive->first);
         }
         iterActive->second->SetServiceSupply(bestSupplier);
-        iterActive->second->SetFrozenedNotifyLostDelay(false);
         CallbackForAvailable(bestSupplier, callback);
         NetRequest netRequest(iterActive->second->GetUid(), iterActive->first);
         bestSupplier->SelectAsBestNetwork(netRequest);
@@ -1948,47 +1947,6 @@ int32_t NetConnService::UpdateUidLostDelay(const std::set<uint32_t> &uidSet)
         NETMGR_LOG_I("UpdateUidLostDelay uid[%{public}d].", uid);
     }
     return NETMANAGER_SUCCESS;
-}
-
-void NetConnService::PostDelayLostCallbackTask(std::shared_ptr<NetActivate> activate)
-{
-    if (!netConnEventHandler_ || !activate) {
-        return;
-    }
-    uint32_t reqId = activate->GetRequestId();
-    int32_t netId = activate->GetLastNetid();
-    NETMGR_LOG_I("Post DelayLostCallbackByFrozened Task uid: %{public}u, reqId: %{public}u,"
-        "netId:%{public}d", activate->GetUid(), reqId, netId);
-    auto taskName = "HandleDelayLostCallback" + std::to_string(reqId);
-    netConnEventHandler_->RemoveTask(taskName);
-    std::weak_ptr<NetConnService> self = shared_from_this();
-    netConnEventHandler_->PostAsyncTask([self, activate, netId]() {
-        std::shared_ptr<NetConnService> netConnService = self.lock();
-        if (netConnService) {
-            netConnService->HandleDelayLostCallback(activate, netId);
-        }
-    },
-        taskName, DELAY_LOST_TIME);
-    activate->SetFrozenedNotifyLostDelay(true);
-}
-
-void NetConnService::HandleDelayLostCallback(std::shared_ptr<NetActivate> activate, int32_t netId)
-{
-    if (!activate) {
-        return;
-    }
-    if (activate->GetFrozenedNotifyLostDelay()) {
-        sptr<INetConnCallback> callback = activate->GetNetCallback();
-        if (!callback) {
-            return;
-        }
-        sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
-        netHandle->SetNetId(netId);
-        callback->NetLost(netHandle);
-    } else {
-        NETMGR_LOG_I("netActivate satisfied, uid: %{public}u, reqId: %{public}d, stop NetLost callback",
-            activate->GetUid(), activate->GetRequestId());
-    }
 }
 
 void NetConnService::HandleCallback(sptr<NetSupplier> &supplier, sptr<NetHandle> &netHandle,
@@ -4277,28 +4235,34 @@ int32_t NetConnService::SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened)
         }
         curNetAct->SetIsAppFrozened(isFrozened);
         if (isFrozened) {
-            sptr<NetSupplier> supplier = curNetAct->GetServiceSupply();
-            if (supplier && supplier->GetNetHandle()) {
-                curNetAct->SetLastNetid(supplier->GetNetHandle()->GetNetId());
-            }
-            CancelRequestForSupplier(curNetAct, curNetAct->GetRequestId());
-            curNetAct->SetServiceSupply(nullptr);
             continue;
         }
-        sptr<NetSupplier> bestNet = nullptr;
-        int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, curNetAct));
+        sptr<NetSupplier> netSupplier = curNetAct->GetServiceSupply();
         sptr<INetConnCallback> callback = curNetAct->GetNetCallback();
-        if (bestScore != 0 && bestNet != nullptr) {
-            NetRequest netRequest(curNetAct->GetUid(), curNetAct->GetRequestId());
-            bestNet->SelectAsBestNetwork(netRequest);
-            curNetAct->SetServiceSupply(bestNet);
-            CallbackForAvailable(bestNet, callback);
-        } else {
-            int32_t lastNetid = curNetAct->GetLastNetid();
-            if (lastNetid) {
-                PostDelayLostCallbackTask(curNetAct);
+        CallbackType callbackType = curNetAct->GetLastCallbackType();
+        if (callbackType == CALL_TYPE_UNKNOWN) {
+            continue;
+        }
+        if (netSupplier == nullptr) {
+            if (callbackType != CALL_TYPE_LOST) {
+                continue;
             }
-            SendRequestToAllNetwork(curNetAct);
+            int32_t lastNetid = curNetAct->GetLastNetid();
+            if (FindNotifyLostDelayCache(lastNetid) && CheckNotifyLostDelay(uid, lastNetid, callbackType)) {
+                curNetAct->SetNotifyLostDelay(true);
+                curNetAct->SetNotifyLostNetId(lastNetid);
+                continue;
+            }
+            if (callback) {
+                sptr<NetHandle> netHandle = sptr<NetHandle>::MakeSptr();
+                netHandle->SetNetId(lastNetid);
+                callback->NetLost(netHandle);
+            }
+        } else if (callbackType == CALL_TYPE_AVAILABLE) {
+            CallbackForAvailable(netSupplier, curNetAct->GetNetCallback());
+        } else {
+            sptr<NetHandle> netHandle = netSupplier->GetNetHandle();
+            HandleCallback(netSupplier, netHandle, callback, callbackType);
         }
         curNetAct->SetLastNetid(0);
         curNetAct->SetLastCallbackType(CALL_TYPE_UNKNOWN);
