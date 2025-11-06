@@ -1156,7 +1156,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
 }
 
 void UpdateNetSupplierInfoAsyncExpand(sptr<NetSupplier> &supplier,
-                                        const HttpProxy &oldHttpProxy)
+                                      const HttpProxy &oldHttpProxy)
 {
     FindBestNetworkForAllRequest();
     if (!oldHttpProxy.GetHost().empty()) {
