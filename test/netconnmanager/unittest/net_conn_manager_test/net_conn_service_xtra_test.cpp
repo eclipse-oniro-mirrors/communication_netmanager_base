@@ -1651,5 +1651,26 @@ HWTEST_F(NetConnServiceExtTest, UpdateUidLostDelay, TestSize.Level1)
     EXPECT_TRUE(netConnService->uidLostDelaySet_.empty());
 }
 
+HWTEST_F(NetConnServiceExtTest, UpdateNetSupplierInfoAsyncExpand001, TestSize.Level1)
+{
+    auto netConnService = std::make_shared<NetConnService>();
+    uint32_t supplierId = 1;
+    std::string netSupplierIdent;
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_VALIDATED);
+    sptr<NetSupplier> supplier = new NetSupplier(BEARER_WIFI, netSupplierIdent, netCaps);
+    supplier->supplierId_ = supplierId;
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    int32_t netId = 123;
+    auto network = std::make_shared<Network>(netId, supplierId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    supplier->SetNetwork(network);
+    netConnService->delaySupplierId_ = supplierId;
+    netConnService->netSuppliers_[1] = supplier;
+    HttpProxy oldHttpProxy;
+    oldHttpProxy.SetHost("192.168.1.1");
+    netConnService->UpdateNetSupplierInfoAsyncExpand(supplier, oldHttpProxy);
+    EXPECT_EQ(supplier->supplierId_, supplierId);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1134,12 +1134,13 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         supplier->GetUid(), supplier->GetNetSupplierIdent().c_str(), netSupplierInfo->ToString(" ").c_str());
     bool isOldAvailable = supplier->IsAvailable();
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
+    HttpProxy oldHttpProxy;
     if (!netSupplierInfo->isAvailable_) {
         HandleSupplierNotAvailable(supplierId, isOldAvailable, supplier);
         std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
         supplier->ResetNetSupplier();
         locker.unlock();
-        ProcessHttpProxyCancel(supplier);
+        supplier->GetHttpProxy(oldHttpProxy);
     } else {
         StopNotifyLostDelay(supplier->GetNetId());
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
@@ -1150,10 +1151,20 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
         supplier->InitNetScore();
     }
     initLocker.unlock();
+    UpdateNetSupplierInfoAsyncExpand(supplier, oldHttpProxy);
+    return NETMANAGER_SUCCESS;
+}
+
+void UpdateNetSupplierInfoAsyncExpand(sptr<NetSupplier> &supplier,
+                                        const HttpProxy &oldHttpProxy)
+{
     FindBestNetworkForAllRequest();
+    if (!oldHttpProxy.GetHost().empty()) {
+        HttpProxy emptyProxy;
+        SendHttpProxyChangeBroadcast(emptyProxy);
+    }
     SetCellularDetectSleepModeWhenWifiStateChange(supplier);
     NETMGR_LOG_D("UpdateNetSupplierInfo service out.");
-    return NETMANAGER_SUCCESS;
 }
 
 void NetConnService::HandleSupplierNotAvailable(uint32_t supplierId, bool isOldAvailable, sptr<NetSupplier> &supplier)
