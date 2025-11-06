@@ -27,7 +27,7 @@ using namespace OHOS::NetsysNative;
 }
 
 const char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
-const char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
+const char *HW_HICLOUD_ADDR = "";
 const uint32_t MAX_RESULT_SIZE = 32;
 const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 const char *DNS_URL_HEADER = "DnsProbeUrl:";
