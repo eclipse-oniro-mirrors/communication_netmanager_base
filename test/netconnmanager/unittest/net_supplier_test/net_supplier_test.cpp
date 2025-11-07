@@ -276,7 +276,7 @@ HWTEST_F(NetSupplierTest, NetExtAttributeTest001, TestSize.Level1)
     EXPECT_EQ(supplier->GetNetExtAttribute(), TEST_IDENT);
 }
 
-HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1) +
+HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1)
 {
     supplier->netSupplierInfo_.isAvailable_ = false;
     supplier->SetOnceSuppress();

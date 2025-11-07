@@ -508,8 +508,7 @@ void NetSupplier::SetOnceSuppress()
 
 bool NetSupplier::IsOnceSuppress() const
 {
-    if (IsNetQualityPoor())
-    {
+    if (IsNetQualityPoor()) {
         return false;
     }
     return isOnceSuppress_;
