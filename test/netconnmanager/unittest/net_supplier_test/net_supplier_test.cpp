@@ -275,5 +275,20 @@ HWTEST_F(NetSupplierTest, NetExtAttributeTest001, TestSize.Level1)
     supplier->SetNetExtAttribute(TEST_IDENT);
     EXPECT_EQ(supplier->GetNetExtAttribute(), TEST_IDENT);
 }
+
+HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1) +
+{
+    supplier->netSupplierInfo_.isAvailable_ = false;
+    supplier->SetOnceSuppress();
+    EXPECT_TRUE(supplier->isOnceSuppress_);
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    supplier->SetOnceSuppress();
+    EXPECT_FALSE(supplier->isOnceSuppress_);
+    supplier->netQuality_ = QUALITY_GOOD_STATE;
+    supplier->SetOnceSuppress();
+    EXPECT_FALSE(supplier->isOnceSuppress_);
+    supplier->SetNetValid(QUALITY_GOOD_STATE);
+    EXPECT_EQ(supplier->netQuality_, QUALITY_GOOD_STATE);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

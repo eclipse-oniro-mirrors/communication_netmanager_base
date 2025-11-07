@@ -79,6 +79,7 @@ void NetSupplier::ResetNetSupplier()
     isFirstTimeDetectionDone = false;
     //Reset User Selection
     isAcceptUnvaliad = false;
+    isOnceSuppress_ = false;
     // Reset network capabilities for checking connectivity finished flag.
     netCaps_.InsertNetCap(NET_CAPABILITY_CHECKING_CONNECTIVITY);
     // Reset network verification status to validated.
@@ -482,6 +483,7 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
         netQuality_ = QUALITY_POOR_STATE;
     } else if (netState == QUALITY_GOOD_STATE) {
         netQuality_ = QUALITY_GOOD_STATE;
+        SetOnceSuppress();
     } else if (netState == ACCEPT_UNVALIDATED) {
         netQuality_ = ACCEPT_UNVALIDATED;
         isAcceptUnvaliad = true;
@@ -497,6 +499,20 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
         }
     }
+}
+
+void NetSupplier::SetOnceSuppress()
+{
+    isOnceSuppress_ = IsAvailable() ? false : true;
+}
+
+bool NetSupplier::IsOnceSuppress() const
+{
+    if (IsNetQualityPoor())
+    {
+        return false;
+    }
+    return isOnceSuppress_;
 }
 
 bool NetSupplier::IsNetValidated() const
@@ -609,7 +625,7 @@ bool NetSupplier::ResumeNetworkInfo()
     return network_->ResumeNetworkInfo();
 }
 
-bool NetSupplier::IsNetQualityPoor()
+bool NetSupplier::IsNetQualityPoor() const
 {
     return netQuality_ == QUALITY_POOR_STATE;
 }
