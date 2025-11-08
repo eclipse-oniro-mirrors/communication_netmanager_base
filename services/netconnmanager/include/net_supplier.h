@@ -146,11 +146,15 @@ public:
     void SetDetectionDone();
     void SetReuseCap(NetCap reuseCap, bool add);
     bool ResumeNetworkInfo();
-    bool IsNetQualityPoor();
     bool IsNetAcceptUnavalidate();
     bool IsInFirstTimeDetecting() const;
     std::string GetNetExtAttribute();
     void SetNetExtAttribute(const std::string &netExtAttribute);
+    bool IsNetQualityPoor() const;
+    bool IsOnceSuppress() const;
+
+private:
+    void SetOnceSuppress();
 
 private:
     NetBearType netSupplierType_;
@@ -174,6 +178,7 @@ private:
     bool isAcceptUnvaliad = false;
     int32_t uid_ = 0;
     std::string netExtAttribute_ = "";
+    bool isOnceSuppress_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

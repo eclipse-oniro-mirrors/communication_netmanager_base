@@ -725,7 +725,8 @@ private:
     void SetCellularDetectSleepModeWhenWifiStateChange(sptr<NetSupplier> &supplier);
     void ActiveCellularDetectWhenExitSleep();
     void HandleFindBestNetworkForDelay();
-    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier);
+    void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier,
+        bool isFirstTimeDetect);
     void RemoveDelayNetwork();
     void UpdateNetSupplierInfoAsyncInvalid(uint32_t supplierId);
     bool CheckNotifyLostDelay(uint32_t uid, int32_t netId, CallbackType type);

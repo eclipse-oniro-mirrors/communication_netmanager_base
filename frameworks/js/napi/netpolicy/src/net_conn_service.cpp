@@ -1247,7 +1247,8 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     }
     locker.unlock();
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
-    HandlePreFindBestNetworkForDelay(supplierId, supplier);
+    bool isFirstTimeDetect = supplier->IsInFirstTimeDetecting();
+    HandlePreFindBestNetworkForDelay(supplierId, supplier, isFirstTimeDetect);
     if (!isDelayHandleFindBestNetwork_) {
         FindBestNetworkForAllRequest();
     }
@@ -1258,7 +1259,8 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier)
+void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier,
+    bool isFirstTimeDetect)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is nullptr");
@@ -1270,9 +1272,8 @@ void NetConnService::HandlePreFindBestNetworkForDelay(uint32_t supplierId, const
     bool isNeedDelay = (system::GetBoolParameter(PERSIST_WIFI_DELAY_ELEVATOR_ENABLE, false) ||
         system::GetBoolParameter(PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE, false));
     std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLocker(defaultNetSupplierMutex_);
-    if (supplier->GetNetSupplierType() == BEARER_WIFI && !supplier->IsNetValidated() &&
-        defaultNetSupplier_ != nullptr && defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR &&
-        isNeedDelay) {
+    if (supplier->GetNetSupplierType() == BEARER_WIFI && defaultNetSupplier_ != nullptr && isFirstTimeDetect &&
+        defaultNetSupplier_->GetNetSupplierType() == BEARER_CELLULAR && isNeedDelay) {
         defaultNetSupplierLocker.unlock();
         int64_t delayTime = 2000;
         if (netConnEventHandler_) {
@@ -2042,6 +2043,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
         return;
     }
     std::unique_lock<std::recursive_mutex> locker(netManagerMutex_);
+    bool isFirstTimeDetect = supplier->IsInFirstTimeDetecting();
     supplier->SetNetValid(netState);
     supplier->SetDetectionDone();
     locker.unlock();
@@ -2050,8 +2052,11 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     std::shared_lock<ffrt::shared_mutex> defaultNetSupplierLocker(defaultNetSupplierMutex_);
     bool needRemoveDelayNetwork = defaultNetSupplier_ && defaultNetSupplier_->GetNetSupplierType() != BEARER_CELLULAR;
     defaultNetSupplierLocker.unlock();
+    NETMGR_LOG_I("HandleDetectionResult IsInFirstTimeDetecting[%{public}d]", isFirstTimeDetect);
     if (needRemoveDelayNetwork) {
         RemoveDelayNetwork();
+    } else if (isFirstTimeDetect && supplier->IsOnceSuppress()) {
+        HandlePreFindBestNetworkForDelay(supplierId, supplier, isFirstTimeDetect);
     }
     if (delaySupplierId_ == supplierId &&
         isDelayHandleFindBestNetwork_ && supplier->GetNetSupplierType() == BEARER_WIFI && ifValid) {
