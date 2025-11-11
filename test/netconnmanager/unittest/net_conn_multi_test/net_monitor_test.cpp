@@ -81,7 +81,7 @@ void NetMonitorTest::TearDown() {}
 std::shared_ptr<NetMonitor> NetMonitorTest::CreateNetMonitorInstance()
 {
     auto cb = std::make_shared<TestMonitorCallback>();
-    NetMonitorInfo info = {true, 0, false};
+    NetMonitorInfo info = {true, 0};
     auto netMonitor = std::make_shared<NetMonitor>(
         TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), cb, info);
     return netMonitor;
