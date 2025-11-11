@@ -40,7 +40,6 @@ namespace NetManagerStandard {
 typedef struct {
     bool isScreenOn;
     uint64_t lastDetectTime;
-    bool isSleep;
 } NetMonitorInfo;
 
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
@@ -99,8 +98,6 @@ public:
      */
     void SetScreenState(bool isScreenOn);
 
-    void SetSleepMode(bool isSleep);
-
     uint64_t GetLastDetectTime();
 
     int32_t StartDualStackProbeThread();
@@ -148,7 +145,6 @@ private:
     bool isNeedSuffix_ = false;
     bool isDataShareReady_ = false;
     bool isScreenOn_ = true;
-    bool isSleep_ = false;
     uint64_t lastDetectTimestamp_ = 0;
     int32_t dualStackProbeTimeOut_ = 5 * 1000;
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;

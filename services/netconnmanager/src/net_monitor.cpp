@@ -87,7 +87,6 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 {
     netBearType_ = bearType;
     lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
-    isSleep_ = netMonitorInfo.isSleep;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
     GetHttpProbeUrlFromConfig();
@@ -96,9 +95,6 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 void NetMonitor::Start()
 {
     NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
-    if (isSleep_) {
-        return;
-    }
     if (isDetecting_) {
         NETMGR_LOG_W("Net[%{public}d] monitor is detecting, notify", netId_);
         detectionDelay_ = 0;
@@ -513,14 +509,6 @@ bool NetMonitor::CheckIfSettingsDataReady()
 void NetMonitor::SetScreenState(bool isScreenOn)
 {
     isScreenOn_ = isScreenOn;
-}
-
-void NetMonitor::SetSleepMode(bool isSleep)
-{
-    isSleep_ = isSleep;
-    if (isSleep_) {
-        Stop();
-    }
 }
 
 uint64_t NetMonitor::GetLastDetectTime()

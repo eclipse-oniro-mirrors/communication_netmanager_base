@@ -836,74 +836,6 @@ void NetConnService::HandleScreenEvent(bool isScreenOn)
     }
 }
 
-bool NetConnService::IsWifiSupplierAvailable()
-{
-    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second != nullptr && pNetSupplier.second->GetNetSupplierType() == BEARER_WIFI &&
-            pNetSupplier.second->IsAvailable()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void NetConnService::SetCellularDetectSleepMode(bool isSleep)
-{
-    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR ||
-            pNetSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
-            continue;
-        }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork != nullptr) {
-            pNetwork->SetSleepMode(isSleep);
-        }
-    }
-}
-
-void NetConnService::SetCellularDetectSleepModeWhenWifiStateChange(sptr<NetSupplier> &supplier)
-{
-    if (supplier == nullptr || supplier->GetNetSupplierType() != BEARER_WIFI) {
-        return;
-    }
-    // wifi available, cancel cellular sleep mode
-    bool isSleep = supplier->IsAvailable() ? false : isSmartSleepMode_;
-    SetCellularDetectSleepMode(isSleep);
-}
-
-void NetConnService::ActiveCellularDetectWhenExitSleep()
-{
-    std::lock_guard<std::recursive_mutex> locker(netManagerMutex_);
-    for (const auto& pNetSupplier : netSuppliers_) {
-        if (pNetSupplier.second == nullptr || pNetSupplier.second->GetNetSupplierType() != BEARER_CELLULAR ||
-            pNetSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
-            continue;
-        }
-        std::shared_ptr<Network> pNetwork = pNetSupplier.second->GetNetwork();
-        if (pNetwork != nullptr && pNetSupplier.second->IsAvailable()) {
-            pNetwork->StartNetDetection(true);
-        }
-    }
-}
-
-void NetConnService::HandleSleepModeChangeEvent(bool isSleep)
-{
-    if (isSmartSleepMode_ == isSleep) {
-        return;
-    }
-    isSmartSleepMode_ = isSleep;
-    if (isSleep && IsWifiSupplierAvailable()) {
-        // if wifi available, not set cellular detect sleep
-        return;
-    }
-    SetCellularDetectSleepMode(isSleep);
-    if (!isSleep) {
-        ActiveCellularDetectWhenExitSleep();
-    }
-}
-
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
@@ -1163,7 +1095,6 @@ void NetConnService::UpdateNetSupplierInfoAsyncExpand(sptr<NetSupplier> &supplie
         HttpProxy emptyProxy;
         SendHttpProxyChangeBroadcast(emptyProxy);
     }
-    SetCellularDetectSleepModeWhenWifiStateChange(supplier);
     NETMGR_LOG_D("UpdateNetSupplierInfo service out.");
 }
 
@@ -3646,7 +3577,6 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         SubscribeCommonEvent();
-        SubscribeSleepEvent();
     }
 }
 
@@ -3686,29 +3616,6 @@ void NetConnService::SubscribeCommonEvent()
     }
 }
 
-void NetConnService::SubscribeSleepEvent()
-{
-    EventFwk::MatchingSkills sleepSkills;
-    sleepSkills.AddEvent("COMMON_EVENT_USER_SLEEP_STATE_CHANGED");
-    EventFwk::CommonEventSubscribeInfo sleepSubscribeInfo(sleepSkills);
-    sleepSubscribeInfo.SetPermission("ohos.permission.PERCEIVE_SMART_POWER_SCENARIO");
-
-    if (sleepSubscriberPtr_ == nullptr) {
-        std::weak_ptr<NetConnService> self = shared_from_this();
-        sleepSubscriberPtr_ = std::make_shared<NetConnListener>(sleepSubscribeInfo,
-            [self](auto&& PH1) {
-                std::shared_ptr<NetConnService> netconnservice = self.lock();
-                if (netconnservice == nullptr) {
-                    return;
-                }
-                netconnservice->OnReceiveEvent(std::forward<decltype(PH1)>(PH1));
-            });
-    }
-    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(sleepSubscriberPtr_)) {
-        NETMGR_LOG_E("sleep state subscribe fail.");
-    }
-}
-
 void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     auto const &want = data.GetWant();
@@ -3736,10 +3643,6 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         HandleScreenEvent(true);
     } else if (action == "usual.event.SCREEN_OFF") {
         HandleScreenEvent(false);
-    }
-    if (action == "COMMON_EVENT_USER_SLEEP_STATE_CHANGED") {
-        bool isSleep = want.GetBoolParam("isSleep", false);
-        HandleSleepModeChangeEvent(isSleep);
     }
 }
 

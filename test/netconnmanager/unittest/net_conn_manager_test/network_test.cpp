@@ -1601,27 +1601,6 @@ HWTEST_F(NetworkTest, PAC_OH_NetConn_SetProxyMode_001, TestSize.Level1)
     EXPECT_EQ(mode, PROXY_MODE_AUTO);
 }
 
-HWTEST_F(NetworkTest, SetSleepModeTest001, TestSize.Level1)
-{
-    int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    network->InitNetMonitor();
-    EXPECT_NE(network->netMonitor_, nullptr);
-    network->SetSleepMode(true);
-    EXPECT_EQ(network->isSleep_, true);
-}
-
-HWTEST_F(NetworkTest, SetSleepModeTest002, TestSize.Level1)
-{
-    int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    network->InitNetMonitor();
-    EXPECT_NE(network->netMonitor_, nullptr);
-    network->netMonitor_ = nullptr;
-    network->SetSleepMode(false);
-    EXPECT_EQ(network->isSleep_, false);
-}
-
 HWTEST_F(NetworkTest, OnHandleNetProbeResultTest001, TestSize.Level1)
 {
     int32_t netId = 1;

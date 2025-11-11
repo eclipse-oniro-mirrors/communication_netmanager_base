@@ -58,7 +58,7 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
-    static inline NetMonitorInfo info = {true, 0, false};
+    static inline NetMonitorInfo info = {true, 0};
     static inline std::shared_ptr<NetMonitor> instance_ =
         std::make_shared<NetMonitor>(TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), callback_, info);
     static std::shared_ptr<NetMonitor> CreateNetMonitorInstance();
@@ -81,7 +81,7 @@ void NetMonitorTest::TearDown() {}
 std::shared_ptr<NetMonitor> NetMonitorTest::CreateNetMonitorInstance()
 {
     auto cb = std::make_shared<TestMonitorCallback>();
-    NetMonitorInfo info = {true, 0, false};
+    NetMonitorInfo info = {true, 0};
     auto netMonitor = std::make_shared<NetMonitor>(
         TEST_NETID, BEARER_DEFAULT, NetLinkInfo(), cb, info);
     return netMonitor;
@@ -174,14 +174,6 @@ HWTEST_F(NetMonitorTest, DetectionTest002, TestSize.Level1)
     instance_->detectionDelay_ = 1;
     instance_->Start();
     EXPECT_TRUE(instance_->IsDetecting());
-}
-
-HWTEST_F(NetMonitorTest, DetectionTest003, TestSize.Level1)
-{
-    instance_->isDetecting_ = false;
-    instance_->isSleep_ = true;
-    instance_->Start();
-    EXPECT_FALSE(instance_->IsDetecting());
 }
 
 HWTEST_F(NetMonitorTest, CheckIfSettingsDataReadyTest001, TestSize.Level1)
