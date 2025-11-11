@@ -76,7 +76,6 @@ public:
     void CloseSocketsUid(uint32_t uid);
     void StopNetDetection();
     void SetScreenState(bool isScreenOn);
-    void SetSleepMode(bool isSleep);
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     void UpdateForbidDetectionFlag(bool forbidDetectionFlag);
 #endif
@@ -130,7 +129,6 @@ private:
 #endif
     bool isNeedResume_ = false;
     bool isScreenOn_ = true;
-    bool isSleep_ = false;
     int32_t dualStackProbeTime_ = 0;
 };
 } // namespace NetManagerStandard

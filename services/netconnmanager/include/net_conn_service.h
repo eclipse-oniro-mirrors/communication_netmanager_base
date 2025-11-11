@@ -718,14 +718,8 @@ private:
     void RemoveALLClientDeathRecipient();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void SubscribeCommonEvent();
-    void SubscribeSleepEvent();
     void HandlePowerMgrEvent(int code);
     void HandleScreenEvent(bool isScreenOn);
-    void HandleSleepModeChangeEvent(bool isSleep);
-    bool IsWifiSupplierAvailable();
-    void SetCellularDetectSleepMode(bool isSleep);
-    void SetCellularDetectSleepModeWhenWifiStateChange(sptr<NetSupplier> &supplier);
-    void ActiveCellularDetectWhenExitSleep();
     void HandleFindBestNetworkForDelay();
     void HandlePreFindBestNetworkForDelay(uint32_t supplierId, const sptr<NetSupplier> &supplier,
         bool isFirstTimeDetect);
@@ -747,9 +741,7 @@ private:
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;
     std::shared_ptr<NetConnListener> subscriberPtr_ = nullptr;
-    std::shared_ptr<NetConnListener> sleepSubscriberPtr_ = nullptr;
     bool isScreenOn_ = true;
-    bool isSmartSleepMode_ = false;
     int32_t dualStackProbeTime_ = 0;
 };
 } // namespace NetManagerStandard

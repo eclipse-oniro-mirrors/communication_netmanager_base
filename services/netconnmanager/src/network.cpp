@@ -737,12 +737,8 @@ void Network::InitNetMonitor()
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
-    NetMonitorInfo netMonitorInfo;
-    netMonitorInfo.isScreenOn = isScreenOn_;
-    netMonitorInfo.isSleep = isSleep_;
-    netMonitorInfo.lastDetectTime = lastDetectTime_;
     netMonitor_ = std::make_shared<NetMonitor>(
-        netId_, netSupplierType_, netLinkInfoBck, monitorCallback, netMonitorInfo);
+        netId_, netSupplierType_, netLinkInfoBck, monitorCallback, isScreenOn_);
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
         return;
@@ -983,15 +979,6 @@ void Network::SetScreenState(bool isScreenOn)
         return;
     }
     netMonitor_->SetScreenState(isScreenOn);
-}
-
-void Network::SetSleepMode(bool isSleep)
-{
-    isSleep_ = isSleep;
-    if (netMonitor_ == nullptr) {
-        return;
-    }
-    netMonitor_->SetSleepMode(isSleep);
 }
 
 int32_t Network::StartDualStackProbeThread()
