@@ -364,7 +364,7 @@ void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uin
     auto needDestroy = [&] (const inet_diag_msg *msg) {
         bool isMatchNetwork = true;
         if (ipAddr != "") {
-            isMatchNetwork == IsMatchNetwork(msg, ipAddr);
+            isMatchNetwork = IsMatchNetwork(msg, ipAddr);
         }
         return msg != nullptr && uid == msg->idiag_uid && isMatchNetwork && !IsLoopbackSocket(msg);
     };
