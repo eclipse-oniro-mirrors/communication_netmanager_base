@@ -20,7 +20,7 @@ use std::{
 
 use ani_sys::{
     ani_array, ani_class, ani_enum, ani_enum_item, ani_env, ani_error, ani_method, ani_namespace,
-    ani_object, ani_ref, ani_static_method, ani_string,
+    ani_object, ani_ref, ani_static_method, ani_string, ani_long,
 };
 use serde::{Deserialize, Serialize};
 
@@ -450,6 +450,22 @@ impl<'local> AniEnv<'local> {
             Err(AniError::from_code(msg, res))
         } else {
             Ok(())
+        }
+    }
+
+    pub fn call_method_long<T: Input>(
+        &self,
+        obj: &AniObject,
+        method: &AniMethod,
+        value: T,
+    ) -> Result<i64, AniError> {
+        let mut result = 0;
+        let res = T::call_method_long(value, &self, obj, method, &mut result as _);
+        if res != 0 {
+            let msg = String::from("Failed to call method long");
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(result)
         }
     }
 
@@ -958,6 +974,15 @@ impl<'local> AniEnv<'local> {
 
 pub trait Input {
     fn call_method(self, env: &AniEnv, obj: &AniObject, method: &AniMethod) -> u32;
+
+    fn call_method_long(
+        self,
+        env: &AniEnv,
+        obj: &AniObject,
+        method: &AniMethod,
+        result: *mut ani_long,
+    ) -> u32;
+
     fn call_method_ref(
         self,
         env: &AniEnv,
@@ -993,6 +1018,19 @@ macro_rules! single_tuple_impl {
                         env.inner,
                         obj.as_raw(),
                         method.as_raw(),
+                        $(self.$field,)*
+                    )
+                }
+            }
+
+            fn call_method_long(self, env: &AniEnv, obj: &AniObject, method: &AniMethod, result: *mut ani_long)
+        -> u32{
+                unsafe {
+                    (**env.inner).Object_CallMethod_Long.unwrap()(
+                        env.inner,
+                        obj.as_raw(),
+                        method.as_raw(),
+                        result,
                         $(self.$field,)*
                     )
                 }
