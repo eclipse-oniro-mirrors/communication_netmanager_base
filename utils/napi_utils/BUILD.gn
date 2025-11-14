@@ -58,6 +58,7 @@ ohos_shared_library("napi_utils") {
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   external_deps = [
+    "ability_base:configuration",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",

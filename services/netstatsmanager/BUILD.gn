@@ -85,6 +85,7 @@ ohos_shared_library("net_stats_manager") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "bounds_checking_function:libsec_shared",

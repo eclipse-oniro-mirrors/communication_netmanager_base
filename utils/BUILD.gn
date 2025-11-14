@@ -90,6 +90,7 @@ ohos_shared_library("net_manager_common") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "ability_base:configuration",
     "ability_runtime:wantagent_innerkits",
     "time_service:time_client",
     "faultloggerd:libbacktrace_local"
