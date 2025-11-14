@@ -992,9 +992,9 @@ int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfa
     NETNATIVE_LOG_D("SetIpv6PrivacyExtensions");
     return result;
 }
-int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
-    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on);
+    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on, needRestart);
     NETNATIVE_LOG_D("SetEnableIpv6");
     return result;
 }

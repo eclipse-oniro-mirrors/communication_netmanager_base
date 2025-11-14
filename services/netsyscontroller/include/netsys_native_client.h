@@ -986,7 +986,7 @@ public:
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
 
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
 
     int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on);
 

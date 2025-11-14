@@ -107,17 +107,19 @@ public:
     int32_t GetNetworkCellularSharingTraffic(NetworkSharingTraffic &traffic, std::string &ifaceName);
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
 private:
     std::set<std::string> forwardingRequests_;
     std::set<std::string> interfaceForwards_;
     std::map<std::string, uint8_t> forbidIpsMap_;
+    std::map<std::string, bool> enableV6Map_;
     std::shared_ptr<IptablesWrapper> iptablesWrapper_ = nullptr;
     bool inited_ = false;
     std::mutex initedMutex_;
     std::mutex forbidIpMutex_;
+    std::mutex enableV6mutex_;
     std::string wifiShareInterface_ = "";
 
     void IpfwdExecSaveBak();

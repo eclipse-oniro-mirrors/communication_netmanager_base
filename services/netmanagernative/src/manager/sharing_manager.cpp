@@ -255,11 +255,24 @@ int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceNam
     return ipv6Success ? 0 : -1;
 }
 
-int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
     std::string option = IPV6_PROC_PATH + interfaceName + "/disable_ipv6";
     const char *value = on ? ENABLE_IPV6_VALUE : DISABLE_IPV6_VALUE;
     bool ipv6Success = WriteToFile(option.c_str(), value);
+    std::lock_guard<std::mutex> guard(enableV6mutex_);
+    bool isIfEnabled = true;
+    if (enableV6Map_.find(interfaceName) != enableV6Map_.end()) {
+        isIfEnabled = enableV6Map_[interfaceName];
+    }
+    if (!on && needRestart && isIfEnabled) {
+        bool restartSuccess = WriteToFile(option.c_str(), ENABLE_IPV6_VALUE);
+        NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s, restart V6, result = %{public}d",
+            interfaceName.c_str(), restartSuccess);
+        enableV6Map_[interfaceName] = true;
+        return restartSuccess ? 0 : -1;
+    }
+    enableV6Map_[interfaceName] = static_cast<bool>(on);
     return ipv6Success ? 0 : -1;
 }
 

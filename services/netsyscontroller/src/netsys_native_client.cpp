@@ -1912,14 +1912,14 @@ int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfac
     return proxy->SetIpv6PrivacyExtensions(interfaceName, on);
 }
 
-int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetEnableIpv6(interfaceName, on);
+    return proxy->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
 int32_t NetsysNativeClient::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)

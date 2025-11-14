@@ -161,7 +161,7 @@ public:
     int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart) override;
     int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on) override;
     int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override;
     int32_t StopClat(const std::string &interfaceName) override;

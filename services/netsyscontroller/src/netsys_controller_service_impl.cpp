@@ -953,10 +953,12 @@ int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string 
     return netsysClient_->SetIpv6PrivacyExtensions(interfaceName, on);
 }
 
-int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceName, const uint32_t on,
+    bool needRestart)
 {
-    NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
-    return netsysClient_->SetEnableIpv6(interfaceName, on);
+    NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s on=%{public}d, needRestart: %{public}d",
+        interfaceName.c_str(), on, needRestart);
+    return netsysClient_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
 int32_t NetsysControllerServiceImpl::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)

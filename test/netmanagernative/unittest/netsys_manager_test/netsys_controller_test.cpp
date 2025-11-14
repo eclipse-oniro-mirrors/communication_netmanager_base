@@ -1279,7 +1279,9 @@ HWTEST_F(NetsysControllerTest, SetEnableIpv6Test001, TestSize.Level1)
     std::string interface = "wlan0";
     int32_t ret = netsysController->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = netsysController->SetEnableIpv6(interface, on);
+    ret = netsysController->SetEnableIpv6(interface, on, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysController->SetEnableIpv6(interface, on, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -1345,7 +1347,7 @@ HWTEST_F(NetsysControllerTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
     std::string interface = "wlan0";
     int32_t ret = netsysController->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = netsysController->SetEnableIpv6(interface, on);
+    ret = netsysController->SetEnableIpv6(interface, on, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

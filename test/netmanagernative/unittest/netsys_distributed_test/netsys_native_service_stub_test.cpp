@@ -556,7 +556,7 @@ public:
         return 0;
     }
 
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart) override
     {
         return 0;
     }

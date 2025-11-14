@@ -440,7 +440,7 @@ HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level
     std::string interface = "wlan0";
     int32_t ret = nativeClient->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = nativeClient->SetEnableIpv6(interface, on);
+    ret = nativeClient->SetEnableIpv6(interface, on, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

@@ -173,7 +173,7 @@ int32_t ClatManager::CreateAndConfigureTunIface(const std::string &v6Iface, cons
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    ret = netsysService->SetEnableIpv6(tunIface, 0);
+    ret = netsysService->SetEnableIpv6(tunIface, 0, false);
     if (ret != NETMANAGER_SUCCESS) {
         close(tunFd);
         NETNATIVE_LOGW("SetEnableIpv6 on %{public}s failed", tunIface.c_str());

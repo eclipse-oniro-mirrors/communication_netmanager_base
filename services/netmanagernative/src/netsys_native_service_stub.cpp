@@ -2301,8 +2301,9 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessagePa
 {
     std::string interfaceName = data.ReadString();
     int32_t on = data.ReadInt32();
+    bool needRestart = data.ReadBool();
 
-    int32_t result = SetEnableIpv6(interfaceName, on);
+    int32_t result = SetEnableIpv6(interfaceName, on, needRestart);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
 
