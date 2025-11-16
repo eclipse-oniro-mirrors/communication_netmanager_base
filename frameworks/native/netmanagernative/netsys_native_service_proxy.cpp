@@ -3350,7 +3350,7 @@ int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &in
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
     NETNATIVE_LOGI("Begin to SetEnableIpv6");
     MessageParcel data;
@@ -3361,6 +3361,9 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(needRestart)) {
         return ERR_FLATTEN_OBJECT;
     }
 

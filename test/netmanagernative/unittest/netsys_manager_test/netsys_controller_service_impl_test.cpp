@@ -780,7 +780,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
 {
     EXPECT_CALL(*mockNetsysService_, SetIpv6PrivacyExtensions(_, _)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*mockNetsysService_, SetEnableIpv6(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockNetsysService_, SetEnableIpv6(_, _, _)).WillRepeatedly(Return(0));
     auto netsysControllerServiceImpl = std::make_shared<NetsysControllerServiceImpl>();
     netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
 
@@ -789,7 +789,10 @@ HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestS
     int32_t ret = netsysControllerServiceImpl->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = netsysControllerServiceImpl->SetEnableIpv6(interface, on);
+    ret = netsysControllerServiceImpl->SetEnableIpv6(interface, on, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    netsysControllerServiceImpl->SetEnableIpv6(interface, 0, false);
+    ret = netsysControllerServiceImpl->SetEnableIpv6(interface, 0, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

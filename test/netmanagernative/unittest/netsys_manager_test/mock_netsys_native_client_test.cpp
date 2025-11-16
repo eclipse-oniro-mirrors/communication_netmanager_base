@@ -70,7 +70,7 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest001, TestSi
     ret = nativeClient_.SetIpv6PrivacyExtensions(iface, 1);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = nativeClient_.SetEnableIpv6(iface, 1);
+    ret = nativeClient_.SetEnableIpv6(iface, 1, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.NetworkRemoveRoute(netId, iface, "", "");

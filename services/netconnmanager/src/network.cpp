@@ -460,9 +460,8 @@ static void HandleDeleteIpv6Route(const NetLinkInfo &netLinkInfoBck,
     bool lostIPv6Router = netLinkInfoBck.HasIpv6DefaultRoute() && !newNetLinkInfo.HasIpv6DefaultRoute();
     if (lostIPv6Router && newNetLinkInfo.IsIpv4Provisioned()) {
         NETMGR_LOG_I("UpdateRoutes, Restart IPV6");
-        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 0);
+        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 0, true);
         NetsysController::GetInstance().FlushDnsCache(netId);
-        NetsysController::GetInstance().SetEnableIpv6(newNetLinkInfo.ifaceName_, 1);
     }
 }
 

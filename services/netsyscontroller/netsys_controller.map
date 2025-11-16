@@ -104,7 +104,7 @@
       "OHOS::NetManagerStandard::NetsysController::SetBrokerUidAccessPolicyMap(std::__h::unordered_map<unsigned int, unsigned int, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, unsigned int>>> const&)";
       "OHOS::NetManagerStandard::NetsysController::SetDefaultNetWork(int)";
       "OHOS::NetManagerStandard::NetsysController::SetDnsCache(unsigned short, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, AddrInfo const&)";
-      "OHOS::NetManagerStandard::NetsysController::SetEnableIpv6(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::SetEnableIpv6(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, bool)";
       "OHOS::NetManagerStandard::NetsysController::SetIpv6AutoConf(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::SetFirewallCurrentUserId(int)";
       "OHOS::NetManagerStandard::NetsysController::SetFirewallDefaultAction(int, OHOS::NetManagerStandard::FirewallRuleAction, OHOS::NetManagerStandard::FirewallRuleAction)";

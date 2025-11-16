@@ -143,7 +143,7 @@ public:
     int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep);
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback);
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
     int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     int32_t SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault);

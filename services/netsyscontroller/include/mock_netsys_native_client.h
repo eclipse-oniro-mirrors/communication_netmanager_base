@@ -461,7 +461,7 @@ public:
     int32_t StopDhcpService(const std::string &iface);
 
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart);
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     /**
      * @brief Flush DNS cache.

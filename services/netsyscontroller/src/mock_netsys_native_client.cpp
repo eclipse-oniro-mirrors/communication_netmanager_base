@@ -602,7 +602,7 @@ int32_t MockNetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &inte
     return 0;
 }
 
-int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
     return 0;
 }

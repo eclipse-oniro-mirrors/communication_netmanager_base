@@ -447,7 +447,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6PrivacyExtensionsTest001, TestSize
     int32_t ret = netsysNativeService->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = netsysNativeService->SetEnableIpv6(interface, on);
+    ret = netsysNativeService->SetEnableIpv6(interface, on, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

@@ -393,9 +393,9 @@ int32_t NetManagerNative::SetIpv6PrivacyExtensions(const std::string &interfaceN
     return sharingManager_->SetIpv6PrivacyExtensions(interfaceName, on);
 }
 
-int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart)
 {
-    return sharingManager_->SetEnableIpv6(interfaceName, on);
+    return sharingManager_->SetEnableIpv6(interfaceName, on, needRestart);
 }
 
 int32_t NetManagerNative::SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on)

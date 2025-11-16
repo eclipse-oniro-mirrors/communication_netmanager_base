@@ -207,7 +207,7 @@ public:
     virtual int32_t RegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) = 0;
     virtual int32_t UnRegisterNetsysTrafficCallback(const sptr<INetsysTrafficCallback> &callback) = 0;
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
-    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on, bool needRestart) = 0;
     virtual int32_t SetIpv6AutoConf(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
     virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
