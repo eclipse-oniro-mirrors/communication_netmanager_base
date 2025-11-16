@@ -613,8 +613,6 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest002, TestSize.Leve
 
 HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Level1)
 {
-    instance_->notifyCallback_ = nullptr;
-    instance_->OnNetManagerRestart();
     instance_->manager_ = nullptr;
     instance_->OnNetManagerRestart();
     instance_->netsysService_ = nullptr;

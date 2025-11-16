@@ -137,9 +137,22 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
 int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     report_delay = std::max(report_delay, timeStep);
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("callback is nullptr");
+        return 0;
+    }
 
     std::unique_lock<std::mutex> locker(resultListenersMutex_);
-    resultListeners_.push_back(callback);
+    std::list<sptr<NetsysNative::INetDnsResultCallback>>::iterator iter;
+    for (iter = resultListeners_.begin(); iter != resultListeners_.end(); ++iter) {
+        if ((*iter)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            NETNATIVE_LOGI("callback is already registered");
+            break;
+        }
+    }
+    if (iter == resultListeners_.end()) {
+        resultListeners_.push_back(callback);
+    }
     locker.unlock();
 
     if (handler_started != true) {
@@ -156,8 +169,19 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
 
 int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallback> &callback)
 {
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("callback is nullptr");
+        return 0;
+    }
     std::lock_guard<std::mutex> locker(resultListenersMutex_);
-    resultListeners_.remove(callback);
+    auto iter = resultListeners_.begin();
+    while (iter != resultListeners_.end()) {
+        if ((*iter)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            iter = resultListeners_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
     if (resultListeners_.empty()) {
         handler_started = false;
     }

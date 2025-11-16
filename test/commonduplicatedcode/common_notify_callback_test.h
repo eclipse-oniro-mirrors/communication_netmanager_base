@@ -70,6 +70,16 @@ public:
         return 0;
     }
 };
+
+class DnsResultCallbackTest : public NetDnsResultCallbackStub {
+public:
+    DnsResultCallbackTest() = default;
+    ~DnsResultCallbackTest() override {};
+    int32_t OnDnsResultReport(uint32_t size, std::list<OHOS::NetsysNative::NetDnsResultReport> res) override
+    {
+        return 0;
+    }
+};
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // COMMON_NOTIFY_CALLBACK_TEST_H
