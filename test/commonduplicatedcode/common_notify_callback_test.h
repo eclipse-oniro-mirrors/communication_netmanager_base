@@ -17,6 +17,7 @@
 #define COMMON_NOTIFY_CALLBACK_TEST_H
 
 #include "notify_callback_stub.h"
+#include "net_dns_result_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
