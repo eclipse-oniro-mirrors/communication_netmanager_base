@@ -13,6 +13,7 @@
 
 mod bridge;
 mod error_code;
+mod log;
 mod register;
 mod statistics;
 mod wrapper;
@@ -32,11 +33,29 @@ ani_constructor! {
         "getUidTxBytesSync" : statistics::get_uid_tx_bytes,
         "getSockfdRxBytesSync" : statistics::get_sockfd_rx_bytes,
         "getSockfdTxBytesSync" : statistics::get_sockfd_tx_bytes,
-        "onNetStatsChange": register::on_net_states_change,
-        "offNetStatsChange": register::off_net_states_change,
+        "onNetStatsChangeSync": register::on_net_states_change,
+        "offNetStatsChangeSync": register::off_net_states_change,
         "getTrafficStatsByIfaceSync": statistics::get_traffic_stats_by_iface,
         "getTrafficStatsByUidSync": statistics::get_traffic_stats_by_uid,
         "getTrafficStatsByNetworkSync" : statistics::get_traffic_stats_by_network,
         "getTrafficStatsByUidNetworkSync" : statistics::get_traffic_stats_by_uid_network,
     ]
 }
+
+const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
+    log_type: hilog_rust::LogType::LogCore,
+    domain: 0xD0015B0,
+    tag: "NetMgrSubSystem",
+};
+
+#[used]
+#[link_section = ".init_array"]
+static G_STATISTICS_PANIC_HOOK: extern "C" fn() = {
+    #[link_section = ".text.startup"]
+    extern "C" fn init() {
+        std::panic::set_hook(Box::new(|info| {
+            statistics_error!("Panic occurred: {:?}", info);
+        }));
+    }
+    init
+};
