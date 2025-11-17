@@ -51,7 +51,6 @@ public:
 private:
     ClientCallBack clientEvent;
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
-    sptr<OHOS::NetsysNative::INotifyCallback> callback_ = nullptr;
     std::vector<sptr<OHOS::NetsysNative::INotifyCallback>> callback_;
     std::shared_mutex callbackMutex_;
 };
