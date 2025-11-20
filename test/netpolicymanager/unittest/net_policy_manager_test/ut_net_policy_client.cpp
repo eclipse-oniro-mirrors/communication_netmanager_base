@@ -663,6 +663,56 @@ HWTEST_F(UtNetPolicyClient, SetInternetAccessByIpForWifiShare001, TestSize.Level
 }
 
 /**
+ * @tc.name: SetIdleDenyPolicy001
+ * @tc.desc: Test NetPolicyClient SetIdleDenyPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetIdleDenyPolicy001, TestSize.Level1)
+{
+    int32_t result = g_netPolicyClient->SetIdleDenyPolicy(true);
+    std::cout << "NetPolicyClient035 SetIdleDenyPolicy ret:" << result << std::endl;
+    ASSERT_GE(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetIdleDenyPolicy002
+ * @tc.desc: Test NetPolicyClient SetIdleDenyPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetIdleDenyPolicy002, TestSize.Level1)
+{
+    int32_t result = g_netPolicyClient->SetIdleDenyPolicy(false);
+    std::cout << "NetPolicyClient036 SetIdleDenyPolicy ret:" << result << std::endl;
+    ASSERT_GE(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidsDeniedListChain001
+ * @tc.desc: Test NetPolicyClient SetUidsDeniedListChain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetUidsDeniedListChain001, TestSize.Level1)
+{
+    std::vector<uint32_t> uids {1000};
+    int32_t result = g_netPolicyClient->SetUidsDeniedListChain(uids, true);
+    std::cout << "NetPolicyClient037 SetIdleDenyPolicy ret:" << result << std::endl;
+    ASSERT_GE(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidsDeniedListChain002
+ * @tc.desc: Test NetPolicyClient SetUidsDeniedListChain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetUidsDeniedListChain002, TestSize.Level1)
+{
+    std::vector<uint32_t> uids {1000};
+    int32_t result = g_netPolicyClient->SetUidsDeniedListChain(uids, false);
+    std::cout << "NetPolicyClient037 SetIdleDenyPolicy ret:" << result << std::endl;
+    ASSERT_GE(result, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnRemoteDied001
  * @tc.desc: Test NetPolicyClient OnRemoteDied.
  * @tc.type: FUNC

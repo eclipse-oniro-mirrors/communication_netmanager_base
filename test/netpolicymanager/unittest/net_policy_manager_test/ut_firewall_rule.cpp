@@ -57,6 +57,8 @@ HWTEST_F(UtFirewallRule, CreateFirewallRule, TestSize.Level1)
     EXPECT_NE(rulePtr, nullptr);
     rulePtr = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_NONE);
     EXPECT_EQ(rulePtr, nullptr);
+    rulePtr = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_IDLE_DENY);
+    EXPECT_NE(rulePtr, nullptr);
 }
 
 /**

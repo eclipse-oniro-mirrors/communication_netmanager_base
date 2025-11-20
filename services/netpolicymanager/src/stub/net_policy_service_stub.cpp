@@ -983,7 +983,7 @@ int32_t NetPolicyServiceStub::OnSetUidsDeniedListChain(MessageParcel &data, Mess
     }
     if (uidsSize < 0 || uidsSize > static_cast<int32_t>(MAX_UIDS_SIZE)) {
         NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
-        return ;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::vector<uint32_t> uids;
     int32_t uid;

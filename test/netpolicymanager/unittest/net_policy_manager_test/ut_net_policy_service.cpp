@@ -238,6 +238,15 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
 
     ret = instance_->SetPowerSavePolicy(true);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetIdleDenyPolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetIdleDenyPolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetUidsDeniedListChain(uids, false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 /**
@@ -289,6 +298,15 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest002, TestSize.Level1)
 
     ret = instance_->SetPowerSavePolicy(true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetIdleDenyPolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetIdleDenyPolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetUidsDeniedListChain(uids, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -322,6 +340,12 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     ret = instance_->SetPowerSavePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetIdleDenyPolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetUidsDeniedListChain(uids, false);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 

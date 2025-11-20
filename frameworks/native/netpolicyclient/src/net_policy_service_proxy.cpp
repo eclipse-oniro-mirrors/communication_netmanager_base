@@ -924,7 +924,7 @@ int32_t NetPolicyServiceProxy::SetUidsDeniedListChain(const std::vector<uint32_t
     int32_t uidsSize = static_cast<int32_t>(uids.size());
     if (uidsSize < 0 || uidsSize > MAX_SIZE) {
         NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
-        return ;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     if (!data.WriteInt32(uidsSize)) {

@@ -192,6 +192,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIdleDenyPolicy(bool enable)
+    {
+        return 0;
+    }
+
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+    {
+        return 0;
+    }
 };
 
 } // namespace
@@ -696,6 +706,42 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestS
     errData.WriteString(ifname);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetIdleDenyPolicy
+ * @tc.desc: Test NetPolicyServiceStub OnSetIdleDenyPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnSetIdleDenyPolicy001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetUidsDeniedListChain
+ * @tc.desc: Test NetPolicyServiceStub OnSetUidsDeniedListChain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnSetUidsDeniedListChain001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    data.Int32(1);
+    data.WriteInt32(TEST_UID);
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
