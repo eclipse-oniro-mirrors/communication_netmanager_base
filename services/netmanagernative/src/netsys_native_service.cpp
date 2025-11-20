@@ -43,8 +43,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILIT
 NetsysNativeService::NetsysNativeService()
     : SystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true),
       netsysService_(nullptr),
-      manager_(nullptr),
-      notifyCallback_(nullptr)
+      manager_(nullptr)
 {
 }
 
@@ -167,9 +166,6 @@ void NetsysNativeService::OnNetManagerRestart()
     if (netsysService_ != nullptr) {
         netsysService_->NetworkReinitRoute();
     }
-    if (manager_ != nullptr && notifyCallback_ != nullptr) {
-        manager_->UnregisterNetlinkCallback(notifyCallback_);
-    }
 }
 
 int32_t NetsysNativeService::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -230,7 +226,6 @@ int32_t NetsysNativeService::SetTcpBufferSizes(const std::string &tcpBufferSizes
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
     NETNATIVE_LOG_D("RegisterNotifyCallback");
-    notifyCallback_ = callback;
     dhcpController_->RegisterNotifyCallback(callback);
     manager_->RegisterNetlinkCallback(callback);
     return 0;
@@ -239,7 +234,8 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
 int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
     NETNATIVE_LOGI("UnRegisterNotifyCallback");
-    manager_->UnregisterNetlinkCallback(notifyCallback_);
+    dhcpController_->UnregisterNotifyCallback(callback);
+    manager_->UnregisterNetlinkCallback(callback);
     return 0;
 }
 

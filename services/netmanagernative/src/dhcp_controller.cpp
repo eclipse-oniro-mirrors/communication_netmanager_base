@@ -75,7 +75,37 @@ DhcpController::~DhcpController() {}
 int32_t DhcpController::RegisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback)
 {
     NETNATIVE_LOGI("DhcpController RegisterNotifyCallback");
-    callback_ = callback;
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("callback is nullptr");
+        return 0;
+    }
+    std::unique_lock<std::shared_mutex> locker(callbackMutex_);
+    for (const auto &cb : callback_) {
+        if (cb->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            NETNATIVE_LOGI("callback is already registered");
+            return 0;
+        }
+    }
+    callback_.push_back(callback);
+    return 0;
+}
+
+int32_t DhcpController::UnregisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback)
+{
+    NETNATIVE_LOGI("DhcpController UnregisterNotifyCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("callback is nullptr");
+        return 0;
+    }
+    std::unique_lock<std::shared_mutex> locker(callbackMutex_);
+    for (auto it = callback_.begin(); it != callback_.end(); ++it) {
+        if ((*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            callback_.erase(it);
+            NETNATIVE_LOGI("callback is unregistered successfully");
+            return 0;
+        }
+    }
+    NETNATIVE_LOGI("callback is not registered");
     return 0;
 }
 
@@ -125,7 +155,10 @@ void DhcpController::Process(const std::string &iface, DhcpResult *result)
     ptr->dns1_ = result->strOptDns1;
     ptr->dns2_ = result->strOptDns2;
     NETNATIVE_LOGI("DhcpController Process iface[%{public}s]", iface.c_str());
-    callback_->OnDhcpSuccess(ptr);
+    std::shared_lock<std::shared_mutex> locker(callbackMutex_);
+    for (auto cb : callback_) {
+        cb->OnDhcpSuccess(ptr);
+    }
 }
 
 bool DhcpController::StartDhcpService(const std::string &iface, const std::string &ipv4addr)

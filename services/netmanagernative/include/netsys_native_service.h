@@ -233,8 +233,6 @@ private:
 #endif
     std::unique_ptr<OHOS::nmd::ClatManager> clatManager_ = nullptr;
 
-    sptr<INotifyCallback> notifyCallback_ = nullptr;
-
     std::mutex instanceLock_;
     bool hasSARemoved_ = false;
     std::set<uint32_t> sharingTypeIsOn_;

@@ -149,7 +149,7 @@ int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallba
         return NetlinkResult::ERR_NULL_PTR;
     }
     for (const auto &cb : *callbacks_) {
-        if (cb == callback) {
+        if (cb->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
             NETNATIVE_LOGI("callback is already registered");
             return NetlinkResult::OK;
         }
@@ -167,7 +167,7 @@ int32_t NetlinkManager::UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCall
         return NetlinkResult::ERR_NULL_PTR;
     }
     for (auto it = callbacks_->begin(); it != callbacks_->end(); ++it) {
-        if (*it == callback) {
+        if ((*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
             callbacks_->erase(it);
             NETNATIVE_LOGI("callback is unregistered successfully");
             return NetlinkResult::OK;

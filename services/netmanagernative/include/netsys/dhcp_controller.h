@@ -16,6 +16,7 @@
 #ifndef INCLUDE_DHCP_CONTROLLER_H
 #define INCLUDE_DHCP_CONTROLLER_H
 
+#include <shared_mutex>
 #include "i_notify_callback.h"
 #include "dhcp_c_api.h"
 
@@ -39,6 +40,7 @@ public:
     ~DhcpController();
 
     int32_t RegisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback);
+    int32_t UnregisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback);
     void StartClient(const std::string &iface, bool bIpv6);
     void StopClient(const std::string &iface, bool bIpv6);
     bool StartDhcpService(const std::string &iface, const std::string &ipv4addr);
@@ -49,7 +51,8 @@ public:
 private:
     ClientCallBack clientEvent;
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
-    sptr<OHOS::NetsysNative::INotifyCallback> callback_ = nullptr;
+    std::vector<sptr<OHOS::NetsysNative::INotifyCallback>> callback_;
+    std::shared_mutex callbackMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

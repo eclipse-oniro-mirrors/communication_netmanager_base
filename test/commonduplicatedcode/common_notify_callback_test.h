@@ -17,6 +17,7 @@
 #define COMMON_NOTIFY_CALLBACK_TEST_H
 
 #include "notify_callback_stub.h"
+#include "net_dns_result_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -66,6 +67,16 @@ public:
     }
 
     int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
+    {
+        return 0;
+    }
+};
+
+class DnsResultCallbackTest : public NetDnsResultCallbackStub {
+public:
+    DnsResultCallbackTest() = default;
+    ~DnsResultCallbackTest() override {};
+    int32_t OnDnsResultReport(uint32_t size, std::list<OHOS::NetsysNative::NetDnsResultReport> res) override
     {
         return 0;
     }
