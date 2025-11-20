@@ -21,11 +21,11 @@ import { BusinessError }  from '@ohos.base';
 export default namespace statistics {
   loadLibrary("statistics_ani")
 
-  type NetBearType = connection.NetBearType;
+  export type NetBearType = connection.NetBearType;
 
   export native function getIfaceRxBytesSync(nic: string): long;
 
-  function getIfaceRxBytes(nic: string, callback: AsyncCallback<long>): void {
+  export function getIfaceRxBytes(nic: string, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getIfaceRxBytesSync(nic);
       })
@@ -36,7 +36,7 @@ export default namespace statistics {
       });
   }
 
-  function getIfaceRxBytes(nic: string): Promise<long> {
+  export function getIfaceRxBytes(nic: string): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getIfaceRxBytesSync(nic);
@@ -50,7 +50,7 @@ export default namespace statistics {
 
   export native function getIfaceTxBytesSync(nic: string): long;
 
-  function getIfaceTxBytes(nic: string, callback: AsyncCallback<long>): void {
+  export function getIfaceTxBytes(nic: string, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getIfaceTxBytesSync(nic);
       })
@@ -61,7 +61,7 @@ export default namespace statistics {
       });
   }
 
-  function getIfaceTxBytes(nic: string): Promise<long> {
+  export function getIfaceTxBytes(nic: string): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getIfaceTxBytesSync(nic);
@@ -75,7 +75,7 @@ export default namespace statistics {
 
   export native function getCellularRxBytesSync(): long;
 
-  function getCellularRxBytes(callback: AsyncCallback<long>): void {
+  export function getCellularRxBytes(callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getCellularRxBytesSync();
       })
@@ -86,7 +86,7 @@ export default namespace statistics {
       });
   }
 
-  function getCellularRxBytes(): Promise<long> {
+  export function getCellularRxBytes(): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getCellularRxBytesSync();
@@ -100,7 +100,7 @@ export default namespace statistics {
 
   export native function getCellularTxBytesSync(): long;
 
-  function getCellularTxBytes(callback: AsyncCallback<long>): void {
+  export function getCellularTxBytes(callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getCellularTxBytesSync();
       })
@@ -111,7 +111,7 @@ export default namespace statistics {
       });
   }
 
-  function getCellularTxBytes(): Promise<long> {
+  export function getCellularTxBytes(): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getCellularTxBytesSync();
@@ -125,7 +125,7 @@ export default namespace statistics {
 
   export native function getAllRxBytesSync(): long;
 
-  function getAllRxBytes(callback: AsyncCallback<long>): void {
+  export function getAllRxBytes(callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getAllRxBytesSync();
       })
@@ -136,7 +136,7 @@ export default namespace statistics {
       });
   }
 
-  function getAllRxBytes(): Promise<long> {
+  export function getAllRxBytes(): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getAllRxBytesSync();
@@ -150,7 +150,7 @@ export default namespace statistics {
 
   export native function getAllTxBytesSync(): long;
 
-  function getAllTxBytes(callback: AsyncCallback<long>): void {
+  export function getAllTxBytes(callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getAllTxBytesSync();
       })
@@ -161,7 +161,7 @@ export default namespace statistics {
       });
   }
 
-  function getAllTxBytes(): Promise<long> {
+  export function getAllTxBytes(): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getAllTxBytesSync();
@@ -175,7 +175,7 @@ export default namespace statistics {
 
   export native function getUidRxBytesSync(uid: int): long;
 
-  function getUidRxBytes(uid: int, callback: AsyncCallback<long>): void {
+  export function getUidRxBytes(uid: int, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
       })
@@ -186,7 +186,7 @@ export default namespace statistics {
       });
   }
 
-  function getUidRxBytes(uid: int): Promise<long> {
+  export function getUidRxBytes(uid: int): Promise<long> {
       return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getUidRxBytesSync(uid);
@@ -200,7 +200,7 @@ export default namespace statistics {
 
   export native function getUidTxBytesSync(uid: int): long;
 
-  function getUidTxBytes(uid: int, callback: AsyncCallback<long>): void {
+  export function getUidTxBytes(uid: int, callback: AsyncCallback<long>): void {
       let p1 = taskpool.execute((): long => {
           return getUidTxBytesSync(uid);
       })
@@ -211,7 +211,7 @@ export default namespace statistics {
       });
   }
 
-  function getUidTxBytes(uid: int): Promise<long> {
+  export function getUidTxBytes(uid: int): Promise<long> {
       return new Promise<long>((resolve, reject) => {
         taskpool.execute((): long => {
         return getUidTxBytesSync(uid);
@@ -225,22 +225,30 @@ export default namespace statistics {
 
   export function on(type: 'netStatsChange', callback: Callback<NetStatsChangeInfo>): void {
     if (type == 'netStatsChange') {
-      onNetStatsChange(callback as Callback<NetStatsChangeInfo>);
+      onNetStatsChangeSync(callback as Callback<NetStatsChangeInfo>);
     }
   }
 
   export function off(type: 'netStatsChange', callback?: Callback<NetStatsChangeInfo>): void {
     if (type == 'netStatsChange') {
-      offNetStatsChange(callback as Callback<NetStatsChangeInfo> | undefined);
+      offNetStatsChangeSync(callback as Callback<NetStatsChangeInfo> | undefined);
     }
   }
 
-  export native function onNetStatsChange(callback: Callback<NetStatsChangeInfo>): void;
-  export native function offNetStatsChange(callback?: Callback<NetStatsChangeInfo>): void;
+  export native function onNetStatsChangeSync(callback: Callback<NetStatsChangeInfo>): void;
+  export native function offNetStatsChangeSync(callback?: Callback<NetStatsChangeInfo>): void;
+
+  export function onNetStatsChange(callback: Callback<NetStatsChangeInfo>): void {
+    onNetStatsChangeSync(callback as Callback<NetStatsChangeInfo>);
+  }
+
+  export function offNetStatsChange(callback?: Callback<NetStatsChangeInfo>): void {
+    offNetStatsChangeSync(callback as Callback<NetStatsChangeInfo> | undefined);
+  }
 
   export native function getTrafficStatsByIfaceSync(ifaceInfo: IfaceInfo): NetStatsInfo;
 
-  function getTrafficStatsByIface(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void {
+  export function getTrafficStatsByIface(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void {
     let p1 = taskpool.execute((): NetStatsInfo => {
           return getTrafficStatsByIfaceSync(ifaceInfo);
       })
@@ -251,7 +259,7 @@ export default namespace statistics {
       });
   }
 
-  function getTrafficStatsByIface(ifaceInfo: IfaceInfo): Promise<NetStatsInfo> {
+  export function getTrafficStatsByIface(ifaceInfo: IfaceInfo): Promise<NetStatsInfo> {
     return new Promise<NetStatsInfo>((resolve, reject) => {
         taskpool.execute((): NetStatsInfo => {
         return getTrafficStatsByIfaceSync(ifaceInfo);
@@ -264,7 +272,7 @@ export default namespace statistics {
   }
 
   export native function getTrafficStatsByUidSync(uidInfo: UidInfo): NetStatsInfo;
-  function getTrafficStatsByUid(uidInfo: UidInfo, callback: AsyncCallback<NetStatsInfo>): void {
+  export function getTrafficStatsByUid(uidInfo: UidInfo, callback: AsyncCallback<NetStatsInfo>): void {
     let p1 = taskpool.execute((): NetStatsInfo => {
           return getTrafficStatsByUidSync(uidInfo);
       })
@@ -275,7 +283,7 @@ export default namespace statistics {
       });
   }
 
-  function getTrafficStatsByUid(uidInfo: UidInfo): Promise<NetStatsInfo> {
+  export function getTrafficStatsByUid(uidInfo: UidInfo): Promise<NetStatsInfo> {
     return new Promise<NetStatsInfo>((resolve, reject) => {
         taskpool.execute((): NetStatsInfo => {
         return getTrafficStatsByUidSync(uidInfo);
@@ -289,7 +297,7 @@ export default namespace statistics {
 
   export native function getSockfdRxBytesSync(sockfd: int): long;
 
-  function getSockfdRxBytes(sockfd: int, callback: AsyncCallback<long>): void {
+  export function getSockfdRxBytes(sockfd: int, callback: AsyncCallback<long>): void {
     let p1 = taskpool.execute((): long => {
         return getSockfdRxBytesSync(sockfd);
     })
@@ -300,7 +308,7 @@ export default namespace statistics {
     });
   }
 
-  function getSockfdRxBytes(sockfd: int): Promise<long> {
+  export function getSockfdRxBytes(sockfd: int): Promise<long> {
     return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getSockfdRxBytesSync(sockfd);
@@ -314,7 +322,7 @@ export default namespace statistics {
 
   export native function getSockfdTxBytesSync(sockfd: int): long;
 
-  function getSockfdTxBytes(sockfd: int, callback: AsyncCallback<long>): void {
+  export function getSockfdTxBytes(sockfd: int, callback: AsyncCallback<long>): void {
     let p1 = taskpool.execute((): long => {
         return getSockfdTxBytesSync(sockfd);
     })
@@ -325,7 +333,7 @@ export default namespace statistics {
     });
   }
 
-  function getSockfdTxBytes(sockfd: int): Promise<long> {
+  export function getSockfdTxBytes(sockfd: int): Promise<long> {
     return new Promise<long>((resolve, reject) => {
           taskpool.execute((): long => {
           return getSockfdTxBytesSync(sockfd);
@@ -392,7 +400,7 @@ export default namespace statistics {
 
   export native function getTrafficStatsByNetworkSync(networkInfo: NetworkInfo): UidNetStatsInfo;
 
-  function getTrafficStatsByNetwork(networkInfo: NetworkInfo): Promise<UidNetStatsInfo> {
+  export function getTrafficStatsByNetwork(networkInfo: NetworkInfo): Promise<UidNetStatsInfo> {
     return new Promise<UidNetStatsInfo>((resolve, reject) => {
           taskpool.execute((): UidNetStatsInfo => {
             return getTrafficStatsByNetworkSync(networkInfo);
@@ -406,7 +414,7 @@ export default namespace statistics {
 
   export native function getTrafficStatsByUidNetworkSync(uid: int, networkInfo: NetworkInfo): NetStatsInfoSequence;
 
-  function getTrafficStatsByUidNetwork(uid: int, networkInfo: NetworkInfo): Promise<NetStatsInfoSequence> {
+  export function getTrafficStatsByUidNetwork(uid: int, networkInfo: NetworkInfo): Promise<NetStatsInfoSequence> {
     return new Promise<NetStatsInfoSequence>((resolve, reject) => {
           taskpool.execute((): NetStatsInfoSequence => {
           return getTrafficStatsByUidNetworkSync(uid, networkInfo);

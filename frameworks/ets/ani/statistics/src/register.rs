@@ -11,7 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::{Arc, Mutex, OnceLock};
+use std::{
+    mem,
+    ops::Deref,
+    sync::{Mutex, OnceLock},
+};
 
 use ani_rs::{
     business_error::BusinessError,
@@ -19,13 +23,15 @@ use ani_rs::{
     AniEnv,
 };
 
-use crate::wrapper::{ffi, NetStatsClient, StatisCallbackUnregister};
+use crate::{
+    bridge,
+    error_code::convert_to_business_error,
+    wrapper::{ffi, NetStatsClient},
+};
 
 struct Registar {
-    inner: Mutex<Vec<(Arc<CallbackFlavor>, StatisCallbackUnregister)>>,
+    inner: Mutex<Vec<CallbackFlavor>>,
 }
-
-use crate::bridge;
 
 impl Registar {
     fn new() -> Self {
@@ -41,56 +47,58 @@ impl Registar {
 
     pub fn register(&self, callback: CallbackFlavor) -> Result<(), i32> {
         let mut inner = self.inner.lock().unwrap();
-        for w in inner.iter() {
-            if *w.0 == callback {
-                return Err(-1);
-            }
-        }
-        let callback = Arc::new(callback);
-        let unregister =
-            NetStatsClient::register_statis_callback(StatisticsCallback::new(callback.clone()))?;
-        inner.push((callback, unregister));
-        Ok(())
-    }
+        NetStatsClient::register_net_statis_observer()?;
 
-    pub fn unregister_callback(&self, callback: &CallbackFlavor) -> Result<(), i32> {
-        let mut ret = 0;
-        self.inner.lock().unwrap().retain_mut(|cb| {
-            if *cb.0 == *callback {
-                if let Err(e) = cb.1.unregister() {
-                    ret = e;
-                };
-                return false;
+        inner.retain(|c| {
+            if std::mem::discriminant(&callback) == std::mem::discriminant(c) {
+                false
+            } else {
+                true
             }
-            true
         });
+        inner.push(callback);
         Ok(())
     }
 
-    pub fn unregister_net_states_change(
-        &self,
-        callback: Option<&CallbackFlavor>,
-    ) -> Result<(), i32> {
-        if let Some(callback) = callback {
-            self.unregister_callback(callback)
+    pub fn unregister(&self, callback_ref: Option<CallbackFlavor>) -> Result<(), i32> {
+        let mut inner = self.inner.lock().unwrap();
+        if let Some(callback) = callback_ref {
+            inner.retain(|c| *c != callback)
         } else {
-            let mut ret = 0;
-            self.inner.lock().unwrap().retain_mut(|cb| {
-                if let CallbackFlavor::NetStatesChange(_) = &*cb.0 {
-                    if let Err(e) = cb.1.unregister() {
-                        ret = e;
-                        true
-                    } else {
-                        false
-                    }
+            inner.retain(|c| {
+                if let CallbackFlavor::NetStatesChange(_) = c {
+                    false
                 } else {
                     true
                 }
-            });
-            if ret != 0 {
-                return Err(ret);
+            })
+        }
+
+        if (inner.is_empty()) {
+            NetStatsClient::unregister_net_statis_observer()?;
+        }
+
+        Ok(())
+    }
+
+    pub fn on_net_iface_stats_changed(&self, info: ffi::NetStatsChangeInfo) {
+        let inner = self.inner.lock().unwrap();
+        let mut param = bridge::NetStatsChangeInfo::from(info);
+        param.uid = None;
+        for listen in inner.deref() {
+            if let CallbackFlavor::NetStatesChange(callback) = listen {
+                callback.execute((param.clone(),));
             }
-            Ok(())
+        }
+    }
+
+    pub fn on_net_uid_stats_changed(&self, info: ffi::NetStatsChangeInfo) {
+        let inner = self.inner.lock().unwrap();
+        let param = bridge::NetStatsChangeInfo::from(info);
+        for listen in inner.deref() {
+            if let CallbackFlavor::NetStatesChange(callback) = listen {
+                callback.execute((param.clone(),));
+            }
         }
     }
 }
@@ -99,36 +107,23 @@ impl Registar {
 pub fn on_net_states_change(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
     let callback = callback.into_global_callback(env).unwrap();
     let flavor = CallbackFlavor::NetStatesChange(callback);
-    Registar::get_instance().register(flavor).map_err(|err| {
-        BusinessError::new(
-            err,
-            "Failed to register net state change callback".to_string(),
-        )
-    })
+    Registar::get_instance()
+        .register(flavor)
+        .map_err(convert_to_business_error)
 }
 
 #[ani_rs::native]
 pub fn off_net_states_change(env: &AniEnv, callback: AniFnObject) -> Result<(), BusinessError> {
-    if env.is_undefined(&callback.clone().into()).unwrap() {
-        return Registar::get_instance()
-            .unregister_net_states_change(None)
-            .map_err(|err| {
-                BusinessError::new(
-                    err,
-                    "Failed to unregister net state change callback".to_string(),
-                )
-            });
-    }
-    let callback = callback.into_global_callback(env).unwrap();
-    let flavor = CallbackFlavor::NetStatesChange(callback);
+    let callback_flavor = if env.is_undefined(&callback).unwrap() {
+        None
+    } else {
+        let callback_global = callback.into_global_callback(env).unwrap();
+        Some(CallbackFlavor::NetStatesChange(callback_global))
+    };
+
     Registar::get_instance()
-        .unregister_net_states_change(Some(&flavor))
-        .map_err(|err| {
-            BusinessError::new(
-                err,
-                "Failed to unregister net state change callback".to_string(),
-            )
-        })
+        .unregister(callback_flavor)
+        .map_err(convert_to_business_error)
 }
 
 #[derive(PartialEq, Eq)]
@@ -136,27 +131,9 @@ pub enum CallbackFlavor {
     NetStatesChange(GlobalRefCallback<(bridge::NetStatsChangeInfo,)>),
 }
 
-#[derive(PartialEq, Eq)]
-pub struct StatisticsCallback {
-    inner: Arc<CallbackFlavor>,
+pub fn execute_net_iface_stats_changed(info: ffi::NetStatsChangeInfo) {
+    Registar::get_instance().on_net_iface_stats_changed(info);
 }
-
-impl StatisticsCallback {
-    fn new(flavor: Arc<CallbackFlavor>) -> Self {
-        Self { inner: flavor }
-    }
-
-    pub fn net_iface_stats_changed(&self, info: ffi::NetStatsChangeInfo) -> i32 {
-        if let CallbackFlavor::NetStatesChange(callback) = &*self.inner {
-            callback.execute((info.into(),));
-        }
-        0
-    }
-
-    pub fn net_uid_stats_changed(&self, info: ffi::NetStatsChangeInfo) -> i32 {
-        if let CallbackFlavor::NetStatesChange(callback) = &*self.inner {
-            callback.execute((info.into(),));
-        }
-        0
-    }
+pub fn execute_net_uid_stats_changed(info: ffi::NetStatsChangeInfo) {
+    Registar::get_instance().on_net_uid_stats_changed(info);
 }
