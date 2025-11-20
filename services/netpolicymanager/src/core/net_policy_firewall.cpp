@@ -29,6 +29,7 @@ void NetPolicyFirewall::Init()
 {
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
     powerSaveFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_POWER_SAVE);
+    idleDenyFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_IDLE_DENY);
     if (deviceIdleFirewallRule_ == nullptr || powerSaveFirewallRule_ == nullptr) {
         return;
     }

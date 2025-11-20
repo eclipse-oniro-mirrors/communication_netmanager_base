@@ -85,6 +85,23 @@ public:
     int32_t UpdatePowerSavePolicy(bool enable);
 
     /**
+     * Process network policy in idle deny mode.
+     *
+     * @param enable idle deny mode is open or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t UpdateIdleDenyPolicy(bool enable);
+
+    /**
+     * Set the Idle Deny Allowed List object.
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into add list or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd);
+
+    /**
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
@@ -99,6 +116,7 @@ private:
 private:
     std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
     std::shared_ptr<FirewallRule> powerSaveFirewallRule_;
+    std::shared_ptr<FirewallRule> idleDenyFirewallRule_;
     bool deviceIdleMode_ = false;
     bool powerSaveMode_ = false;
     std::set<uint32_t> deviceIdleAllowedList_;

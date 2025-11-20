@@ -266,6 +266,10 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
 
+    int32_t SetIdleDenyPolicy(bool enable) override;
+
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) override;
+
     void SetBrokerUidAccessPolicyMap(std::optional<uint32_t> uid);
     void DelBrokerUidAccessPolicyMap(uint32_t uid);
     int32_t OnRestoreSingleApp(const std::string &bundleName);

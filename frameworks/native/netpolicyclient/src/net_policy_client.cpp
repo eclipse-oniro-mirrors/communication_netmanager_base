@@ -473,5 +473,27 @@ int32_t NetPolicyClient::SetInternetAccessByIpForWifiShare(
     return proxy->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
 
+int32_t NetPolicyClient::SetIdleDenyPolicy(bool enable)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetIdleDenyPolicy(enable);
+}
+
+int32_t NetPolicyClient::SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetUidsDeniedListChain(uids, isAdd);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

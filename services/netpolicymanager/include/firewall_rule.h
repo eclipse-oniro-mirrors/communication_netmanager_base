@@ -84,8 +84,9 @@ public:
      * Set the firewall reject list
      *
      * @param uids The vector of UID
+     * @param rule The firewall rull, see {@link FIREWALL_RULE_ALLOW} and {@link FIREWALL_RULE_DENY}
      */
-    virtual void SetDeniedList(const std::vector<uint32_t> &uids);
+    virtual void SetDeniedList(const std::vector<uint32_t> &uids, uint32_t rule);
 
     /**
      * Set the firewall reject list

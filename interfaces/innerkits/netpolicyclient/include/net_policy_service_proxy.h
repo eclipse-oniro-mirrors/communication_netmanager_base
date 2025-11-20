@@ -56,6 +56,8 @@ public:
     int32_t SetNicTrafficAllowed(const std::vector<std::string> &ifaceNames, bool status) override;
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
+    int32_t SetIdleDenyPolicy(bool enable) override;
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

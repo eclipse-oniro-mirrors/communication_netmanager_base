@@ -884,5 +884,75 @@ int32_t NetPolicyServiceProxy::SetInternetAccessByIpForWifiShare(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
         data, reply, option);
 }
+
+int32_t NetPolicyServiceProxy::SetIdleDenyPolicy(bool enable)
+{
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    if (!data.WriteBool(enable)) {
+        NETMGR_LOG_E("Write Bool data failed.");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), data, reply,
+                       option);
+}
+
+int32_t NetPolicyServiceProxy::SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+{
+    MessageParcel data;
+    // LCOV_EXCL_START
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    int32_t uidsSize = static_cast<int32_t>(uids.size());
+    if (uidsSize < 0 || uidsSize > MAX_SIZE) {
+        NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
+        return ;
+    }
+
+    if (!data.WriteInt32(uidsSize)) {
+        NETMGR_LOG_E("Write int32 data failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    for (int32_t i = 0; i < uidsSize; ++i) {
+        if (!data.WriteUint32(uids[i])) {
+            NETMGR_LOG_E("Write uint32 data failed");
+            return NETMANAGER_ERR_WRITE_DATA_FAIL;
+        }
+    }
+    if (!data.WriteBool(isAdd)) {
+        NETMGR_LOG_E("Write Bool data failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    // LCOV_EXCL_STOP
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), data,
+                       reply, option);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
