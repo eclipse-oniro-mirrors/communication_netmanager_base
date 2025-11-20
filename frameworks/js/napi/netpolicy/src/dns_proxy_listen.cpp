@@ -309,6 +309,11 @@ void DnsProxyListen::InitListenForIpv4()
             return;
         }
     }
+    int on = 1;
+    if (setsockopt(proxySockFd_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+        NETNATIVE_LOGE("setsockopt Ipv4 SO_REUSEADDR failed errno:%{public}d", errno);
+        return;
+    }
     sockaddr_in proxyAddr{};
     proxyAddr.sin_family = AF_INET;
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -336,6 +341,10 @@ void DnsProxyListen::InitListenForIpv6()
     proxyAddr6.sin6_addr = in6addr_any;
     proxyAddr6.sin6_port = htons(DNS_PROXY_PORT);
     int on = 1;
+    if (setsockopt(proxySockFd6_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+        NETNATIVE_LOGE("setsockopt Ipv6 SO_REUSEADDR failed errno:%{public}d", errno);
+        return;
+    }
     if (setsockopt(proxySockFd6_, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
         NETNATIVE_LOGE("setsockopt failed");
         close(proxySockFd6_);
