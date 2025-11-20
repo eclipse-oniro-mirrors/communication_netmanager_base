@@ -56,12 +56,16 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
      Permission::MANAGE_NET_STRATEGY},
+     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), Permission::MANAGE_NET_STRATEGY},
+     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
+constexpr uint32_t MAX_UIDS_SIZE = 1000;
 constexpr int UID_EDM = 3057;
 constexpr int UID_NET_MANAGER = 1099;
 constexpr int UID_IOT_NET_MANAGER = 7211;
 constexpr int UID_COLLABORATION = 5520;
+constexpr int UID_RSS = 1096;
 } // namespace
 
 NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
@@ -126,6 +130,10 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetNicTrafficAllowed;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE)] =
         &NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY)] =
+        &NetPolicyServiceStub::OnSetIdleDenyPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST)] =
+        &NetPolicyServiceStub::OnSetUidsDeniedListChain;
     return;
 }
 
@@ -162,6 +170,12 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     auto uid = IPCSkeleton::GetCallingUid();
     if (code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE) &&
         uid != UID_COLLABORATION) {
+        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    if ((code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY) ||
+        code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST)) &&
+        uid != UID_RSS) {
         NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
@@ -935,5 +949,65 @@ int32_t NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare(MessageParcel 
     return NETMANAGER_SUCCESS;
     // LCOV_EXCL_STOP
 }
+
+int32_t NetPolicyServiceStub::OnSetIdleDenyPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("SetIdleDenyPolicy callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
+    // LCOV_EXCL_START
+    bool isEnable = false;
+    if (!data.ReadBool(isEnable)) {
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = SetDeviceIdlePolicy(isEnable);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+    // LCOV_EXCL_STOP
+}
+
+int32_t NetPolicyServiceStub::OnSetUidsDeniedListChain(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("SetUidsDeniedListChain callingUid/callingPid: %{public}d/%{public}d", IPCSkeleton::GetCallingUid(),
+                 IPCSkeleton::GetCallingPid());
+    // LCOV_EXCL_START
+    int32_t uidsSize = -1;
+    
+    iif (!data.ReadInt32(uidsSize)) {
+        NETMGR_LOG_E("Read Int32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (uidsSize < 0 || uidsSize > static_cast<int32_t>(MAX_UIDS_SIZE)) {
+        NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
+        return ;
+    }
+    std::vector<uint32_t> uids;
+    int32_t uid;
+    for (int32_t i = 0; i < uidsSize; ++i) {
+        if (!data.ReadUint32(uid)) {
+            NETMGR_LOG_E("Read uint32 data failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        uids.push_back(uid);
+    }
+    bool isAdd = false;
+    if (!data.ReadBool(isAdd)) {
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = SetUidsDeniedListChain(uids, isAdd);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+    // LCOV_EXCL_STOP
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

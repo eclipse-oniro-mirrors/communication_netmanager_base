@@ -18,6 +18,7 @@
 #include "device_idle_firewall_rule.h"
 #include "net_policy_inner_define.h"
 #include "power_save_firewall_rule.h"
+#include "idle_deny_firewall_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -28,6 +29,8 @@ std::shared_ptr<FirewallRule> FirewallRule::CreateFirewallRule(uint32_t chain)
             return DelayedSingleton<DeviceIdleFirewallRule>::GetInstance();
         case FIREWALL_CHAIN_POWER_SAVE:
             return DelayedSingleton<PowerSaveFirewallRule>::GetInstance();
+        case FIREWALL_CHAIN_IDLE_DENY:
+            return DelayedSingleton<IdleDenyFirewallRule>::GetInstance();
         default:
             break;
     }
@@ -130,13 +133,16 @@ void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
     netsys_->FirewallSetUidRule(chainType_, {uid}, rule);
 }
 
-void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids)
+void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids, uint32_t rule)
 {
     {
         std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
         for (const auto &it : uids) {
-            if (std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
+            if (rule == FIREWALL_RULE_DENY &&
+                std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
                 deniedList_.push_back(it);
+            } else {
+                deniedList_.erase(std::remove(deniedList_.begin(), deniedList_.end(), it), deniedList_.end());
             }
         }
     }
@@ -154,7 +160,7 @@ void FirewallRule::ClearDeniedList()
 {
     std::unique_lock<std::shared_mutex> lock(deniedListMutex_);
     deniedList_.clear();
-    netsys_->FirewallSetUidsAllowedListChain(chainType_, deniedList_);
+    netsys_->FirewallSetUidsDeniedListChain(chainType_, deniedList_);
 }
 
 void FirewallRule::SetUidFirewallRule(uint uid, bool isAllowed)
