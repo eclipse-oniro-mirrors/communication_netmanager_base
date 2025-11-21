@@ -34,7 +34,7 @@ extern "C" {
 #define MAX_RESULTS 32
 #define MAX_CANON_NAME 256
 #define MAX_HOST_NAME_LEN 256
-#define MAX_KEY_LENGTH (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
+#define MAX_KEY_LEN (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
 #define DEFAULT_TIMEOUT 5000
 #define DEFAULT_RETRY 2
 #define DEFAULT_SERVER_LENTH 16
