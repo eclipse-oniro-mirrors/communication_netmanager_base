@@ -147,23 +147,23 @@ static int CreateConnectionToNetSys(void)
 }
 
 static bool MakeKey(const char *hostName, const char *serv, const struct addrinfo *hints,
-                    char key[static MAX_KEY_LENGTH])
+                    char key[static MAX_KEY_LEN])
 {
     if (serv && hints) {
-        return sprintf_s(key, MAX_KEY_LENGTH, "%s %s %d %d %d %d", hostName, serv, hints->ai_family, hints->ai_flags,
+        return sprintf_s(key, MAX_KEY_LEN, "%s %s %d %d %d %d", hostName, serv, hints->ai_family, hints->ai_flags,
                          hints->ai_protocol, hints->ai_socktype) > 0;
     }
 
     if (hints) {
-        return sprintf_s(key, MAX_KEY_LENGTH, "%s %d %d %d %d", hostName, hints->ai_family, hints->ai_flags,
+        return sprintf_s(key, MAX_KEY_LEN, "%s %d %d %d %d", hostName, hints->ai_family, hints->ai_flags,
                          hints->ai_protocol, hints->ai_socktype) > 0;
     }
 
     if (serv) {
-        return sprintf_s(key, MAX_KEY_LENGTH, "%s %s", hostName, serv) > 0;
+        return sprintf_s(key, MAX_KEY_LEN, "%s %s", hostName, serv) > 0;
     }
 
-    return sprintf_s(key, MAX_KEY_LENGTH, "%s", hostName) > 0;
+    return sprintf_s(key, MAX_KEY_LEN, "%s", hostName) > 0;
 }
 
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config)
@@ -278,7 +278,7 @@ int32_t NetSysGetResolvConfExt(uint16_t netId, struct ResolvConfigExt *config)
 
 static int32_t NetsysSendKeyForCache(int sockFd, struct ParamWrapper param, struct RequestInfo info)
 {
-    char key[MAX_KEY_LENGTH] = {0};
+    char key[MAX_KEY_LEN] = {0};
     if (!MakeKey(param.host, param.serv, param.hint, key)) {
         return CloseSocketReturn(sockFd, -1);
     }
