@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-config("net_policy_manager_if_config") {
+config("net_policy_manager_if_include_config") {
   # header file path
   include_dirs = [
     "$INNERKITS_ROOT/include",
@@ -22,7 +22,9 @@ config("net_policy_manager_if_config") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
+}
 
+config("net_policy_manager_if_config") {
   cflags = []
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
@@ -85,7 +87,9 @@ ohos_shared_library("net_policy_manager_if") {
 
   version_script = "libnetpolicy_kits.map"
 
-  public_configs = [ ":net_policy_manager_if_config" ]
+  public_configs = [ ":net_policy_manager_if_include_config" ]
+
+  configs = [":net_policy_manager_if_config"]
 
   deps = [ ":net_policy_parcel" ]
 
