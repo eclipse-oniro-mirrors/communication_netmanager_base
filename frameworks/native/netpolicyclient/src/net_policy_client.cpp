@@ -476,10 +476,12 @@ int32_t NetPolicyClient::SetInternetAccessByIpForWifiShare(
 int32_t NetPolicyClient::SetIdleDenyPolicy(bool enable)
 {
     sptr<INetPolicyService> proxy = GetProxy();
+    // LCOV_EXCL_START
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    // LCOV_EXCL_STOP
 
     return proxy->SetIdleDenyPolicy(enable);
 }
@@ -487,10 +489,12 @@ int32_t NetPolicyClient::SetIdleDenyPolicy(bool enable)
 int32_t NetPolicyClient::SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
 {
     sptr<INetPolicyService> proxy = GetProxy();
+    // LCOV_EXCL_START
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    // LCOV_EXCL_STOP
 
     return proxy->SetUidsDeniedListChain(uids, isAdd);
 }

@@ -272,7 +272,7 @@ public:
      * @param enable idle deny mode is open or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetIdleDenyPolicy(bool enable);
+    virtual int32_t SetIdleDenyPolicy(bool enable) = 0;
 
     /**
      * Get the allow list of UID in idle deny mode.
@@ -281,7 +281,7 @@ public:
      * @param isAdd The UID is into add list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd);
+    virtual int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

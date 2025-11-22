@@ -709,7 +709,8 @@ void SetIdleDenyPolicyFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    bool enable = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    bool isEnable = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    dataParcel.WriteBool(isEnable);
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), dataParcel);
 }
 
@@ -720,15 +721,15 @@ void SetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 21;
-    dataParcel.WriteUint32(vectorSize);
-    for (uint32_t i = 0; i < vectorSize; i++) {
+    int32_t vectorSize = NetPolicyGetData<int32_t>() % 21;
+    dataParcel.WriteInt32(vectorSize);
+    for (int32_t i = 0; i < vectorSize; i++) {
         uint32_t uid = NetPolicyGetData<uint32_t>();
         dataParcel.WriteUint32(uid);
     }
     bool isAdd = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteBool(isAdd);
-    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST), dataParcel);
 }
 
 void FactoryResetPoliciesFuzzTest(const uint8_t *data, size_t size)

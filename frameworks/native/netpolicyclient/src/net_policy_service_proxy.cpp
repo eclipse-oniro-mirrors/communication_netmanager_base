@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int32_t MAX_LIST_SIZE = 65535;
 NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyService>(impl) {}
 
 NetPolicyServiceProxy::~NetPolicyServiceProxy() = default;
@@ -901,7 +902,7 @@ int32_t NetPolicyServiceProxy::SetIdleDenyPolicy(bool enable)
     }
 
     if (!data.WriteBool(enable)) {
-        NETMGR_LOG_E("Write Bool data failed.");
+        NETMGR_LOG_E("Write Bool data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     // LCOV_EXCL_STOP
@@ -922,7 +923,7 @@ int32_t NetPolicyServiceProxy::SetUidsDeniedListChain(const std::vector<uint32_t
     }
 
     int32_t uidsSize = static_cast<int32_t>(uids.size());
-    if (uidsSize < 0 || uidsSize > MAX_SIZE) {
+    if (uidsSize < 0 || uidsSize > MAX_LIST_SIZE) {
         NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
@@ -951,7 +952,7 @@ int32_t NetPolicyServiceProxy::SetUidsDeniedListChain(const std::vector<uint32_t
 
     MessageParcel reply;
     MessageOption option;
-    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), data,
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST), data,
                        reply, option);
 }
 } // namespace NetManagerStandard

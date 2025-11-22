@@ -416,7 +416,7 @@ int32_t NetPolicyService::SetUidsDeniedListChain(const std::vector<uint32_t> &ui
         NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return netPolicyFirewall_->SetUidsDeniedListChain(enable);
+    return netPolicyFirewall_->SetUidsDeniedListChain(uids, isAdd);
 }
 
 int32_t NetPolicyService::SetIdleDenyPolicy(bool enable)
@@ -426,7 +426,7 @@ int32_t NetPolicyService::SetIdleDenyPolicy(bool enable)
         NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return netPolicyFirewall_->SetIdleDenyPolicy(enable);
+    return netPolicyFirewall_->UpdateIdleDenyPolicy(enable);
 }
 
 int32_t NetPolicyService::GetDumpMessage(std::string &message)

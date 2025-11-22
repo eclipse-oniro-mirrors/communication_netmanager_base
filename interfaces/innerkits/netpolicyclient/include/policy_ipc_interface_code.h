@@ -49,7 +49,7 @@ enum class PolicyInterfaceCode {
     CMD_NPS_SET_NIC_TRAFFIC_ALLOWED,
     CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE,
     CMD_NPS_SET_IDLE_DENY_POLICY,
-    CMD_NPS_SET_IDLE_DENYTLIST,
+    CMD_NPS_SET_IDLE_DENYLIST,
     CMD_NPS_END = 100,
 };
 enum class PolicyCallbackInterfaceCode {

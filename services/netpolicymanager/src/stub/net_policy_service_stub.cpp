@@ -132,7 +132,7 @@ void NetPolicyServiceStub::ExtraNetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetInternetAccessByIpForWifiShare;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY)] =
         &NetPolicyServiceStub::OnSetIdleDenyPolicy;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST)] =
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST)] =
         &NetPolicyServiceStub::OnSetUidsDeniedListChain;
     return;
 }
@@ -174,7 +174,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     if ((code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY) ||
-        code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST)) &&
+        code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST)) &&
         uid != UID_RSS) {
         NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
         return NETMANAGER_ERR_PERMISSION_DENIED;
@@ -961,7 +961,7 @@ int32_t NetPolicyServiceStub::OnSetIdleDenyPolicy(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = SetDeviceIdlePolicy(isEnable);
+    int32_t result = SetIdleDenyPolicy(isEnable);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
