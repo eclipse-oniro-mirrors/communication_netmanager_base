@@ -136,7 +136,7 @@ HWTEST_F(UtFirewallRule, SetDeniedList, TestSize.Level1)
         uids.emplace_back(i);
     }
     rule.ClearDeniedList();
-    rule.SetDeniedList(uids);
+    rule.SetDeniedList(uids, FIREWALL_RULE_DENY);
     EXPECT_EQ(rule.GetDeniedList().size(), uidCount);
     rule.SetDeniedList(uid, FIREWALL_RULE_ALLOW);
     uint32_t expectCount = uidCount - 1;

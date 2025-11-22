@@ -60,7 +60,7 @@ std::map<uint32_t, const char *> g_codeNPS = {
      {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
-constexpr uint32_t MAX_UIDS_SIZE = 1000;
+constexpr int32_t MAX_LIST_SIZE = 1000;
 constexpr int UID_EDM = 3057;
 constexpr int UID_NET_MANAGER = 1099;
 constexpr int UID_IOT_NET_MANAGER = 7211;
@@ -976,17 +976,16 @@ int32_t NetPolicyServiceStub::OnSetUidsDeniedListChain(MessageParcel &data, Mess
                  IPCSkeleton::GetCallingPid());
     // LCOV_EXCL_START
     int32_t uidsSize = -1;
-    
-    iif (!data.ReadInt32(uidsSize)) {
+    if (!data.ReadInt32(uidsSize)) {
         NETMGR_LOG_E("Read Int32 data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    if (uidsSize < 0 || uidsSize > static_cast<int32_t>(MAX_UIDS_SIZE)) {
+    if (uidsSize < 0 || uidsSize > MAX_LIST_SIZE) {
         NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::vector<uint32_t> uids;
-    int32_t uid;
+    uint32_t uid;
     for (int32_t i = 0; i < uidsSize; ++i) {
         if (!data.ReadUint32(uid)) {
             NETMGR_LOG_E("Read uint32 data failed");

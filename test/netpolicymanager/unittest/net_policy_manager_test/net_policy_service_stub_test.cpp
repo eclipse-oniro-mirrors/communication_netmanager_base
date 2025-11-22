@@ -734,7 +734,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetUidsDeniedListChain001, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(true);
-    data.Int32(1);
+    data.WriteInt32(1);
     data.WriteInt32(TEST_UID);
     data.WriteBool(true);
     MessageParcel reply;
