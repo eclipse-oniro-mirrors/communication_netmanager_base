@@ -37,6 +37,7 @@
 extern "C" {
 #endif
 
+#define MAX_KEY_LEN (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
 static volatile uint8_t g_allowInternet = 1;
 int64_t g_lastDnsQueryPollSendTime = 0;
 static uint32_t g_curDnsStoreSize = 0;
