@@ -1131,7 +1131,7 @@ int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
     for (const auto &info : allInfo) {
         historyData += info.GetStats();    // histroy DB data
     }
-    NETMGR_LOG_I("get history DB:%{public}lu ", historyData);
+    NETMGR_LOG_I("get history DB:%{public}" PRIu64, historyData);
     std::vector<NetStatsInfo> cacheInfo;
     GetUidPushStatsCached(cacheInfo);
     GetUidStatsCached(cacheInfo);
@@ -1144,7 +1144,7 @@ int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
         }
         historyData += info.GetStats();  // histroy cache data
     }
-    NETMGR_LOG_I("get history DB+cache:%{public}lu ", historyData);
+    NETMGR_LOG_I("get history DB+cache:%{public}" PRIu64, historyData);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1180,7 +1180,7 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
             dataTemp += info.GetStats();
         }
     }
-    NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}lu, kernelData:%{public}lu",
+    NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}" PRIu64 ", kernelData:%{public}" PRIu64,
         cellularHistoryData_[simId].trafficData, dataTemp);
     dataTemp += cellularHistoryData_[simId].trafficData;
     return dataTemp;
@@ -1197,7 +1197,7 @@ void NetStatsCached::UpdateHistoryData(const std::map<std::string, uint64_t> dat
         if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
             continue;
         }
-        NETMGR_LOG_I("simId:%{public}d, update traffic:%{public}lu", simId, info.second);
+        NETMGR_LOG_I("simId:%{public}d, update traffic:%{public}" PRIu64, simId, info.second);
         cellularHistoryData_[simId].trafficData += info.second;
     }
 }

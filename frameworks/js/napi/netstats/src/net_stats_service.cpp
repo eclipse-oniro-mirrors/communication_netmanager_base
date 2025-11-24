@@ -364,7 +364,7 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
     uint64_t monthData = netStatsCached_->GetMonthTrafficData(simId);
     if (monthData != UINT64_MAX) {
         monthDataIpc = monthData;
-        NETMGR_LOG_I("monthDataIpc data: %{public}lu", monthDataIpc);
+        NETMGR_LOG_I("monthDataIpc data: %{public}" PRIu64, monthDataIpc);
         return NETMANAGER_SUCCESS;
     }
 
@@ -383,7 +383,7 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
         monthData += info.second.txBytes_;
     }
     monthDataIpc = monthData;
-    NETMGR_LOG_I("GetTrafficStatsByNetwork data: %{public}lu", monthDataIpc);
+    NETMGR_LOG_I("GetTrafficStatsByNetwork data: %{public}" PRIu64, monthDataIpc);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     return NETMANAGER_SUCCESS;
 }
@@ -1485,7 +1485,7 @@ monthlyLimit:%{public}" PRIu64 ", monthlyMark:%{public}u, dailyMark:%{public}u",
 
 void NetStatsService::ClearTrafficMapBySlotId(int32_t slotId, uint64_t ifIndex)
 {
-    NETMGR_LOG_I("ClearTrafficMapBySlotId slotId:%{public}d, ifIndex: %{public}lu", slotId, ifIndex);
+    NETMGR_LOG_I("ClearTrafficMapBySlotId slotId:%{public}d, ifIndex: %{public}" PRIu64, slotId, ifIndex);
     NetsysController::GetInstance().DeleteIncreaseTrafficMap(ifIndex);
     NetsysController::GetInstance().UpdateIfIndexMap(slotId, UINT64_MAX);
     SetTrafficMapMaxValue(slotId);
