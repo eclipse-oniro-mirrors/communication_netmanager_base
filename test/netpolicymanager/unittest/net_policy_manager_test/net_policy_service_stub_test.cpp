@@ -193,12 +193,12 @@ public:
         return 0;
     }
 
-    int32_t SetIdleDenyPolicy(bool enable)
+    int32_t SetIdleDenyPolicy(bool enable) override
     {
         return 0;
     }
 
-    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd) override
     {
         return 0;
     }

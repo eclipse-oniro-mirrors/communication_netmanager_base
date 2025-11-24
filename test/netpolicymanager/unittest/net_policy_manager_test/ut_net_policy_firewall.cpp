@@ -255,10 +255,10 @@ HWTEST_F(UtNetPolicyFirewall, SetUidsDeniedListChain001, TestSize.Level1)
 
     std::vector<uint32_t> uid2 {1};
     ret = netPolicyFirewall_->SetUidsDeniedListChain(uid2, true);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret , NETMANAGER_SUCCESS);
 
     ret = netPolicyFirewall_->SetUidsDeniedListChain(uid2, false);
-    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret , NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(UtNetPolicyFirewall, SetPowerSaveTrustlist001, TestSize.Level1)
