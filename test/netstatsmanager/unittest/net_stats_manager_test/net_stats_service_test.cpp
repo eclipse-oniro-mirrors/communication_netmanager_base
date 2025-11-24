@@ -28,6 +28,7 @@
 #include "net_stats_callback_test.h"
 #include "net_stats_constants.h"
 #include "net_stats_service.h"
+#include "net_stats_cached.h"
 #include "net_stats_database_defines.h"
 #include "system_ability_definition.h"
 

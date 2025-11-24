@@ -161,8 +161,7 @@ ohos_unittest("net_stats_manager_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
-    "os_account:os_account_innerkits",
-    "state_registry:tel_state_registry_api"
+    "os_account:os_account_innerkits"
   ]
 
   if (netmanager_base_enable_traffic_statistic) {
@@ -180,7 +179,6 @@ ohos_unittest("net_stats_manager_test") {
     "protected = public",
   ]
 
-  defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
   if (netmanager_base_enable_netsys_access_policy_diag_listen) {
     sources += [ "net_stats_notification_test.cpp" ]
   }

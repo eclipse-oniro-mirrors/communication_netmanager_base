@@ -375,6 +375,10 @@ private:
 
     NetStatsInfo GetIncreasedSimStats(const NetStatsInfo &info);
 
+    void UpdateNetStatsFlag(NetStatsInfo &info);
+
+    void UpdateNetStatsUserId(NetStatsInfo &info);
+
     inline bool CheckUidStor()
     {
         return stats_.GetCurrentUidStats() >= trafficThreshold_;

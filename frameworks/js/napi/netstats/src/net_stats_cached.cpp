@@ -319,6 +319,20 @@ void NetStatsCached::CacheAppStats()
     UpdateHistoryData(uidStatscache);
 }
 
+void NetStatsCached::UpdateNetStatsFlag(NetStatsInfo &info)
+{
+    if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
+        info.flag_ = GetUidStatsFlag(info.uid_);
+    }
+}
+
+void NetStatsCached::UpdateNetStatsUserId(NetStatsInfo &info)
+{
+    if (info.uid_ > 0) {
+        info.userId_ = info.uid_ / USER_ID_DIVIDOR;
+    }
+}
+
 void NetStatsCached::CacheUidSimStats()
 {
     std::vector<NetStatsInfo> statsInfos;
@@ -352,12 +366,8 @@ void NetStatsCached::CacheUidSimStats()
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
-            info.flag_ = GetUidStatsFlag(info.uid_);
-        }
-        if (info.uid_ > 0) {
-            info.userId_ = info.uid_ / USER_ID_DIVIDOR;
-        }
+        UpdateNetStatsFlag(info);
+        UpdateNetStatsUserId(info);
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
