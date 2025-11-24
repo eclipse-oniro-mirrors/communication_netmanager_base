@@ -35,6 +35,7 @@ enum {
     UID_EDM = 3057,
     UID_SECURITY_COLLECTOR = 3521,
     UID_IOT_NET_MANAGER = 7211,
+    UID_IOT_TV_NET_MANAGER = 7501,
 };
 
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
