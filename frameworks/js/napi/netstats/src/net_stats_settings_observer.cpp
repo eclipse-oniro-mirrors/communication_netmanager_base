@@ -109,7 +109,7 @@ void TrafficDataObserver::UnRegisterTrafficDataSettingObserver()
     }
     Uri uri4(SETTING_URI + TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE);
     if (dataShareHelperUtils->UnRegisterSettingsObserver(uri4, mTrafficMonthlyBeginDateObserver_) != NETSYS_SUCCESS) {
-        NETMGR_LOG_E("unregister mTrafficMonthlyValueObserver_ failed.");
+        NETMGR_LOG_E("unregister mTrafficMonthlyBeginDateObserver_ failed.");
     }
     Uri uri5(SETTING_URI + TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_NOTIFY_TYPE);
     if (dataShareHelperUtils->UnRegisterSettingsObserver(uri5, mTrafficMonthlyNotifyTypeObserver_) != NETSYS_SUCCESS) {
@@ -230,7 +230,7 @@ void UnlimitTrafficEnableObserver::OnChange()
     }
     NETMGR_LOG_E("UnlimitTrafficEnableObserver OnChanged. dataString: %{public}s, TrafficInt: %{public}d",
         value.c_str(), enable);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_NO_LIMIT_ENABLE, enable);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_NO_LIMIT_ENABLE, enable);
 }
 
 // 套餐限额选项
@@ -248,7 +248,7 @@ void TrafficMonthlyValueObserver::OnChange()
     }
     NETMGR_LOG_E("TrafficMonthlyValueObserver OnChanged. dataString: %{public}s, TrafficInt: %{public}lu",
         value.c_str(), trafficInt);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_MONTHLY_LIMIT, trafficInt);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_MONTHLY_LIMIT, trafficInt);
 }
 
 // 每月起始日期
@@ -266,7 +266,7 @@ void TrafficMonthlyBeginDateObserver::OnChange()
     }
     NETMGR_LOG_E("TrafficMonthlyBeginDateObserver OnChanged. dataString: %{public}s, dateInt: %{public}d",
         value.c_str(), dateInt);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_BEGIN_DATE, dateInt);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_BEGIN_DATE, dateInt);
 }
 
 // 月超限提醒类型
@@ -284,7 +284,7 @@ void TrafficMonthlyNotifyTypeObserver::OnChange()
     }
     NETMGR_LOG_E("TrafficMonthlyNotifyTypeObserver OnChanged. typeString: %{public}s, typeInt: %{public}d",
         value.c_str(), typeInt);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_NOTIFY_TYPE, typeInt);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_NOTIFY_TYPE, typeInt);
 }
 
 // 月超额提醒比例
@@ -302,7 +302,7 @@ void TrafficMonthlyMarkObserver::OnChange()
     }
     NETMGR_LOG_E("TrafficMonthlyMarkObserver OnChanged. percentString: %{public}s, percentInt: %{public}d",
         value.c_str(), percentInt);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_MONTHLY_MARK, percentInt);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_MONTHLY_MARK, percentInt);
 }
 
 // 日超额提醒比例
@@ -320,7 +320,7 @@ void TrafficDailyMarkObserver::OnChange()
     }
     NETMGR_LOG_E("TrafficDailyMarkObserver OnChanged. percentString: %{public}s, percentInt: %{public}d",
         value.c_str(), percentInt);
-    DelayedSingleton<NetStatsService>::GetInstance()->UpdataSettingsdata(simId_, NET_STATS_DAILY_MARK, percentInt);
+    DelayedSingleton<NetStatsService>::GetInstance()->UpdateSettingsdata(simId_, NET_STATS_DAILY_MARK, percentInt);
 }
 
 void CellularDataObserver::OnChange()

@@ -1223,8 +1223,6 @@ void NetStatsCached::JudgeAndUpdateHistoryData(uint64_t curSecond)
             info.second.startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(info.second.beginDate));
             info.second.endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(info.second.beginDate));
             NETMGR_LOG_I("new time. %{public}" PRIu64 ",%{public}" PRIu64, info.second.startTime, info.second.endTime);
-        } else {
-            NETMGR_LOG_E("time error");
         }
     }
 }

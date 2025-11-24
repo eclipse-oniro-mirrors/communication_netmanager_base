@@ -1670,7 +1670,7 @@ void NetStatsService::SetTrafficMapMaxValue(int32_t slotId)
         slotId * TRAFFIC_NOTIFY_TYPE + NET_STATS_DAILY_MARK, UINT64_MAX);
 }
 
-void NetStatsService::UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t value)
+void NetStatsService::UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value)
 {
     if (!trafficPlanFfrtQueue_) {
         NETMGR_LOG_E("FFRT Init Fail");
@@ -1687,7 +1687,7 @@ void NetStatsService::UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t v
 
 int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uint64_t value)
 {
-    NETMGR_LOG_I("UpdataSettingsdata. simId: %{public}d, flag: %{public}d, value: %{public}lu", simId, flag, value);
+    NETMGR_LOG_I("UpdateSettingsdata. simId: %{public}d, flag: %{public}d, value: %{public}lu", simId, flag, value);
     auto iter = settingsTrafficMap_.find(simId);
     if (iter == settingsTrafficMap_.end() || iter->second.second == nullptr) {
         return NETMANAGER_ERR_PARAMETER_ERROR;

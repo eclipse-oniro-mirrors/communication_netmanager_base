@@ -96,7 +96,7 @@ public:
     int32_t SaveSharingTraffic(const NetStatsInfo &infos) override;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
-    void UpdataSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
+    void UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> GetSettingsObserverMap();
     int32_t NotifyTrafficAlert(int32_t simId, uint8_t flag);
     bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
