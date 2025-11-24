@@ -297,7 +297,7 @@ void NetStatsCached::CacheAppStats()
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
     // 判断是否在周期内,不在则更新historydata及周期
     JudgeAndUpdateHistoryData(curSecond);
-    std::map<std::string, uint64_t> uidStatscache; 
+    std::map<std::string, uint64_t> uidStatscache;
     std::for_each(pushInfos.begin(), pushInfos.end(), [this, &uidStatscache, curSecond](auto &item) {
         item.date_ = curSecond;
         stats_.PushUidStats(item);
@@ -1163,7 +1163,7 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
         cellularHistoryData_[simId].trafficData = 0;
         cellularHistoryData_[simId].startTime =
             static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(cellularHistoryData_[simId].beginDate));
-        cellularHistoryData_[simId].endTime = 
+        cellularHistoryData_[simId].endTime =
             static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(cellularHistoryData_[simId].beginDate));
         NETMGR_LOG_I("new time. %{public}" PRIu64 ", %{public}" PRIu64,
             cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime);
@@ -1172,7 +1172,7 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
     std::vector<NetStatsInfo> statsInfo;
     GetKernelStats(statsInfo);   //  bpf data
 #ifdef SUPPORT_NETWORK_SHARE
-    GetIptablesStatsIncrease(statsInfo); 
+    GetIptablesStatsIncrease(statsInfo);
 #endif
     uint64_t dataTemp = 0;
     for (const auto &info : statsInfo) {
@@ -1206,7 +1206,7 @@ void NetStatsCached::JudgeAndUpdateHistoryData(uint64_t curSecond)
 {
     std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
 
-    for(auto &info : cellularHistoryData_) {
+    for (auto &info : cellularHistoryData_) {
         // not in cycle
         if (curSecond > info.second.endTime) {
             info.second.trafficData = 0;

@@ -375,7 +375,7 @@ int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t 
     networkInfo.type_ = 0;  // 0:cellular
     networkInfo.simId_ = simId;
     networkInfo.startTime_ = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
-    networkInfo.endTime_ = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 59));
+    networkInfo.endTime_ = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 59)); // 23:59:59
     int32_t ret = GetTrafficStatsByNetwork(infos, networkInfo);
     monthData = 0;
     for (const auto &info : infos) {

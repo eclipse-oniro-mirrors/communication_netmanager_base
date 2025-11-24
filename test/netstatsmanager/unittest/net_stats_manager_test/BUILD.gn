@@ -161,7 +161,8 @@ ohos_unittest("net_stats_manager_test") {
     "safwk:system_ability_fwk",
     "sqlite:sqlite",
     "time_service:time_client",
-    "os_account:os_account_innerkits"
+    "os_account:os_account_innerkits",
+    "state_registry:tel_state_registry_api"
   ]
 
   if (netmanager_base_enable_traffic_statistic) {
