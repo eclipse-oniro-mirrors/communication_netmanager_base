@@ -44,6 +44,7 @@ public:
 protected:
     bool SubCheckPermission(const std::string &permission, uint32_t funcCode);
     int32_t CheckPolicyPermission(uint32_t funcCode);
+    int32_t CheckProcessPermission(uint32_t code);
 
     ffrt::queue ffrtQueue_;
     std::shared_ptr<NetPolicyEventHandler> handler_;

@@ -56,8 +56,8 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NIC_TRAFFIC_ALLOWED), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE),
      Permission::MANAGE_NET_STRATEGY},
-     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), Permission::MANAGE_NET_STRATEGY},
-     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYTLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST), Permission::MANAGE_NET_STRATEGY},
 };
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr int32_t MAX_LIST_SIZE = 1000;
@@ -166,20 +166,10 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             return NETMANAGER_ERR_INTERNAL;
         }
     }
-    
-    auto uid = IPCSkeleton::GetCallingUid();
-    if (code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE) &&
-        uid != UID_COLLABORATION) {
-        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+    auto res = CheckProcessPermission(code);
+    if (res != NETMANAGER_SUCCESS) {
+        return res;
     }
-    if ((code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY) ||
-        code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST)) &&
-        uid != UID_RSS) {
-        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         int32_t checkPermissionResult = CheckPolicyPermission(code);
@@ -231,6 +221,23 @@ int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
     }
     NETMGR_LOG_E("Error funcCode, need check");
     return NETMANAGER_ERR_PERMISSION_DENIED;
+}
+
+int32_t NetPolicyServiceStub::CheckProcessPermission(uint32_t code)
+{
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_INTERNET_ACCESS_BY_IP_FOR_WIFI_SHARE) &&
+        uid != UID_COLLABORATION) {
+        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    if ((code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY) ||
+        code == static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST)) &&
+        uid != UID_RSS) {
+        NETMGR_LOG_E("CheckUidPermission failed, code %{public}d, uid %{public}d", code, uid);
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)

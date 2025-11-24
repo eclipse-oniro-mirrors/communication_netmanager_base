@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int32_t MAX_LIST_SIZE = 65535;
+constexpr int32_t MAX_LIST_SIZE = 1000;
 NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyService>(impl) {}
 
 NetPolicyServiceProxy::~NetPolicyServiceProxy() = default;
