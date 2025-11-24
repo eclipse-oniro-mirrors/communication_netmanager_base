@@ -56,15 +56,6 @@ bool TrafficLimitDialog::PopUpTrafficLimitDialog(int32_t simId)
     return ShowTrafficLimitDialog();
 }
 
-bool TrafficLimitDialog::DismissTrafficLimitDialog()
-{
-    if (!isDialogOpen_) {
-        return false;
-    }
-    NETMGR_LOG_I("Dismiss TrafficLimit Dialog");
-    return UnShowTrafficLimitDialog();
-}
-
 void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {

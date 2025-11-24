@@ -197,6 +197,23 @@ void TrafficDataObserver::ReadTrafficDataSettingsPart2(std::shared_ptr<TrafficSe
     }
 }
 
+int32_t TrafficDataObserver::ReadBeginDateSettings()
+{
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+
+    Uri beginTimeUri(SETTING_URI + TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE);
+    std::string value = "";
+    dataShareHelperUtils->Query(beginTimeUri, TAG_NAME + std::to_string(simId_) + "_" + MONTHLY_BEGIN_DATE, value);
+    int32_t beginDate = 1;
+    int32_t dateInt = 0;
+    if (!value.empty() && NetStatsUtils::ConvertToInt32(value, dateInt)) {
+        beginDate = dateInt;
+    }
+
+    NETMGR_LOG_I("ReadBeginDateSettings beginDate:%{public}d", beginDate);
+    return beginDate;
+}
+
 // 无限流量开关
 UnlimitTrafficEnableObserver::UnlimitTrafficEnableObserver(int32_t simId) : simId_(simId) {}
 

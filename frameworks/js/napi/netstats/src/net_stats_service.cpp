@@ -35,6 +35,7 @@
 #include "common_event_support.h"
 #include "ffrt_inner.h"
 #include "net_bundle.h"
+#include "net_stats_cached.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -54,6 +55,8 @@
 #include "cellular_data_types.h"
 #include "net_stats_notification.h"
 #include "net_stats_rdb.h"
+#include "telephony_observer_broker.h"
+#include "telephony_observer_client.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
 #include "iptables_wrapper.h"
 #ifdef SUPPORT_NETWORK_SHARE
@@ -76,6 +79,8 @@ constexpr uint32_t DEFAULT_UPDATE_TRAFFIC_INFO_CYCLE_MS = 30 * 60 * 1000;
 constexpr uint32_t DAY_SECONDS = 2 * 24 * 60 * 60;
 constexpr uint32_t DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 constexpr int32_t TRAFFIC_NOTIFY_TYPE = 3;
+constexpr int32_t SLOT_0 = 0;
+constexpr int32_t SLOT_1 = 1;
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
@@ -92,6 +97,10 @@ enum NetStatusConn : uint8_t {
     NON_CONNECTED = 0,
     CONNECTED = 1,
 };
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+static constexpr uint32_t TELEPHONY_EVENT_MASK =
+    Telephony::TelephonyObserverBroker::OBSERVER_MASK_SIM_STATE;
+#endif // SUPPORT_TRAFFIC_STATISTIC
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -100,7 +109,7 @@ NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
     netStatsCallback_ = std::make_shared<NetStatsCallback>();
-    netStatsCached_ = std::make_unique<NetStatsCached>();
+    netStatsCached_ = std::make_shared<NetStatsCached>();
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     trafficObserver_ = std::make_unique<TrafficObserver>().release();
     trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
@@ -123,6 +132,7 @@ void NetStatsService::OnStart()
     AddSystemAbilityListener(TIME_SERVICE_ID);
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    AddSystemAbilityListener(TELEPHONY_STATE_REGISTRY_SYS_ABILITY_ID);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     state_ = STATE_RUNNING;
@@ -209,6 +219,10 @@ void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::str
         StartTrafficOvserver();
         return;
     }
+    if (systemAbilityId == TELEPHONY_STATE_REGISTRY_SYS_ABILITY_ID) {
+        SubscribeTelephonyInfo();
+        return;
+    }
 #endif // SUPPORT_TRAFFIC_STATISTIC
     if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
         RefreshUidStatsFlag(DELAY_US);
@@ -260,14 +274,6 @@ void NetStatsService::RegisterCommonEvent()
             NETMGR_LOG_D("Net Manager add uid, uid:[%{public}d]", uid);
             return CommonEventPackageAdded(uid);
         });
-    subscriber_->RegisterStatsCallback(COMMON_EVENT_STATUS, [this](const EventFwk::Want &want) -> bool {
-        std::string status = want.GetStringParam(STATUS_FIELD);
-        NETMGR_LOG_I("Net Manager status changed, status:[%{public}s]", status.c_str());
-        if (status == STATUS_UNLOCKED) {
-            RefreshUidStatsFlag(0);
-        }
-        return true;
-    });
     RegisterCommonTelephonyEvent();
     RegisterCommonTimeEvent();
     RegisterCommonNetStatusEvent();
@@ -312,12 +318,20 @@ void NetStatsService::RegisterCommonTimeEvent()
     subscriber_->RegisterStatsCallback(
         EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED, [this](const EventFwk::Want &want) {
             NETMGR_LOG_I("COMMON_EVENT_TIME_CHANGED");
-            return ModifySysTimer();
+            ModifySysTimer();
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+            UpdateAllHistoryDateInfo();
+#endif // SUPPORT_TRAFFIC_STATISTIC
+            return true;
         });
     subscriber_->RegisterStatsCallback(
         EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED, [this](const EventFwk::Want &want) -> bool {
             NETMGR_LOG_I("COMMON_EVENT_TIMEZONE_CHANGED");
-            return ModifySysTimer();
+            ModifySysTimer();
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+            UpdateAllHistoryDateInfo();
+#endif // SUPPORT_TRAFFIC_STATISTIC
+            return true;
         });
 }
 
@@ -328,6 +342,50 @@ bool NetStatsService::UpdateNetStatusMap(uint8_t type, uint8_t value)
         return false;
     }
     return true;
+}
+
+int32_t NetStatsService::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthDataIpc)
+{
+#ifndef SUPPORT_TRAFFIC_STATISTIC
+    monthDataIpc = 0;
+    return NETMANAGER_ERR_OPERATION_FAILED;
+#else
+    int32_t checkPermission = CheckNetManagerAvailable();
+    if (checkPermission != NETMANAGER_SUCCESS) {
+        return checkPermission;
+    }
+
+    int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
+    if (slotId != SLOT_0 && slotId != SLOT_1) {
+        NETMGR_LOG_I("slotId error: %{public}d", slotId);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
+    uint64_t monthData = netStatsCached_->GetMonthTrafficData(simId);
+    if (monthData != UINT64_MAX) {
+        monthDataIpc = monthData;
+        NETMGR_LOG_I("monthDataIpc data: %{public}lu", monthDataIpc);
+        return NETMANAGER_SUCCESS;
+    }
+
+    ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
+    int32_t beginDate = trafficDataObserver->ReadBeginDateSettings();
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    NetStatsNetwork networkInfo;
+    networkInfo.type_ = 0;  // 0:cellular
+    networkInfo.simId_ = simId;
+    networkInfo.startTime_ = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
+    networkInfo.endTime_ = static_cast<uint64_t>(CommonUtils::GetTodayMidnightTimestamp(23, 59, 59));
+    int32_t ret = GetTrafficStatsByNetwork(infos, networkInfo);
+    monthData = 0;
+    for (const auto &info : infos) {
+        monthData += info.second.rxBytes_;
+        monthData += info.second.txBytes_;
+    }
+    monthDataIpc = monthData;
+    NETMGR_LOG_I("GetTrafficStatsByNetwork data: %{public}lu", monthDataIpc);
+#endif // SUPPORT_TRAFFIC_STATISTIC
+    return NETMANAGER_SUCCESS;
 }
 
 void NetStatsService::InitPrivateUserId()
@@ -1266,7 +1324,6 @@ bool NetStatsService::CommonEventSimStateChangedFfrt(int32_t slotId, int32_t sim
         NETMGR_LOG_E("get simId error");
         return false;
     }
-
     if (simState == static_cast<int32_t>(Telephony::SimState::SIM_STATE_LOADED)) {
         if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
             ObserverPtr trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
@@ -1633,7 +1690,6 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
     NETMGR_LOG_I("UpdataSettingsdata. simId: %{public}d, flag: %{public}d, value: %{public}lu", simId, flag, value);
     auto iter = settingsTrafficMap_.find(simId);
     if (iter == settingsTrafficMap_.end() || iter->second.second == nullptr) {
-        NETMGR_LOG_I("iter is nullptr.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     switch (flag) {
@@ -1652,6 +1708,7 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
         case NET_STATS_BEGIN_DATE:
             if (value >= 1 && value <= 31) { // 31: 每月日期数最大值
                 iter->second.second->beginDate = static_cast<int32_t>(value);
+                UpdateHistoryData(simId);
             }
             break;
         case NET_STATS_NOTIFY_TYPE:
@@ -1679,6 +1736,35 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
         UpdateBpfMap(simId);
     }
     return NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::UpdateHistoryData(int32_t simId)
+{
+    if (simId <= 0) {
+        NETMGR_LOG_E("UpdateHistoryData simId invalid");
+        return;
+    }
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    auto trafficDataObserver = std::make_shared<TrafficDataObserver>(simId);
+    int32_t beginDate = trafficDataObserver->ReadBeginDateSettings();
+    netStatsCached_->ForceUpdateHistoryData(simId, beginDate);
+#endif
+}
+
+void NetStatsService::DeleteHistoryData(int32_t simId)
+{
+#ifdef SUPPORT_TRAFFIC_STATISTIC
+    netStatsCached_->DeleteHistoryData(simId);
+#endif
+}
+
+void NetStatsService::UpdateAllHistoryDateInfo()
+{
+    int32_t simId0 = Telephony::CoreServiceClient::GetInstance().GetSimId(SLOT_0);
+    int32_t simId1 = Telephony::CoreServiceClient::GetInstance().GetSimId(SLOT_1);
+    NETMGR_LOG_I("UpdateAllHistoryDateInfo simId0: %{public}d ,simId1: %{public}d", simId0, simId1);
+    UpdateHistoryData(simId0);
+    UpdateHistoryData(simId1);
 }
 
 TrafficObserver::TrafficObserver() {}
@@ -1967,6 +2053,35 @@ bool NetStatsService::GetdailyMarkBySimId(int32_t simId, uint16_t &dailyMark)
     }
     dailyMark = settingsTrafficMap_[simId].second->dailyMark;
     return true;
+}
+
+void NetStatsService::SubscribeTelephonyInfo()
+{
+    if (telephonyInfoObserver_ == nullptr) {
+        telephonyInfoObserver_ = sptr<TelephonyInfoObserver>::MakeSptr();
+    }
+    NETMGR_LOG_I("SubscribeTelephonyInfo start.");
+    int32_t ret1 = Telephony::TelephonyObserverClient::GetInstance().AddStateObserver(telephonyInfoObserver_, SLOT_0,
+        TELEPHONY_EVENT_MASK, true);
+    int32_t ret2 = Telephony::TelephonyObserverClient::GetInstance().AddStateObserver(telephonyInfoObserver_, SLOT_1,
+        TELEPHONY_EVENT_MASK, true);
+    NETMGR_LOG_I("SubscribeTelephonyInfo result. ret1: %{public}d, ret2: %{public}d", ret1, ret2);
+}
+
+void TelephonyInfoObserver::OnSimStateUpdated(int32_t slotId, Telephony::CardType type,
+    Telephony::SimState state, Telephony::LockReason reaso)
+{
+    NETMGR_LOG_I("OnSimStateUpdated start slot:%{public}d, state:%{public}d", slotId, state);
+    int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
+    if (simId <= 0) {
+        NETMGR_LOG_E("simId error");
+        return;
+    }
+    if (state == Telephony::SimState::SIM_STATE_NOT_PRESENT) {
+        DelayedSingleton<NetStatsService>::GetInstance()->DeleteHistoryData(simId);
+    } else if (state == Telephony::SimState::SIM_STATE_LOADED) {
+        DelayedSingleton<NetStatsService>::GetInstance()->UpdateHistoryData(simId);
+    }
 }
 #endif //SUPPORT_TRAFFIC_STATISTIC
 } // namespace NetManagerStandard

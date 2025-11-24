@@ -26,6 +26,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 
 const int32_t TM_YEAR_START = 1900;
+const int32_t MONTH_NUM = 12;
 static const int32_t DAYS_IN_MONTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 constexpr uint32_t ONE_MONTH_SECOND = 31 * 24 * 60 * 60;
 
@@ -45,10 +46,10 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
     int current_day = now_tm->tm_mday;
  
     // 计算上个月的年份和月份
-    int previous_month = current_month == 1 ? 12 : current_month - 1;
+    int previous_month = current_month == 1 ? MONTH_NUM : current_month - 1;
     int previous_year = current_month == 1 ? current_year - 1 : current_year;
 
-    // 构建 tm 结构表示上个月的10号
+    // 构建 tm 结构表示上个月
     tm last_month_xth_tm = {};
     last_month_xth_tm.tm_year = previous_year - TM_YEAR_START;
     last_month_xth_tm.tm_mon = previous_month - 1;
@@ -79,6 +80,56 @@ int32_t NetStatsUtils::GetStartTimestamp(int32_t startdate)
     NETMGR_LOG_I("timestamp: %{public}d", timestamp);
  
     return timestamp;
+}
+
+int32_t NetStatsUtils::GetEndTimestamp(int32_t startdate)
+{
+    auto now = std::chrono::system_clock::now();
+    time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    tm* now_tm = std::localtime(&now_time_t);
+    if (now_tm == nullptr) {
+        return INT32_MAX;
+    }
+ 
+    int current_year = now_tm->tm_year + TM_YEAR_START;
+    int current_month = now_tm->tm_mon + 1;
+    int current_day = now_tm->tm_mday;
+ 
+    int next_month = current_month == MONTH_NUM ? 1 : current_month + 1;
+    int next_year = current_month == MONTH_NUM ? current_year + 1 : current_year;
+
+    tm next_month_xth_tm = {};
+    next_month_xth_tm.tm_year = current_year - TM_YEAR_START;
+    next_month_xth_tm.tm_mon = current_month - 1;
+    next_month_xth_tm.tm_mday = startdate;
+    next_month_xth_tm.tm_hour = 0;
+    next_month_xth_tm.tm_min = 0;
+    next_month_xth_tm.tm_sec = 0;
+
+    if (startdate > current_day) {
+        int daysInCurrentMonth = GetDaysInMonth(current_year, current_month);
+        if (startdate > daysInCurrentMonth) {
+            next_month_xth_tm.tm_year = current_year - TM_YEAR_START;
+            next_month_xth_tm.tm_mon = current_month - 1 ;
+            next_month_xth_tm.tm_mday = daysInCurrentMonth;
+        } else {
+            next_month_xth_tm.tm_year = current_year - TM_YEAR_START;
+            next_month_xth_tm.tm_mon = current_month - 1;
+            next_month_xth_tm.tm_mday = startdate;
+        }
+    }
+
+    if (startdate <= current_day) {
+        next_month_xth_tm.tm_year = next_year - TM_YEAR_START;
+        next_month_xth_tm.tm_mon = next_month - 1;
+        next_month_xth_tm.tm_mday = startdate;
+    }
+
+    time_t next_month_xth_time_t = mktime(&next_month_xth_tm);
+    auto next_month_xth = std::chrono::system_clock::from_time_t(next_month_xth_time_t);
+    int32_t timestamp = static_cast<int32_t>(std::chrono::system_clock::to_time_t(next_month_xth));
+ 
+    return timestamp - 1;
 }
 
 int32_t NetStatsUtils::GetTodayStartTimestamp()
@@ -127,8 +178,7 @@ int32_t NetStatsUtils::GetDaysInMonth(int32_t year, int32_t month)
     if (month == 2 && NetStatsUtils::IsLeapYear(year)) { // 如果是2月并且是闰年
         return 29;  // 则天数为29
     }
- 
-    // 返回对应月份的天数
+
     return DAYS_IN_MONTH[month - 1];
 }
 

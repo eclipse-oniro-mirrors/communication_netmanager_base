@@ -93,6 +93,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
 

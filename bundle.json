@@ -95,7 +95,8 @@
                 "config_policy",
                 "ace_engine",
                 "ylong_runtime",
-                "rust_cxx"
+                "rust_cxx",
+                "state_registry"
             ]
         },
         "build": {

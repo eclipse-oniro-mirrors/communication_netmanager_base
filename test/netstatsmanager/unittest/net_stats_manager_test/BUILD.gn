@@ -69,6 +69,7 @@ ohos_unittest("net_stats_mock_data") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
   defines = [
@@ -167,6 +168,7 @@ ohos_unittest("net_stats_manager_test") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
 
@@ -261,6 +263,7 @@ ohos_unittest("net_stats_cached_service_test") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
 
@@ -347,6 +350,7 @@ ohos_unittest("net_stats_service_new_test") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
 
@@ -435,6 +439,7 @@ ohos_unittest("net_stats_service_common_test") {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
     ]
   }
 

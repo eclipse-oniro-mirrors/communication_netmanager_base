@@ -135,6 +135,13 @@ HWTEST_F(NetStatsNotificationTest, GetMonthNotificationTextTest001, TestSize.Lev
     EXPECT_FALSE(ret.empty());
 }
 
+HWTEST_F(NetStatsNotificationTest, ReadBeginDateSettingsTest001, TestSize.Level1)
+{
+    std::shared_ptr<TrafficDataObserver> observer = std::make_shared<TrafficDataObserver>(0);
+    int beginDate = observer->ReadBeginDateSettings();
+    EXPECT_EQ(beginDate, 1);
+}
+
 HWTEST_F(NetStatsNotificationTest, GetMonthAlertTextTest001, TestSize.Level1)
 {
     auto &notification = NetMgrNetStatsLimitNotification::GetInstance();

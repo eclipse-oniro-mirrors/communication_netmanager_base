@@ -22,6 +22,7 @@
 #include "get_iface_uid_stats_context.h"
 #include "get_traffic_stats_by_network_context.h"
 #include "get_traffic_stats_by_uid_network_context.h"
+#include "get_month_traffic_stats_context_by_network.h"
 #include "get_uid_rxbytes_context.h"
 #include "statistics_exec.h"
 #include "update_iface_stats_context.h"
@@ -116,6 +117,12 @@ void StatisticsAsyncWork::ExecGetSelfTrafficStats(napi_env env, void *data)
         env, data);
 }
 
+void StatisticsAsyncWork::ExecGetMonthTrafficStatsByNetwork(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetMonthTrafficStatsByNetworkContext,
+        StatisticsExec::ExecGetMonthTrafficStatsByNetwork>(env, data);
+}
+
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(
@@ -198,6 +205,12 @@ void StatisticsAsyncWork::GetTrafficStatsByNetworkCallback(napi_env env, napi_st
 {
     BaseAsyncWork::AsyncWorkCallback<GetTrafficStatsByNetworkContext,
                                      StatisticsExec::GetGetTrafficStatsByNetworkCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::GetMonthTrafficStatsByNetworkCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetMonthTrafficStatsByNetworkContext,
+                                     StatisticsExec::GetMonthTrafficStatsByNetworkCallback>(env, status, data);
 }
 
 void StatisticsAsyncWork::GetTrafficStatsByUidNetworkCallback(napi_env env, napi_status status, void *data)

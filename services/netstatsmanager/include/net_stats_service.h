@@ -20,7 +20,6 @@
 #include "system_ability.h"
 
 #include "net_push_stats_info.h"
-#include "net_stats_cached.h"
 #include "net_stats_callback.h"
 #include "net_stats_history.h"
 #include "net_stats_info_sequence.h"
@@ -35,18 +34,22 @@
 #include "netsys_traffic_callback_stub.h"
 #include "netsys_controller_callback.h"
 #include "net_stats_trafficLimit_dialog.h"
+#include "telephony_observer.h"
 #endif // SUPPORT_TRAFFIC_STATISTIC
 #include "network_sharing.h"
 #include "net_stats_subscriber.h"
+#include "safe_map.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-
+class NetStatsCached;
 #ifdef SUPPORT_TRAFFIC_STATISTIC
 using ObserverPtr = std::shared_ptr<TrafficDataObserver>;
 using SettingsInfoPtr = std::shared_ptr<TrafficSettingsInfo>;
 class TrafficObserver;
 class NetsysControllerObserver;
+class TelephonyInfoObserver;
 #endif // SUPPORT_TRAFFIC_STATISTIC
 
 class NetStatsService : public SystemAbility,
@@ -74,6 +77,7 @@ public:
                                      const NetStatsNetwork &networkIpc) override;
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                         const NetStatsNetwork &networkIpc) override;
+    int32_t GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthDataIpc) override;
     int32_t SetAppStats(const PushStatsInfo &info) override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
@@ -98,6 +102,10 @@ public:
     bool GetMonthlyLimitBySimId(int32_t simId, uint64_t &monthlyLimit);
     bool GetMonthlyMarkBySimId(int32_t simId, uint16_t &monthlyMark);
     bool GetdailyMarkBySimId(int32_t simId, uint16_t &dailyMark);
+
+    void UpdateAllHistoryDateInfo();
+    void UpdateHistoryData(int32_t simId);
+    void DeleteHistoryData(int32_t simId);
 #endif // SUPPORT_TRAFFIC_STATISTIC
 
 private:
@@ -154,6 +162,7 @@ private:
     void PrintTrafficBpfMapInfo(int32_t slotId);
     void PrintTrafficSettingsMapInfo(int32_t simId);
     void UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifIndex);
+    void SubscribeTelephonyInfo();
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -168,6 +177,8 @@ private:
     void InitPrivateUserId();
     bool UpdateNetStatusMap(uint8_t type, uint8_t value);
     void UpdateNetStatusMapCellular(int32_t dataState);
+    void InsertHistoryData(int32_t simId);
+    void InitHistoryData();
 
 private:
     enum ServiceRunningState {
@@ -179,7 +190,7 @@ private:
     ServiceRunningState state_;
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
-    std::unique_ptr<NetStatsCached> netStatsCached_ = nullptr;
+    std::shared_ptr<NetStatsCached> netStatsCached_ = nullptr;
     uint64_t netStatsSysTimerId_ = 0;
     std::shared_ptr<NetStatsAccountSubscriber> accountSubscriber_ = nullptr;
     int32_t defaultUserId_ = 0;
@@ -195,6 +206,7 @@ private:
     SafeMap<std::string, std::string> ifaceNameIdentMap_;
     std::shared_ptr<TrafficLimitDialog> dialog_ = nullptr;
     std::shared_ptr<ffrt::queue> trafficPlanFfrtQueue_ = nullptr;
+    sptr<TelephonyInfoObserver> telephonyInfoObserver_ = nullptr;
 #endif // SUPPORT_TRAFFIC_STATISTIC
     std::mutex timerMutex_;
 };
@@ -206,6 +218,15 @@ public:
     ~TrafficObserver() override;
     int32_t OnExceedTrafficLimits(int8_t &flag) override;
 };
+
+class TelephonyInfoObserver : public Telephony::TelephonyObserver {
+public:
+    TelephonyInfoObserver() = default;
+    ~TelephonyInfoObserver() = default;
+    void OnSimStateUpdated(
+         int32_t slotId, Telephony::CardType type, Telephony::SimState state, Telephony::LockReason reason) override;
+};
+
 #endif // SUPPORT_TRAFFIC_STATISTIC
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -33,6 +33,7 @@ interface OHOS.NetManagerStandard.INetStatsService {
         [in] NetStatsNetwork network);
     void GetTrafficStatsByUidNetwork([out] List<NetStatsInfoSequence> infos, [in] unsigned int uid,
         [in] NetStatsNetwork network);
+    void GetMonthTrafficStatsByNetwork([in] unsigned int simId, [out] unsigned long monthTrafficData);
     void SetAppStats([in] PushStatsInfo info);
     void RegisterNetStatsCallback([in] INetStatsCallback cb);
     void UnregisterNetStatsCallback([in] INetStatsCallback cb);
@@ -47,4 +48,4 @@ interface OHOS.NetManagerStandard.INetStatsService {
     void GetCookieRxBytes([out] unsigned long stats, [in] unsigned long cookie);
     void GetCookieTxBytes([out] unsigned long stats, [in] unsigned long cookie);
     void SaveSharingTraffic([in] NetStatsInfo infos);
-}
+}
