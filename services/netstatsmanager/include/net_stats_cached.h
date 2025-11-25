@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <shared_mutex>
 
 #include "ffrt.h"
 #include "net_bundle.h"
@@ -37,6 +38,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+typedef  struct {
+    int32_t beginDate;
+    uint64_t startTime;
+    uint64_t endTime;
+    uint64_t trafficData;
+} HistoryData;
+
 class NetStatsCached {
 public:
     NetStatsCached();
@@ -74,6 +82,13 @@ public:
     void GetIptablesStatsIncrease(std::vector<NetStatsInfo> &InfosVec);
 #endif
     void SaveSharingTraffic(const NetStatsInfo &infos);
+
+    uint64_t GetMonthTrafficData(int32_t simId);
+    void UpdateAllHistoryData(int32_t simId, uint64_t startTime, uint64_t endTime, uint64_t data);
+    void UpdateHistoryData(int32_t simId, int32_t beginDate);
+    void ForceUpdateHistoryData(int32_t simId, int32_t beginDate);
+    void DeleteHistoryData(int32_t simId);
+    bool FindInHistoryData(int32_t simId);
 
     inline void SetTrafficThreshold(uint64_t threshold)
     {
@@ -130,7 +145,6 @@ private:
             if (info.HasNoData()) {
                 return;
             }
-            info.date_ = CommonUtils::GetCurrentSecond();
             uidStatsInfo_.push_back(info);
             currentUidStats_ += info.GetStats();
             if (netStatsCallbackManager_ != nullptr) {
@@ -143,7 +157,6 @@ private:
             if (info.HasNoData()) {
                 return;
             }
-            info.date_ = CommonUtils::GetCurrentSecond();
             uidSimStatsInfo_.push_back(info);
             currentUidSimStats_ += info.GetStats();
             if (netStatsCallbackManager_ != nullptr) {
@@ -170,7 +183,6 @@ private:
             if (info.HasNoData()) {
                 return;
             }
-            info.date_ = CommonUtils::GetCurrentSecond();
             iptablesStatsInfo_.push_back(info);
             currentIptablesStats_ += info.GetStats();
             if (netStatsCallbackManager_ != nullptr) {
@@ -321,6 +333,8 @@ private:
     bool isDisplayTrafficAncoList = false;
     int32_t curPrivateUserId_ = -1;
     int32_t curDefaultUserId_ = -1;
+    std::map<uint32_t, HistoryData> cellularHistoryData_;
+    std::shared_mutex cellularHistoryDataMutex_;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;
@@ -350,12 +364,20 @@ private:
     void CacheIptablesStatsService(nmd::NetworkSharingTraffic &traffic, std::string &ifaceName);
     void WriteIptablesStats();
 #endif
+    int32_t GetTotalHistoryStatsByIdent(int32_t simId, uint64_t start,
+        uint64_t end, uint64_t &historyData);
+    void UpdateHistoryData(const std::map<std::string, uint64_t> data);
+    void JudgeAndUpdateHistoryData(uint64_t curSecond);
 
     void GetUpIfaceName(std::string &downIface, std::string &upIface);
 
     NetStatsInfo GetIncreasedStats(const NetStatsInfo &info);
 
     NetStatsInfo GetIncreasedSimStats(const NetStatsInfo &info);
+
+    void UpdateNetStatsFlag(NetStatsInfo &info);
+
+    void UpdateNetStatsUserId(NetStatsInfo &info);
 
     inline bool CheckUidStor()
     {

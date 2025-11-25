@@ -191,6 +191,17 @@ public:
                                         const sptr<NetStatsNetwork> &network);
 
     /**
+     * Get this month traffic data of the cellular network
+     *
+     * @param simId the id of the specified sim card
+     * @param monthData the network of traffic stats
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.GET_NETWORK_STATS
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthData);
+
+    /**
      * Set traffic stats of the specified application
      *
      * @param info traffic of the application

@@ -467,6 +467,33 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::unordered_map<uint32
     return result;
 }
 
+int32_t NetStatsServiceProxy::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthData)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteUint32(simId)) {
+        NETMGR_LOG_E("WriteUint32 simId failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_MONTH_TRAFFIC_STATS_BY_NETWORK), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!reply.ReadUint64(monthData)) {
+        NETMGR_LOG_E("ReadUint64 failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
 int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                                           const sptr<NetStatsNetwork> &network)
 {

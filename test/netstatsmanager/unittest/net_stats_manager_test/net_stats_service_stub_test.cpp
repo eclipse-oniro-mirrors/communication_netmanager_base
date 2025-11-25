@@ -122,6 +122,11 @@ public:
         return 0;
     }
 
+    int32_t GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthDataIpc) override
+    {
+        return 0;
+    }
+
     int32_t SetAppStats(const PushStatsInfo &info) override
     {
         return 0;

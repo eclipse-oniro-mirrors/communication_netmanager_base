@@ -32,7 +32,6 @@ public:
     TrafficLimitDialog();
     ~TrafficLimitDialog();
     bool PopUpTrafficLimitDialog(int32_t simId);
-    bool DismissTrafficLimitDialog();
 
 private:
     DISALLOW_COPY_AND_MOVE(TrafficLimitDialog);

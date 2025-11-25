@@ -115,6 +115,7 @@ public:
     void UnRegisterTrafficDataSettingObserver();
     void ReadTrafficDataSettings(std::shared_ptr<TrafficSettingsInfo> info);
     void ReadTrafficDataSettingsPart2(std::shared_ptr<TrafficSettingsInfo> info);
+    int32_t ReadBeginDateSettings();
 
 public:
     int32_t simId_ { -1 };
@@ -128,4 +129,4 @@ public:
 };
 }
 }
-#endif
+#endif

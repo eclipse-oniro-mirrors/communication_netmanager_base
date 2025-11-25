@@ -23,9 +23,12 @@
 #include "net_conn_client.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
+#include "net_stats_service.h"
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_database_helper.h"
+#include "net_stats_history.h"
+#include "net_stats_utils.h"
 #include "netsys_controller.h"
 #include "bpf_stats.h"
 #include "ffrt_inner.h"
@@ -240,16 +243,21 @@ void NetStatsCached::CacheUidStats()
         NETMGR_LOG_W("No stats need to save");
         return;
     }
-
-    ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
-        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
+    std::map<std::string, uint64_t> uidStatscache;
+    ifaceNameIdentMap_.Iterate([&statsInfos, &uidStatscache](const std::string &k, const std::string &v) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v, &uidStatscache](NetStatsInfo &item) {
             if (item.iface_ == k) {
                 item.ident_ = v;
+            }
+            if (uidStatscache.find(item.ident_) == uidStatscache.end()) {
+                uidStatscache[item.ident_] = 0;
             }
         });
     });
 
-    std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    JudgeAndUpdateHistoryData(curSecond);
+    std::for_each(statsInfos.begin(), statsInfos.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
@@ -258,14 +266,19 @@ void NetStatsCached::CacheUidStats()
         }
         auto findRet = std::find_if(lastUidStatsInfo_.begin(), lastUidStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
+        info.date_ = curSecond;
         if (findRet == lastUidStatsInfo_.end()) {
             stats_.PushUidStats(info);
+            uidStatscache[info.ident_] += info.GetStats();
             return;
         }
         auto currentStats = info - *findRet;
+        currentStats.date_ = curSecond;
         stats_.PushUidStats(currentStats);
+        uidStatscache[info.ident_] += currentStats.GetStats();
     });
     lastUidStatsInfo_.swap(statsInfos);
+    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::CacheAppStats()
@@ -280,8 +293,18 @@ void NetStatsCached::CacheAppStats()
         }
         *findRet += info;
     });
-    std::for_each(pushInfos.begin(), pushInfos.end(), [this](auto &item) {
+    // 获取当前时间
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    // 判断是否在周期内,不在则更新historydata及周期
+    JudgeAndUpdateHistoryData(curSecond);
+    std::map<std::string, uint64_t> uidStatscache;
+    std::for_each(pushInfos.begin(), pushInfos.end(), [this, &uidStatscache, curSecond](auto &item) {
+        item.date_ = curSecond;
         stats_.PushUidStats(item);
+        if (uidStatscache.find(item.ident_) == uidStatscache.end()) {
+            uidStatscache[item.ident_] = 0;
+        }
+        uidStatscache[item.ident_] += item.GetStats();
         auto findRet = std::find_if(allPushStatsInfo_.begin(), allPushStatsInfo_.end(),
                                     [&item](const NetStatsInfo &info) {
                                         return info.Equals(item) && info.ident_ == item.ident_;
@@ -293,22 +316,39 @@ void NetStatsCached::CacheAppStats()
         *findRet += item;
     });
     uidPushStatsInfo_.clear();
+    UpdateHistoryData(uidStatscache);
+}
+
+void NetStatsCached::UpdateNetStatsFlag(NetStatsInfo &info)
+{
+    if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
+        info.flag_ = GetUidStatsFlag(info.uid_);
+    }
+}
+
+void NetStatsCached::UpdateNetStatsUserId(NetStatsInfo &info)
+{
+    if (info.uid_ > 0) {
+        info.userId_ = info.uid_ / USER_ID_DIVIDOR;
+    }
 }
 
 void NetStatsCached::CacheUidSimStats()
 {
-    NETMGR_LOG_I("CacheUidSimStats");
     std::vector<NetStatsInfo> statsInfos;
     NetsysController::GetInstance().GetAllSimStatsInfo(statsInfos);
     if (statsInfos.empty()) {
         NETMGR_LOG_W("No stats need to save");
         return;
     }
-
-    ifaceNameIdentMap_.Iterate([&statsInfos](const std::string &k, const std::string &v) {
-        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v](NetStatsInfo &item) {
+    std::map<std::string, uint64_t> uidStatscache;
+    ifaceNameIdentMap_.Iterate([&statsInfos, &uidStatscache](const std::string &k, const std::string &v) {
+        std::for_each(statsInfos.begin(), statsInfos.end(), [&k, &v, &uidStatscache](NetStatsInfo &item) {
             if (item.iface_ == k) {
                 item.ident_ = v;
+            }
+            if (uidStatscache.find(item.ident_) == uidStatscache.end()) {
+                uidStatscache[item.ident_] = 0;
             }
         });
     });
@@ -320,26 +360,29 @@ void NetStatsCached::CacheUidSimStats()
         });
     });
 
-    std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    JudgeAndUpdateHistoryData(curSecond);
+    std::for_each(statsInfos.begin(), statsInfos.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
-        if (info.flag_ <= STATS_DATA_FLAG_DEFAULT || info.flag_ >= STATS_DATA_FLAG_LIMIT) {
-            info.flag_ = GetUidStatsFlag(info.uid_);
-        }
-        if (info.uid_ > 0) {
-            info.userId_ = info.uid_ / USER_ID_DIVIDOR;
-        }
+        UpdateNetStatsFlag(info);
+        UpdateNetStatsUserId(info);
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
+            info.date_ = curSecond;
             stats_.PushUidSimStats(info);
+            uidStatscache[info.ident_] += info.GetStats();
             return;
         }
         auto currentStats = info - *findRet;
+        currentStats.date_ = curSecond;
         stats_.PushUidSimStats(currentStats);
+        uidStatscache[info.ident_] += currentStats.GetStats();
     });
     lastUidSimStatsInfo_.swap(statsInfos);
+    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::CacheIfaceStats()
@@ -901,29 +944,39 @@ void NetStatsCached::CacheIptablesStatsService(nmd::NetworkSharingTraffic &traff
     std::vector<NetStatsInfo> statsInfosVec;
     statsInfosVec.push_back(std::move(statsInfos));
 
-    ifaceNameIdentMap_.Iterate([&statsInfosVec](const std::string &k, const std::string &v) {
-        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [&k, &v](NetStatsInfo &item) {
+    std::map<std::string, uint64_t> uidStatscache;
+    ifaceNameIdentMap_.Iterate([&statsInfosVec, &uidStatscache](const std::string &k, const std::string &v) {
+        std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [&k, &v, &uidStatscache](NetStatsInfo &item) {
             if (item.iface_ == k) {
                 item.ident_ = v;
             }
+            if (uidStatscache.find(item.ident_) == uidStatscache.end()) {
+                uidStatscache[item.ident_] = 0;
+            }
         });
     });
-
-    std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this](NetStatsInfo &info) {
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    JudgeAndUpdateHistoryData(curSecond);
+    std::for_each(statsInfosVec.begin(), statsInfosVec.end(), [this, &uidStatscache, curSecond](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
         auto findRet = std::find_if(lastIptablesStatsInfo_.begin(), lastIptablesStatsInfo_.end(),
             [this, &info](const NetStatsInfo &lastInfo) {return info.Equals(lastInfo); });
         if (findRet == lastIptablesStatsInfo_.end()) {
+            info.date_ = curSecond;
             stats_.PushIptablesStats(info);
+            uidStatscache[info.ident_] += info.GetStats();
             return;
         }
         auto currentStats = info - *findRet;
+        currentStats.date_ = curSecond;
         stats_.PushIptablesStats(currentStats);
+        uidStatscache[info.ident_] += currentStats.GetStats();
     });
     NETMGR_LOG_D("CacheIptablesStatsService info success");
     lastIptablesStatsInfo_.swap(statsInfosVec);
+    UpdateHistoryData(uidStatscache);
 }
 
 void NetStatsCached::GetIptablesStatsIncrease(std::vector<NetStatsInfo> &infosVec)
@@ -1022,5 +1075,157 @@ void NetStatsCached::SetCurDefaultUserId(int32_t userId)
     NETMGR_LOG_I("set defaultUserId: %{public}d", userId);
     curDefaultUserId_ = userId;
 }
+
+void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate)
+{
+    NETMGR_LOG_I("ForceUpdateHistoryData start");
+    if (simId <= 0) {
+        NETMGR_LOG_E("simId invalid");
+        return;
+    }
+    std::function<void()> ForceUpdateHistoryData = [this, simId, beginDate]() {
+        std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+        if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
+            cellularHistoryData_.erase(simId);
+        }
+
+        uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
+        uint64_t endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(beginDate));
+        uint64_t curSecond = CommonUtils::GetCurrentSecond();
+        uint64_t historyData = 0;
+        GetTotalHistoryStatsByIdent(simId, startTime, curSecond, historyData); // 获取本月已存入DB的流量数据
+        HistoryData historyDataStru;
+        historyDataStru.beginDate = beginDate;
+        historyDataStru.startTime = startTime;
+        historyDataStru.endTime = endTime;
+        historyDataStru.trafficData = historyData;
+        cellularHistoryData_[simId] = historyDataStru;
+        NETMGR_LOG_I("historyData[%{public}d]:%{public}"  PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64,
+            simId, cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime,
+            cellularHistoryData_[simId].trafficData);
+    };
+    ffrt::submit(std::move(ForceUpdateHistoryData), {}, {}, ffrt::task_attr().name("ForceUpdateHistoryData"));
+}
+
+void NetStatsCached::DeleteHistoryData(int32_t simId)
+{
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+    if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
+        cellularHistoryData_.erase(simId);
+    }
+}
+
+bool NetStatsCached::FindInHistoryData(int32_t simId)
+{
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+    if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
+        return true;
+    }
+    return false;
+}
+
+int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
+    int32_t simId, uint64_t startTime, uint64_t endTime, uint64_t &historyData)
+{
+    auto history = std::make_unique<NetStatsHistory>();
+    std::string ident;
+    if (simId > 0) {
+        ident = std::to_string(simId);
+    }
+    std::vector<NetStatsInfo> allInfo;
+    int32_t ret = history->GetHistoryByIdent(allInfo, ident, startTime, endTime);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("get history by ident failed, err code=%{public}d", ret);
+        return ret;
+    }
+    for (const auto &info : allInfo) {
+        historyData += info.GetStats();    // histroy DB data
+    }
+    NETMGR_LOG_I("get history DB:%{public}" PRIu64, historyData);
+    std::vector<NetStatsInfo> cacheInfo;
+    GetUidPushStatsCached(cacheInfo);
+    GetUidStatsCached(cacheInfo);
+    GetUidSimStatsCached(cacheInfo);
+
+    // 过滤cache中的数据  simId及时间
+    for (const auto &info : cacheInfo) {
+        if (std::to_string(simId) != info.ident_ || startTime > info.date_ || endTime < info.date_) {
+            continue;
+        }
+        historyData += info.GetStats();  // histroy cache data
+    }
+    NETMGR_LOG_I("get history DB+cache:%{public}" PRIu64, historyData);
+    return NETMANAGER_SUCCESS;
+}
+
+uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
+{
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+
+    if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
+        NETMGR_LOG_E("GetMonthTrafficData find error");
+        return UINT64_MAX;
+    }
+
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    // be in next month
+    if (curSecond > cellularHistoryData_[simId].endTime) {
+        cellularHistoryData_[simId].trafficData = 0;
+        cellularHistoryData_[simId].startTime =
+            static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(cellularHistoryData_[simId].beginDate));
+        cellularHistoryData_[simId].endTime =
+            static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(cellularHistoryData_[simId].beginDate));
+        NETMGR_LOG_I("new time. %{public}" PRIu64 ", %{public}" PRIu64,
+            cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime);
+    }
+
+    std::vector<NetStatsInfo> statsInfo;
+    GetKernelStats(statsInfo);   //  bpf data
+#ifdef SUPPORT_NETWORK_SHARE
+    GetIptablesStatsIncrease(statsInfo);
+#endif
+    uint64_t dataTemp = 0;
+    for (const auto &info : statsInfo) {
+        if (info.ident_ == std::to_string(simId)) {
+            dataTemp += info.GetStats();
+        }
+    }
+    NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}" PRIu64 ", kernelData:%{public}" PRIu64,
+        cellularHistoryData_[simId].trafficData, dataTemp);
+    dataTemp += cellularHistoryData_[simId].trafficData;
+    return dataTemp;
+}
+
+void NetStatsCached::UpdateHistoryData(const std::map<std::string, uint64_t> data)
+{
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+    for (const auto &info : data) {
+        int32_t simId = -1;
+        if (!info.first.empty()) {
+            NetStatsUtils::ConvertToInt32(info.first, simId);
+        }
+        if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
+            continue;
+        }
+        NETMGR_LOG_I("simId:%{public}d, update traffic:%{public}" PRIu64, simId, info.second);
+        cellularHistoryData_[simId].trafficData += info.second;
+    }
+}
+
+void NetStatsCached::JudgeAndUpdateHistoryData(uint64_t curSecond)
+{
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+
+    for (auto &info : cellularHistoryData_) {
+        // not in cycle
+        if (curSecond > info.second.endTime) {
+            info.second.trafficData = 0;
+            info.second.startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(info.second.beginDate));
+            info.second.endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(info.second.beginDate));
+            NETMGR_LOG_I("new time. %{public}" PRIu64 ",%{public}" PRIu64, info.second.startTime, info.second.endTime);
+        }
+    }
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -154,6 +154,15 @@ bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContex
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecGetMonthTrafficStatsByNetwork(GetMonthTrafficStatsByNetworkContext *context)
+{
+    uint32_t simId = context->GetSimId();
+    int32_t result = NetStatsClient::GetInstance().GetMonthTrafficStatsByNetwork(simId,
+        context->GetMonthTrafficData());
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetworkContext *context)
 {
     sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
@@ -308,6 +317,11 @@ napi_value StatisticsExec::GetSelfTrafficStatsCallback(GetSelfTrafficStatsContex
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_PACKETS, rxPackets);
     NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_PACKETS, txPackets);
     return netStatsInfo;
+}
+
+napi_value StatisticsExec::GetMonthTrafficStatsByNetworkCallback(GetMonthTrafficStatsByNetworkContext *context)
+{
+    return NapiUtils::CreateInt64(context->GetEnv(), context->GetMonthTrafficData());
 }
 
 napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context)

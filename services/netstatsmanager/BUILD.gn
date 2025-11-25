@@ -118,6 +118,7 @@ ohos_shared_library("net_stats_manager") {
       "distributed_notification_service:ans_innerkits",
       "i18n:intl_util",
       "relational_store:native_rdb",
+      "state_registry:tel_state_registry_api",
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [
@@ -214,7 +215,8 @@ ohos_static_library("net_stats_manager_static") {
       "distributed_notification_service:ans_innerkits",
       "i18n:intl_util",
       "relational_store:native_rdb",
-      "os_account:os_account_innerkits"
+      "os_account:os_account_innerkits",
+      "state_registry:tel_state_registry_api",
     ]
     defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
     sources += [

@@ -346,6 +346,18 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
     return proxy->GetTrafficStatsByNetwork(infos, *network);
 }
 
+int32_t NetStatsClient::GetMonthTrafficStatsByNetwork(uint32_t simId, uint64_t &monthData)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    // LCOV_EXCL_START
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->GetMonthTrafficStatsByNetwork(simId, monthData);
+}
+
 int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                                     const sptr<NetStatsNetwork> &network)
 {
