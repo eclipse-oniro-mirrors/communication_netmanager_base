@@ -388,7 +388,8 @@ int32_t FirewallManager::EnableChain(ChainType chain, bool enable)
         command = "-t filter -A " + fChainName + " -j " + chainName;
         ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) ==
                       NETMANAGER_ERROR);
-    } else if (enable == false && firewallChainStatus_[chain].enable == true) {
+    } else if (enable == false) {
+        // if disable, do it anyway
         fChainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
         command = "-t filter -D " + fChainName + " -j " + chainName;
         ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4V6, command) ==
