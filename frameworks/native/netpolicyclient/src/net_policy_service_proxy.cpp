@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int32_t MAX_LIST_SIZE = 1000;
+constexpr uint32_t MAX_LIST_SIZE = 1000;
 NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyService>(impl) {}
 
 NetPolicyServiceProxy::~NetPolicyServiceProxy() = default;
@@ -922,17 +922,17 @@ int32_t NetPolicyServiceProxy::SetUidsDeniedListChain(const std::vector<uint32_t
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    int32_t uidsSize = static_cast<int32_t>(uids.size());
+    uint32_t uidsSize = uids.size();
     if (uidsSize < 0 || uidsSize > MAX_LIST_SIZE) {
         NETMGR_LOG_E("uids length is invalid: %{public}d", uidsSize);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    if (!data.WriteInt32(uidsSize)) {
+    if (!data.WriteInt32(static_cast<int32_t>(uidsSize))) {
         NETMGR_LOG_E("Write int32 data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    for (int32_t i = 0; i < uidsSize; ++i) {
+    for (uint32_t i = 0; i < uidsSize; ++i) {
         if (!data.WriteUint32(uids[i])) {
             NETMGR_LOG_E("Write uint32 data failed");
             return NETMANAGER_ERR_WRITE_DATA_FAIL;

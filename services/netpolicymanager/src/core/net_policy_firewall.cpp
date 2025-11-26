@@ -192,7 +192,7 @@ int32_t NetPolicyFirewall::UpdateIdleDenyPolicy(bool enable)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Update idle deny firewall status start");
     idleDenyFirewallRule_->EnableFirewall(enable);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update idle deny firewall status end");
-    powerSaveMode_ = enable;
+    idleDenyMode_ = enable;
     return NETMANAGER_SUCCESS;
 }
 
