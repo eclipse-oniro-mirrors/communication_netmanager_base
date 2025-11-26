@@ -76,6 +76,7 @@ private:
     static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
     int32_t CheckRespCode(int32_t respCode);
     std::string GetHeaderField(const std::string key);
+    int32_t CheckSuccessRespCode(int32_t respCode);
     int32_t CheckClientErrorRespCode(int32_t respCode);
 
 private:
