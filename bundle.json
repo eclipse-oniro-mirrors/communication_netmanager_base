@@ -96,6 +96,7 @@
                 "ace_engine",
                 "ylong_runtime",
                 "rust_cxx",
+                "icu",
                 "state_registry"
             ]
         },

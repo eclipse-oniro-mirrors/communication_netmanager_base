@@ -61,6 +61,7 @@ public:
     static constexpr const char *INTERFACE_NET_CAP = "NetCap";
     static constexpr const char *INTERFACE_NET_BEAR_TYPE = "NetBearType";
     static constexpr const char *INTERFACE_PROXY_MODE_TYPE = "ProxyMode";
+    static constexpr const char *INTERFACE_CONVERSION_PROCESS = "ConversionProcess";
     static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK = "factoryReset";
     static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK_SYNC = "factoryResetNetworkSync";
     static constexpr const char *FUNCTION_SET_PAC_URL = "setPacUrl";
@@ -88,9 +89,12 @@ public:
     static constexpr const char *FUNCTION_SET_VLAN_IP = "setVlanIp";
     static constexpr const char *INTERFACE_FAMILY_TYPE = "FamilyType";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
+    static constexpr const char *FUNCTION_GET_DNS_ASCII = "getDnsAscii";
+    static constexpr const char *FUNCTION_GET_DNS_UNICODE = "getDnsUnicode";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
     static std::initializer_list<napi_property_descriptor> createPropertyList();
+    static std::initializer_list<napi_property_descriptor> createWritablePropertyList();
 
     class NetConnectionInterface final {
     public:
@@ -117,6 +121,7 @@ public:
 private:
     static void InitClasses(napi_env env, napi_value exports);
     static void InitProperties(napi_env env, napi_value exports);
+    static void InitFamilyTypes(napi_env env, napi_value exports);
 
     static napi_value GetDefaultNet(napi_env env, napi_callback_info info);
     static napi_value GetDefaultNetSync(napi_env env, napi_callback_info info);
@@ -171,6 +176,8 @@ private:
     static napi_value DestroyVlan(napi_env env, napi_callback_info info);
     static napi_value SetVlanIp(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
+    static napi_value GetDnsASCII(napi_env env, napi_callback_info info);
+    static napi_value GetDnsUnicode(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 
