@@ -57,9 +57,6 @@ constexpr int32_t DEFAULT_HTTP_PORT = 80;
 constexpr int32_t DEFAULT_HTTPS_PORT = 443;
 constexpr const char *ADDR_SEPARATOR = ",";
 constexpr const char *SYMBOL_COLON = ":";
-constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-const std::string XREQ_HEADER = "XReqId:";
-const std::string XREQ_LEN_HEADER = "XReqIdLen:";
 const std::string DEFAULT_USER_AGENT = std::string("User-Agent: Mozilla/5.0 (X11; Linux x86_64) ") +
     std::string("AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36");
 constexpr const char *CONNECTION_PROPERTY = "Connection: close";
@@ -81,8 +78,6 @@ constexpr const char *TLS12_SECURITY_CIPHER_SUITE =
         "ECDHE-ECDSA-AES128-CCM:ECDHE-ECDSA-AES256-CCM:ECDHE-ECDSA-CHACHA20-POLY1305";
 constexpr const char *TLS13_SECURITY_CIPHER_SUITE = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:"
         "TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_SHA256";
-static std::string XReqId_;
-static int32_t XReqIdLen_;
 } // namespace
 
 std::mutex NetHttpProbe::initCurlMutex_;
@@ -134,6 +129,13 @@ void NetHttpProbe::GetXReqFromConfig()
             NETMGR_LOG_E("XReqIdLen_ get failed");
         };
     }
+}
+
+void NetHttpProbe::SetXReqId(const std::string& xReqId, int32_t xReqIdLen)
+{
+    std::lock_guard<std::mutex> locker(xReqIdMtx_);
+    xReqId_ = xReqId;
+    xReqIdLen_ = xReqIdLen;
 }
 
 void NetHttpProbe::CurlGlobalCleanup()
@@ -752,8 +754,8 @@ int32_t NetHttpProbe::CheckSuccessRespCode(int32_t respCode)
     if (result != HTTP_SUCCESS_CODE) {
         return result;
     }
-    std::string requestId = GetHeaderField(XReqId_);
-    if (XReqIdLen_ != static_cast<int32_t>(requestId.length())) {
+    std::string requestId = GetHeaderField(xReqId_);
+    if (requestId.empty() || xReqIdLen_ != static_cast<int32_t>(requestId.length())) {
         NETMGR_LOG_I("http return 204, but request id error and unreachable!");
         result = FAIL_CODE;
     }

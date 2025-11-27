@@ -149,6 +149,8 @@ private:
     int32_t dualStackProbeTimeOut_ = 5 * 1000;
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;
     PortalDetectInfo portalDetectInfo_;
+    std::string xReqId_;
+    int32_t xReqIdLen_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

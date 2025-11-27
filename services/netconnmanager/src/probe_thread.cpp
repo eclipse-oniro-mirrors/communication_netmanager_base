@@ -150,6 +150,13 @@ void ProbeThread::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     }
 }
 
+void ProbeThread::SetXReqId(const std::string& xReqId, int32_t xReqIdLen)
+{
+    if (httpProbe_) {
+        httpProbe_->SetXReqId(xReqId, xReqIdLen);
+    }
+}
+
 void ProbeThread::ProbeWithoutGlobalHttpProxy()
 {
     httpProbe_->ProbeWithoutGlobalHttpProxy();

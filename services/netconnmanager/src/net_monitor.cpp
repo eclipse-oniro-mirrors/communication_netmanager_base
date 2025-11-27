@@ -69,6 +69,8 @@ const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
 const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
 const std::string ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
 const std::string ADD_RANDOM_CFG_VALUE = "true";
+const std::string XREQ_HEADER = "XReqId:";
+const std::string XREQ_LEN_HEADER = "XReqIdLen:";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -321,8 +323,10 @@ void NetMonitor::StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread,
         backHttpsThread->Start();
         backHttpThread->Start();
     } else {
+        httpProbeThread->SetXReqId(xReqId_, xReqIdLen_);
         httpProbeThread->Start();
         httpsProbeThread->Start();
+        backHttpThread->SetXReqId(xReqId_, xReqIdLen_);
         backHttpThread->Start();
         backHttpsThread->Start();
     }
@@ -435,9 +439,25 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
         pos += FALLBACK_HTTPS_URL_HEADER.length();
         fallbackHttpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
+    GetXReqIDFromConfig(content);
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
         " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
         fallbackHttpsUrl_.c_str());
+}
+
+void NetMonitor::GetXReqIDFromConfig(std::string &content)
+{
+    auto pos = content.find(XREQ_HEADER);
+    if (pos != std::string::npos) {
+        pos += XREQ_HEADER.length();
+        xReqId_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    pos = content.find(XREQ_LEN_HEADER);
+    xReqIdLen_ = -1;
+    if (pos != std::string::npos) {
+        pos += XREQ_LEN_HEADER.length();
+        xReqIdLen_ = std::atoi(content.substr(pos, content.find(NEW_LINE_STR, pos) - pos).c_str());
+    }
 }
 
 void NetMonitor::GetDetectUrlConfig()
