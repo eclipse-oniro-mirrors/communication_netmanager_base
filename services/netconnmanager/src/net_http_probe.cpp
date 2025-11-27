@@ -94,40 +94,7 @@ bool NetHttpProbe::CurlGlobalInit()
     }
     useCurlCount_++;
     NETMGR_LOG_D("curl_global_init() count:[%{public}d]", useCurlCount_);
-    GetXReqFromConfig();
     return true;
-}
-
-void NetHttpProbe::GetXReqFromConfig()
-{
-    if (!std::filesystem::exists(URL_CFG_FILE)) {
-        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
-        return;
-    }
- 
-    std::ifstream file(URL_CFG_FILE);
-    if (!file.is_open()) {
-        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
-        return;
-    }
- 
-    std::ostringstream oss;
-    oss << file.rdbuf();
-    std::string content = oss.str();
-    auto pos = content.find(XREQ_HEADER);
-    if (pos != std::string::npos) {
-        pos += XREQ_HEADER.length();
-        XReqId_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
-    }
-    pos = content.find(XREQ_LEN_HEADER);
-    XReqIdLen_ = -1;
-    if (pos != std::string::npos) {
-        pos += XREQ_LEN_HEADER.length();
-        std::istringstream iss(content.substr(pos, content.find(NEW_LINE_STR, pos) - pos));
-        if (!(iss >> XReqIdLen_)) {
-            NETMGR_LOG_E("XReqIdLen_ get failed");
-        };
-    }
 }
 
 void NetHttpProbe::SetXReqId(const std::string& xReqId, int32_t xReqIdLen)
