@@ -55,6 +55,7 @@ public:
 private:
     static bool CurlGlobalInit();
     static void CurlGlobalCleanup();
+    static void GetXReqFromConfig();
 
     bool CheckCurlGlobalInitState();
     void CleanHttpCurl();
