@@ -18,7 +18,6 @@
 #include <cerrno>
 #include <memory>
 #include <numeric>
-#include <fstream>
 #include <unistd.h>
 
 #include "fwmark_client.h"
