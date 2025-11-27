@@ -55,7 +55,6 @@ constexpr int CURL_OPERATE_TIME_OUT_MS = 10000;
 constexpr int32_t DOMAIN_IP_ADDR_LEN_MAX = 128;
 constexpr int32_t DEFAULT_HTTP_PORT = 80;
 constexpr int32_t DEFAULT_HTTPS_PORT = 443;
-constexpr int32_t X_HWCLOUD_REQID_LEN = 32;
 constexpr const char *ADDR_SEPARATOR = ",";
 constexpr const char *SYMBOL_COLON = ":";
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
@@ -72,7 +71,6 @@ const std::string CONTENT_LENGTH_KEY = "Content-Length:";
 const std::string KEY_WORDS_REDIRECTION = "location.replace";
 const std::string HTML_TITLE_HTTP_EN = "http://";
 const std::string HTML_TITLE_HTTPS_EN = "https://";
-const std::string X_HWCLOUD_REQID = "X-Hwcloud-ReqId:";
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *TLS12_SECURITY_CIPHER_SUITE =
         "DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-DSS-AES128-GCM-SHA256:DHE-DSS-AES256-GCM-SHA384:"
@@ -754,8 +752,8 @@ int32_t NetHttpProbe::CheckSuccessRespCode(int32_t respCode)
     if (result != HTTP_SUCCESS_CODE) {
         return result;
     }
-    std::string requestId = GetHeaderField(X_HWCLOUD_REQID);
-    if (requestId.length() != X_HWCLOUD_REQID_LEN) {
+    std::string requestId = GetHeaderField(XReqId_);
+    if (XReqIdLen_ != static_cast<int32_t>(requestId.length())) {
         NETMGR_LOG_I("http return 204, but request id error and unreachable!");
         result = FAIL_CODE;
     }
