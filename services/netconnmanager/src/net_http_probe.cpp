@@ -18,6 +18,7 @@
 #include <cerrno>
 #include <memory>
 #include <numeric>
+#include <fstream>
 #include <unistd.h>
 
 #include "fwmark_client.h"
@@ -57,6 +58,9 @@ constexpr int32_t DEFAULT_HTTPS_PORT = 443;
 constexpr int32_t X_HWCLOUD_REQID_LEN = 32;
 constexpr const char *ADDR_SEPARATOR = ",";
 constexpr const char *SYMBOL_COLON = ":";
+constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+const std::string XREQ_HEADER = "XReqId:";
+const std::string XREQ_LEN_HEADER = "XReqIdLen:";
 const std::string DEFAULT_USER_AGENT = std::string("User-Agent: Mozilla/5.0 (X11; Linux x86_64) ") +
     std::string("AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36");
 constexpr const char *CONNECTION_PROPERTY = "Connection: close";
@@ -79,6 +83,8 @@ constexpr const char *TLS12_SECURITY_CIPHER_SUITE =
         "ECDHE-ECDSA-AES128-CCM:ECDHE-ECDSA-AES256-CCM:ECDHE-ECDSA-CHACHA20-POLY1305";
 constexpr const char *TLS13_SECURITY_CIPHER_SUITE = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:"
         "TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_SHA256";
+static std::string XReqId_;
+static int32_t XReqIdLen_;
 } // namespace
 
 std::mutex NetHttpProbe::initCurlMutex_;
@@ -96,7 +102,40 @@ bool NetHttpProbe::CurlGlobalInit()
     }
     useCurlCount_++;
     NETMGR_LOG_D("curl_global_init() count:[%{public}d]", useCurlCount_);
+    GetXReqFromConfig();
     return true;
+}
+
+void NetHttpProbe::GetXReqFromConfig()
+{
+    if (!std::filesystem::exists(URL_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
+        return;
+    }
+ 
+    std::ifstream file(URL_CFG_FILE);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        return;
+    }
+ 
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    auto pos = content.find(XREQ_HEADER);
+    if (pos != std::string::npos) {
+        pos += XREQ_HEADER.length();
+        XReqId_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    pos = content.find(XREQ_LEN_HEADER);
+    XReqIdLen_ = -1;
+    if (pos != std::string::npos) {
+        pos += XREQ_LEN_HEADER.length();
+        std::istringstream iss(content.substr(pos, content.find(NEW_LINE_STR, pos) - pos));
+        if (!(iss >> XReqIdLen_)) {
+            NETMGR_LOG_E("XReqIdLen_ get failed");
+        };
+    }
 }
 
 void NetHttpProbe::CurlGlobalCleanup()
