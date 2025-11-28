@@ -30,7 +30,7 @@ std::shared_ptr<FirewallRule> FirewallRule::CreateFirewallRule(uint32_t chain)
         case FIREWALL_CHAIN_POWER_SAVE:
             return DelayedSingleton<PowerSaveFirewallRule>::GetInstance();
         case FIREWALL_CHAIN_IDLE_DENY:
-            return DelayedSingleton<IdleDenyFirewallRule>::GetInstance();
+            return std::make_shared<IdleDenyFirewallRule>();
         default:
             break;
     }

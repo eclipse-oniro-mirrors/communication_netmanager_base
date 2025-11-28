@@ -23,7 +23,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 class IdleDenyFirewallRule : public FirewallRule {
-    DECLARE_DELAYED_SINGLETON(IdleDenyFirewallRule);
+public:
+    IdleDenyFirewallRule();
+    ~IdleDenyFirewallRule();
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
