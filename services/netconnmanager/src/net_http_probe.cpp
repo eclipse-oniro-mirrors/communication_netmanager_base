@@ -97,7 +97,7 @@ bool NetHttpProbe::CurlGlobalInit()
     return true;
 }
 
-void NetHttpProbe::SetXReqId(const std::string& xReqId, int32_t xReqIdLen)
+void NetHttpProbe::SetXReqId(const std::string& xReqId, int8_t xReqIdLen)
 {
     xReqId_ = xReqId;
     xReqIdLen_ = xReqIdLen;

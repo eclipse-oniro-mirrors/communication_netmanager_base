@@ -1140,12 +1140,17 @@ HWTEST_F(NetworkTest, CheckSuccessRespCodeTest001, TestSize.Level1)
     int32_t respCode = HTTP_RES_CODE_BAD_REQUEST;
     auto ret = probe->CheckSuccessRespCode(respCode);
     EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
-
+ 
+    probe->respHeader_ = "";
+    respCode = SUCCESS_CODE;
+    ret = probe->CheckSuccessRespCode(respCode);
+    EXPECT_EQ(ret, PORTAL_CODE);
+ 
     probe->respHeader_ = "X-Hwcloud-ReqId:12345678910";
     respCode = SUCCESS_CODE;
     ret = probe->CheckSuccessRespCode(respCode);
     EXPECT_EQ(ret, PORTAL_CODE);
-
+ 
     probe->respHeader_ = "X-Hwcloud-ReqId:40483ead9aeb8af136beb74071f1365f";
     ret = probe->CheckSuccessRespCode(respCode);
     EXPECT_EQ(ret, SUCCESS_CODE);

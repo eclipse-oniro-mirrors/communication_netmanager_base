@@ -61,7 +61,7 @@ public:
     /**
      * Set global Req Id
      */
-    void SetXReqId(const std::string& xReqId, int32_t xReqIdLen);
+    void SetXReqId(const std::string& xReqId, int8_t xReqIdLen);
 
     /*
      * send http probe
