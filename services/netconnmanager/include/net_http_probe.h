@@ -102,7 +102,6 @@ private:
     ProbeType probeType_;
     char errBuffer[CURL_ERROR_SIZE] = {0};
     std::string ipAddrList_ = "";
-    std::mutex xReqIdMtx_;
     std::string xReqId_;
     int32_t xReqIdLen_;
 };
