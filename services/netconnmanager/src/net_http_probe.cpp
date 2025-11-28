@@ -99,7 +99,6 @@ bool NetHttpProbe::CurlGlobalInit()
 
 void NetHttpProbe::SetXReqId(const std::string& xReqId, int32_t xReqIdLen)
 {
-    std::lock_guard<std::mutex> locker(xReqIdMtx_);
     xReqId_ = xReqId;
     xReqIdLen_ = xReqIdLen;
 }
