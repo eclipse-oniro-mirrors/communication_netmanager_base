@@ -1131,6 +1131,31 @@ HWTEST_F(NetworkTest, CheckClientErrorRespCodeTest001, TestSize.Level1)
     EXPECT_EQ(ret, PORTAL_CODE);
 }
 
+HWTEST_F(NetworkTest, CheckSuccessRespCodeTest001, TestSize.Level1)
+{
+    uint32_t netId = 1;
+    NetLinkInfo netLinkInfo;
+    ProbeType probeType = PROBE_HTTP;
+    auto probe = std::make_shared<NetHttpProbe>(netId, BEARER_WIFI, netLinkInfo, probeType);
+    int32_t respCode = HTTP_RES_CODE_BAD_REQUEST;
+    auto ret = probe->CheckSuccessRespCode(respCode);
+    EXPECT_EQ(ret, HTTP_RES_CODE_BAD_REQUEST);
+ 
+    probe->respHeader_ = "";
+    respCode = SUCCESS_CODE;
+    ret = probe->CheckSuccessRespCode(respCode);
+    EXPECT_EQ(ret, PORTAL_CODE);
+ 
+    probe->respHeader_ = "X-Hwcloud-ReqId:12345678910";
+    respCode = SUCCESS_CODE;
+    ret = probe->CheckSuccessRespCode(respCode);
+    EXPECT_EQ(ret, PORTAL_CODE);
+ 
+    probe->respHeader_ = "X-Hwcloud-ReqId:40483ead9aeb8af136beb74071f1365f";
+    ret = probe->CheckSuccessRespCode(respCode);
+    EXPECT_EQ(ret, SUCCESS_CODE);
+}
+
 HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest001, TestSize.Level1)
 {
     char *host = nullptr;

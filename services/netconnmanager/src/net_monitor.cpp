@@ -63,12 +63,14 @@ constexpr const char* DETECT_CFG_FILE = "/system/etc/detectionconfig.conf";
 constexpr const char *SETTINGS_DATASHARE_URI =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-const std::string HTTP_URL_HEADER = "HttpProbeUrl:";
-const std::string HTTPS_URL_HEADER = "HttpsProbeUrl:";
-const std::string FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
-const std::string FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
-const std::string ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
-const std::string ADD_RANDOM_CFG_VALUE = "true";
+const char *HTTP_URL_HEADER = "HttpProbeUrl:";
+const char *HTTPS_URL_HEADER = "HttpsProbeUrl:";
+const char *FALLBACK_HTTP_URL_HEADER = "FallbackHttpProbeUrl:";
+const char *FALLBACK_HTTPS_URL_HEADER = "FallbackHttpsProbeUrl:";
+const char *ADD_RANDOM_CFG_PREFIX = "AddSuffix:";
+const char *ADD_RANDOM_CFG_VALUE = "true";
+const char *XREQ_HEADER = "XReqId:";
+const char *XREQ_LEN_HEADER = "XReqIdLen:";
 } // namespace
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
@@ -321,8 +323,10 @@ void NetMonitor::StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread,
         backHttpsThread->Start();
         backHttpThread->Start();
     } else {
+        httpProbeThread->SetXReqId(xReqId_, xReqIdLen_);
         httpProbeThread->Start();
         httpsProbeThread->Start();
+        backHttpThread->SetXReqId(xReqId_, xReqIdLen_);
         backHttpThread->Start();
         backHttpsThread->Start();
     }
@@ -392,6 +396,21 @@ void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     globalHttpProxy_ = httpProxy;
 }
 
+void NetMonitor::GetXReqIDFromConfig(std::string &content)
+{
+    auto pos = content.find(XREQ_HEADER);
+    if (pos != std::string::npos) {
+        pos += strlen(XREQ_HEADER);
+        xReqId_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
+    }
+    pos = content.find(XREQ_LEN_HEADER);
+    xReqIdLen_ = -1;
+    if (pos != std::string::npos) {
+        pos += strlen(XREQ_LEN_HEADER);
+        xReqIdLen_ = std::atoi(content.substr(pos, content.find(NEW_LINE_STR, pos) - pos).c_str());
+    }
+}
+
 void NetMonitor::GetHttpProbeUrlFromConfig()
 {
     if (!std::filesystem::exists(URL_CFG_FILE)) {
@@ -410,7 +429,7 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
     std::string content = oss.str();
     auto pos = content.find(HTTP_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += HTTP_URL_HEADER.length();
+        pos += strlen(HTTP_URL_HEADER);
         httpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
         if (isNeedSuffix_) {
             uint64_t ranNum = CommonUtils::GenRandomNumber();
@@ -420,21 +439,22 @@ void NetMonitor::GetHttpProbeUrlFromConfig()
 
     pos = content.find(HTTPS_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += HTTPS_URL_HEADER.length();
+        pos += strlen(HTTPS_URL_HEADER);
         httpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
 
     pos = content.find(FALLBACK_HTTP_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += FALLBACK_HTTP_URL_HEADER.length();
+        pos += strlen(FALLBACK_HTTP_URL_HEADER);
         fallbackHttpUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
 
     pos = content.find(FALLBACK_HTTPS_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += FALLBACK_HTTPS_URL_HEADER.length();
+        pos += strlen(FALLBACK_HTTPS_URL_HEADER);
         fallbackHttpsUrl_ = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     }
+    GetXReqIDFromConfig(content);
     NETMGR_LOG_D("Get net detection http url:[%{public}s], https url:[%{public}s], fallback http url:[%{public}s],"
         " fallback https url:[%{public}s]", httpUrl_.c_str(), httpsUrl_.c_str(), fallbackHttpUrl_.c_str(),
         fallbackHttpsUrl_.c_str());
@@ -457,7 +477,7 @@ void NetMonitor::GetDetectUrlConfig()
     std::string content = oss.str();
     auto pos = content.find(ADD_RANDOM_CFG_PREFIX);
     if (pos != std::string::npos) {
-        pos += ADD_RANDOM_CFG_PREFIX.length();
+        pos += strlen(ADD_RANDOM_CFG_PREFIX);
         std::string value = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
         value = CommonUtils::Trim(value);
         isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;

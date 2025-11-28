@@ -51,6 +51,7 @@ public:
     bool IsHttpsDetect(ProbeType probeType);
     void ProbeWithoutGlobalHttpProxy();
     bool NetDetection(const std::string& portalUrl, PortalResponse& resp);
+    void SetXReqId(const std::string& xReqId, int8_t xReqIdLen);
 
 private:
     static bool CurlGlobalInit();
@@ -76,6 +77,7 @@ private:
     static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
     int32_t CheckRespCode(int32_t respCode);
     std::string GetHeaderField(const std::string key);
+    int32_t CheckSuccessRespCode(int32_t respCode);
     int32_t CheckClientErrorRespCode(int32_t respCode);
 
 private:
@@ -100,6 +102,8 @@ private:
     ProbeType probeType_;
     char errBuffer[CURL_ERROR_SIZE] = {0};
     std::string ipAddrList_ = "";
+    std::string xReqId_;
+    int8_t xReqIdLen_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

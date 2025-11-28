@@ -58,6 +58,11 @@ public:
      */
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
+    /**
+     * Set global Req Id
+     */
+    void SetXReqId(const std::string& xReqId, int8_t xReqIdLen);
+
     /*
      * send http probe
     */

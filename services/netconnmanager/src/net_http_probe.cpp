@@ -42,6 +42,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr int PERFORM_POLL_INTERVAL_MS = 50;
 constexpr int32_t HTTP_OK_CODE = 200;
+constexpr int32_t HTTP_SUCCESS_CODE = 204;
 constexpr int32_t DEFAULT_CONTENT_LENGTH_VALUE = -1;
 constexpr int32_t MIN_VALID_CONTENT_LENGTH_VALUE = 5;
 constexpr int32_t FAIL_CODE = 599;
@@ -94,6 +95,12 @@ bool NetHttpProbe::CurlGlobalInit()
     useCurlCount_++;
     NETMGR_LOG_D("curl_global_init() count:[%{public}d]", useCurlCount_);
     return true;
+}
+
+void NetHttpProbe::SetXReqId(const std::string& xReqId, int8_t xReqIdLen)
+{
+    xReqId_ = xReqId;
+    xReqIdLen_ = xReqIdLen;
 }
 
 void NetHttpProbe::CurlGlobalCleanup()
@@ -700,7 +707,22 @@ int32_t NetHttpProbe::CheckRespCode(int32_t respCode)
     }
     int32_t result = respCode;
     if (IsHttpDetect(probeType_)) {
+        result = CheckSuccessRespCode(result);
         result = CheckClientErrorRespCode(result);
+    }
+    return result;
+}
+
+int32_t NetHttpProbe::CheckSuccessRespCode(int32_t respCode)
+{
+    int32_t result = respCode;
+    if (result != HTTP_SUCCESS_CODE) {
+        return result;
+    }
+    std::string requestId = GetHeaderField(xReqId_);
+    if (requestId.empty() || xReqIdLen_ != static_cast<int32_t>(requestId.length())) {
+        NETMGR_LOG_I("http return 204, but request id error and unreachable!");
+        result = FAIL_CODE;
     }
     return result;
 }
