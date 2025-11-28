@@ -29,6 +29,7 @@ void NetPolicyFirewall::Init()
 {
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
     powerSaveFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_POWER_SAVE);
+    idleDenyFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_IDLE_DENY);
     if (deviceIdleFirewallRule_ == nullptr || powerSaveFirewallRule_ == nullptr) {
         return;
     }
@@ -178,6 +179,37 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetPolicyFirewall::UpdateIdleDenyPolicy(bool enable)
+{
+    if (idleDenyMode_ == enable) {
+        NETMGR_LOG_E("Same power save policy.");
+        return NETMANAGER_ERR_STATUS_EXIST;
+    }
+    if (idleDenyFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("idleDenyFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("Update idle deny firewall status start");
+    idleDenyFirewallRule_->EnableFirewall(enable);
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update idle deny firewall status end");
+    idleDenyMode_ = enable;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyFirewall::SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+{
+    if (uids.size() > MAX_LIST_SIZE) {
+        NETMGR_LOG_E("idle deny list's size is over the max size.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (idleDenyFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("idleDenyFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    idleDenyFirewallRule_->SetDeniedList(uids, isAdd ? FIREWALL_RULE_DENY : FIREWALL_RULE_ALLOW);
+    return NETMANAGER_SUCCESS;
+}
+
 void NetPolicyFirewall::ResetPolicies()
 {
     if (deviceIdleFirewallRule_ == nullptr) {
@@ -194,6 +226,12 @@ void NetPolicyFirewall::ResetPolicies()
     powerSaveFirewallRule_->ClearAllowedList();
     powerSaveFirewallRule_->ClearDeniedList();
 
+    if (idleDenyFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("idleDenyFirewallRule_ is nullptr");
+        return ;
+    }
+    idleDenyFirewallRule_->ClearDeniedList();
+
     std::unique_lock<std::shared_mutex> lock(listMutex_);
     deviceIdleAllowedList_.clear();
     deviceIdleDeniedList_.clear();
@@ -205,6 +243,7 @@ void NetPolicyFirewall::ResetPolicies()
 
     UpdateDeviceIdlePolicy(false);
     UpdatePowerSavePolicy(false);
+    UpdateIdleDenyPolicy(false);
 }
 
 void NetPolicyFirewall::DeleteUid(uint32_t uid)

@@ -351,6 +351,28 @@ public:
      */
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName = "");
+
+    /**
+     *  Set the Idle Deny Policy object
+     *
+     * @param enable idle deny mode is open or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    [[nodiscard]] int32_t SetIdleDenyPolicy(bool enable);
+
+    /**
+     * Get the allow list of UID in idle deny mode.
+     *
+     * @param uid The list of UIDs
+     * @param isAdd The UID is into add list or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd);
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

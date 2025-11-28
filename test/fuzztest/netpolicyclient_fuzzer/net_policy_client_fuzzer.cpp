@@ -702,6 +702,36 @@ void ResetNetAccessPolicyFuzzTest(const uint8_t *data, size_t size)
     DelayedSingleton<NetPolicyService>::GetInstance()->ResetNetAccessPolicy();
 }
 
+void SetIdleDenyPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    bool isEnable = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    dataParcel.WriteBool(isEnable);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENY_POLICY), dataParcel);
+}
+
+void SetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    int32_t vectorSize = NetPolicyGetData<int32_t>() % 21;
+    dataParcel.WriteInt32(vectorSize);
+    for (int32_t i = 0; i < vectorSize; i++) {
+        uint32_t uid = NetPolicyGetData<uint32_t>();
+        dataParcel.WriteUint32(uid);
+    }
+    bool isAdd = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    dataParcel.WriteBool(isAdd);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_DENYLIST), dataParcel);
+}
+
 void FactoryResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
@@ -753,5 +783,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::ResetNetAccessPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::FactoryResetPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetInternetAccessByIpForWifiShareFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetIdleDenyPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetUidsDeniedListChainFuzzTest(data, size);
     return 0;
 }

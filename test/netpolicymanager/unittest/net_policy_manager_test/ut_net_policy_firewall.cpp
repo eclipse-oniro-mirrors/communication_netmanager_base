@@ -229,6 +229,38 @@ HWTEST_F(UtNetPolicyFirewall, HandleEvent001, TestSize.Level1)
     ASSERT_FALSE(std::find(allowedList.begin(), allowedList.end(), uid) == allowedList.end());
 }
 
+/**
+ * @tc.name: UpdateIdleDenyPolicy001
+ * @tc.desc: Test NetPolicyFirewall UpdateIdleDenyPolicy Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyFirewall, UpdateIdleDenyPolicy001, TestSize.Level1)
+{
+    netPolicyFirewall_->UpdateIdleDenyPolicy(false);
+    netPolicyFirewall_->UpdateIdleDenyPolicy(true);
+    int32_t ret = netPolicyFirewall_->UpdateIdleDenyPolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+}
+
+/**
+ * @tc.name: UpdateIdleDenyPolicy001
+ * @tc.desc: Test NetPolicyFirewall SetUidsDeniedListChain Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyFirewall, SetUidsDeniedListChain001, TestSize.Level1)
+{
+    std::vector<uint32_t> uids(1001, 1);
+    int32_t ret = netPolicyFirewall_->SetUidsDeniedListChain(uids, true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    std::vector<uint32_t> uid2 {1};
+    ret = netPolicyFirewall_->SetUidsDeniedListChain(uid2, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = netPolicyFirewall_->SetUidsDeniedListChain(uid2, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(UtNetPolicyFirewall, SetPowerSaveTrustlist001, TestSize.Level1)
 {
     std::vector<uint32_t> uids(1001);

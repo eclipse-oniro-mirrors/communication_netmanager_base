@@ -409,6 +409,26 @@ int32_t NetPolicyService::SetPowerSavePolicy(bool enable)
     return netPolicyFirewall_->UpdatePowerSavePolicy(enable);
 }
 
+int32_t NetPolicyService::SetUidsDeniedListChain(const std::vector<uint32_t> &uids, bool isAdd)
+{
+    NETMGR_LOG_I("SetUidsDeniedListChain start");
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netPolicyFirewall_->SetUidsDeniedListChain(uids, isAdd);
+}
+
+int32_t NetPolicyService::SetIdleDenyPolicy(bool enable)
+{
+    NETMGR_LOG_I("SetIdleDenyPolicy enable[%{public}d]", enable);
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netPolicyFirewall_->UpdateIdleDenyPolicy(enable);
+}
+
 int32_t NetPolicyService::GetDumpMessage(std::string &message)
 {
     if (netPolicyRule_ == nullptr || netPolicyTraffic_ == nullptr) {

@@ -57,6 +57,8 @@ HWTEST_F(UtFirewallRule, CreateFirewallRule, TestSize.Level1)
     EXPECT_NE(rulePtr, nullptr);
     rulePtr = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_NONE);
     EXPECT_EQ(rulePtr, nullptr);
+    rulePtr = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_IDLE_DENY);
+    EXPECT_NE(rulePtr, nullptr);
 }
 
 /**
@@ -134,7 +136,7 @@ HWTEST_F(UtFirewallRule, SetDeniedList, TestSize.Level1)
         uids.emplace_back(i);
     }
     rule.ClearDeniedList();
-    rule.SetDeniedList(uids);
+    rule.SetDeniedList(uids, FIREWALL_RULE_DENY);
     EXPECT_EQ(rule.GetDeniedList().size(), uidCount);
     rule.SetDeniedList(uid, FIREWALL_RULE_ALLOW);
     uint32_t expectCount = uidCount - 1;
