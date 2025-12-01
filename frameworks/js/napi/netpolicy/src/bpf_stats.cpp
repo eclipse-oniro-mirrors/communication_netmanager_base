@@ -196,9 +196,11 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         if (pName != nullptr) {
             tempStats.iface_ = pName;
         }
+#ifndef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
         if (IFACE_NAME_SET.find(tempStats.iface_) == IFACE_NAME_SET.end()) {
             continue;
         }
+#endif
         tempStats.rxBytes_ = v.rxBytes;
         tempStats.txBytes_ = v.txBytes;
         tempStats.rxPackets_ = v.rxPackets;
