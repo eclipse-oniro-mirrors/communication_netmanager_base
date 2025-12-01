@@ -104,14 +104,11 @@ long TrafficManager::GetAllRxTraffic()
 
     long allRxBytes = 0;
     for (auto iter = ifNameList.begin(); iter != ifNameList.end(); iter++) {
-#ifndef FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE
-        if (*iter == "lo") {
-            continue;
+        if (*iter != "lo") {
+            std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
+            long rxBytes = GetInterfaceTrafficByType(baseTrafficPath, RX_BYTES);
+            allRxBytes += rxBytes;
         }
-#endif
-        std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
-        long rxBytes = GetInterfaceTrafficByType(baseTrafficPath, RX_BYTES);
-        allRxBytes += rxBytes;
     }
     return allRxBytes;
 }
