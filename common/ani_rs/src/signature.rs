@@ -28,7 +28,7 @@ pub const STRING: &CStr = cstr(b"std.core.String\0");
 pub const CHAR: &CStr = cstr(b"std.core.Char\0");
 
 pub const MAP: &CStr = cstr(b"std.core.ReadonlyMap\0");
-pub const ARRAY: &CStr = cstr(b"escompat.Array\0");
+pub const ARRAY: &CStr = cstr(b"std.core.Array\0");
 pub const ARRAY_BUFFER: &CStr = cstr(b"std.core.ArrayBuffer\0");
 pub const RECORD: &CStr = cstr(b"std.core.Record\0");
 pub const ITERATOR: &CStr = cstr(b"std.core.Iterator\0");

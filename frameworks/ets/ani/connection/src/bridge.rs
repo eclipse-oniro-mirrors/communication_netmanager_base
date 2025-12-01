@@ -210,7 +210,7 @@ const CONNECTIONPROPERTIES_CLASS_NAME: &CStr = unsafe {
 };
 
 const CONNECTIONPROPERTIES_CTOR_SIG: &CStr = unsafe {
-    CStr::from_bytes_with_nul_unchecked(b"C{std.core.String}C{std.core.String}C{escompat.Array}C{escompat.Array}C{escompat.Array}i:\0")
+    CStr::from_bytes_with_nul_unchecked(b"C{std.core.String}C{std.core.String}C{std.core.Array}C{std.core.Array}C{std.core.Array}i:\0")
 };
 
 const NETCAPABILITIES_CLASS_NAME: &CStr = unsafe {
@@ -218,7 +218,7 @@ const NETCAPABILITIES_CLASS_NAME: &CStr = unsafe {
 };
 
 const NETCAPABILITIES_CTOR_SIG: &CStr =
-    unsafe { CStr::from_bytes_with_nul_unchecked(b"iiC{escompat.Array}C{escompat.Array}:\0") };
+    unsafe { CStr::from_bytes_with_nul_unchecked(b"iiC{std.core.Array}C{std.core.Array}:\0") };
 
 const NETCAP_ENUM_NAME: &CStr =
     unsafe { CStr::from_bytes_with_nul_unchecked(b"@ohos.net.connection.connection.NetCap\0") };
