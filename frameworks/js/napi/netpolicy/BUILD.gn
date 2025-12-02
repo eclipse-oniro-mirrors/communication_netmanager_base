@@ -21,6 +21,8 @@ config("policy_config") {
     "include",
   ]
 
+  defines = []
+
   cflags = [
     "-Wall",
     "-Werror",
@@ -90,6 +92,11 @@ ohos_shared_library("policy") {
     "ability_runtime:ui_extension",
     "ace_engine:ace_uicontent",
   ]
+
+  if (netmanager_base_enable_feature_wearable_distributed_net) {
+    defines += [ "FEATURE_WEARABLE_DISTRIBUTED_NET_ENABLE" ]
+  }
+
   relative_install_dir = "module/net"
   part_name = "netmanager_base"
 
