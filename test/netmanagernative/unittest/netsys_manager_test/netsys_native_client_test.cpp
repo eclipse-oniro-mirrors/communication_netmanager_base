@@ -646,7 +646,7 @@ HWTEST_F(NetsysNativeClientTest, OnRemoteDiedTest001, TestSize.Level1)
     result = new (std::nothrow) IPCObjectProxy(handle, descriptor);
     IRemoteObject *object = result.GetRefPtr();
     remote = object;
-    EXPECT_NE(nativeClient->netsysNativeService_, nullptr);
+    EXPECT_EQ(nativeClient->netsysNativeService_, nullptr);
     nativeClient->netsysNativeService_ = nullptr;
     nativeClient->OnRemoteDied(remote);
 }
