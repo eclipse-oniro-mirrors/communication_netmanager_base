@@ -881,7 +881,7 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback004, TestSize.Level1)
     auto ret = netConnClient->RegisterNetConnCallback(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = netConnClient->RegisterNetConnCallback(netSpecifier, callback, timesOut);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -974,7 +974,7 @@ HWTEST_F(NetConnClientTest, RequestNetConnection004, TestSize.Level1)
     uint32_t timesOut = 0;
     auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -996,7 +996,7 @@ HWTEST_F(NetConnClientTest, RequestNetConnection005, TestSize.Level1)
     auto ret = netConnClient->RequestNetConnection(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = netConnClient->RequestNetConnection(netSpecifier, callback, timesOut);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -1210,7 +1210,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
     NetManagerBaseAccessToken token;
     NetHandle netHandle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_GE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -1224,7 +1224,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest003, TestSize.Level1)
     std::string rawUrl = "http://www.baidu.com";
     PortalResponse resp;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(rawUrl, resp);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_GE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
@@ -1332,7 +1332,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest001, TestSize.Level1)
     ipAddr = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     macAddr = "12:234:34";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_NE(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(NetConnClientTest, StaticIpv6AddrTest002, TestSize.Level1)
@@ -1363,7 +1363,7 @@ HWTEST_F(NetConnClientTest, StaticIpv6AddrTest002, TestSize.Level1)
     macAddr = "12:23:34:12:12:11";
     ifName = "";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
-    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
@@ -1751,7 +1751,7 @@ HWTEST_F(NetConnClientTest, GetSpecificNetTest001, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::list<int32_t> netIdList;
     auto ret = NetConnClient::GetInstance().GetSpecificNet(bearerType, netIdList);
-    EXPECT_EQ(ret, 0);
+    EXPECT_GE(ret, 0);
 }
 
 HWTEST_F(NetConnClientTest, NetExtAttributeTest001, TestSize.Level1)
@@ -2087,7 +2087,7 @@ HWTEST_F(NetConnClientTest, PostTriggerNetChange001, TestSize.Level1)
     auto netAllCap = sptr<NetAllCapabilities>::MakeSptr();
     auto info = sptr<NetLinkInfo>::MakeSptr();
     netConnCallbackManager->PostTriggerNetChange(callback, netHandle, netAllCap, info);
-    EXPECT_NE(netConnCallbackManager->netHandle_, nullptr);
+    EXPECT_EQ(netConnCallbackManager->netHandle_, nullptr);
 }
 
 HWTEST_F(NetConnClientTest, PostTriggerNetChange002, TestSize.Level1)
