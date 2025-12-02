@@ -378,7 +378,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest014, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
 
     ret = netsysController->SetBlocking(g_ifaceFd, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysController->StartDhcpClient(INTERFACE_NAME, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
