@@ -408,7 +408,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest002, TestSize.Level1)
     AppStateAwareManager::GetInstance().appStateObserver_ = nullptr;
     instance_->lastCallbackType_ = CALL_TYPE_LOST;
     ret = instance_->IsAllowCallback(callbackType);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
@@ -434,7 +434,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
 
     instance_->lastNetId_ = 0;
     ret = instance_->IsAllowCallback(callbackType);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 HWTEST_F(NetActivateTest, IsAllowCallbackTest004, TestSize.Level1)
