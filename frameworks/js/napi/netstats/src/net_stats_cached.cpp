@@ -1172,7 +1172,6 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
         }
     }
 
-    // be in next month
     std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
     if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
         NETMGR_LOG_E("GetMonthTrafficData find error");
@@ -1180,6 +1179,7 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
     }
 
     uint64_t curSecond = CommonUtils::GetCurrentSecond();
+    // be in next month
     if (curSecond > cellularHistoryData_[simId].endTime) {
         cellularHistoryData_[simId].trafficData = 0;
         cellularHistoryData_[simId].startTime =
