@@ -84,11 +84,9 @@ public:
     void SaveSharingTraffic(const NetStatsInfo &infos);
 
     uint64_t GetMonthTrafficData(int32_t simId);
-    void UpdateAllHistoryData(int32_t simId, uint64_t startTime, uint64_t endTime, uint64_t data);
     void UpdateHistoryData(int32_t simId, int32_t beginDate);
     void ForceUpdateHistoryData(int32_t simId, int32_t beginDate);
     void DeleteHistoryData(int32_t simId);
-    bool FindInHistoryData(int32_t simId);
 
     inline void SetTrafficThreshold(uint64_t threshold)
     {
