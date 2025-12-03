@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "app_mgr_client.h"
 #include "app_state_callback_host.h"
@@ -54,6 +55,7 @@ public:
     {
         std::shared_ptr<NetPolicyBase> core = std::make_shared<NetPolicyBase>();
         core->Init();
+        std::unique_lock<std::shared_mutex> lock(coreMutex_);
         cores_.push_back(core);
         return core;
     }
@@ -121,6 +123,7 @@ private:
     std::shared_ptr<NetPolicyEventHandler> handler_;
     sptr<AppExecFwk::IAppStateCallback> netAppStatusCallback_ = nullptr;
     std::shared_ptr<ReceiveMessage> subscriber_ = nullptr;
+    std::shared_mutex coreMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
