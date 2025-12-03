@@ -1084,16 +1084,16 @@ void NetStatsCached::ForceUpdateHistoryData(int32_t simId, int32_t beginDate)
         return;
     }
     std::function<void()> ForceUpdateHistoryData = [this, simId, beginDate]() {
-        std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
-        if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
-            cellularHistoryData_.erase(simId);
-        }
-
         uint64_t startTime = static_cast<uint64_t>(NetStatsUtils::GetStartTimestamp(beginDate));
         uint64_t endTime = static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(beginDate));
         uint64_t curSecond = CommonUtils::GetCurrentSecond();
         uint64_t historyData = 0;
         GetTotalHistoryStatsByIdent(simId, startTime, curSecond, historyData); // 获取本月已存入DB的流量数据
+
+        std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+        if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
+            cellularHistoryData_.erase(simId);
+        }
         HistoryData historyDataStru;
         historyDataStru.beginDate = beginDate;
         historyDataStru.startTime = startTime;
@@ -1160,8 +1160,19 @@ int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
 
 uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
 {
-    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
+    std::vector<NetStatsInfo> statsInfo;
+    GetKernelStats(statsInfo);   //  bpf data
+#ifdef SUPPORT_NETWORK_SHARE
+    GetIptablesStatsIncrease(statsInfo);
+#endif
+    uint64_t dataTemp = 0;
+    for (const auto &info : statsInfo) {
+        if (info.ident_ == std::to_string(simId)) {
+            dataTemp += info.GetStats();
+        }
+    }
 
+    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
     if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
         NETMGR_LOG_E("GetMonthTrafficData find error");
         return UINT64_MAX;
@@ -1177,18 +1188,6 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
             static_cast<uint64_t>(NetStatsUtils::GetEndTimestamp(cellularHistoryData_[simId].beginDate));
         NETMGR_LOG_I("new time. %{public}" PRIu64 ", %{public}" PRIu64,
             cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime);
-    }
-
-    std::vector<NetStatsInfo> statsInfo;
-    GetKernelStats(statsInfo);   //  bpf data
-#ifdef SUPPORT_NETWORK_SHARE
-    GetIptablesStatsIncrease(statsInfo);
-#endif
-    uint64_t dataTemp = 0;
-    for (const auto &info : statsInfo) {
-        if (info.ident_ == std::to_string(simId)) {
-            dataTemp += info.GetStats();
-        }
     }
     NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}" PRIu64 ", kernelData:%{public}" PRIu64,
         cellularHistoryData_[simId].trafficData, dataTemp);
