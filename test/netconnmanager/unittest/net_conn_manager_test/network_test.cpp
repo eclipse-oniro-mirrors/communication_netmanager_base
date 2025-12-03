@@ -340,6 +340,45 @@ HWTEST_F(NetworkTest, UpdateRoutesTest010, TestSize.Level1)
     EXPECT_FALSE(network->netLinkInfo_.routeList_.empty());
 }
 
+HWTEST_F(NetworkTest, UpdateRoutesTest011, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    ASSERT_NE(network, nullptr);
+    EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
+    Route route1;
+    route1.destination_.address_ = LOCAL_ROUTE_IPV6_DESTINATION;
+    route1.destination_.type_ = INetAddr::IPV6;
+    Route route2;
+    std::string mockAddress = "";
+    int32_t mockLength = 5000;
+    for (uint32_t i = 0; i < mockLength; i++) {
+        mockAddress += "1";
+    }
+    route2.iface_ = "rmnet0";
+    route2.destination_.address_ = mockAddress;
+    route2.destination_.type_ = INetAddr::IPV6;
+    network->netLinkInfo_.routeList_.push_back(route1);
+    network->netLinkInfo_.routeList_.push_back(route2);
+    Route route3;
+    Route route4;
+    NetLinkInfo newNetLinkInfo;
+    route3.destination_.address_ = "0.0.0.0";
+    route3.destination_.type_ = INetAddr::IPV4;
+    route4.destination_.address_ = mockAddress;
+    route4.destination_.type_ = INetAddr::IPV6;
+    route4.iface_ = "rmnet1";
+    newNetLinkInfo.routeList_.push_back(route3);
+    newNetLinkInfo.routeList_.push_back(route4);
+    INetAddr addr;
+    addr.address_ = "192.168.0.1";
+    addr.type_ = INetAddr::IPV4;
+    newNetLinkInfo.netAddrList_.push_back(addr);
+    newNetLinkInfo.dnsList_.push_back(addr);
+    network->UpdateRoutes(newNetLinkInfo);
+    EXPECT_FALSE(network->netLinkInfo_.routeList_.empty());
+}
+
 HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
 {
     int32_t netId = 1;
@@ -1724,5 +1763,37 @@ HWTEST_F(NetworkTest, UpdateDnsTest003, TestSize.Level1)
     EXPECT_TRUE(!netLinkInfo.dnsList_.empty());
     network->UpdateDns(netLinkInfo);
 }
+
+HWTEST_F(NetworkTest, ReleaseBasicNetwork001, TestSize.Level1)
+{
+    int32_t netId = 1;
+    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    EXPECT_NE(network, nullptr);
+    Route route1;
+    Route route2;
+    route1.destination_.type_ = INetAddr::IpType::IPV4;
+    route1.iface_ = "rmnet0";
+    route1.destination_.address_ = "0.0.0.0";
+    route1.destination_.prefixlen_ = 24;
+    route1.gateway_.address_ = "0.0.0.0";
+    route2.destination_.type_ = INetAddr::IpType::IPV6;
+    route2.iface_ = "rmnet0";
+    std::string mockAddress = "";
+    int32_t mockLength = 5000;
+    for (uint32_t i = 0; i < mockLength; i++) {
+        mockAddress += "1";
+    }
+    route2.destination_.address_ = mockAddress;
+    route2.destination_.prefixlen_ = 64;
+    route2.gateway_.address_ = "fe80::1";
+    network->netLinkInfo_.routeList_.push_back(route1);
+    network->netLinkInfo_.routeList_.push_back(route2);
+    network->isPhyNetCreated_ = true;
+    network->isNeedResume_ = true;
+    network->ReleaseBasicNetwork();
+    network->RemoveRouteByFamily(INetAddr::IpType::IPV6);
+    EXPECT_NE(network->netLinkInfo_.routeList_.size(), 0);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
