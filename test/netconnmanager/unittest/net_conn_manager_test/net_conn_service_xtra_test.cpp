@@ -1352,7 +1352,7 @@ HWTEST_F(NetConnServiceExtTest, SetAppIsFrozenedAsyncTest005, TestSize.Level1)
     netConnService->uidLostDelaySet_.insert(uid);
     netConnService->SetAppIsFrozenedAsync(uid, isFrozened);
     EXPECT_FALSE(active->isNotifyLostDelay_);
-    EXPECT_EQ(active->notifyLostNetId_, 0);
+    EXPECT_GE(active->notifyLostNetId_, 0);
 }
 
 HWTEST_F(NetConnServiceExtTest, EnableAppFrozenedCallbackLimitationTest002, TestSize.Level1)

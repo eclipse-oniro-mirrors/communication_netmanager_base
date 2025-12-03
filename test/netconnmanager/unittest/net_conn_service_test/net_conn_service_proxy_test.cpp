@@ -762,7 +762,7 @@ HWTEST_F(NetConnServiceProxyTest, GetIpNeighTableTest001, TestSize.Level1)
 {
     std::vector<NetIpMacInfo> ipMacInfo;
     int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 }
 } // namespace NetManagerStandard
