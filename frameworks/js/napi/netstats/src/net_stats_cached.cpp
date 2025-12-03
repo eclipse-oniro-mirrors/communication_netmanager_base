@@ -1171,16 +1171,15 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
             dataTemp += info.GetStats();
         }
     }
-    NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}" PRIu64 ", kernelData:%{public}" PRIu64,
-        cellularHistoryData_[simId].trafficData, dataTemp);
 
-    uint64_t curSecond = CommonUtils::GetCurrentSecond();
     // be in next month
     std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
     if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
         NETMGR_LOG_E("GetMonthTrafficData find error");
         return UINT64_MAX;
     }
+
+    uint64_t curSecond = CommonUtils::GetCurrentSecond();
     if (curSecond > cellularHistoryData_[simId].endTime) {
         cellularHistoryData_[simId].trafficData = 0;
         cellularHistoryData_[simId].startTime =
@@ -1190,6 +1189,8 @@ uint64_t NetStatsCached::GetMonthTrafficData(int32_t simId)
         NETMGR_LOG_I("new time. %{public}" PRIu64 ", %{public}" PRIu64,
             cellularHistoryData_[simId].startTime, cellularHistoryData_[simId].endTime);
     }
+    NETMGR_LOG_I("GetMonthTrafficData find Mapdata:%{public}" PRIu64 ", kernelData:%{public}" PRIu64,
+        cellularHistoryData_[simId].trafficData, dataTemp);
     dataTemp += cellularHistoryData_[simId].trafficData;
     return dataTemp;
 }
