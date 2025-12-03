@@ -151,7 +151,7 @@ private:
     std::shared_ptr<NetDualStackProbe> dualStackProbe_;
     PortalDetectInfo portalDetectInfo_;
     std::string xReqId_;
-    int32_t xReqIdLen_;
+    int8_t xReqIdLen_ = -1;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -103,7 +103,7 @@ private:
     char errBuffer[CURL_ERROR_SIZE] = {0};
     std::string ipAddrList_ = "";
     std::string xReqId_;
-    int8_t xReqIdLen_;
+    int8_t xReqIdLen_ = -1;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
