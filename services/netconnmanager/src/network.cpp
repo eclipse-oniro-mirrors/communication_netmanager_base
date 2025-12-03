@@ -56,6 +56,7 @@ constexpr int32_t LAST_DETECTION_LAPSE_MS = 200;
 constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 constexpr int32_t MAX_IPV4_DNS_NUM = 5;
 constexpr int32_t MAX_IPV6_DNS_NUM = 2;
+constexpr int32_t MAX_ROUTE_ADDRESS_LENGTH = 4096;
 } // namespace
 
 Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -151,6 +152,27 @@ std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
     return NetConnServiceIface().GetNetCapabilitiesAsString(supplierId);
 }
 
+void Network::ReleaseRouteList(NetLinkInfo &netLinkInfoBck)
+{
+    for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
+        int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+        NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_, prefixLen);
+    }
+    for (const auto &route : netLinkInfoBck.routeList_) {
+        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+            route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
+            auto family = GetAddrFamily(route.destination_.address_);
+            std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+            if (!IsAddressValid(route)) {
+                continue;
+            }
+            auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+            NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
+        }
+    }
+    isNeedResume_ = false;
+}
+
 bool Network::ReleaseBasicNetwork()
 {
     if (!isPhyNetCreated_) {
@@ -166,21 +188,7 @@ bool Network::ReleaseBasicNetwork()
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (!IsIfaceNameInUse() || isNeedResume_) {
-        for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_,
-                                                                prefixLen);
-        }
-        for (const auto &route : netLinkInfoBck.routeList_) {
-            if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
-                route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
-                auto family = GetAddrFamily(route.destination_.address_);
-                std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
-                auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-                NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
-            }
-        }
-        isNeedResume_ = false;
+        ReleaseRouteList(netLinkInfoBck);
     } else {
         for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
@@ -189,6 +197,9 @@ bool Network::ReleaseBasicNetwork()
         }
     }
     for (const auto &route : netLinkInfoBck.routeList_) {
+        if (!IsAddressValid(route)) {
+            continue;
+        }
         auto destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                            route.gateway_.address_);
@@ -384,6 +395,9 @@ void Network::RemoveRouteByFamily(INetAddr::IpType addrFamily)
             route++;
             continue;
         }
+        if (!IsAddressValid(*route)) {
+            continue;
+        }
         std::string destAddress =
             route->destination_.address_ + "/" + std::to_string(route->destination_.prefixlen_);
         NetsysController::GetInstance().NetworkRemoveRoute(netId_, route->iface_, destAddress,
@@ -465,6 +479,15 @@ static void HandleDeleteIpv6Route(const NetLinkInfo &netLinkInfoBck,
     }
 }
 
+bool Network::IsAddressValid(const Route &route)
+{
+    if (route.destination_.address_.length() > MAX_ROUTE_ADDRESS_LENGTH) {
+        NETMGR_LOG_E("too large address: %{public}lu", route.destination_.address_.length());
+        return false;
+    }
+    return true;
+}
+
 void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
@@ -478,6 +501,9 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
         if (newNetLinkInfo.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
+            continue;
+        }
+        if (!IsAddressValid(route)) {
             continue;
         }
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
@@ -494,14 +520,21 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);
         }
     }
-    
+    UpdateNewRoutes(netLinkInfoBck, newNetLinkInfo);
+    HandleDeleteIpv6Route(netLinkInfoBck, newNetLinkInfo, netId_);
+}
+
+void Network::UpdateNewRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkInfo &newNetLinkInfo)
+{
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : newNetLinkInfo.routeList_) {
         if (netLinkInfoBck.HasRoute(route)) {
             NETMGR_LOG_W("Same route:[%{public}s]", CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
         }
-
+        if (!IsAddressValid(route)) {
+            continue;
+        }
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         auto ret = NetsysController::GetInstance().NetworkAddRoute(
             netId_, route.iface_, destAddress, route.gateway_.address_, route.isExcludedRoute_);
@@ -519,7 +552,6 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
     if (newNetLinkInfo.routeList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_ROUTES_FAILED);
     }
-    HandleDeleteIpv6Route(netLinkInfoBck, newNetLinkInfo, netId_);
 }
 
 void Network::UpdateDns(const NetLinkInfo &netLinkInfo)

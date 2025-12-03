@@ -103,6 +103,9 @@ private:
     bool IsNat464Prefered();
     std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
     void RemoveRouteByFamily(INetAddr::IpType addrFamily);
+    bool IsAddressValid(const Route &route);
+    void ReleaseRouteList(NetLinkInfo &netLinkInfoBck);
+    void UpdateNewRoutes(const NetLinkInfo &netLinkInfoBck, const NetLinkInfo &newNetLinkInfo);
 
 private:
     int32_t netId_ = 0;

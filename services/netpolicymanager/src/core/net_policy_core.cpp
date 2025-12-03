@@ -73,6 +73,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
 
 void NetPolicyCore::HandleEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData)
 {
+    std::shared_lock<std::shared_mutex> lock(coreMutex_);
     for (const auto &core : cores_) {
         if (eventData && core && core != eventData->sender) {
             core->HandleEvent(eventId, eventData);
