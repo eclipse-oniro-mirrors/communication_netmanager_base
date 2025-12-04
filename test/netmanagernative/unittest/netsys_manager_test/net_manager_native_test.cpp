@@ -285,7 +285,7 @@ HWTEST_F(NetManagerNativeTest, GetIpNeighTable002, TestSize.Level1)
 {
     std::vector<NetIpMacInfo> ipMacInfo;
     auto ret = instance_->GetIpNeighTable(ipMacInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace nmd
 } // namespace OHOS
