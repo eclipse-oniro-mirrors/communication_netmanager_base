@@ -1330,5 +1330,13 @@ HWTEST_F(UtNetmanagerBaseCommon, AnonymizeIptablesCommandTest001, TestSize.Level
     auto result = CommonUtils::AnonymizeIptablesCommand(command);
     ASSERT_FALSE(result.empty());
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, IsValidAddressTest001, TestSize.Level2)
+{
+    EXPECT_FALSE(CommonUtils::IsValidAddress(""));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("abc"));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("0.0.0.0"));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("::"));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
