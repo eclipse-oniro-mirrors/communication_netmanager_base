@@ -578,46 +578,43 @@ int32_t NetsysBpfNetFirewall::WriteDstIpv6BpfMap(BitmapManager &manager, NetFire
     return res;
 }
 
-int32_t NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
+int32_t NetsysBpfNetFirewall::WritePortBpfMap(BpfPortMap &portMap, const char *path)
 {
-    BpfPortMap &srcPortMap = manager.GetSrcPortMap();
+    if (path == nullptr || *path == '\0') {
+        return -1;
+    }
     int32_t res = 0;
-    if (srcPortMap.Empty()) {
-        NETNATIVE_LOGE("WriteSrcPortBpfMap: srcPortMap is empty");
+    if (portMap.Empty()) {
+        NETNATIVE_LOGE("WriteSrcPortBpfMap: portMap is empty");
         return -1;
     } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : srcPortMap.Get()) {
+        BpfMapper<PortKey, RuleCode> map(path, BPF_F_WRONLY);
+        if (!map.IsValid()) {
+            NETNATIVE_LOGE("WriteBpfMap: map invalid: %{public}s", path);
+            return -1;
+        }
+        for (const auto &pair : portMap.Get()) {
             PortKey key = pair.first;
             Bitmap val = pair.second;
             RuleCode rule;
             memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
             NETNATIVE_LOG_D("sport_map=%{public}u", key);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, sport), key, rule);
+            res += map.Write(key, rule, BPF_ANY) == 0 ? 0 : -1;
         }
     }
     return res;
 }
 
+int32_t NetsysBpfNetFirewall::WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
+{
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    return WritePortBpfMap(manager.GetSrcPortMap(), GET_MAP_PATH(ingress, sport));
+}
+
 int32_t NetsysBpfNetFirewall::WriteDstPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)
 {
-    BpfPortMap &dstPortMap = manager.GetDstPortMap();
-    int32_t res = 0;
-    if (dstPortMap.Empty()) {
-        NETNATIVE_LOGE("WriteDstPortBpfMap: dstPortMap is empty");
-        return -1;
-    } else {
-        bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
-        for (const auto &pair : dstPortMap.Get()) {
-            PortKey key = pair.first;
-            Bitmap val = pair.second;
-            RuleCode rule;
-            memcpy_s(rule.val, sizeof(RuleCode), val.Get(), sizeof(RuleCode));
-            NETNATIVE_LOG_D("dport_map=%{public}u", key);
-            res += WriteBpfMap(GET_MAP_PATH(ingress, dport), key, rule);
-        }
-    }
-    return res;
+    bool ingress = (direction == NetFirewallRuleDirection::RULE_IN);
+    return WritePortBpfMap(manager.GetDstPortMap(), GET_MAP_PATH(ingress, dport));
 }
 
 int32_t NetsysBpfNetFirewall::WriteProtoBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction)

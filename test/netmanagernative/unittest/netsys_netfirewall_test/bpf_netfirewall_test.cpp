@@ -86,3 +86,44 @@ HWTEST_F(NetsysBpfNetFirewallTest, ClearFirewallRules001, TestSize.Level0)
     ret = bpfNet->ClearFirewallRules(NetFirewallRuleType::RULE_DOMAIN);
     EXPECT_EQ(ret, FIREWALL_SUCCESS);
 }
+
+HWTEST_F(NetsysBpfNetFirewallTest, WriteSrcPortBpfMap001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
+    
+    BitmapManager manager;
+
+    int ret = bpfNet->WriteSrcPortBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(ret, -1);
+    ret = bpfNet->WriteSrcPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, WriteDstPortBpfMap001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
+    
+    BitmapManager manager;
+
+    int ret = bpfNet->WriteDstPortBpfMap(manager, NetFirewallRuleDirection::RULE_IN);
+    EXPECT_EQ(ret, -1);
+    ret = bpfNet->WriteDstPortBpfMap(manager, NetFirewallRuleDirection::RULE_OUT);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, WritePortBpfMap001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = NetsysBpfNetFirewall::GetInstance();
+    
+    BpfPortMap portMap;
+    const char *path = "test";
+    int ret = bpfNet->WritePortBpfMap(portMap, path);
+    EXPECT_EQ(ret, -1);
+
+    uint32_t start = 1;
+    PortKey key = (PortKey)hltons(start);
+    Bitmap bitmap(1);
+    portMap.OrInsert(key, bitmap);
+    ret = bpfNet->WritePortBpfMap(portMap, path);
+    EXPECT_EQ(ret, -1);
+}

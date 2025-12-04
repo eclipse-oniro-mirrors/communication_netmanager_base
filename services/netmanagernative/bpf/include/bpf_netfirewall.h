@@ -279,6 +279,8 @@ private:
 
     int32_t WriteDstIpv6BpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
+    int32_t WritePortBpfMap(BpfPortMap &portMap, const char *path);
+
     int32_t WriteSrcPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
 
     int32_t WriteDstPortBpfMap(BitmapManager &manager, NetFirewallRuleDirection direction);
