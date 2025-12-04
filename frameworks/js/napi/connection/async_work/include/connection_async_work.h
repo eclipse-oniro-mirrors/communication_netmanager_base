@@ -58,6 +58,10 @@ public:
 
     static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetAddressesByNameWithOptions(napi_env env, void *data);
+
+    static void GetAddressesByNameWithOptionsCallback(napi_env env, napi_status status, void *data);
+
     static void ExecGetAllNets(napi_env env, void *data);
 
     static void GetAllNetsCallback(napi_env env, napi_status status, void *data);
@@ -163,6 +167,10 @@ public:
         static void ExecGetAddressesByName(napi_env env, void *data);
 
         static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
+        
+        static void ExecGetAddressesByNameWithOptions(napi_env env, void *data);
+
+        static void GetAddressesByNameWithOptionsCallback(napi_env env, napi_status status, void *data);
 
         static void ExecBindSocket(napi_env env, void *data);
 

@@ -92,6 +92,10 @@ public:
 
     static napi_value GetAddressByNameCallback(GetAddressByNameContext *context);
 
+    static bool ExecGetAddressesByNameWithOptions(GetAddressByNameWithOptionsContext *context);
+
+    static napi_value GetAddressesByNameWithOptionsCallback(GetAddressByNameWithOptionsContext *context);
+
     static bool ExecGetAllNets(GetAllNetsContext *context);
 
     static napi_value GetAllNetsCallback(GetAllNetsContext *context);
@@ -229,6 +233,10 @@ public:
         static bool ExecGetAddressesByName(GetAddressByNameContext *context);
 
         static napi_value GetAddressesByNameCallback(GetAddressByNameContext *context);
+        
+        static bool ExecGetAddressesByNameWithOptions(GetAddressByNameWithOptionsContext *context);
+
+        static napi_value GetAddressesByNameWithOptionsCallback(GetAddressByNameWithOptionsContext *context);
 
         static bool ExecBindSocket(BindSocketContext *context);
 
@@ -278,6 +286,8 @@ private:
     static void FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 
     static void FillNetAddressInfo(napi_env env, napi_value jsNetAddress, const NetIpMacInfo &ipNeighTable);
+
+    static int ConvertToAiFamily(GetAddressByNameWithOptionsContext::Family family);
 };
 
 extern std::mutex g_predefinedHostMtx;

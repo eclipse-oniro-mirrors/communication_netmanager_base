@@ -101,7 +101,8 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
 
     context->CreateAsyncWork(asyncWorkName, executor, callback);
     if (NapiUtils::GetValueType(env, context->GetCallback()) != napi_function && context->IsNeedPromise()) {
-        return context->CreatePromise();
+        auto promise = context->CreatePromise();
+        return promise;
     }
     return NapiUtils::GetUndefined(env);
 }
