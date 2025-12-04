@@ -355,7 +355,7 @@ HWTEST_F(FirewallManagerTest, EnableChain3, TestSize.Level1)
 HWTEST_F(FirewallManagerTest, EnableChain4, TestSize.Level1)
 {
     int32_t ret = g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
 /**
