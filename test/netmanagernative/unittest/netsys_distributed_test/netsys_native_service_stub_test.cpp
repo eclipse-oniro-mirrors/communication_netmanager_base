@@ -558,7 +558,8 @@ public:
         return 0;
     }
 
-    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault, FirewallRuleAction outDefault) override
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault,
+        FirewallRuleAction outDefault) override
     {
         return 0;
     }
