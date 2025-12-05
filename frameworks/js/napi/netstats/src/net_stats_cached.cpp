@@ -329,7 +329,7 @@ void NetStatsCached::UpdateNetStatsFlag(NetStatsInfo &info)
 void NetStatsCached::UpdateNetStatsUserId(NetStatsInfo &info)
 {
     if (info.uid_ > 0) {
-        info.userId_ = info.uid_ / USER_ID_DIVIDOR;
+        info.userId_ = static_cast<int32_t>(info.uid_ / USER_ID_DIVIDOR);
     }
 }
 
@@ -1115,15 +1115,6 @@ void NetStatsCached::DeleteHistoryData(int32_t simId)
     }
 }
 
-bool NetStatsCached::FindInHistoryData(int32_t simId)
-{
-    std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
-    if (cellularHistoryData_.find(simId) != cellularHistoryData_.end()) {
-        return true;
-    }
-    return false;
-}
-
 int32_t NetStatsCached::GetTotalHistoryStatsByIdent(
     int32_t simId, uint64_t startTime, uint64_t endTime, uint64_t &historyData)
 {
@@ -1199,14 +1190,14 @@ void NetStatsCached::UpdateHistoryData(const std::map<std::string, uint64_t> dat
 {
     std::unique_lock<std::shared_mutex> lock(cellularHistoryDataMutex_);
     for (const auto &info : data) {
-        int32_t simId = -1;
+        uint64_t simId = 0;
         if (!info.first.empty()) {
-            NetStatsUtils::ConvertToInt32(info.first, simId);
+            NetStatsUtils::ConvertToUint64(info.first, simId);
         }
         if (cellularHistoryData_.find(simId) == cellularHistoryData_.end()) {
             continue;
         }
-        NETMGR_LOG_I("simId:%{public}d, update traffic:%{public}" PRIu64, simId, info.second);
+        NETMGR_LOG_I("simId:%{public}" PRIu64 ", update traffic:%{public}" PRIu64, simId, info.second);
         cellularHistoryData_[simId].trafficData += info.second;
     }
 }

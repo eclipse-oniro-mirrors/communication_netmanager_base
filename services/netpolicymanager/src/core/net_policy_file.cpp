@@ -270,7 +270,7 @@ bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
     }
     content = jsonStr;
     cJSON_Delete(root);
-    free(jsonStr);
+    cJSON_free(jsonStr);
     NETMGR_LOG_D("content: %{public}s", content.c_str());
     return true;
 }
