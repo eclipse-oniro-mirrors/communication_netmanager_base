@@ -274,25 +274,6 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         netId = defaultNetId_;
     }
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = static_cast<int32_t>(GetCallingUid());
-    bool isMatchAllow = false;
-    if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
-        DNS_CONFIG_PRINT("SetDnsCache failed: domain was Intercepted: %{public}s,", hostName.c_str());
-        return;
-    }
-    if (isMatchAllow && (addrInfo.aiFamily == AF_INET || addrInfo.aiFamily == AF_INET6)) {
-        NetAddrInfo netInfo;
-        netInfo.aiFamily = addrInfo.aiFamily;
-        if (addrInfo.aiFamily == AF_INET) {
-            netInfo.aiAddr.sin = addrInfo.aiAddr.sin.sin_addr;
-        } else {
-            memcpy_s(&netInfo.aiAddr.sin6, sizeof(addrInfo.aiAddr.sin6.sin6_addr), &addrInfo.aiAddr.sin6.sin6_addr,
-                     sizeof(addrInfo.aiAddr.sin6.sin6_addr));
-        }
-        OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->AddDomainCache(netInfo);
-    }
-#endif
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
@@ -309,20 +290,6 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
     }
 
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-    int32_t appUid = static_cast<int32_t>(GetCallingUid());
-    bool isMatchAllow = false;
-    if (IsInterceptDomain(appUid, hostName, isMatchAllow)) {
-        NotifyDomianIntercept(appUid, hostName);
-        AddrInfo fakeAddr = { 0 };
-        fakeAddr.aiFamily = AF_UNSPEC;
-        fakeAddr.aiAddr.sin.sin_family = AF_UNSPEC;
-        fakeAddr.aiAddr.sin.sin_addr.s_addr = INADDR_NONE;
-        fakeAddr.aiAddrLen = sizeof(struct sockaddr_in);
-        return { fakeAddr };
-    }
-#endif
-
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("GetDnsCache failed: netid is not have netid:%{public}d,", netId);
@@ -438,14 +405,6 @@ int32_t DnsParamCache::SetFirewallRules(NetFirewallRuleType type,
         }
         case NetFirewallRuleType::RULE_DOMAIN: {
             ClearAllDnsCache();
-            for (const auto &rule : ruleList) {
-                firewallDomainRules_.emplace_back(firewall_rule_cast<NetFirewallDomainRule>(rule));
-            }
-            if (isFinish) {
-                ret = SetFirewallDomainRules(firewallDomainRules_);
-                firewallDomainRules_.clear();
-                OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
-            }
             break;
         }
         default:
@@ -484,141 +443,11 @@ FirewallRuleAction DnsParamCache::GetFirewallRuleAction(int32_t appUid,
     return FirewallRuleAction::RULE_INVALID;
 }
 
-bool DnsParamCache::checkEmpty4InterceptDomain(const std::string &hostName)
-{
-    if (hostName.empty()) {
-        return true;
-    }
-    if (!netFirewallDomainRulesAllowMap_.empty() || !netFirewallDomainRulesDenyMap_.empty()) {
-        return false;
-    }
-    if (domainAllowLsmTrie_ && !domainAllowLsmTrie_->Empty()) {
-        return false;
-    }
-    return !domainDenyLsmTrie_ || domainDenyLsmTrie_->Empty();
-}
-
-bool DnsParamCache::IsInterceptDomain(int32_t appUid, const std::string &hostName, bool &isMatchAllow)
-{
-    if (checkEmpty4InterceptDomain(hostName)) {
-        return false;
-    }
-    std::string host = hostName.substr(0, hostName.find(' '));
-    DNS_CONFIG_PRINT("IsInterceptDomain: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
-    std::transform(host.begin(), host.end(), host.begin(), ::tolower);
-    std::vector<sptr<NetFirewallDomainRule>> rules;
-    FirewallRuleAction exactAllowAction = FirewallRuleAction::RULE_INVALID;
-    auto it = netFirewallDomainRulesAllowMap_.find(host);
-    if (it != netFirewallDomainRulesAllowMap_.end()) {
-        rules = it->second;
-        exactAllowAction = GetFirewallRuleAction(appUid, rules);
-    }
-    FirewallRuleAction exactDenyAction = FirewallRuleAction::RULE_INVALID;
-    auto iter = netFirewallDomainRulesDenyMap_.find(host);
-    if (iter != netFirewallDomainRulesDenyMap_.end()) {
-        rules = iter->second;
-        exactDenyAction = GetFirewallRuleAction(appUid, rules);
-    }
-    FirewallRuleAction wildcardAllowAction = FirewallRuleAction::RULE_INVALID;
-    if (domainAllowLsmTrie_->LongestSuffixMatch(host, rules)) {
-        wildcardAllowAction = GetFirewallRuleAction(appUid, rules);
-    }
-    FirewallRuleAction wildcardDenyAction = FirewallRuleAction::RULE_INVALID;
-    if (domainDenyLsmTrie_->LongestSuffixMatch(host, rules)) {
-        wildcardDenyAction = GetFirewallRuleAction(appUid, rules);
-    }
-    isMatchAllow = (exactAllowAction != FirewallRuleAction::RULE_INVALID) ||
-                   (wildcardAllowAction != FirewallRuleAction::RULE_INVALID);
-    bool isDeny = (exactDenyAction != FirewallRuleAction::RULE_INVALID) ||
-                  (wildcardDenyAction != FirewallRuleAction::RULE_INVALID);
-    if (isMatchAllow) {
-        // Apply default rules in case of conflict
-        return isDeny && (firewallDefaultAction_ == FirewallRuleAction::RULE_DENY);
-    }
-    return isDeny;
-}
-
 int32_t DnsParamCache::SetFirewallDefaultAction(FirewallRuleAction inDefault, FirewallRuleAction outDefault)
 {
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     DNS_CONFIG_PRINT("SetFirewallDefaultAction: firewallDefaultAction_: %{public}d", (int)outDefault);
     firewallDefaultAction_ = outDefault;
-    return 0;
-}
-
-void DnsParamCache::BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule, const std::string &domain)
-{
-    std::vector<sptr<NetFirewallDomainRule>> rules;
-    std::string suffix(domain);
-    auto wildcardCharIndex = suffix.find('*');
-    if (wildcardCharIndex != std::string::npos) {
-        suffix = suffix.substr(wildcardCharIndex + 1);
-    }
-    DNS_CONFIG_PRINT("BuildFirewallDomainLsmTrie: suffix: %{public}s", suffix.c_str());
-    std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
-    if (rule->ruleAction == FirewallRuleAction::RULE_DENY) {
-        if (domainDenyLsmTrie_->LongestSuffixMatch(suffix, rules)) {
-            rules.emplace_back(std::move(rule));
-            domainDenyLsmTrie_->Update(suffix, rules);
-            return;
-        }
-        rules.emplace_back(std::move(rule));
-        domainDenyLsmTrie_->Insert(suffix, rules);
-    } else {
-        if (domainAllowLsmTrie_->LongestSuffixMatch(suffix, rules)) {
-            rules.emplace_back(std::move(rule));
-            domainAllowLsmTrie_->Update(suffix, rules);
-            return;
-        }
-        rules.emplace_back(std::move(rule));
-        domainAllowLsmTrie_->Insert(suffix, rules);
-    }
-}
-
-void DnsParamCache::BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule, const std::string &raw)
-{
-    DNS_CONFIG_PRINT("BuildFirewallDomainMap: domain: %{public}s", raw.c_str());
-    std::string domain(raw);
-    std::vector<sptr<NetFirewallDomainRule>> rules;
-    std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
-    if (rule->ruleAction == FirewallRuleAction::RULE_DENY) {
-        auto it = netFirewallDomainRulesDenyMap_.find(domain);
-        if (it != netFirewallDomainRulesDenyMap_.end()) {
-            rules = it->second;
-        }
-
-        rules.emplace_back(std::move(rule));
-        netFirewallDomainRulesDenyMap_.emplace(domain, std::move(rules));
-    } else {
-        auto it = netFirewallDomainRulesAllowMap_.find(domain);
-        if (it != netFirewallDomainRulesAllowMap_.end()) {
-            rules = it->second;
-        }
-
-        rules.emplace_back(rule);
-        netFirewallDomainRulesAllowMap_.emplace(domain, std::move(rules));
-    }
-}
-
-int32_t DnsParamCache::SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList)
-{
-    if (!domainAllowLsmTrie_) {
-        domainAllowLsmTrie_ =
-            std::make_shared<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>>();
-    }
-    if (!domainDenyLsmTrie_) {
-        domainDenyLsmTrie_ =
-            std::make_shared<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>>();
-    }
-    for (const auto &rule : ruleList) {
-        for (const auto &param : rule->domains) {
-            if (param.isWildcard) {
-                BuildFirewallDomainLsmTrie(rule, param.domain);
-            } else {
-                BuildFirewallDomainMap(rule, param.domain);
-            }
-        }
-    }
     return 0;
 }
 
@@ -631,30 +460,12 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             netFirewallDnsRuleMap_.clear();
             break;
         case NetFirewallRuleType::RULE_DOMAIN: {
-            firewallDomainRules_.clear();
-            netFirewallDomainRulesAllowMap_.clear();
-            netFirewallDomainRulesDenyMap_.clear();
-            if (domainAllowLsmTrie_) {
-                domainAllowLsmTrie_ = nullptr;
-            }
-            if (domainDenyLsmTrie_) {
-                domainDenyLsmTrie_ = nullptr;
-            }
             OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
             break;
         }
         case NetFirewallRuleType::RULE_ALL: {
             firewallDnsRules_.clear();
             netFirewallDnsRuleMap_.clear();
-            firewallDomainRules_.clear();
-            netFirewallDomainRulesAllowMap_.clear();
-            netFirewallDomainRulesDenyMap_.clear();
-            if (domainAllowLsmTrie_) {
-                domainAllowLsmTrie_ = nullptr;
-            }
-            if (domainDenyLsmTrie_) {
-                domainDenyLsmTrie_ = nullptr;
-            }
             OHOS::NetManagerStandard::NetsysBpfNetFirewall::GetInstance()->ClearDomainCache();
             break;
         }
@@ -662,29 +473,6 @@ int32_t DnsParamCache::ClearFirewallRules(NetFirewallRuleType type)
             break;
     }
     return 0;
-}
-
-void DnsParamCache::NotifyDomianIntercept(int32_t appUid, const std::string &hostName)
-{
-    if (hostName.empty()) {
-        return;
-    }
-    std::string host = hostName.substr(0, hostName.find(' '));
-    NETNATIVE_LOGI("NotifyDomianIntercept: appUid: %{public}d, hostName: %{private}s", appUid, host.c_str());
-    sptr<InterceptRecord> record = sptr<InterceptRecord>::MakeSptr();
-    record->time = (int32_t)time(NULL);
-    record->appUid = appUid;
-    record->domain = host;
-
-    if (oldRecord_ != nullptr && (record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
-        if (record->appUid == oldRecord_->appUid && record->domain == oldRecord_->domain) {
-            return;
-        }
-    }
-    oldRecord_ = record;
-    for (const auto &callback : callbacks_) {
-        callback->OnIntercept(record);
-    }
 }
 
 int32_t DnsParamCache::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)

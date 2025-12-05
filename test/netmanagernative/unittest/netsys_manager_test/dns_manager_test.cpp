@@ -134,5 +134,55 @@ HWTEST_F(DnsManagerTest, SetDnsCacheTest001, TestSize.Level1)
     auto result = dnsManager.SetDnsCache(netId, testHost, info);
     EXPECT_EQ(result, 0);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(DnsManagerTest, SetFirewallRules001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    int32_t ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_IP, ruleList, false);
+    EXPECT_EQ(ret, -1);
+    ruleList.emplace_back(nullptr);
+    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_IP, ruleList, false);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+}
+
+HWTEST_F(DnsManagerTest, SetFirewallRules002, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    ruleList.emplace_back(nullptr);
+    auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
+    domainRule->ruleAction = FirewallRuleAction::RULE_DENY;
+    ruleList.emplace_back(domainRule);
+    int32_t ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+}
+
+HWTEST_F(DnsManagerTest, SetFirewallRules003, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    std::vector<sptr<NetFirewallBaseRule>> ruleList;
+    auto domainRule = sptr<NetFirewallDomainRule>::MakeSptr();
+    domainRule->ruleAction = FirewallRuleAction::RULE_ALLOW;
+    ruleList.emplace_back(domainRule);
+    int32_t ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, false);
+    EXPECT_EQ(ret, 0);
+    EXPECT_FALSE(dnsManager.firewallDomainRules_.empty());
+    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+    NetFirewallDomainParam domains;
+    domainRule->domains.emplace_back(domains);
+    ret = dnsManager.SetFirewallRules(NetFirewallRuleType::RULE_DOMAIN, ruleList, true);
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(dnsManager.firewallDomainRules_.empty());
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

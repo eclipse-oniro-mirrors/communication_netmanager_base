@@ -551,6 +551,38 @@ public:
         return 0;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+        bool isFinish) override
+    {
+        return 0;
+    }
+
+    int32_t SetFirewallDefaultAction(int32_t userId, FirewallRuleAction inDefault, FirewallRuleAction outDefault) override
+    {
+        return 0;
+    }
+    int32_t SetFirewallCurrentUserId(int32_t userId) override
+    {
+        return 0;
+    }
+
+    int32_t ClearFirewallRules(NetFirewallRuleType type) override
+    {
+        return 0;
+    }
+
+    int32_t RegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t UnRegisterNetFirewallCallback(const sptr<INetFirewallCallback> &callback) override
+    {
+        return 0;
+    }
+#endif
+
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
     {
         return 0;

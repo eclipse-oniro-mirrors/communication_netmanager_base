@@ -1042,18 +1042,11 @@ int32_t NetsysNativeService::SetFirewallRules(NetFirewallRuleType type,
 {
     NETNATIVE_LOGI("NetsysNativeService::SetFirewallRules: size=%{public}zu isFinish=%{public}" PRId32, ruleList.size(),
                    isFinish);
-    int32_t ret = NETSYS_SUCCESS;
-    switch (type) {
-        case NetFirewallRuleType::RULE_IP:
-        case NetFirewallRuleType::RULE_DOMAIN:
-            ret = bpfNetFirewall_->SetFirewallRules(type, ruleList, isFinish);
-            break;
-        case NetFirewallRuleType::RULE_DNS:
-            ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
-            break;
-        default:
-            break;
+    int32_t ret = bpfNetFirewall_->SetFirewallRules(type, ruleList, isFinish);
+    if (ret != NETSYS_SUCCESS) {
+        return ret;
     }
+    ret = netsysService_->SetFirewallRules(type, ruleList, isFinish);
     return ret;
 }
 
