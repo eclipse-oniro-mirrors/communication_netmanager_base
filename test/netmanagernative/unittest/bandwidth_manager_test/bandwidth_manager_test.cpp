@@ -80,7 +80,7 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest002, TestSize.Level1)
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest003, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthEnableDataSaver(true);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthEnableDataSaver(true);
     EXPECT_TRUE(ret == -1 || ret == NETSYS_NETSYSSERVICE_NULL);
 }
@@ -93,7 +93,7 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest003, TestSize.Level1)
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest004, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthEnableDataSaver(false);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthEnableDataSaver(false);
     EXPECT_TRUE(ret == -1 || ret == NETSYS_NETSYSSERVICE_NULL);
 }
@@ -150,7 +150,7 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest003, TestSize.Level1)
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest004, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthSetIfaceQuota("wlan0", 5000000000000);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthSetIfaceQuota("wlan0", 2097152);
     EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
 }
@@ -196,7 +196,7 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest002, TestSize.Level1
 HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest001, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthAddDeniedList(TEST_UID);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthRemoveDeniedList(TEST_UID);
     EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
 }
@@ -209,7 +209,7 @@ HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest001, TestSize.Level1)
 HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest002, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthAddDeniedList(TEST_UID);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthAddDeniedList(TEST_UID);
     EXPECT_TRUE(ret == -1 || ret == NETSYS_NETSYSSERVICE_NULL);
 }
@@ -235,9 +235,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveDeniedListTest002, TestSize.Level1
     int32_t ret = NetsysController::GetInstance().BandwidthAddDeniedList(TEST_UID);
     EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthRemoveDeniedList(TEST_UID);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthRemoveDeniedList(TEST_UID);
-    EXPECT_TRUE(ret == -1 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 
 /**
@@ -283,9 +283,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveAllowedListTest002, TestSize.Level
     int32_t ret = NetsysController::GetInstance().BandwidthAddAllowedList(TEST_UID);
     EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthRemoveAllowedList(TEST_UID);
-    EXPECT_TRUE(ret == 0 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
     ret = NetsysController::GetInstance().BandwidthRemoveAllowedList(TEST_UID);
-    EXPECT_TRUE(ret == -1 || ret == NETSYS_NETSYSSERVICE_NULL);
+    EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetsysNative
 } // namespace OHOS
