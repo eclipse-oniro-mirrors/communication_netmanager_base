@@ -33,6 +33,7 @@
 #include "netmanager_base_common_utils.h"
 #include "net_manager_constants.h"
 #include "net_probe.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -182,7 +183,8 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, uint32_t duration, NetConn
         if (timeNextSend < timeNow) {
             rc = SendRequest(s, iov, ai, seq++, timeNow);
             if (rc < 0) {
-                continue;
+                NETMGR_LOG_I("sendRequest rc < 0, errno = %{public}d", errno);
+                break;
             }
 
             totalSend += 1;
@@ -210,6 +212,7 @@ static int32_t DoPing(int32_t s, struct addrinfo *ai, uint32_t duration, NetConn
     }
 
     if (totalRecv == 0) {
+        NETMGR_LOG_I("totalRecv = 0, errno = %{public}d", errno);
         return ResetToFullLoss(result, duration);
     }
 
@@ -243,6 +246,7 @@ int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_
     info.ai_family = family;
     rc = getaddrinfo(dest.c_str(), nullptr, &info, &ai);
     if (rc < 0 || ai == nullptr) {
+        NETMGR_LOG_I("rc < 0 || ai == nullptr, errno = %{public}d", errno);
         (void)ResetToFullLoss(result, duration);
         return NETMANAGER_SUCCESS;
     }
@@ -252,10 +256,6 @@ int32_t NetProbe::QueryProbeResult(std::string &dest, int32_t duration, NetConn_
         InitialProbeResult(result);
 
         rc = DoPing(fd, ai, static_cast<uint32_t>(duration), result);
-        if (rc < 0) {
-            (void)ResetToFullLoss(result, duration);
-        }
-
         close(fd);
     } else {
         (void)ResetToFullLoss(result, duration);
