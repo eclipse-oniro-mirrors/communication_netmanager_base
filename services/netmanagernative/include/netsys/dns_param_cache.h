@@ -142,39 +142,13 @@ private:
 
     bool GetDnsServersByAppUid(int32_t appUid, std::vector<std::string> &servers);
 
-    void BuildFirewallDomainLsmTrie(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
-
-    void BuildFirewallDomainMap(const sptr<NetFirewallDomainRule> &rule, const std::string &domain);
-
     int32_t SetFirewallDnsRules(const std::vector<sptr<NetFirewallDnsRule>> &ruleList);
-
-    int32_t SetFirewallDomainRules(const std::vector<sptr<NetFirewallDomainRule>> &ruleList);
 
     FirewallRuleAction GetFirewallRuleAction(int32_t appUid, const std::vector<sptr<NetFirewallDomainRule>> &rules);
 
-    bool checkEmpty4InterceptDomain(const std::string &hostName);
-
-    bool IsInterceptDomain(int32_t appUid, const std::string &host, bool &isMatchAllow);
-
-    void NotifyDomianIntercept(int32_t appUid, const std::string &host);
-
-    std::vector<sptr<NetFirewallDomainRule>> firewallDomainRules_;
-
     std::vector<sptr<NetFirewallDnsRule>> firewallDnsRules_;
 
-    sptr<NetManagerStandard::InterceptRecord> oldRecord_ = nullptr;
-
     std::unordered_map<int32_t, std::vector<sptr<NetFirewallDnsRule>>> netFirewallDnsRuleMap_;
-
-    std::unordered_map<std::string, std::vector<sptr<NetFirewallDomainRule>>> netFirewallDomainRulesAllowMap_;
-
-    std::unordered_map<std::string, std::vector<sptr<NetFirewallDomainRule>>> netFirewallDomainRulesDenyMap_;
-
-    std::shared_ptr<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>> domainAllowLsmTrie_ =
-        nullptr;
-
-    std::shared_ptr<NetManagerStandard::SuffixMatchTrie<std::vector<sptr<NetFirewallDomainRule>>>> domainDenyLsmTrie_ =
-        nullptr;
 
     uint32_t callingUid_;
 

@@ -14,6 +14,21 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
+config("netsys_bpf_utils_config") {
+  include_dirs = [
+    "include",
+    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/include",
+    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include",
+    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$NETPOLICYMANAGER_SOURCE_DIR/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include",
+  ]
+  if (netmanager_base_enable_feature_net_firewall) {
+    defines = [ "FEATURE_NET_FIREWALL_ENABLE" ]
+  }
+}
+
 ohos_bpf("netsys") {
   sources = [ "src/netsys.c" ]
 
@@ -57,16 +72,6 @@ ohos_shared_library("netsys_bpf_utils") {
     "src/bpf_ring_buffer.cpp",
   ]
 
-  include_dirs = [
-    "include",
-    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/include",
-    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include",
-    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
-    "$NETPOLICYMANAGER_SOURCE_DIR/include",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include",
-  ]
-
   cflags = common_cflags
 
   cflags_cc = common_cflags
@@ -87,14 +92,13 @@ ohos_shared_library("netsys_bpf_utils") {
   use_exceptions = true
   deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
 
+  public_configs = [ ":netsys_bpf_utils_config" ]
   if (netmanager_base_enable_feature_net_firewall) {
-    public_configs = [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
+    public_configs += [ "$NETMANAGER_BASE_ROOT/resource:coverage_flags" ]
     sources += [
       "src/bitmap_manager.cpp",
       "src/bpf_netfirewall.cpp",
     ]
-
-    defines += [ "FEATURE_NET_FIREWALL_ENABLE" ]
 
     deps += [ "$INNERKITS_ROOT/netmanagernative:net_native_parcel" ]
 

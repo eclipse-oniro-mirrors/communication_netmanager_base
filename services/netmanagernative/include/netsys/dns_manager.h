@@ -183,6 +183,9 @@ public:
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    std::vector<sptr<NetManagerStandard::NetFirewallDomainRule>> firewallDomainRules_;
+#endif
 };
 } // namespace nmd
 } // namespace OHOS

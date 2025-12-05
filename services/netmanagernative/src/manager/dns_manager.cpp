@@ -238,7 +238,29 @@ int32_t DnsManager::SetFirewallCurrentUserId(int32_t userId)
 int32_t DnsManager::SetFirewallRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
                                      bool isFinish)
 {
-    return DnsParamCache::GetInstance().SetFirewallRules(type, ruleList, isFinish);
+    int32_t ret = DnsParamCache::GetInstance().SetFirewallRules(type, ruleList, isFinish);
+    if (ret != 0 || type != NetFirewallRuleType::RULE_DOMAIN) {
+        return ret;
+    }
+    for (auto &rule : ruleList) {
+        auto domainRule = firewall_rule_cast<NetFirewallDomainRule>(rule);
+        if (domainRule == nullptr || domainRule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
+            continue;
+        }
+        firewallDomainRules_.emplace_back(domainRule);
+    }
+    if (!isFinish) {
+        return 0;
+    }
+    for (auto &rule : firewallDomainRules_) {
+        for (auto &domain : rule->domains) {
+            AddrInfo addrInfo;
+            std::vector<AddrInfo> res;
+            GetAddrInfo(domain.domain, "", addrInfo, 0, res);
+        }
+    }
+    firewallDomainRules_.clear();
+    return 0;
 }
 
 int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)
