@@ -103,6 +103,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
+    std::string gw = "0.0.0.0";
     if (!data.WriteString(iif)) {
         return;
     }
@@ -110,6 +111,9 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
         return;
     }
     if (!data.WriteString(dstAddr)) {
+        return;
+    }
+    if (!data.WriteString(gw)) {
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET);

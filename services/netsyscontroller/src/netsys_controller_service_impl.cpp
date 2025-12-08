@@ -80,10 +80,10 @@ int32_t NetsysControllerServiceImpl::EnableDistributedClientNet(const std::strin
 }
 
 int32_t NetsysControllerServiceImpl::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                                const std::string &dstAddr)
+                                                                const std::string &dstAddr, const std::string &gw)
 {
     NETMGR_LOG_I("EnableDistributedServerNet");
-    return netsysClient_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return netsysClient_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetsysControllerServiceImpl::DisableDistributedNet(bool isServer)

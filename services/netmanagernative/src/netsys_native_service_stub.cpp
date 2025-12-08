@@ -1113,8 +1113,9 @@ int32_t NetsysNativeServiceStub::CmdEnableDistributedServerNet(MessageParcel &da
     std::string iif = data.ReadString();
     std::string devIface = data.ReadString();
     std::string dstAddr = data.ReadString();
+    std::string gw = data.ReadString();
 
-    int32_t result = EnableDistributedServerNet(iif, devIface, dstAddr);
+    int32_t result = EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("CmdEnableDistributedServerNet has recved result %{public}d", result);
 

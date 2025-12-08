@@ -1484,9 +1484,11 @@ void CmdEnableDistributedServerNetFuzzTest(const uint8_t *data, size_t size)
     std::string iif = NetSysGetString(STR_LEN);
     std::string devIface = NetSysGetString(STR_LEN);
     std::string dstAddr = NetSysGetString(STR_LEN);
+    std::string gw = NetSysGetString(STR_LEN);
     dataParcel.WriteString(iif);
     dataParcel.WriteString(devIface);
     dataParcel.WriteString(dstAddr);
+    dataParcel.WriteString(gw);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ENABLE_DISTRIBUTE_SERVER_NET),
                     dataParcel);
 }

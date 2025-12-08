@@ -1072,7 +1072,7 @@ int32_t NetsysNativeServiceProxy::EnableDistributedClientNet(const std::string &
 }
 
 int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                             const std::string &dstAddr)
+                                                             const std::string &dstAddr, const std::string &gw)
 {
     NETNATIVE_LOGI("Begin to EnableDistributedServerNet");
     MessageParcel data;
@@ -1089,6 +1089,10 @@ int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &
     }
 
     if (!data.WriteString(dstAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(gw)) {
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -46,9 +46,9 @@ int32_t NetConnServiceIface::EnableDistributedClientNet(const std::string &virni
 }
 
 int32_t NetConnServiceIface::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                        const std::string &dstAddr)
+                                                        const std::string &dstAddr, const std::string &gw)
 {
-    return NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetConnServiceIface::DisableDistributedNet(bool isServer)

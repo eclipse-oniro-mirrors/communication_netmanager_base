@@ -458,8 +458,12 @@ int32_t NetConnServiceStub::OnEnableDistributedServerNet(MessageParcel &data, Me
     if (!data.ReadString(dstAddr)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+    std::string gw = "";
+    if (!data.ReadString(gw)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
 
-    int32_t ret = EnableDistributedServerNet(iif, devIface, dstAddr);
+    int32_t ret = EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

@@ -407,7 +407,7 @@ public:
     int32_t DisableVnicNetwork() override;
     int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
     int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                       const std::string &dstAddr) override;
+                                       const std::string &dstAddr, const std::string &gw) override;
     int32_t DisableDistributedNet(bool isServer) override;
     int32_t CloseSocketsUid(int32_t netId, uint32_t uid) override;
     int32_t SetPacUrl(const std::string &pacUrl) override;
@@ -593,7 +593,7 @@ private:
     int32_t DisableVnicNetworkAsync();
     int32_t EnableDistributedClientNetAsync(const std::string &virnicAddr, const std::string &iif);
     int32_t EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
-                                            const std::string &dstAddr);
+                                            const std::string &dstAddr, const std::string &gw);
     int32_t DisableDistributedNetAsync(bool isServer);
     int32_t CloseSocketsUidAsync(int32_t netId, uint32_t uid);
     int32_t SetAppIsFrozenedAsync(uint32_t uid, bool isFrozened);

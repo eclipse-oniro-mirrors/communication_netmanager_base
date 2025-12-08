@@ -65,7 +65,8 @@ HWTEST_F(NetManagerNativeTest, EnableDistributedServerNet001, TestSize.Level1)
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
-    auto ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    auto ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     bool isServer = true;

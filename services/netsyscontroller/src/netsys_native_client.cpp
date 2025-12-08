@@ -386,14 +386,14 @@ int32_t NetsysNativeClient::EnableDistributedClientNet(const std::string &virnic
 }
 
 int32_t NetsysNativeClient::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                       const std::string &dstAddr)
+                                                       const std::string &dstAddr, const std::string &gw)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return proxy->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetsysNativeClient::DisableDistributedNet(bool isServer)

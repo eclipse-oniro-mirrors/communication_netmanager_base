@@ -211,7 +211,7 @@ public:
     }
 
     int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                       const std::string &dstAddr) override
+                                       const std::string &dstAddr, const std::string &gw) override
     {
         return 0;
     }

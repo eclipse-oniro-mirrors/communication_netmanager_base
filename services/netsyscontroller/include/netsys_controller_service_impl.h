@@ -61,7 +61,7 @@ public:
     int32_t DestroyVnic() override;
     int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
     int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                       const std::string &dstAddr) override;
+                                       const std::string &dstAddr, const std::string &gw) override;
     int32_t DisableDistributedNet(bool isServer) override;
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;

@@ -1441,7 +1441,7 @@ HWTEST_F(NetsysControllerTest, EnableDistributedServerNetTest001, TestSize.Level
 {
     auto netsysController = std::make_shared<NetsysController>();
 
-    int32_t ret = netsysController->EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100");
+    int32_t ret = netsysController->EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100", "0.0.0.0");
     EXPECT_EQ(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -1452,7 +1452,7 @@ HWTEST_F(NetsysControllerTest, EnableDistributedServerNetTest002, TestSize.Level
     netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
     netsysController->netsysService_ = netsysControllerServiceImpl;
 
-    int32_t ret = netsysController->EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100");
+    int32_t ret = netsysController->EnableDistributedServerNet(ETH0, WLAN, "192.168.1.100", "0.0.0.0");
     EXPECT_NE(ret, NETSYS_NETSYSSERVICE_NULL);
 }
 
@@ -1633,7 +1633,8 @@ HWTEST_F(NetsysControllerTest, EnableDistributedServerNet001, TestSize.Level1)
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
-    int32_t ret = netsysController->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    int32_t ret = netsysController->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     bool isServer = true;
