@@ -79,6 +79,7 @@ constexpr const char *DOMAIN_DELIMITER = ".";
 constexpr const char *TLDS_SPLIT_SYMBOL = "|";
 constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^(https?://)?[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
 constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
+constexpr const char *DEFAULT_IPV4_ANY_INIT_ADDR = "0.0.0.0";
 constexpr const char *DEFAULT_IPV6_ANY_INIT_ADDR = "::";
 const std::string DISPLAY_TRAFFIC_ANCO_LIST = "const.netmanager.display_traffic_anco_list";
 const std::regex IP_PATTERN{
@@ -1034,5 +1035,20 @@ std::string ExtractDomainFormUrl(const std::string &url)
         domain = url.substr(domainStartPos);
     }
     return domain;
+}
+
+bool IsValidAddress(const std::string &ipStrAddr)
+{
+    if (IsValidIPV4(ipStrAddr)) {
+        if (ipStrAddr != DEFAULT_IPV4_ANY_INIT_ADDR) {
+            return true;
+        }
+    }
+    if (IsValidIPV6(ipStrAddr)) {
+        if (ipStrAddr != DEFAULT_IPV6_ANY_INIT_ADDR) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
