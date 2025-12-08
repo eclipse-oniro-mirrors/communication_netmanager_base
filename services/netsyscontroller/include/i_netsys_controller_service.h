@@ -86,7 +86,7 @@ public:
     virtual int32_t DestroyVnic() = 0;
     virtual int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) = 0;
     virtual int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                               const std::string &dstAddr, const std::string &gw) = 0;
+                                               const std::string &dstAddr, const std::string &gw = "") = 0;
     virtual int32_t DisableDistributedNet(bool isServer) = 0;
     virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
     virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
