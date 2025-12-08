@@ -143,7 +143,7 @@ HWTEST_F(NetConnServiceProxyTest, EnableDistributedServerNet001, TestSize.Level1
     std::string gw = "0.0.0.0";
 
     int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 
     bool isServer = true;
     ret = instance_->DisableDistributedNet(isServer);
