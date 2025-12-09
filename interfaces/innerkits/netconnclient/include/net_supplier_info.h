@@ -41,7 +41,6 @@ struct NetSupplierInfo final : public Parcelable {
     int32_t uid_ = 0;
     std::string ident_;
     int32_t score_ = 0;
-    bool isMetered_ = true;
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSupplierInfo> Unmarshalling(Parcel &parcel);

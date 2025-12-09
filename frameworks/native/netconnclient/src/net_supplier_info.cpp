@@ -29,11 +29,6 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isRoaming_)) {
         return false;
     }
-    // LCOV_EXCL_START
-    if (!parcel.WriteBool(isMetered_)) {
-        return false;
-    }
-    // LCOV_EXCL_STOP
     if (!parcel.WriteInt8(strength_)) {
         return false;
     }
@@ -69,9 +64,6 @@ sptr<NetSupplierInfo> NetSupplierInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     if (!parcel.ReadBool(ptr->isRoaming_)) {
-        return nullptr;
-    }
-    if (!parcel.ReadBool(ptr->isMetered_)) {
         return nullptr;
     }
     if (!parcel.ReadInt8(ptr->strength_)) {
@@ -111,11 +103,6 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &o
     if (!parcel.WriteBool(object->isRoaming_)) {
         return false;
     }
-    // LCOV_EXCL_START
-    if (!parcel.WriteBool(object->isMetered_)) {
-        return false;
-    }
-    // LCOV_EXCL_STOP
     if (!parcel.WriteInt8(object->strength_)) {
         return false;
     }
