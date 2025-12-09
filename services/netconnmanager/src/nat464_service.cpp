@@ -93,6 +93,7 @@ void Nat464Service::UpdateServiceState(Nat464UpdateFlag updateFlag)
 
 void Nat464Service::StartPrefixDiscovery()
 {
+    NETMGR_LOG_I("start to discover prefix64 from DNS64 server");
     std::weak_ptr<Nat464Service> wp = shared_from_this();
     ffrt::submit([wp]() {
         if (auto sharedSelf = wp.lock()) {
