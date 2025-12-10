@@ -96,11 +96,11 @@ void Nat464Service::StartPrefixDiscovery()
     NETMGR_LOG_I("start to discover prefix64 from DNS64 server");
     std::weak_ptr<Nat464Service> wp = shared_from_this();
     ffrt::submit([wp]() {
-        if (auto sharedSelf = wp.lock()) {
-            sharedSelf->DiscoverPrefix();
-        }
-    }, {}, {}, ffrt::task_attr()
-        .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+            if (auto sharedSelf = wp.lock()) {
+                sharedSelf->DiscoverPrefix();
+            }
+        }, {}, {}, ffrt::task_attr()
+            .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
 }
 
 void Nat464Service::DiscoverPrefix()
@@ -126,11 +126,11 @@ void Nat464Service::DiscoverPrefix()
         discoveryCycleMs_ *= DISCOVERY_CYCLE_MULTIPLIER;
         std::weak_ptr<Nat464Service> wp = shared_from_this();
         ffrt::submit([wp]() {
-            if (auto sharedSelf = wp.lock()) {
-                sharedSelf->DiscoverPrefix();
-            }
-        }, {}, {}, ffrt::task_attr()
-            .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+                if (auto sharedSelf = wp.lock()) {
+                    sharedSelf->DiscoverPrefix();
+                }
+            }, {}, {}, ffrt::task_attr()
+                .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
     }
 }
 
