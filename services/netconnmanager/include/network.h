@@ -124,7 +124,7 @@ private:
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
     std::set<NetCap> netCaps_;
-    std::unique_ptr<Nat464Service> nat464Service_;
+    std::shared_ptr<Nat464Service> nat464Service_;
     std::shared_mutex netCapsMutex;
     uint64_t lastDetectTime_ = 0;
 #ifdef FEATURE_SUPPORT_POWERMANAGER
