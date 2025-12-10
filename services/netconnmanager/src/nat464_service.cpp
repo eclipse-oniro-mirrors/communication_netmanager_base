@@ -51,7 +51,7 @@ void Nat464Service::MaybeUpdateV6Iface(const std::string &v6Iface)
 void Nat464Service::UpdateService(Nat464UpdateFlag updateFlag)
 {
     std::weak_ptr<Nat464Service> wp = shared_from_this();
-    auto handle = serviceUpdateQueue_.submit_h([wp, updateFlag]() { 
+    auto handle = serviceUpdateQueue_.submit_h([wp, updateFlag]() {
         if (auto sharedSelf = wp.lock()) {
             sharedSelf->UpdateServiceState(updateFlag);
         }
@@ -99,8 +99,8 @@ void Nat464Service::StartPrefixDiscovery()
         if (auto sharedSelf = wp.lock()) {
             sharedSelf->DiscoverPrefix();
         }
-    }, {}, {}, ffrt::task_attr().
-                name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+    }, {}, {}, ffrt::task_attr()
+        .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
 }
 
 void Nat464Service::DiscoverPrefix()
@@ -129,8 +129,8 @@ void Nat464Service::DiscoverPrefix()
             if (auto sharedSelf = wp.lock()) {
                 sharedSelf->DiscoverPrefix();
             }
-        }, {}, {}, ffrt::task_attr().
-                    name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+        }, {}, {}, ffrt::task_attr()
+            .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
     }
 }
 
