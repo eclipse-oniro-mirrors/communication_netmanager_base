@@ -45,6 +45,32 @@ public:
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
+
+class GetAddressByNameWithOptionsContext final : public BaseContext {
+public:
+    GetAddressByNameWithOptionsContext() = delete;
+
+    explicit GetAddressByNameWithOptionsContext(napi_env env, std::shared_ptr<EventManager>& manager);
+
+    void ParseParams(napi_value *params, size_t paramsCount);
+
+    enum class Family : uint8_t {
+        All = 0,
+        IPv4 = 1,
+        IPv6 = 2,
+    };
+
+    int32_t netId_;
+
+    std::string host_;
+
+    std::vector<NetAddress> addresses_;
+
+    Family family_;
+
+private:
+    bool CheckParamsType(napi_value *params, size_t paramsCount);
+};
 } // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H */

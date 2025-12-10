@@ -83,6 +83,8 @@ public:
     static constexpr const char *FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC = "setNetExtAttributeSync";
     static constexpr const char *FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC = "getNetExtAttributeSync";
     static constexpr const char *FUNCTION_GET_IP_NEIGH_TABLE = "getIpNeighTable";
+    static constexpr const char *INTERFACE_FAMILY_TYPE = "FamilyType";
+    static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
     static std::initializer_list<napi_property_descriptor> createPropertyList();
@@ -162,6 +164,7 @@ private:
     static napi_value GetNetExtAttributeSync(napi_env env, napi_callback_info info);
     static napi_value SetNetExtAttributeSync(napi_env env, napi_callback_info info);
     static napi_value GetIpNeighTable(napi_env env, napi_callback_info info);
+    static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

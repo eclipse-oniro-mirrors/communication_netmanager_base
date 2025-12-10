@@ -56,6 +56,8 @@ napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
             NetHandleInterface::GetAddressesByName),
         DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
             NetHandleInterface::GetAddressByName),
+        DECLARE_WRITABLE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION,
+            NetHandleInterface::GetAddressesByNameWithOptions),
         DECLARE_NAPI_FUNCTION(NetHandleInterface::FUNCTION_BIND_SOCKET,
             NetHandleInterface::BindSocket),
     };
@@ -136,6 +138,16 @@ bool ConnectionExec::ExecGetAddressByName(GetAddressByNameContext *context)
 napi_value ConnectionExec::GetAddressByNameCallback(GetAddressByNameContext *context)
 {
     return NetHandleExec::GetAddressesByNameCallback(context);
+}
+
+bool ConnectionExec::ExecGetAddressesByNameWithOptions(GetAddressByNameWithOptionsContext *context)
+{
+    return NetHandleExec::ExecGetAddressesByNameWithOptions(context);
+}
+
+napi_value ConnectionExec::GetAddressesByNameWithOptionsCallback(GetAddressByNameWithOptionsContext *context)
+{
+    return NetHandleExec::GetAddressesByNameWithOptionsCallback(context);
 }
 
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
@@ -934,6 +946,69 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     return true;
 }
 
+napi_value ConnectionExec::NetHandleExec::GetAddressesByNameWithOptionsCallback(
+    GetAddressByNameWithOptionsContext *context)
+{
+    napi_value addresses = NapiUtils::CreateArray(context->GetEnv(), context->addresses_.size());
+    for (uint32_t index = 0; index < context->addresses_.size(); ++index) {
+        napi_value obj = MakeNetAddressJsValue(context->GetEnv(), context->addresses_[index]);
+        NapiUtils::SetArrayElement(context->GetEnv(), addresses, index, obj);
+    }
+    return addresses;
+}
+
+bool ConnectionExec::NetHandleExec::ExecGetAddressesByNameWithOptions(GetAddressByNameWithOptionsContext *context)
+{
+    if (!context->IsParseOK()) {
+        return false;
+    }
+    uint32_t netid = static_cast<uint32_t>(context->netId_);
+    addrinfo *res = nullptr;
+    queryparam param;
+    param.qp_type = QEURY_TYPE_NORMAL;
+    param.qp_netid = netid;
+    NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    if (context->host_.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty!");
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        return false;
+    }
+    struct addrinfo hints = {};
+    hints.ai_family = ConvertToAiFamily(context->family_);
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    int status = getaddrinfo_ext(context->host_.c_str(), nullptr, &hints, &res, &param);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s,  status: %{public}d", errno, strerror(errno),
+                             status);
+        int32_t temp = TransErrorCode(errno);
+        context->SetErrorCode(temp);
+        return false;
+    }
+
+    for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
+        std::string host;
+        if (tmp->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
+            char ip[MAX_IPV4_STR_LEN] = {0};
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            host = ip;
+        } else if (tmp->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
+            char ip[MAX_IPV6_STR_LEN] = {0};
+            inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+            host = ip;
+        }
+
+        NetAddress address;
+        SetAddressInfo(host.c_str(), tmp, address);
+
+        context->addresses_.emplace_back(address);
+    }
+    freeaddrinfo(res);
+    return true;
+}
+
 napi_value ConnectionExec::NetHandleExec::GetAddressByNameCallback(GetAddressByNameContext *context)
 {
     if (context->addresses_.empty()) {
@@ -1176,6 +1251,19 @@ void ConnectionExec::FillNetAddressInfo(napi_env env, napi_value jsNetAddress, c
         NapiUtils::SetUint32Property(env, jsNetAddress, KEY_FAMILY, static_cast<uint32_t>(NetAddress::Family::IPv4));
     } else if (ipNeighTable.family_ == FAMILY_V6) {
         NapiUtils::SetUint32Property(env, jsNetAddress, KEY_FAMILY, static_cast<uint32_t>(NetAddress::Family::IPv6));
+    }
+}
+
+
+int ConnectionExec::ConvertToAiFamily(GetAddressByNameWithOptionsContext::Family family)
+{
+    switch (family) {
+        case GetAddressByNameWithOptionsContext::Family::IPv4:
+            return AF_INET;
+        case GetAddressByNameWithOptionsContext::Family::IPv6:
+            return AF_INET6;
+        default:
+            return AF_UNSPEC;
     }
 }
 

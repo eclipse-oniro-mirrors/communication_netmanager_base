@@ -46,6 +46,18 @@ void ConnectionAsyncWork::GetAddressesByNameCallback(napi_env env, napi_status s
                                                                                                         data);
 }
 
+void ConnectionAsyncWork::ExecGetAddressesByNameWithOptions(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetAddressByNameWithOptionsContext, ConnectionExec::ExecGetAddressesByNameWithOptions>(
+        env, data);
+}
+
+void ConnectionAsyncWork::GetAddressesByNameWithOptionsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetAddressByNameWithOptionsContext,
+                                        ConnectionExec::GetAddressesByNameWithOptionsCallback>(
+        env, status, data);
+}
 void ConnectionAsyncWork::ExecHasDefaultNet(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<HasDefaultNetContext, ConnectionExec::ExecHasDefaultNet>(env, data);
@@ -372,6 +384,22 @@ void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressByName(napi_env env,
 void ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetAddressByNameContext, ConnectionExec::NetHandleExec::GetAddressByNameCallback>(
+        env, status, data);
+}
+
+void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByNameWithOptions(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetAddressByNameWithOptionsContext,
+                                    ConnectionExec::NetHandleExec::ExecGetAddressesByNameWithOptions>(
+        env, data);
+}
+
+void ConnectionAsyncWork::NetHandleAsyncWork::GetAddressesByNameWithOptionsCallback(napi_env env,
+                                                                                    napi_status status,
+                                                                                    void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetAddressByNameWithOptionsContext,
+                                        ConnectionExec::NetHandleExec::GetAddressesByNameWithOptionsCallback>(
         env, status, data);
 }
 

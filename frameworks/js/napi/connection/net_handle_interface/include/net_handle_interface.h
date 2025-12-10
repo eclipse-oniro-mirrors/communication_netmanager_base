@@ -25,10 +25,12 @@ public:
     static constexpr const char *PROPERTY_NET_ID = "netId";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME = "getAddressesByName";
     static constexpr const char *FUNCTION_GET_ADDRESS_BY_NAME = "getAddressByName";
+    static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
     static constexpr const char *FUNCTION_BIND_SOCKET = "bindSocket";
  
     static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
     static napi_value GetAddressByName(napi_env env, napi_callback_info info);
+    static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
     static napi_value BindSocket(napi_env env, napi_callback_info info);
 };
  
