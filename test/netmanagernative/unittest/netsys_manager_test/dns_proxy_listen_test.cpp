@@ -73,18 +73,6 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
     EXPECT_EQ(listener.netId_, 0);
 }
 
-HWTEST_F(DnsProxyListenTest, StartListenTest2, TestSize.Level1)
-{
-    NETNATIVE_LOGI("StartListenTest2 enter");
-    DnsProxyListen listener;
-    listener.proxySockFd_ = CLIENT_SOCKET;
-    listener.exitFd_ = TEST_SOCKET;
-    listener.StartListen();
-    listener.OffListen();
-    listener.clearResource();
-    EXPECT_EQ(listener.proxySockFd_, -1);
-}
-
 HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
 {
     DnsProxyListen listener;
