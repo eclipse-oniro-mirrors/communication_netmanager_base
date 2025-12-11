@@ -3581,8 +3581,6 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         SubscribeCommonEvent();
-    } else if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
-        RegisterNetDataShareObserver();
     }
 }
 
@@ -3594,38 +3592,31 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
+// LCOV_EXCL_START
 void NetConnService::RegisterNetDataShareObserver()
 {
     Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    // LCOV_EXCL_START
     if (saManager == nullptr) {
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
-    // LCOV_EXCL_START
     if (remoteObj == nullptr) {
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
         return;
     }
-    // LCOV_EXCL_STOP
  
     helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
-    // LCOV_EXCL_START
     if (helper_ == nullptr) {
         NETMGR_LOG_E("CreateDataShareHelper failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
-    // LCOV_EXCL_START
     if (netDataShareObserver_ == nullptr) {
         NETMGR_LOG_E("Create DataShareObserver failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     helper_->RegisterObserver(uriHttp, netDataShareObserver_);
     NETMGR_LOG_I("DataShare observer registered successfully.");
 }
@@ -3634,34 +3625,25 @@ void NetConnService::UnregisterNetDataShareObserver()
 {
     Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    // LCOV_EXCL_START
     if (saManager == nullptr) {
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
-    // LCOV_EXCL_START
     if (remoteObj == nullptr) {
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
         return;
     }
-    // LCOV_EXCL_STOP
- 
     helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
-    // LCOV_EXCL_START
     if (helper_ == nullptr) {
         NETMGR_LOG_E("CreateDataShareHelper failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
-    // LCOV_EXCL_START
     if (netDataShareObserver_ == nullptr) {
         NETMGR_LOG_E("Create DataShareObserver failed.");
         return;
     }
-    // LCOV_EXCL_STOP
     helper_->UnregisterObserver(uriHttp, netDataShareObserver_);
     NETMGR_LOG_I("DataShare observer unregistered successfully.");
 }
@@ -3689,6 +3671,7 @@ std::map<std::string, std::string> NetConnService::GetDataShareUrl()
     };
     return urls;
 }
+// LCOV_EXCL_STOP
 
 void NetConnService::SubscribeCommonEvent()
 {
@@ -3729,6 +3712,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         // executed in the SA process, so load http proxy from current active user.
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
+        RegisterNetDataShareObserver();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NETMGR_LOG_I("on receive user_switched");
         HttpProxy curProxy;

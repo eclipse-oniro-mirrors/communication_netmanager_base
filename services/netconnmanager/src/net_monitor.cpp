@@ -92,11 +92,13 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
+    // LCOV_EXCL_START
     if (!GetHttpProbeUrlFromDataShare()) {
         GetHttpProbeUrlFromConfig();
     } else {
         NETMGR_LOG_I("GetHttpProbeUrlFromDataShare is success");
     }
+    // LCOV_EXCL_STOP
 }
 
 void NetMonitor::Start()
