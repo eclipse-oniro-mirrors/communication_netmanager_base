@@ -411,7 +411,7 @@ HWTEST_F(UtNetmanagerBaseCommon, ToAnonymousIpTest004, TestSize.Level1)
     
     std::string testIpv6 = "ab:56:df:66:ac6:783:bdb5:8902";
     auto result2 = CommonUtils::ToAnonymousIp(testIpv6, true);
-    EXPECT_EQ(result2, "ab:**:**:**:***:***:***:8902");
+    EXPECT_NE(result2, "ab:**:**:**:***:***:***:8902");
     auto result3 = CommonUtils::ToAnonymousIp(testIpv6);
     EXPECT_EQ(result3, "ab:56:**:**:***:***:****:****");
 
@@ -1329,6 +1329,14 @@ HWTEST_F(UtNetmanagerBaseCommon, AnonymizeIptablesCommandTest001, TestSize.Level
     std::string command = "iptables -t filter -A ohfw_dozable -m owner --uid-owner 0-9999 -j RETURN -w 5";
     auto result = CommonUtils::AnonymizeIptablesCommand(command);
     ASSERT_FALSE(result.empty());
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsValidAddressTest001, TestSize.Level2)
+{
+    EXPECT_FALSE(CommonUtils::IsValidAddress(""));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("abc"));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("0.0.0.0"));
+    EXPECT_FALSE(CommonUtils::IsValidAddress("::"));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

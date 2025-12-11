@@ -537,6 +537,22 @@ declare namespace connection {
    */
   function getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
+
+  /**
+   * Resolves a host name to obtain all IP addresses based on the specified NetHandle.
+   * @permission ohos.permission.INTERNET
+   * @param { string } host Indicates the host name or the domain.
+   * @param { QueryOptions } option - Indicates the query option.
+   * @returns { Promise<Array<NetAddress>> } The promise returned by the function.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Failed to connect to the service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 23 dynamic&static
+   */
+  function getAddressesByNameWithOptions(host: string, option: QueryOptions): Promise<Array<NetAddress>>;
+
   /**
    * Obtains the {@link NetHandle} bound to a process using {@link setAppNet}.
    * @param { AsyncCallback<NetHandle> } callback Returns the {@link NetHandle} bound to the process;
@@ -1241,6 +1257,21 @@ declare namespace connection {
      * @since 8
      */
     getAddressesByName(host: string): Promise<Array<NetAddress>>;
+    
+    /**
+     * Resolves a host name to obtain all IP addresses based on the specified NetHandle.
+     * @permission ohos.permission.INTERNET
+     * @param { string } host Indicates the host name or the domain.
+     * @param { QueryOptions } option - Indicates the query option.
+     * @returns { Promise<Array<NetAddress>> } The promise returned by the function.
+     * @throws { BusinessError } 201 - Permission denied.
+     * @throws { BusinessError } 2100001 - Invalid parameter value.
+     * @throws { BusinessError } 2100002 - Failed to connect to the service.
+     * @throws { BusinessError } 2100003 - System internal error.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 23 dynamic&static
+     */
+    getAddressesByNameWithOptions(host: string, option: QueryOptions): Promise<Array<NetAddress>>;
 
     /**
      * Resolves a host name to obtain the first IP address based on the specified NetHandle.
@@ -1271,6 +1302,43 @@ declare namespace connection {
      * @since 8
      */
     getAddressByName(host: string): Promise<NetAddress>;
+  }
+  
+  /**
+   * Defines option of DNS query.
+   * @interface QueryOptions
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 23 dynamic&static
+   */
+  export interface QueryOptions {
+    family?: FamilyType;
+  }
+
+  /**
+   * Defines address family type.
+   * @enum {int}
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 23 dynamic&static
+   */
+  export enum FamilyType {
+    /**
+     * Indicates that no ip type is specified, all address types can be use.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 23 dynamic&static
+     */
+    FAMILY_TYPE_ALL = 0,
+    /**
+     * Indicates that family type is ipv4.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 23 dynamic&static
+     */
+    FAMILY_TYPE_IPV4 = 1,
+    /**
+     * Indicates that family type is ipv6.
+     * @syscap SystemCapability.Communication.NetManager.Core
+     * @since 23 dynamic&static
+     */
+    FAMILY_TYPE_IPV6 = 2,
   }
 
   /**

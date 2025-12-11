@@ -50,8 +50,12 @@ void Nat464Service::MaybeUpdateV6Iface(const std::string &v6Iface)
 
 void Nat464Service::UpdateService(Nat464UpdateFlag updateFlag)
 {
-    auto handle = serviceUpdateQueue_.submit_h([this, updateFlag]() { UpdateServiceState(updateFlag); },
-                                               ffrt::task_attr().name("UpdateNat464ServiceState"));
+    std::weak_ptr<Nat464Service> wp = shared_from_this();
+    auto handle = serviceUpdateQueue_.submit_h([wp, updateFlag]() {
+        if (auto sharedSelf = wp.lock()) {
+            sharedSelf->UpdateServiceState(updateFlag);
+        }
+    }, ffrt::task_attr().name("UpdateNat464ServiceState"));
     serviceUpdateQueue_.wait(handle);
 }
 
@@ -90,8 +94,13 @@ void Nat464Service::UpdateServiceState(Nat464UpdateFlag updateFlag)
 void Nat464Service::StartPrefixDiscovery()
 {
     NETMGR_LOG_I("start to discover prefix64 from DNS64 server");
-    ffrt::submit([this]() { DiscoverPrefix(); }, {}, {},
-                 ffrt::task_attr().name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+    std::weak_ptr<Nat464Service> wp = shared_from_this();
+    ffrt::submit([wp]() {
+            if (auto sharedSelf = wp.lock()) {
+                sharedSelf->DiscoverPrefix();
+            }
+        }, {}, {}, ffrt::task_attr()
+            .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
 }
 
 void Nat464Service::DiscoverPrefix()
@@ -115,8 +124,13 @@ void Nat464Service::DiscoverPrefix()
         ffrt::this_task::sleep_for(std::chrono::milliseconds(discoveryCycleMs_));
         discoveryIter_ += 1;
         discoveryCycleMs_ *= DISCOVERY_CYCLE_MULTIPLIER;
-        ffrt::submit([this]() { DiscoverPrefix(); }, {}, {},
-                     ffrt::task_attr().name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
+        std::weak_ptr<Nat464Service> wp = shared_from_this();
+        ffrt::submit([wp]() {
+                if (auto sharedSelf = wp.lock()) {
+                    sharedSelf->DiscoverPrefix();
+                }
+            }, {}, {}, ffrt::task_attr()
+                .name(("Prefix64DiscoveryIter" + std::to_string(discoveryIter_)).c_str()));
     }
 }
 

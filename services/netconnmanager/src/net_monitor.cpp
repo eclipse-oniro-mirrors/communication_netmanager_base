@@ -317,16 +317,16 @@ void NetMonitor::StartProbe(std::shared_ptr<ProbeThread>& httpProbeThread,
         backHttpThread->ProbeWithoutGlobalHttpProxy();
         backHttpsThread->ProbeWithoutGlobalHttpProxy();
     }
+    httpProbeThread->SetXReqId(xReqId_, xReqIdLen_);
+    backHttpThread->SetXReqId(xReqId_, xReqIdLen_);
     if (netBearType_ == BEARER_CELLULAR) {
         httpsProbeThread->Start();
         httpProbeThread->Start();
         backHttpsThread->Start();
         backHttpThread->Start();
     } else {
-        httpProbeThread->SetXReqId(xReqId_, xReqIdLen_);
         httpProbeThread->Start();
         httpsProbeThread->Start();
-        backHttpThread->SetXReqId(xReqId_, xReqIdLen_);
         backHttpThread->Start();
         backHttpsThread->Start();
     }

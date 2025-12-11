@@ -265,7 +265,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     lock.unlock();
     if (IsNat464Prefered()) {
         if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
+            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
         }
         nat464Service_->MaybeUpdateV6Iface(netLinkInfoBck.ifaceName_);
         nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);
@@ -875,7 +875,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
         NetLinkInfo netLinkInfoBck = netLinkInfo_;
         lock.unlock();
         if (nat464Service_ == nullptr) {
-            nat464Service_ = std::make_unique<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
+            nat464Service_ = std::make_shared<Nat464Service>(netId_, netLinkInfoBck.ifaceName_);
         }
         nat464Service_->MaybeUpdateV6Iface(netLinkInfoBck.ifaceName_);
         nat464Service_->UpdateService(NAT464_SERVICE_CONTINUE);

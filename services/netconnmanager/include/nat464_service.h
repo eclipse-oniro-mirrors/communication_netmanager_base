@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 
 class NetSupplier;
 
-class Nat464Service {
+class Nat464Service : public std::enable_shared_from_this<Nat464Service> {
 public:
     Nat464Service(int32_t netId, const std::string &v6Iface);
 

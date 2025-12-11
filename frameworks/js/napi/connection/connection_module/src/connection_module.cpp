@@ -258,6 +258,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION, GetAddressesByNameWithOptions),
         DEFINE_PAC_FUNCTIONS
     };
     return functions;
@@ -327,6 +328,24 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     napi_value pmtypes = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, pmtypes, proxyModeTypes);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_PROXY_MODE_TYPE, pmtypes);
+    
+    std::initializer_list<napi_property_descriptor> familyTypes = {
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "FAMILY_TYPE_ALL",
+            NapiUtils::CreateUint32(
+                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::All))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "FAMILY_TYPE_IPV4",
+            NapiUtils::CreateUint32(
+                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv4))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "FAMILY_TYPE_IPV6",
+            NapiUtils::CreateUint32(
+                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv6))),
+    };
+    napi_value fTypes = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, fTypes, familyTypes);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_FAMILY_TYPE, fTypes);
 }
 
 napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info info)
@@ -336,11 +355,20 @@ napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info
                                                               ConnectionAsyncWork::GetAddressesByNameCallback);
 }
 
+napi_value ConnectionModule::GetAddressesByNameWithOptions(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetAddressByNameWithOptionsContext>(
+        env, info, FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION, nullptr,
+        ConnectionAsyncWork::ExecGetAddressesByNameWithOptions,
+        ConnectionAsyncWork::GetAddressesByNameWithOptionsCallback);
+}
+
 napi_value ConnectionModule::HasDefaultNet(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<HasDefaultNetContext>(env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
-                                                           ConnectionAsyncWork::ExecHasDefaultNet,
-                                                           ConnectionAsyncWork::HasDefaultNetCallback);
+    return ModuleTemplate::Interface<HasDefaultNetContext>(
+        env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
+        ConnectionAsyncWork::ExecHasDefaultNet,
+        ConnectionAsyncWork::HasDefaultNetCallback);
 }
 
 napi_value ConnectionModule::HasDefaultNetSync(napi_env env, napi_callback_info info)

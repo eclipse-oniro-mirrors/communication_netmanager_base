@@ -47,6 +47,18 @@ napi_value NetHandleInterface::GetAddressByName(napi_env env, napi_callback_info
         ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback);
 }
 
+napi_value NetHandleInterface::GetAddressesByNameWithOptions(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetAddressByNameWithOptionsContext>(
+        env, info, FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION,
+        [](napi_env theEnv, napi_value thisVal, GetAddressByNameWithOptionsContext *context) -> bool {
+            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
+            return true;
+        },
+    ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByNameWithOptions,
+        ConnectionAsyncWork::NetHandleAsyncWork::GetAddressesByNameWithOptionsCallback);
+}
+
 napi_value NetHandleInterface::BindSocket(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<BindSocketContext>(
