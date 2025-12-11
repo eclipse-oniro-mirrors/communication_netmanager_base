@@ -88,6 +88,8 @@ constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
 constexpr const char *PERSIST_EDM_AIRPLANE_MODE_DISABLE = "persist.edm.airplane_mode_disable";
 constexpr const char *PERSIST_WIFI_DELAY_ELEVATOR_ENABLE = "persist.booster.enable_wifi_delay_elevator";
 constexpr const char *PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE = "persist.booster.enable_wifi_delay_weak_signal";
+constexpr const char *SETTINGS_DATASHARE_URI_HTTP =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=EffectiveTime";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -101,6 +103,7 @@ NetConnService::NetConnService()
 NetConnService::~NetConnService()
 {
     RemoveALLClientDeathRecipient();
+    UnregisterNetDataShareObserver();
 }
 
 void NetConnService::OnStart()
@@ -195,6 +198,7 @@ bool NetConnService::Init()
     AddSystemAbilityListener(ACCESS_TOKEN_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
 
     if (netConnEventHandler_) {
         netConnEventHandler_->PostAsyncTask([&]() { CheckProxyStatus(); }, PROXY_INIT_DELAY_TIME);
@@ -3577,6 +3581,8 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         SubscribeCommonEvent();
+    } else if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
+        RegisterNetDataShareObserver();
     }
 }
 
@@ -3586,6 +3592,85 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         hasSARemoved_ = true;
     }
+}
+
+void NetConnService::RegisterNetDataShareObserver()
+{
+    Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
+        return;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return;
+    }
+ 
+    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
+    if (helper_ == nullptr) {
+        NETMGR_LOG_E("CreateDataShareHelper failed.");
+        return;
+    }
+    netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
+    if (netDataShareObserver_ == nullptr) {
+        NETMGR_LOG_E("Create DataShareObserver failed.");
+        return;
+    }
+    helper_->RegisterObserver(uriHttp, netDataShareObserver_);
+    NETMGR_LOG_I("DataShare observer registered successfully.");
+}
+ 
+void NetConnService::UnregisterNetDataShareObserver()
+{
+    Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
+        return;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        return;
+    }
+ 
+    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
+    if (helper_ == nullptr) {
+        NETMGR_LOG_E("CreateDataShareHelper failed.");
+        return;
+    }
+    netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
+    if (netDataShareObserver_ == nullptr) {
+        NETMGR_LOG_E("Create DataShareObserver failed.");
+        return;
+    }
+    helper_->UnregisterObserver(uriHttp, netDataShareObserver_);
+    NETMGR_LOG_I("DataShare observer registered successfully.");
+}
+ 
+void NetConnService::HandleDataShareMessage()
+{
+    Uri uri(SETTINGS_DATASHARE_URI);
+    NetDataShareHelperUtils utils;
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    utils.Query(uri, "httpMain", httpProbeUrlExt_);
+    utils.Query(uri, "httpsMain", httpsProbeUrlExt_);
+    utils.Query(uri, "httpBackup", FallbackHttpProbeUrlExt_);
+    utils.Query(uri, "httpsBackup", FallbackHttpsProbeUrlExt_);
+    NETMGR_LOG_I("HandleDataShareMessage successfully");
+}
+ 
+std::map<std::string, std::string> NetConnService::GetDataShareUrl() {
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    std::map<std::string, std::string> urls = {
+        {"httpMain", httpProbeUrlExt_},
+        {"httpsMain", httpsProbeUrlExt_},
+        {"httpBackup", FallbackHttpProbeUrlExt_},
+        {"httpsBackup", FallbackHttpsProbeUrlExt_}
+    };
+    return urls;
 }
 
 void NetConnService::SubscribeCommonEvent()

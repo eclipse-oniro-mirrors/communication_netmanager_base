@@ -434,6 +434,20 @@ public:
     int32_t DualStackProbe(uint32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
+    std::map<std::string, std::string> GetDataShareUrl();
+    class NetDataShareObserver : public AAFwk::DataAbilityObserverStub {
+    public:
+        explicit NetDataShareObserver(NetConnService &instance) : NetConnService_(instance) {}
+        ~NetDataShareObserver() = default;
+        void OnChange() override
+        {
+            NETMGR_LOG_I("OnChange successfully.");
+            NetConnService_.HandleDataShareMessage();
+        }
+    private:
+        NetConnService &NetConnService_;
+    };
+    void HandleDataShareMessage();
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -619,6 +633,8 @@ private:
     void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
     void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
+    void RegisterNetDataShareObserver();
+    void UnregisterNetDataShareObserver();
 
 private:
     enum ServiceRunningState {
@@ -660,6 +676,13 @@ private:
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
+    std::mutex dataShareMutex_;
+    std::shared_ptr<DataShare::DataShareHelper> helper_ = nullptr;
+    sptr<NetDataShareObserver> netDataShareObserver_ = nullptr;
+    std::string httpProbeUrlExt_ = "";
+    std::string httpsProbeUrlExt_ = "";
+    std::string FallbackHttpProbeUrlExt_ = "";
+    std::string FallbackHttpsProbeUrlExt_ = "";
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;

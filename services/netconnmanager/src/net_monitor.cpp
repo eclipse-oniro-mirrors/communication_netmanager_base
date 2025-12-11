@@ -40,6 +40,7 @@
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
 #include "cJSON.h"
+#include "net_conn_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -91,7 +92,11 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     lastDetectTimestamp_ = netMonitorInfo.lastDetectTime;
     LoadGlobalHttpProxy();
     GetDetectUrlConfig();
-    GetHttpProbeUrlFromConfig();
+    if (!GetHttpProbeUrlFromDataShare()) {
+        GetHttpProbeUrlFromConfig();
+    } else {
+        NETMGR_LOG_I("GetHttpProbeUrlFromDataShare is success");
+    }
 }
 
 void NetMonitor::Start()
@@ -483,6 +488,24 @@ void NetMonitor::GetDetectUrlConfig()
         isNeedSuffix_ = value.compare(ADD_RANDOM_CFG_VALUE) == 0;
     }
     NETMGR_LOG_D("is need add suffix (%{public}d)", isNeedSuffix_);
+}
+
+bool NetMonitor::GetHttpProbeUrlFromDataShare()
+{
+    std::map<std::string, std::string> ProbeMap = NetConnService::GetInstance()->GetDataShareUrl();
+    httpUrl_ = ProbeMap["httpMain"];
+    httpsUrl_ = ProbeMap["httpsMain"];
+    fallbackHttpUrl_ = ProbeMap["httpBackup"];
+    fallbackHttpsUrl_ = ProbeMap["httpsBackup"];
+    if (!httpUrl_.empty() && !httpsUrl_.empty() &&
+        !fallbackHttpUrl_.empty() && !fallbackHttpsUrl_.empty()) {
+        if (isNeedSuffix_) {
+            uint64_t ranNum = CommonUtils::GenRandomNumber();
+            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);            
+        }
+        return true;
+    }
+    return false;
 }
 
 bool NetMonitor::CheckIfSettingsDataReady()

@@ -123,7 +123,8 @@ private:
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
-
+    bool GetHttpProbeUrlFromDataShare();
+    
 private:
     uint32_t netId_ = 0;
     NetBearType netBearType_;
