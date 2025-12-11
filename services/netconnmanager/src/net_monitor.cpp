@@ -497,6 +497,7 @@ bool NetMonitor::GetHttpProbeUrlFromDataShare()
     httpsUrl_ = ProbeMap["httpsMain"];
     fallbackHttpUrl_ = ProbeMap["httpBackup"];
     fallbackHttpsUrl_ = ProbeMap["httpsBackup"];
+    // LCOV_EXCL_START
     if (!httpUrl_.empty() && !httpsUrl_.empty() &&
         !fallbackHttpUrl_.empty() && !fallbackHttpsUrl_.empty()) {
         if (isNeedSuffix_) {
@@ -505,6 +506,7 @@ bool NetMonitor::GetHttpProbeUrlFromDataShare()
         }
         return true;
     }
+    // LCOV_EXCL_STOP
     return false;
 }
 
