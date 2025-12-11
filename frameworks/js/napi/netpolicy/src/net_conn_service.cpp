@@ -3663,7 +3663,7 @@ void NetConnService::UnregisterNetDataShareObserver()
     }
     // LCOV_EXCL_STOP
     helper_->UnregisterObserver(uriHttp, netDataShareObserver_);
-    NETMGR_LOG_I("DataShare observer registered successfully.");
+    NETMGR_LOG_I("DataShare observer unregistered successfully.");
 }
  
 void NetConnService::HandleDataShareMessage()
