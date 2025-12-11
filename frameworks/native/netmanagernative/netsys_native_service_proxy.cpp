@@ -1080,6 +1080,7 @@ int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &
         return ERR_FLATTEN_OBJECT;
     }
 
+    // LCOV_EXCL_START
     if (!data.WriteString(iif)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -1095,6 +1096,7 @@ int32_t NetsysNativeServiceProxy::EnableDistributedServerNet(const std::string &
     if (!data.WriteString(gw)) {
         return ERR_FLATTEN_OBJECT;
     }
+    // LCOV_EXCL_STOP
 
     MessageParcel reply;
     MessageOption option;

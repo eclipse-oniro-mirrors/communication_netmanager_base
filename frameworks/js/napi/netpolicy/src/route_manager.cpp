@@ -813,7 +813,7 @@ int32_t RouteManager::EnableDistributedServerNet(const std::string &iif, const s
                                                  const std::string &dstAddr, const std::string &gw)
 {
     NETNATIVE_LOGI("EnableDistributedServerNet iif:%{public}s,devIface:%{public}s,dstAddr:%{public}s,gw:%{public}s",
-                   iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str(), gw.c_str());
+                   iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str(), ToAnonymousIp(gw).c_str());
 
     int32_t ret = ROUTEMANAGER_SUCCESS;
     DistributedManager::GetInstance().SetServerNicInfo(iif, devIface);
