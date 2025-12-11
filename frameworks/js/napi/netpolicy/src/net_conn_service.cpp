@@ -3606,7 +3606,7 @@ void NetConnService::RegisterNetDataShareObserver()
         return;
     }
  
-    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
+    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
     if (helper_ == nullptr) {
         NETMGR_LOG_E("CreateDataShareHelper failed.");
         return;
@@ -3633,7 +3633,8 @@ void NetConnService::UnregisterNetDataShareObserver()
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
         return;
     }
-    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
+    
+    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
     if (helper_ == nullptr) {
         NETMGR_LOG_E("CreateDataShareHelper failed.");
         return;
