@@ -3678,7 +3678,8 @@ void NetConnService::HandleDataShareMessage()
     NETMGR_LOG_I("HandleDataShareMessage successfully");
 }
  
-std::map<std::string, std::string> NetConnService::GetDataShareUrl() {
+std::map<std::string, std::string> NetConnService::GetDataShareUrl() 
+{
     std::lock_guard<std::mutex> lock(dataShareMutex_);
     std::map<std::string, std::string> urls = {
         {"httpMain", httpProbeUrlExt_},

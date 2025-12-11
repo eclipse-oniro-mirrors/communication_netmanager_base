@@ -502,7 +502,7 @@ bool NetMonitor::GetHttpProbeUrlFromDataShare()
         !fallbackHttpUrl_.empty() && !fallbackHttpsUrl_.empty()) {
         if (isNeedSuffix_) {
             uint64_t ranNum = CommonUtils::GenRandomNumber();
-            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);            
+            httpUrl_ = httpUrl_ + std::string("_") + std::to_string(ranNum);
         }
         return true;
     }
