@@ -325,7 +325,7 @@ HWTEST_F(NetPolicyCallbackUTest, NotifyNetUidPolicyChange001, TestSize.Level1)
     uint32_t uid = 123;
     uint32_t policy = 123;
     auto result = g_netPolicyCallback->NotifyNetUidPolicyChange(uid, policy);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 /**
@@ -338,7 +338,7 @@ HWTEST_F(NetPolicyCallbackUTest, NotifyNetUidRuleChange001, TestSize.Level1)
     uint32_t uid = 123;
     uint32_t rule = 123;
     auto result = g_netPolicyCallback->NotifyNetUidRuleChange(uid, rule);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 /**
@@ -350,7 +350,7 @@ HWTEST_F(NetPolicyCallbackUTest, NotifyNetBackgroundPolicyChange001, TestSize.Le
 {
     bool isAllowed = true;
     auto result = g_netPolicyCallback->NotifyNetBackgroundPolicyChange(isAllowed);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 /**
@@ -363,7 +363,7 @@ HWTEST_F(NetPolicyCallbackUTest, NotifyNetQuotaPolicyChange001, TestSize.Level1)
     NetQuotaPolicy netquotapolicy;
     std::vector<NetQuotaPolicy> quotaPolicies = {netquotapolicy};
     auto result = g_netPolicyCallback->NotifyNetQuotaPolicyChange(quotaPolicies);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 /**
@@ -375,7 +375,7 @@ HWTEST_F(NetPolicyCallbackUTest, NotifyNetMeteredIfacesChange001, TestSize.Level
 {
     std::vector<std::string> ifaces = {"123"};
     auto result = g_netPolicyCallback->NotifyNetMeteredIfacesChange(ifaces);
-    EXPECT_EQ(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_NE(result, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

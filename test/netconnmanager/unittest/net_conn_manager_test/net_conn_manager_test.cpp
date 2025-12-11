@@ -694,7 +694,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager017, TestSize.Level1)
         for (auto netId : netIdList) {
             std::cout << "Get net id:" << netId << " through ident:" << ident << std::endl;
         }
-        EXPECT_GE(result, NETMANAGER_SUCCESS);
+        EXPECT_LE(result, NETMANAGER_SUCCESS);
     }
 }
 
