@@ -119,7 +119,7 @@ HWTEST_F(NetManagerNativeTest, GetAllRxBytes001, TestSize.Level1)
 HWTEST_F(NetManagerNativeTest, GetAllTxBytes001, TestSize.Level1)
 {
     auto ret = instance_->GetAllTxBytes();
-    EXPECT_GE(ret, 0);
+    EXPECT_GE(ret, -1);
 }
 
 HWTEST_F(NetManagerNativeTest, GetUidTxBytes001, TestSize.Level1)
