@@ -112,6 +112,15 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
     EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
 }
 
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare001, TestSize.Level1)
+{
+    instance_->GetHttpProbeUrlFromDataShare();
+    EXPECT_TRUE(instance_->httpUrl_.empty());
+    EXPECT_TRUE(instance_->httpsUrl_.empty());
+    EXPECT_TRUE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_TRUE(instance_->fallbackHttpsUrl_.empty());
+}
+
 HWTEST_F(NetMonitorTest, GetXReqIDFromConfig001, TestSize.Level1)
 {
     std::string content = "";
