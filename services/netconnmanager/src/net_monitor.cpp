@@ -494,12 +494,11 @@ void NetMonitor::GetDetectUrlConfig()
 
 bool NetMonitor::GetHttpProbeUrlFromDataShare()
 {
-    std::map<std::string, std::string> ProbeMap = NetConnService::GetInstance()->GetDataShareUrl();
-    httpUrl_ = ProbeMap["httpMain"];
-    httpsUrl_ = ProbeMap["httpsMain"];
-    fallbackHttpUrl_ = ProbeMap["httpBackup"];
-    fallbackHttpsUrl_ = ProbeMap["httpsBackup"];
-    // LCOV_EXCL_START
+    ProbeUrls probeUrl = NetConnService::GetInstance()->GetDataShareUrl();
+    httpUrl_ = probeUrl.httpProbeUrlExt;
+    httpsUrl_ = probeUrl.httpsProbeUrlExt;
+    fallbackHttpUrl_ = probeUrl.fallbackHttpProbeUrlExt;
+    fallbackHttpsUrl_ = probeUrl.fallbackHttpsProbeUrlExt;
     if (!httpUrl_.empty() && !httpsUrl_.empty() &&
         !fallbackHttpUrl_.empty() && !fallbackHttpsUrl_.empty()) {
         if (isNeedSuffix_) {
@@ -508,7 +507,6 @@ bool NetMonitor::GetHttpProbeUrlFromDataShare()
         }
         return true;
     }
-    // LCOV_EXCL_STOP
     return false;
 }
 

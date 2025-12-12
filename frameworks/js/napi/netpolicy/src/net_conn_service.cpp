@@ -3594,58 +3594,17 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
 // LCOV_EXCL_START
 void NetConnService::RegisterNetDataShareObserver()
 {
-    Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (saManager == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
-        return;
-    }
-    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
-    if (remoteObj == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
-        return;
-    }
- 
-    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
-    if (helper_ == nullptr) {
-        NETMGR_LOG_E("CreateDataShareHelper failed.");
-        return;
-    }
-    netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
-    if (netDataShareObserver_ == nullptr) {
-        NETMGR_LOG_E("Create DataShareObserver failed.");
-        return;
-    }
-    helper_->RegisterObserver(uriHttp, netDataShareObserver_);
-    NETMGR_LOG_I("DataShare observer registered successfully.");
+    NETMGR_LOG_I("start registered");
+    helper_ = std::make_shared<NetDataShareHelperUtilsIface>();
+    auto onChange = std::bind(&NetConnService::HandleDataShareMessage, this);
+    helperCallbackId_ = helper_->RegisterObserver(SETTINGS_DATASHARE_URI_HTTP, onChange);
+    NETMGR_LOG_I("DataShare observer registered successfully");
 }
- 
+
 void NetConnService::UnregisterNetDataShareObserver()
 {
-    Uri uriHttp(SETTINGS_DATASHARE_URI_HTTP);
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (saManager == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
-        return;
-    }
-    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
-    if (remoteObj == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
-        return;
-    }
-    
-    helper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
-    if (helper_ == nullptr) {
-        NETMGR_LOG_E("CreateDataShareHelper failed.");
-        return;
-    }
-    netDataShareObserver_ = sptr<NetDataShareObserver>::MakeSptr(*this);
-    if (netDataShareObserver_ == nullptr) {
-        NETMGR_LOG_E("Create DataShareObserver failed.");
-        return;
-    }
-    helper_->UnregisterObserver(uriHttp, netDataShareObserver_);
-    NETMGR_LOG_I("DataShare observer unregistered successfully.");
+    helper_->UnregisterObserver(SETTINGS_DATASHARE_URI_HTTP, helperCallbackId_);
+    NETMGR_LOG_I("DataShare observer unregistered successfully");
 }
  
 void NetConnService::HandleDataShareMessage()
@@ -3660,16 +3619,9 @@ void NetConnService::HandleDataShareMessage()
     NETMGR_LOG_I("HandleDataShareMessage successfully");
 }
  
-std::map<std::string, std::string> NetConnService::GetDataShareUrl()
-{
+ProbeUrls NetConnService::GetDataShareUrl() {
     std::lock_guard<std::mutex> lock(dataShareMutex_);
-    std::map<std::string, std::string> urls = {
-        {"httpMain", httpProbeUrlExt_},
-        {"httpsMain", httpsProbeUrlExt_},
-        {"httpBackup", FallbackHttpProbeUrlExt_},
-        {"httpsBackup", FallbackHttpsProbeUrlExt_}
-    };
-    return urls;
+    return probeUrl_;
 }
 // LCOV_EXCL_STOP
 

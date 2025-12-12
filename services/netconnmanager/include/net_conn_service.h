@@ -48,6 +48,7 @@
 #include "common_event_support.h"
 #include "os_account_manager.h"
 #include "app_state_aware.h"
+#include "net_datashare_utils_iface.h"
 
 #include "net_trace_route_probe.h"
 #include "net_pac_local_proxy_server.h"
@@ -59,6 +60,12 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
+struct ProbeUrls {
+    std::string httpProbeUrlExt;
+    std::string httpsProbeUrlExt;
+    std::string fallbackHttpProbeUrlExt;
+    std::string fallbackHttpsProbeUrlExt;
+};
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
@@ -434,7 +441,7 @@ public:
     int32_t DualStackProbe(uint32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
-    std::map<std::string, std::string> GetDataShareUrl();
+    ProbeUrls GetDataShareUrl();
     class NetDataShareObserver : public AAFwk::DataAbilityObserverStub {
     public:
         explicit NetDataShareObserver(NetConnService &instance) : NetConnService_(instance) {}
@@ -677,12 +684,9 @@ private:
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
     std::mutex dataShareMutex_;
-    std::shared_ptr<DataShare::DataShareHelper> helper_ = nullptr;
-    sptr<NetDataShareObserver> netDataShareObserver_ = nullptr;
-    std::string httpProbeUrlExt_ = "";
-    std::string httpsProbeUrlExt_ = "";
-    std::string FallbackHttpProbeUrlExt_ = "";
-    std::string FallbackHttpsProbeUrlExt_ = "";
+    std::shared_ptr<NetDataShareHelperUtilsIface> helper_ = nullptr;
+    ProbeUrls probeUrl_;
+    int32_t helperCallbackId_;
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;
