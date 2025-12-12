@@ -71,6 +71,10 @@ public:
 
     void EnableIpv6(uint16_t netId);
 
+    bool IsIpv4Enable(uint16_t netId);
+
+    void EnableIpv4(uint16_t netId);
+
     int32_t AddUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
     int32_t DelUidRange(uint32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);

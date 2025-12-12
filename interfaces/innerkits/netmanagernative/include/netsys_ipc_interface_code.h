@@ -158,6 +158,7 @@ enum class NetsysInterfaceCode {
 #endif
     NETSYS_SET_INTERNET_ACCESS_BY_IP_FOR_NET_SHARE,
     NETSYS_GET_IP_NEIGH_TABLE,
+    NETSYS_NETWORK_ENABLE_IPV4,
 };
 
 enum class NotifyInterfaceCode {

@@ -182,6 +182,34 @@ bool DnsParamCache::IsIpv6Enable(uint16_t netId)
     return it->second.IsIpv6Enable();
 }
 
+void DnsParamCache::EnableIpv4(uint16_t netId)
+{
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("EnableIpv4 netid:%{public}d,", netId);
+        return;
+    }
+
+    it->second.EnableIpv4();
+}
+
+bool DnsParamCache::IsIpv4Enable(uint16_t netId)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
+    auto it = serverConfigMap_.find(netId);
+    if (it == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("IsIpv4Enable netid:%{public}d,", netId);
+        return false;
+    }
+
+    return it->second.IsIpv4Enable();
+}
+
 int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
                                          std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                          uint8_t &retryCount)

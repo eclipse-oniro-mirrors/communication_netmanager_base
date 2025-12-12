@@ -53,6 +53,7 @@ public:
                                     uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
+    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
@@ -250,4 +251,12 @@ HWTEST_F(DnsResolvListenTest, ProcBindSocketCommand, TestSize.Level0)
     EXPECT_EQ(dnsResolvListenInternal.serverSockFd_, -1);
 }
 
+HWTEST_F(DnsResolvListenTest, ProcJudgeIpv4Command_EnableIpv4, TestSize.Level0)
+{
+    int clientSockFd = 1;
+    uint16_t netId = 100;
+    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId) ? 1 : 0;
+    dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId);
+    EXPECT_EQ(enable, 0);
+}
 }  // namespace OHOS::nmd

@@ -197,6 +197,7 @@ int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceNa
     auto ret = connManager_->AddRoute(netId, networkRouteInfo, routeRepeat);
     if (!ret || routeRepeat) {
         dnsManager_->EnableIpv6(netId, destination, nextHop);
+        dnsManager_->EnableIpv4(netId, destination, nextHop);
     }
     return ret;
 }

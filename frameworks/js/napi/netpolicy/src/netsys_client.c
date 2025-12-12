@@ -535,6 +535,42 @@ int NetSysIsIpv6Enable(uint16_t netId)
     return enable;
 }
 
+static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, int *enable)
+{
+    struct RequestInfo info = {
+        .uid = getuid(),
+        .command = JUDGE_IPV4,
+        .netId = netId,
+    };
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
+        DNS_CONFIG_PRINT("read failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int NetSysIsIpv4Enable(uint16_t netId)
+{
+    int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysIsIpv4Enable CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return -1;
+    }
+    int enable = 0;
+    int err = NetSysIsIpv4EnableInternal(sockFd, netId, &enable);
+    if (err < 0) {
+        return -1;
+    }
+    DNS_CONFIG_PRINT("NetSysIsIpv4Enable : enable:%d", enable);
+    return enable;
+}
+
 static int32_t NetSysPostDnsResultPollSendData(int sockFd, int queryret, int32_t resNum, struct QueryParam *param,
                                                struct AddrInfo addrInfo[static MAX_RESULTS])
 {

@@ -105,6 +105,26 @@ HWTEST_F(DnsManagerTest, EnableIpv6Test001, TestSize.Level1)
     EXPECT_FALSE(DnsParamCache::GetInstance().IsIpv6Enable(netId));
 }
 
+HWTEST_F(DnsManagerTest, EnableIpv4Test001, TestSize.Level1)
+{
+    DnsManager dnsManager;
+    uint16_t netId = 123;
+    std::string destination = "123";
+    std::string nextHop = "";
+    dnsManager.CreateNetworkCache(netId);
+    dnsManager.EnableIpv4(netId, destination, nextHop);
+    EXPECT_EQ(destination, "123");
+    destination = "192.100.100.1/ab";
+    dnsManager.EnableIpv4(netId, destination, nextHop);
+    nextHop = "192.100.100.1/0";
+    dnsManager.EnableIpv4(netId, destination, nextHop);
+    destination = "192.100.100.1";
+    dnsManager.EnableIpv4(netId, destination, nextHop);
+    destination = "0.0.0.0";
+    dnsManager.EnableIpv4(netId, destination, nextHop);
+    EXPECT_TRUE(DnsParamCache::GetInstance().IsIpv4Enable(netId));
+}
+
 HWTEST_F(DnsManagerTest, GetAddrInfoTest001, TestSize.Level1)
 {
     DnsManager dnsManager;

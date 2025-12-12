@@ -77,6 +77,21 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
     }
 }
 
+void DnsManager::EnableIpv4(uint16_t netId, const std::string &destination, const std::string &nextHop)
+{
+    std::string ip = "";
+    auto pos = destination.find("/");
+    if (pos != std::string::npos) {
+        ip = destination.substr(0, pos);
+    } else {
+        ip = destination;
+        NETNATIVE_LOGI("EnableIpv4 npos");
+    }
+    if ((IsValidIPV4(ip)) && (IsValidIPV4(nextHop) || nextHop.empty())) {
+        DnsParamCache::GetInstance().EnableIpv4(netId);
+    }
+}
+
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
                                       const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {

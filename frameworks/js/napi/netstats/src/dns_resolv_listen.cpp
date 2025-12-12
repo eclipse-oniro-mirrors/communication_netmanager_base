@@ -65,6 +65,7 @@ private:
                                     uint32_t resNum);
     static void ProcGetCacheCommand(const std::string &name, int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
+    static void ProcJudgeIpv4Command(int clientSockFd, uint16_t netId);
     static void ProcGetDefaultNetworkCommand(int clientSockFd);
     static void ProcBindSocketCommand(int32_t remoteFd, uint16_t netId);
     static void AddPublicDnsServers(ResolvConfig &sendData, size_t serverSize);
@@ -333,6 +334,14 @@ void DnsResolvListenInternal::ProcJudgeIpv6Command(int clientSockFd, uint16_t ne
     }
 }
 
+void DnsResolvListenInternal::ProcJudgeIpv4Command(int clientSockFd, uint16_t netId)
+{
+    int enable = DnsParamCache::GetInstance().IsIpv4Enable(netId) ? 1 : 0;
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
+        DNS_CONFIG_PRINT("send failed");
+    }
+}
+
 void DnsResolvListenInternal::ProcGetDefaultNetworkCommand(int clientSockFd)
 {
     NetHandle netHandle;
@@ -433,6 +442,9 @@ ReceiverRunner DnsResolvListenInternal::ProcCommand()
                 server_->AddReceiver(fd, DNS_QUERY_ABNORMAL_SIZE,
                                      ProcPostDnsThreadAbnormal());
                 return FixedLengthReceiverState::CONTINUE;
+            case JUDGE_IPV4:
+                ProcJudgeIpv4Command(fd, netId);
+                return FixedLengthReceiverState::DATA_ENOUGH;
             default:
                 return FixedLengthReceiverState::ONERROR;
         }
