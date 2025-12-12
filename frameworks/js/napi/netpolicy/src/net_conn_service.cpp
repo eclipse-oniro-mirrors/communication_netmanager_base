@@ -3612,10 +3612,10 @@ void NetConnService::HandleDataShareMessage()
     Uri uri(SETTINGS_DATASHARE_URI);
     NetDataShareHelperUtils utils;
     std::lock_guard<std::mutex> lock(dataShareMutex_);
-    utils.Query(uri, "httpMain", httpProbeUrlExt_);
-    utils.Query(uri, "httpsMain", httpsProbeUrlExt_);
-    utils.Query(uri, "httpBackup", FallbackHttpProbeUrlExt_);
-    utils.Query(uri, "httpsBackup", FallbackHttpsProbeUrlExt_);
+    utils.Query(uri, "httpMain", probeUrl_.httpProbeUrlExt);
+    utils.Query(uri, "httpsMain", probeUrl_.httpsProbeUrlExt);
+    utils.Query(uri, "httpBackup", probeUrl_.fallbackHttpProbeUrlExt);
+    utils.Query(uri, "httpsBackup", probeUrl_.fallbackHttpsProbeUrlExt);
     NETMGR_LOG_I("HandleDataShareMessage successfully");
 }
  
