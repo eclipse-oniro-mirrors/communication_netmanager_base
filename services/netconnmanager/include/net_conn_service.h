@@ -442,18 +442,6 @@ public:
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
     ProbeUrls GetDataShareUrl();
-    class NetDataShareObserver : public AAFwk::DataAbilityObserverStub {
-    public:
-        explicit NetDataShareObserver(NetConnService &instance) : NetConnService_(instance) {}
-        ~NetDataShareObserver() = default;
-        void OnChange() override
-        {
-            NETMGR_LOG_I("OnChange successfully.");
-            NetConnService_.HandleDataShareMessage();
-        }
-    private:
-        NetConnService &NetConnService_;
-    };
     void HandleDataShareMessage();
 
 private:
