@@ -3620,7 +3620,7 @@ void NetConnService::HandleDataShareMessage()
     NETMGR_LOG_I("HandleDataShareMessage successfully");
 }
  
-ProbeUrls NetConnService::GetDataShareUrl() 
+ProbeUrls NetConnService::GetDataShareUrl()
 {
     std::lock_guard<std::mutex> lock(dataShareMutex_);
     return probeUrl_;
