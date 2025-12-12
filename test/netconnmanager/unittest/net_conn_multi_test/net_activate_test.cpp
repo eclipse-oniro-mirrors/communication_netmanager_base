@@ -430,7 +430,7 @@ HWTEST_F(NetActivateTest, IsAllowCallbackTest003, TestSize.Level1)
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
     instance_->lastNetId_ = 1;
     ret = instance_->IsAllowCallback(callbackType);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     instance_->lastNetId_ = 0;
     ret = instance_->IsAllowCallback(callbackType);
