@@ -56,6 +56,9 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
     std::string threadName = "DnsMgerListen";
     pthread_setname_np(t.native_handle(), threadName.c_str());
     t.detach();
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    firewallDomainRulesQueue_ = std::make_shared<ffrt::queue>("firewallDomainRulesQueue");
+#endif    
 }
 
 void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)
@@ -239,28 +242,42 @@ int32_t DnsManager::SetFirewallRules(NetFirewallRuleType type, const std::vector
                                      bool isFinish)
 {
     int32_t ret = DnsParamCache::GetInstance().SetFirewallRules(type, ruleList, isFinish);
-    if (ret != 0 || type != NetFirewallRuleType::RULE_DOMAIN) {
+    if (ret != 0) {
         return ret;
     }
-    for (auto &rule : ruleList) {
-        auto domainRule = firewall_rule_cast<NetFirewallDomainRule>(rule);
-        if (domainRule == nullptr || domainRule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
-            continue;
-        }
-        firewallDomainRules_.emplace_back(domainRule);
-    }
-    if (!isFinish) {
-        return 0;
-    }
-    for (auto &rule : firewallDomainRules_) {
-        for (auto &domain : rule->domains) {
-            AddrInfo addrInfo;
-            std::vector<AddrInfo> res;
-            GetAddrInfo(domain.domain, "", addrInfo, 0, res);
-        }
-    }
-    firewallDomainRules_.clear();
+    EeffectDomainRules(type, ruleList, isFinish);
     return 0;
+}
+
+void DnsManager::EeffectDomainRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+                                    bool isFinish)
+{
+    if (type != NetFirewallRuleType::RULE_DOMAIN || firewallDomainRulesQueue_ == nullptr) {
+        return;
+    }
+    firewallDomainRulesQueue_->submit([this, ruleList, isFinish]() {
+        for (auto &rule : ruleList) {
+            auto domainRule = firewall_rule_cast<NetFirewallDomainRule>(rule);
+            if (domainRule == nullptr || domainRule->ruleAction != FirewallRuleAction::RULE_ALLOW) {
+                continue;
+            }
+            firewallDomainRules_.emplace_back(domainRule);
+        }
+        if (!isFinish) {
+            return;
+        }
+        for (auto &rule : firewallDomainRules_) {
+            for (auto &domain : rule->domains) {
+                AddrInfo addrInfo = {};
+                addrInfo.aiFamily = AF_UNSPEC;
+                addrInfo.aiSockType = SOCK_STREAM;
+                addrInfo.aiProtocol = IPPROTO_TCP;
+                std::vector<AddrInfo> res;
+                GetAddrInfo(domain.domain, "", addrInfo, 0, res);
+            }
+        }
+        firewallDomainRules_.clear();
+    });
 }
 
 int32_t DnsManager::ClearFirewallRules(NetFirewallRuleType type)
