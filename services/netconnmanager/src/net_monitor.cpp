@@ -40,7 +40,7 @@
 #include "net_manager_constants.h"
 #include "tiny_count_down_latch.h"
 #include "cJSON.h"
-#include "net_conn_service.h"
+#include "net_conn_service_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -494,7 +494,8 @@ void NetMonitor::GetDetectUrlConfig()
 
 bool NetMonitor::GetHttpProbeUrlFromDataShare()
 {
-    ProbeUrls probeUrl = NetConnService::GetInstance()->GetDataShareUrl();
+    serviceIface_ =  std::make_shared<NetConnServiceIface>();
+    ProbeUrls probeUrl = serviceIface_->GetDataShareUrl();
     httpUrl_ = probeUrl.httpProbeUrlExt;
     httpsUrl_ = probeUrl.httpsProbeUrlExt;
     fallbackHttpUrl_ = probeUrl.fallbackHttpProbeUrlExt;

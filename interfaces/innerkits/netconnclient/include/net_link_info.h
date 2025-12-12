@@ -32,6 +32,13 @@ struct PortalResponse {
     char url[MAX_URL_LEN] = "";
 };
 
+struct ProbeUrls {
+    std::string httpProbeUrlExt;
+    std::string httpsProbeUrlExt;
+    std::string fallbackHttpProbeUrlExt;
+    std::string fallbackHttpsProbeUrlExt;
+};
+
 struct NetLinkInfo final : public Parcelable {
     std::string ifaceName_;
     std::string domain_;

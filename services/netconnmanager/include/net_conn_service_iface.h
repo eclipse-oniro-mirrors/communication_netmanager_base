@@ -52,6 +52,7 @@ public:
         std::shared_ptr<IDualStackProbeCallback>& callback) override;
     int32_t DualStackProbe(int32_t netId) override;
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime) override;
+    ProbeUrls GetDataShareUrl() override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

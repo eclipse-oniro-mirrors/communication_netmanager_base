@@ -103,6 +103,12 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+
+    inline ProbeUrls GetDataShareUrl() override
+    {
+        ProbeUrls urls;
+        return urls;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {

@@ -41,6 +41,7 @@ typedef struct {
     bool isScreenOn;
     uint64_t lastDetectTime;
 } NetMonitorInfo;
+class NetConnServiceIface;
 
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
@@ -152,6 +153,7 @@ private:
     PortalDetectInfo portalDetectInfo_;
     std::string xReqId_;
     int8_t xReqIdLen_ = -1;
+    std::shared_ptr<NetConnServiceIface> serviceIface_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

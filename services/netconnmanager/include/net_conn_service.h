@@ -60,12 +60,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
-struct ProbeUrls {
-    std::string httpProbeUrlExt;
-    std::string httpsProbeUrlExt;
-    std::string fallbackHttpProbeUrlExt;
-    std::string fallbackHttpsProbeUrlExt;
-};
+class NetDataShareHelperUtilsIface;
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
