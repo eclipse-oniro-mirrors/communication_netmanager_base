@@ -48,7 +48,6 @@
 #include "common_event_support.h"
 #include "os_account_manager.h"
 #include "app_state_aware.h"
-#include "net_datashare_utils_iface.h"
 
 #include "net_trace_route_probe.h"
 #include "net_pac_local_proxy_server.h"

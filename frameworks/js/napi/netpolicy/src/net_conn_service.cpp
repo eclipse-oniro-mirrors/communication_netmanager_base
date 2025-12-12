@@ -49,6 +49,7 @@
 #include "ipc_skeleton.h"
 #include "parameter.h"
 #include "parameters.h"
+#include "net_datashare_utils_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
