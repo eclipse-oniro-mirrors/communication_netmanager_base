@@ -1103,7 +1103,6 @@ void NetConnService::HandleSupplierNotAvailable(uint32_t supplierId, bool isOldA
     if (isOldAvailable) {
         StartNotifyLostDelay(supplier->GetNetId());
     }
-    CallbackForSupplier(supplier, CALL_TYPE_LOST);
     std::unique_lock<std::recursive_mutex> lock(delayFindBestNetMutex_);
     if (supplierId == delaySupplierId_) {
         RemoveDelayNetwork();
