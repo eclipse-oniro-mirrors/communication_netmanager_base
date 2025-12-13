@@ -163,9 +163,10 @@ static __always_inline bool match_domain_value(struct __sk_buff *skb, const stru
     return false;
 }
 
-static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num)
+static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry_off, __u16 quNum,
+    __u16 defaultactionrst)
 {
-    if (qu_num == 1) {
+    if (quNum == 1) {
         __u16 res;
         __u16 key_len = 0;
         struct domain_hash_key key = { 0 };
@@ -175,9 +176,24 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
             return 0;
         }
         key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
-        struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
 
-        if (deny_value != NULL && match_domain_value(skb, deny_value)) {
+        __u16 denyrst = 0;
+        __u16 allowrst = 0;
+        struct domain_value *allowValue = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if (allowValue != NULL && match_domain_value(skb, allowValue)) {
+            allowrst = 1;
+        }
+
+        struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+            denyrst = 1;
+        }
+
+        if (!defaultactionrst && denyrst) {
+            return 1;
+        }
+
+        if (defaultactionrst && denyrst && !allowrst) {
             return 1;
         }
     }
@@ -185,7 +201,7 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
 }
 
 static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns_qry_off, __u16 qu_num,
-    __u16 as_num)
+    __u16 asNum, __u16 defaultactionrst)
 {
     __u16 offset;
     bool is_in_pass = 0;
@@ -200,19 +216,33 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
             return 0;
         }
         key.prefixlen = (__u32)(key_len * BITS_PER_BYTE);
-        struct domain_value *deny_value = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
-        if (deny_value != NULL && match_domain_value(skb, deny_value)) {
+
+        __u16 denyrst = 0;
+        __u16 allowrst = 0;
+        struct domain_value *allowValue = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if (allowValue != NULL && match_domain_value(skb, allowValue)) {
+            allowrst = 1;
+        }
+
+        struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
+        if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+            denyrst = 1;
+        }
+
+        if (!defaultactionrst && denyrst) {
             return 1;
         }
 
-        struct domain_value *allow_value = bpf_map_lookup_elem(&DOMAIN_PASS_MAP, &key);
+        if (defaultactionrst && denyrst && !allowrst) {
+            return 1;
+        }
 
-        if (allow_value != NULL && match_domain_value(skb, allow_value)) {
-            is_in_pass = 1;
-            appuid = allow_value->appuid;
-            log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
-        } else {
+        if (!allowrst) {
             return 0;
+        } else {
+            is_in_pass = 1;
+            appuid = allowValue->appuid;
+            log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_PASS);
         }
     } else {
         // not support multi questions
@@ -220,13 +250,24 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
     }
 
     for (__u16 i = 0; i < DNS_ANSWER_CNT; i++) {
-        if (i >= as_num) {
+        if (i >= asNum) {
             break;
         }
         offset = parse_answers(skb, offset, is_in_pass, appuid);
     }
 
     return 0;
+}
+
+static __always_inline __u16 MatchDefaultActionMap(const struct __sk_buff *skb)
+{
+    __u32 currentUid = get_current_uid(skb);
+    struct defalut_action_value *defaultValue = bpf_map_lookup_elem(&DEFAULT_ACTION_MAP, &currentUid);
+    enum sk_action sk_act = SK_PASS;
+    if (defaultValue) {
+        sk_act = defaultValue->outaction;
+    }
+    return sk_act;
 }
 
 static __always_inline enum sk_action match_dns_query(struct __sk_buff *skb)
@@ -268,10 +309,12 @@ static __always_inline enum sk_action match_dns_query(struct __sk_buff *skb)
             __u16 bit_mask = (1 << DNS_QR_DEFALUT_MASK);
             __u16 qr = (flag & bit_mask);
             __u16 res = 0;
+
+            __u16 defaultactionrst = MatchDefaultActionMap(skb);
             if (qr == bit_mask) {
-                res = parse_dns_response(skb, dns_qry_off, qu_num, as_num);
+                res = parse_dns_response(skb, dns_qry_off, qu_num, as_num, defaultactionrst);
             } else {
-                res = parse_dns_query(skb, dns_qry_off, qu_num);
+                res = parse_dns_query(skb, dns_qry_off, qu_num, defaultactionrst);
             }
             if (res == 1) {
                 log_dbg(DBG_MATCH_DOMAIN_ACTION, EGRESS, SK_DROP);
