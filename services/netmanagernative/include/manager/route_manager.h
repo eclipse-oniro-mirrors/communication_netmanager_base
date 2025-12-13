@@ -303,7 +303,7 @@ public:
      * @return Returns 0, enable successfully, otherwise it will fail
      */
     static int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                              const std::string &dstAddr);
+                                              const std::string &dstAddr, const std::string &gw);
 
     /**
      * Disable distribute net: del route
@@ -424,7 +424,8 @@ private:
     static int32_t SetRouteInfo(TableType tableType, NetworkRouteInfo networkRouteInfo, RouteInfo &routeInfo);
     static int32_t UpdateClatTunInterface(const std::string &interfaceName,
                                             NetworkPermission permission, bool add);
-    static int32_t AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface);
+    static int32_t AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface,
+                                        const std::string &gw);
     static int32_t AddServerDownlinkRoute(const std::string &UplinkIif, const std::string &dstAddr);
     static int32_t SetRuleMsgPriority(NetlinkMsg &nlmsg, RuleInfo &ruleInfo);
     static int32_t SetRuleMsgTable(NetlinkMsg &nlmsg, RuleInfo &ruleInfo);

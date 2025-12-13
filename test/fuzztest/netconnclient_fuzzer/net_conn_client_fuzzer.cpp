@@ -1595,6 +1595,7 @@ void EnableDistributedServerNetFuzzTest(const uint8_t *data, size_t size)
     std::string iif = NetConnGetString(STR_LEN);
     std::string devIface = NetConnGetString(STR_LEN);
     std::string dstAddr = NetConnGetString(STR_LEN);
+    std::string gw = NetConnGetString(STR_LEN);
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
@@ -1604,6 +1605,7 @@ void EnableDistributedServerNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(iif);
     dataParcel.WriteString(devIface);
     dataParcel.WriteString(dstAddr);
+    dataParcel.WriteString(gw);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET), dataParcel);
 }
 

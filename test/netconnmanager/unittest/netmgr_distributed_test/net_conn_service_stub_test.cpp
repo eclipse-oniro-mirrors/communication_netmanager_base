@@ -103,6 +103,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
+    std::string gw = "0.0.0.0";
     if (!data.WriteString(iif)) {
         return;
     }
@@ -110,6 +111,9 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
         return;
     }
     if (!data.WriteString(dstAddr)) {
+        return;
+    }
+    if (!data.WriteString(gw)) {
         return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET);
@@ -125,6 +129,52 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
     }
     ret = SendRemoteRequest(data1, ConnInterfaceCode::CMD_NM_DISABLE_DISTRIBUTE_NET);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnEnableDistributedServerNet002
+ * @tc.desc: Test OnEnableDistributedServerNet Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string iif = "lo";
+    std::string devIface = "lo";
+    std::string dstAddr = "1.189.55.61";
+    int32_t gw = 0;
+
+    data.WriteString(iif);
+    data.WriteString(devIface);
+    data.WriteString(dstAddr);
+    data.WriteInt32(gw);
+
+    int32_t ret = instance_->OnEnableDistributedServerNet(data, reply);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnEnableDistributedServerNet003
+ * @tc.desc: Test OnEnableDistributedServerNet Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string iif = "lo";
+    std::string devIface = "lo";
+    std::string dstAddr = "1.189.55.61";
+    std::string gw = "0.0.0.0";
+
+    data.WriteString(iif);
+    data.WriteString(devIface);
+    data.WriteString(dstAddr);
+    data.WriteString(gw);
+
+    int32_t ret = instance_->OnEnableDistributedServerNet(data, reply);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
