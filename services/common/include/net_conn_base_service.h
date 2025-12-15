@@ -47,6 +47,7 @@ public:
         std::shared_ptr<IDualStackProbeCallback>& callback) = 0;
     virtual int32_t DualStackProbe(int32_t netId) = 0;
     virtual int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut) = 0;
+    virtual ProbeUrls GetDataShareUrl() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,8 +21,10 @@
 #include "net_manager_constants.h"
 #define private public
 #include "net_monitor.h"
+#include "net_conn_service.h"
 #undef private
 #include "netmanager_base_common_utils.h"
+#include "net_http_proxy_tracker.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -36,6 +38,7 @@ constexpr int32_t SIM_PORTAL_CODE = 302;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t ONE_URL_DETECT_NUM = 4;
 constexpr int32_t ALL_DETECT_THREAD_NUM = 8;
+constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 
 class TestMonitorCallback : public INetMonitorCallback {
 public:
@@ -66,6 +69,21 @@ public:
 
 void NetMonitorTest::SetUpTestCase()
 {
+    NetConnService::GetInstance()->OnStart();
+    if (NetConnService::GetInstance()->state_ != NetConnService::STATE_RUNNING) {
+        NetConnService::GetInstance()->netConnEventRunner_ =
+            AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
+        ASSERT_NE(NetConnService::GetInstance()->netConnEventRunner_, nullptr);
+        NetConnService::GetInstance()->netConnEventHandler_ =
+            std::make_shared<NetConnEventHandler>(NetConnService::GetInstance()->netConnEventRunner_);
+        NetConnService::GetInstance()->serviceIface_ = std::make_unique<NetConnServiceIface>().release();
+        NetManagerCenter::GetInstance().RegisterConnService(NetConnService::GetInstance()->serviceIface_);
+        NetHttpProxyTracker httpProxyTracker;
+        HttpProxy httpProxy;
+        httpProxy.SetPort(0);
+        httpProxyTracker.ReadFromSettingsData(httpProxy);
+        NetConnService::GetInstance()->SendHttpProxyChangeBroadcast(httpProxy);
+    }
     instance_->Start();
 }
 
@@ -110,6 +128,74 @@ HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromConfig001, TestSize.Level1)
     EXPECT_FALSE(instance_->httpsUrl_.empty());
     EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
     EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
+}
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare001, TestSize.Level1)
+{
+    instance_->GetHttpProbeUrlFromDataShare();
+    EXPECT_TRUE(instance_->httpUrl_.empty());
+    EXPECT_TRUE(instance_->httpsUrl_.empty());
+    EXPECT_TRUE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_TRUE(instance_->fallbackHttpsUrl_.empty());
+}
+
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare002, TestSize.Level1)
+{
+    ProbeUrls testProbeUrls;
+    testProbeUrls.httpProbeUrlExt = "http://test.com/probe";
+    testProbeUrls.httpsProbeUrlExt = "https://test.com/probe";
+    testProbeUrls.fallbackHttpProbeUrlExt = "http://fallback.com/probe";
+    testProbeUrls.fallbackHttpsProbeUrlExt = "";
+    NetConnService::GetInstance()->probeUrl_ = testProbeUrls;
+    bool result = instance_->GetHttpProbeUrlFromDataShare();
+
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_TRUE(instance_->fallbackHttpsUrl_.empty());
+}
+
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare003, TestSize.Level1)
+{
+    ProbeUrls testProbeUrls;
+    testProbeUrls.httpProbeUrlExt = "http://test.com/probe";
+    testProbeUrls.httpsProbeUrlExt = "https://test.com/probe";
+    testProbeUrls.fallbackHttpProbeUrlExt = "http://fallback.com/probe";
+    testProbeUrls.fallbackHttpsProbeUrlExt = "https://fallback.com/probe";
+    NetConnService::GetInstance()->probeUrl_ = testProbeUrls;
+    bool result = instance_->GetHttpProbeUrlFromDataShare();
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
+}
+
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare004, TestSize.Level1)
+{
+    instance_->isNeedSuffix_ = false;
+    bool result = instance_->GetHttpProbeUrlFromDataShare();
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
+    EXPECT_EQ(instance_->httpUrl_.find("_"), std::string::npos);
+}
+
+HWTEST_F(NetMonitorTest, GetHttpProbeUrlFromDataShare005, TestSize.Level1)
+{
+    instance_->isNeedSuffix_ = true;
+    bool result = instance_->GetHttpProbeUrlFromDataShare();
+
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(instance_->httpUrl_.empty());
+    EXPECT_FALSE(instance_->httpsUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpUrl_.empty());
+    EXPECT_FALSE(instance_->fallbackHttpsUrl_.empty());
+    EXPECT_NE(instance_->httpUrl_.find("_"), std::string::npos);
 }
 
 HWTEST_F(NetMonitorTest, GetXReqIDFromConfig001, TestSize.Level1)

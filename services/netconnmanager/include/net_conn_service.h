@@ -59,6 +59,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using EventReceiver = std::function<void(const EventFwk::CommonEventData&)>;
+class NetDataShareHelperUtilsIface;
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
@@ -434,6 +435,8 @@ public:
     int32_t DualStackProbe(uint32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTime);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
+    ProbeUrls GetDataShareUrl();
+    void HandleDataShareMessage();
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -619,6 +622,8 @@ private:
     void DecreaseNetActivatesForUid(const uint32_t callingUid, const sptr<INetConnCallback> &callback);
     void DecreaseNetActivates(const uint32_t callingUid, const sptr<INetConnCallback> &callback, uint32_t reqId);
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
+    void RegisterNetDataShareObserver();
+    void UnregisterNetDataShareObserver();
 
 private:
     enum ServiceRunningState {
@@ -660,6 +665,10 @@ private:
     static constexpr uint32_t HTTP_PROXY_ACTIVE_PERIOD_IN_SLEEP_S = 240;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
+    std::mutex dataShareMutex_;
+    std::shared_ptr<NetDataShareHelperUtilsIface> helper_ = nullptr;
+    ProbeUrls probeUrl_;
+    int32_t helperCallbackId_;
 
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;

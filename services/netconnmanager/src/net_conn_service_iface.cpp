@@ -140,5 +140,10 @@ int32_t NetConnServiceIface::UpdateDualStackProbeTime(int32_t dualStackProbeTime
 {
     return NetConnService::GetInstance()->UpdateDualStackProbeTime(dualStackProbeTime);
 }
+
+ProbeUrls NetConnServiceIface::GetDataShareUrl()
+{
+    return NetConnService::GetInstance()->GetDataShareUrl();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

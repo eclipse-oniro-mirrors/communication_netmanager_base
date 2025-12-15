@@ -41,6 +41,7 @@ typedef struct {
     bool isScreenOn;
     uint64_t lastDetectTime;
 } NetMonitorInfo;
+class NetConnServiceIface;
 
 class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
@@ -123,7 +124,7 @@ private:
     bool CheckIfSettingsDataReady();
     void CreateProbeThread(std::shared_ptr<ProbeThread>& httpThread, std::shared_ptr<ProbeThread>& httpsThread,
         std::shared_ptr<TinyCountDownLatch>& latch, std::shared_ptr<TinyCountDownLatch>& latchAll, bool isPrimProbe);
-
+    bool GetHttpProbeUrlFromDataShare();
 private:
     uint32_t netId_ = 0;
     NetBearType netBearType_;
@@ -152,6 +153,7 @@ private:
     PortalDetectInfo portalDetectInfo_;
     std::string xReqId_;
     int8_t xReqIdLen_ = -1;
+    std::shared_ptr<NetConnServiceIface> serviceIface_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

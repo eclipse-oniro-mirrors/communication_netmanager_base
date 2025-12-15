@@ -27,6 +27,7 @@ config("net_conn_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETMANAGER_BASE_ROOT/utils/data_share",
   ]
 }
 
@@ -79,6 +80,7 @@ ohos_shared_library("net_conn_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$INNERKITS_ROOT/netmanagernative:net_native_manager_if",
   ]
@@ -211,6 +213,7 @@ ohos_static_library("net_conn_manager_static") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/utils:net_data_share",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 

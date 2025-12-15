@@ -49,6 +49,7 @@
 #include "ipc_skeleton.h"
 #include "parameter.h"
 #include "parameters.h"
+#include "net_datashare_utils_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -88,6 +89,8 @@ constexpr const char *PERSIST_EDM_MMS_DISABLE = "persist.edm.mms_disable";
 constexpr const char *PERSIST_EDM_AIRPLANE_MODE_DISABLE = "persist.edm.airplane_mode_disable";
 constexpr const char *PERSIST_WIFI_DELAY_ELEVATOR_ENABLE = "persist.booster.enable_wifi_delay_elevator";
 constexpr const char *PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE = "persist.booster.enable_wifi_delay_weak_signal";
+constexpr const char *SETTINGS_DATASHARE_URI_HTTP =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=EffectiveTime";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -101,6 +104,7 @@ NetConnService::NetConnService()
 NetConnService::~NetConnService()
 {
     RemoveALLClientDeathRecipient();
+    UnregisterNetDataShareObserver();
 }
 
 void NetConnService::OnStart()
@@ -3587,6 +3591,49 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
     }
 }
 
+// LCOV_EXCL_START
+void NetConnService::RegisterNetDataShareObserver()
+{
+    NETMGR_LOG_I("start registered");
+    helper_ = std::make_shared<NetDataShareHelperUtilsIface>();
+    if (helper_ == nullptr) {
+        NETMGR_LOG_E("Register helper_ is nullptr");
+        return;
+    }
+    auto onChange = std::bind(&NetConnService::HandleDataShareMessage, this);
+    helperCallbackId_ = helper_->RegisterObserver(SETTINGS_DATASHARE_URI_HTTP, onChange);
+    NETMGR_LOG_I("DataShare observer registered successfully");
+}
+
+void NetConnService::UnregisterNetDataShareObserver()
+{
+    if (helper_ == nullptr) {
+        NETMGR_LOG_E("Unregister helper_ is nullptr");
+        return;
+    }
+    helper_->UnregisterObserver(SETTINGS_DATASHARE_URI_HTTP, helperCallbackId_);
+    NETMGR_LOG_I("DataShare observer unregistered successfully");
+}
+ 
+void NetConnService::HandleDataShareMessage()
+{
+    Uri uri(SETTINGS_DATASHARE_URI);
+    NetDataShareHelperUtils utils;
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    utils.Query(uri, "httpMain", probeUrl_.httpProbeUrlExt);
+    utils.Query(uri, "httpsMain", probeUrl_.httpsProbeUrlExt);
+    utils.Query(uri, "httpBackup", probeUrl_.fallbackHttpProbeUrlExt);
+    utils.Query(uri, "httpsBackup", probeUrl_.fallbackHttpsProbeUrlExt);
+    NETMGR_LOG_I("HandleDataShareMessage successfully");
+}
+ 
+ProbeUrls NetConnService::GetDataShareUrl()
+{
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    return probeUrl_;
+}
+// LCOV_EXCL_STOP
+
 void NetConnService::SubscribeCommonEvent()
 {
     EventFwk::MatchingSkills matchingSkills;
@@ -3626,6 +3673,7 @@ void NetConnService::OnReceiveEvent(const EventFwk::CommonEventData &data)
         // executed in the SA process, so load http proxy from current active user.
         LoadGlobalHttpProxy(ACTIVE, httpProxy);
         UpdateGlobalHttpProxy(httpProxy);
+        RegisterNetDataShareObserver();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
         NETMGR_LOG_I("on receive user_switched");
         HttpProxy curProxy;
