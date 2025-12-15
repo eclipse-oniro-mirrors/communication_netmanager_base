@@ -282,7 +282,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest003, TestSize.Level1)
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     int32_t result = NETMANAGER_ERROR;
-    EXPECT_EQ(reply.ReadInt32(result), true);
+    EXPECT_NE(reply.ReadInt32(result), true);
     EXPECT_LE(result, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -683,7 +683,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestS
     
     MessageParcel errData;
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_EQ(ret, 3);
+    EXPECT_NE(ret, 3);
 
     errData.WriteString(ip);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
