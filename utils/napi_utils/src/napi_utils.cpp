@@ -120,27 +120,34 @@ uint64_t CreateUvHandlerQueue(napi_env env)
     napi_add_env_cleanup_hook(
         env,
         [](void *data) {
-            auto envWrapper = reinterpret_cast<napi_env *>(data);
-            if (envWrapper == nullptr) {
-                return;
-            }
-            auto env = *envWrapper;
-            delete envWrapper;
-            if (env == nullptr) {
-                return;
-            }
-            auto queueWrapper = NapiUtils::GetValueFromGlobal(env, HTTP_UV_SYNC_QUEUE_NAME);
-            if (queueWrapper == nullptr) {
-                return;
-            }
-            void *result = nullptr;
-            napi_remove_wrap(env, queueWrapper, &result);
-            auto id = reinterpret_cast<uint64_t>(result);
-            std::lock_guard lock(g_mutex);
-            g_handlerQueueMap.erase(id);
+            NapiUtils::HandleNapiCleanUp(data);
         },
         envWrapper);
     return newId;
+}
+
+void HandleNapiCleanUp(void *data)
+{
+    auto envWrapper = reinterpret_cast<napi_env *>(data);
+    if (envWrapper == nullptr) {
+        return;
+    }
+    auto env = *envWrapper;
+    delete envWrapper;
+    if (env == nullptr) {
+        return;
+    }
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+    auto queueWrapper = NapiUtils::GetValueFromGlobal(env, HTTP_UV_SYNC_QUEUE_NAME);
+    if (queueWrapper == nullptr) {
+        return;
+    }
+    void *result = nullptr;
+    napi_remove_wrap(env, queueWrapper, &result);
+    auto id = reinterpret_cast<uint64_t>(result);
+    std::lock_guard lock(g_mutex);
+    g_handlerQueueMap.erase(id);
 }
 
 napi_value GetValueFromGlobal(napi_env env, const std::string &className)
