@@ -84,7 +84,8 @@ HWTEST_F(NetsysNativeServiceTest, EnableDistributedServerNet001, TestSize.Level1
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
-    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     bool isServer = true;
     ret = instance_->DisableDistributedNet(isServer);
@@ -94,7 +95,8 @@ HWTEST_F(NetsysNativeServiceTest, EnableDistributedServerNet002, TestSize.Level1
     std::string iif = "";
     std::string devIface = "";
     std::string dstAddr = "";
-    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "";
+    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     bool isServer = true;
     ret = instance_->DisableDistributedNet(isServer);
@@ -121,22 +123,23 @@ HWTEST_F(NetsysNativeServiceTest, EnableDistributedServerNet003, TestSize.Level1
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
-    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    int32_t ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     dstAddr = "";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     devIface = "";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     dstAddr = "1.189.55.61";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     iif = "";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     devIface = "lo";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     dstAddr = "";
-    instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     devIface = "";
-    ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    ret = instance_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

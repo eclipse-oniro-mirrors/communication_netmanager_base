@@ -62,7 +62,8 @@ constexpr int32_t RULE_LEVEL_SHARING = 14000;
 constexpr int32_t RULE_LEVEL_ENTERPRISE = 15000;
 #endif
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
-constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION = 16500;
+constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION_SERVER = 8500;
+constexpr int32_t RULE_LEVEL_DISTRIBUTE_COMMUNICATION_CLIENT = 16500;
 constexpr uint32_t ROUTE_UNREACHABLE_TABLE = 80;
 constexpr uint32_t ROUTE_DISTRIBUTE_TO_CLIENT_TABLE = 90;
 constexpr uint32_t ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE = 91;
@@ -701,7 +702,7 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
     NETNATIVE_LOGI("EnableDistributedClientNet ConfigVirnicAndVeth success.");
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
-    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
+    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION_CLIENT;
     ruleInfo.ruleIif = iif;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
@@ -735,11 +736,12 @@ int32_t RouteManager::EnableDistributedClientNet(const std::string &virNicAddr, 
     return ROUTEMANAGER_SUCCESS;
 }
 
-int32_t RouteManager::AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface)
+int32_t RouteManager::AddServerUplinkRoute(const std::string &UplinkIif, const std::string &devIface,
+                                           const std::string &gw)
 {
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE;
-    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
+    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION_SERVER;
     ruleInfo.ruleIif = UplinkIif;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
@@ -749,11 +751,15 @@ int32_t RouteManager::AddServerUplinkRoute(const std::string &UplinkIif, const s
         return ret;
     }
 
+    std::string nextHop = gw;
+    if (nextHop.empty()) {
+        nextHop = "0.0.0.0";
+    }
     RouteInfo routeInfo;
     routeInfo.routeTable = ROUTE_DISTRIBUTE_FROM_CLIENT_TABLE;
     routeInfo.routeInterfaceName = devIface;
     routeInfo.routeDestinationName = "0.0.0.0/0";
-    routeInfo.routeNextHop = "0.0.0.0";
+    routeInfo.routeNextHop = nextHop;
     uint16_t flags = (NLM_F_CREATE | NLM_F_EXCL);
     uint16_t action = RTM_NEWROUTE;
     ret = UpdateRouteRule(action, flags, routeInfo);
@@ -773,7 +779,7 @@ int32_t RouteManager::AddServerDownlinkRoute(const std::string &UplinkIif, const
 {
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
-    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
+    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION_SERVER;
     ruleInfo.ruleDstIp = dstAddr;
     ruleInfo.ruleFwmark = MARK_UNSET;
     ruleInfo.ruleMask = MARK_UNSET;
@@ -804,14 +810,14 @@ int32_t RouteManager::AddServerDownlinkRoute(const std::string &UplinkIif, const
 }
 
 int32_t RouteManager::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                 const std::string &dstAddr)
+                                                 const std::string &dstAddr, const std::string &gw)
 {
-    NETNATIVE_LOGI("EnableDistributedServerNet iif:%{public}s,devIface:%{public}s,dstAddr:%{public}s",
-                   iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str());
+    NETNATIVE_LOGI("EnableDistributedServerNet iif:%{public}s,devIface:%{public}s,dstAddr:%{public}s,gw:%{public}s",
+                   iif.c_str(), devIface.c_str(), ToAnonymousIp(dstAddr).c_str(), ToAnonymousIp(gw).c_str());
 
     int32_t ret = ROUTEMANAGER_SUCCESS;
     DistributedManager::GetInstance().SetServerNicInfo(iif, devIface);
-    ret += AddServerUplinkRoute(iif, devIface);
+    ret += AddServerUplinkRoute(iif, devIface, gw);
     ret += AddServerDownlinkRoute(iif, dstAddr);
 
     return ret;
@@ -826,7 +832,11 @@ int32_t RouteManager::DisableDistributedNet(bool isServer)
     ruleInfo.ruleIif = RULEIIF_NULL;
     ruleInfo.ruleOif = RULEOIF_NULL;
     ruleInfo.ruleTable = RT_TABLE_UNSPEC;
-    ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION;
+    if (isServer) {
+        ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION_SERVER;
+    } else {
+        ruleInfo.rulePriority = RULE_LEVEL_DISTRIBUTE_COMMUNICATION_CLIENT;
+    }
     RouteInfo routeInfo;
     routeInfo.routeTable = ROUTE_DISTRIBUTE_TO_CLIENT_TABLE;
     routeInfo.routeInterfaceName = DISTRIBUTED_TUN_CARD_NAME;

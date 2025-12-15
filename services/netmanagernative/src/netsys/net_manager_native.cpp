@@ -126,9 +126,9 @@ int32_t NetManagerNative::EnableDistributedClientNet(const std::string &virnicAd
 }
 
 int32_t NetManagerNative::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                     const std::string &dstAddr)
+                                                     const std::string &dstAddr, const std::string &gw)
 {
-    return routeManager_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return routeManager_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetManagerNative::DisableDistributedNet(bool isServer)

@@ -145,7 +145,7 @@ int32_t NetConnServiceProxy::EnableDistributedClientNet(const std::string &virni
 }
 
 int32_t NetConnServiceProxy::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                        const std::string &dstAddr)
+                                                        const std::string &dstAddr, const std::string &gw)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -154,6 +154,7 @@ int32_t NetConnServiceProxy::EnableDistributedServerNet(const std::string &iif, 
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
+    // LCOV_EXCL_START
     if (!data.WriteString(iif)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
@@ -165,6 +166,11 @@ int32_t NetConnServiceProxy::EnableDistributedServerNet(const std::string &iif, 
     if (!data.WriteString(dstAddr)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
+
+    if (!data.WriteString(gw)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    // LCOV_EXCL_STOP
 
     int32_t error =
         RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ENABLE_DISTRIBUTE_SERVER_NET), data, reply);

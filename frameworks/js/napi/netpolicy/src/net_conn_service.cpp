@@ -1103,7 +1103,6 @@ void NetConnService::HandleSupplierNotAvailable(uint32_t supplierId, bool isOldA
     if (isOldAvailable) {
         StartNotifyLostDelay(supplier->GetNetId());
     }
-    CallbackForSupplier(supplier, CALL_TYPE_LOST);
     std::unique_lock<std::recursive_mutex> lock(delayFindBestNetMutex_);
     if (supplierId == delaySupplierId_) {
         RemoveDelayNetwork();
@@ -4054,19 +4053,19 @@ int32_t NetConnService::EnableDistributedClientNetAsync(const std::string &virni
 }
 
 int32_t NetConnService::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                   const std::string &dstAddr)
+                                                   const std::string &dstAddr, const std::string &gw)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, &iif, &devIface, &dstAddr, &result]() {
-            result = this->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+        netConnEventHandler_->PostSyncTask([this, &iif, &devIface, &dstAddr, &gw, &result]() {
+            result = this->EnableDistributedServerNetAsync(iif, devIface, dstAddr, gw);
         });
     }
     return result;
 }
 
 int32_t NetConnService::EnableDistributedServerNetAsync(const std::string &iif, const std::string &devIface,
-                                                        const std::string &dstAddr)
+                                                        const std::string &dstAddr, const std::string &gw)
 {
     if (iif.empty() || devIface.empty()) {
         NETMGR_LOG_E("iif || devIface is empty");
@@ -4078,7 +4077,7 @@ int32_t NetConnService::EnableDistributedServerNetAsync(const std::string &iif, 
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
-    if (NetsysController::GetInstance().EnableDistributedServerNet(iif, devIface, dstAddr) != NETMANAGER_SUCCESS) {
+    if (NetsysController::GetInstance().EnableDistributedServerNet(iif, devIface, dstAddr, gw) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("EnableDistributedServerNet failed");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }

@@ -56,7 +56,8 @@ HWTEST_F(RouteManagerTest, EnableDistributedServerNet001, TestSize.Level1)
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";
-    auto ret = RouteManager::EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    auto ret = RouteManager::EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, 0);
     bool isServer = true;
     ret = RouteManager::DisableDistributedNet(isServer);

@@ -227,7 +227,7 @@ public:
     }
 
     int32_t EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                       const std::string &dstAddr) override
+                                       const std::string &dstAddr, const std::string &gw) override
     {
         return 0;
     }
@@ -743,6 +743,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdEnableDistributedServerNet001, TestSize
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.60";
+    std::string gw = "0.0.0.0";
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
         return;
     }
@@ -753,6 +754,9 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdEnableDistributedServerNet001, TestSize
         return;
     }
     if (!data.WriteString(dstAddr)) {
+        return;
+    }
+    if (!data.WriteString(gw)) {
         return;
     }
 

@@ -199,7 +199,7 @@ int32_t NetConnClient::EnableDistributedClientNet(const std::string &virnicAddr,
 }
 
 int32_t NetConnClient::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                  const std::string &dstAddr)
+                                                  const std::string &dstAddr, const std::string &gw)
 {
     NETMGR_LOG_D("EnableDistributedServerNet client in.");
     sptr<INetConnService> proxy = GetProxy();
@@ -208,7 +208,7 @@ int32_t NetConnClient::EnableDistributedServerNet(const std::string &iif, const 
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return proxy->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetConnClient::DisableDistributedNet(bool isServer)

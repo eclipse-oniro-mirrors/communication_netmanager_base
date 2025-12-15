@@ -1159,12 +1159,13 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetTest001, TestSize.Leve
     std::string iif = "eth0";
     std::string devIface = "bond0";
     std::string dstAddr = "192.168.1.100";
-    auto ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    auto ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     netConnService->netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     netConnService->netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnService->netConnEventRunner_);
-    ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr);
+    ret = netConnService->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
     EXPECT_NE(ret, NETMANAGER_ERROR);
 }
 
@@ -1174,16 +1175,17 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest001, TestSize
     std::string iif;
     std::string devIface;
     std::string dstAddr;
-    auto ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+    std::string gw;
+    auto ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 
     iif = "eth0";
-    ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+    ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 
     devIface = "bond0";
     dstAddr = "192.168.1.300";
-    ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+    ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
@@ -1193,7 +1195,8 @@ HWTEST_F(NetConnServiceExtTest, EnableDistributedServerNetAsyncTest002, TestSize
     std::string iif = "eth0";
     std::string devIface = "bond0";
     std::string dstAddr = "192.168.1.100";
-    auto ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr);
+    std::string gw = "0.0.0.0";
+    auto ret = netConnService->EnableDistributedServerNetAsync(iif, devIface, dstAddr, gw);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 

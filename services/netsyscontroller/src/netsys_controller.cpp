@@ -123,13 +123,13 @@ int32_t NetsysController::EnableDistributedClientNet(const std::string &virnicAd
 }
 
 int32_t NetsysController::EnableDistributedServerNet(const std::string &iif, const std::string &devIface,
-                                                     const std::string &dstAddr)
+                                                     const std::string &dstAddr, const std::string &gw)
 {
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->EnableDistributedServerNet(iif, devIface, dstAddr);
+    return netsysService_->EnableDistributedServerNet(iif, devIface, dstAddr, gw);
 }
 
 int32_t NetsysController::DisableDistributedNet(bool isServer)

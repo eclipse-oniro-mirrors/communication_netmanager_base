@@ -1799,11 +1799,12 @@ HWTEST_F(NetConnServiceTest, EnableDistributedServerNetTest001, TestSize.Level1)
     std::string devIface = "devIface";
     std::string virnicAddr = "127.0.0.1";
     std::string iif = "iif";
+    std::string gw = "0.0.0.0";
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    int32_t ret = NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, virnicAddr);
+    int32_t ret = NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
     NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, virnicAddr);
+    ret = NetConnService::GetInstance()->EnableDistributedServerNet(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -1812,17 +1813,18 @@ HWTEST_F(NetConnServiceTest, EnableDistributedServerNetTest002, TestSize.Level1)
     std::string virnicAddr = "";
     std::string iif = "";
     std::string devIface = "devIface";
-    int32_t ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr);
+    std::string gw = "";
+    int32_t ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
     iif = "iif";
-    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr);
+    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
     virnicAddr = "127.0.0.1";
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr);
+    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
     NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr);
+    ret = NetConnService::GetInstance()->EnableDistributedServerNetAsync(iif, devIface, virnicAddr, gw);
     ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
