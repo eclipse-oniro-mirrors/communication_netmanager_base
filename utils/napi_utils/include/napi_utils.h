@@ -120,6 +120,7 @@ bool IsEnvValid(napi_env env);
 using UvHandler = std::function<void(napi_env)>;
 napi_value GetGlobal(napi_env env);
 uint64_t CreateUvHandlerQueue(napi_env env);
+void HandleNapiCleanUp(void *data);
 napi_value GetValueFromGlobal(napi_env env, const std::string &className);
 void CreateUvQueueWorkByModuleId(napi_env env, const UvHandler &handler, uint64_t id);
 } // namespace NapiUtils
