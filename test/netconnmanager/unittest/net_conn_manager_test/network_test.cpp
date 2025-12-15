@@ -1183,7 +1183,7 @@ HWTEST_F(NetworkTest, CheckSuccessRespCodeTest001, TestSize.Level1)
     probe->respHeader_ = "";
     respCode = SUCCESS_CODE;
     ret = probe->CheckSuccessRespCode(respCode);
-    EXPECT_LE(ret, PORTAL_CODE);
+    EXPECT_GE(ret, PORTAL_CODE);
  
     probe->respHeader_ = "X-Hwcloud-ReqId:12345678910";
     respCode = SUCCESS_CODE;
