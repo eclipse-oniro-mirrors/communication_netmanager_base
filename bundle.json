@@ -95,6 +95,7 @@
                 "config_policy",
                 "ace_engine",
                 "ylong_runtime",
+                "rust_bindgen",
                 "rust_cxx",
                 "state_registry"
             ]
