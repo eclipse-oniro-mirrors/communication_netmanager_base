@@ -15,7 +15,7 @@ use ani_rs::objects::AniObject;
 use ani_rs::{business_error::BusinessError, objects::AniRef};
 use ani_rs::AniEnv;
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/PrimitiveTest")]
+#[ani_rs::ani(path = "anirs.test.ani_test.PrimitiveTest")]
 struct PrimitiveTest {
     primitive_bool: bool,
     primitive_i8: i8,
@@ -40,7 +40,7 @@ pub fn aniref_deserialize_test<'local>(env: &AniEnv, input: AniRef<'local>) -> R
     Ok(raw1 == raw2)
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/AniRefStruct")]
+#[ani_rs::ani(path = "anirs.test.ani_test.AniRefStruct")]
 #[derive(Debug)]
 struct AniRefStruct<'local> {
     ani_obj_string: AniObject<'local>,

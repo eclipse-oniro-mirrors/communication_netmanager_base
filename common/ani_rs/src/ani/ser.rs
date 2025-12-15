@@ -147,11 +147,7 @@ impl<'recur, 'local> ArraySer<'recur, 'local> {
         let array = match &mut self.array {
             Some(array) => array,
             None => {
-                let array = if let Some(class) = &self.ref_class {
-                    self.env.new_array_ref(class, self.len)?
-                } else {
-                    T::new_array(&self.env, self.len)?
-                };
+                let array = T::new_array(&self.env, self.len)?;
                 self.array = Some(array);
                 self.array.as_mut().unwrap()
             }

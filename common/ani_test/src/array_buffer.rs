@@ -160,7 +160,7 @@ pub fn create_uint32_array(input: Uint32Array) -> Result<Uint32Array, BusinessEr
     Ok(output)
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/ArrayBufferStruct")]
+#[ani_rs::ani(path = "anirs.test.ani_test.ArrayBufferStruct")]
 pub struct ArrayBufferStruct {
     pub buffer1: ArrayBuffer,
     pub buffer2: Int32Array,

@@ -55,7 +55,7 @@ pub fn execute_json_callback2(env: &AniEnv, callback: AniFnObject) -> Result<(),
     Ok(())
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/HttpDataType")]
+#[ani_rs::ani(path = "anirs.test.ani_test.HttpDataType")]
 #[derive(Debug)]
 pub enum HttpDataType {
     String,
@@ -98,7 +98,7 @@ pub fn json_request_test(
     Ok(res)
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/HttpResponse", output = "only")]
+#[ani_rs::ani(path = "anirs.test.ani_test.HttpResponse", output = "only")]
 pub struct HttpResponse {
     pub result: GlobalRef<AniRef<'static>>,
     pub result_type: HttpDataType,

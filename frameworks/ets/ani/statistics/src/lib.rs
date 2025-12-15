@@ -21,7 +21,7 @@ mod wrapper;
 use ani_rs::ani_constructor;
 
 ani_constructor! {
-    namespace "L@ohos/net/statistics/statistics"
+    namespace "@ohos.net.statistics.statistics"
     [
         "getAllRxBytesSync" : statistics::get_all_rx_bytes,
         "getAllTxBytesSync" : statistics::get_all_tx_bytes,

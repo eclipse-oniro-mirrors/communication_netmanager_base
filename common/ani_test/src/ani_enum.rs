@@ -13,7 +13,7 @@
 
 use ani_rs::business_error::BusinessError;
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/EnumNumber")]
+#[ani_rs::ani(path = "anirs.test.ani_test.EnumNumber")]
 #[derive(Debug)]
 enum EnumNumber {
     One = 1,
@@ -21,7 +21,7 @@ enum EnumNumber {
     Three = 3,
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/EnumString")]
+#[ani_rs::ani(path = "anirs.test.ani_test.EnumString")]
 #[derive(Debug)]
 enum EnumString {
     One = 1,
@@ -39,14 +39,14 @@ pub fn enum_test_string<'local>(input: EnumString) -> Result<EnumString, Busines
     Ok(input)
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/ResponseCode")]
+#[ani_rs::ani(path = "anirs.test.ani_test.ResponseCode")]
 #[derive(Debug)]
 pub struct ResponseCode {
     code: i32,
     url: String,
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/HttpProtocol")]
+#[ani_rs::ani(path = "anirs.test.ani_test.HttpProtocol")]
 #[derive(Debug)]
 pub enum HttpProtocol {
     Http1_1,
@@ -57,9 +57,9 @@ pub enum HttpProtocol {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Debug)]
 pub enum ResponseCodeOutput {
-    #[serde(rename = "Lanirs/test/ani_test/ResponseCode;")]
+    #[serde(rename = "anirs.test.ani_test.ResponseCode")]
     Code(ResponseCode),
-    #[serde(rename = "Lanirs/test/ani_test/HttpProtocol;")]
+    #[serde(rename = "anirs.test.ani_test.HttpProtocol")]
     Proto(HttpProtocol),
     I32(i32),
 }

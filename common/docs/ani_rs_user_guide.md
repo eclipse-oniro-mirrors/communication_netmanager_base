@@ -18,13 +18,13 @@ Rust 和 ArkTS的代码风格有很大区别，Rust 社区喜欢 `snake_case` �
 - Rust枚举中的字段名必须保持大驼峰，最终会通过ani_rs过程宏将序列化名修改为全大写。Rust枚举字段名转换成全大写后必须和Arkts结构体字段名一致。
 
 ```rust
-#[ani_rs::ani(path = "L@ohos/anirs/test/ani_test/ActionInner")]
+#[ani_rs::ani(path = "@ohos.anirs.test.ani_test.ActionInner")]
 pub enum Action {
     Download, //命名与Arkts一致，仅命名风格区别，ani_rs过程宏自动切换命名风格
     Upload,
 }
 
-#[ani_rs::ani(path = "L@ohos/anirs/test/ani_test/ConfigInner")]
+#[ani_rs::ani(path = "@ohos.anirs.test.ani_test.ConfigInner")]
 pub struct Config {
     pub config_action: Action, //命名与Arkts一致，仅命名风格区别，ani_rs过程宏自动切换命名风格
     pub config_url: String,
@@ -48,7 +48,7 @@ export class ConfigInner {
 如果结构体仅涉及序列化，不涉及反序列化(即仅存在rust到arkts的转换)，可以如下定义：
 
 ```rust
-#[ani_rs::ani(path = "L@ohos/anirs/test/ani_test/ConfigInner", output = "only")]
+#[ani_rs::ani(path = "@ohos.anirs.test.ani_test.ConfigInner", output = "only")]
 pub struct Config {
     pub config_action: Action,
     pub config_url: String,
@@ -73,11 +73,11 @@ Rust中完成函数/方法绑定：
 
 ```rust
 ani_constructor!(
-    namespace "L@ohos/net/connection/connection"
+    namespace "@ohos.net.connection.connection"
     [
         "addCustomDnsRuleSync": connection::add_custom_dns_rule,
     ]
-    class "L@ohos/net/connection/connection/NetConnectionInner"
+    class "@ohos.net.connection.connection.NetConnectionInner"
     [
         "onNetAvailable": connection::on_net_available,
         "onNetBlockStatusChange": connection::on_net_block_status_change,
@@ -468,9 +468,9 @@ rust:
 ```rust
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum ResponseCodeOutput {
-    #[serde(rename = "Lanirs/test/ani_test/ResponseCode;")]
+    #[serde(rename = "anirs.test.ani_test.ResponseCode")]
     Code(ResponseCode),
-    #[serde(rename = "Lanirs/test/ani_test/HttpProtocol;")]
+    #[serde(rename = "anirs.test.ani_test.HttpProtocol")]
     Proto(HttpProtocol),
     I32(i32),
 }
@@ -490,7 +490,7 @@ export native function enumTestStruct(input: ResponseCode | HttpProtocol | int):
 rust
 
 ```rust
-#[ani_rs::ani(path = "L@ohos/anirs/test/ani_test/EnumNumber")]
+#[ani_rs::ani(path = "@ohos.anirs.test.ani_test.EnumNumber")]
 enum EnumNumber {
     One = 1,
     Two = 2,
@@ -521,7 +521,7 @@ export native function enumTestNumber ( input: EnumNumber): EnumNumber
 rust
 
 ```rust
-#[ani_rs::ani(path = "L@ohos/anirs/test/ani_test/Config")]
+#[ani_rs::ani(path = "@ohos.anirs.test.ani_test.Config")]
 pub struct Config {
     pub config_action: Action,
     pub config_url: String,
@@ -567,7 +567,7 @@ pub struct AniObject<'local>(AniRef<'local>);
 rust: 
 
 ```rust
-#[ani_rs::ani(path = "Lanirs/test/ani_test/HttpDataType")]
+#[ani_rs::ani(path = "anirs.test.ani_test.HttpDataType")]
 pub enum HttpDataType {
     String,
     Object = 1,
