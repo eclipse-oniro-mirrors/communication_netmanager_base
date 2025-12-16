@@ -457,12 +457,12 @@ HWTEST_F(NetLinkInfoTest, EqualTestDomain, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
-    std::string domain = "www.huawei.com";
+    std::string domain = "123";
     netLinkInfo->domain_ = domain;
 
     sptr<NetLinkInfo> netLinkInfo1 = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo1, nullptr);
-    std::string domain1 = "www.huawei1.com";
+    std::string domain1 = "456";
     netLinkInfo1->domain_ = domain1;
     ASSERT_TRUE(*netLinkInfo1 != *netLinkInfo);
 }
