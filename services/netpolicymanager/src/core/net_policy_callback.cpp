@@ -76,7 +76,9 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t polic
 {
     NETMGR_LOG_I("NotifyNetUidPolicyChange uid= %{public}d policy= %{public}d", uid, policy);
     std::shared_lock<std::shared_mutex> lock(callbacksMutex_);
-    for (const auto &callback : callbacks_) {
+    std::vector<sptr<INetPolicyCallback>> callbacks = callbacks_;
+    lock.unlock();
+    for (const auto &callback : callbacks) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidPolicyChange(uid, policy);
         }
