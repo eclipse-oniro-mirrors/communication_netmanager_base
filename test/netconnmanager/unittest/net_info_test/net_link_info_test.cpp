@@ -395,7 +395,7 @@ HWTEST_F(NetLinkInfoTest, EqualTest, TestSize.Level1)
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
     std::string ifaceName = "wlan0";
-    std::string domain = "www.huawei.com";
+    std::string domain = "789";
     INetAddr addr;
     addr.address_ = "192.168.0.1";
     addr.type_ = INetAddr::IPV4;
