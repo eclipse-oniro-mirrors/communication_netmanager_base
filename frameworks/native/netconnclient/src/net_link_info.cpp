@@ -239,6 +239,26 @@ bool NetLinkInfo::HasNetAddr(const INetAddr &netAddr) const
     return std::find(netAddrList_.begin(), netAddrList_.end(), netAddr) != netAddrList_.end();
 }
 
+bool NetLinkInfo::operator==(const NetLinkInfo &info) const
+{
+    bool out = true;
+    out = out && (ifaceName_ == info.ifaceName_);
+    out = out && (domain_ == info.domain_);
+    out = out && (netAddrList_ == info.netAddrList_);
+    out = out && (dnsList_ == info.dnsList_);
+    out = out && (routeList_ == info.routeList_);
+    out = out && (mtu_ == info.mtu_);
+    out = out && (tcpBufferSizes_ == info.tcpBufferSizes_);
+    out = out && (ident_ == info.ident_);
+    out = out && (httpProxy_ == info.httpProxy_);
+    return out;
+}
+
+bool NetLinkInfo::operator!=(const NetLinkInfo &info) const
+{
+    return !(*this == info);
+}
+
 bool NetLinkInfo::HasRoute(const Route &route) const
 {
     return std::find(routeList_.begin(), routeList_.end(), route) != routeList_.end();
