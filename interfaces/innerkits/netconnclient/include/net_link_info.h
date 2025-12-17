@@ -53,6 +53,8 @@ struct NetLinkInfo final : public Parcelable {
     NetLinkInfo() = default;
     NetLinkInfo(const NetLinkInfo &cap);
     NetLinkInfo &operator=(const NetLinkInfo &cap);
+    bool operator==(const NetLinkInfo &info) const;
+    bool operator!=(const NetLinkInfo &info) const;
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
