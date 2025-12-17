@@ -44,6 +44,8 @@ constexpr int32_t IF_NAME_SIZE = 16;
 constexpr const uint32_t FAMILY_INVALID = 0;
 constexpr const uint32_t FAMILY_V4 = 1;
 constexpr const uint32_t FAMILY_V6 = 2;
+constexpr const char* ANCO_IFNAME = "anco";
+constexpr const char* RMNET_IFNAME = "rmnet";
 
 static ssize_t SendMsgToKernel(struct nlmsghdr *msg, int32_t &kernelSocket)
 {
@@ -395,25 +397,27 @@ void DealNeighInfo(nlmsghdr *nlmsgHeader, uint16_t msgType, uint32_t table,
     std::vector<NetManagerStandard::NetIpMacInfo>& ipMacInfoVec)
 {
     if (nlmsgHeader == nullptr) {
-        NETNATIVE_LOGE("nlmsgHeader is nullptr");
         return;
     }
     char macStr[MAC_ADDRESS_STR_LEN] = {0};
     int32_t length = static_cast<int32_t>(RTM_PAYLOAD(nlmsgHeader));
     if (nlmsgHeader->nlmsg_type != RTM_NEWNEIGH && nlmsgHeader->nlmsg_type != RTM_DELNEIGH &&
         nlmsgHeader->nlmsg_type != RTM_GETNEIGH) {
-        NETNATIVE_LOGE("not ip neigh info: %{public}d", nlmsgHeader->nlmsg_type);
         return;
     }
     ndmsg *ndm = reinterpret_cast<ndmsg *>(NLMSG_DATA(nlmsgHeader));
     if (ndm->ndm_type != RTN_UNICAST) {
-        NETNATIVE_LOGE("not unicast");
         return;
     }
     NetManagerStandard::NetIpMacInfo info;
     char ifIndexName[IF_NAME_SIZE] = {0};
     if (if_indextoname(static_cast<unsigned>(ndm->ndm_ifindex), ifIndexName) == nullptr) {
-        NETNATIVE_LOGE("if_indextoname failed");
+        return;
+    }
+    if (strncmp(ifIndexName, ANCO_IFNAME, strlen(ANCO_IFNAME)) == 0 ||
+        strncmp(ifIndexName, RMNET_IFNAME, strlen(RMNET_IFNAME)) == 0) {
+        NETNATIVE_LOGE("need filter out ifname");
+        return;
     }
     info.iface_ = ifIndexName;
     for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(ndm); RTA_OK(infoRta, length);
