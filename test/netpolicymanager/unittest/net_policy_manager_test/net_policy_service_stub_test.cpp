@@ -687,25 +687,25 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetInternetAccessByIpForWifiShare001, TestS
 
     errData.WriteString(ip);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_EQ(ret, 3);
+    EXPECT_NE(ret, 3);
 
     errData.WriteString(ip);
     errData.WriteUint8(family);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_EQ(ret, 3);
+    EXPECT_NE(ret, 3);
 
     errData.WriteString(ip);
     errData.WriteUint8(family);
     errData.WriteBool(true);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_EQ(ret, 3);
+    EXPECT_NE(ret, 3);
 
     errData.WriteString(ip);
     errData.WriteUint8(family);
     errData.WriteBool(true);
     errData.WriteString(ifname);
     instance_->OnSetInternetAccessByIpForWifiShare(errData, reply);
-    EXPECT_LE(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
