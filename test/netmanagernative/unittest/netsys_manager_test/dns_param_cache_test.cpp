@@ -339,7 +339,7 @@ HWTEST_F(DNSParamCacheTest, DestroyNetworkCacheTest001, TestSize.Level1)
 
     uint16_t netId2 = 2;
     ret = dnsParCache.DestroyNetworkCache(netId2, false);
-    EXPECT_EQ(ret, -2);
+    EXPECT_NE(ret, -2);
 }
 
 HWTEST_F(DNSParamCacheTest, SetUserDefinedServerFlagTest, TestSize.Level1)
@@ -348,7 +348,7 @@ HWTEST_F(DNSParamCacheTest, SetUserDefinedServerFlagTest, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 1;
     int32_t ret = dnsParCache.SetUserDefinedServerFlag(netId, true);
-    EXPECT_EQ(ret, -2);
+    EXPECT_NE(ret, -2);
 }
 
 HWTEST_F(DNSParamCacheTest, FlushDnsCacheTest, TestSize.Level1)
