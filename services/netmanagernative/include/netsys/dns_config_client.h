@@ -73,6 +73,7 @@ enum CommandType {
     POST_DNS_QUERY_RESULT = 8,    // for musl and c-ares
     POST_DNS_ABNORMAL_RESULT = 9, // for musl and c-ares
     GET_CONFIG_EXT = 10, // for musl and c-ares
+    JUDGE_IPV4 = 11,
 };
 
 struct RequestInfo {

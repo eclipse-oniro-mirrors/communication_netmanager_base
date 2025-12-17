@@ -52,6 +52,10 @@ public:
 
     void EnableIpv6();
 
+    bool IsIpv4Enable();
+
+    void EnableIpv4();
+
     void SetUserDefinedServerFlag(bool flag);
 
     bool IsUserDefinedServer();
@@ -83,6 +87,7 @@ private:
     NetManagerStandard::DelayedQueue<DelayedTaskWrapper, NetManagerStandard::DEFAULT_CAPABILITY, DEFAULT_DELAYED_COUNT>
         delayedQueue_;
     bool isIpv6Enable_;
+    bool isIpv4Enable_;
     bool isUserDefinedDnsServer_;
 };
 } // namespace OHOS::nmd

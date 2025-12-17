@@ -159,6 +159,18 @@ HWTEST_F(DNSParamCacheTest, IsIpv6EnableTest01, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+HWTEST_F(DNSParamCacheTest, EnableIpv4Test01, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    uint16_t netId = 1;
+    dnsParCache.CreateCacheForNet(netId);
+    dnsParCache.EnableIpv4(netId);
+    EXPECT_TRUE(dnsParCache.IsIpv4Enable(netId));
+    dnsParCache.defaultNetId_ = netId;
+    bool res = dnsParCache.IsIpv4Enable(0);
+    EXPECT_TRUE(res);
+}
+
 HWTEST_F(DNSParamCacheTest, GetResolverConfigTest05, TestSize.Level1)
 {
     DnsParamCache dnsParCache;

@@ -34,7 +34,7 @@ bool DnsResolvConfig::DelayedTaskWrapper::operator<(const DelayedTaskWrapper &ot
 
 DnsResolvConfig::DnsResolvConfig()
     : netId_(0), netIdIsSet_(false), revisionId_(0), timeoutMsec_(0), retryCount_(0), isIpv6Enable_(false),
-    isUserDefinedDnsServer_(false)
+    isIpv4Enable_(false), isUserDefinedDnsServer_(false)
 {
 }
 
@@ -46,6 +46,16 @@ void DnsResolvConfig::EnableIpv6()
 bool DnsResolvConfig::IsIpv6Enable()
 {
     return isIpv6Enable_;
+}
+
+void DnsResolvConfig::EnableIpv4()
+{
+    isIpv4Enable_ = true;
+}
+
+bool DnsResolvConfig::IsIpv4Enable()
+{
+    return isIpv4Enable_;
 }
 
 void DnsResolvConfig::SetNetId(uint16_t netId)

@@ -171,6 +171,7 @@ public:
 #endif
 
     void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop);
+    void EnableIpv4(uint16_t netId, const std::string &destination, const std::string &nextHop);
 
     int32_t RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);
     int32_t UnregisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback);

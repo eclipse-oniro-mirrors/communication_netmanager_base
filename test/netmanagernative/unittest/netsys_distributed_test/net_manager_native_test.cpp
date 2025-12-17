@@ -72,5 +72,16 @@ HWTEST_F(NetManagerNativeTest, EnableDistributedServerNet001, TestSize.Level1)
     bool isServer = true;
     ret = instance_->DisableDistributedNet(isServer);
 }
+
+HWTEST_F(NetManagerNativeTest, NetworkAddRoute001, TestSize.Level1)
+{
+    uint16_t netId = 123;
+    std::string interfaceName = "wlan0";
+    std::string destination = "1.189.55.61";
+    std::string nextHop = "";
+    bool isExcludeRoute = false;
+    int32_t ret = instance_->NetworkAddRoute(netId, interfaceName, destination, nextHop, isExcludeRoute);
+    EXPECT_LE(ret, NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS
