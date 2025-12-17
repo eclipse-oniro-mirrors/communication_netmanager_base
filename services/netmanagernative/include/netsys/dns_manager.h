@@ -22,6 +22,9 @@
 #include "dns_proxy_listen.h"
 #include "i_net_dns_result_callback.h"
 #include "uid_range.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "ffrt.h"
+#endif
 
 namespace OHOS {
 namespace nmd {
@@ -185,7 +188,10 @@ private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);
 #ifdef FEATURE_NET_FIREWALL_ENABLE
+    void EeffectDomainRules(NetFirewallRuleType type, const std::vector<sptr<NetFirewallBaseRule>> &ruleList,
+        bool isFinish);
     std::vector<sptr<NetManagerStandard::NetFirewallDomainRule>> firewallDomainRules_;
+    std::shared_ptr<ffrt::queue> firewallDomainRulesQueue_ = nullptr;
 #endif
 };
 } // namespace nmd

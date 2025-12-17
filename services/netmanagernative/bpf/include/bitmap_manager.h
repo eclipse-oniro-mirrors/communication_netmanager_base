@@ -449,6 +449,7 @@ struct SegmentBitmap {
     uint16_t start;
     uint16_t end;
     Bitmap bitmap;
+    bool isValid() const { return start <= end; }
 };
 
 class SegmentBitmapMap {
@@ -462,159 +463,115 @@ public:
      * @param end end of segment
      * @param bitmap rule itmap
      */
-    void AddMap(uint16_t start, uint16_t end, const Bitmap &bitmap)
-    {
-        std::vector<uint32_t> indexs;
-        SearchIntersection(start, end, indexs);
-        if (indexs.empty()) {
-            Insert(start, end, bitmap);
-            return;
-        }
-        std::vector<SegmentBitmap> list;
-        GetMapList(start, end, bitmap, indexs, list);
-        DeleteSegBitmap(indexs);
-        AddSegBitmapMap(list);
-    }
-
-    std::vector<SegmentBitmap> &GetMap()
-    {
-        return mapList_;
-    }
-
-private:
-    /**
-     * search input segment intersection in exist map list
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param indexs has intersection index value in exist map
-     */
-    void SearchIntersection(uint16_t start, uint16_t end, std::vector<uint32_t> &indexs)
-    {
-        for (size_t i = 0; i < mapList_.size(); ++i) {
-            if (((start >= mapList_[i].start) && (start <= mapList_[i].end)) ||
-                ((mapList_[i].start >= start) && (mapList_[i].start <= end))) {
-                indexs.push_back(i);
-            }
-        }
-    }
-
-    void DeleteSegBitmap(std::vector<uint32_t> &indexs)
-    {
-        if (indexs.empty()) {
-            return;
-        }
-        auto it = indexs.rbegin();
-        for (; it != indexs.rend(); ++it) {
-            mapList_.erase(mapList_.begin() + *it);
-        }
-    }
-
-    /**
-     * insert segment and bitmap into map lsit
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     */
-    void Insert(uint16_t start, uint16_t end, const Bitmap &bitmap)
-    {
-        SegmentBitmap segBitmap;
-        segBitmap.start = start;
-        segBitmap.end = end;
-        segBitmap.bitmap = bitmap;
-        std::vector<SegmentBitmap>::iterator it = mapList_.begin();
-        for (; it != mapList_.end(); ++it) {
-            if (start < it->start) {
-                mapList_.insert(it, segBitmap);
-                return;
-            }
-        }
-        mapList_.insert(mapList_.end(), segBitmap);
-    }
-
-    /**
-     * add segment and bitmap map to vector
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     * @param mapList map list
-     */
-    void AddSegBitmap(uint16_t start, uint16_t end, const Bitmap &bitmap, std::vector<SegmentBitmap> &mapList)
-    {
+     void AddMap(uint16_t start, uint16_t end, const Bitmap& bitmap) {
         if (start > end) {
             return;
         }
-        SegmentBitmap tmpSegBitmap;
-        tmpSegBitmap.start = start;
-        tmpSegBitmap.end = end;
-        tmpSegBitmap.bitmap = bitmap;
-        mapList.emplace_back(tmpSegBitmap);
+        std::vector<size_t> intersectIndices;
+        CollectIntersectIndices(start, end, intersectIndices);
+
+        std::vector<SegmentBitmap> newSegments;
+        ProcessIntersections(start, end, bitmap, intersectIndices, newSegments);
+
+        RemoveSegments(intersectIndices);
+        InsertNewSegments(newSegments);
+    }
+    std::vector<SegmentBitmap>& GetMap() {
+        return segments_;
     }
 
-    void AddSegBitmapMap(const std::vector<SegmentBitmap> &mapList)
+private:
+    void CollectIntersectIndices(uint16_t start, uint16_t end, std::vector<size_t>& indices) const
     {
-        auto it = mapList.begin();
-        for (; it != mapList.end(); ++it) {
-            Insert(it->start, it->end, it->bitmap);
-        }
-    }
-
-    /**
-     * merge segment and bitmap map with exit map into new maps
-     *
-     * @param start start of segment
-     * @param end end of segment
-     * @param bitmap rule bitmap
-     * @param indexs intersection indexs
-     * @param list segment and rule bitmap map list
-     */
-    void GetMapList(uint16_t start, uint16_t end, const Bitmap &bitmap, std::vector<uint32_t> &indexs,
-        std::vector<SegmentBitmap> &list)
-    {
-        uint32_t tmpStart = start;
-        for (auto index : indexs) {
-            SegmentBitmap &segBitmap = mapList_[index];
-            if (tmpStart < segBitmap.start) {
-                AddSegBitmap(tmpStart, segBitmap.start - 1, bitmap, list);
-                Bitmap bmap(bitmap);
-                if (end <= segBitmap.end) {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(segBitmap.start, end, bmap, list);
-                    AddSegBitmap(end + 1, segBitmap.end, segBitmap.bitmap, list);
-                    tmpStart = end + 1;
-                    break;
-                } else {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(segBitmap.start, segBitmap.end, bmap, list);
-                    tmpStart = segBitmap.end + 1;
-                }
-            } else {
-                if (tmpStart > segBitmap.start) {
-                    AddSegBitmap(segBitmap.start, tmpStart - 1, segBitmap.bitmap, list);
-                }
-                Bitmap bmap(bitmap);
-                if (end <= segBitmap.end) {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(tmpStart, end, bmap, list);
-                    AddSegBitmap(end + 1, segBitmap.end, segBitmap.bitmap, list);
-                    tmpStart = end + 1;
-                    break;
-                } else {
-                    bmap.Or(segBitmap.bitmap);
-                    AddSegBitmap(tmpStart, segBitmap.end, bmap, list);
-                    tmpStart = segBitmap.end + 1;
-                }
+        for (size_t i = 0; i < segments_.size(); ++i) {
+            const auto& seg = segments_[i];
+            if (!(end < seg.start || start > seg.end)) {
+                indices.push_back(i);
             }
         }
-        if (tmpStart <= end) {
-            AddSegBitmap(tmpStart, end, bitmap, list);
+    }
+
+    void RemoveSegments(const std::vector<size_t>& indices) {
+        std::vector<size_t> sortedIndices = indices;
+        std::sort(sortedIndices.rbegin(), sortedIndices.rend());
+
+        for (size_t idx : sortedIndices) {
+            if (idx < segments_.size()) {
+                segments_.erase(segments_.begin() + idx);
+            }
+        }
+    }
+
+    void ProcessIntersections(uint16_t targetStart, uint16_t targetEnd, const Bitmap& targetBitmap,
+                              const std::vector<size_t>& intersectIndices,
+                              std::vector<SegmentBitmap>& newSegments) {
+        std::vector<SegmentBitmap> intersectSegs;
+        for (size_t idx : intersectIndices) {
+            intersectSegs.push_back(segments_[idx]);
+        }
+        std::sort(intersectSegs.begin(), intersectSegs.end(),
+                  [](const SegmentBitmap& a, const SegmentBitmap& b) {
+                      return a.start < b.start;
+                  });
+
+        uint16_t currentPos = targetStart;
+        for (const auto& seg : intersectSegs) {
+            if (currentPos < seg.start) {
+                addSegment(currentPos, seg.start - 1, targetBitmap, newSegments);
+                currentPos = seg.start;
+            }
+
+            if (currentPos > seg.end) {
+                continue;
+            }
+
+            if (seg.start < currentPos) {
+                addSegment(seg.start, currentPos - 1, seg.bitmap, newSegments);
+            }
+
+            uint16_t overlapEnd = std::min(targetEnd, seg.end);
+            Bitmap mergedBitmap = seg.bitmap;
+            mergedBitmap.Or(targetBitmap);
+            addSegment(currentPos, overlapEnd, mergedBitmap, newSegments);
+
+            currentPos = overlapEnd + 1;
+
+            if (currentPos <= seg.end) {
+                addSegment(currentPos, seg.end, seg.bitmap, newSegments);
+            }
+
+            if (currentPos > targetEnd) {
+                break;
+            }
+        }
+
+        if (currentPos <= targetEnd) {
+            addSegment(currentPos, targetEnd, targetBitmap, newSegments);
+        }
+    }
+
+    void addSegment(uint16_t start, uint16_t end, const Bitmap& bitmap, std::vector<SegmentBitmap>& segments) {
+        if (start > end) {
+            return;
+        }
+        segments.push_back({start, end, bitmap});
+    }
+
+    void InsertNewSegments(const std::vector<SegmentBitmap>& newSegments) {
+        for (const auto& seg : newSegments) {
+            if (!seg.isValid()) {
+                continue;
+            }
+            auto it = std::lower_bound(segments_.begin(), segments_.end(), seg,
+                [](const SegmentBitmap& a, const SegmentBitmap& b) {
+                    return a.start < b.start;
+                });
+            segments_.insert(it, seg);
         }
     }
 
 private:
-    std::vector<SegmentBitmap> mapList_;
+    std::vector<SegmentBitmap> segments_;
 };
 
 using PortKey = port_key;

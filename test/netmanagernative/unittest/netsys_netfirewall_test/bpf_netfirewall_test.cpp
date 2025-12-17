@@ -121,7 +121,7 @@ HWTEST_F(NetsysBpfNetFirewallTest, WritePortBpfMap001, TestSize.Level0)
     EXPECT_EQ(ret, -1);
 
     uint32_t start = 1;
-    PortKey key = (PortKey)hltons(start);
+    PortKey key = (PortKey)BitmapManager::Hltons(start);
     Bitmap bitmap(1);
     portMap.OrInsert(key, bitmap);
     ret = bpfNet->WritePortBpfMap(portMap, path);

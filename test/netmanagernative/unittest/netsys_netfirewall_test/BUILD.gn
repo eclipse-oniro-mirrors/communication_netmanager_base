@@ -39,6 +39,7 @@ ohos_unittest("netsys_netfirewall_test") {
   defines = [
     "NETMGR_LOG_TAG = \"NetSysNetFirewallTest\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "private = public",
   ]
 
   if (enable_netmgr_debug) {
