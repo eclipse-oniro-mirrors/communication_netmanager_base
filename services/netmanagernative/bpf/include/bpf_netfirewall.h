@@ -263,11 +263,11 @@ private:
 
     static void HandleDebugEvent(DebugEvent *ev);
 
-    bool ShouldSkipNotify(sptr<InterceptRecord> record);
-
     void NotifyInterceptEvent(InterceptEvent *info);
 
     static void ConntrackGcTask();
+
+    uint64_t GetNowMs();
 
     void ClearBpfFirewallRules(NetFirewallRuleDirection direction);
 
@@ -314,7 +314,6 @@ private:
     static bool keepListen_;
     std::unique_ptr<std::thread> thread_;
     std::vector<sptr<NetsysNative::INetFirewallCallback>> callbacks_;
-    sptr<InterceptRecord> oldRecord_ = nullptr;
     static bool keepGc_;
     std::unique_ptr<std::thread> gcThread_;
     static std::unique_ptr<BpfMapper<CtKey, CtVaule>> ctRdMap_, ctWrMap_;

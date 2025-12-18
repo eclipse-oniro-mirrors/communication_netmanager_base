@@ -726,29 +726,13 @@ int32_t NetsysBpfNetFirewall::UnregisterCallback(const sptr<NetsysNative::INetFi
     return -1;
 }
 
-bool NetsysBpfNetFirewall::ShouldSkipNotify(sptr<InterceptRecord> record)
-{
-    if (!record) {
-        return true;
-    }
-    if (oldRecord_ != nullptr && (record->time - oldRecord_->time) < INTERCEPT_BUFF_INTERVAL_SEC) {
-        if (record->localIp == oldRecord_->localIp && record->remoteIp == oldRecord_->remoteIp &&
-            record->localPort == oldRecord_->localPort && record->remotePort == oldRecord_->remotePort &&
-            record->protocol == oldRecord_->protocol && record->appUid == oldRecord_->appUid) {
-            return true;
-        }
-    }
-    oldRecord_ = record;
-    return false;
-}
-
 void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
 {
     if (!info) {
         return;
     }
     sptr<InterceptRecord> record = sptr<InterceptRecord>::MakeSptr();
-    record->time = (int32_t)time(NULL);
+    record->time = static_cast<decltype(record->time)>(GetNowMs());
     record->localPort = BitmapManager::Nstohl(info->sport);
     record->remotePort = BitmapManager::Nstohl(info->dport);
     record->protocol = static_cast<uint16_t>(info->protocol);
@@ -777,12 +761,17 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
         record->localIp = dstIp;
         record->remoteIp = srcIp;
     }
-    if (ShouldSkipNotify(record)) {
-        return;
-    }
     for (auto callback : callbacks_) {
         callback->OnIntercept(record);
     }
+}
+
+uint64_t NetsysBpfNetFirewall::GetNowMs()
+{
+    struct timespec ts;
+    return (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+               ? static_cast<uint64_t>(ts.tv_sec) * MILLIS_PER_SEC + static_cast<uint64_t>(ts.tv_nsec) / NANOS_PER_MILLI
+               : static_cast<uint64_t>(time(nullptr)) * MILLIS_PER_SEC;
 }
 
 void NetsysBpfNetFirewall::HandleTupleEvent(TupleEvent *ev)
@@ -844,7 +833,7 @@ void NetsysBpfNetFirewall::HandleDebugEvent(DebugEvent *ev)
 
 int NetsysBpfNetFirewall::HandleEvent(void *ctx, void *data, size_t len)
 {
-    if (data != NULL && len > sizeof(Event)) {
+    if (data != NULL && len >= sizeof(Event)) {
         Event *ev = (Event *)data;
 
         switch (ev->type) {
