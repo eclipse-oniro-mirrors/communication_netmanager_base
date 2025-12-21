@@ -118,6 +118,9 @@ public:
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName) override;
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
+    int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);

@@ -55,6 +55,7 @@ private:
 #ifdef SUPPORT_SYSVPN
     void InitVpnOpToInterfaceMap();
 #endif // SUPPORT_SYSVPN
+    void InitVlanInterfaceMap();
     void InitOpToInterfaceMapExt();
     void InitDnsServerOpToInterfaceMap();
     void InitNetDiagOpToInterfaceMap();
@@ -204,6 +205,9 @@ private:
 #endif
     int32_t CmdSetInternetAccessByIpForWifiShare(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIpNeighTable(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdCreateVlan(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDestroyVlan(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetVlanIp(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

@@ -1193,5 +1193,272 @@ HWTEST_F(NetConnServiceStubTest, OnGetIpNeighTableTest002, TestSize.Level1)
     int32_t ret = instance_->OnGetIpNeighTable(data, reply);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: OnCreateVlanTest001
+ * @tc.desc: Test NetConnServiceStub OnCreateVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnCreateVlanTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_CREATE_VLAN);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnCreateVlanTest002
+ * @tc.desc: Test NetConnServiceStub OnCreateVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnCreateVlanTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnCreateVlan(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnCreateVlanTest003
+ * @tc.desc: Test NetConnServiceStub OnCreateVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnCreateVlanTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnCreateVlan(data, reply);
+    EXPECT_NE(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnCreateVlanTest004
+ * @tc.desc: Test NetConnServiceStub OnCreateVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnCreateVlanTest004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnCreateVlan(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDestroyVlanTest001
+ * @tc.desc: Test NetConnServiceStub OnDestroyVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDestroyVlanTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DESTROY_VLAN);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDestroyVlanTest002
+ * @tc.desc: Test NetConnServiceStub OnDestroyVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDestroyVlanTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDestroyVlan(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDestroyVlanTest003
+ * @tc.desc: Test NetConnServiceStub OnDestroyVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDestroyVlanTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnDestroyVlan(data, reply);
+    EXPECT_NE(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDestroyVlanTest004
+ * @tc.desc: Test NetConnServiceStub OnDestroyVlan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDestroyVlanTest004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDestroyVlan(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest001
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_SET_VLAN_IP);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest002
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest003
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest004
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest005
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest005, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_NE(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest006
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest006, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnSetVlanIpTest007
+ * @tc.desc: Test NetConnServiceStub OnSetVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnSetVlanIpTest007, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnSetVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -87,5 +87,29 @@ HWTEST_F(NetlinkMsgTest, AddRouteTest001, TestSize.Level1)
     ret = netLinkMsg.AddAttr(action, data, dataLength10);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(NetlinkMsgTest, AddLinkTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("AddLinkTest001 enter");
+    uint16_t flags = 2;
+    size_t maxBufLen = 50;
+    int32_t pid = 513;
+    NetlinkMsg netLinkMsg(flags, maxBufLen, pid);
+
+    uint16_t action = RTM_NEWLINK;
+    struct ifinfomsg ifm;
+    ifm.ifi_family = AF_UNSPEC;
+    ifm.ifi_type = 1;
+    ifm.ifi_index = 0;
+    ifm.ifi_flags = 0;
+    ifm.ifi_change = 0;
+    netLinkMsg.AddLink(action, ifm);
+    
+    size_t dataLength10 = 10;
+    char temp[10] = "123456789";
+    char* data = temp;
+    int32_t ret = netLinkMsg.AddAttr(action, data, dataLength10);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace NetsysNative
 } // namespace OHOS

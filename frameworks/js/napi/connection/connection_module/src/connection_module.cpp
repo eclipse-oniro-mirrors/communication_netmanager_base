@@ -204,12 +204,23 @@ static void AddCleanupHook(napi_env env)
     napi_add_env_cleanup_hook(env, NapiUtils::HookForEnvCleanup, envWrapper);
 }
 
+#define DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE, SetNetExtAttribute),          \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE, GetNetExtAttribute),          \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync), \
+    DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync), \
+
 #define DEFINE_PAC_FUNCTIONS \
     DECLARE_NAPI_FUNCTION(FUNCTION_GET_PROXY_MODE, GetProxyMode),        \
     DECLARE_NAPI_FUNCTION(FUNCTION_SET_PROXY_MODE, SetProxyMode),        \
     DECLARE_NAPI_FUNCTION(FUNCTION_SET_FILE_PAC_URL, SetPacFileUrl),     \
     DECLARE_NAPI_FUNCTION(FUNCTION_FIND_PROXY_FOR_URL, FindProxyForUrl), \
     DECLARE_NAPI_FUNCTION(FUNCTION_GET_FILE_PAC_URL, GetPacFileUrl),
+
+#define DEFINE_VLAN_FUNCTIONS \
+    DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_VLAN, CreateVlan),          \
+    DECLARE_NAPI_FUNCTION(FUNCTION_DESTROY_VLAN, DestroyVlan),        \
+    DECLARE_NAPI_FUNCTION(FUNCTION_SET_VLAN_IP, SetVlanIp),           \
 
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
@@ -253,12 +264,10 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_INTERFACE_CONFIG, GetNetInterfaceConfiguration),
         DECLARE_NAPI_FUNCTION(FUNCTION_REGISTER_NET_SUPPLIER, RegisterNetSupplier),
         DECLARE_NAPI_FUNCTION(FUNCTION_UNREGISTER_NET_SUPPLIER, UnregisterNetSupplier),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE, SetNetExtAttribute),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE, GetNetExtAttribute),
-        DECLARE_NAPI_FUNCTION(FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC, SetNetExtAttributeSync),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC, GetNetExtAttributeSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
         DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION, GetAddressesByNameWithOptions),
+        DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS
+        DEFINE_VLAN_FUNCTIONS
         DEFINE_PAC_FUNCTIONS
     };
     return functions;
@@ -588,6 +597,24 @@ napi_value ConnectionModule::GetIpNeighTable(napi_env env, napi_callback_info in
 {
     return ModuleTemplate::Interface<GetIpNeighTableContext>(env, info, FUNCTION_GET_IP_NEIGH_TABLE, nullptr,
         ConnectionAsyncWork::ExecGetIpNeighTable, ConnectionAsyncWork::GetIpNeighTableCallback);
+}
+
+napi_value ConnectionModule::CreateVlan(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<CreateVlanContext>(env, info, FUNCTION_CREATE_VLAN, nullptr,
+        ConnectionAsyncWork::ExecCreateVlan, ConnectionAsyncWork::CreateVlanCallback);
+}
+
+napi_value ConnectionModule::DestroyVlan(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<DestroyVlanContext>(env, info, FUNCTION_DESTROY_VLAN, nullptr,
+        ConnectionAsyncWork::ExecDestroyVlan, ConnectionAsyncWork::DestroyVlanCallback);
+}
+
+napi_value ConnectionModule::SetVlanIp(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetVlanIpContext>(env, info, FUNCTION_SET_VLAN_IP, nullptr,
+        ConnectionAsyncWork::ExecSetVlanIp, ConnectionAsyncWork::SetVlanIpCallback);
 }
 
 napi_value ConnectionModule::AddNetworkRoute(napi_env env, napi_callback_info info)

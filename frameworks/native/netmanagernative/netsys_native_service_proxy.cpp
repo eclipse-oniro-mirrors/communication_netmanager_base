@@ -3970,6 +3970,86 @@ int32_t NetsysNativeServiceProxy::UpdateEnterpriseRoute(const std::string &inter
 }
 #endif
 
+int32_t NetsysNativeServiceProxy::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(ifName) || !data.WriteUint32(vlanId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in CreateVlan");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_VLAN),
+                                        data, reply, option);
+    if (res != ERR_NONE) {
+        NETNATIVE_LOGE("GetCookieStats SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(ifName) || !data.WriteUint32(vlanId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in DestroyVlan");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_VLAN),
+                                        data, reply, option);
+    if (res != ERR_NONE) {
+        NETNATIVE_LOGE("GetCookieStats SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                            const std::string &ip, uint32_t mask)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteString(ifName) ||
+        !data.WriteUint32(vlanId) || !data.WriteString(ip) || !data.WriteUint32(mask)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("Remote is null in SetVlanIp");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_VLAN_IP),
+                                        data, reply, option);
+    if (res != ERR_NONE) {
+        NETNATIVE_LOGE("GetCookieStats SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {

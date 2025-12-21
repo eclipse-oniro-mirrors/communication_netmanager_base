@@ -214,6 +214,9 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) override;
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
+    int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

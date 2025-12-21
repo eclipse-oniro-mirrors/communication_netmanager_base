@@ -1914,5 +1914,78 @@ HWTEST_F(NetsysControllerTest, GetIpNeighTable002, TestSize.Level1)
     int32_t ret = netsysController->GetIpNeighTable(ipMacInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, CreateVlan001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = netsysController->CreateVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, CreateVlan002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->CreateVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, DestroyVlan001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = netsysController->DestroyVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, DestroyVlan002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->DestroyVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetVlanIp001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = netsysController->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, SetVlanIp002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+    int32_t ret = netsysController->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

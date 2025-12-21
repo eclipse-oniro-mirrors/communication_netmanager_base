@@ -986,6 +986,10 @@ public:
      */
     int32_t ClearFirewallAllRules() override;
 
+    int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) override;
+    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
+
     /**
      * Set NIC Traffic allowed or disallowed
      *

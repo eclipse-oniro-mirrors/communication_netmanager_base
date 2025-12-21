@@ -132,6 +132,10 @@ public:
     static int32_t SetIpv6AutoConf(const std::string &ipAddr, const uint32_t on);
     static int32_t GetIpNeighTable(std::vector<NetManagerStandard::NetIpMacInfo> &ipMacInfo);
 
+    static int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
+    static int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
+    static int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
     static int32_t AssembleArp(const std::string &ipAddr, const std::string &macAddr,

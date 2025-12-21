@@ -101,6 +101,9 @@ enum class ConnInterfaceCode {
     CMD_NM_ADD_STATIC_IPV6,
     CMD_NM_DEL_STATIC_IPV6,
     CMD_NM_GET_IP_NEIGH_TABLE,
+    CMD_NM_CREATE_VLAN,
+    CMD_NM_DESTROY_VLAN,
+    CMD_NM_SET_VLAN_IP,
 };
 
 enum class AdjCallbackInterfaceCode {

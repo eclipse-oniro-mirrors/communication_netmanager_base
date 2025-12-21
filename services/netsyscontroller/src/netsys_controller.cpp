@@ -1786,6 +1786,37 @@ int32_t NetsysController::SetInternetAccessByIpForWifiShare(
     return netsysService_->SetInternetAccessByIpForWifiShare(ipAddr, family, accessInternet, clientNetIfName);
 }
 
+int32_t NetsysController::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    NETMGR_LOG_I("CreateVlan");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->CreateVlan(ifName, vlanId);
+}
+
+int32_t NetsysController::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    NETMGR_LOG_I("DestroyVlan");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DestroyVlan(ifName, vlanId);
+}
+
+int32_t NetsysController::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                    const std::string &ip, uint32_t mask)
+{
+    NETMGR_LOG_I("SetVlanIp");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetVlanIp(ifName, vlanId, ip, mask);
+}
+
 int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
 {
     NETMGR_LOG_D("GetIpNeighTable");

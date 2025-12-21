@@ -44,6 +44,9 @@
 #include "unregisternetsupplier_context.h"
 #include "netextattribute_context.h"
 #include "getipneightable_context.h"
+#include "createvlan_context.h"
+#include "destroyvlan_context.h"
+#include "setvlanip_context.h"
 
 #define DECLARE_WRITABLE_NAPI_FUNCTION(name, func)                                  \
     {                                                                               \
@@ -219,6 +222,18 @@ public:
     static bool ExecGetIpNeighTable(GetIpNeighTableContext *context);
 
     static napi_value GetIpNeighTableCallback(GetIpNeighTableContext *context);
+
+    static bool ExecCreateVlan(CreateVlanContext *context);
+
+    static napi_value CreateVlanCallback(CreateVlanContext *context);
+
+    static bool ExecDestroyVlan(DestroyVlanContext *context);
+
+    static napi_value DestroyVlanCallback(DestroyVlanContext *context);
+
+    static bool ExecSetVlanIp(SetVlanIpContext *context);
+
+    static napi_value SetVlanIpCallback(SetVlanIpContext *context);
 
     class NetHandleExec final {
     public:

@@ -1078,6 +1078,25 @@ int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &in
 }
 #endif
 
+int32_t NetsysControllerServiceImpl::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    NETMGR_LOG_I("CreateVlan");
+    return netsysClient_->CreateVlan(ifName, vlanId);
+}
+
+int32_t NetsysControllerServiceImpl::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    NETMGR_LOG_I("DestroyVlan");
+    return netsysClient_->DestroyVlan(ifName, vlanId);
+}
+
+int32_t NetsysControllerServiceImpl::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                               const std::string &ip, uint32_t mask)
+{
+    NETMGR_LOG_I("SetVlanIp");
+    return netsysClient_->SetVlanIp(ifName, vlanId, ip, mask);
+}
+
 int32_t NetsysControllerServiceImpl::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {

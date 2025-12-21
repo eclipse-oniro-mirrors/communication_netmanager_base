@@ -4380,5 +4380,39 @@ int32_t NetConnService::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    if (ifName.find("eth") == std::string::npos) {
+        return NETMANAGER_ERR_INCORRECT_IFNAME;
+    }
+    if (NetsysController::GetInstance().CreateVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    if (ifName.find("eth") == std::string::npos) {
+        return NETMANAGER_ERR_INCORRECT_IFNAME;
+    }
+    if (NetsysController::GetInstance().DestroyVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                  const std::string &ip, uint32_t mask)
+{
+    if (ifName.find("eth") == std::string::npos) {
+        return NETMANAGER_ERR_INCORRECT_IFNAME;
+    }
+    if (NetsysController::GetInstance().SetVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

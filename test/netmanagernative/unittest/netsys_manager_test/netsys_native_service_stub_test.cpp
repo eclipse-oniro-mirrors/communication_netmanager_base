@@ -1418,5 +1418,29 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetIpNeighTable001, TestSize.Level1)
     int32_t ret = notifyStub_->CmdGetIpNeighTable(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdCreateVlan001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdCreateVlan(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyVlan001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDestroyVlan(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetVlanIp001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetVlanIp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

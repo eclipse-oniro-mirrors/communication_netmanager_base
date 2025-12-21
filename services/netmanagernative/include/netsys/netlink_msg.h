@@ -104,6 +104,14 @@ public:
      */
     void AddNeighbor(uint16_t action, const struct ndmsg& msg);
 
+    /**
+     * Add ifinfomsg message to nlmsghdr
+     *
+     * @param action Action name
+     * @param ifm Added ifinfomsg
+     */
+    void AddLink(uint16_t action, const struct ifinfomsg& ifm);
+
 private:
     std::unique_ptr<char[]> msghdrBuf_;
     struct nlmsghdr *netlinkMessage_;

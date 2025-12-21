@@ -129,5 +129,18 @@ void NetlinkMsg::AddNeighbor(uint16_t action, const struct ndmsg& msg)
     }
     netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ndmsg)));
 }
+
+void NetlinkMsg::AddLink(uint16_t action, const struct ifinfomsg& msg)
+{
+    netlinkMessage_->nlmsg_type = action;
+    size_t remainSize = maxBufLen_ > (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_LENGTH(0)) ?
+        (maxBufLen_ - (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_LENGTH(0))) : 0;
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), remainSize, &msg, sizeof(struct ifinfomsg));
+    if (result != 0) {
+        NETNATIVE_LOGE("[AddLink]: string copy failed result %{public}d", result);
+        return;
+    }
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ifinfomsg)));
+}
 } // namespace nmd
 } // namespace OHOS

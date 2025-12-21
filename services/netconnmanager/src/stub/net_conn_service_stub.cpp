@@ -34,7 +34,10 @@ const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode:
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_PROXY_MODE),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CREATE_VLAN),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
@@ -237,6 +240,12 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
 
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IP_NEIGH_TABLE)] = {
         &NetConnServiceStub::OnGetIpNeighTable, {Permission::GET_NETWORK_INFO, Permission::GET_IP_MAC_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CREATE_VLAN)] = {
+        &NetConnServiceStub::OnCreateVlan, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN)] = {
+        &NetConnServiceStub::OnDestroyVlan, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP)] = {
+        &NetConnServiceStub::OnSetVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2175,6 +2184,68 @@ int32_t NetConnServiceStub::OnGetIpNeighTable(MessageParcel &data, MessageParcel
                 return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnCreateVlan(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("Enter OnCreateVlan");
+    std::string ifName = "";
+    uint32_t vlanId = 0;
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(vlanId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = CreateVlan(ifName, vlanId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDestroyVlan(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("Enter OnDestroyVlan");
+    std::string ifName = "";
+    uint32_t vlanId = 0;
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(vlanId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = DestroyVlan(ifName, vlanId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnSetVlanIp(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("Enter OnSetVlanIp");
+    std::string ifName = "";
+    uint32_t vlanId = 0;
+    std::string ip = "";
+    uint32_t mask = 0;
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(vlanId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadString(ip)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(mask)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = SetVlanIp(ifName, vlanId, ip, mask);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }

@@ -126,6 +126,10 @@ public:
     MOCK_METHOD(int32_t, DelStaticIpv6Addr, (const std::string &ipAddr, const std::string &macAddr,
         const std::string &ifName));
     MOCK_METHOD(int32_t, GetIpNeighTable, (std::vector<NetIpMacInfo> &ipMacInfo));
+    MOCK_METHOD(int32_t, CreateVlan, (const std::string &ifName, uint32_t vlanId));
+    MOCK_METHOD(int32_t, DestroyVlan, (const std::string &ifName, uint32_t vlanId));
+    MOCK_METHOD(int32_t, SetVlanIp, (const std::string &ifName, uint32_t vlanId,
+        const std::string &ip, uint32_t mask));
 };
  
 }  // namespace NetManagerStandard

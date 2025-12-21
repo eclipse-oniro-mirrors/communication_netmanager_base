@@ -2078,6 +2078,32 @@ HWTEST_F(NetConnClientTest, GetIpNeighTable001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 }
 
+HWTEST_F(NetConnClientTest, CreateVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto ret = NetConnClient::GetInstance().CreateVlan(ifName, vlanId);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnClientTest, DestroyVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto ret = NetConnClient::GetInstance().DestroyVlan(ifName, vlanId);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetConnClientTest, SetVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto ret = NetConnClient::GetInstance().SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_NE(ret, 0);
+}
+
 HWTEST_F(NetConnClientTest, PostTriggerNetChange001, TestSize.Level1)
 {
     auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();

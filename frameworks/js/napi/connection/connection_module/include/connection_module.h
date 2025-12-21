@@ -83,6 +83,9 @@ public:
     static constexpr const char *FUNCTION_SET_NET_EXT_ATTRIBUTE_SYNC = "setNetExtAttributeSync";
     static constexpr const char *FUNCTION_GET_NET_EXT_ATTRIBUTE_SYNC = "getNetExtAttributeSync";
     static constexpr const char *FUNCTION_GET_IP_NEIGH_TABLE = "getIpNeighTable";
+    static constexpr const char *FUNCTION_CREATE_VLAN = "createVlanInterface";
+    static constexpr const char *FUNCTION_DESTROY_VLAN = "destroyVlanInterface";
+    static constexpr const char *FUNCTION_SET_VLAN_IP = "setVlanIp";
     static constexpr const char *INTERFACE_FAMILY_TYPE = "FamilyType";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
 
@@ -164,6 +167,9 @@ private:
     static napi_value GetNetExtAttributeSync(napi_env env, napi_callback_info info);
     static napi_value SetNetExtAttributeSync(napi_env env, napi_callback_info info);
     static napi_value GetIpNeighTable(napi_env env, napi_callback_info info);
+    static napi_value CreateVlan(napi_env env, napi_callback_info info);
+    static napi_value DestroyVlan(napi_env env, napi_callback_info info);
+    static napi_value SetVlanIp(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard

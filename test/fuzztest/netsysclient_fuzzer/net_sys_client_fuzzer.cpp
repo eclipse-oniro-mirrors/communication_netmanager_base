@@ -1668,6 +1668,49 @@ void CmdGetIpNeighTableFuzzTest(data, size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE), dataParcel);
 }
 
+void CmdCreateVlanFuzzTest(data, size)
+{
+    MessageParcel dataParcel;
+    std::string ifName = NetConnGetString(STR_LEN);
+    int32_t vlanId = NetConnGetData<int32_t>();
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(vlanId);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CREATE_VLAN), dataParcel);
+}
+
+void CmdDestroyVlanFuzzTest(data, size)
+{
+    MessageParcel dataParcel;
+    std::string ifName = NetConnGetString(STR_LEN);
+    int32_t vlanId = NetConnGetData<int32_t>();
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(vlanId);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DESTROY_VLAN), dataParcel);
+}
+
+void CmdSetVlanIpFuzzTest(data, size)
+{
+    MessageParcel dataParcel;
+    std::string ifName = NetConnGetString(STR_LEN);
+    int32_t vlanId = NetConnGetData<int32_t>();
+    std::string ip = NetConnGetString(STR_LEN);
+    int32_t mask = NetConnGetData<int32_t>();
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(vlanId);
+    dataParcel.WriteString(ip);
+    dataParcel.WriteInt32(mask);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_VLAN_IP), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1733,6 +1776,9 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdSetInternetAccessByIpForWifiShareFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdGetIpNeighTableFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdCreateVlanFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDestroyVlanFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetVlanIpFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

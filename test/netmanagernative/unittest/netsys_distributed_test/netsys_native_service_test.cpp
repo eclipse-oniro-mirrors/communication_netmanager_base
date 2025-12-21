@@ -325,5 +325,37 @@ HWTEST_F(NetsysNativeServiceTest, SetBrokerUidAccessPolicyMap001, TestSize.Level
     int32_t ret = instance_->SetBrokerUidAccessPolicyMap(uidMaps);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, CreateVlan001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    instance->netsysService_ = nullptr;
+    int32_t ret = instance->CreateVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DestroyVlan001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    instance->netsysService_ = nullptr;
+    int32_t ret = instance->DestroyVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetVlanIp001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    instance->netsysService_ = nullptr;
+    int32_t ret = instance->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetsysNative
 } // namespace OHOS
