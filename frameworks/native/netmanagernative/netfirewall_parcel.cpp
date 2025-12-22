@@ -475,7 +475,7 @@ bool InterceptRecord::Marshalling(Parcel &parcel) const
     parcel.WriteUint16(localPort);
     parcel.WriteUint16(remotePort);
     parcel.WriteUint16(protocol);
-    if (!parcel.WriteInt32(time)) {
+    if (!parcel.WriteUint64(time)) {
         return false;
     }
     if (!parcel.WriteString(localIp)) {
@@ -503,7 +503,7 @@ sptr<InterceptRecord> InterceptRecord::Unmarshalling(Parcel &parcel)
     parcel.ReadUint16(ptr->localPort);
     parcel.ReadUint16(ptr->remotePort);
     parcel.ReadUint16(ptr->protocol);
-    if (!parcel.ReadInt32(ptr->time)) {
+    if (!parcel.ReadUint64(ptr->time)) {
         return nullptr;
     }
     if (!parcel.ReadString(ptr->localIp)) {

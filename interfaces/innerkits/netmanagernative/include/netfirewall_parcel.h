@@ -24,8 +24,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-// Intercept only one record per minute, with a buffer time of 60 seconds
-constexpr const int32_t INTERCEPT_BUFF_INTERVAL_SEC = 60;
+// Intercept only one record per minute, with a buffer time of 60000 milliseconds
+constexpr const uint64_t INTERCEPT_BUFF_INTERVAL_MS = 60000ULL;
+constexpr uint64_t MILLIS_PER_SEC = 1000ULL;
+constexpr uint64_t NANOS_PER_MILLI = 1000000ULL;
 // Maximum number of rules per user
 constexpr int32_t FIREWALL_RULE_SIZE_MAX = 1000;
 // Maximum number of domain for all users
@@ -240,7 +242,7 @@ struct InterceptRecord : public Parcelable {
     uint16_t localPort;   // Local Port
     uint16_t remotePort;  // Destination Port
     uint16_t protocol;    // Transport Layer Protocol
-    int32_t time;         // time stamp
+    uint64_t time;         // time stamp
     std::string localIp;  // Local IP
     std::string remoteIp; // Remote IP
     int32_t appUid;       // Application or Service ID
