@@ -1020,6 +1020,10 @@ public:
 
     int32_t SetUserDefinedServerFlag(uint16_t netId, bool isUserDefinedServer);
 
+    int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
+    int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
+    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+
 #ifdef SUPPORT_SYSVPN
     /**
      * process the next vpn stage by SysVpnStageCode

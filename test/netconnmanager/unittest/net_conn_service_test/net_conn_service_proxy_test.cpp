@@ -764,6 +764,33 @@ HWTEST_F(NetConnServiceProxyTest, GetIpNeighTableTest001, TestSize.Level1)
     int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
     EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, CreateVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = instance_->CreateVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, DestroyVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = instance_->DestroyVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceProxyTest, SetVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

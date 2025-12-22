@@ -599,5 +599,44 @@ HWTEST_F(InterfaceManagerTest, GetIpNeighTableTest003, TestSize.Level1)
     int32_t ret = InterfaceManager::GetIpNeighTable(ipMacInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(InterfaceManagerTest, CreateVlan001, TestSize.Level1)
+{
+    std::string ifName = "rmnet0";
+    uint32_t vlanId = 1;
+    int32_t ret = InterfaceManager::CreateVlan(ifName, vlanId);
+    ifName = "wlan0";
+    ret = InterfaceManager::CreateVlan(ifName, vlanId);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(InterfaceManagerTest, DestroyVlan001, TestSize.Level1)
+{
+    std::string ifName = "rmnet0";
+    uint32_t vlanId = 1;
+    int32_t ret = InterfaceManager::DestroyVlan(ifName, vlanId);
+    ifName = "wlan0";
+    ret = InterfaceManager::DestroyVlan(ifName, vlanId);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(InterfaceManagerTest, SetVlanIp001, TestSize.Level1)
+{
+    std::string ifName = "rmnet0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = InterfaceManager::SetVlanIp(ifName, vlanId, ip, mask);
+
+    ifName = "wlan0";
+    ret = InterfaceManager::SetVlanIp(ifName, vlanId, ip, mask);
+    ifName = "rmnet0";
+    ip = "2001:0db8:0000:0000:0000:0000:0000:0001";
+    ret = InterfaceManager::SetVlanIp(ifName, vlanId, ip, mask);
+    ip = "192.168.1.1.1";
+    ret = InterfaceManager::SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
 } // namespace nmd
 } // namespace OHOS

@@ -1296,6 +1296,34 @@ int32_t NetsysNativeService::UpdateEnterpriseRoute(const std::string &interfaceN
 }
 #endif
 
+int32_t NetsysNativeService::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->CreateVlan(ifName, vlanId);
+}
+
+int32_t NetsysNativeService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->DestroyVlan(ifName, vlanId);
+}
+
+int32_t NetsysNativeService::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                       const std::string &ip, uint32_t mask)
+{
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->SetVlanIp(ifName, vlanId, ip, mask);
+}
+
 int32_t NetsysNativeService::SetInternetAccessByIpForWifiShare(
     const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName)
 {

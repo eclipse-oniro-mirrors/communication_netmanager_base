@@ -2089,6 +2089,43 @@ int32_t NetsysNativeClient::SetDnsCache(uint16_t netId, const std::string &hostN
     return proxy->SetDnsCache(netId, hostName, addrInfo);
 }
 
+int32_t NetsysNativeClient::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    auto proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->CreateVlan(ifName, vlanId);
+}
+
+int32_t NetsysNativeClient::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    auto proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->DestroyVlan(ifName, vlanId);
+}
+
+int32_t NetsysNativeClient::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+                                      const std::string &ip, uint32_t mask)
+{
+    auto proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->SetVlanIp(ifName, vlanId, ip, mask);
+}
+
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 int32_t NetsysNativeClient::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
 {

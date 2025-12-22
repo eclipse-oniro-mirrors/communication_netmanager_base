@@ -1002,5 +1002,31 @@ HWTEST_F(NetsysControllerServiceImplTest, GetIpNeighTableTest001, TestSize.Level
     int32_t ret = instance_->GetIpNeighTable(ipMacInfo);
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, CreateVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = instance_->CreateVlan(ifName, vlanId);
+    EXPECT_FALSE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, DestroyVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = instance_->DestroyVlan(ifName, vlanId);
+    EXPECT_FALSE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, SetVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_FALSE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

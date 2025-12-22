@@ -1559,5 +1559,41 @@ int32_t NetConnClient::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
     }
     return proxy->GetIpNeighTable(ipMacInfo);
 }
+
+int32_t NetConnClient::CreateVlan(const std::string &ifName, uint32_t vlanId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->CreateVlan(ifName, vlanId);
+}
+
+int32_t NetConnClient::DestroyVlan(const std::string &ifName, uint32_t vlanId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->DestroyVlan(ifName, vlanId);
+}
+
+int32_t NetConnClient::SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->SetVlanIp(ifName, vlanId, ip, mask);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

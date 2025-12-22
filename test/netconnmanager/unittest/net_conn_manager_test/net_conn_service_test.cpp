@@ -2142,5 +2142,34 @@ HWTEST_F(NetConnServiceTest, GetIpNeighTableTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, CreateVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto netConnService = std::make_shared<NetConnService>();
+    auto ret = netConnService->CreateVlan(ifName, vlanId);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DestroyVlanTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto netConnService = std::make_shared<NetConnService>();
+    auto ret = netConnService->DestroyVlan(ifName, vlanId);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto netConnService = std::make_shared<NetConnService>();
+    auto ret = netConnService->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

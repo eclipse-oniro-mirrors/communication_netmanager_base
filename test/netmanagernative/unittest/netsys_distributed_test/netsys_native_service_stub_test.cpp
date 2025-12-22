@@ -692,6 +692,21 @@ public:
     {
         return 0;
     }
+    
+    int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) override
+    {
+        return 0;
+    }
+    
+    int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) override
+    {
+        return 0;
+    }
+    
+    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

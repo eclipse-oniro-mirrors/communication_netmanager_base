@@ -154,6 +154,18 @@ public:
 
     static void GetIpNeighTableCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecCreateVlan(napi_env env, void *data);
+
+    static void CreateVlanCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecDestroyVlan(napi_env env, void *data);
+
+    static void DestroyVlanCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecSetVlanIp(napi_env env, void *data);
+
+    static void SetVlanIpCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

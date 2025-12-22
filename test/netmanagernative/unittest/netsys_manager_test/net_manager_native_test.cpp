@@ -287,5 +287,60 @@ HWTEST_F(NetManagerNativeTest, GetIpNeighTable002, TestSize.Level1)
     auto ret = instance_->GetIpNeighTable(ipMacInfo);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetManagerNativeTest, CreateVlan001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->CreateVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, CreateVlan002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto ret = instance_->CreateVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerNativeTest, DestroyVlan001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->DestroyVlan(ifName, vlanId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, DestroyVlan002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    auto ret = instance_->DestroyVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerNativeTest, SetVlanIp001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    instance_->interfaceManager_ = nullptr;
+    auto ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetManagerNativeTest, SetVlanIp002, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS

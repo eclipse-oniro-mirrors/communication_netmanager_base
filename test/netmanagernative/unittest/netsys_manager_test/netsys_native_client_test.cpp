@@ -746,5 +746,34 @@ HWTEST_F(NetsysNativeClientTest, GetIpNeighTable001, TestSize.Level1)
     int32_t ret = nativeClient->GetIpNeighTable(ipMacInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, CreateVlan001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = nativeClient->CreateVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, DestroyVlan001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = nativeClient->DestroyVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, SetVlanIp001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = nativeClient->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

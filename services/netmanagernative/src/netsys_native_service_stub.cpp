@@ -50,6 +50,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
+    InitVlanInterfaceMap();
     InitNetDiagOpToInterfaceMap();
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
@@ -227,6 +228,16 @@ void NetsysNativeServiceStub::InitVpnOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdUpdateVpnRules;
 }
 #endif
+
+void NetsysNativeServiceStub::InitVlanInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_VLAN)] =
+        &NetsysNativeServiceStub::CmdCreateVlan;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_VLAN)] =
+        &NetsysNativeServiceStub::CmdDestroyVlan;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_VLAN_IP)] =
+        &NetsysNativeServiceStub::CmdSetVlanIp;
+}
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
 {
@@ -2025,6 +2036,62 @@ int32_t NetsysNativeServiceStub::CmdGetIpNeighTable(MessageParcel &data, Message
         }
     }
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdCreateVlan(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdCreateVlan CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string ifName = data.ReadString();
+    uint32_t vlanId = data.ReadUint32();
+    int32_t result = CreateVlan(ifName, vlanId);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdCreateVlan result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdDestroyVlan(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdDestroyVlan CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string ifName = data.ReadString();
+    uint32_t vlanId = data.ReadUint32();
+    int32_t result = DestroyVlan(ifName, vlanId);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdDestroyVlan result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetVlanIp(MessageParcel &data, MessageParcel &reply)
+{
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetVlanIp CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    std::string ifName = data.ReadString();
+    uint32_t vlanId = data.ReadUint32();
+    std::string ip = data.ReadString();
+    uint32_t mask = data.ReadUint32();
+    int32_t result = SetVlanIp(ifName, vlanId, ip, mask);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetVlanIp result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeServiceStub::CmdRegisterDnsResultListener(MessageParcel &data, MessageParcel &reply)

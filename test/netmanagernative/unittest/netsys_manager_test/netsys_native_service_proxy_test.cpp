@@ -791,5 +791,37 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetIpNeighTable001, TestSize.Level1)
     int32_t ret = netsysNativeService->GetIpNeighTable(ipMacInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, CreateVlan001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = netsysNativeService->CreateVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DestroyVlan001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    int32_t ret = netsysNativeService->DestroyVlan(ifName, vlanId);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetVlanIp001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = netsysNativeService->SetVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
