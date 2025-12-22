@@ -129,8 +129,9 @@ impl AniExt for bool {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Boolean.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new bool array of size {}", size);
@@ -146,14 +147,13 @@ impl AniExt for bool {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
-        let value = value as ani_boolean;
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Boolean.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const ani_boolean,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -169,21 +169,21 @@ impl AniExt for bool {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value: ani_boolean = 0;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Boolean.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut ani_boolean,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get bool value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value == 1)
+            let booleanRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &booleanRef)
         }
     }
 
@@ -212,7 +212,7 @@ impl AniExt for bool {
             let class = env.find_class(signature::BOOLEAN)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"Z:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"z:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -311,8 +311,9 @@ impl AniExt for i8 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Byte.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new byte array of size {}", size);
@@ -328,13 +329,13 @@ impl AniExt for i8 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Byte.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const i8 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -350,21 +351,21 @@ impl AniExt for i8 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0i8;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Byte.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let byteRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &byteRef)
         }
     }
 
@@ -392,7 +393,7 @@ impl AniExt for i8 {
             let class = env.find_class(signature::BYTE)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"B:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"b:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -491,8 +492,9 @@ impl AniExt for i16 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Short.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new short array of size {}", size);
@@ -508,13 +510,13 @@ impl AniExt for i16 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Short.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const i16 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -530,21 +532,21 @@ impl AniExt for i16 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0i16;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Short.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let shortRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &shortRef)
         }
     }
 
@@ -572,7 +574,7 @@ impl AniExt for i16 {
             let class = env.find_class(signature::SHORT)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"S:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"s:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -671,7 +673,8 @@ impl AniExt for i32 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
-        let res = unsafe { (**env.inner).Array_New_Int.unwrap()(env.inner, size, &mut array as _) };
+        let undefined = env.undefined()?.as_raw();
+        let res = unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new int array of size {}", size);
@@ -687,13 +690,13 @@ impl AniExt for i32 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Int.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const i32 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -709,21 +712,21 @@ impl AniExt for i32 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0i32;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Int.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let intRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &intRef)
         }
     }
 
@@ -751,7 +754,7 @@ impl AniExt for i32 {
             let class = env.find_class(signature::INT)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"I:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"i:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -850,8 +853,9 @@ impl AniExt for i64 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Long.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new long array of size {}", size);
@@ -867,13 +871,13 @@ impl AniExt for i64 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Long.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const i64 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -888,21 +892,21 @@ impl AniExt for i64 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0i64;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Long.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let longRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &longRef)
         }
     }
 
@@ -930,7 +934,7 @@ impl AniExt for i64 {
             let class = env.find_class(signature::LONG)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"J:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"l:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -1029,8 +1033,9 @@ impl AniExt for f32 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Float.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new float array of size {}", size);
@@ -1046,13 +1051,13 @@ impl AniExt for f32 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Float.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const f32 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -1068,21 +1073,21 @@ impl AniExt for f32 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0f32;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Float.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let floatRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &floatRef)
         }
     }
 
@@ -1110,8 +1115,8 @@ impl AniExt for f32 {
             let class = env.find_class(signature::FLOAT)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"F:V\0"),
-                (value,),
+                CStr::from_bytes_with_nul_unchecked(b"d:\0"),
+                (value as f64,),
             )
             .map(|obj| obj.into())
         }
@@ -1208,8 +1213,9 @@ impl AniExt for f64 {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Double.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new double array of size {}", size);
@@ -1225,13 +1231,13 @@ impl AniExt for f64 {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Double.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &value as *const f64 as _,
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -1247,21 +1253,21 @@ impl AniExt for f64 {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value = 0f64;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Double.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            Ok(value)
+            let doubleRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &doubleRef)
         }
     }
 
@@ -1289,7 +1295,7 @@ impl AniExt for f64 {
             let class = env.find_class(signature::DOUBLE)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"D:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"d:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -1416,8 +1422,9 @@ impl AniExt for char {
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
         let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
         let res =
-            unsafe { (**env.inner).Array_New_Char.unwrap()(env.inner, size, &mut array as _) };
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
 
         if res != 0 {
             let msg = format!("Failed to create a new char array of size {}", size);
@@ -1432,27 +1439,21 @@ impl AniExt for char {
         array: &AniRef<'local>,
         index: usize,
     ) -> Result<Self, AniError> {
-        let mut value: ani_char = 0;
+        let mut valueRef = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_GetRegion_Char.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                &mut value as *mut _,
+                &mut valueRef as *mut ani_ref,
             )
         };
         if res != 0 {
             let msg = format!("Failed to get char value at index {}", index);
             Err(AniError::from_code(msg, res))
         } else {
-            match char::decode_utf16(vec![value]).next() {
-                Some(Ok(c)) => Ok(c),
-                _ => {
-                    let msg = format!("Failed to decode char from value {}", value);
-                    Err(AniError::from_code(msg, res))
-                }
-            }
+            let charRef = AniRef::from_raw(valueRef);
+            Self::unbox(env, &charRef)
         }
     }
 
@@ -1462,15 +1463,13 @@ impl AniExt for char {
         index: usize,
         value: Self,
     ) -> Result<(), AniError> {
-        let mut v: [ani_char; 2] = [0; 2];
-        let c = value.encode_utf16(&mut v);
+        let valueRef = Self::inbox(env, value)?;
         let res = unsafe {
-            (**env.inner).Array_SetRegion_Char.unwrap()(
+            (**env.inner).Array_Set.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                1,
-                c.as_ptr(),
+                valueRef.as_raw(),
             )
         };
         if res != 0 {
@@ -1511,7 +1510,7 @@ impl AniExt for char {
             let class = env.find_class(signature::CHAR)?;
             env.new_object_with_signature(
                 &class,
-                CStr::from_bytes_with_nul_unchecked(b"C:V\0"),
+                CStr::from_bytes_with_nul_unchecked(b"c:\0"),
                 (value,),
             )
             .map(|obj| obj.into())
@@ -1608,8 +1607,18 @@ impl AniExt for AniRef<'_> {
         }
     }
 
-    fn new_array<'local>(_env: &AniEnv<'local>, _size: usize) -> Result<AniRef<'local>, AniError> {
-        unimplemented!("use new_array_ref instead");
+    fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
+        let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
+        let res =
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
+
+        if res != 0 {
+            let msg = format!("Failed to create a new short array of ref {}", size);
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(AniRef::from_raw(array))
+        }
     }
 
     fn array_set<'local>(
@@ -1619,7 +1628,7 @@ impl AniExt for AniRef<'_> {
         value: Self,
     ) -> Result<(), AniError> {
         let res = unsafe {
-            (**env.inner).Array_Set_Ref.unwrap()(env.inner, array.as_raw(), index, value.as_raw())
+            (**env.inner).Array_Set.unwrap()(env.inner, array.as_raw(), index, value.as_raw())
         };
         if res != 0 {
             let msg = format!("Failed to set ani ref value at index {}", index);
@@ -1636,11 +1645,11 @@ impl AniExt for AniRef<'_> {
     ) -> Result<Self, AniError> {
         let mut value = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_Get_Ref.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                &mut value as *mut _,
+                &mut value as *mut ani_ref,
             )
         };
         if res != 0 {
@@ -1753,8 +1762,17 @@ impl AniExt for String {
     }
 
     fn new_array<'local>(env: &AniEnv<'local>, size: usize) -> Result<AniRef<'local>, AniError> {
-        let class = env.find_class(signature::STRING)?;
-        env.new_array_ref(&class, size)
+        let mut array = null_mut() as ani_array;
+        let undefined = env.undefined()?.as_raw();
+        let res =
+            unsafe { (**env.inner).Array_New.unwrap()(env.inner, size, undefined, &mut array as _) };
+
+        if res != 0 {
+            let msg = format!("Failed to create a new short array of string {}", size);
+            Err(AniError::from_code(msg, res))
+        } else {
+            Ok(AniRef::from_raw(array))
+        }
     }
 
     fn array_set<'local>(
@@ -1766,7 +1784,7 @@ impl AniExt for String {
         let ani_s = env.convert_std_string(&value)?;
 
         let res = unsafe {
-            (**env.inner).Array_Set_Ref.unwrap()(env.inner, array.as_raw(), index, ani_s.as_raw())
+            (**env.inner).Array_Set.unwrap()(env.inner, array.as_raw(), index, ani_s.as_raw())
         };
         if res != 0 {
             let msg = format!("Failed to set ani string value at index {}", index);
@@ -1783,11 +1801,11 @@ impl AniExt for String {
     ) -> Result<Self, AniError> {
         let mut value = null_mut() as ani_ref;
         let res = unsafe {
-            (**env.inner).Array_Get_Ref.unwrap()(
+            (**env.inner).Array_Get.unwrap()(
                 env.inner,
                 array.as_raw(),
                 index,
-                &mut value as *mut _,
+                &mut value as *mut ani_ref,
             )
         };
         if res != 0 {

@@ -24,7 +24,7 @@ mod business_error;
 mod ani_json;
 
 ani_rs::ani_constructor!(
-    namespace "Lanirs/test/ani_test"
+    namespace "anirs.test.ani_test"
     [
         "primitiveTest" : primitive::primitive_test,
         "anirefDeserializeTest": primitive::aniref_deserialize_test,

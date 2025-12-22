@@ -225,10 +225,10 @@ pub(crate) fn create_net_connection<'local>(
 ) -> Result<AniRef<'local>, BusinessError> {
     static CONNECTION_CLASS: &CStr = unsafe {
         CStr::from_bytes_with_nul_unchecked(
-            b"L@ohos/net/connection/connection/NetConnectionInner;\0",
+            b"@ohos.net.connection.connection.NetConnectionInner\0",
         )
     };
-    static CTOR_SIGNATURE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"J:V\0") };
+    static CTOR_SIGNATURE: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"l:\0") };
 
     let connection = Box::new(Connection::new(None, None));
 

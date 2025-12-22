@@ -183,7 +183,7 @@ pub fn execute_ani_ref_callback2(env: &AniEnv, callback: AniFnObject) -> Result<
     Ok(())
 }
 
-#[ani_rs::ani(path = "Lanirs/test/ani_test/AniRefStruct", output = "only")]
+#[ani_rs::ani(path = "anirs.test.ani_test.AniRefStruct", output = "only")]
 struct AniRefCallbackStruct {
     ani_obj_string: GlobalRef<AniObject<'static>>,
     ani_string: String,
