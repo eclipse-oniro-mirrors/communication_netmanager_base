@@ -267,10 +267,6 @@ ohos_static_library("net_conn_manager_static") {
     defines += [ "SYS_FUNC" ]
   }
 
-  if (factory == true) {
-    defines += ["CONFIG_FACTORY_MODE"]
-  }
-
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
