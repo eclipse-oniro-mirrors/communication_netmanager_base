@@ -535,7 +535,7 @@ int NetSysIsIpv6Enable(uint16_t netId)
     return enable;
 }
 
-static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, int *enable)
+static int32_t NetSysIsIpv4EnableInternal(int sockFd, uint16_t netId, const int *enable)
 {
     struct RequestInfo info = {
         .uid = getuid(),
