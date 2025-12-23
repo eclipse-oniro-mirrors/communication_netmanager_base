@@ -165,6 +165,10 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "FEATURE_ENTERPRISE_ROUTE_CUSTOM" ]
   }
 
+  if (factory == true) {
+    defines += ["CONFIG_FACTORY_MODE"]
+  }
+
   external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
@@ -261,6 +265,10 @@ ohos_static_library("net_conn_manager_static") {
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]
+  }
+
+  if (factory == true) {
+    defines += ["CONFIG_FACTORY_MODE"]
   }
 
   external_deps += [ "hilog:libhilog" ]

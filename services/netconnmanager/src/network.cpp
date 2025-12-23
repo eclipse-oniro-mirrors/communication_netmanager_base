@@ -689,6 +689,10 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 
 void Network::StartNetDetection(bool needReport)
 {
+#ifdef CONFIG_FACTORY_MODE
+    NETMGR_LOG_I("factory mode, stop net detection");
+    return;
+#endif
     NETMGR_LOG_D("Enter StartNetDetection");
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     if (forbidDetectionFlag_) {
