@@ -3594,25 +3594,41 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
 // LCOV_EXCL_START
 void NetConnService::RegisterNetDataShareObserver()
 {
-    NETMGR_LOG_I("start registered");
-    helper_ = std::make_shared<NetDataShareHelperUtilsIface>();
-    if (helper_ == nullptr) {
-        NETMGR_LOG_E("Register helper_ is nullptr");
+    if (isObserverRegistered_.load()) {
+        NETMGR_LOG_E("NetDataShareObserver already registered, skip");
         return;
     }
-    auto onChange = std::bind(&NetConnService::HandleDataShareMessage, this);
-    helperCallbackId_ = helper_->RegisterObserver(SETTINGS_DATASHARE_URI_HTTP, onChange);
-    NETMGR_LOG_I("DataShare observer registered successfully");
+    NETMGR_LOG_I("start registered");
+    auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
+    if (helper == nullptr) {
+        NETMGR_LOG_E("Register helper is nullptr");
+        return;
+    }
+    onChange_ = std::bind(&NetConnService::HandleDataShareMessage, this);
+    if (helper->RegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
+        NETMGR_LOG_E("RegisterNetDataShareObserver failed");
+        return;
+    }
+    NETMGR_LOG_I("RegisterNetDataShareObserver success");
+    isObserverRegistered_.store(true);
 }
 
 void NetConnService::UnregisterNetDataShareObserver()
 {
-    if (helper_ == nullptr) {
-        NETMGR_LOG_E("Unregister helper_ is nullptr");
+    if (!isObserverRegistered_.load()) {
+        NETMGR_LOG_E("NetDataShareObserver not registered, skip");
         return;
     }
-    helper_->UnregisterObserver(SETTINGS_DATASHARE_URI_HTTP, helperCallbackId_);
-    NETMGR_LOG_I("DataShare observer unregistered successfully");
+    auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
+    if (helper == nullptr) {
+        NETMGR_LOG_E("Register helper is nullptr");
+        return;
+    }
+    if (helper->UnRegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
+        NETMGR_LOG_E("unRegisterNetDataShareObserver failed");
+        return;
+    }
+    isObserverRegistered_.store(false);
 }
  
 void NetConnService::HandleDataShareMessage()
