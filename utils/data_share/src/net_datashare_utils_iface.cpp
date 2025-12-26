@@ -89,8 +89,7 @@ int32_t NetDataShareHelperUtilsIface::RegisterSettingsObserver(const std::string
 {
     Uri uri(strUri);
     sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
-    if (observer == nullptr)
-    {
+    if (observer == nullptr) {
         return NETMANAGER_ERROR;
     }
     return dataShareHelperUtils_->RegisterSettingsObserver(uri, observer);
@@ -101,8 +100,7 @@ int32_t NetDataShareHelperUtilsIface::UnRegisterSettingsObserver(const std::stri
 {
     Uri uri(strUri);
     sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
-    if (observer == nullptr)
-    {
+    if (observer == nullptr) {
         return NETMANAGER_ERROR;
     }
     return dataShareHelperUtils_->UnRegisterSettingsObserver(uri, observer);
