@@ -19,6 +19,8 @@
 #include "net_mgr_log_wrapper.h"
 #include "time_service_client.h"
 #endif
+#include <shared_mutex>
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,7 +28,8 @@ namespace NetManagerStandard {
 const int64_t TIMEOUT = 90;
 const int64_t ROW = 30;
 const int64_t PROCESSOR_ID_NOT_CREATE = -1;
-static int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
+static volatile int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
+static ffrt::shared_mutex g_netAppEventProcessorIdMutex;
 #endif
 
 HiAppEventReport::HiAppEventReport(std::string sdk, std::string api)
@@ -50,24 +53,32 @@ HiAppEventReport::~HiAppEventReport()
 void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
 {
 #ifdef ENABLE_EMULATOR
-    int64_t endTime = OHOS::MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
-    OHOS::HiviewDFX::HiAppEvent::Event event("api_diagnostic", "api_exec_end", OHOS::HiviewDFX::HiAppEvent::BEHAVIOR);
-    event.AddParam("trans_id", this->transId_);
-    event.AddParam("api_name", this->apiName_);
-    event.AddParam("sdk_name", this->sdkName_);
-    event.AddParam("begin_time", this->beginTime_);
-    event.AddParam("end_time", endTime);
-    event.AddParam("result", result);
-    event.AddParam("error_code", errCode);
-    int ret = Write(event);
-    NETMGR_LOG_D("transId:%{public}s, apiName:%{public}s, sdkName:%{public}s, "
-        "startTime:%{public}ld, endTime:%{public}ld, result:%{public}d, errCode:%{public}d, ret:%{public}d",
-        this->transId_.c_str(), this->apiName_.c_str(), this->sdkName_.c_str(),
-        this->beginTime_, endTime, result, errCode, ret);
+    ffrt::submit([result, errCode, selfShared = shared_from_this()]() {
+        std::shared_lock<ffrt::shared_mutex> lock(g_netAppEventProcessorIdMutex);
+        int64_t processorId = g_processorID;
+        lock.unlock();
+        if (processorId == PROCESSOR_ID_NOT_CREATE) {
+            selfShared->AddProcessor();
+        }
+        int64_t endTime = OHOS::MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+        OHOS::HiviewDFX::HiAppEvent::Event event("api_diagnostic", "api_exec_end", OHOS::HiviewDFX::HiAppEvent::BEHAVIOR);
+        event.AddParam("trans_id", selfShared->transId_);
+        event.AddParam("api_name", selfShared->apiName_);
+        event.AddParam("sdk_name", selfShared->sdkName_);
+        event.AddParam("begin_time", selfShared->beginTime_);
+        event.AddParam("end_time", endTime);
+        event.AddParam("result", result);
+        event.AddParam("error_code", errCode);
+        int ret = Write(event);
+        NETMGR_LOG_D("transId:%{public}s, apiName:%{public}s, sdkName:%{public}s, "
+            "startTime:%{public}ld, endTime:%{public}ld, result:%{public}d, errCode:%{public}d, ret:%{public}d",
+            selfShared->transId_.c_str(), selfShared->apiName_.c_str(), selfShared->sdkName_.c_str(),
+            selfShared->beginTime_, endTime, result, errCode, ret);
+    }, {}, {}, ffrt::task_attr().name("reportSdkEvent"));
 #endif
 }
 
-int64_t HiAppEventReport::AddProcessor()
+void HiAppEventReport::AddProcessor()
 {
 #ifdef ENABLE_EMULATOR
     NETMGR_LOG_D("AddProcessor enter");
@@ -99,7 +110,8 @@ int64_t HiAppEventReport::AddProcessor()
         event3.isRealTime = true;
         config.eventConfigs.push_back(event3);
     }
-    return OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+    std::unique_lock<ffrt::shared_mutex> lock(g_netAppEventProcessorIdMutex);
+    g_processorID = OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 #endif
 }
 } // namespace NetManagerStandard
