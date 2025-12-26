@@ -15,6 +15,7 @@
 
 #include "net_datashare_utils_iface.h"
 #include "net_datashare_utils.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
