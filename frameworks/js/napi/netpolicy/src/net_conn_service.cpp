@@ -3600,10 +3600,6 @@ void NetConnService::RegisterNetDataShareObserver()
     }
     NETMGR_LOG_I("start registered");
     auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
-    if (helper == nullptr) {
-        NETMGR_LOG_E("Register helper is nullptr");
-        return;
-    }
     onChange_ = std::bind(&NetConnService::HandleDataShareMessage, this);
     if (helper->RegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
         NETMGR_LOG_E("RegisterNetDataShareObserver failed");
@@ -3620,10 +3616,6 @@ void NetConnService::UnregisterNetDataShareObserver()
         return;
     }
     auto helper = std::make_unique<NetDataShareHelperUtilsIface>();
-    if (helper == nullptr) {
-        NETMGR_LOG_E("Register helper is nullptr");
-        return;
-    }
     if (helper->UnRegisterSettingsObserver(SETTINGS_DATASHARE_URI_HTTP, onChange_) != NETSYS_SUCCESS) {
         NETMGR_LOG_E("unRegisterNetDataShareObserver failed");
         return;
