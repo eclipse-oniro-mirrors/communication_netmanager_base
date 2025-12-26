@@ -31,7 +31,7 @@ static constexpr int RESULT_SUCCESS = 0;
 static constexpr int RESULT_FAIL = 1;
 static constexpr int ERR_NONE = 0;
 
-class HiAppEventReport {
+class HiAppEventReport : public std::enable_shared_from_this<HiAppEventReport> {
 public:
     HiAppEventReport(std::string sdk, std::string api);
     ~HiAppEventReport();
@@ -39,7 +39,7 @@ public:
 
 #ifdef ENABLE_EMULATOR
 private:
-    int64_t AddProcessor();
+    void AddProcessor();
 
     int64_t beginTime_ = 0;
     std::string transId_ = "";
