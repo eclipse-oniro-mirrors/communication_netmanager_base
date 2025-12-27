@@ -551,7 +551,7 @@ declare namespace connection {
    * @syscap SystemCapability.Communication.NetManager.Core
    * @since 23 dynamic&static
    */
-  function getAddressesByNameWithOptions(host: string, option: QueryOptions): Promise<Array<NetAddress>>;
+  function getAddressesByNameWithOptions(host: string, option?: QueryOptions): Promise<Array<NetAddress>>;
 
   /**
    * Obtains the {@link NetHandle} bound to a process using {@link setAppNet}.
@@ -1271,7 +1271,7 @@ declare namespace connection {
      * @syscap SystemCapability.Communication.NetManager.Core
      * @since 23 dynamic&static
      */
-    getAddressesByNameWithOptions(host: string, option: QueryOptions): Promise<Array<NetAddress>>;
+    getAddressesByNameWithOptions(host: string, option?: QueryOptions): Promise<Array<NetAddress>>;
 
     /**
      * Resolves a host name to obtain the first IP address based on the specified NetHandle.

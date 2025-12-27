@@ -52,22 +52,26 @@ GetAddressByNameWithOptionsContext::GetAddressByNameWithOptionsContext(
 
 void GetAddressByNameWithOptionsContext::ParseParams(napi_value *params, size_t paramsCount)
 {
-        if (!CheckParamsType(params, paramsCount)) {
+    if (!CheckParamsType(params, paramsCount)) {
         SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return;
     }
     host_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
-    if (NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_1], "family")) {
-        auto jsFamily =  NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_1], "family");
-        if (NapiUtils::GetValueType(GetEnv(), jsFamily) != napi_undefined &&
-            NapiUtils::GetValueType(GetEnv(), jsFamily) != napi_null) {
-            uint32_t family = NapiUtils::GetInt32FromValue(GetEnv(), jsFamily);
-            if (family < static_cast<uint32_t>(Family::All) || family > static_cast<uint32_t>(Family::IPv6)) {
+    if (paramsCount == PARAM_HOSTNAME_AND_OPTION &&
+        NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_object &&
+        NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_1], "family")) {
+        auto jsFamily = NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_1], "family");
+        if (NapiUtils::GetValueType(GetEnv(), jsFamily) == napi_undefined ||
+            NapiUtils::GetValueType(GetEnv(), jsFamily) == napi_null) {
                 SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
                 return;
             }
-            family_ = static_cast<Family>(family);
+        auto family = NapiUtils::GetInt32FromValue(GetEnv(), jsFamily);
+        if (family < static_cast<uint32_t>(Family::All) || family > static_cast<uint32_t>(Family::IPv6)) {
+            SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+            return;
         }
+        family_ = static_cast<Family>(family);
     }
     SetParseOK(true);
 }
@@ -97,13 +101,14 @@ bool GetAddressByNameContext::CheckParamsType(napi_value *params, size_t paramsC
 
 bool GetAddressByNameWithOptionsContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
-    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
+    if (paramsCount == PARAM_HOSTNAME_AND_OPTION) {
         if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_object) {
+            (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_object)) {
             return true;
         }
-        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function) {
-            SetCallback(params[paramsCount - 1]);
+    } else if (paramsCount == PARAM_JUST_HOSTNAME) {
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string) {
+            return true;
         }
     }
     return false;

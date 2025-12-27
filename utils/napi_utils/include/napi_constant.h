@@ -32,6 +32,8 @@ constexpr int PARAM_OPTIONS_AND_CALLBACK = 2;
 constexpr int PARAM_DOUBLE_OPTIONS_AND_CALLBACK = 3;
 constexpr int PARAM_TRIPLE_OPTIONS_AND_CALLBACK = 4;
 constexpr int PARAM_FOUR_OPTIONS_AND_CALLBACK = 5;
+constexpr int PARAM_JUST_HOSTNAME = 1;
+constexpr int PARAM_HOSTNAME_AND_OPTION = 2;
 
 enum {
     ARG_NUM_0 = 0,
