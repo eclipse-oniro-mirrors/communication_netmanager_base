@@ -34,6 +34,7 @@
 #include "netmanager_base_log.h"
 #include "securec.h"
 #include "hi_app_event_report.h"
+#include "icu_helper.h"
 
 namespace OHOS::NetManagerStandard {
 std::mutex g_predefinedHostMtx;
@@ -757,6 +758,49 @@ bool ConnectionExec::ExecSetVlanIp(SetVlanIpContext *context)
 napi_value ConnectionExec::SetVlanIpCallback(SetVlanIpContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecGetDnsASCII(GetDnsContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecGetDnsASCII");
+    auto host = context->GetHost();
+    if (host.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty");
+        return true;
+    }
+    std::string ascii = "";
+    int32_t errorCode = ICUHelper::GetDnsASCII(host, context->GetConversionProcess(), ascii);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetDnsASCII failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    context->SetHost(ascii);
+    return true;
+}
+
+bool ConnectionExec::ExecGetDnsUnicode(GetDnsContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecGetDnsUnicode");
+    auto host = context->GetHost();
+    if (host.empty()) {
+        NETMANAGER_BASE_LOGE("host is empty");
+        return true;
+    }
+    std::string unicode = "";
+    int32_t errorCode = ICUHelper::GetDnsUnicode(host, context->GetConversionProcess(), unicode);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec GetDnsUnicode failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    context->SetHost(unicode);
+    return true;
+}
+
+napi_value ConnectionExec::GetDnsCallback(GetDnsContext *context)
+{
+    return NapiUtils::CreateStringUtf8(context->GetEnv(), context->GetHost());
 }
 
 bool ConnectionExec::ExecAddNetworkRoute(AddNetworkRouteContext *context)

@@ -47,6 +47,7 @@
 #include "createvlan_context.h"
 #include "destroyvlan_context.h"
 #include "setvlanip_context.h"
+#include "getdns_context.h"
 
 #define DECLARE_WRITABLE_NAPI_FUNCTION(name, func)                                  \
     {                                                                               \
@@ -234,6 +235,12 @@ public:
     static bool ExecSetVlanIp(SetVlanIpContext *context);
 
     static napi_value SetVlanIpCallback(SetVlanIpContext *context);
+
+    static bool ExecGetDnsASCII(GetDnsContext *context);
+
+    static bool ExecGetDnsUnicode(GetDnsContext *context);
+
+    static napi_value GetDnsCallback(GetDnsContext *context);
 
     class NetHandleExec final {
     public:

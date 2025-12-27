@@ -41,6 +41,7 @@
 #include "getinterfaceconfig_context.h"
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
+#include "icu_helper.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 static thread_local uint64_t g_moduleId;
@@ -50,6 +51,10 @@ static thread_local uint64_t g_moduleId;
 
 #define DECLARE_NET_BEAR_TYPE(type) \
     DECLARE_NAPI_STATIC_PROPERTY(#type, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetBearType::type)))
+
+#define DECLARE_CONVERSION_PROCESS(process) \
+    DECLARE_NAPI_STATIC_PROPERTY(#process,  \
+                                 NapiUtils::CreateUint32(env, static_cast<uint32_t>(ConversionProcess::process)))
 
 namespace OHOS::NetManagerStandard {
 
@@ -228,15 +233,10 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET_SYNC, HasDefaultNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_IS_DEFAULT_NET_METERED, IsDefaultNetMetered),
         DECLARE_NAPI_FUNCTION(FUNCTION_IS_DEFAULT_NET_METERED_SYNC, IsDefaultNetMeteredSync),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES_SYNC, GetNetCapabilitiesSync),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES_SYNC, GetConnectionPropertiesSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS, GetAllNets),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS_SYNC, GetAllNetsSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_ENABLE_AIRPLANE_MODE, EnableAirplaneMode),
@@ -265,10 +265,24 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_REGISTER_NET_SUPPLIER, RegisterNetSupplier),
         DECLARE_NAPI_FUNCTION(FUNCTION_UNREGISTER_NET_SUPPLIER, UnregisterNetSupplier),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
-        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION, GetAddressesByNameWithOptions),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_ASCII, GetDnsASCII),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_UNICODE, GetDnsUnicode),
         DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS
         DEFINE_VLAN_FUNCTIONS
         DEFINE_PAC_FUNCTIONS
+    };
+    return functions;
+}
+
+std::initializer_list<napi_property_descriptor> ConnectionModule::createWritablePropertyList()
+{
+    std::initializer_list<napi_property_descriptor> functions = {
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES_SYNC, GetNetCapabilitiesSync),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES_SYNC, GetConnectionPropertiesSync),
+        DECLARE_WRITABLE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION, GetAddressesByNameWithOptions),
     };
     return functions;
 }
@@ -278,6 +292,8 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     g_moduleId = NapiUtils::CreateUvHandlerQueue(env);
     std::initializer_list<napi_property_descriptor> functions = ConnectionModule::createPropertyList();
     NapiUtils::DefineProperties(env, exports, functions);
+    std::initializer_list<napi_property_descriptor> writableFunctions = ConnectionModule::createWritablePropertyList();
+    NapiUtils::DefineProperties(env, exports, writableFunctions);
     InitClasses(env, exports);
     InitProperties(env, exports);
     AddCleanupHook(env);
@@ -338,19 +354,29 @@ void ConnectionModule::InitProperties(napi_env env, napi_value exports)
     NapiUtils::DefineProperties(env, pmtypes, proxyModeTypes);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_PROXY_MODE_TYPE, pmtypes);
     
+    InitFamilyTypes(env, exports);
+
+    std::initializer_list<napi_property_descriptor> conversionProcess = {
+        DECLARE_CONVERSION_PROCESS(NO_CONFIGURATION),  DECLARE_CONVERSION_PROCESS(ALLOW_UNASSIGNED),
+        DECLARE_CONVERSION_PROCESS(USE_STD3_ASCII_RULES)
+    };
+    napi_value process = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, process, conversionProcess);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_CONVERSION_PROCESS, process);
+}
+
+void ConnectionModule::InitFamilyTypes(napi_env env, napi_value exports)
+{
     std::initializer_list<napi_property_descriptor> familyTypes = {
         DECLARE_NAPI_STATIC_PROPERTY(
             "FAMILY_TYPE_ALL",
-            NapiUtils::CreateUint32(
-                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::All))),
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::All))),
         DECLARE_NAPI_STATIC_PROPERTY(
             "FAMILY_TYPE_IPV4",
-            NapiUtils::CreateUint32(
-                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv4))),
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv4))),
         DECLARE_NAPI_STATIC_PROPERTY(
             "FAMILY_TYPE_IPV6",
-            NapiUtils::CreateUint32(
-                env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv6))),
+            NapiUtils::CreateUint32(env, static_cast<uint32_t>(GetAddressByNameWithOptionsContext::Family::IPv6))),
     };
     napi_value fTypes = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, fTypes, familyTypes);
@@ -615,6 +641,19 @@ napi_value ConnectionModule::SetVlanIp(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<SetVlanIpContext>(env, info, FUNCTION_SET_VLAN_IP, nullptr,
         ConnectionAsyncWork::ExecSetVlanIp, ConnectionAsyncWork::SetVlanIpCallback);
+}
+
+napi_value ConnectionModule::GetDnsASCII(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetDnsContext>(
+        env, info, FUNCTION_GET_DNS_ASCII, nullptr, ConnectionExec::ExecGetDnsASCII, ConnectionExec::GetDnsCallback);
+}
+
+napi_value ConnectionModule::GetDnsUnicode(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetDnsContext>(env, info, FUNCTION_GET_DNS_UNICODE, nullptr,
+                                                        ConnectionExec::ExecGetDnsUnicode,
+                                                        ConnectionExec::GetDnsCallback);
 }
 
 napi_value ConnectionModule::AddNetworkRoute(napi_env env, napi_callback_info info)
