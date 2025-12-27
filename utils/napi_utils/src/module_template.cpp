@@ -32,7 +32,7 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
               bool asyncCallback)
 {
 #ifndef CROSS_PLATFORM
-    HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionOn");
+    auto hiAppEventReport = std::make_shared<HiAppEventReport>("NetworkKit", "ConnectionOn");
 #endif
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;
@@ -57,7 +57,7 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
         manager->AddListener(env, event, params[1], false, asyncCallback);
     }
 #ifndef CROSS_PLATFORM
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
+    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ERR_NONE);
 #endif
     return NapiUtils::GetUndefined(env);
 }
