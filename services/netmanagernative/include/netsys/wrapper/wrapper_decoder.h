@@ -50,6 +50,22 @@ private:
     static constexpr int32_t SPLIT_SIZE = 2;
     std::shared_ptr<NetsysEventMessage> message_ = nullptr;
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    struct FiveTuple {
+        uint16_t localPort = 0;
+        uint16_t remotePort = 0;
+        uint16_t protocol = 0;
+        std::string localIp;
+        std::string remoteIp;
+    };
+
+    bool InterpretNflogPacket(const nlmsghdr *hdrMsg);
+    void SaveFiveTupleMsg(const uint8_t *payload, int32_t payloadLen, uint8_t family, FiveTuple &fiveTuple);
+    std::string ParseDnsDomain(const uint8_t *payload, int32_t payloadLen, uint8_t family, uint16_t srcPort,
+                               uint16_t dstPort);
+    int32_t CalculateDnsStartOffset(const uint8_t *payload, int32_t payloadLen, uint8_t family);
+#endif
+
     bool PushAsciiMessage(const std::vector<std::string> &recvmsg);
     bool InterpreteInfoMsg(const nlmsghdr *hdrMsg);
     bool InterpreteUlogMsg(const nlmsghdr *hdrMsg);

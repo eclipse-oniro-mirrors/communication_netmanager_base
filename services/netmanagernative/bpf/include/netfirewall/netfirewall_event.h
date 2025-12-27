@@ -18,6 +18,11 @@
 #include "netfirewall_types.h"
 #include "netfirewall_event_map.h"
 
+#include "netfirewall_event.h"
+#include "netfirewall_map.h"
+#include "netfirewall_utils.h"
+#include "netfirewall_domain.h"
+
 /**
  * @brief output event to ring buffer for user polling
  *
@@ -82,6 +87,43 @@ static __always_inline void log_intercept(struct match_tuple *tuple)
         ev.ipv6.daddr = tuple->ipv6.daddr;
     }
     output_to_user(EVENT_INTERCEPT, &ev, sizeof(struct intercept_event));
+}
+
+static __always_inline void log_intercept_event(struct match_tuple *tuple)
+{
+    if (!tuple) {
+        return;
+    }
+
+    __u16 num = 0;
+    struct domain_hash_key *domainData = bpf_map_lookup_elem(&DOMAIN_DATA_KEY_MAP, &num);
+
+    struct event *e = bpf_ringbuf_reserve(&EVENT_MAP, sizeof(struct event), 0);
+    if (!e) {
+        return;
+    }
+    e->type = EVENT_INTERCEPT;
+    e->len = sizeof(struct intercept_event);
+    e->intercept.dir = tuple->dir;
+    e->intercept.family = tuple->family;
+    e->intercept.protocol = tuple->protocol;
+    e->intercept.sport = tuple->sport;
+    e->intercept.dport = tuple->dport;
+    e->intercept.appuid = tuple->appuid;
+    if (domainData) {
+        memcpy(&(e->intercept.domainData), domainData, sizeof(struct domain_hash_key));
+    } else {
+        e->intercept.domainData.prefixlen = 0;
+        memset(&(e->intercept.domainData.data), 0, sizeof(e->intercept.domainData.data));
+    }
+    if (AF_INET == tuple->family) {
+        e->intercept.ipv4.saddr = tuple->ipv4.saddr;
+        e->intercept.ipv4.daddr = tuple->ipv4.daddr;
+    } else if (AF_INET6 == tuple->family) {
+        e->intercept.ipv6.saddr = tuple->ipv6.saddr;
+        e->intercept.ipv6.daddr = tuple->ipv6.daddr;
+    }
+    bpf_ringbuf_submit(e, 0);
 }
 
 #if NET_FIREWALL_DEBUG_TUPLE

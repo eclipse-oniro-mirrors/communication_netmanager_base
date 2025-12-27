@@ -42,6 +42,9 @@ private:
     int32_t CmdOnRouteChanged(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDhcpSuccess(MessageParcel &data, MessageParcel &reply);
     int32_t CmdOnBandwidthReachedLimit(MessageParcel &data, MessageParcel &reply);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t CmdOnInterceptRecord(MessageParcel &data, MessageParcel &reply);
+#endif
 
 private:
     std::map<uint32_t, NotifyCallbackFunc> memberFuncMap_;

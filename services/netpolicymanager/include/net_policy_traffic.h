@@ -138,6 +138,12 @@ private:
         {
             return 0;
         }
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        int32_t OnInterceptRecord(sptr<InterceptRecord> &record)
+        {
+            return 0;
+        }
+#endif
         int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
         {
             traffic_->ReachedLimit(iface);

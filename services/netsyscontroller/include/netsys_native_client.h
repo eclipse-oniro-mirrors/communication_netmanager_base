@@ -24,6 +24,9 @@
 
 #include "i_netsys_service.h"
 #include "i_net_diag_callback.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "i_netfirewall_callback.h"
+#endif
 #include "net_dns_result_callback_stub.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
@@ -50,6 +53,9 @@ private:
         int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
                                const std::string &ifName) override;
         int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        int32_t OnInterceptRecord(sptr<OHOS::NetManagerStandard::InterceptRecord> &record) override;
+#endif
         int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
 
     private:
@@ -1056,6 +1062,10 @@ public:
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    void RegisterFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+    void UnregisterFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback);
+#endif
     sptr<OHOS::NetsysNative::INetsysService> GetProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
@@ -1075,6 +1085,10 @@ private:
     std::mutex cbObjMutex_;
     std::mutex cbDnsReportObjMutex_;
     std::mutex cbDnsQueryReportObjMutex_;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    std::shared_mutex firewallCallbackMutex_;
+    std::vector<sptr<NetsysNative::INetFirewallCallback>> firewallCallbacks_;
+#endif
 
 private:
     class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {

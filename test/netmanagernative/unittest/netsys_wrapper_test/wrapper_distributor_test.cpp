@@ -113,6 +113,13 @@ public:
         return NETMANAGER_EXT_SUCCESS;
     }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record) override
+    {
+        return 0;
+    }
+#endif
+
     vector<std::string> ifnameContainer_;
     std::string  alertName_;
     int flags_ = 0;
@@ -265,5 +272,24 @@ HWTEST_F(WrapperDistributorTest, WrapperDistributorBranchTest001, TestSize.Level
     int32_t ret = instance_->RegisterNetlinkCallbacks(nullptr);
     EXPECT_EQ(ret, NetlinkResult::ERR_NULL_PTR);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(WrapperDistributorTest, WrapperDistributorBranchTest002, TestSize.Level1)
+{
+    std::shared_ptr<WrapperDistributor> instance =
+        std::make_shared<WrapperDistributor>(TEST_SOCKET, TEST_FORMAT, EXTERN_MUTEX);
+    instance->netlinkCallbacks_ = nullptr;
+    std::shared_ptr<NetsysEventMessage> message = std::make_shared<NetsysEventMessage>();
+
+    instance->HandleSubSysNflog(message);
+
+    auto callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+    sptr<NotifyCallbackImp> notifyCallback = new (std::nothrow) NotifyCallbackImp();
+    callbacks_->push_back(notifyCallback);
+    int32_t ret = instance->RegisterNetlinkCallbacks(callbacks_);
+    instance->HandleSubSysNflog(message);
+    EXPECT_EQ(ret, NetlinkResult::OK);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

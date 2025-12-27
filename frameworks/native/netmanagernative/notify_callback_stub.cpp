@@ -37,6 +37,10 @@ NotifyCallbackStub::NotifyCallbackStub()
     memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS)] = &NotifyCallbackStub::CmdDhcpSuccess;
     memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT)] =
         &NotifyCallbackStub::CmdOnBandwidthReachedLimit;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERCEPT_RECORD)] =
+        &NotifyCallbackStub::CmdOnInterceptRecord;
+#endif
 }
 
 NotifyCallbackStub::~NotifyCallbackStub() {}
@@ -186,5 +190,18 @@ int32_t NotifyCallbackStub::CmdOnBandwidthReachedLimit(MessageParcel &data, Mess
 
     return ERR_NONE;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NotifyCallbackStub::CmdOnInterceptRecord(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NetManagerStandard::InterceptRecord> record = NetManagerStandard::InterceptRecord::Unmarshalling(data);
+    int32_t result = OnInterceptRecord(record);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return result;
+    }
+    return ERR_NONE;
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

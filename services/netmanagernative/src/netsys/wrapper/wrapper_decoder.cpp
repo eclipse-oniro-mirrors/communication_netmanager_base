@@ -68,6 +68,22 @@ constexpr const char *RTA_GATEWAY_STR = "RTA_GATEWAY";
 constexpr const char *RTA_DST_STR = "RTA_DST";
 constexpr const char *RTA_OIF_STR = "RTA_OIF";
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+constexpr uint8_t BYTES_4 = 4;
+constexpr uint8_t IPV4_MIN_HDR_LEN = 20;
+constexpr uint8_t HEAD_LENGTH = 12;
+constexpr uint8_t IPV4_DST_OFFSET = 16;
+constexpr uint8_t IPV4_PROTO_OFFSET = 9;
+
+constexpr uint8_t IPV6_HDR_LEN = 40;
+constexpr uint8_t SRC_ADDR_OFFSET = 8;
+constexpr uint8_t IPV6_DST_OFFSET = 24;
+constexpr uint8_t IPV6_NH_OFFSET = 6;
+
+constexpr uint8_t DPORT_OFFSET = 2;
+constexpr uint16_t DNS_PORT = 53;
+#endif
+
 struct ULogMessage {
     uint64_t mark;
     int64_t timeStampSec;
@@ -161,6 +177,48 @@ inline bool IsPayloadValidated(rtattr *dest, uint32_t size)
     }
     return ret;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+inline const nlattr *GetAttrBegin(const nfgenmsg *nfg)
+{
+    return reinterpret_cast<const nlattr *>(reinterpret_cast<const uint8_t *>(nfg) + sizeof(*nfg));
+}
+
+inline bool IsAttrOk(const nlattr *attr, int len)
+{
+    if (!attr || len < static_cast<int>(sizeof(nlattr))) {
+        return false;
+    }
+    const uint16_t rawLen = attr->nla_len;
+    const uint16_t alignedLen = static_cast<uint16_t>(NLA_ALIGN(rawLen));
+    return rawLen >= sizeof(nlattr) && alignedLen <= len;
+}
+
+inline const nlattr *GetNextAttr(const nlattr *attr, int &attrLen)
+{
+    if (!attr) {
+        attrLen = 0;
+        return nullptr;
+    }
+    const uint16_t step = static_cast<uint16_t>(NLA_ALIGN(attr->nla_len));
+    if (step < sizeof(nlattr) || attrLen < static_cast<int>(step)) {
+        attrLen = 0;
+        return nullptr;
+    }
+    attrLen -= static_cast<int>(step);
+    return reinterpret_cast<const nlattr *>(reinterpret_cast<const char *>(attr) + step);
+}
+
+inline const void *GetAttrData(const nlattr *attr)
+{
+    return reinterpret_cast<const void *>(reinterpret_cast<const char *>(attr) + NLA_HDRLEN);
+}
+
+inline int GetAttrPayloadLen(const nlattr *attr)
+{
+    return static_cast<int>(attr->nla_len) - NLA_HDRLEN;
+}
+#endif
 
 const std::map<std::string, NetsysEventMessage::Type> ASCII_PARAM_LIST = {
     {"IFINDEX", NetsysEventMessage::Type::IFINDEX},
@@ -265,6 +323,11 @@ bool WrapperDecoder::DecodeBinary(const char *buffer, int32_t buffSize)
             case RTM_DELROUTE:
                 result = InterpreteRtMsg(hdrMsg);
                 break;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+            case LOCAL_NFLOG_PACKET:
+                result = InterpretNflogPacket(hdrMsg);
+                break;
+#endif
             default:
                 result = false;
                 NETNATIVE_LOG_D("message type error as :%{public}d\n", hdrMsg->nlmsg_type);
@@ -485,6 +548,165 @@ bool WrapperDecoder::InterpreteRtMsg(const nlmsghdr *hdrMsg)
     message_->SetAction(action);
     return true;
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t WrapperDecoder::CalculateDnsStartOffset(const uint8_t *payload, int32_t payloadLen, uint8_t family)
+{
+    if (family == AF_INET) {
+        if (payloadLen < IPV4_MIN_HDR_LEN) {
+            return -1;
+        }
+        uint8_t ihlBytes = (payload[0] & 0x0F) * BYTES_4;
+        if (payloadLen < ihlBytes + SRC_ADDR_OFFSET) {
+            return -1;
+        }
+        return ihlBytes + SRC_ADDR_OFFSET;
+    } else if (family == AF_INET6) {
+        if (payloadLen < IPV6_HDR_LEN + SRC_ADDR_OFFSET) {
+            return -1;
+        }
+        return IPV6_HDR_LEN + SRC_ADDR_OFFSET;
+    }
+    return -1;
+}
+
+std::string WrapperDecoder::ParseDnsDomain(const uint8_t *payload, int32_t payloadLen, uint8_t family, uint16_t srcPort,
+                                           uint16_t dstPort)
+{
+    if (!payload || payloadLen <= 0) {
+        return "";
+    }
+    if (srcPort != DNS_PORT && dstPort != DNS_PORT) {
+        return "";
+    }
+    int32_t dnsStartOffset = CalculateDnsStartOffset(payload, payloadLen, family);
+    if (dnsStartOffset == -1) {
+        return "";
+    }
+    int32_t dnsLength = payloadLen - dnsStartOffset;
+    if (dnsLength < HEAD_LENGTH) {
+        return "";
+    }
+    int32_t pos = HEAD_LENGTH;
+    std::string domain;
+    while (pos < dnsLength) {
+        uint8_t labelLen = payload[dnsStartOffset + pos];
+        pos += 1;
+        if (labelLen == 0) {
+            break;
+        }
+
+        if ((labelLen & 0xC0) != 0) {
+            return "";
+        }
+        if (pos + labelLen > dnsLength) {
+            return "";
+        }
+        if (!domain.empty()) {
+            domain.push_back('.');
+        }
+        domain.append(reinterpret_cast<const char *>(payload + dnsStartOffset + pos), labelLen);
+        pos += labelLen;
+    }
+    return domain;
+}
+
+void WrapperDecoder::SaveFiveTupleMsg(const uint8_t *payload, int32_t payloadLen, uint8_t family, FiveTuple &fiveTuple)
+{
+    if (!payload || payloadLen <= 0) {
+        NETNATIVE_LOGW("NFLOG payload missing");
+        return;
+    }
+
+    if (family == AF_INET) {
+        if (payloadLen < IPV4_MIN_HDR_LEN) {
+            NETNATIVE_LOGW("short IPv4 payload: %{public}d", payloadLen);
+            return;
+        }
+        char src[INET_ADDRSTRLEN] = {};
+        char dst[INET_ADDRSTRLEN] = {};
+        inet_ntop(AF_INET, payload + HEAD_LENGTH, src, sizeof(src));
+        inet_ntop(AF_INET, payload + IPV4_DST_OFFSET, dst, sizeof(dst));
+        uint8_t ihl = (payload[0] & 0x0F) * BYTES_4;
+        fiveTuple.protocol = payload[IPV4_PROTO_OFFSET];
+
+        if (payloadLen >= ihl + BYTES_4 && (fiveTuple.protocol == IPPROTO_TCP || fiveTuple.protocol == IPPROTO_UDP)) {
+            fiveTuple.localPort = ntohs(*reinterpret_cast<const uint16_t *>(payload + ihl));
+            fiveTuple.remotePort = ntohs(*reinterpret_cast<const uint16_t *>(payload + ihl + DPORT_OFFSET));
+        }
+
+        fiveTuple.localIp = std::string(src);
+        fiveTuple.remoteIp = std::string(dst);
+    } else if (family == AF_INET6) {
+        if (payloadLen < IPV6_HDR_LEN) {
+            NETNATIVE_LOGW("short IPv6 payload: %{public}d", payloadLen);
+            return;
+        }
+        char src6[INET6_ADDRSTRLEN] = {};
+        char dst6[INET6_ADDRSTRLEN] = {};
+        inet_ntop(AF_INET6, payload + SRC_ADDR_OFFSET, src6, sizeof(src6));
+        inet_ntop(AF_INET6, payload + IPV6_DST_OFFSET, dst6, sizeof(dst6));
+        uint8_t nh = payload[IPV6_NH_OFFSET];
+        fiveTuple.protocol = nh;
+        if (payloadLen >= IPV6_HDR_LEN + BYTES_4 && (nh == IPPROTO_TCP || nh == IPPROTO_UDP)) {
+            fiveTuple.localPort = ntohs(*reinterpret_cast<const uint16_t *>(payload + IPV6_HDR_LEN));
+            fiveTuple.remotePort = ntohs(*reinterpret_cast<const uint16_t *>(payload + IPV6_HDR_LEN + DPORT_OFFSET));
+        }
+        fiveTuple.localIp = std::string(src6);
+        fiveTuple.remoteIp = std::string(dst6);
+    }
+}
+
+bool WrapperDecoder::InterpretNflogPacket(const nlmsghdr *hdrMsg)
+{
+    if (hdrMsg == nullptr) {
+        return false;
+    }
+    if (!CheckRtNetlinkLength(hdrMsg, sizeof(nfgenmsg))) {
+        return false;
+    }
+    const nfgenmsg *nfg = reinterpret_cast<const nfgenmsg *>(NLMSG_DATA(hdrMsg));
+
+    uint32_t uid = 0;
+    const uint8_t *payload = nullptr;
+    int32_t payloadLen = 0;
+
+    int32_t attrLen = NLMSG_PAYLOAD(hdrMsg, sizeof(*nfg));
+    for (const nlattr *attr = GetAttrBegin(nfg); IsAttrOk(attr, attrLen); attr = GetNextAttr(attr, attrLen)) {
+        switch (attr->nla_type) {
+            case NFULA_PAYLOAD:
+                payload = reinterpret_cast<const uint8_t *>(GetAttrData(attr));
+                payloadLen = static_cast<int>(GetAttrPayloadLen(attr));
+                break;
+            case NFULA_UID:
+                if (GetAttrPayloadLen(attr) >= static_cast<int>(sizeof(uint32_t))) {
+                    uid = *reinterpret_cast<const uint32_t *>(GetAttrData(attr));
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    uint64_t time =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+    FiveTuple fiveTuple;
+    const uint8_t family = nfg->nfgen_family;
+    SaveFiveTupleMsg(payload, payloadLen, family, fiveTuple);
+    std::string domain = ParseDnsDomain(payload, payloadLen, family, fiveTuple.localPort, fiveTuple.remotePort);
+    message_->SetAction(NetsysEventMessage::Action::NFLOG_REPORT);
+    message_->SetSubSys(NetsysEventMessage::SubSys::NFLOG);
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_PROTO, std::to_string(fiveTuple.protocol));
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_IP_SRC, fiveTuple.localIp);
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_IP_DST, fiveTuple.remoteIp);
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_SPORT, std::to_string(fiveTuple.localPort));
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_DPORT, std::to_string(fiveTuple.remotePort));
+    message_->PushMessage(NetsysEventMessage::Type::TSTAMP, std::to_string(time));
+    message_->PushMessage(NetsysEventMessage::Type::UID, std::to_string(static_cast<int32_t>(uid)));
+    message_->PushMessage(NetsysEventMessage::Type::NFLOG_DOMAIN, domain);
+    return true;
+}
+#endif
 
 rtmsg *WrapperDecoder::CheckRtParam(const nlmsghdr *hdrMsg, uint8_t type)
 {

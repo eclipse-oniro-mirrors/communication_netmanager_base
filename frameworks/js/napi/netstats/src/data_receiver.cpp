@@ -98,7 +98,11 @@ ssize_t DataReceiver::ReceiveMessage(bool isRepair, uid_t &uid)
 
     ucred *cred = reinterpret_cast<ucred *>(CMSG_DATA(cmsgHeader));
     uid = cred->uid;
-    if (addr.nl_pid != 0 || (isRepair && addr.nl_groups == 0)) {
+    bool isRepairCondition = isRepair && addr.nl_groups == 0;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    isRepairCondition = false;
+#endif
+    if (addr.nl_pid != 0 || isRepairCondition) {
         bzero(buffer_, sizeof(buffer_));
         errno = EIO;
         return NetlinkResult::ERROR;

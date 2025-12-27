@@ -33,6 +33,13 @@ public:
     int32_t
         RegisterNetlinkCallbacks(std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks);
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t GetSocketFd()
+    {
+        return socketFd_;
+    }
+#endif
+
 private:
     void HandleDecodeSuccess(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleStateChanged(const std::shared_ptr<NetsysEventMessage> &message);
@@ -40,6 +47,9 @@ private:
     void HandleRouteChange(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleSubSysNet(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleSubSysQlog(const std::shared_ptr<NetsysEventMessage> &message);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    void HandleSubSysNflog(const std::shared_ptr<NetsysEventMessage> &message);
+#endif
     void NotifyInterfaceAdd(const std::string &ifName);
     void NotifyInterfaceRemove(const std::string &ifName);
     void NotifyInterfaceChange(const std::string &ifName, bool isUp);
@@ -55,6 +65,9 @@ private:
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
     std::mutex& netlinkCallbacksMutex_;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t socketFd_ = -1;
+#endif
 };
 } // namespace nmd
 } // namespace OHOS

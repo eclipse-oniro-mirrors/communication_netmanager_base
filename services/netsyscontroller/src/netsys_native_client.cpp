@@ -217,6 +217,23 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
     return NETMANAGER_SUCCESS;
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record)
+{
+    NETMGR_LOG_I("OnInterceptRecord");
+    auto netsysNativeClient = netsysNativeClient_.lock();
+    if (netsysNativeClient == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient has destory");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard<std::shared_mutex> lock(netsysNativeClient->firewallCallbackMutex_);
+    for (auto callback : netsysNativeClient->firewallCallbacks_) {
+        callback->OnIntercept(record);
+    }
+    return NETMANAGER_SUCCESS;
+}
+#endif
+
 NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(
     std::weak_ptr<NetsysNativeClient> netsysNativeClient) : netsysNativeClient_(netsysNativeClient)
 {
@@ -1833,9 +1850,38 @@ int32_t NetsysNativeClient::ClearFirewallRules(NetFirewallRuleType type)
     return proxy->ClearFirewallRules(type);
 }
 
+void NetsysNativeClient::RegisterFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    if (callback == nullptr) {
+        return;
+    }
+    std::lock_guard<std::shared_mutex> lock(firewallCallbackMutex_);
+    for (auto it = firewallCallbacks_.begin(); it != firewallCallbacks_.end(); ++it) {
+        if ((*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            return;
+        }
+    }
+    firewallCallbacks_.push_back(callback);
+}
+
+void NetsysNativeClient::UnregisterFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
+{
+    if (callback == nullptr) {
+        return;
+    }
+    std::lock_guard<std::shared_mutex> lock(firewallCallbackMutex_);
+    for (auto it = firewallCallbacks_.begin(); it != firewallCallbacks_.end(); ++it) {
+        if ((*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            firewallCallbacks_.erase(it);
+            break;
+        }
+    }
+}
+
 int32_t NetsysNativeClient::RegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterNetFirewallCallback");
+    RegisterFirewallCallback(callback);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -1847,6 +1893,7 @@ int32_t NetsysNativeClient::RegisterNetFirewallCallback(const sptr<NetsysNative:
 int32_t NetsysNativeClient::UnRegisterNetFirewallCallback(const sptr<NetsysNative::INetFirewallCallback> &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::UnRegisterNetFirewallCallback");
+    UnregisterFirewallCallback(callback);
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
