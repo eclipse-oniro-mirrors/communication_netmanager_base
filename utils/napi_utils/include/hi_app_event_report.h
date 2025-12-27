@@ -39,7 +39,7 @@ public:
 
 #ifdef ENABLE_EMULATOR
 private:
-    void AddProcessor();
+    int64_t AddProcessor();
 
     int64_t beginTime_ = 0;
     std::string transId_ = "";
