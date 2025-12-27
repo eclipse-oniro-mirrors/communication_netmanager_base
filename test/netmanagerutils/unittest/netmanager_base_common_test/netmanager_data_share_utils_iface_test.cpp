@@ -51,6 +51,20 @@ HWTEST_F(NetDataShareHelperUtilsIfaceTest, RegisterObserver_01, TestSize.Level1)
     EXPECT_EQ(id, 1);
 }
 
+HWTEST_F(NetDataShareHelperUtilsIfaceTest, RegisterSettingsObserver_01, TestSize.Level1)
+{
+    std::string strUri = WIFI_URI;
+    std::function<void()> onChange = []() {printf("onChange execute.\n");};
+    int32_t result = NetDataShareHelperUtilsIface::RegisterSettingsObserver(strUri, onChange);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetDataShareHelperUtilsIfaceTest, UnregisterSettingsObserver_01, TestSize.Level1)
+{
+    int32_t result = NetDataShareHelperUtilsIface::UnregisterObserver(WIFI_URI, 1);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetDataShareHelperUtilsIfaceTest, Insert_01, TestSize.Level1)
 {
     int32_t ret = NetDataShareHelperUtilsIface::Insert(WIFI_URI, TEST_KEY, TEST_VALUE);

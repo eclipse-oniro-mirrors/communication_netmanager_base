@@ -669,10 +669,10 @@ private:
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
     std::mutex preAirplaneCbsMutex_;
     std::mutex dataShareMutex_;
-    std::shared_ptr<NetDataShareHelperUtilsIface> helper_ = nullptr;
     ProbeUrls probeUrl_;
-    int32_t helperCallbackId_;
+    std::function<void()> onChange_;
 
+    std::atomic<bool> isObserverRegistered_ = false;
     bool hasSARemoved_ = false;
     std::atomic<bool> isInSleep_ = false;
     static constexpr int32_t INVALID_USER_ID = -1;

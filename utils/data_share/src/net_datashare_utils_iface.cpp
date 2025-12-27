@@ -15,11 +15,28 @@
 
 #include "net_datashare_utils_iface.h"
 #include "net_datashare_utils.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 std::unique_ptr<NetDataShareHelperUtils> NetDataShareHelperUtilsIface::dataShareHelperUtils_ =
     std::make_unique<NetDataShareHelperUtils>();
+
+class NetDataAbilityObserver : public AAFwk::DataAbilityObserverStub {
+public:
+    explicit NetDataAbilityObserver(std::function<void()> onChange) : onChange_(std::move(onChange)) {}
+    void OnChange() override
+    {
+        if (onChange_) {
+            onChange_();
+        }
+    }
+    void OnChangeExt(const AAFwk::ChangeInfo &) override {}
+    void OnChangePreferences(const std::string &) override {}
+
+private:
+    std::function<void()> onChange_;
+};
 
 int32_t NetDataShareHelperUtilsIface::Query(const std::string &strUri, const std::string &key, std::string &value)
 {
@@ -65,6 +82,28 @@ int32_t NetDataShareHelperUtilsIface::UnregisterObserver(const std::string &strU
 {
     Uri uri(strUri);
     return dataShareHelperUtils_->UnregisterObserver(uri, callbackId);
+}
+
+int32_t NetDataShareHelperUtilsIface::RegisterSettingsObserver(const std::string &strUri,
+    const std::function<void()> &onChange)
+{
+    Uri uri(strUri);
+    sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
+    if (observer == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return dataShareHelperUtils_->RegisterSettingsObserver(uri, observer);
+}
+
+int32_t NetDataShareHelperUtilsIface::UnRegisterSettingsObserver(const std::string &strUri,
+    const std::function<void()> &onChange)
+{
+    Uri uri(strUri);
+    sptr<AAFwk::IDataAbilityObserver> observer = new (std::nothrow) NetDataAbilityObserver(onChange);
+    if (observer == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return dataShareHelperUtils_->UnRegisterSettingsObserver(uri, observer);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -45,6 +45,8 @@ public:
     static int32_t Delete(const std::string &strUri, const std::string &key);
     static int32_t RegisterObserver(const std::string &strUri, const std::function<void()> &onChange);
     static int32_t UnregisterObserver(const std::string &strUri, int32_t callbackId);
+    static int32_t RegisterSettingsObserver(const std::string &strUri, const std::function<void()> &onChange);
+    static int32_t UnRegisterSettingsObserver(const std::string &strUri, const std::function<void()> &onChange);
     static std::unique_ptr<NetDataShareHelperUtils> dataShareHelperUtils_;
 };
 } // namespace NetManagerStandard

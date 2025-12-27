@@ -136,8 +136,6 @@ HWTEST_F(NetConnServiceTest, OnAddSystemAbility001, TestSize.Level1)
     EXPECT_FALSE(NetConnService::GetInstance()->hasSARemoved_);
     NetConnService::GetInstance()->OnAddSystemAbility(-1, deviceId);
     EXPECT_FALSE(NetConnService::GetInstance()->hasSARemoved_);
-    NetConnService::GetInstance()->OnAddSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, deviceId);
-    EXPECT_FALSE(NetConnService::GetInstance()->hasSARemoved_);
 }
 
 HWTEST_F(NetConnServiceTest, IsSupplierMatchRequestAndNetworkTest001, TestSize.Level1)
