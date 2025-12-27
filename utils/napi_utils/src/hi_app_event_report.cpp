@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 const int64_t TIMEOUT = 90;
 const int64_t ROW = 30;
 const int64_t PROCESSOR_ID_NOT_CREATE = -1;
-static volatile int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
+static int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
 static ffrt::shared_mutex g_netAppEventProcessorIdMutex;
 #endif
 
@@ -52,13 +52,13 @@ void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
 #ifdef ENABLE_EMULATOR
     ffrt::submit([result, errCode, selfShared = shared_from_this()]() {
         std::shared_lock<ffrt::shared_mutex> lock(g_netAppEventProcessorIdMutex);
-        int64_t processorId = g_processorID;
-        lock.unlock();
-        if (processorId == PROCESSOR_ID_NOT_CREATE) {
-            selfShared->AddProcessor();
+        if (g_processorID == PROCESSOR_ID_NOT_CREATE) {
+            g_processorID = selfShared->AddProcessor();
         }
+        lock.unlock();
         int64_t endTime = OHOS::MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
-        OHOS::HiviewDFX::HiAppEvent::Event event("api_diagnostic", "api_exec_end", OHOS::HiviewDFX::HiAppEvent::BEHAVIOR);
+        OHOS::HiviewDFX::HiAppEvent::Event event("api_diagnostic", "api_exec_end",
+            OHOS::HiviewDFX::HiAppEvent::BEHAVIOR);
         event.AddParam("trans_id", selfShared->transId_);
         event.AddParam("api_name", selfShared->apiName_);
         event.AddParam("sdk_name", selfShared->sdkName_);
@@ -71,11 +71,11 @@ void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
             "startTime:%{public}ld, endTime:%{public}ld, result:%{public}d, errCode:%{public}d, ret:%{public}d",
             selfShared->transId_.c_str(), selfShared->apiName_.c_str(), selfShared->sdkName_.c_str(),
             selfShared->beginTime_, endTime, result, errCode, ret);
-    }, {}, {}, ffrt::task_attr().name("reportSdkEvent"));
+        }, {}, {}, ffrt::task_attr().name("reportSdkEvent"));
 #endif
 }
 
-void HiAppEventReport::AddProcessor()
+int64_t HiAppEventReport::AddProcessor()
 {
 #ifdef ENABLE_EMULATOR
     NETMGR_LOG_D("AddProcessor enter");
@@ -107,8 +107,7 @@ void HiAppEventReport::AddProcessor()
         event3.isRealTime = true;
         config.eventConfigs.push_back(event3);
     }
-    std::unique_lock<ffrt::shared_mutex> lock(g_netAppEventProcessorIdMutex);
-    g_processorID = OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+    return OHOS::HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 #endif
 }
 } // namespace NetManagerStandard
