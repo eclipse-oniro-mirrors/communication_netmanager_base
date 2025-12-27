@@ -19,7 +19,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "time_service_client.h"
 #endif
-#include <shared_mutex>
+#include <mutex>
 #include "ffrt.h"
 
 namespace OHOS {
@@ -29,7 +29,7 @@ const int64_t TIMEOUT = 90;
 const int64_t ROW = 30;
 const int64_t PROCESSOR_ID_NOT_CREATE = -1;
 static int64_t g_processorID = PROCESSOR_ID_NOT_CREATE;
-static ffrt::shared_mutex g_netAppEventProcessorIdMutex;
+static ffrt::mutex g_netAppEventProcessorIdMutex;
 #endif
 
 HiAppEventReport::HiAppEventReport(std::string sdk, std::string api)
@@ -51,7 +51,7 @@ void HiAppEventReport::ReportSdkEvent(const int result, const int errCode)
 {
 #ifdef ENABLE_EMULATOR
     ffrt::submit([result, errCode, selfShared = shared_from_this()]() {
-        std::shared_lock<ffrt::shared_mutex> lock(g_netAppEventProcessorIdMutex);
+        std::unique_lock<ffrt::mutex> lock(g_netAppEventProcessorIdMutex);
         if (g_processorID == PROCESSOR_ID_NOT_CREATE) {
             g_processorID = selfShared->AddProcessor();
         }
