@@ -1065,12 +1065,11 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByNameWithOptions(GetAddress
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
-    param.qp_netid = netid;
-    NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    param.qp_netid = context->netId_;
+    NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d", param.qp_netid);
     if (context->host_.empty()) {
         NETMANAGER_BASE_LOGE("host is empty!");
         context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
