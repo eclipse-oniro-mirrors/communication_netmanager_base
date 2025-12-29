@@ -70,9 +70,7 @@ void NetPolicyDBCloneTest::TearDown() {}
 HWTEST_F(NetPolicyDBCloneTest, OnBackupTest001, TestSize.Level1)
 {
     auto bundleMgrProxy = GetBundleMgrProxy();
-    if (bundleMgrProxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(bundleMgrProxy, nullptr);
     NetAccessPolicyRDB netAccessPolicyRdb;
     int32_t uid1 = bundleMgrProxy->GetUidByBundleName("com.ss.hm.artical.news", MAIN_USER_ID);
     NetAccessPolicyData policyData1;
@@ -121,10 +119,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreTest001, TestSize.Level1)
     std::string content;
     std::ostringstream ss;
     auto bundleMgrProxy = GetBundleMgrProxy();
-    if (bundleMgrProxy == nullptr) {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
-        return;
-    }
+    ASSERT_NE(bundleMgrProxy, nullptr);
     ss << "com.xingin.xhs_hos" << " " << "0" << " " << "1" << std::endl;
     ss << "com.sina.weibo.stage" << " " << "1" << " " << "1" << std::endl;
     ss << "com.xxx.test.test1" << " " << "1" << " " << "0" << std::endl;
@@ -135,9 +130,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreTest001, TestSize.Level1)
     UniqueFd fd = UniqueFd(open(POLICY_DATABASE_BACKUP_FILE_TEST, O_RDONLY));
     lseek(fd.Get(), 0, SEEK_SET);
     auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
-    if (netpolicyClonePtr == nullptr) {
-        return;
-    }
+    ASSERT_NE(netpolicyClonePtr, nullptr);
     netpolicyClonePtr->OnRestore(fd, "");
     close(fd.Release());
     EXPECT_NE(netpolicyClonePtr, nullptr);
@@ -146,9 +139,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreTest001, TestSize.Level1)
 HWTEST_F(NetPolicyDBCloneTest, FdCloneTest001, TestSize.Level1)
 {
     auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
-    if (netpolicyClonePtr == nullptr) {
-        return;
-    }
+    ASSERT_NE(netpolicyClonePtr, nullptr);
     UniqueFd fdErr1;
     bool ret = netpolicyClonePtr->FdClone(fdErr1);
     EXPECT_EQ(ret, false);
@@ -169,9 +160,7 @@ HWTEST_F(NetPolicyDBCloneTest, FdCloneTest001, TestSize.Level1)
 HWTEST_F(NetPolicyDBCloneTest, OnRestoreSingleAppTest001, TestSize.Level1)
 {
     auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
-    if (netpolicyClonePtr == nullptr) {
-        return;
-    }
+    ASSERT_NE(netpolicyClonePtr, nullptr);
     std::string bundleNameFromListen = "";
     int ret = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
     EXPECT_EQ(ret, -1);
@@ -192,9 +181,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreSingleAppTest001, TestSize.Level1)
 HWTEST_F(NetPolicyDBCloneTest, ClearBackupInfoTest001, TestSize.Level1)
 {
     auto netpolicyClonePtr = std::make_shared<NetPolicyDBClone>();
-    if (netpolicyClonePtr == nullptr) {
-        return;
-    }
+    ASSERT_NE(netpolicyClonePtr, nullptr);
 
     netpolicyClonePtr->ClearBackupInfo();
     EXPECT_NE(netpolicyClonePtr, nullptr);

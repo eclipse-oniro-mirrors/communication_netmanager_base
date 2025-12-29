@@ -57,9 +57,7 @@ void FirewallManagerTest::TearDown() {}
  */
 HWTEST_F(FirewallManagerTest, FirewallManagerInnerFunctionTest, TestSize.Level1)
 {
-    if (g_firewallManager == nullptr) {
-        return;
-    }
+    ASSERT_NE(g_firewallManager, nullptr);
     if (!g_firewallManager->chainInitFlag_) {
         int32_t ret = g_firewallManager->InitChain();
         EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);

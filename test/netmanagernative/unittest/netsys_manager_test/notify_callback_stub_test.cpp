@@ -52,9 +52,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     int32_t flags = 2;
     int32_t scope = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(addr)) {
         return;
     }
@@ -104,9 +102,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressRemoved001, TestSize.Level1)
     int32_t flags = 2;
     int32_t scope = 0;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(addr)) {
         return;
     }
@@ -130,9 +126,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAdded001, TestSize.Level1)
 {
     std::string ifName = "test0";
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(ifName)) {
         return;
     }
@@ -147,9 +141,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceRemoved001, TestSize.Level1)
 {
     std::string ifName = "test0";
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(ifName)) {
         return;
     }
@@ -165,9 +157,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceChanged001, TestSize.Level1)
     std::string ifName = "test0";
     bool isUp = false;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(ifName)) {
         return;
     }
@@ -186,9 +176,7 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceLinkStateChanged001, TestSize.Level1
     std::string ifName = "test0";
     bool isUp = false;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(ifName)) {
         return;
     }
@@ -209,9 +197,7 @@ HWTEST_F(NotifyCallbackStubTest, OnRouteChanged001, TestSize.Level1)
     std::string gateway = "192.168.0.1";
     std::string ifName = "test0";
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteBool(updated)) {
         return;
     }
@@ -234,9 +220,7 @@ HWTEST_F(NotifyCallbackStubTest, OnRouteChanged001, TestSize.Level1)
 HWTEST_F(NotifyCallbackStubTest, OnDhcpSuccess001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     sptr<DhcpResultParcel> dhcpResult = new (std::nothrow) DhcpResultParcel;
     dhcpResult->iface_ = "test0";
     dhcpResult->ipAddr_ = "192.168.11.55";
@@ -256,9 +240,7 @@ HWTEST_F(NotifyCallbackStubTest, OnBandwidthReachedLimit001, TestSize.Level1)
     std::string limitName = "limit";
     std::string iface = "test0";
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(limitName)) {
         return;
     }

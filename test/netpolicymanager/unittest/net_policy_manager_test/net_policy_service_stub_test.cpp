@@ -253,9 +253,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest002, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(false);
-    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
@@ -272,9 +270,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest003, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(false);
-    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID),
@@ -611,9 +607,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetNetworkAccessPolicyTest001, TestSize.Lev
 {
     MessageParcel data;
     data.WriteBool(false);
-    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor()), false);
     bool wifiBool = true;
     bool cellularBool = true;
     data.WriteUint32(TEST_UID);
@@ -644,9 +638,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetNetworkAccessPolicy001, TestSize.Level1)
     MessageParcel data;
     uint32_t userId = 1;
     data.WriteBool(false);
-    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor()), false);
     data.WriteBool(true);
     data.WriteInt32(TEST_UID);
     data.WriteUint32(userId);

@@ -83,9 +83,7 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
     std::string interfaceName = "eth0";
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
 
     char *mtuValue = nullptr;
     auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue);
@@ -328,9 +326,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
     int32_t prefixLength = 0;
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
     auto ret = InterfaceManager::AddAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -350,9 +346,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest003, TestSize.Level1)
     int32_t prefixLength = 45;
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
     auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -381,9 +375,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)
     int32_t prefixLength = 0;
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -403,9 +395,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest003, TestSize.Level1)
     std::string addr;
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }

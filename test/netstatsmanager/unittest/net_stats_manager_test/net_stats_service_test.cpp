@@ -165,10 +165,7 @@ HWTEST_F(NetStatsServiceTest, GetCellularRxBytesTest001, TestSize.Level1)
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCellularRxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
-    if (ifaceNames.empty()) {
-        EXPECT_GE(ret, -1);
-        return;
-    }
+    ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 
@@ -183,10 +180,7 @@ HWTEST_F(NetStatsServiceTest, GetCellularTxBytesTest001, TestSize.Level1)
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCellularTxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
-    if (ifaceNames.empty()) {
-        EXPECT_GE(ret, -1);
-        return;
-    }
+    ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 
@@ -701,9 +695,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
     int32_t ret2 = AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    if (ret1 != 0 || ret2 != 0) {
-        return;
-    }
+    ASSERT_NE(ret1 != 0 || ret2 != 0, true);
 
     std::vector<NetStatsInfo> infos;
     NetStatsInfo info1;

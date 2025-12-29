@@ -738,9 +738,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdEnableDistributedClientNet001, TestSize
     MessageParcel reply;
     std::string virnicAddr = "1.189.55.60";
     std::string iif = "lo";
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()), false);
     if (!data.WriteString(virnicAddr)) {
         return;
     }
@@ -759,9 +757,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdEnableDistributedServerNet001, TestSize
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.60";
     std::string gw = "0.0.0.0";
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()), false);
     if (!data.WriteString(iif)) {
         return;
     }
@@ -784,9 +780,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDisableDistributedNet001, TestSize.Leve
     MessageParcel data;
     MessageParcel reply;
     bool isServer = true;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()), false);
 
     if (!data.WriteBool(isServer)) {
         return;
@@ -803,9 +797,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute001, TestSize.Leve
     bool add = true;
  
     MessageParcel data;
-    if (!data.WriteString(ifname)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifname), false);
  
     if (!data.WriteUint32(uid)) {
         return;
@@ -833,9 +825,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute003, TestSize.Leve
     std::string ifname = "wlan0";
  
     MessageParcel data;
-    if (!data.WriteString(ifname)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifname), false);
  
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUpdateEnterpriseRoute(data, reply);
@@ -848,9 +838,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateEnterpriseRoute004, TestSize.Leve
     std::string ifname = "wlan0";
  
     MessageParcel data;
-    if (!data.WriteString(ifname)) {
-        return;
-    }
+    ASSERT_NE(data.WriteString(ifname), false);
  
     if (!data.WriteUint32(uid)) {
         return;

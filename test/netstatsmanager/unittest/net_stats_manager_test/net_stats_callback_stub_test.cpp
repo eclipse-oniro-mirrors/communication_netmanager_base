@@ -68,9 +68,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest001, TestSize.Level1)
 HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest002, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(OUTOFFRANGECODE, data, reply, option);
@@ -85,9 +83,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest002, TestSize.Level1)
 HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     if (!data.WriteString("test")) {
         return;
     }
@@ -106,9 +102,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
 HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),
@@ -124,9 +118,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest001, TestSize.Level
 HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     if (!data.WriteString("test")) {
         return;
     }
@@ -145,9 +137,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level
 HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED),
@@ -163,9 +153,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest001, TestSize.Level1)
 HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest002, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     if (!data.WriteString("test")) {
         return;
     }
@@ -184,9 +172,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest002, TestSize.Level1)
 HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest003, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor()), false);
     if (!data.WriteString("test")) {
         return;
     }
