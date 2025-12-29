@@ -126,9 +126,7 @@ void EthernetServiceStubTest::TearDown() {}
 HWTEST_F(EthernetServiceStubTest, OnGetMacAddressTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -147,9 +145,7 @@ HWTEST_F(EthernetServiceStubTest, OnGetMacAddressTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnSetIfaceConfigTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -168,9 +164,7 @@ HWTEST_F(EthernetServiceStubTest, OnSetIfaceConfigTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnGetIfaceConfigTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -189,9 +183,7 @@ HWTEST_F(EthernetServiceStubTest, OnGetIfaceConfigTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnIsIfaceActiveTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -210,9 +202,7 @@ HWTEST_F(EthernetServiceStubTest, OnIsIfaceActiveTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnGetAllActiveIfacesTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(EthernetInterfaceCode::CMD_GET_ACTIVATE_INTERFACE),
@@ -228,9 +218,7 @@ HWTEST_F(EthernetServiceStubTest, OnGetAllActiveIfacesTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnResetFactoryTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(EthernetInterfaceCode::CMD_RESET_FACTORY),
@@ -246,9 +234,7 @@ HWTEST_F(EthernetServiceStubTest, OnResetFactoryTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnRegisterIfacesStateChangedTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(EthernetInterfaceCode::CMD_REGISTER_INTERFACE_CB),
@@ -264,9 +250,7 @@ HWTEST_F(EthernetServiceStubTest, OnRegisterIfacesStateChangedTest001, TestSize.
 HWTEST_F(EthernetServiceStubTest, OnUnregisterIfacesStateChangedTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(EthernetInterfaceCode::CMD_UNREGISTER_INTERFACE_CB),
@@ -282,9 +266,7 @@ HWTEST_F(EthernetServiceStubTest, OnUnregisterIfacesStateChangedTest001, TestSiz
 HWTEST_F(EthernetServiceStubTest, OnSetInterfaceUpTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -303,9 +285,7 @@ HWTEST_F(EthernetServiceStubTest, OnSetInterfaceUpTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnSetInterfaceDownTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -324,9 +304,7 @@ HWTEST_F(EthernetServiceStubTest, OnSetInterfaceDownTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnGetInterfaceConfigTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }
@@ -345,9 +323,7 @@ HWTEST_F(EthernetServiceStubTest, OnGetInterfaceConfigTest001, TestSize.Level1)
 HWTEST_F(EthernetServiceStubTest, OnSetInterfaceConfigTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(EthernetServiceStub::GetDescriptor()), false);
     if (!data.WriteString(TEST_STRING)) {
         return;
     }

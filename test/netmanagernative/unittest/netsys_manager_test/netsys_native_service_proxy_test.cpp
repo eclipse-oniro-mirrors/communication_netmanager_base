@@ -99,10 +99,8 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
     NetConnClient::GetInstance().GetDefaultNet(handle);
     NetAllCapabilities netAllCap;
     NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
-    if (netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
-        netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0) {
-        return;
-    }
+    ASSERT_NE(netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
+        netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0, true);
 
     ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);

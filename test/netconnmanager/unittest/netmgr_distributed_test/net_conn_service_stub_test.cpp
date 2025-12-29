@@ -62,9 +62,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedClientNet001, TestSize.Level
 {
     NetManagerBaseAccessToken token;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()), false);
     std::string virnicAddr = "1.189.55.61";
     if (!data.WriteString(virnicAddr)) {
         return;
@@ -97,9 +95,7 @@ HWTEST_F(NetConnServiceStubTest, OnEnableDistributedServerNet001, TestSize.Level
 {
     NetManagerBaseAccessToken token;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()), false);
     std::string iif = "lo";
     std::string devIface = "lo";
     std::string dstAddr = "1.189.55.61";

@@ -1401,9 +1401,7 @@ HWTEST_F(NetConnServiceTest, UpdateSupplierScore003, TestSize.Level1)
         netCaps, supplierId, callingUid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
-    if (netLinkInfo == nullptr) {
-        return;
-    }
+    ASSERT_NE(netLinkInfo, nullptr);
     netLinkInfo->ifaceName_ = "wlan0";
     INetAddr netAddr;
     netAddr.type_ = INetAddr::IPV4;

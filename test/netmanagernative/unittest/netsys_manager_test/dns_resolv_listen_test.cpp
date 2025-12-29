@@ -66,10 +66,7 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest001, TestSize.Level1)
 {
     NETNATIVE_LOGI("NetSysGetResolvConf001 enter");
     void *handle = dlopen(DNS_SO_PATH, RTLD_LAZY);
-    if (handle == NULL) {
-        NETNATIVE_LOGI("StartListenTest002 dlopen err %{public}s", dlerror());
-        return;
-    }
+    ASSERT_NE(handle, NULL);
     GetConfig func = (GetConfig)dlsym(handle, "NetSysGetResolvConf");
     if (func == NULL) {
         NETNATIVE_LOGI("dlsym err %{public}s\n", dlerror());
@@ -86,10 +83,7 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfExtTest001, TestSize.Level1)
 {
     NETNATIVE_LOGI("NetSysGetResolvConfExtTest001 enter");
     void *handle = dlopen(DNS_SO_PATH, RTLD_LAZY);
-    if (handle == NULL) {
-        NETNATIVE_LOGI("StartListenTest002 dlopen err %{public}s", dlerror());
-        return;
-    }
+    ASSERT_NE(handle, NULL);
     GetConfigExt func = (GetConfigExt)dlsym(handle, "NetSysGetResolvConf");
     if (func == NULL) {
         NETNATIVE_LOGI("dlsym err %{public}s\n", dlerror());

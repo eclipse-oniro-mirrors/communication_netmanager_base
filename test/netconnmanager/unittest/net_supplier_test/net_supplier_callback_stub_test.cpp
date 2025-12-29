@@ -57,9 +57,7 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor()), false);
     if (!data.WriteString(ident)) {
         return;
     }
@@ -106,9 +104,7 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
     netrequest.netCaps.insert(NetCap::NET_CAPABILITY_NOT_METERED);
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetSupplierCallbackStub::GetDescriptor()), false);
     bool result = data.WriteUint32(netrequest.uid) && data.WriteUint32(netrequest.requestId) &&
                   data.WriteUint32(netrequest.registerType) && data.WriteString(netrequest.ident);
     if (!result) {

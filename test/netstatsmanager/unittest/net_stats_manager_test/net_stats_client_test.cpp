@@ -132,10 +132,7 @@ HWTEST_F(NetStatsClientTest, GetCellularRxBytesTest001, TestSize.Level1)
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
-    if (ifaceNames.empty()) {
-        EXPECT_GE(ret, -1);
-        return;
-    }
+    ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 
@@ -150,10 +147,7 @@ HWTEST_F(NetStatsClientTest, GetCellularTxBytesTest001, TestSize.Level1)
     uint64_t stats = 0;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
-    if (ifaceNames.empty()) {
-        EXPECT_GE(ret, -1);
-        return;
-    }
+    ASSERT_FALSE(ifaceNames.empty());
     EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 

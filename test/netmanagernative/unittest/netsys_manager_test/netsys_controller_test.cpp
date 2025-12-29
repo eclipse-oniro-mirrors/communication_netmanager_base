@@ -205,9 +205,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
 
     auto ifaceList = netsysController->InterfaceGetList();
     bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), std::string(ETH0)) == ifaceList.end();
-    if (eth0NotExist) {
-        return;
-    }
+    ASSERT_NE(eth0NotExist, true);
 
     int32_t ret = netsysController->AddInterfaceAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, 0);

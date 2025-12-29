@@ -86,9 +86,7 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidPolicyChangeTest001, TestSize.Leve
     uint32_t uid = TEST_UID;
     uint32_t policy = TEST_POLICY;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
     if (!data.WriteUint32(uid)) {
         return;
     }
@@ -124,9 +122,7 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidRuleChangeTest001, TestSize.Level1
     uint32_t uid = TEST_UID;
     uint32_t rule = TEST_RULE;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
     if (!data.WriteUint32(uid)) {
         return;
     }
@@ -149,9 +145,7 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetQuotaPolicyChangeTest001, TestSize.Le
     policy.quotapolicy.title = "testTitle";
     cellularPolicies.push_back(policy);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
     if (!NetQuotaPolicy::Marshalling(data, cellularPolicies)) {
         return;
     }
@@ -169,9 +163,7 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetMeteredIfacesChangeTest001, TestSize.
     ifNames.push_back("test0");
     ifNames.push_back("test1");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
     if (!data.WriteUint32(ifNames.size())) {
         return;
     }
@@ -192,9 +184,7 @@ HWTEST_F(UtNetPolicyCallbackStubTest, NotifyNetQuotaPolicyChangeTest002, TestSiz
 {
     bool isBackgroundPolicyAllow = false;
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {
-        return;
-    }
+    ASSERT_NE(data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor()), false);
     if (!data.WriteBool(isBackgroundPolicyAllow)) {
         return;
     }

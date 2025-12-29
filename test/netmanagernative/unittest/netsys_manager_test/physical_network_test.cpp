@@ -61,9 +61,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     std::string interfaceName1 = "wlan0";
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool wlan0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName1) == ifaceList.end();
-    if (wlan0NotExist) {
-        return;
-    }
+    ASSERT_NE(wlan0NotExist, true);
     int32_t ret = physicNetwork.AddInterface(interfaceName1);
     EXPECT_EQ(ret, 0);
     physicNetwork.AddDefault();
@@ -99,9 +97,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
     interfaceName = "wlan1";
     auto ifaceList = InterfaceManager::GetInterfaceNames();
     bool wlan1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) != ifaceList.end();
-    if (wlan1Exist) {
-        return;
-    }
+    ASSERT_NE(wlan1Exist, true);
     ret = instance_->AddInterface(interfaceName);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }

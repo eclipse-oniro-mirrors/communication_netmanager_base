@@ -208,9 +208,7 @@ HWTEST_F(EthernetManagerTest, OnRemoteRequest, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager001, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     sptr<InterfaceConfiguration> ic = GetIfaceConfig();
     ASSERT_EQ(DelayedSingleton<EthernetClient>::GetInstance()->SetIfaceConfig(DEV_NAME, ic), NETMANAGER_EXT_SUCCESS);
@@ -223,9 +221,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager001, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager0011, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     sptr<InterfaceConfiguration> ic = GetIfaceConfig();
     const char *DEV_NAME_1 = "eth3";
@@ -240,9 +236,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager0011, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager002, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     sptr<InterfaceConfiguration> ic;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->GetIfaceConfig(DEV_NAME, ic);
@@ -257,9 +251,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager002, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager0021, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     sptr<InterfaceConfiguration> ic;
     const char *DEV_NAME_1 = "eth3";
@@ -275,9 +267,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager0021, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager003, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     int32_t activeStatus = -1;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->IsIfaceActive(DEV_NAME, activeStatus);
@@ -292,9 +282,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager003, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager0031, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     int32_t activeStatus = -1;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->IsIfaceActive("eth3", activeStatus);
@@ -309,9 +297,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager0031, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager004, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     std::vector<std::string> result;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->GetAllActiveIfaces(result);
@@ -327,9 +313,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager004, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, EthernetManager005, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     std::vector<MacAddressInfo> mai;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->GetMacAddress(mai);
@@ -343,9 +327,7 @@ HWTEST_F(EthernetManagerTest, EthernetManager005, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, ResetFactoryTest001, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_EXT_SUCCESS);
@@ -358,9 +340,7 @@ HWTEST_F(EthernetManagerTest, ResetFactoryTest001, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, ResetFactoryTest002, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_EXT_ERR_PERMISSION_DENIED);
 }
@@ -372,9 +352,7 @@ HWTEST_F(EthernetManagerTest, ResetFactoryTest002, TestSize.Level1)
  */
 HWTEST_F(EthernetManagerTest, ResetFactoryTest003, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_EXT_ERR_PERMISSION_DENIED);
@@ -382,9 +360,7 @@ HWTEST_F(EthernetManagerTest, ResetFactoryTest003, TestSize.Level1)
 
 HWTEST_F(EthernetManagerTest, EthernetManager006, TestSize.Level1)
 {
-    if (!CheckIfaceUp(DEV_NAME)) {
-        return;
-    }
+    ASSERT_NE(CheckIfaceUp(DEV_NAME), false);
     NetManagerExtAccessToken token;
     OHOS::nmd::InterfaceConfigurationParcel cfg;
     int32_t ret = DelayedSingleton<EthernetClient>::GetInstance()->GetInterfaceConfig(DEV_NAME, cfg);
