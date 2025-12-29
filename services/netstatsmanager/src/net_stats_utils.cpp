@@ -245,7 +245,7 @@ bool NetStatsUtils::ConvertToUint64(const std::string &str, uint64_t &value)
         return false;
     }
     // 3. 若字符串包含非数字字符
-    if (*end != '\0') {
+    if (end !=nullptr && *end != '\0') {
         NETMGR_LOG_E("string error. str: %{public}s", str.c_str());
         return false;
     }
