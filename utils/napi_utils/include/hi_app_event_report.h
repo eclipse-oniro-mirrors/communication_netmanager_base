@@ -31,7 +31,7 @@ static constexpr int RESULT_SUCCESS = 0;
 static constexpr int RESULT_FAIL = 1;
 static constexpr int ERR_NONE = 0;
 
-class HiAppEventReport : public std::enable_shared_from_this<HiAppEventReport> {
+class HiAppEventReport {
 public:
     HiAppEventReport(std::string sdk, std::string api);
     ~HiAppEventReport();
