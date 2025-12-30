@@ -4392,7 +4392,7 @@ int32_t NetConnService::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
 int32_t NetConnService::CreateVlan(const std::string &ifName, uint32_t vlanId)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     if (NetsysController::GetInstance().CreateVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -4403,7 +4403,7 @@ int32_t NetConnService::CreateVlan(const std::string &ifName, uint32_t vlanId)
 int32_t NetConnService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     if (NetsysController::GetInstance().DestroyVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -4415,7 +4415,7 @@ int32_t NetConnService::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                   const std::string &ip, uint32_t mask)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     if (NetsysController::GetInstance().AddVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
