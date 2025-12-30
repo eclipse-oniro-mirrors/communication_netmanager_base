@@ -245,3 +245,388 @@ HWTEST_F(NetsysNetFirewallTest, IpParamParserTest001, TestSize.Level0)
     EXPECT_EQ(IpParamParser::GetSuffixZeroLength(0), 0);
     EXPECT_GE(IpParamParser::GetSuffixZeroLength(1000), 0);
 }
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap001, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    segBitMap.AddMap(1, 65535, bitmap0);
+    ASSERT_EQ(segBitMap.segments_.size(), 1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 1);
+    EXPECT_EQ(segBitMap.segments_[0].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap002, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 1000, bitmap0);
+    segBitMap.AddMap(65535, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    EXPECT_EQ(segBitMap.segments_[1].start, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap003, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(65535, 65535, bitmap0);
+    segBitMap.AddMap(500, 1000, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap004, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 65535, bitmap0);
+    segBitMap.AddMap(65535, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 65534);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap005, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(65535, 65535, bitmap0);
+    segBitMap.AddMap(500, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 65534);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap006, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 65535, bitmap0);
+    segBitMap.AddMap(500, 500, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 500);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[1].start, 501);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap007, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 500, bitmap0);
+    segBitMap.AddMap(500, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 500);
+    EXPECT_EQ(segBitMap.segments_[0].end, 500);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[1].start, 501);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap008, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 65535, bitmap0);
+    segBitMap.AddMap(400, 400, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 400);
+    EXPECT_EQ(segBitMap.segments_[0].end, 400);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap009, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(1, 65535, bitmap0);
+    segBitMap.AddMap(1, 65535, bitmap1);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 1);
+    EXPECT_EQ(segBitMap.segments_[0].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, result);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap010, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(100, 65535, bitmap0);
+    segBitMap.AddMap(500, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap011, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 65535, bitmap0);
+    segBitMap.AddMap(100, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap012, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(100, 65535, bitmap0);
+    segBitMap.AddMap(100, 1000, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[1].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap013, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(100, 1000, bitmap0);
+    segBitMap.AddMap(100, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 2);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[1].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[1].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap014, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(100, 65535, bitmap0);
+    segBitMap.AddMap(500, 1000, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 3);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[2].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[2].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap015, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 65535, bitmap0);
+    segBitMap.AddMap(100, 1000, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 3);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[2].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[2].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, bitmap0);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap016, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(100, 1000, bitmap0);
+    segBitMap.AddMap(500, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 3);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[2].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[2].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap017, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    segBitMap.AddMap(500, 1000, bitmap0);
+    segBitMap.AddMap(100, 65535, bitmap1);
+    ASSERT_EQ(segBitMap.segments_.size(), 3);
+    EXPECT_EQ(segBitMap.segments_[0].start, 100);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap1);
+    Bitmap result;
+    result.Or(bitmap0);
+    result.Or(bitmap1);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result);
+    EXPECT_EQ(segBitMap.segments_[2].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[2].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap018, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    Bitmap bitmap2(2);
+    segBitMap.AddMap(40, 800, bitmap0);
+    segBitMap.AddMap(1000, 65535, bitmap1);
+    segBitMap.AddMap(500, 5000, bitmap2);
+    ASSERT_EQ(segBitMap.segments_.size(), 5);
+    EXPECT_EQ(segBitMap.segments_[0].start, 40);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result02;
+    result02.Or(bitmap0);
+    result02.Or(bitmap2);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 800);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result02);
+    EXPECT_EQ(segBitMap.segments_[2].start, 801);
+    EXPECT_EQ(segBitMap.segments_[2].end, 999);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, bitmap2);
+    Bitmap result12;
+    result12.Or(bitmap1);
+    result12.Or(bitmap2);
+    EXPECT_EQ(segBitMap.segments_[3].start, 1000);
+    EXPECT_EQ(segBitMap.segments_[3].end, 5000);
+    EXPECT_EQ(segBitMap.segments_[3].bitmap, result12);
+    EXPECT_EQ(segBitMap.segments_[4].start, 5001);
+    EXPECT_EQ(segBitMap.segments_[4].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[4].bitmap, bitmap1);
+}
+
+HWTEST_F(NetsysNetFirewallTest, SegmentBitmapMap019, TestSize.Level0)
+{
+    SegmentBitmapMap segBitMap;
+    Bitmap bitmap0(0);
+    Bitmap bitmap1(1);
+    Bitmap bitmap2(2);
+    segBitMap.AddMap(40, 1000, bitmap0);
+    segBitMap.AddMap(800, 65535, bitmap1);
+    segBitMap.AddMap(500, 5000, bitmap2);
+    ASSERT_EQ(segBitMap.segments_.size(), 5);
+    EXPECT_EQ(segBitMap.segments_[0].start, 40);
+    EXPECT_EQ(segBitMap.segments_[0].end, 499);
+    EXPECT_EQ(segBitMap.segments_[0].bitmap, bitmap0);
+    Bitmap result02;
+    result02.Or(bitmap0);
+    result02.Or(bitmap2);
+    EXPECT_EQ(segBitMap.segments_[1].start, 500);
+    EXPECT_EQ(segBitMap.segments_[1].end, 799);
+    EXPECT_EQ(segBitMap.segments_[1].bitmap, result02);
+    Bitmap result012;
+    result012.Or(bitmap0);
+    result012.Or(bitmap1);
+    result012.Or(bitmap2);
+    EXPECT_EQ(segBitMap.segments_[2].start, 800);
+    EXPECT_EQ(segBitMap.segments_[2].end, 1000);
+    EXPECT_EQ(segBitMap.segments_[2].bitmap, result012);
+    Bitmap result12;
+    result12.Or(bitmap1);
+    result12.Or(bitmap2);
+    EXPECT_EQ(segBitMap.segments_[3].start, 1001);
+    EXPECT_EQ(segBitMap.segments_[3].end, 5000);
+    EXPECT_EQ(segBitMap.segments_[3].bitmap, result12);
+    EXPECT_EQ(segBitMap.segments_[4].start, 5001);
+    EXPECT_EQ(segBitMap.segments_[4].end, 65535);
+    EXPECT_EQ(segBitMap.segments_[4].bitmap, bitmap1);
+}

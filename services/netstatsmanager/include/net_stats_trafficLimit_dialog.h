@@ -42,6 +42,7 @@ private:
     public:
         void CloseDialog();
     private:
+        std::shared_mutex remoteObjectMutex_;
         sptr<IRemoteObject> remoteObject_ = nullptr;
     };
     bool ShowTrafficLimitDialog();

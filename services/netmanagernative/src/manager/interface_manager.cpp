@@ -237,10 +237,10 @@ int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, in
 }
 
 int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, int prefixLen,
-                                 const std::string &netCapabilities)
+                                 int socketType)
 {
     NetLinkSocketDiag socketDiag;
-    socketDiag.SetSocketDestroyType(netCapabilities);
+    socketDiag.SetSocketDestroyType(socketType);
     socketDiag.DestroyLiveSockets(addr, true);
     return 0;
 }

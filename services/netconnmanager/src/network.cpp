@@ -26,6 +26,7 @@
 #include "network.h"
 #include "route_utils.h"
 #include "securec.h"
+#include "ffrt.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -57,13 +58,17 @@ constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 constexpr int32_t MAX_IPV4_DNS_NUM = 5;
 constexpr int32_t MAX_IPV6_DNS_NUM = 2;
 constexpr int32_t MAX_ROUTE_ADDRESS_LENGTH = 4096;
+enum SocketDestroyType {
+    DESTROY_DEFAULT_CELLULAR,
+    DESTROY_SPECIAL_CELLULAR,
+    DESTROY_DEFAULT,
+};
 } // namespace
 
-Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
+Network::Network(int32_t netId, uint32_t supplierId, NetBearType bearerType,
                  const std::shared_ptr<NetConnEventHandler> &eventHandler)
     : netId_(netId),
       supplierId_(supplierId),
-      netCallback_(handler),
       netSupplierType_(bearerType),
       eventHandler_(eventHandler)
 {
@@ -147,11 +152,6 @@ bool Network::IsIfaceNameInUse()
     return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
 }
 
-std::string Network::GetNetCapabilitiesAsString(const uint32_t supplierId) const
-{
-    return NetConnServiceIface().GetNetCapabilitiesAsString(supplierId);
-}
-
 void Network::ReleaseRouteList(NetLinkInfo &netLinkInfoBck)
 {
     for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
@@ -181,19 +181,24 @@ bool Network::ReleaseBasicNetwork()
     }
     NETMGR_LOG_D("Destroy physical network");
     StopNetDetection();
-    std::string netCapabilities = GetNetCapabilitiesAsString(supplierId_);
-    NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d, netCapabilities %{public}s",
-        supplierId_, netId_, netCapabilities.c_str());
+    NETMGR_LOG_D("ReleaseBasicNetwork supplierId %{public}u, netId %{public}d",
+        supplierId_, netId_);
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();
     if (!IsIfaceNameInUse() || isNeedResume_) {
         ReleaseRouteList(netLinkInfoBck);
     } else {
+        int socketType = SocketDestroyType::DESTROY_DEFAULT;
+        if (isInternalDefault_) {
+            socketType = SocketDestroyType::DESTROY_SPECIAL_CELLULAR;
+        } else if (netSupplierType_ == BEARER_CELLULAR) {
+            socketType = SocketDestroyType::DESTROY_DEFAULT_CELLULAR;
+        }
         for (const auto &inetAddr : netLinkInfoBck.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfoBck.ifaceName_, inetAddr.address_,
-                                                                prefixLen, netCapabilities);
+                                                                prefixLen, socketType);
         }
     }
     for (const auto &route : netLinkInfoBck.routeList_) {
@@ -244,13 +249,8 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateStatsCached(netLinkInfo);
     UpdateInterfaces(netLinkInfo);
     bool isIfaceNameInUse = NetConnServiceIface().IsIfaceNameInUse(netLinkInfo.ifaceName_, netId_);
-    bool flag = false;
     bool hasSameIpAddr = false;
-    {
-        std::shared_lock<std::shared_mutex> nlock(netCapsMutex);
-        flag = netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end();
-    }
-    if (!isIfaceNameInUse || flag) {
+    if (!isIfaceNameInUse || isSupportInternet_) {
         hasSameIpAddr = UpdateIpAddrs(netLinkInfo);
     }
     UpdateRoutes(netLinkInfo);
@@ -272,14 +272,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     } else if (nat464Service_ != nullptr) {
         nat464Service_->UpdateService(NAT464_SERVICE_STOP);
     }
-    bool find = false;
-    {
-        std::shared_lock<std::shared_mutex> lock(netCapsMutex);
-        if (netSupplierType_ != BEARER_VPN && netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
-            find = true;
-        }
-    }
-    if (find) {
+    if (netSupplierType_ != BEARER_VPN && isSupportInternet_) {
         if (netMonitor_) {
             if (DelayStartDetectionForIpUpdate(hasSameIpAddr)) {
                 return true;
@@ -723,8 +716,8 @@ void Network::UpdateForbidDetectionFlag(bool forbidDetectionFlag)
 
 void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 {
-    std::unique_lock<std::shared_mutex> lock(netCapsMutex);
-    netCaps_ = netCaps;
+    isSupportInternet_ = netCaps.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps.end();
+    isInternalDefault_ = netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end();
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
@@ -951,11 +944,8 @@ bool Network::ResumeNetworkInfo()
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo nli = netLinkInfo_;
     lock.unlock();
-    {
-        std::shared_lock<std::shared_mutex> lock(netCapsMutex);
-        if (netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
-            isNeedResume_ = true;
-        }
+    if (isSupportInternet_) {
+        isNeedResume_ = true;
     }
     NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
@@ -1062,6 +1052,11 @@ int32_t Network::UnRegisterDualStackProbeCallback(std::shared_ptr<IDualStackProb
     }
 
     return NETMANAGER_SUCCESS;
+}
+
+void Network::SetNetDetectionHandler(const NetDetectionHandler &handler)
+{
+    netCallback_ = handler;
 }
 
 void Network::HandleNetProbeResult(DualStackProbeResultCode DualStackProbeResultCode)

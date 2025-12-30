@@ -161,20 +161,16 @@ void SharingManager::InitChildChains()
 int32_t SharingManager::IpEnableForwarding(const std::string &requestor)
 {
     NETNATIVE_LOG_D("IpEnableForwarding requestor: %{public}s", requestor.c_str());
-    {
-        std::lock_guard<std::mutex> guard(initedMutex_);
-        forwardingRequests_.insert(requestor);
-    }
+    std::lock_guard<std::mutex> guard(initedMutex_);
+    forwardingRequests_.insert(requestor);
     return SetIpFwdEnable();
 }
 
 int32_t SharingManager::IpDisableForwarding(const std::string &requestor)
 {
     NETNATIVE_LOG_D("IpDisableForwarding requestor: %{public}s", requestor.c_str());
-    {
-        std::lock_guard<std::mutex> guard(initedMutex_);
-        forwardingRequests_.erase(requestor);
-    }
+    std::lock_guard<std::mutex> guard(initedMutex_);
+    forwardingRequests_.erase(requestor);
     return SetIpFwdEnable();
 }
 

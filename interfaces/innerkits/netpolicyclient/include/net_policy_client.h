@@ -17,7 +17,7 @@
 #define NET_POLICY_CLIENT_H
 
 #include <map>
-
+#include <shared_mutex>
 #include "singleton.h"
 
 #include "i_net_policy_service.h"
@@ -396,6 +396,7 @@ private:
     std::mutex mutex_;
     sptr<INetPolicyService> netPolicyService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    std::shared_mutex callbackMutex_;
     sptr<INetPolicyCallback> callback_;
 };
 } // namespace NetManagerStandard

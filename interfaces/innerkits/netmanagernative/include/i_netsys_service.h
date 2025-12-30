@@ -110,7 +110,7 @@ public:
     virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
     virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                        int32_t prefixLength, const std::string &netCapabilities) = 0;
+                                        int32_t prefixLength, int socketType) = 0;
     virtual int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) = 0;
     virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
     virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface, NetBearType netBearerType) = 0;

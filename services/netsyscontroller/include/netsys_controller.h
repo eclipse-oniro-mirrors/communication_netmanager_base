@@ -214,7 +214,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength,
-                                const std::string &netCapabilities);
+                                int socketType);
 
     /**
      * Set iface ip address

@@ -21,8 +21,6 @@
 #include <memory>
 #include <mutex>
 
-#include "refbase.h"
-
 #include "system_ability.h"
 #include "system_ability_definition.h"
 #include "i_net_monitor_callback.h"
@@ -43,7 +41,7 @@ typedef struct {
 } NetMonitorInfo;
 class NetConnServiceIface;
 
-class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
+class NetMonitor : public std::enable_shared_from_this<NetMonitor> {
 public:
     /**
      * Construct a new NetMonitor to detection a network

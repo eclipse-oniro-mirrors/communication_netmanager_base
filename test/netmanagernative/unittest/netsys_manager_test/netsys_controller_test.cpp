@@ -1805,7 +1805,7 @@ HWTEST_F(NetsysControllerTest, SetDnsCacheTest02, TestSize.Level1)
 }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
-HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
+HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
     auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
@@ -1819,7 +1819,7 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
  
-HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
+HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
     auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
@@ -1833,7 +1833,7 @@ HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
  
-HWTEST_F(NetsysNativeClientTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
+HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
     auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();

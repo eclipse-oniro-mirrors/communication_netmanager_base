@@ -62,7 +62,7 @@ public:
     MOCK_METHOD(int32_t, DelInterfaceAddress, (const std::string &interfaceName, const std::string &addrString,
         int32_t prefixLength), (override));
     MOCK_METHOD(int32_t, DelInterfaceAddress, (const std::string &interfaceName, const std::string &addrString,
-        int32_t prefixLength, const std::string &netCapabilities), (override));
+        int32_t prefixLength, int socketType), (override));
     MOCK_METHOD(int32_t, InterfaceSetIpAddress,
         (const std::string &ifaceName, const std::string &ipAddress), (override));
     MOCK_METHOD(int32_t, InterfaceSetIffUp, (const std::string &ifaceName), (override));

@@ -48,6 +48,7 @@ int32_t NetDetectionCallbackProxy::OnNetDetectionResultChanged(NetDetectionResul
     }
     MessageParcel replyParcel;
     MessageOption option;
+    option.SetFlags(MessageOption::TF_ASYNC);
     int32_t retCode = remote->SendRequest(static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT),
                                           dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {

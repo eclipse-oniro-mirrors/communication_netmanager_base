@@ -165,6 +165,15 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule004, TestSize.Level1)
     ASSERT_TRUE(result5 && result6);
 }
 
+HWTEST_F(UtNetPolicyRule, TransPolicyToRule001, TestSize.Level1)
+{
+    auto netPolicyRule = std::make_shared<NetPolicyRule>();
+    UidPolicyRule uidPolicyRule;
+    netPolicyRule->uidPolicyRules_.emplace(2000, uidPolicyRule);
+    netPolicyRule->TransPolicyToRule(2000);
+    EXPECT_NE(netPolicyRule->uidPolicyRules_.find(2000), netPolicyRule->uidPolicyRules_.end());
+}
+
 /**
  * @tc.name: NetPolicyRule005
  * @tc.desc: Test NetPolicyRule ResetPolicies.

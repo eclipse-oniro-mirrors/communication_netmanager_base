@@ -23,6 +23,7 @@
 #include <vector>
 #include <regex>
 #include <map>
+#include <shared_mutex>
 #include "iptables_wrapper.h"
 #include "network_sharing.h"
 #include "route_manager.h"
@@ -111,6 +112,7 @@ public:
     int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName);
 private:
+    std::shared_mutex forwardingRequestsMutex_;
     std::set<std::string> forwardingRequests_;
     std::set<std::string> interfaceForwards_;
     std::map<std::string, uint8_t> forbidIpsMap_;

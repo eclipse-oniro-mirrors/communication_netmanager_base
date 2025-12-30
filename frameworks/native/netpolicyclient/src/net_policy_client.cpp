@@ -161,6 +161,7 @@ void NetPolicyClient::RecoverCallback()
     }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+    std::shared_lock<std::shared_mutex> lock(callbackMutex_);
     if (proxy != nullptr && callback_ != nullptr) {
         int32_t ret = proxy->RegisterNetPolicyCallback(callback_);
         NETMGR_LOG_D("Register result %{public}d", ret);
@@ -191,6 +192,7 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         netPolicyService_ = nullptr;
     }
 
+    std::shared_lock<std::shared_mutex> lock(callbackMutex_);
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
         std::thread t([sp = shared_from_this()]() { sp->RecoverCallback(); });
@@ -211,6 +213,7 @@ int32_t NetPolicyClient::RegisterNetPolicyCallback(const sptr<INetPolicyCallback
     int32_t ret = proxy->RegisterNetPolicyCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetPolicyCallback success, save callback");
+        std::unique_lock<std::shared_mutex> lock(callbackMutex_);
         callback_ = callback;
     }
     
@@ -227,6 +230,7 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
     int32_t ret = proxy->UnregisterNetPolicyCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnRegisterNetPolicyCallback success, delete callback");
+        std::unique_lock<std::shared_mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
 
