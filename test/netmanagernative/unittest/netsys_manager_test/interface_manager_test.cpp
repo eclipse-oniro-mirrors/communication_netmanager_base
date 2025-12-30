@@ -602,7 +602,7 @@ HWTEST_F(InterfaceManagerTest, CreateVlan001, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, DestroyVlan001, TestSize.Level1)
 {
-    std::string ifName = "rmnet1";
+    std::string ifName = "rmnet0";
     uint32_t vlanId = 1;
     int32_t ret = InterfaceManager::DestroyVlan(ifName, vlanId);
     ifName = "wlan0";
@@ -612,7 +612,7 @@ HWTEST_F(InterfaceManagerTest, DestroyVlan001, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, AddVlanIp001, TestSize.Level1)
 {
-    std::string ifName = "rmnet2";
+    std::string ifName = "rmnet0";
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
@@ -620,7 +620,7 @@ HWTEST_F(InterfaceManagerTest, AddVlanIp001, TestSize.Level1)
 
     ifName = "wlan0";
     ret = InterfaceManager::AddVlanIp(ifName, vlanId, ip, mask);
-    ifName = "rmnet3";
+    ifName = "rmnet0";
     ip = "2001:0db8:0000:0000:0000:0000:0000:0001";
     ret = InterfaceManager::AddVlanIp(ifName, vlanId, ip, mask);
     ip = "192.168.1.1.1";
