@@ -2863,7 +2863,8 @@ int32_t NetConnService::EnableVnicNetworkAsync(const sptr<NetLinkInfo> &netLinkI
         return NET_CONN_ERR_INVALID_NETWORK;
     }
 
-    NETMGR_LOG_I("EnableVnicNetwork tunAddr:[%{public}s], prefix:[%{public}d]", tunAddr.c_str(), prefix);
+    NETMGR_LOG_I("EnableVnicNetwork tunAddr:[%{public}s], prefix:[%{public}d]",
+        CommonUtils::ToAnonymousIp(tunAddr).c_str(), prefix);
     if (NetsysController::GetInstance().CreateVnic(mtu, tunAddr, prefix, uids) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("EnableVnicNetwork CreateVnic failed");
         return NETMANAGER_ERR_OPERATION_FAILED;
