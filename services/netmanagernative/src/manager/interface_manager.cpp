@@ -59,7 +59,6 @@ constexpr uint32_t IOCTL_RETRY_TIME = 32;
 constexpr int32_t MAX_MTU_LEN = 11;
 constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
 constexpr int32_t MAC_SSCANF_SPACE = 3;
-constexpr int32_t MAX_IFNAME_SIZE = 32;
 const std::regex REGEX_CMD_MAC_ADDRESS("^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$");
 constexpr const char *IPV6_PROC_PATH = "/proc/sys/net/ipv6/conf/";
 constexpr const char *DISABLE_IPV6_AUTO_CONF = "0";
@@ -660,49 +659,6 @@ int32_t InterfaceManager::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
     return ret;
 }
 
-static void AddAttribute(struct nlmsghdr *msghdr, int type, const void *data, size_t len)
-{
-    if (msghdr == nullptr || data == nullptr) {
-        return;
-    }
-    if (NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(sizeof(struct rtattr)) > nmd::NETLINK_MAX_LEN) {
-        return;
-    }
-    struct rtattr *attr = reinterpret_cast<struct rtattr*>(
-        reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
-    attr->rta_type = type;
-    attr->rta_len = RTA_LENGTH(len);
-    if (memcpy_s(RTA_DATA(attr), NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN), data, len) != 0) {
-        NETNATIVE_LOGE("[AddRoute]: string copy failed");
-    }
-    msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(attr->rta_len);
-}
-
-static struct nlattr *AddNestedStart(struct nlmsghdr *msghdr, int type)
-{
-    if (msghdr == nullptr) {
-        return nullptr;
-    }
-    if (NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(sizeof(struct nlattr)) > nmd::NETLINK_MAX_LEN) {
-        return nullptr;
-    }
-    struct nlattr *nested = reinterpret_cast<struct nlattr*>(
-        reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len));
-    nested->nla_type = type;
-    nested->nla_len = RTA_LENGTH(0);
-    msghdr->nlmsg_len = NLMSG_ALIGN(msghdr->nlmsg_len) + RTA_ALIGN(nested->nla_len);
-    return nested;
-}
-
-static void AddNestedEnd(struct nlmsghdr *msghdr, struct nlattr *nested)
-{
-    if (msghdr == nullptr || nested == nullptr) {
-        return;
-    }
-    nested->nla_len = reinterpret_cast<char*>(msghdr) + NLMSG_ALIGN(msghdr->nlmsg_len) -
-                       reinterpret_cast<char*>(nested);
-}
-
 int32_t InterfaceManager::CreateVlan(const std::string &ifName, uint32_t vlanId)
 {
     NETNATIVE_LOGI("CreateVlan, ifName %{public}s, vlanId %{public}d", ifName.c_str(), vlanId);
@@ -723,18 +679,20 @@ int32_t InterfaceManager::CreateVlan(const std::string &ifName, uint32_t vlanId)
     nlmsg.AddLink(RTM_NEWLINK, ifm);
 
     std::string name = ifName + "." + std::to_string(vlanId);
-    if (name.length() > MAX_IFNAME_SIZE) {
+    if (name.length() > IFNAMSIZ) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFLA_LINK, &index, sizeof(index));
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFLA_IFNAME, name.c_str(), name.length() + 1);
-    struct nlattr *linkinfo = AddNestedStart(nlmsg.GetNetLinkMessage(), IFLA_LINKINFO);
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFLA_INFO_KIND, VLAN_TYPE_NAME, strlen(VLAN_TYPE_NAME) + 1);
-    struct nlattr *info_data = AddNestedStart(nlmsg.GetNetLinkMessage(), IFLA_INFO_DATA);
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFLA_VLAN_ID, &vlanId, sizeof(vlanId));
+    char vlanIfName[IFNAMSIZ] = {0};
+    size_t vlanIfLength = strlcpy(vlanIfName, name.c_str(), IFNAMSIZ) + 1;
+    nlmsg.AddAttr(IFLA_LINK, &index, sizeof(index));
+    nlmsg.AddAttr(IFLA_IFNAME, vlanIfName, vlanIfLength);
+    struct nlattr *linkinfo = nlmsg.AddNestedStart(IFLA_LINKINFO);
+    nlmsg.AddAttr(IFLA_INFO_KIND, const_cast<char*>(VLAN_TYPE_NAME), strlen(VLAN_TYPE_NAME) + 1);
+    struct nlattr *info_data = nlmsg.AddNestedStart(IFLA_INFO_DATA);
+    nlmsg.AddAttr(IFLA_VLAN_ID, &vlanId, sizeof(vlanId));
 
-    AddNestedEnd(nlmsg.GetNetLinkMessage(), info_data);
-    AddNestedEnd(nlmsg.GetNetLinkMessage(), linkinfo);
+    nlmsg.AddNestedEnd(info_data);
+    nlmsg.AddNestedEnd(linkinfo);
 
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
@@ -793,8 +751,8 @@ int32_t InterfaceManager::AddVlanIp(const std::string &ifName, uint32_t vlanId,
     nlmsg.AddAddress(RTM_NEWADDR, ifa);
 
     int addrLen = (family == AF_INET) ? 4 : 16;
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFA_LOCAL, const_cast<char*>(addrbuf), addrLen);
-    AddAttribute(nlmsg.GetNetLinkMessage(), IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen);
+    nlmsg.AddAttr(IFA_LOCAL, const_cast<char*>(addrbuf), addrLen);
+    nlmsg.AddAttr(IFA_ADDRESS, const_cast<char*>(addrbuf), addrLen);
 
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
