@@ -164,6 +164,5 @@ void NetlinkMsg::AddNestedEnd(struct nlattr *nested)
     nested->nla_len = reinterpret_cast<char*>(netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len) -
                        reinterpret_cast<char*>(nested);
 }
-
 } // namespace nmd
 } // namespace OHOS
