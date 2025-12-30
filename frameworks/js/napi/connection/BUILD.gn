@@ -100,6 +100,7 @@ ohos_shared_library("connection_if") {
     "async_context/src/factoryresetnetwork_context.cpp",
     "async_context/src/getaddressbyname_context.cpp",
     "async_context/src/getappnet_context.cpp",
+    "async_context/src/getconnectowneruid_context.cpp",
     "async_context/src/getdefaultnet_context.cpp",
     "async_context/src/getdns_context.cpp",
     "async_context/src/gethttpproxy_context.cpp",

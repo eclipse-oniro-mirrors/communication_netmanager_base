@@ -763,5 +763,43 @@ HWTEST_F(ConnManagerTest, GetInterfaceNameId001, TestSize.Level1)
     netBearerType = BEARER_BLUETOOTH;
     EXPECT_EQ(instance_->GetInterfaceNameId(netBearerType), NETWORK_BEARER_TYPE_INITIAL);
 }
+
+/**
+ * @tc.name: GetConnectOwnerUidTest001
+ * @tc.desc: Test ConnManager GetConnectOwnerUid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetConnectOwnerUidTest002
+ * @tc.desc: Test ConnManager GetConnectOwnerUid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, GetConnectOwnerUidTest002, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_UDP;
+    info.family_ = NetConnInfo::Family::IPv6;
+    info.localAddress_ = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    info.localPort_ = 6666;
+    info.remoteAddress_ = "2001:0db8:85a3:0000:0000:8a2e:0370:7335";
+    info.remotePort_ = 8888;
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

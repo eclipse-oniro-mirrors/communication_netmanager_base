@@ -976,6 +976,17 @@ int32_t NetsysNativeService::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInf
     return netsysService_->GetIpNeighTable(ipMacInfo);
 }
 
+int32_t NetsysNativeService::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                                int32_t &ownerUid)
+{
+    NETNATIVE_LOG_D("NetsysNativeService GetConnectOwnerUid");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->GetConnectOwnerUid(netConnInfo, ownerUid);
+}
+
 int32_t NetsysNativeService::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return netsysService_->RegisterDnsResultCallback(callback, timeStep);

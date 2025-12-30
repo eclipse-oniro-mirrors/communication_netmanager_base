@@ -1722,6 +1722,18 @@ int32_t NetsysNativeClient::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo
     return proxy->GetIpNeighTable(ipMacInfo);
 }
 
+int32_t NetsysNativeClient::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                               int32_t &ownerUid)
+{
+    NETMGR_LOG_D("get connect owner uid");
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetConnectOwnerUid(netConnInfo, ownerUid);
+}
+
 int32_t NetsysNativeClient::RegisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
 {

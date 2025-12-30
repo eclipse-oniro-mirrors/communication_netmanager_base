@@ -42,6 +42,7 @@ constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
+constexpr int32_t INVALID_UID = -1;
 } // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -131,6 +132,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdStopClat;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_AUTO_CONF)] =
         &NetsysNativeServiceStub::CmdSetIpv6AutoConf;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID)] =
+        &NetsysNativeServiceStub::CmdGetConnectOwnerUid;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -2094,6 +2097,26 @@ int32_t NetsysNativeServiceStub::CmdSetVlanIp(MessageParcel &data, MessageParcel
         return ERR_FLATTEN_OBJECT;
     }
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NetConnInfo> netConnInfo = NetConnInfo::Unmarshalling(data);
+    if (netConnInfo == nullptr) {
+        NETNATIVE_LOGE("netConnInfo is nullptr");
+        return IPC_STUB_ERR;
+    }
+    int32_t ownerUid = INVALID_UID;
+    int32_t ret = GetConnectOwnerUid(*netConnInfo, ownerUid);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteInt32(ownerUid)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
 }
 
 int32_t NetsysNativeServiceStub::CmdRegisterDnsResultListener(MessageParcel &data, MessageParcel &reply)

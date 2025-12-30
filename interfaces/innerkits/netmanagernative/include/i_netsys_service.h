@@ -27,6 +27,7 @@
 #include "i_netsys_traffic_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
+#include "net_conn_info.h"
 #include "net_stats_info.h"
 #include "network_sharing.h"
 #include "netsys_ipc_interface_code.h"
@@ -235,6 +236,8 @@ public:
     virtual int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
     virtual int32_t SetInternetAccessByIpForWifiShare(
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) = 0;
+    virtual int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                       int32_t &ownerUid) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

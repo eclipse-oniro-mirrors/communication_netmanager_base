@@ -40,6 +40,8 @@
       "OHOS::NetsysNative::NetsysTrafficCallbackStub::OnExceedTrafficLimits(signed char&)";
       "OHOS::NetsysNative::NetsysTrafficCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
       "OHOS::NetManagerStandard::NetIpMacInfo::Marshalling(OHOS::Parcel&, OHOS::sptr<OHOS::NetManagerStandard::NetIpMacInfo> const&)";
+      "OHOS::NetManagerStandard::NetConnInfo::Marshalling(OHOS::Parcel&) const";
+      "OHOS::NetManagerStandard::NetConnInfo::Unmarshalling(OHOS::Parcel&)";
       "virtual thunk to OHOS::NetsysNative::NotifyCallbackStub::~NotifyCallbackStub()";
       "vtable for OHOS::NetManagerStandard::InterceptRecord";
       "vtable for OHOS::NetManagerStandard::NetFirewallDnsParam";
@@ -51,6 +53,7 @@
       "vtable for OHOS::NetManagerStandard::NetFirewallPortParam";
       "vtable for OHOS::NetManagerStandard::NetFirewallRule";
       "vtable for OHOS::NetManagerStandard::NetIpMacInfo";
+      "vtable for OHOS::NetManagerStandard::NetConnInfo";
       "vtable for OHOS::NetManagerStandard::UidRange";
       "vtable for OHOS::NetsysNative::NetsysNativeServiceProxy";
       "vtable for OHOS::NetsysNative::NetDnsResultCallbackStub";
@@ -69,6 +72,7 @@
       "VTT for OHOS::NetManagerStandard::NetFirewallPortParam";
       "VTT for OHOS::NetManagerStandard::NetFirewallRule";
       "VTT for OHOS::NetManagerStandard::NetIpMacInfo";
+      "VTT for OHOS::NetManagerStandard::NetConnInfo";
       "VTT for OHOS::NetManagerStandard::UidRange";
       "VTT for OHOS::NetsysNative::NetsysNativeServiceProxy";
       "VTT for OHOS::NetsysNative::NetDnsResultAddrInfo";

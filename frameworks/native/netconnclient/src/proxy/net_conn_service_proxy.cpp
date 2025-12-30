@@ -2332,5 +2332,37 @@ int32_t NetConnServiceProxy::SetVlanIp(const std::string &ifName, uint32_t vlanI
     return reply.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!netConnInfo.Marshalling(data)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadInt32(ownerUid)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

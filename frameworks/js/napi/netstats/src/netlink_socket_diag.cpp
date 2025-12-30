@@ -39,6 +39,8 @@ constexpr int32_t DOMAIN_IP_ADDR_MAX_LEN = 128;
 constexpr uint32_t LOCKBACK_MASK = 0xff000000;
 constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
 constexpr uid_t PUSH_UID = 7023;
+constexpr uint32_t INET_DIAG_REQ_V2_STATES_ALL = 0xffffffff;
+constexpr int32_t INVALID_UID = -1;
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
@@ -87,8 +89,12 @@ void NetLinkSocketDiag::CloseNetlinkSocket()
     if (destroySock_ >= 0) {
         close(destroySock_);
     }
+    if (queryUidSock_ >= 0) {
+        close(queryUidSock_);
+    }
     dumpSock_ = -1;
     destroySock_ = -1;
+    queryUidSock_ = -1;
 }
 
 int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg)
@@ -123,6 +129,12 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
 
 int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd)
 {
+    int32_t kernelError = 0;
+    return GetErrorFromKernel(fd, kernelError);
+}
+
+int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd, int32_t &kernelError)
+{
     Ack ack;
     ssize_t bytesread = recv(fd, &ack, sizeof(ack), MSG_DONTWAIT | MSG_PEEK);
     if (bytesread < 0) {
@@ -131,6 +143,7 @@ int32_t NetLinkSocketDiag::GetErrorFromKernel(int32_t fd)
     if (bytesread == static_cast<ssize_t>(sizeof(ack)) && ack.hdr_.nlmsg_type == NLMSG_ERROR) {
         recv(fd, &ack, sizeof(ack), 0);
         NETNATIVE_LOGE("Receive NLMSG_ERROR:[%{public}d] from kernel", ack.err_.error);
+        kernelError = ack.err_.error;
         return NETMANAGER_ERR_INTERNAL;
     }
     return NETMANAGER_SUCCESS;
@@ -383,5 +396,165 @@ void NetLinkSocketDiag::DestroyLiveSocketsWithUid(const std::string &ipAddr, uin
     NETNATIVE_LOGI("TCP-RST Destroyed %{public}d sockets for uid:%{public}d", socketsDestroyed_, uid);
 }
 
+bool NetLinkSocketDiag::CreateNetlinkSocketForQueryUid()
+{
+    queryUidSock_ = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, NETLINK_INET_DIAG);
+    if (queryUidSock_ < 0) {
+        NETNATIVE_LOGE("Create netlink socket for query uid failed, error[%{public}d]: %{public}s", errno,
+                       strerror(errno));
+        return false;
+    }
+
+    sockaddr_nl nl = {.nl_family = AF_NETLINK};
+    if (connect(queryUidSock_, reinterpret_cast<sockaddr *>(&nl), sizeof(nl)) < 0) {
+        NETNATIVE_LOGE("Connect to netlink socket failed, error[%{public}d]: %{public}s", errno, strerror(errno));
+        CloseNetlinkSocket();
+        return false;
+    }
+    return true;
+}
+
+int32_t NetLinkSocketDiag::MakeQueryUidRequestInfo(uint8_t proto, uint8_t family, const std::string &localAddress,
+                                                   uint32_t localPort, const std::string &remoteAddress,
+                                                   uint32_t remotePort, inet_diag_req_v2 &request)
+{
+    memset_s(&request, sizeof(inet_diag_req_v2), 0, sizeof(inet_diag_req_v2));
+    request = {
+        .sdiag_family = family,
+        .sdiag_protocol = proto,
+        .idiag_ext = 1,
+        .pad = 0,
+        .idiag_states = INET_DIAG_REQ_V2_STATES_ALL,
+        .id = {
+            .idiag_sport = htons(localPort),
+            .idiag_dport = htons(remotePort),
+            .idiag_if = 0,
+            .idiag_cookie = {INET_DIAG_NOCOOKIE, INET_DIAG_NOCOOKIE},
+        }
+    };
+    if (family == AF_INET) {
+        in_addr ip;
+        if (inet_pton(AF_INET, localAddress.c_str(), &ip) != 1) {
+            NETNATIVE_LOGE("Convert IP address failed.");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        request.id.idiag_src[0] = ip.s_addr;
+        if (inet_pton(AF_INET, remoteAddress.c_str(), &ip) != 1) {
+            NETNATIVE_LOGE("Convert IP address failed.");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        request.id.idiag_dst[0] = ip.s_addr;
+    } else {
+        if ((inet_pton(AF_INET6, localAddress.c_str(), request.id.idiag_src) != 1) ||
+            (inet_pton(AF_INET6, remoteAddress.c_str(), request.id.idiag_dst) != 1)) {
+            NETNATIVE_LOGE("Convert IP address failed.");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetLinkSocketDiag::ProcessQueryUidResponse(int32_t &uid)
+{
+    uid = INVALID_UID;
+    char buf[KERNEL_BUFFER_SIZE] = {0};
+    ssize_t readBytes = read(queryUidSock_, buf, sizeof(buf));
+    if (readBytes < 0) {
+        NETNATIVE_LOGE("Failed to read socket, errno:%{public}d, strerror:%{public}s", errno, strerror(errno));
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    // if readBytes is 0, it is equivalent to no matching uid being found.
+    while (readBytes > 0) {
+        int len = readBytes;
+        for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
+                NETNATIVE_LOGE("Error netlink msg, errno:%{public}d, strerror:%{public}s", -err->error,
+                               strerror(-err->error));
+                return NETMANAGER_ERR_INTERNAL;
+            } else if (nlh->nlmsg_type == NLMSG_DONE) {
+                NETNATIVE_LOGE("ProcessQueryUidResponse nlh->nlmsg_type == NLMSG_DONE");
+                return NETMANAGER_SUCCESS;
+            } else {
+                const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
+                uid = static_cast<int32_t>(msg->idiag_uid);
+                return NETMANAGER_SUCCESS;
+            }
+        }
+        readBytes = read(queryUidSock_, buf, sizeof(buf));
+        if (readBytes < 0) {
+            NETNATIVE_LOGE("Failed to read socket, errno:%{public}d, strerror:%{public}s", errno, strerror(errno));
+            return NETMANAGER_ERR_INTERNAL;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetLinkSocketDiag::GetConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress,
+                                              uint32_t localPort, const std::string &remoteAddress, uint32_t remotePort,
+                                              int32_t &uid)
+{
+    uid = INVALID_UID;
+    if (!CreateNetlinkSocketForQueryUid()) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    int32_t ret = QueryConnectOwnerUid(proto, family, localAddress, localPort, remoteAddress, remotePort, uid);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    /**
+     * If five-tuple match fails, retry with local address + port only.
+     * Reason: Unconnected UDP sockets don't store remote endpoint info.
+     */
+    if (uid == INVALID_UID && proto == IPPROTO_UDP) {
+        std::string wildcardIp = (family == AF_INET) ? "0.0.0.0" : "::";
+        ret = QueryConnectOwnerUid(proto, family, localAddress, localPort, wildcardIp, 0, uid);
+    }
+
+    return ret;
+}
+
+int32_t NetLinkSocketDiag::QueryConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress,
+                                                uint32_t localPort, const std::string &remoteAddress,
+                                                uint32_t remotePort, int32_t &uid)
+{
+    SockDiagRequest request;
+    memset_s(&request, sizeof(SockDiagRequest), 0, sizeof(SockDiagRequest));
+    size_t requestLen = sizeof(request);
+    iovec iov;
+    iov.iov_base = &request;
+    iov.iov_len = requestLen;
+    request.nlh_.nlmsg_type = SOCK_DIAG_BY_FAMILY;
+    request.nlh_.nlmsg_flags = (NLM_F_REQUEST | NLM_F_DUMP);
+    request.nlh_.nlmsg_len = requestLen;
+
+    int32_t ret =
+        MakeQueryUidRequestInfo(proto, family, localAddress, localPort, remoteAddress, remotePort, request.req_);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("Failed to query uid err = %{public}d", ret);
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    ssize_t writeLen = writev(queryUidSock_, &iov, (sizeof(iov) / sizeof(iovec)));
+    if (writeLen != static_cast<ssize_t>(requestLen)) {
+        NETNATIVE_LOGE("Write dump request failed errno:%{public}d, strerror:%{public}s", errno, strerror(errno));
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    int32_t kernelError = 0;
+    ret = GetErrorFromKernel(queryUidSock_, kernelError);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("GetErrorFromKernel failed ret = %{public}d, kernelError = %{public}d", ret, kernelError);
+        return (kernelError == -ENOENT) ? NETMANAGER_SUCCESS : NETMANAGER_ERR_INTERNAL;
+    }
+
+    ret = ProcessQueryUidResponse(uid);
+    return ret;
+}
 } // namespace nmd
 } // namespace OHOS

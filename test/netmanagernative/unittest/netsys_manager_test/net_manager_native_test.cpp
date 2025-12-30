@@ -342,5 +342,19 @@ HWTEST_F(NetManagerNativeTest, SetVlanIp002, TestSize.Level1)
     auto ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetManagerNativeTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    auto ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS
