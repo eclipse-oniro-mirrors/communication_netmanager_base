@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <charconv>
 #include "common_event_support.h"
 
 #include "broadcast_manager.h"
@@ -238,6 +239,87 @@ bool Network::ReleaseVirtualNetwork()
     return true;
 }
 
+bool Network::IsValidIpRoute(const INetAddr &destination)
+{
+    auto family = GetAddrFamily(destination.address_);
+    std::string ip;
+    auto pos = destination.address_.find("/");
+    std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+    NETMGR_LOG_E("address_=%{public}s family=%{public}d nextHop=%{public}s", destination.address_.c_str(), family,
+                 nextHop.c_str());
+
+    if (family == AF_INET) {
+        if (pos != std::string::npos) {
+            ip = destination.address_.substr(0, pos);
+        } else {
+            ip = destination.address_;
+        }
+        NETMGR_LOG_E("ip=%{public}s IsValidIPV4=%{public}s", ip.c_str(), IsValidIPV4(ip) ? "TRUE" : "FALSE");
+        return IsValidIPV4(ip) && (IsValidIPV4(nextHop) || nextHop.empty());
+    } else if (family == AF_INET6) {
+        if (pos == std::string::npos) {
+            return false;
+        }
+        ip = destination.address_.substr(0, pos);
+        std::string prefixStr = destination.address_.substr(pos + 1);
+        int prefix = -1;
+
+        auto result = std::from_chars(prefixStr.data(), prefixStr.data() + prefixStr.size(), prefix);
+        if (result.ec != std::errc()) {
+            return false;
+        }
+        NETMGR_LOG_E("prefix=%{public}d", prefix);
+        NETMGR_LOG_E("ip=%{public}s IsValidIPV6=%{public}s", ip.c_str(), IsValidIPV6(ip) ? "TRUE" : "FALSE");
+        return (IsValidIPV6(ip) && prefix == 0) && (IsValidIPV6(nextHop) || nextHop.empty());
+    } else {
+        return false;
+    }
+}
+
+void Network::UpdateNetLinkInfoLinkType(const NetLinkInfo &netLinkInfo)
+{
+    NetLinkInfo tmpNetLinkInfo = netLinkInfo;
+    bool hasIpv4 = false;
+    bool hasIpv6 = false;
+    bool validIpv4Route = false;
+    bool validIpv6Route = false;
+    for (const auto &route : tmpNetLinkInfo.routeList_) {
+        auto family = GetAddrFamily(route.destination_.address_);
+        if (IsValidIpRoute(route.destination_)) {
+            if (family == AF_INET) {
+                validIpv4Route = true;
+            }
+            if (family == AF_INET6) {
+                validIpv6Route = true;
+            }
+            NETMGR_LOG_E("addr=%{public}s, IsValidIpRoute return true", route.destination_.address_.c_str());
+        }
+        if (validIpv4Route && validIpv6Route) {
+            break;
+        }
+    }
+    NETMGR_LOG_E("validIpv4Route=%{public}s", validIpv4Route ? "true" : "false");
+    NETMGR_LOG_E("validIpv6Route=%{public}s", validIpv6Route ? "true" : "false");
+    for (const auto &addr : tmpNetLinkInfo.netAddrList_) {
+        auto family = GetAddrFamily(addr.address_);
+        if (family == AF_INET && validIpv4Route) {
+            hasIpv4 = true;
+        }
+        if (family == AF_INET6 && validIpv6Route && IsUsableGlobalIpv6Addr(addr.address_)) {
+            hasIpv6 = true;
+        }
+        if (hasIpv4 && hasIpv6) {
+            break;
+        }
+    }
+    NETMGR_LOG_E("hasIpv4=%{public}s", hasIpv4 ? "true" : "false");
+    NETMGR_LOG_E("hasIpv6=%{public}s", hasIpv6 ? "true" : "false");
+    tmpNetLinkInfo.isIpv4LinkValid_ = hasIpv4;
+    tmpNetLinkInfo.isIpv6LinkValid_ = hasIpv6;
+    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
+    netLinkInfo_ = tmpNetLinkInfo;
+}
+
 bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("update net link information process");
@@ -257,9 +339,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
-    std::unique_lock<std::shared_mutex> wlock(netLinkInfoMutex_);
-    netLinkInfo_ = netLinkInfo;
-    wlock.unlock();
+    UpdateNetLinkInfoLinkType(netLinkInfo);
     std::shared_lock<std::shared_mutex> lock(netLinkInfoMutex_);
     NetLinkInfo netLinkInfoBck = netLinkInfo_;
     lock.unlock();

@@ -607,5 +607,25 @@ HWTEST_F(NetLinkInfoTest, EqualTestHttpProxy, TestSize.Level1)
     netLinkInfo1->httpProxy_ = {TEST_IPV4_ADDR, 8010, {"localhost"}};
     ASSERT_TRUE(*netLinkInfo1 != *netLinkInfo);
 }
+
+/**
+ * @tc.name: ToStringLinkValidTest
+ * @tc.desc: Test NetLinkInfo::ToStringLinkValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, ToStringLinkValidTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    netLinkInfo->isIpv4LinkValid_ = false;
+    netLinkInfo->isIpv6LinkValid_ = false;
+    std::string str = netLinkInfo->ToStringLinkValid("ToStringLinkValidTest");
+    ASSERT_TRUE(!str.empty());
+
+    netLinkInfo->isIpv4LinkValid_ = true;
+    netLinkInfo->isIpv6LinkValid_ = true;
+    str = netLinkInfo->ToStringLinkValid("ToStringLinkValidTest");
+    ASSERT_TRUE(!str.empty());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

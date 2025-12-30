@@ -506,6 +506,33 @@ HWTEST_F(NetworkTest, UpdateNetConnStateTest002, TestSize.Level1)
     network->UpdateNetConnState(netConnState);
 }
 
+HWTEST_F(NetworkTest, UpdateNetLinkInfoLinkTypeTest, TestSize.Level1)
+{
+    int32_t netId = 1;
+    uint32_t supplierId = 1;
+    auto network = std::make_shared<Network>(netId, supplierId, NetBearType::BEARER_CELLULAR, nullptr);
+    network->InitNetMonitor();
+    EXPECT_NE(network->netMonitor_, nullptr);
+    network->netLinkInfo_.ifaceName_ = "test";
+    INetAddr addr1;
+    INetAddr addr2;
+    addr1.address_ = "10.0.0.2";
+    addr1.family_ = AF_INET;
+    addr2.address_ = "fe80::";
+    addr2.family_ = AF_INET6;
+    network->netLinkInfo_.netAddrList_.push_back(addr1);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res1 = network->GetNetLinkInfo();
+    EXPECT_TRUE(res1.isIpv4LinkValid_);
+    EXPECT_FALSE(res1.isIpv6LinkValid_);
+
+    network->netLinkInfo_.netAddrList_.push_back(addr2);
+    network->UpdateNetLinkInfoLinkType(network->netLinkInfo_);
+    auto res2 = network->GetNetLinkInfo();
+    EXPECT_TRUE(res2.isIpv4LinkValid_);
+    EXPECT_TRUE(res2.isIpv6LinkValid_);
+}
+
 HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
 {
     int32_t netId = 1;
