@@ -1959,7 +1959,7 @@ HWTEST_F(NetsysControllerTest, DestroyVlan002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
-HWTEST_F(NetsysControllerTest, SetVlanIp001, TestSize.Level1)
+HWTEST_F(NetsysControllerTest, AddVlanIp001, TestSize.Level1)
 {
     auto netsysController = std::make_shared<NetsysController>();
     auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
@@ -1970,11 +1970,11 @@ HWTEST_F(NetsysControllerTest, SetVlanIp001, TestSize.Level1)
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
-    int32_t ret = netsysController->SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = netsysController->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysControllerTest, SetVlanIp002, TestSize.Level1)
+HWTEST_F(NetsysControllerTest, AddVlanIp002, TestSize.Level1)
 {
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
@@ -1982,7 +1982,7 @@ HWTEST_F(NetsysControllerTest, SetVlanIp002, TestSize.Level1)
     uint32_t mask = 24;
     auto netsysController = std::make_shared<NetsysController>();
     netsysController->netsysService_  = nullptr;
-    int32_t ret = netsysController->SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = netsysController->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetManagerStandard

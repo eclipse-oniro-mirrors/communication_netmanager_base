@@ -760,14 +760,14 @@ int32_t InterfaceManager::DestroyVlan(const std::string &ifName, uint32_t vlanId
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
-int32_t InterfaceManager::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t InterfaceManager::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                     const std::string &ip, uint32_t mask)
 {
-    NETNATIVE_LOGI("SetVlanIp, ifName %{public}s, vlanId %{public}d", ifName.c_str(), vlanId);
+    NETNATIVE_LOGI("AddVlanIp, ifName %{public}s, vlanId %{public}d", ifName.c_str(), vlanId);
     std::string name = ifName + "." + std::to_string(vlanId);
     uint32_t index = if_nametoindex(name.c_str());
     if (index == 0) {
-        NETNATIVE_LOGE("SetVlanIp, ifName error %{public}d", errno);
+        NETNATIVE_LOGE("AddVlanIp, ifName error %{public}d", errno);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     char addrbuf[sizeof(in6_addr)] = {0};
@@ -778,7 +778,7 @@ int32_t InterfaceManager::SetVlanIp(const std::string &ifName, uint32_t vlanId,
     } else if (inet_pton(AF_INET6, ip.c_str(), addrbuf) == 1) {
         family = AF_INET6;
     } else {
-        NETNATIVE_LOGE("SetVlanIp, invalid ip address");
+        NETNATIVE_LOGE("AddVlanIp, invalid ip address");
         return NETMANAGER_ERROR;
     }
 

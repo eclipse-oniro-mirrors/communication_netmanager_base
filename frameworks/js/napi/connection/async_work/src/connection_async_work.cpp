@@ -294,15 +294,26 @@ void ConnectionAsyncWork::DestroyVlanCallback(napi_env env, napi_status status, 
         ConnectionExec::DestroyVlanCallback>(env, status, data);
 }
 
-void ConnectionAsyncWork::ExecSetVlanIp(napi_env env, void *data)
+void ConnectionAsyncWork::ExecAddVlanIp(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<SetVlanIpContext, ConnectionExec::ExecSetVlanIp>(env, data);
+    BaseAsyncWork::ExecAsyncWork<AddVlanIpContext, ConnectionExec::ExecAddVlanIp>(env, data);
 }
 
-void ConnectionAsyncWork::SetVlanIpCallback(napi_env env, napi_status status, void *data)
+void ConnectionAsyncWork::AddVlanIpCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<SetVlanIpContext,
-        ConnectionExec::SetVlanIpCallback>(env, status, data);
+    BaseAsyncWork::AsyncWorkCallback<AddVlanIpContext,
+        ConnectionExec::AddVlanIpCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecDeleteVlanIp(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<DeleteVlanIpContext, ConnectionExec::ExecDeleteVlanIp>(env, data);
+}
+
+void ConnectionAsyncWork::DeleteVlanIpCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<DeleteVlanIpContext,
+        ConnectionExec::DeleteVlanIpCallback>(env, status, data);
 }
 
 void ConnectionAsyncWork::ExecAddNetworkRoute(napi_env env, void *data)

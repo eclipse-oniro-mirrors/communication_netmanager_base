@@ -4411,13 +4411,13 @@ int32_t NetConnService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetConnService::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                   const std::string &ip, uint32_t mask)
 {
     if (ifName.find("eth") == std::string::npos) {
         return NETMANAGER_ERR_INCORRECT_IFNAME;
     }
-    if (NetsysController::GetInstance().SetVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
+    if (NetsysController::GetInstance().AddVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;

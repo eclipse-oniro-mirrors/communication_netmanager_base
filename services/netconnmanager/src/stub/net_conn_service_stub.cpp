@@ -37,7 +37,7 @@ const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode:
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CREATE_VLAN),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
@@ -244,8 +244,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnCreateVlan, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN)] = {
         &NetConnServiceStub::OnDestroyVlan, {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP)] = {
-        &NetConnServiceStub::OnSetVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP)] = {
+        &NetConnServiceStub::OnAddVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2224,9 +2224,9 @@ int32_t NetConnServiceStub::OnDestroyVlan(MessageParcel &data, MessageParcel &re
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnSetVlanIp(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnAddVlanIp(MessageParcel &data, MessageParcel &reply)
 {
-    NETMGR_LOG_I("Enter OnSetVlanIp");
+    NETMGR_LOG_I("Enter OnAddVlanIp");
     std::string ifName = "";
     uint32_t vlanId = 0;
     std::string ip = "";
@@ -2243,7 +2243,7 @@ int32_t NetConnServiceStub::OnSetVlanIp(MessageParcel &data, MessageParcel &repl
     if (!data.ReadUint32(mask)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t ret = SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = AddVlanIp(ifName, vlanId, ip, mask);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

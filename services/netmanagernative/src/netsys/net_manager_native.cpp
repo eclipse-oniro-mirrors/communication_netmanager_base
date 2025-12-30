@@ -733,15 +733,15 @@ int32_t NetManagerNative::DestroyVlan(const std::string &ifName, uint32_t vlanId
     return interfaceManager_->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetManagerNative::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetManagerNative::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                     const std::string &ip, uint32_t mask)
 {
-    NETNATIVE_LOGI("SetVlanIp");
+    NETNATIVE_LOGI("AddVlanIp");
     if (interfaceManager_ == nullptr) {
         NETNATIVE_LOGE("interfaceManager_ is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return interfaceManager_->SetVlanIp(ifName, vlanId, ip, mask);
+    return interfaceManager_->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
 int32_t NetManagerNative::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)

@@ -1694,7 +1694,7 @@ void CmdDestroyVlanFuzzTest(data, size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DESTROY_VLAN), dataParcel);
 }
 
-void CmdSetVlanIpFuzzTest(data, size)
+void CmdAddVlanIpFuzzTest(data, size)
 {
     MessageParcel dataParcel;
     std::string ifName = NetConnGetString(STR_LEN);
@@ -1708,7 +1708,7 @@ void CmdSetVlanIpFuzzTest(data, size)
     dataParcel.WriteInt32(vlanId);
     dataParcel.WriteString(ip);
     dataParcel.WriteInt32(mask);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_VLAN_IP), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ADD_VLAN_IP), dataParcel);
 }
 
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
@@ -1778,7 +1778,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdGetIpNeighTableFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdCreateVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDestroyVlanFuzzTest(data, size);
-    OHOS::NetManagerStandard::CmdSetVlanIpFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdAddVlanIpFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

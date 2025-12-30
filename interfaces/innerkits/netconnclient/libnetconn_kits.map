@@ -233,7 +233,8 @@
       "OHOS::NetManagerStandard::NetConnClient::GetIpNeighTable(std::__h::vector<OHOS::NetManagerStandard::NetIpMacInfo, std::__h::allocator<OHOS::NetManagerStandard::NetIpMacInfo>>&)";
       "OHOS::NetManagerStandard::NetConnClient::CreateVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::DestroyVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
-      "OHOS::NetManagerStandard::NetConnClient::SetVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NetConnClient::AddVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NetConnClient::DeleteVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "VTT for OHOS::NetManagerStandard::NetIpMacInfo";
       "vtable for OHOS::NetManagerStandard::NetIpMacInfo";
     };

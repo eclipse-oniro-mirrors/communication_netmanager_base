@@ -739,15 +739,15 @@ napi_value ConnectionExec::DestroyVlanCallback(DestroyVlanContext *context)
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-bool ConnectionExec::ExecSetVlanIp(SetVlanIpContext *context)
+bool ConnectionExec::ExecAddVlanIp(AddVlanIpContext *context)
 {
-    NETMANAGER_BASE_LOGI("ExecSetVlanIp");
+    NETMANAGER_BASE_LOGI("ExecAddVlanIp");
     if (context == nullptr) {
         return false;
     }
     std::string ip = context->address_.address_;
     uint32_t mask = context->address_.prefixlen_;
-    int32_t errorCode = NetConnClient::GetInstance().SetVlanIp(context->ifName_, context->vlanId_, ip, mask);
+    int32_t errorCode = NetConnClient::GetInstance().AddVlanIp(context->ifName_, context->vlanId_, ip, mask);
     if (errorCode != NET_CONN_SUCCESS) {
         context->SetErrorCode(errorCode);
         return false;
@@ -755,7 +755,28 @@ bool ConnectionExec::ExecSetVlanIp(SetVlanIpContext *context)
     return true;
 }
 
-napi_value ConnectionExec::SetVlanIpCallback(SetVlanIpContext *context)
+napi_value ConnectionExec::AddVlanIpCallback(AddVlanIpContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecDeleteVlanIp(DeleteVlanIpContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecDeleteVlanIp");
+    if (context == nullptr) {
+        return false;
+    }
+    std::string ip = context->address_.address_;
+    uint32_t mask = context->address_.prefixlen_;
+    int32_t errorCode = NetConnClient::GetInstance().DeleteVlanIp(context->ifName_, context->vlanId_, ip, mask);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::DeleteVlanIpCallback(DeleteVlanIpContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }

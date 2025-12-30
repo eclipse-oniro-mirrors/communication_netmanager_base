@@ -765,14 +765,14 @@ HWTEST_F(NetsysNativeClientTest, DestroyVlan001, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeClientTest, SetVlanIp001, TestSize.Level1)
+HWTEST_F(NetsysNativeClientTest, AddVlanIp001, TestSize.Level1)
 {
     auto nativeClient = std::make_shared<NetsysNativeClient>();
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
-    int32_t ret = nativeClient->SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = nativeClient->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

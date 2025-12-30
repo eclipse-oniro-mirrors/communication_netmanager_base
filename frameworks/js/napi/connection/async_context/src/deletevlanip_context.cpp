@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "setvlanip_context.h"
+#include "deletevlanip_context.h"
 #include "napi_constant.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 
-SetVlanIpContext::SetVlanIpContext(napi_env env, std::shared_ptr<EventManager>& manager)
+DeleteVlanIpContext::DeleteVlanIpContext(napi_env env, std::shared_ptr<EventManager>& manager)
     : BaseContext(env, manager) {}
 
-void SetVlanIpContext::ParseParams(napi_value *params, size_t paramsCount)
+void DeleteVlanIpContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (params == nullptr) {
         return;

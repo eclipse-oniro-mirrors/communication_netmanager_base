@@ -86,7 +86,8 @@ public:
     static constexpr const char *FUNCTION_GET_IP_NEIGH_TABLE = "getIpNeighTable";
     static constexpr const char *FUNCTION_CREATE_VLAN = "createVlanInterface";
     static constexpr const char *FUNCTION_DESTROY_VLAN = "destroyVlanInterface";
-    static constexpr const char *FUNCTION_SET_VLAN_IP = "setVlanIp";
+    static constexpr const char *FUNCTION_ADD_VLAN_IP = "addVlanIp";
+    static constexpr const char *FUNCTION_DELETE_VLAN_IP = "deleteVlanIp";
     static constexpr const char *INTERFACE_FAMILY_TYPE = "FamilyType";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
     static constexpr const char *FUNCTION_GET_DNS_ASCII = "getDnsAscii";
@@ -174,7 +175,8 @@ private:
     static napi_value GetIpNeighTable(napi_env env, napi_callback_info info);
     static napi_value CreateVlan(napi_env env, napi_callback_info info);
     static napi_value DestroyVlan(napi_env env, napi_callback_info info);
-    static napi_value SetVlanIp(napi_env env, napi_callback_info info);
+    static napi_value AddVlanIp(napi_env env, napi_callback_info info);
+    static napi_value DeleteVlanIp(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
     static napi_value GetDnsASCII(napi_env env, napi_callback_info info);
     static napi_value GetDnsUnicode(napi_env env, napi_callback_info info);

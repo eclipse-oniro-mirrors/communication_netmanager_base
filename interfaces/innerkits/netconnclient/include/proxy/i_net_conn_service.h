@@ -140,7 +140,7 @@ public:
     virtual int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) = 0;
     virtual int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) = 0;
     virtual int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) = 0;
-    virtual int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
+    virtual int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

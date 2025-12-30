@@ -131,7 +131,7 @@ private:
     int32_t OnGetIpNeighTable(MessageParcel &data, MessageParcel &reply);
     int32_t OnCreateVlan(MessageParcel &data, MessageParcel &reply);
     int32_t OnDestroyVlan(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetVlanIp(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddVlanIp(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };

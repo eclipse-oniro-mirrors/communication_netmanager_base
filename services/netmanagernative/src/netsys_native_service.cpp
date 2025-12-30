@@ -1314,14 +1314,14 @@ int32_t NetsysNativeService::DestroyVlan(const std::string &ifName, uint32_t vla
     return netsysService_->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetsysNativeService::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetsysNativeService::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                        const std::string &ip, uint32_t mask)
 {
     if (netsysService_ == nullptr) {
         NETNATIVE_LOGE("netsysService_ is null");
         return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return netsysService_->SetVlanIp(ifName, vlanId, ip, mask);
+    return netsysService_->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
 int32_t NetsysNativeService::SetInternetAccessByIpForWifiShare(

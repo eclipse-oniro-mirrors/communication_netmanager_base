@@ -810,7 +810,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, DestroyVlan001, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceProxyTest, SetVlanIp001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceProxyTest, AddVlanIp001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
@@ -818,7 +818,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetVlanIp001, TestSize.Level1)
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
-    int32_t ret = netsysNativeService->SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = netsysNativeService->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

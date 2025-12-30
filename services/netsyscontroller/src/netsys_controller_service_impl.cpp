@@ -1090,11 +1090,11 @@ int32_t NetsysControllerServiceImpl::DestroyVlan(const std::string &ifName, uint
     return netsysClient_->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetsysControllerServiceImpl::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetsysControllerServiceImpl::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                                const std::string &ip, uint32_t mask)
 {
-    NETMGR_LOG_I("SetVlanIp");
-    return netsysClient_->SetVlanIp(ifName, vlanId, ip, mask);
+    NETMGR_LOG_I("AddVlanIp");
+    return netsysClient_->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
 int32_t NetsysControllerServiceImpl::SetInternetAccessByIpForWifiShare(

@@ -103,7 +103,7 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_IP_NEIGH_TABLE,
     CMD_NM_CREATE_VLAN,
     CMD_NM_DESTROY_VLAN,
-    CMD_NM_SET_VLAN_IP,
+    CMD_NM_ADD_VLAN_IP,
 };
 
 enum class AdjCallbackInterfaceCode {
