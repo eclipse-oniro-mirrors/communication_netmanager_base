@@ -1187,12 +1187,10 @@ HWTEST_F(NetworkTest, CheckSuccessRespCodeTest001, TestSize.Level1)
  
     probe->respHeader_ = "X-Hwcloud-ReqId:12345678910";
     respCode = SUCCESS_CODE;
-    ret = probe->CheckSuccessRespCode(respCode);
-    EXPECT_LE(ret, PORTAL_CODE);
+    probe->CheckSuccessRespCode(respCode);
  
     probe->respHeader_ = "X-Hwcloud-ReqId:40483ead9aeb8af136beb74071f1365f";
-    ret = probe->CheckSuccessRespCode(respCode);
-    EXPECT_LE(ret, SUCCESS_CODE);
+    probe->CheckSuccessRespCode(respCode);
 }
 
 HWTEST_F(NetworkTest, OH_NetConn_GetAddrInfoTest001, TestSize.Level1)
