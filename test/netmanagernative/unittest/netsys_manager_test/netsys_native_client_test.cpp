@@ -24,6 +24,9 @@
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_client.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_callback_stub.h"
+#endif
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -78,6 +81,16 @@ void NetsysNativeClientTest::TearDownTestCase() {}
 void NetsysNativeClientTest::SetUp() {}
 
 void NetsysNativeClientTest::TearDown() {}
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+class TestNetFirewallCallbackStub : public OHOS::NetsysNative::NetFirewallCallbackStub {
+public:
+    int32_t OnIntercept(OHOS::sptr<InterceptRecord> &info) override
+    {
+        return 0;
+    }
+};
+#endif
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
 {
@@ -386,6 +399,33 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest016, TestSize.Level1)
     ret = nativeClient->DelStaticIpv6Addr(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest017, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
+    sptr<InterceptRecord> record = new (std::nothrow) InterceptRecord();
+    sptr<NetsysNative::INetFirewallCallback> netFierwallCallback = nullptr;
+    nativeClient->RegisterFirewallCallback(netFierwallCallback);
+    nativeClient->UnregisterFirewallCallback(netFierwallCallback);
+    netFierwallCallback = new (std::nothrow) TestNetFirewallCallbackStub;
+    ASSERT_NE(netFierwallCallback, nullptr);
+    nativeClient->RegisterFirewallCallback(netFierwallCallback);
+    int32_t ret = notifyCallback.OnInterceptRecord(record);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    nativeClient->UnregisterFirewallCallback(netFierwallCallback);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest018, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient);
+    sptr<InterceptRecord> record = new (std::nothrow) InterceptRecord();
+    int32_t ret = notifyCallback.OnInterceptRecord(record);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+#endif
 
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {

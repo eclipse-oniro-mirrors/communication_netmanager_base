@@ -22,6 +22,10 @@ namespace {
 using namespace testing::ext;
 using namespace OHOS::NetManagerStandard;
 constexpr int32_t USER_ID1 = 100;
+constexpr uint8_t LABEL_LEN = 3;
+constexpr uint8_t OVERFLOW_TOTAL_LEN = 4;
+constexpr uint8_t OVERFLOW_LABEL_LEN = static_cast<uint8_t>(OVERFLOW_TOTAL_LEN + 1);
+constexpr uint8_t TWO_LABEL_TOTAL = static_cast<uint8_t>(LABEL_LEN + 1 + LABEL_LEN + 1);
 }
 
 class NetsysBpfNetFirewallTest : public testing::Test {
@@ -126,4 +130,43 @@ HWTEST_F(NetsysBpfNetFirewallTest, WritePortBpfMap001, TestSize.Level0)
     portMap.OrInsert(key, bitmap);
     ret = bpfNet->WritePortBpfMap(portMap, path);
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysBpfNetFirewallTest, DecodeDomainFromKey001, TestSize.Level0)
+{
+    std::shared_ptr<NetsysBpfNetFirewall> bpfNet = std::make_shared<NetsysBpfNetFirewall>();
+    DomainHashKey nullKey = {};
+    nullKey.prefixlen = 0;
+    auto result = bpfNet->DecodeDomainFromKey(nullKey);
+    EXPECT_TRUE(result.empty());
+
+    DomainHashKey maxKey = {};
+    maxKey.prefixlen = static_cast<uint32_t>((DNS_DOMAIN_LEN + LABEL_LEN) * BIT_PER_BYTE);
+    EXPECT_EQ(memset_s(maxKey.data, sizeof(maxKey.data), 0, sizeof(maxKey.data)), EOK);
+    result = bpfNet->DecodeDomainFromKey(maxKey);
+    EXPECT_TRUE(result.empty());
+
+    DomainHashKey overflowKey = {};
+    overflowKey.prefixlen = static_cast<uint32_t>(OVERFLOW_TOTAL_LEN * BIT_PER_BYTE);
+    EXPECT_EQ(memset_s(overflowKey.data, sizeof(overflowKey.data), 0, sizeof(overflowKey.data)), EOK);
+    overflowKey.data[OVERFLOW_TOTAL_LEN - 1] = OVERFLOW_LABEL_LEN;
+    result = bpfNet->DecodeDomainFromKey(overflowKey);
+    EXPECT_TRUE(result.empty());
+
+    DomainHashKey normalKey = {};
+    normalKey.prefixlen = static_cast<uint32_t>(TWO_LABEL_TOTAL * BIT_PER_BYTE);
+    EXPECT_EQ(memset_s(normalKey.data, sizeof(normalKey.data), 0, sizeof(normalKey.data)), EOK);
+    {
+        const char label1[] = "moc";
+        EXPECT_EQ(memcpy_s(normalKey.data, sizeof(label1) - 1, label1, sizeof(label1) - 1), EOK);
+        normalKey.data[LABEL_LEN] = LABEL_LEN;
+    }
+    {
+        const char label2[] = "www";
+        const size_t off = static_cast<size_t>(LABEL_LEN + 1);
+        EXPECT_EQ(memcpy_s(normalKey.data + off, sizeof(label2) - 1, label2, sizeof(label2) - 1), EOK);
+        normalKey.data[off + LABEL_LEN] = LABEL_LEN;
+    }
+    result = bpfNet->DecodeDomainFromKey(normalKey);
+    EXPECT_FALSE(result.empty());
 }

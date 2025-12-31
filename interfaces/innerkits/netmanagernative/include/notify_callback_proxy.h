@@ -35,6 +35,9 @@ public:
     int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
                            const std::string &ifName) override;
     int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record) override;
+#endif
     int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
 
 private:

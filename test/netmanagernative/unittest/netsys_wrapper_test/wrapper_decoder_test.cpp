@@ -40,6 +40,24 @@ constexpr int16_t LOCAL_QLOG_NL_EVENT = 112;
 constexpr const char TEST_ASCII_MESSAGE[] = {
     "action@msg\0ACTION=add\0ACTION=remove\0ACTION=change\0SEQNUM=111\0SEQNUM=\0SUBSYSTEM=net\0SUBSYSTEM="
     "\0SUBSYSTEM=test\0dfdfcc=ttt\0"};
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+constexpr uint8_t BYTES_4 = 4;
+constexpr uint8_t IPV4_MIN_HDR_LEN = 20;
+constexpr uint8_t HEAD_LENGTH = 12;
+constexpr uint8_t IPV4_DST_OFFSET = 16;
+constexpr uint8_t IPV4_PROTO_OFFSET = 9;
+
+constexpr uint8_t IPV6_HDR_LEN = 40;
+constexpr uint8_t SRC_ADDR_OFFSET = 8;
+constexpr uint8_t IPV6_DST_OFFSET = 24;
+constexpr uint8_t IPV6_NH_OFFSET = 6;
+
+constexpr uint8_t DPORT_OFFSET = 2;
+constexpr uint16_t DNS_PORT = 53;
+constexpr uint8_t IPV4_IHL_WORDS = 5;
+constexpr uint8_t LABEL_LEN = 3;
+constexpr int16_t LOCAL_NFLOG_PACKET = NFNL_SUBSYS_ULOG << 8 | NFULNL_MSG_PACKET;
+#endif
 } // namespace
 
 class WrapperDecoderTest : public testing::Test {
@@ -361,6 +379,11 @@ HWTEST_F(WrapperDecoderTest, WrapperDecoderBranchTest001, TestSize.Level1)
     ret = decoder->SaveAddressMsg(testString, addrMsg, testString, cacheInfo, testString);
     EXPECT_FALSE(ret);
 
+    #ifdef FEATURE_NET_FIREWALL_ENABLE
+    auto boolVal = decoder->InterpretNflogPacket(hdrMsg);
+    EXPECT_FALSE(boolVal);
+    #endif
+
     uint8_t type = RTM_NEWNEIGH;
     auto result = decoder->CheckRtParam(hdrMsg, type);
     EXPECT_TRUE(result == nullptr);
@@ -375,5 +398,150 @@ HWTEST_F(WrapperDecoderTest, WrapperDecoderBranchTest001, TestSize.Level1)
     ret = decoder->SaveRtMsg(testString, testString, testString, length, family);
     EXPECT_TRUE(ret);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(WrapperDecoderTest, InterpretNflogPacketTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    auto result = decoder->InterpretNflogPacket(nullptr);
+    EXPECT_FALSE(result);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr))];
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
+    nlmsghdr *hdrMsg = reinterpret_cast<struct nlmsghdr *>(&binarydata);
+    ASSERT_NE(hdrMsg, nullptr);
+    hdrMsg->nlmsg_len = sizeof(binarydata);
+    hdrMsg->nlmsg_type = LOCAL_NFLOG_PACKET;
+    result = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(WrapperDecoderTest, InterpretNflogPacketTest002, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct nfgenmsg)) +
+                    NLMSG_ALIGN(sizeof(struct nlattr))];
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
+    nlmsghdr *hdrMsg = reinterpret_cast<struct nlmsghdr *>(&binarydata);
+    ASSERT_NE(hdrMsg, nullptr);
+    hdrMsg->nlmsg_len = sizeof(binarydata);
+    hdrMsg->nlmsg_type = LOCAL_NFLOG_PACKET;
+    hdrMsg->nlmsg_flags = 0;
+    hdrMsg->nlmsg_seq = 1;
+    hdrMsg->nlmsg_pid = 0;
+    nfgenmsg *nfHeader = reinterpret_cast<nfgenmsg *>(NLMSG_DATA(hdrMsg));
+    nfHeader->nfgen_family = AF_UNSPEC;
+    nfHeader->version = NFNETLINK_V0;
+    nfHeader->res_id = 0;
+    nlattr *attr = reinterpret_cast<nlattr *>(reinterpret_cast<char *>(nfHeader) + sizeof(*nfHeader));
+    attr->nla_type = NFULA_PAYLOAD;
+    auto result = decoder->InterpretNflogPacket(hdrMsg);
+    EXPECT_TRUE(result);
+    attr->nla_type = NFULA_UID;
+    result = decoder->InterpretNflogPacket(hdrMsg);
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(WrapperDecoderTest, SaveFiveTupleMsgTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    WrapperDecoder::FiveTuple fiveTuple;
+    decoder->SaveFiveTupleMsg(nullptr, 0, AF_INET, fiveTuple);
+    EXPECT_EQ(fiveTuple.localIp, "");
+
+    std::vector<uint8_t> bufIpv4Short(static_cast<size_t>(IPV4_MIN_HDR_LEN - 1));
+    ASSERT_EQ(memset_s(bufIpv4Short.data(), bufIpv4Short.size(), 0, bufIpv4Short.size()), EOK);
+    decoder->SaveFiveTupleMsg(bufIpv4Short.data(), static_cast<int32_t>(bufIpv4Short.size()), AF_INET, fiveTuple);
+    EXPECT_EQ(fiveTuple.localPort, 0);
+    std::vector<uint8_t> bufIpv4(static_cast<size_t>(IPV4_MIN_HDR_LEN + BYTES_4));
+    ASSERT_EQ(memset_s(bufIpv4.data(), bufIpv4.size(), 0, bufIpv4.size()), EOK);
+    decoder->SaveFiveTupleMsg(bufIpv4.data(), static_cast<int32_t>(bufIpv4.size()), AF_INET, fiveTuple);
+    bufIpv4[0] = static_cast<uint8_t>((BYTES_4 << BYTES_4) | IPV4_IHL_WORDS);
+    bufIpv4[IPV4_PROTO_OFFSET] = IPPROTO_TCP;
+    decoder->SaveFiveTupleMsg(bufIpv4.data(), static_cast<int32_t>(bufIpv4.size()), AF_INET, fiveTuple);
+    EXPECT_EQ(fiveTuple.protocol, IPPROTO_TCP);
+    bufIpv4[IPV4_PROTO_OFFSET] = IPPROTO_UDP;
+    decoder->SaveFiveTupleMsg(bufIpv4.data(), static_cast<int32_t>(bufIpv4.size()), AF_INET, fiveTuple);
+    EXPECT_EQ(fiveTuple.protocol, IPPROTO_UDP);
+
+    std::vector<uint8_t> bufIpv6Short(static_cast<size_t>(IPV6_HDR_LEN - 1));
+    ASSERT_EQ(memset_s(bufIpv6Short.data(), bufIpv6Short.size(), 0, bufIpv6Short.size()), EOK);
+    decoder->SaveFiveTupleMsg(bufIpv6Short.data(), static_cast<int32_t>(bufIpv6Short.size()), AF_INET6, fiveTuple);
+    EXPECT_EQ(fiveTuple.localPort, 0);
+    std::vector<uint8_t> bufIpv6(static_cast<size_t>(IPV6_HDR_LEN + BYTES_4));
+    ASSERT_EQ(memset_s(bufIpv6.data(), bufIpv6.size(), 0, bufIpv6.size()), EOK);
+    decoder->SaveFiveTupleMsg(bufIpv6.data(), static_cast<int32_t>(bufIpv6.size()), AF_INET6, fiveTuple);
+    bufIpv6[IPV6_NH_OFFSET] = IPPROTO_TCP;
+    decoder->SaveFiveTupleMsg(bufIpv6.data(), static_cast<int32_t>(bufIpv6.size()), AF_INET6, fiveTuple);
+    EXPECT_EQ(fiveTuple.protocol, IPPROTO_TCP);
+    bufIpv6[IPV6_NH_OFFSET] = IPPROTO_UDP;
+    decoder->SaveFiveTupleMsg(bufIpv6.data(), static_cast<int32_t>(bufIpv6.size()), AF_INET6, fiveTuple);
+    EXPECT_EQ(fiveTuple.protocol, IPPROTO_UDP);
+}
+
+HWTEST_F(WrapperDecoderTest, ParseDnsDomainTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    auto domain = decoder->ParseDnsDomain(nullptr, 0, AF_INET, DNS_PORT, DNS_PORT);
+    EXPECT_TRUE(domain.empty());
+    std::vector<uint8_t> bufNonDns(static_cast<size_t>(IPV4_MIN_HDR_LEN), 0);
+    domain = decoder->ParseDnsDomain(bufNonDns.data(), 0, AF_INET, 0, 0);
+    EXPECT_TRUE(domain.empty());
+    bufNonDns[0] = static_cast<uint8_t>((BYTES_4 << BYTES_4) | IPV4_IHL_WORDS);
+    domain = decoder->ParseDnsDomain(bufNonDns.data(), static_cast<int32_t>(bufNonDns.size()), AF_INET, 0, 0);
+    EXPECT_TRUE(domain.empty());
+    domain = decoder->ParseDnsDomain(bufNonDns.data(), static_cast<int32_t>(bufNonDns.size()), AF_INET, DNS_PORT, 0);
+    EXPECT_TRUE(domain.empty());
+    domain = decoder->ParseDnsDomain(bufNonDns.data(), static_cast<int32_t>(bufNonDns.size()), AF_INET, 0, DNS_PORT);
+    EXPECT_TRUE(domain.empty());
+
+    std::vector<uint8_t> bufShort(static_cast<size_t>(IPV4_MIN_HDR_LEN - 1), 0);
+    bufShort[0] = static_cast<uint8_t>((BYTES_4 << BYTES_4) | IPV4_IHL_WORDS);
+    domain =
+        decoder->ParseDnsDomain(bufShort.data(), static_cast<int32_t>(bufShort.size()), AF_INET, DNS_PORT, DNS_PORT);
+    EXPECT_TRUE(domain.empty());
+
+    auto payloadLenShort = static_cast<int32_t>(IPV4_MIN_HDR_LEN + SRC_ADDR_OFFSET + HEAD_LENGTH) - 1;
+    std::vector<uint8_t> bufDnsTooShort(static_cast<size_t>(payloadLenShort), 0);
+    bufDnsTooShort[0] = static_cast<uint8_t>((BYTES_4 << BYTES_4) | IPV4_IHL_WORDS);
+    domain = decoder->ParseDnsDomain(bufDnsTooShort.data(), static_cast<int32_t>(bufDnsTooShort.size()), AF_INET,
+                                     DNS_PORT, DNS_PORT);
+    EXPECT_TRUE(domain.empty());
+
+    auto shortLen6 = static_cast<int32_t>(IPV6_HDR_LEN + SRC_ADDR_OFFSET) - 1;
+    std::vector<uint8_t> bufIpv6Short(static_cast<size_t>(shortLen6), 0);
+    domain = decoder->ParseDnsDomain(bufIpv6Short.data(), shortLen6, AF_INET6, DNS_PORT, DNS_PORT);
+    EXPECT_TRUE(domain.empty());
+}
+
+HWTEST_F(WrapperDecoderTest, ParseDnsDomainTest002, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    const size_t dnsPayloadLen = HEAD_LENGTH + 1 + LABEL_LEN + 1 + LABEL_LEN + 1;
+    auto dnsStart = IPV4_MIN_HDR_LEN + SRC_ADDR_OFFSET;
+    const size_t totalLen = static_cast<size_t>(dnsStart) + dnsPayloadLen;
+    std::vector<uint8_t> bufDns(totalLen, 0);
+    bufDns[0] = static_cast<uint8_t>((BYTES_4 << BYTES_4) | IPV4_IHL_WORDS);
+    size_t cursor = static_cast<size_t>(dnsStart + HEAD_LENGTH);
+    const char label1[] = "www";
+    const char label2[] = "com";
+    bufDns[cursor] = LABEL_LEN;
+    cursor += 1;
+    ASSERT_EQ(memcpy_s(bufDns.data() + cursor, LABEL_LEN, label1, LABEL_LEN), EOK);
+    cursor += LABEL_LEN;
+    bufDns[cursor] = LABEL_LEN;
+    cursor += 1;
+    ASSERT_EQ(memcpy_s(bufDns.data() + cursor, LABEL_LEN, label2, LABEL_LEN), EOK);
+    cursor += LABEL_LEN;
+    bufDns[cursor] = 0;
+    auto domain = decoder->ParseDnsDomain(bufDns.data(), static_cast<int32_t>(bufDns.size()),
+                                    AF_INET, DNS_PORT, DNS_PORT);
+    EXPECT_EQ(domain, "www.com");
+}
+#endif
 } // namespace nmd
 } // namespace OHOS

@@ -108,6 +108,11 @@ static __always_inline bool get_ct_tuple(struct match_tuple *match_tpl, struct c
 static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buff *skb)
 {
     if (match_dns_query(skb) == SK_DROP) {
+        struct match_tuple tuple = { 0 };
+        if (!get_match_tuple(skb, &tuple, INGRESS)) {
+            return SK_DROP;
+        }
+        log_intercept_event(&tuple);
         return SK_DROP;
     }
 
@@ -170,6 +175,11 @@ static __always_inline bool MatchDnsQuery(const struct match_tuple *tuple)
 static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff *skb)
 {
     if (match_dns_query(skb) == SK_DROP) {
+        struct match_tuple tuple = { 0 };
+        if (!get_match_tuple(skb, &tuple, EGRESS)) {
+            return SK_DROP;
+        }
+        log_intercept_event(&tuple);
         return SK_DROP;
     }
 

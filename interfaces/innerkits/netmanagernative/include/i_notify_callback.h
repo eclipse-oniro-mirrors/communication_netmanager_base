@@ -19,6 +19,9 @@
 
 #include "dhcp_result_parcel.h"
 #include "iremote_broker.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "netfirewall_parcel.h"
+#endif
 #include "netsys_ipc_interface_code.h"
 
 namespace OHOS {
@@ -42,6 +45,9 @@ public:
     virtual int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
                                    const std::string &ifName) = 0;
     virtual int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) = 0;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    virtual int32_t OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record) = 0;
+#endif
     virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) = 0;
 };
 } // namespace NetsysNative

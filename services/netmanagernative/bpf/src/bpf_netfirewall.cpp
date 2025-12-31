@@ -761,9 +761,47 @@ void NetsysBpfNetFirewall::NotifyInterceptEvent(InterceptEvent *info)
         record->localIp = dstIp;
         record->remoteIp = srcIp;
     }
+    record->domain = DecodeDomainFromKey(info->domainData);
     for (auto callback : callbacks_) {
         callback->OnIntercept(record);
     }
+}
+
+std::string NetsysBpfNetFirewall::DecodeDomainFromKey(const DomainHashKey &key)
+{
+    if (key.prefixlen == 0) {
+        return "";
+    }
+    size_t domainLenBytes = static_cast<size_t>(key.prefixlen / BIT_PER_BYTE);
+    if (domainLenBytes < DNS_DOMAIN_LEN_MIN) {
+        return "";
+    }
+    if (domainLenBytes > DNS_DOMAIN_LEN) {
+        domainLenBytes = DNS_DOMAIN_LEN;
+    }
+    std::vector<uint8_t> qnameReconstructed(domainLenBytes);
+    for (size_t i = 0; i < domainLenBytes; i++) {
+        qnameReconstructed[i] = key.data[domainLenBytes - 1 - i];
+    }
+    std::string domain;
+    size_t i = 0;
+    bool isFirstLable = true;
+    while (i < qnameReconstructed.size()) {
+        uint8_t labelLen = qnameReconstructed[i++];
+        if (labelLen == 0) {
+            break;
+        }
+        if (i + labelLen > qnameReconstructed.size()) {
+            break;
+        }
+        if (!isFirstLable) {
+            domain.push_back('.');
+        }
+        domain.append(reinterpret_cast<const char*>(&qnameReconstructed[i]), labelLen);
+        isFirstLable = false;
+        i += labelLen;
+    }
+    return domain;
 }
 
 uint64_t NetsysBpfNetFirewall::GetNowMs()

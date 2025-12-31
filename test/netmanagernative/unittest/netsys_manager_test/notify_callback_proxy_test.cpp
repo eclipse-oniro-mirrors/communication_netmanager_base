@@ -119,6 +119,15 @@ HWTEST_F(NotifyCallbackProxyTest, OnDhcpSuccess001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NotifyCallbackProxyTest, OnInterceptRecord001, TestSize.Level1)
+{
+    sptr<NetManagerStandard::InterceptRecord> record = new (std::nothrow) NetManagerStandard::InterceptRecord();
+    int32_t ret = notifyProxy->OnInterceptRecord(record);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+#endif
+
 HWTEST_F(NotifyCallbackProxyTest, OnBandwidthReachedLimit001, TestSize.Level1)
 {
     std::string limitName = "limit";

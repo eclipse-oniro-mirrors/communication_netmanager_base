@@ -55,6 +55,7 @@
 #define DOMAIN_DENY_MAP domain_deny_map
 #define LOOP_BACK_IPV4_MAP loop_ipv4_map
 #define LOOP_BACK_IPV6_MAP loop_ipv6_map
+#define DOMAIN_DATA_KEY_MAP domain_data_key_map
 
 #define MAPS_DIR() "/sys/fs/bpf/netsys/maps/"
 #define STR(x) #x
