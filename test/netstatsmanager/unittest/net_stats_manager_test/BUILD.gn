@@ -65,17 +65,19 @@ ohos_unittest("net_stats_mock_data") {
     "os_account:os_account_innerkits"
   ]
 
+  defines = [
+    "NETMGR_LOG_TAG = \"NetStatsClient\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
   if (netmanager_base_enable_traffic_statistic) {
     external_deps += [
       "cellular_data:tel_cellular_data_api",
       "core_service:tel_core_service_api",
       "state_registry:tel_state_registry_api",
     ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
   }
-  defines = [
-    "NETMGR_LOG_TAG = \"NetStatsClient\"",
-    "LOG_DOMAIN = 0xD0015B0",
-  ]
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
@@ -164,20 +166,21 @@ ohos_unittest("net_stats_manager_test") {
     "os_account:os_account_innerkits"
   ]
 
-  if (netmanager_base_enable_traffic_statistic) {
-    external_deps += [
-      "cellular_data:tel_cellular_data_api",
-      "core_service:tel_core_service_api",
-      "state_registry:tel_state_registry_api",
-    ]
-  }
-
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
     "private = public",
     "protected = public",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
 
   if (netmanager_base_enable_netsys_access_policy_diag_listen) {
     sources += [ "net_stats_notification_test.cpp" ]
@@ -258,20 +261,21 @@ ohos_unittest("net_stats_cached_service_test") {
     "os_account:os_account_innerkits"
   ]
 
-  if (netmanager_base_enable_traffic_statistic) {
-    external_deps += [
-      "cellular_data:tel_cellular_data_api",
-      "core_service:tel_core_service_api",
-      "state_registry:tel_state_registry_api",
-    ]
-  }
-
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
     "private = public",
     "protected = public",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
@@ -345,20 +349,21 @@ ohos_unittest("net_stats_service_new_test") {
     "os_account:os_account_innerkits"
   ]
 
-  if (netmanager_base_enable_traffic_statistic) {
-    external_deps += [
-      "cellular_data:tel_cellular_data_api",
-      "core_service:tel_core_service_api",
-      "state_registry:tel_state_registry_api",
-    ]
-  }
-
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
     "private = public",
     "protected = public",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
@@ -434,20 +439,21 @@ ohos_unittest("net_stats_service_common_test") {
     "os_account:os_account_innerkits"
   ]
 
-  if (netmanager_base_enable_traffic_statistic) {
-    external_deps += [
-      "cellular_data:tel_cellular_data_api",
-      "core_service:tel_core_service_api",
-      "state_registry:tel_state_registry_api",
-    ]
-  }
-
   defines = [
     "NETMGR_LOG_TAG = \"NetStatsClient\"",
     "LOG_DOMAIN = 0xD0015B0",
     "private = public",
     "protected = public",
   ]
+
+  if (netmanager_base_enable_traffic_statistic) {
+    external_deps += [
+      "cellular_data:tel_cellular_data_api",
+      "core_service:tel_core_service_api",
+      "state_registry:tel_state_registry_api",
+    ]
+    defines += [ "SUPPORT_TRAFFIC_STATISTIC" ]
+  }
 
   if (enable_netmgr_debug) {
     defines += [ "NETMGR_DEBUG" ]
