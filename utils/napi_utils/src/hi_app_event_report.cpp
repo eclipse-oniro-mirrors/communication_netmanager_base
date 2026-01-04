@@ -40,9 +40,6 @@ HiAppEventReport::HiAppEventReport(std::string sdk, std::string api)
     transId_ = std::string("transId_") + std::to_string(std::rand());
 
     beginTime_ = OHOS::MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
-    if (g_processorID == PROCESSOR_ID_NOT_CREATE) {
-        g_processorID = AddProcessor();
-    }
 #endif
 }
 
