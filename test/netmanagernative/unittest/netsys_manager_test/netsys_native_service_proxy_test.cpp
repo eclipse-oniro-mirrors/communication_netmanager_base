@@ -181,7 +181,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest001, TestSi
 HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest002, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    int32_t ret = netsysNativeService->DelInterfaceAddress(INTERFACENAME, "192.168.113.209", 24, "internet");
+    int32_t ret = netsysNativeService->DelInterfaceAddress(INTERFACENAME, "192.168.113.209", 24, 2);
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);

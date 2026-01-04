@@ -101,6 +101,7 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityConnectDone(const App
         NETMGR_LOG_E("TrafficLimit Dialog failed: ret=%{public}u", ret);
         return;
     }
+    std::unique_lock<std::shared_mutex> lock(remoteObjectMutex_);
     remoteObject_ = remoteObject;
     return;
 }
@@ -109,12 +110,14 @@ void TrafficLimitDialog::TrafficLimitAbilityConn::OnAbilityDisconnectDone(
     const AppExecFwk::ElementName& element, int resultCode)
 {
     NETMGR_LOG_I("TrafficLimitAbilityConn::OnAbilityDisconnectDone");
+    std::unique_lock<std::shared_mutex> lock(remoteObjectMutex_);
     remoteObject_ = nullptr;
     return;
 }
 
 void TrafficLimitDialog::TrafficLimitAbilityConn::CloseDialog()
 {
+    std::shared_lock<std::shared_mutex> lock(remoteObjectMutex_);
     if (remoteObject_ == nullptr) {
         NETMGR_LOG_I("CloseDialog: disconnected");
         return;

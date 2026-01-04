@@ -39,20 +39,21 @@ void NetPolicyRule::TransPolicyToRule()
 {
     // When system status is changed,traverse uidPolicyRules_ to calculate the rule and netsys.
     std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
-    auto uidPolicyRulesBak = uidPolicyRules_;
-    lock.unlock();
-    for (const auto &[uid, policy] : uidPolicyRulesBak) {
-        TransPolicyToRule(uid, policy.policy_);
+    for (auto &[uid, policy] : uidPolicyRules_) {
+        TransConditionToRuleAndNetsys(uid, policy);
     }
 }
 
 void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 {
-    uint32_t policy = 0;
-    GetPolicyByUid(uid, policy);
-    NETMGR_LOG_D("TransPolicyToRule only with uid value: uid[%{public}u] policy[%{public}u]", uid, policy);
-    TransPolicyToRule(uid, policy);
-    return;
+    std::shared_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
+    auto policyRule = uidPolicyRules_.find(uid);
+    if (policyRule == uidPolicyRules_.end()) {
+        return;
+    }
+    NETMGR_LOG_D("TransPolicyToRule only with uid value: uid[%{public}u] policy[%{public}u]", uid,
+        policyRule->second.policy_);
+    TransConditionToRuleAndNetsys(uid, policyRule->second);
 }
 
 int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
@@ -61,28 +62,21 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
         NETMGR_LOG_E("policy[%{public}d] is invalid", policy);
         return POLICY_ERR_INVALID_POLICY;
     }
-    NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
     std::unique_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
         uidPolicyRules_[uid] = {.policy_ = policy};
-        lock.unlock();
         GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
     } else {
         if (policyRule->second.policy_ != policy) {
             NETMGR_LOG_D("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
             policyRule->second.policy_ = policy;
-            lock.unlock();
             GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
-        } else {
-            lock.unlock();
         }
     }
 
-    auto policyCondition = BuildTransCondition(uid, policy);
-    TransConditionToRuleAndNetsys(policyCondition, uid, policy);
-    NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
+    TransConditionToRuleAndNetsys(uid, uidPolicyRules_[uid]);
     NETMGR_LOG_D("End TransPolicyToRule");
     return NETMANAGER_SUCCESS;
 }
@@ -117,34 +111,32 @@ uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
     return policyCondition;
 }
 
-void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy)
+void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t uid, UidPolicyRule& policyRule)
 {
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
+    auto policyCondition = BuildTransCondition(uid, policyRule.policy_);
     uint32_t conditionValue = GetMatchTransCondition(policyCondition);
-
     auto rule = MoveToRuleBit(conditionValue & POLICY_TRANS_RULE_MASK);
     NETMGR_LOG_D("NetPolicyRule->uid:[%{public}u] policy:[%{public}u] rule:[%{public}u] policyCondition[%{public}u]",
-                 uid, policy, rule, policyCondition);
-    std::unique_lock<std::shared_mutex> lock(uidPolicyRuleMutex_);
-    UidPolicyRule &policyRuleNetsys = uidPolicyRules_.find(uid)->second;
+                 uid, policyRule.policy_, rule, policyCondition);
     auto netsys = conditionValue & POLICY_TRANS_NET_CTRL_MASK;
 
-    if (policyRuleNetsys.netsys_ != netsys) {
+    if (policyRule.netsys_ != netsys) {
         NetsysCtrl(uid, netsys);
-        policyRuleNetsys.netsys_ = netsys;
+        policyRule.netsys_ = netsys;
     } else {
         NETMGR_LOG_I("Same netsys and uid ,don't need to do others.now netsys is: [%{public}u]", netsys);
     }
 
-    GetFileInst()->WritePolicyByUid(uid, policy);
+    GetFileInst()->WritePolicyByUid(uid, policyRule.policy_);
 
-    if (policyRuleNetsys.rule_ == rule) {
+    if (policyRule.rule_ == rule) {
         NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
-        return;
+    } else {
+        policyRule.rule_ = rule;
+        GetCbInst()->NotifyNetUidRuleChange(uid, rule);
     }
-
-    policyRuleNetsys.rule_ = rule;
-    lock.unlock();
-    GetCbInst()->NotifyNetUidRuleChange(uid, rule);
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
 }
 
 uint32_t NetPolicyRule::GetMatchTransCondition(uint32_t policyCondition)
@@ -357,6 +349,7 @@ bool NetPolicyRule::IsIdleMode()
 
 bool NetPolicyRule::InIdleAllowedList(uint32_t uid)
 {
+    std::shared_lock<std::shared_mutex> lock(deviceIdleAllowedListMutex_);
     if (std::find(deviceIdleAllowedList_.begin(), deviceIdleAllowedList_.end(), uid) != deviceIdleAllowedList_.end()) {
         return true;
     }
@@ -409,9 +402,11 @@ void NetPolicyRule::DeleteUid(uint32_t uid)
 void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent)
 {
     switch (eventId) {
-        case NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED:
+        case NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED: {
+            std::unique_lock<std::shared_mutex> lock(deviceIdleAllowedListMutex_);
             deviceIdleAllowedList_ = policyEvent->deviceIdleList;
             break;
+        }
         case NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED:
             deviceIdleMode_ = policyEvent->deviceIdleMode;
             TransPolicyToRule();
@@ -475,8 +470,10 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                        "NetSys: " + std::to_string(pair.second.netsys_) + "\n");
     });
     message.append(TAB + "DeviceIdleAllowedList: {");
+    std::shared_lock<std::shared_mutex> deviceIdleAllowedListLock(deviceIdleAllowedListMutex_);
     std::for_each(deviceIdleAllowedList_.begin(), deviceIdleAllowedList_.end(),
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
+    deviceIdleAllowedListLock.unlock();
     message.append("}\n");
     message.append(TAB + "DeviceIdleMode: " + std::to_string(deviceIdleMode_) + "\n");
     message.append(TAB + "PowerSaveAllowedList: {");

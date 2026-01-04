@@ -1385,9 +1385,11 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
     int32_t simId = Telephony::CoreServiceClient::GetInstance().GetSimId(slotId);
 
     if (dataState != static_cast<int32_t>(Telephony::DataConnectState::DATA_STATE_CONNECTED)) {
-        if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
+        uint64_t ifIndex = UINT64_MAX;
+        if (GetIfIndex(simId, ifIndex)) {
             NETMGR_LOG_E("simIdToIfIndexMap erase, simId: %{public}d", simId);
-            ClearTrafficMapBySlotId(slotId, simIdToIfIndexMap_[simId]);
+            ClearTrafficMapBySlotId(slotId, ifIndex);
+            std::unique_lock<ffrt::shared_mutex> lock(simIdToIfIndexMapMutex_);
             simIdToIfIndexMap_.erase(simId);
         }
         return true;
@@ -1407,7 +1409,8 @@ bool NetStatsService::CellularDataStateChangedFfrt(int32_t slotId, int32_t dataS
             NETMGR_LOG_E("curIfIndex_:%{public}" PRIu64, ifIndex);
         }
     });
-    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end() && simIdToIfIndexMap_[simId] == ifIndex) {
+    uint64_t ifIndexRecords = UINT64_MAX;
+    if (GetIfIndex(simId, ifIndexRecords) && ifIndexRecords == ifIndex) {
         NETMGR_LOG_E("not need process");
         return true;
     }
@@ -1460,18 +1463,39 @@ void NetStatsService::UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifInde
     }
 }
 
+bool NetStatsService::IsSimIdExist(int32_t simId)
+{
+    std::shared_lock<ffrt::shared_mutex> lock(simIdToIfIndexMapMutex_);
+    return simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end();
+}
+
+bool NetStatsService::GetIfIndex(int32_t simId, uint64_t &ifIndex)
+{
+    ifIndex = UINT64_MAX;
+    std::shared_lock<ffrt::shared_mutex> lock(simIdToIfIndexMapMutex_);
+    auto itIfIndex = simIdToIfIndexMap_.find(simId);
+    if (itIfIndex == simIdToIfIndexMap_.end()) {
+        return false;
+    }
+    ifIndex = itIfIndex->second;
+    return true;
+}
+
 void NetStatsService::AddSimIdInTwoMap(int32_t simId, uint64_t ifIndex)
 {
     NETMGR_LOG_I("AddSimIdInTwoMap. simId:%{public}d, ifIndex:%{public}" PRIu64, simId, ifIndex);
-    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
+    uint64_t ifIndexRecords = UINT64_MAX;
+    if (GetIfIndex(simId, ifIndexRecords)) {
         int32_t slotId = Telephony::CoreServiceClient::GetInstance().GetSlotId(simId);
         if (slotId != 0 && slotId != 1) {
             NETMGR_LOG_I("SetTrafficMapMaxValue error. slotId: %{public}d", slotId);
             return;
         }
-        ClearTrafficMapBySlotId(slotId, simIdToIfIndexMap_[simId]);
+        ClearTrafficMapBySlotId(slotId, ifIndexRecords);
     }
+    std::unique_lock<ffrt::shared_mutex> lock(simIdToIfIndexMapMutex_);
     simIdToIfIndexMap_[simId] = ifIndex;
+    lock.unlock();
 
     if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end()) {
         NETMGR_LOG_E("settingsTrafficMap_ not find simId: %{public}d", simId);
@@ -1520,8 +1544,8 @@ int32_t NetStatsService::GetAllUsedTrafficStatsByNetwork(const sptr<NetStatsNetw
 void NetStatsService::UpdateBpfMap(int32_t simId)
 {
     NETMGR_LOG_I("UpdateBpfMap start. simId:%{public}d", simId);
-    if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end() ||
-        simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end()) {
+    uint64_t ifIndex = UINT64_MAX;
+    if (settingsTrafficMap_.find(simId) == settingsTrafficMap_.end() || !GetIfIndex(simId, ifIndex)) {
         NETMGR_LOG_E("simId: %{public}d error", simId);
         return;
     }
@@ -1532,8 +1556,8 @@ void NetStatsService::UpdateBpfMap(int32_t simId)
         return;
     }
 
-    NetsysController::GetInstance().DeleteIncreaseTrafficMap(simIdToIfIndexMap_[simId]);
-    NetsysController::GetInstance().UpdateIfIndexMap(slotId, simIdToIfIndexMap_[simId]);
+    NetsysController::GetInstance().DeleteIncreaseTrafficMap(ifIndex);
+    NetsysController::GetInstance().UpdateIfIndexMap(slotId, ifIndex);
 
     PrintTrafficSettingsMapInfo(simId);
 
@@ -1740,7 +1764,7 @@ int32_t NetStatsService::UpdataSettingsdataFfrt(int32_t simId, uint8_t flag, uin
             break;
     }
 
-    if (simIdToIfIndexMap_.find(simId) != simIdToIfIndexMap_.end()) {
+    if (IsSimIdExist(simId)) {
         UpdateBpfMap(simId);
     }
     return NETMANAGER_SUCCESS;
@@ -1825,7 +1849,7 @@ void NetStatsService::UpdateNetStatsToMapFromDB(int32_t simId)
 
 int32_t NetStatsService::NotifyTrafficAlert(int32_t simId, uint8_t flag)
 {
-    if (simIdToIfIndexMap_.find(simId) == simIdToIfIndexMap_.end()) {
+    if (!IsSimIdExist(simId)) {
         NETMGR_LOG_E("simIdToIfIndexMap not find simId: %{public}d", simId);
         return -1;
     }

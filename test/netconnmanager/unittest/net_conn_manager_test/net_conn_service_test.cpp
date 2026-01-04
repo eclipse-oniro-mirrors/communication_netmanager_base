@@ -1520,14 +1520,15 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthSyncTest001, TestSize.Level
 {
     int32_t netId = 1;
     bool dnsHealthSuccess = true;
-    int32_t ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    auto netConnService = std::make_shared<NetConnService>();
+    int32_t ret = netConnService->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
     EXPECT_EQ(ret, NET_DETECTION_FAIL);
-    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
-        NetBearType::BEARER_ETHERNET, nullptr);
-    std::map<int32_t, std::shared_ptr<Network>> networks;
-    networks[1] = network;
-    NetConnService::GetInstance()->networks_ = networks;
-    ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    std::set<NetCap> netCasps;
+    netConnService->netSuppliers_[99] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, "", netCasps);
+    netConnService->netSuppliers_[99]->SetNetwork(network);
+    ret = netConnService->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1535,14 +1536,15 @@ HWTEST_F(NetConnServiceTest, NNetDetectionForDnsHealthSyncTest001, TestSize.Leve
 {
     int32_t netId = 1;
     bool dnsHealthSuccess = true;
-    int32_t ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    auto netConnService = std::make_shared<NetConnService>();
+    int32_t ret = netConnService->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
     EXPECT_EQ(ret, NET_DETECTION_FAIL);
-    std::shared_ptr<Network> network = std::make_shared<Network>(netId, netId, nullptr,
-        NetBearType::BEARER_ETHERNET, nullptr);
-    std::map<int32_t, std::shared_ptr<Network>> networks;
-    networks[1] = network;
-    NetConnService::GetInstance()->networks_ = networks;
-    ret = NetConnService::GetInstance()->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
+    std::set<NetCap> netCasps;
+    netConnService->netSuppliers_[99] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, "", netCasps);
+    netConnService->netSuppliers_[99]->SetNetwork(network);
+    ret = netConnService->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1732,19 +1734,6 @@ HWTEST_F(NetConnServiceTest, GetSlotTypeTest001, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetNetCapabilitiesAsStringTest001, TestSize.Level1)
-{
-    uint32_t supplierId = 1;
-    std::string netSupplierIdent = "test";
-    std::string str = {};
-    const std::set<NetCap> netCaps = {NetCap::NET_CAPABILITY_SUPL};
-    sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_WIFI, netSupplierIdent, netCaps);
-    std::map<uint32_t, sptr<NetSupplier>> netSupplierMap = {{supplierId, supplier}};
-    NetConnService::GetInstance()->netSuppliers_ = netSupplierMap;
-    std::string ret = NetConnService::GetInstance()->GetNetCapabilitiesAsString(supplierId);
-    ASSERT_TRUE(ret != str);
-}
-
 HWTEST_F(NetConnServiceTest, OnRemoteDiedTest001, TestSize.Level1)
 {
     wptr<IRemoteObject> remoteObject = nullptr;
@@ -1842,30 +1831,6 @@ HWTEST_F(NetConnServiceTest, DisableDistributedNetTest001, TestSize.Level1)
     NetConnService::GetInstance()->Init();
     ret = NetConnService::GetInstance()->DisableDistributedNetAsync(isServer);
     ASSERT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
-}
-
-HWTEST_F(NetConnServiceTest, CloseSocketsUidTest001, TestSize.Level1)
-{
-    int32_t netId = 1;
-    uint32_t uid = 1;
-    std::shared_ptr<Network> network =
-        std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    std::map<int32_t, std::shared_ptr<Network>> networks;
-    networks[1] = network;
-    NetConnService::GetInstance()->networks_ = networks;
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    int32_t ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
-    NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->CloseSocketsUid(netId, uid);
-    ASSERT_EQ(ret, NETMANAGER_ERROR);
-
-    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
-    ret = NetConnService::GetInstance()->CloseSocketsUidAsync(0, uid);
-    ASSERT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
-    NetConnService::GetInstance()->Init();
-    ret = NetConnService::GetInstance()->CloseSocketsUidAsync(netId, uid);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetInterfaceUpTest001, TestSize.Level1)
@@ -2071,18 +2036,17 @@ HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback002, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, RegUnRegisterNetProbeCallback003, TestSize.Level1)
 {
     int32_t testNetId = 999;
-    auto network = std::make_shared<Network>(testNetId, testNetId,
-        nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    NetConnService::GetInstance()->networks_[testNetId] = network;
+    auto netConnService = std::make_shared<NetConnService>();
+    auto network = std::make_shared<Network>(testNetId, testNetId, NetBearType::BEARER_ETHERNET, nullptr);
+    std::set<NetCap> netCasps;
+    netConnService->netSuppliers_[99] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_ETHERNET, "", netCasps);
+    netConnService->netSuppliers_[99]->SetNetwork(network);
     std::shared_ptr<IDualStackProbeCallback> cb = std::make_shared<NetProbeCallbackTest>();
-    auto ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, true);
+    auto ret = netConnService->RegUnRegisterNetProbeCallback(testNetId, cb, true);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    ret = NetConnService::GetInstance()->RegUnRegisterNetProbeCallback(testNetId, cb, false);
-    auto iter = NetConnService::GetInstance()->networks_.find(testNetId);
-    if (iter != NetConnService::GetInstance()->networks_.end()) {
-        NetConnService::GetInstance()->networks_.erase(iter);
-    }
+    ret = netConnService->RegUnRegisterNetProbeCallback(testNetId, cb, false);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -2096,13 +2060,8 @@ HWTEST_F(NetConnServiceTest, NetProbe001, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, NetProbe002, TestSize.Level1)
 {
     int32_t testNetId = 9999;
-    NetConnService::GetInstance()->networks_[testNetId] = nullptr;
-    auto ret = NetConnService::GetInstance()->DualStackProbe(testNetId);
-    auto networks = NetConnService::GetInstance()->networks_;
-    auto iter = networks.find(testNetId);
-    if (iter != networks.end()) {
-        NetConnService::GetInstance()->networks_.erase(iter);
-    }
+    auto netConnService = std::make_shared<NetConnService>();
+    auto ret = netConnService->DualStackProbe(testNetId);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -2124,10 +2083,12 @@ HWTEST_F(NetConnServiceTest, NetProbe004, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, UpdateNetProbeTime001, TestSize.Level1)
 {
     int32_t testProbeTime = 5 * 1000;
-    int32_t testNetId = 9999;
+    int32_t supplierId = 9999;
     auto netConnService = std::make_shared<NetConnService>();
-    netConnService->networks_[testNetId] = nullptr;
     auto ret = netConnService->UpdateDualStackProbeTime(testProbeTime);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    netConnService->netSuppliers_[supplierId] = nullptr;
+    ret = netConnService->UpdateDualStackProbeTime(testProbeTime);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

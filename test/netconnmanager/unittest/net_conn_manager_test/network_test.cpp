@@ -27,6 +27,7 @@
 #include "net_connection.h"
 #include "net_connection_adapter.h"
 #include "net_probe_callback_test.h"
+#include "net_conn_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -71,7 +72,7 @@ public:
 HWTEST_F(NetworkTest, UpdateBasicNetworkTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     network->nat464Service_ = std::make_shared<Nat464Service>(netId, "ifaceName");
     auto ret = network->UpdateBasicNetwork(false);
     EXPECT_TRUE(ret);
@@ -80,7 +81,7 @@ HWTEST_F(NetworkTest, UpdateBasicNetworkTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     EXPECT_FALSE(network->isVirtualCreated_);
     auto ret = network->ReleaseVirtualNetwork();
@@ -90,7 +91,7 @@ HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->isVirtualCreated_ = true;
     INetAddr addr;
@@ -102,7 +103,7 @@ HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest003, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->isVirtualCreated_ = true;
     INetAddr addr;
@@ -115,7 +116,7 @@ HWTEST_F(NetworkTest, ReleaseVirtualNetworkTest003, TestSize.Level1)
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_EQ(network->netSupplierType_, NetBearType::BEARER_VPN);
     network->GetNetLinkInfo();
 }
@@ -123,7 +124,7 @@ HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, GetNetLinkInfoTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     Route route1;
     route1.destination_.address_ = LOCAL_ROUTE_NEXT_HOP;
     Route route2;
@@ -140,7 +141,7 @@ HWTEST_F(NetworkTest, GetNetLinkInfoTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateInterfacesTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     NetLinkInfo newNetLinkInfo;
     EXPECT_TRUE(newNetLinkInfo.ifaceName_.empty());
@@ -151,7 +152,7 @@ HWTEST_F(NetworkTest, UpdateInterfacesTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateIpAddrsTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     INetAddr addr1;
     INetAddr addr2;
@@ -166,7 +167,7 @@ HWTEST_F(NetworkTest, UpdateIpAddrsTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, RemoveRouteByFamily001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     Route route1;
     Route route2;
@@ -190,7 +191,7 @@ HWTEST_F(NetworkTest, RemoveRouteByFamily001, TestSize.Level1)
 HWTEST_F(NetworkTest, HandleUpdateIpAddrsTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     INetAddr addr1;
     INetAddr addr2;
@@ -205,7 +206,7 @@ HWTEST_F(NetworkTest, HandleUpdateIpAddrsTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     Route route;
     route.destination_.address_ = LOCAL_ROUTE_NEXT_HOP;
@@ -218,7 +219,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     Route route;
     route.destination_.address_ = LOCAL_ROUTE_NEXT_HOP;
@@ -230,7 +231,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest003, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     Route route;
     route.destination_.address_ = LOCAL_ROUTE_NEXT_HOP;
@@ -242,7 +243,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest003, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest004, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     Route route;
     route.destination_.address_ = LOCAL_ROUTE_IPV6_DESTINATION;
@@ -254,7 +255,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest004, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest005, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     Route route;
     route.destination_.address_ = "192.168.1.1";
@@ -267,7 +268,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest005, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest006, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route;
@@ -280,7 +281,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest006, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest007, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route;
@@ -293,7 +294,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest007, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest008, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route;
@@ -306,7 +307,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest008, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest009, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route;
@@ -319,7 +320,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest009, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest010, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     ASSERT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route;
@@ -343,7 +344,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest010, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateRoutesTest011, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     ASSERT_NE(network, nullptr);
     EXPECT_TRUE(network->netLinkInfo_.routeList_.empty());
     Route route1;
@@ -382,7 +383,7 @@ HWTEST_F(NetworkTest, UpdateRoutesTest011, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetLinkInfo netLinkInfo;
     EXPECT_TRUE(netLinkInfo.dnsList_.empty());
@@ -406,7 +407,7 @@ HWTEST_F(NetworkTest, UpdateDnsTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateTcpBufferSizeTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetLinkInfo netLinkInfo;
     netLinkInfo.tcpBufferSizes_ = "4096";
@@ -417,7 +418,7 @@ HWTEST_F(NetworkTest, UpdateTcpBufferSizeTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     network->InitNetMonitor();
     EXPECT_NE(network->netMonitor_, nullptr);
     network->detectResult_ = INVALID_DETECTION_STATE;
@@ -427,7 +428,7 @@ HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, HandleNetMonitorResultTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetDetectionStatus state = UNKNOWN_STATE;
     std::string urlRedirect = "test";
@@ -438,7 +439,7 @@ HWTEST_F(NetworkTest, HandleNetMonitorResultTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, HandleNetMonitorResultTest003, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetDetectionStatus state = UNKNOWN_STATE;
     std::string urlRedirect = "test";
@@ -450,7 +451,7 @@ HWTEST_F(NetworkTest, HandleNetMonitorResultTest003, TestSize.Level1)
 HWTEST_F(NetworkTest, HandleNetMonitorResultTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetDetectionStatus state = UNKNOWN_STATE;
     std::string urlRedirect = "test";
@@ -462,7 +463,7 @@ HWTEST_F(NetworkTest, HandleNetMonitorResultTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, NotifyNetDetectionResultTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetDetectionResultCode detectionResult = NET_DETECTION_FAIL;
     std::string urlRedirect = "test";
@@ -473,7 +474,7 @@ HWTEST_F(NetworkTest, NotifyNetDetectionResultTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, NetDetectionResultConvertTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     int32_t internalRet = static_cast<int32_t>(INVALID_DETECTION_STATE);
     auto ret = network->NetDetectionResultConvert(internalRet);
@@ -483,7 +484,7 @@ HWTEST_F(NetworkTest, NetDetectionResultConvertTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateNetConnStateTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     network->state_ = NET_CONN_STATE_CONNECTED;
@@ -496,7 +497,7 @@ HWTEST_F(NetworkTest, UpdateNetConnStateTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateNetConnStateTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     network->state_ = NET_CONN_STATE_CONNECTED;
@@ -509,13 +510,13 @@ HWTEST_F(NetworkTest, UpdateNetConnStateTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     auto ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
     EXPECT_TRUE(ret);
     network->netSupplierType_ = NetBearType::BEARER_CELLULAR;
-    network->netCaps_.insert(NetCap::NET_CAPABILITY_INTERNET);
+    network->isSupportInternet_ = true;
     network->netMonitor_ = nullptr;
     ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
     EXPECT_TRUE(ret);
@@ -524,7 +525,7 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_CELLULAR, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_CELLULAR, nullptr);
     network->InitNetMonitor();
     EXPECT_NE(network->netMonitor_, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
@@ -533,7 +534,7 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
     addr1.address_ = "10.0.0.2";
     addr2.address_ = "fe80::";
     network->netLinkInfo_.netAddrList_.push_back(addr1);
-    network->netCaps_.insert(NetCap::NET_CAPABILITY_INTERNET);
+    network->isSupportInternet_ = true;
     auto ret = network->UpdateNetLinkInfo(network->netLinkInfo_);
     EXPECT_TRUE(ret);
     network->netLinkInfo_.netAddrList_.push_back(addr2);
@@ -541,11 +542,40 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest003, TestSize.Level1)
+{
+    auto network = std::make_shared<Network>(1, 2000, NetBearType::BEARER_CELLULAR, nullptr);
+    network->UpdateNetLinkInfo(network->netLinkInfo_);
+    EXPECT_FALSE(network->isSupportInternet_);
+    EXPECT_FALSE(network->IsIfaceNameInUse());
+    network->isSupportInternet_ = true;
+    network->UpdateNetLinkInfo(network->netLinkInfo_);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest004, TestSize.Level1)
+{
+    auto network1 = std::make_shared<Network>(1, 2000, NetBearType::BEARER_VPN, nullptr);
+    network1->netLinkInfo_.ifaceName_ = "test";
+    auto network2 = std::make_shared<Network>(2, 2000, NetBearType::BEARER_VPN, nullptr);
+    network2->netLinkInfo_.ifaceName_ = "test";
+    std::set<NetCap> netCaps;
+    NetConnService::GetInstance()->netSuppliers_[2000] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_VPN, "", netCaps);
+    NetConnService::GetInstance()->netSuppliers_[2000]->SetNetwork(network2);
+    NetConnService::GetInstance()->netSuppliers_[2000]->netSupplierInfo_.isAvailable_ = true;
+    network1->UpdateNetLinkInfo(network1->netLinkInfo_);
+    EXPECT_FALSE(network1->isSupportInternet_);
+    EXPECT_TRUE(network1->IsIfaceNameInUse());
+    network1->isSupportInternet_ = true;
+    network1->UpdateNetLinkInfo(network1->netLinkInfo_);
+    NetConnService::GetInstance()->netSuppliers_.erase(2000);
+}
+
 HWTEST_F(NetworkTest, DelayStartDetectionTest001, TestSize.Level1)
 {
     bool hasSameIpAddr = false;
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     network->InitNetMonitor();
     EXPECT_NE(network->netMonitor_, nullptr);
     auto ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
@@ -553,11 +583,11 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest001, TestSize.Level1)
     hasSameIpAddr = true;
     ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
     EXPECT_FALSE(ret);
-    network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_CELLULAR, nullptr);
+    network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_CELLULAR, nullptr);
     network->InitNetMonitor();
     ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
     EXPECT_TRUE(network->netMonitor_->IsDetecting());
-    network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->InitNetMonitor();
     network->netMonitor_->Stop();
     ret = network->DelayStartDetectionForIpUpdate(hasSameIpAddr);
@@ -568,11 +598,7 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
 {
     bool hasSameIpAddr = true;
     int32_t netId = 1;
-    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {
-        std::cout << "supplierId:" << supplierId;
-        std::cout << " IfValid:" << ifValid << std::endl;
-    };
-    auto network = std::make_shared<Network>(netId, netId, detectionHandler, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->InitNetMonitor();
     uint64_t nowTime = CommonUtils::GetCurrentMilliSecond();
     network->netMonitor_->lastDetectTimestamp_ = nowTime - 30;
@@ -599,7 +625,7 @@ HWTEST_F(NetworkTest, DelayStartDetectionTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, IsNat464PreferedTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     EXPECT_TRUE(network->netLinkInfo_.netAddrList_.empty());
@@ -610,7 +636,7 @@ HWTEST_F(NetworkTest, IsNat464PreferedTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, IsNat464PreferedTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     network->netLinkInfo_.ifaceName_ = "test";
     network->state_ = NET_CONN_STATE_CONNECTED;
@@ -622,7 +648,7 @@ HWTEST_F(NetworkTest, IsNat464PreferedTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, SetScreenStateTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_EQ(network->netMonitor_, nullptr);
     network->SetScreenState(false);
 }
@@ -630,7 +656,7 @@ HWTEST_F(NetworkTest, SetScreenStateTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, SetScreenStateTest002, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     network->InitNetMonitor();
     EXPECT_NE(network->netMonitor_, nullptr);
     network->SetScreenState(false);
@@ -1668,7 +1694,7 @@ HWTEST_F(NetworkTest, PAC_OH_NetConn_SetProxyMode_001, TestSize.Level1)
 HWTEST_F(NetworkTest, OnHandleNetProbeResultTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->OnHandleDualStackProbeResult(DualStackProbeResultCode::PROBE_FAIL);
     EXPECT_EQ(network->eventHandler_, nullptr);
 }
@@ -1678,7 +1704,7 @@ HWTEST_F(NetworkTest, OnHandleNetProbeResultTest002, TestSize.Level1)
     int32_t netId = 1;
     auto eventRunner = AppExecFwk::EventRunner::Create("TEST_THREAD");
     auto eventHandle = std::make_shared<NetConnEventHandler>(eventRunner);
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, eventHandle);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, eventHandle);
     network->OnHandleDualStackProbeResult(DualStackProbeResultCode::PROBE_FAIL);
     EXPECT_NE(network->eventHandler_, nullptr);
 }
@@ -1686,7 +1712,7 @@ HWTEST_F(NetworkTest, OnHandleNetProbeResultTest002, TestSize.Level1)
 HWTEST_F(NetworkTest, StartDualStackProbeThreadTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->StartDualStackProbeThread();
     EXPECT_EQ(network->netMonitor_, nullptr);
     network->InitNetMonitor();
@@ -1697,7 +1723,7 @@ HWTEST_F(NetworkTest, StartDualStackProbeThreadTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, RegisterNetProbeCallbackTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     std::shared_ptr<IDualStackProbeCallback> probeCb = nullptr;
     auto ret = network->RegisterDualStackProbeCallback(probeCb);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
@@ -1711,7 +1737,7 @@ HWTEST_F(NetworkTest, RegisterNetProbeCallbackTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UnRegisterNetProbeCallbackTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     std::shared_ptr<IDualStackProbeCallback> probeCb = nullptr;
     auto ret = network->UnRegisterDualStackProbeCallback(probeCb);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
@@ -1726,7 +1752,7 @@ HWTEST_F(NetworkTest, UnRegisterNetProbeCallbackTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, HandleNetProbeResultTest001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->HandleNetProbeResult(DualStackProbeResultCode::PROBE_FAIL);
     EXPECT_EQ(network->dualStackProbeCallback_.size(), 0);
     std::shared_ptr<IDualStackProbeCallback> probeCb = std::make_shared<NetProbeCallbackTest>();
@@ -1739,7 +1765,7 @@ HWTEST_F(NetworkTest, UpdateNetProbeTimeTest001, TestSize.Level1)
 {
     int32_t netId = 1;
     int32_t probeTime = 5 * 1000;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_WIFI, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_WIFI, nullptr);
     network->UpdateDualStackProbeTime(probeTime);
     EXPECT_EQ(network->netMonitor_, nullptr);
     
@@ -1751,7 +1777,7 @@ HWTEST_F(NetworkTest, UpdateNetProbeTimeTest001, TestSize.Level1)
 HWTEST_F(NetworkTest, UpdateDnsTest003, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_NE(network, nullptr);
     NetLinkInfo netLinkInfo;
     EXPECT_TRUE(netLinkInfo.dnsList_.empty());
@@ -1767,7 +1793,7 @@ HWTEST_F(NetworkTest, UpdateDnsTest003, TestSize.Level1)
 HWTEST_F(NetworkTest, ReleaseBasicNetwork001, TestSize.Level1)
 {
     int32_t netId = 1;
-    auto network = std::make_shared<Network>(netId, netId, nullptr, NetBearType::BEARER_VPN, nullptr);
+    auto network = std::make_shared<Network>(netId, netId, NetBearType::BEARER_VPN, nullptr);
     EXPECT_NE(network, nullptr);
     Route route1;
     Route route2;
@@ -1795,5 +1821,73 @@ HWTEST_F(NetworkTest, ReleaseBasicNetwork001, TestSize.Level1)
     EXPECT_EQ(network->netLinkInfo_.routeList_.size(), 0);
 }
 
+HWTEST_F(NetworkTest, ReleaseBasicNetwork002, TestSize.Level1)
+{
+    auto network1 = std::make_shared<Network>(1, 2000, NetBearType::BEARER_VPN, nullptr);
+    network1->isPhyNetCreated_ = true;
+    network1->isNeedResume_ = false;
+    network1->netLinkInfo_.ifaceName_ = "test";
+    auto network2 = std::make_shared<Network>(2, 2000, NetBearType::BEARER_VPN, nullptr);
+    network2->netLinkInfo_.ifaceName_ = "test";
+    std::set<NetCap> netCaps;
+    NetConnService::GetInstance()->netSuppliers_[2000] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_VPN, "", netCaps);
+    NetConnService::GetInstance()->netSuppliers_[2000]->SetNetwork(network2);
+    NetConnService::GetInstance()->netSuppliers_[2000]->netSupplierInfo_.isAvailable_ = true;
+    network1->isInternalDefault_ = true;
+    EXPECT_TRUE(network1->IsIfaceNameInUse());
+    network1->ReleaseBasicNetwork();
+    NetConnService::GetInstance()->netSuppliers_.erase(2000);
+}
+
+HWTEST_F(NetworkTest, ReleaseBasicNetwork003, TestSize.Level1)
+{
+    auto network1 = std::make_shared<Network>(1, 2000, NetBearType::BEARER_VPN, nullptr);
+    network1->isPhyNetCreated_ = true;
+    network1->isNeedResume_ = false;
+    network1->netLinkInfo_.ifaceName_ = "test";
+    auto network2 = std::make_shared<Network>(2, 2000, NetBearType::BEARER_VPN, nullptr);
+    network2->netLinkInfo_.ifaceName_ = "test";
+    std::set<NetCap> netCaps;
+    NetConnService::GetInstance()->netSuppliers_[2000] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_VPN, "", netCaps);
+    NetConnService::GetInstance()->netSuppliers_[2000]->SetNetwork(network2);
+    NetConnService::GetInstance()->netSuppliers_[2000]->netSupplierInfo_.isAvailable_ = true;
+    network1->isInternalDefault_ = false;
+    EXPECT_TRUE(network1->IsIfaceNameInUse());
+    network1->ReleaseBasicNetwork();
+    NetConnService::GetInstance()->netSuppliers_.erase(2000);
+}
+
+HWTEST_F(NetworkTest, ReleaseBasicNetwork004, TestSize.Level1)
+{
+    auto network1 = std::make_shared<Network>(1, 2000, NetBearType::BEARER_CELLULAR, nullptr);
+    network1->isPhyNetCreated_ = true;
+    network1->isNeedResume_ = false;
+    network1->netLinkInfo_.ifaceName_ = "test";
+    auto network2 = std::make_shared<Network>(2, 2000, NetBearType::BEARER_CELLULAR, nullptr);
+    network2->netLinkInfo_.ifaceName_ = "test";
+    std::set<NetCap> netCaps;
+    NetConnService::GetInstance()->netSuppliers_[2000] =
+        sptr<NetSupplier>::MakeSptr(NetBearType::BEARER_CELLULAR, "", netCaps);
+    NetConnService::GetInstance()->netSuppliers_[2000]->SetNetwork(network2);
+    NetConnService::GetInstance()->netSuppliers_[2000]->netSupplierInfo_.isAvailable_ = true;
+    network1->isInternalDefault_ = false;
+    EXPECT_TRUE(network1->IsIfaceNameInUse());
+    network1->ReleaseBasicNetwork();
+    NetConnService::GetInstance()->netSuppliers_.erase(2000);
+}
+
+HWTEST_F(NetworkTest, ResumeNetworkInfo001, TestSize.Level1)
+{
+    auto network = std::make_shared<Network>(1, 2000, NetBearType::BEARER_VPN, nullptr);
+    std::set<NetCap> netCaps;
+    netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
+    network->SetNetCaps(netCaps);
+    network->ResumeNetworkInfo();
+    EXPECT_TRUE(network->isSupportInternet_);
+    EXPECT_FALSE(network->isInternalDefault_);
+    EXPECT_TRUE(network->isNeedResume_);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

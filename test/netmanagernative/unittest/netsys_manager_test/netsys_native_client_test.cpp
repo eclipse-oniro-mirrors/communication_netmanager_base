@@ -671,8 +671,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest015, TestSize.Level1)
 HWTEST_F(NetsysNativeClientTest, DelInterfaceAddressTest001, TestSize.Level1)
 {
     auto nativeClient = std::make_shared<NetsysNativeClient>();
-    std::string netCapabilities = "";
-    auto ret = nativeClient->DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH, netCapabilities);
+    auto ret = nativeClient->DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH, 2);
     EXPECT_EQ(ret, 0);
 }
 

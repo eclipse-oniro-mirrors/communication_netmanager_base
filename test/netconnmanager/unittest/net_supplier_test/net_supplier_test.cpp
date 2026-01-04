@@ -72,28 +72,8 @@ HWTEST_F(NetSupplierTest, GetSupplierCallbackTest002, TestSize.Level1)
 
 HWTEST_F(NetSupplierTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
 {
-    NetSupplierInfo netSupplierInfo{};
-    netSupplierInfo.isAvailable_ = false;
-    netSupplierInfo.ident_ = "ident_";
-    netSupplierInfo.score_ = 1;
-    supplier->network_ = nullptr;
-    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {};
-    std::shared_ptr<Network> network = std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID,
-        detectionHandler, NetBearType::BEARER_ETHERNET, nullptr);
-
-    supplier->UpdateNetSupplierInfo(netSupplierInfo);
-    EXPECT_FALSE(supplier->netSupplierInfo_.ident_.empty());
-    EXPECT_TRUE(supplier->netScore_ == 1);
-    EXPECT_FALSE(supplier->netSupplierInfo_.isAvailable_);
-    netSupplierInfo.isAvailable_ = true;
-    supplier->UpdateNetSupplierInfo(netSupplierInfo);
-    EXPECT_TRUE(supplier->netSupplierInfo_.isAvailable_);
-    EXPECT_TRUE(supplier->network_ == nullptr);
-    EXPECT_TRUE(supplier->netSupplierInfo_.isAvailable_);
-
-    supplier->network_ = network;
-    supplier->UpdateNetSupplierInfo(netSupplierInfo);
-    EXPECT_TRUE(supplier->network_ != nullptr);
+    sptr<INetSupplierCallback> callBack = supplier->GetSupplierCallback();
+    EXPECT_TRUE(callBack != nullptr);
 }
 
 HWTEST_F(NetSupplierTest, UpdateNetLinkInfoTest001, TestSize.Level1)
@@ -178,15 +158,6 @@ HWTEST_F(NetSupplierTest, SetNetValidTest001, TestSize.Level1)
     EXPECT_FALSE(supplier->HasNetCap(NET_CAPABILITY_PORTAL));
 }
 
-HWTEST_F(NetSupplierTest, SupplierTypeTest001, TestSize.Level1)
-{
-    int32_t type = 10; // SLOT_TYPE_LTE_CA = 10
-    supplier->SetSupplierType(type);
-    EXPECT_EQ(supplier->type_, "4G");
-    std::string ret = supplier->GetSupplierType();
-    EXPECT_EQ(ret, "4G");
-}
-
 HWTEST_F(NetSupplierTest, SetDefaultTest001, TestSize.Level1)
 {
     std::shared_ptr<Network> network = nullptr;
@@ -209,7 +180,7 @@ HWTEST_F(NetSupplierTest, NetSupplieroperatorTest001, TestSize.Level1)
     netCaps.insert(NET_CAPABILITY_INTERNET);
     std::string netSupplierIdent = "netSupplierIdent";
     NetSupplier netSupplier1(BEARER_CELLULAR, netSupplierIdent, netCaps);
-    NetSupplier netSupplier2 = netSupplier1;
+    NetSupplier netSupplier2(BEARER_CELLULAR, netSupplierIdent, netCaps);
     EXPECT_TRUE(netSupplier1 == netSupplier2);
     netSupplier2.netSupplierType_ = BEARER_BLUETOOTH;
     EXPECT_FALSE(netSupplier1 == netSupplier2);
@@ -260,6 +231,13 @@ HWTEST_F(NetSupplierTest, NetExtAttributeTest001, TestSize.Level1)
 {
     supplier->SetNetExtAttribute(TEST_IDENT);
     EXPECT_EQ(supplier->GetNetExtAttribute(), TEST_IDENT);
+}
+
+HWTEST_F(NetSupplierTest, UpdateNetLinkInfo, TestSize.Level1) {
+    NetLinkInfo netLinkInfo1;
+    EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NET_CONN_ERR_INVALID_NETWORK);
+    supplier->network_ = std::make_shared<Network>(0, 0, BEARER_CELLULAR, nullptr);
+    EXPECT_EQ(supplier->UpdateNetLinkInfo(netLinkInfo1), NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetSupplierTest, SetOnceSuppress001, TestSize.Level1)

@@ -203,7 +203,9 @@ int32_t DnsQualityDiag::ParseDnsQueryReportAddr(uint8_t size,
 
 int32_t DnsQualityDiag::ReportDnsQueryResult(PostDnsQueryParam queryParam, AddrInfo* addrinfo, uint8_t addrSize)
 {
+    std::shared_lock<std::shared_mutex> lock(dnsQueryReportMutex_);
     bool reportSizeReachLimit = (dnsQueryReport_.size() >= MAX_RESULT_SIZE);
+    lock.unlock();
     if (!reportSizeReachLimit) {
         NetsysNative::NetDnsQueryResultReport report;
         FillDnsQueryResultReport(report, queryParam);
@@ -365,9 +367,12 @@ int32_t DnsQualityDiag::send_dns_report()
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
     }
-    if (dnsQueryReport_.size() > 0) {
-        std::list<NetsysNative::NetDnsQueryResultReport> reportSend(dnsQueryReport_);
-        dnsQueryReport_.clear();
+
+    std::unique_lock<std::shared_mutex> lock(dnsQueryReportMutex_);
+    std::list<NetsysNative::NetDnsQueryResultReport> reportSend(dnsQueryReport_);
+    dnsQueryReport_.clear();
+    lock.unlock();
+    if (reportSend.size() > 0) {
         for (auto cb: resultListeners_) {
             cb->OnDnsQueryResultReport(reportSend.size(), reportSend);
         }
@@ -382,6 +387,7 @@ int32_t DnsQualityDiag::add_dns_query_report(std::shared_ptr<NetsysNative::NetDn
     if (!report) {
         return 0;
     }
+    std::unique_lock<std::shared_mutex> lock(dnsQueryReportMutex_);
     if (dnsQueryReport_.size() < MAX_RESULT_SIZE) {
         dnsQueryReport_.push_back(*report);
     }

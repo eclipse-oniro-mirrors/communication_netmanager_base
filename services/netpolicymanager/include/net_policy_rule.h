@@ -180,7 +180,7 @@ public:
 
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
-    void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);
+    void TransConditionToRuleAndNetsys(uint32_t uid, UidPolicyRule &policyRule);
     uint32_t MoveToConditionBit(uint32_t value);
     uint32_t MoveToRuleBit(uint32_t value);
     uint32_t ChangePolicyToPolicyTransitionCondition(uint32_t policy);
@@ -207,6 +207,7 @@ private:
     bool backgroundAllow_ = true;
     bool deviceIdleMode_ = false;
     bool powerSaveMode_ = false;
+    std::shared_mutex deviceIdleAllowedListMutex_;
     std::set<uint32_t> deviceIdleAllowedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> foregroundUidList_;

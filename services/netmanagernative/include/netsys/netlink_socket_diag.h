@@ -53,7 +53,7 @@ public:
      * @param netCapabilities Net capabilities in string format.
      * @return The result of the method is returned.
      */
-    int32_t SetSocketDestroyType(const std::string &netCapabilities);
+    int32_t SetSocketDestroyType(int socketType);
     void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
 private:
     static bool InLookBack(uint32_t a);

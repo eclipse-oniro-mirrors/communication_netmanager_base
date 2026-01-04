@@ -375,9 +375,9 @@ int32_t NetsysNativeService::DelInterfaceAddress(const std::string &interfaceNam
 }
 
 int32_t NetsysNativeService::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                                 int32_t prefixLength, const std::string &netCapabilities)
+                                                 int32_t prefixLength, int socketType)
 {
-    int32_t result = netsysService_->DelInterfaceAddress(interfaceName, addrString, prefixLength, netCapabilities);
+    int32_t result = netsysService_->DelInterfaceAddress(interfaceName, addrString, prefixLength, socketType);
     NETNATIVE_LOG_D("DelInterfaceAddress");
     return result;
 }

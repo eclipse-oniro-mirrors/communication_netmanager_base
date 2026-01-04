@@ -126,8 +126,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest004, TestSize.Level1)
 {
     std::string interfaceName = "eth0";
     std::string addr = "127.0.0.1";
-    std::string netCapabilities;
-    auto ret = InterfaceManager::DelAddress(interfaceName.c_str(), addr.c_str(), 0, netCapabilities);
+    auto ret = InterfaceManager::DelAddress(interfaceName.c_str(), addr.c_str(), 0, 2);
     EXPECT_EQ(ret, 0);
 }
 

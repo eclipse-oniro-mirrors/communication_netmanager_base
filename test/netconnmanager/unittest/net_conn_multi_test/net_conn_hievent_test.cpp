@@ -35,7 +35,7 @@ public:
     void SetUp();
     void TearDown();
 
-    sptr<Network> GetNetwork();
+    std::shared_ptr<Network> GetNetwork();
     sptr<NetLinkInfo> GetNetLinkInfo() const;
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
@@ -49,15 +49,11 @@ void NetConnHiEventTest::SetUp() {}
 
 void NetConnHiEventTest::TearDown() {}
 
-sptr<Network> NetConnHiEventTest::GetNetwork()
+std::shared_ptr<Network> NetConnHiEventTest::GetNetwork()
 {
     int32_t netId = 100;
     int32_t supplierId = 1001;
-    sptr<Network> network = (std::make_unique<Network>(netId, supplierId,
-                                                       std::bind(&NetConnHiEventTest::HandleDetectionResult, this,
-                                                                 std::placeholders::_1, std::placeholders::_2),
-                                                       BEARER_CELLULAR, nullptr))
-                                .release();
+    std::shared_ptr<Network> network = std::make_shared<Network>(netId, supplierId, BEARER_CELLULAR, nullptr);
     return network;
 }
 
@@ -130,7 +126,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_002, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_003, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
@@ -144,7 +140,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_003, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_004, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
@@ -158,7 +154,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_004, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_005, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
@@ -172,7 +168,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_005, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_006, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
@@ -186,7 +182,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_006, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
@@ -200,7 +196,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_009, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     network->SetDefaultNetWork();
 }
@@ -212,7 +208,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_009, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     network->ClearDefaultNetWorkNetId();
 }
@@ -236,7 +232,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_012, TestSize.Level1)
 {
-    sptr<Network> network = GetNetwork();
+    std::shared_ptr<Network> network = GetNetwork();
     ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);

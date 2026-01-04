@@ -69,7 +69,6 @@ class NetConnService : public SystemAbility,
     NetConnService();
     virtual ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
-    using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
     using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
     using NET_UIDREQUEST_MAP = std::map<uint32_t, uint32_t>;
     using NET_UIDACTIVATE_MAP = std::map<uint32_t, std::vector<std::shared_ptr<NetActivate>>>;
@@ -403,7 +402,6 @@ public:
     int32_t UpdateSupplierScore(uint32_t supplierId, uint32_t detectionStatus) override;
     int32_t GetDefaultSupplierId(NetBearType bearerType, const std::string &ident,
         uint32_t& supplierId) override;
-    std::string GetNetCapabilitiesAsString(const uint32_t supplierId);
     int32_t EnableVnicNetwork(const sptr<NetLinkInfo> &netLinkInfo, const std::set<int32_t> &uids) override;
     int32_t DisableVnicNetwork() override;
     int32_t EnableDistributedClientNet(const std::string &virnicAddr, const std::string &iif) override;
@@ -440,6 +438,7 @@ public:
     int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
     ProbeUrls GetDataShareUrl();
     void HandleDataShareMessage();
+    void SendNetPolicyChange(uint32_t uid, uint32_t policy);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -488,9 +487,6 @@ private:
     public:
         NetPolicyCallback(std::weak_ptr<NetConnService> netConnService) : netConnService_(netConnService) {}
         int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
-
-    private:
-        void SendNetPolicyChange(uint32_t uid, uint32_t policy);
 
     private:
         std::weak_ptr<NetConnService> netConnService_;
@@ -542,6 +538,7 @@ private:
                           RegisterType &registerType, uint32_t &uid);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
+    std::shared_ptr<Network> FindNetwork(int32_t netId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                      uint32_t &supplierId, int32_t callingUid);
     int32_t UnregisterNetSupplierAsync(uint32_t supplierId, bool ignoreUid, int32_t callingUid);
@@ -613,6 +610,7 @@ private:
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
+    void NotifyNetBearerTypeChange();
     int32_t CheckAndCompareUid(sptr<NetSupplier> &supplier, int32_t callingUid);
 #ifdef SUPPORT_SYSVPN
     int32_t realCallingUid_ = -1;
@@ -627,6 +625,8 @@ private:
     sptr<NetSupplier> GetSupplierByNetId(int32_t netId);
     void RegisterNetDataShareObserver();
     void UnregisterNetDataShareObserver();
+    NetBearType GetDefaultNetSupplierType();
+    uint32_t GetDefaultNetSupplierId();
 
 private:
     enum ServiceRunningState {
@@ -639,21 +639,20 @@ private:
     sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
     std::shared_ptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
+    ffrt::shared_mutex netSuppliersMutex_;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
     std::shared_mutex netActivatesMutex_;
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
-    NET_NETWORK_MAP networks_;
     NET_UIDACTIVATE_MAP netUidActivates_;
-    std::mutex uidActivateMutex_;
+    std::shared_mutex uidActivateMutex_;
     std::atomic<bool> vnicCreated = false;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isDataShareReady_ = false;
     SafeMap<int32_t, HttpProxy> globalHttpProxyCache_;
-    std::recursive_mutex netManagerMutex_;
     std::mutex netUidRequestMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
@@ -683,16 +682,16 @@ private:
     std::recursive_mutex delayFindBestNetMutex_;
     std::atomic<bool> isDelayHandleFindBestNetwork_ = false;
     uint32_t delaySupplierId_ = 0;
-    std::recursive_mutex uidLostDelayMutex_;
-    std::set<uint32_t> uidLostDelaySet_;
-    SafeMap<int32_t, bool> notifyLostDelayCache_;
-    ffrt::shared_mutex defaultNetSupplierMutex_;
 #ifdef NETMANAGER_ENABLE_PAC_PROXY
     std::shared_ptr<OHOS::NetManagerStandard::NetPACManager> netPACManager_;
     std::mutex netPacManagerMutex_;
     std::shared_ptr<OHOS::NetManagerStandard::ProxyServer> netPACProxyServer_;
     std::mutex netPacProxyServerMutex_;
 #endif
+    std::shared_mutex uidLostDelayMutex_;
+    std::set<uint32_t> uidLostDelaySet_;
+    SafeMap<int32_t, bool> notifyLostDelayCache_;
+    ffrt::shared_mutex defaultNetSupplierMutex_;
 
 private:
     class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -749,6 +748,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> netSuplierDeathRecipient_ = nullptr;
     std::vector<sptr<INetConnCallback>> remoteCallback_;
+    NetBearType prevNetSupplierType_ = BEARER_DEFAULT;
     bool CheckIfSettingsDataReady();
     std::mutex dataShareMutexWait;
     std::condition_variable dataShareWait;

@@ -295,16 +295,12 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
     NETNATIVE_LOGI("Destroyed %{public}d sockets", socketsDestroyed_);
 }
 
-int32_t NetLinkSocketDiag::SetSocketDestroyType(const std::string &netCapabilities)
+int32_t NetLinkSocketDiag::SetSocketDestroyType(int socketType)
 {
-    const std::string capSpecialCellularStr = "NET_CAPABILITY_INTERNAL_DEFAULT";
-    const std::string bearerCellularStr = "BEARER_CELLULAR";
-    if (netCapabilities.find(capSpecialCellularStr) != std::string::npos) {
-        socketDestroyType_ = SocketDestroyType::DESTROY_SPECIAL_CELLULAR;
-    } else if (netCapabilities.find(bearerCellularStr) != std::string::npos) {
-        socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT_CELLULAR;
-    } else {
+    if (socketType >= static_cast<int>(SocketDestroyType::DESTROY_DEFAULT)) {
         socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
+    } else {
+        socketDestroyType_ = static_cast<SocketDestroyType>(socketType);
     }
     return 0;
 }

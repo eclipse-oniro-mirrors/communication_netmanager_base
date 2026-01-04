@@ -223,7 +223,6 @@ private:
     bool IsValidNetRemindType(uint32_t remindType);
 
 private:
-    std::vector<uint32_t> idleAllowedList_;
     std::shared_mutex quotaMutex_;
     std::vector<NetQuotaPolicy> quotaPolicies_;
     std::vector<std::string> meteredIfaces_;
