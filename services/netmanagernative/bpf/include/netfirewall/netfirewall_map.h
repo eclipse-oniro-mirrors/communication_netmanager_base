@@ -278,9 +278,9 @@ bpf_map_def SEC("maps") LOOP_BACK_IPV4_MAP = {
 
 bpf_map_def SEC("maps") DOMAIN_DATA_KEY_MAP = {
     .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(__u16),
+    .key_size = sizeof(__u64),
     .value_size = sizeof(struct domain_hash_key),
-    .max_entries = 1,
+    .max_entries = MAP_MAX_ENTRIES,
     .map_flags = BPF_F_NO_PREALLOC,
     .inner_map_idx = 0,
     .numa_node = 0,

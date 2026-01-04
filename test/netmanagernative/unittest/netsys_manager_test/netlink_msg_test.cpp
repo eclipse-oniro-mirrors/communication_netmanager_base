@@ -111,5 +111,41 @@ HWTEST_F(NetlinkMsgTest, AddLinkTest001, TestSize.Level1)
     int32_t ret = netLinkMsg.AddAttr(action, data, dataLength10);
     EXPECT_EQ(ret, 0);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+HWTEST_F(NetlinkMsgTest, InitNflogConfigTest001, TestSize.Level1)
+{
+    uint16_t flags = 0;
+    size_t maxBufLen = sizeof(struct nlmsghdr) + sizeof(struct nfgenmsg);
+    int32_t pid = 0;
+    auto netlinkMsgPtr = std::make_shared<NetlinkMsg>(flags, maxBufLen, pid);
+    auto result = netlinkMsgPtr->InitNflogConfig(1);
+    EXPECT_EQ(result, true);
+    netlinkMsgPtr->netlinkMessage_ = nullptr;
+    result = netlinkMsgPtr->InitNflogConfig(1);
+    EXPECT_EQ(result, false);
+    netlinkMsgPtr->maxBufLen_ = 0;
+    result = netlinkMsgPtr->InitNflogConfig(1);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NetlinkMsgTest, AddNlattrTest001, TestSize.Level1)
+{
+    uint16_t flags = 0;
+    size_t maxBufLen = sizeof(struct nlmsghdr) + sizeof(struct nfgenmsg);
+    int32_t pid = 0;
+    auto netlinkMsgPtr = std::make_shared<NetlinkMsg>(flags, maxBufLen, pid);
+    nfulnl_msg_config_cmd cmd{.command = NFULNL_CFG_CMD_BIND};
+    auto result = netlinkMsgPtr->AddNlattr(NFULA_CFG_CMD, &cmd, sizeof(cmd));
+    EXPECT_EQ(result, true);
+    netlinkMsgPtr->netlinkMessage_ = nullptr;
+    result = netlinkMsgPtr->AddNlattr(NFULA_CFG_CMD, &cmd, sizeof(cmd));
+    EXPECT_EQ(result, false);
+    result = netlinkMsgPtr->AddNlattr(NFULA_CFG_CMD, nullptr, sizeof(cmd));
+    EXPECT_EQ(result, false);
+    result = netlinkMsgPtr->AddNlattr(NFULA_CFG_CMD, &cmd, 0);
+    EXPECT_EQ(result, false);
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS
