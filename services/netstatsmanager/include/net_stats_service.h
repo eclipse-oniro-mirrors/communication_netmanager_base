@@ -94,6 +94,7 @@ public:
     int32_t GetCookieRxBytes(uint64_t &stats, uint64_t cookie) override;
     int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) override;
     int32_t SaveSharingTraffic(const NetStatsInfo &infos) override;
+    void AddUidStatsFlag(uint64_t delay);
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     void UpdateSettingsdata(int32_t simId, uint8_t flag, uint64_t value);
@@ -181,6 +182,7 @@ private:
     void UpdateNetStatusMapCellular(int32_t dataState);
     void InsertHistoryData(int32_t simId);
     void InitHistoryData();
+    void EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, uint32_t userId);
 
 private:
     enum ServiceRunningState {
@@ -196,6 +198,7 @@ private:
     uint64_t netStatsSysTimerId_ = 0;
     std::shared_ptr<NetStatsAccountSubscriber> accountSubscriber_ = nullptr;
     int32_t defaultUserId_ = 0;
+    std::atomic_bool isUpdate_ = false;
 
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     uint64_t curIfIndex_ = UINT64_MAX;

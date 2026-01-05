@@ -320,7 +320,7 @@ int32_t NetStatsDataHandler::UpdateSimStatsFlagByUserId(int32_t userId, uint32_t
         NETMGR_LOG_E("db helper instance is nullptr");
         return NETMANAGER_ERR_INTERNAL;
     }
-    return helper->UpdateStatsFlag(UID_SIM_TABLE, userId, flag);
+    return helper->UpdateStatsFlagByUserId(UID_SIM_TABLE, userId, flag);
 }
 
 int32_t NetStatsDataHandler::UpdateSimStatsFlag(uint32_t uid, uint32_t flag)
