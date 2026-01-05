@@ -791,6 +791,16 @@ HWTEST_F(NetConnServiceProxyTest, AddVlanIpTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceProxyTest, DeleteVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    int32_t ret = instance_->DeleteVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

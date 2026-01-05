@@ -1460,5 +1460,144 @@ HWTEST_F(NetConnServiceStubTest, OnAddVlanIpTest007, TestSize.Level1)
     int32_t ret = instance_->OnAddVlanIp(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
+
+/**
+ * @tc.name: OnDeleteVlanIpTest001
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest002
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest003
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest004
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest005
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest005, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_NE(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest006
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest006, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnDeleteVlanIpTest007
+ * @tc.desc: Test NetConnServiceStub OnDeleteVlanIp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest007, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    int32_t ret = instance_->OnDeleteVlanIp(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

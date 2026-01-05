@@ -37,7 +37,8 @@ const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode:
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_PROXY_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_CREATE_VLAN),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN),
-                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
@@ -246,6 +247,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnDestroyVlan, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP)] = {
         &NetConnServiceStub::OnAddVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP)] = {
+        &NetConnServiceStub::OnDeleteVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2250,5 +2253,30 @@ int32_t NetConnServiceStub::OnAddVlanIp(MessageParcel &data, MessageParcel &repl
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceStub::OnDeleteVlanIp(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("Enter OnDeleteVlanIp");
+    std::string ifName = "";
+    uint32_t vlanId = 0;
+    std::string ip = "";
+    uint32_t mask = 0;
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(vlanId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadString(ip)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadUint32(mask)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = DeleteVlanIp(ifName, vlanId, ip, mask);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

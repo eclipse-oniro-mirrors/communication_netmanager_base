@@ -104,6 +104,7 @@ enum class ConnInterfaceCode {
     CMD_NM_CREATE_VLAN,
     CMD_NM_DESTROY_VLAN,
     CMD_NM_ADD_VLAN_IP,
+    CMD_NM_DELETE_VLAN_IP,
 };
 
 enum class AdjCallbackInterfaceCode {

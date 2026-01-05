@@ -710,7 +710,7 @@ int32_t InterfaceManager::DestroyVlan(const std::string &ifName, uint32_t vlanId
     struct ifinfomsg ifm;
     ifm.ifi_family = AF_UNSPEC;
     ifm.ifi_type = ARPHRD_ETHER;
-    ifm.ifi_index = index;
+    ifm.ifi_index = static_cast<int32_t>(index);
     ifm.ifi_flags = 0;
     ifm.ifi_change = 0;
 

@@ -1605,7 +1605,7 @@ int32_t NetConnClient::DeleteVlanIp(const std::string &ifName, uint32_t vlanId, 
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     // LCOV_EXCL_STOP
-    return proxy->AddVlanIp(ifName, vlanId, ip, mask);
+    return proxy->DeleteVlanIp(ifName, vlanId, ip, mask);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

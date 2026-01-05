@@ -36,7 +36,7 @@ public:
 
 public:
     std::string ifName_;
-    uint32_t vlanId_;
+    uint32_t vlanId_ { 0 };
     INetAddr address_;
 };
 } // namespace NetManagerStandard

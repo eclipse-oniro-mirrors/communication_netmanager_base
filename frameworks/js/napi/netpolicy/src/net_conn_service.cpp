@@ -4422,5 +4422,18 @@ int32_t NetConnService::AddVlanIp(const std::string &ifName, uint32_t vlanId,
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::DeleteVlanIp(const std::string &ifName, uint32_t vlanId,
+                                     const std::string &ip, uint32_t mask)
+{
+    if (ifName.find("eth") == std::string::npos) {
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
+    }
+    std::string name = ifName + "." + std::to_string(vlanId);
+    if (NetsysController::GetInstance().DelInterfaceAddress(name, ip, mask) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
