@@ -169,6 +169,7 @@ HWTEST_F(DNSParamCacheTest, EnableIpv4Test01, TestSize.Level1)
     dnsParCache.defaultNetId_ = netId;
     bool res = dnsParCache.IsIpv4Enable(0);
     EXPECT_TRUE(res);
+    dnsParCache.DestroyNetworkCache(netId);
 }
 
 HWTEST_F(DNSParamCacheTest, GetResolverConfigTest05, TestSize.Level1)
