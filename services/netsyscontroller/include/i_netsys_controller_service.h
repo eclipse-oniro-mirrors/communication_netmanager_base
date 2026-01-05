@@ -27,6 +27,7 @@
 #include "interface_type.h"
 #include "i_net_diag_callback.h"
 #include "i_net_dns_result_callback.h"
+#include "net_conn_info.h"
 #include "net_stats_info.h"
 #include "netsys_controller_callback.h"
 #include "netsys_dns_report_callback.h"
@@ -1038,6 +1039,8 @@ public:
     virtual int32_t CreateVlan(const std::string &ifName, uint32_t vlanId) = 0;
     virtual int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId) = 0;
     virtual int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
+    virtual int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                       int32_t &ownerUid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

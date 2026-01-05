@@ -43,6 +43,7 @@ namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
+constexpr int32_t INVALID_UID = -1;
 } // namespace
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -777,6 +778,35 @@ bool ConnectionExec::ExecGetDnsASCII(GetDnsContext *context)
     }
     context->SetHost(ascii);
     return true;
+}
+
+bool ConnectionExec::ExecGetConnectOwnerUid(GetConnectOwnerUidContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecGetConnectOwnerUid");
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        return false;
+    }
+    NetConnInfo netConnInfo;
+    netConnInfo.protocolType_ = context->protocolType_;
+    netConnInfo.family_ = static_cast<NetConnInfo::Family>(context->localAddress_.GetJsValueFamily());
+    netConnInfo.localAddress_ = context->localAddress_.GetAddress();
+    netConnInfo.localPort_ = context->localAddress_.GetPort();
+    netConnInfo.remoteAddress_ = context->remoteAddress_.GetAddress();
+    netConnInfo.remotePort_ = context->remoteAddress_.GetPort();
+    int32_t errorCode = NetConnClient::GetInstance().GetConnectOwnerUid(netConnInfo, context->ownerUid_);
+    if (errorCode != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec getConnectOwnerUid failed errorCode: %{public}d", errorCode);
+        context->ownerUid_ = INVALID_UID;
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetConnectOwnerUidCallback(GetConnectOwnerUidContext *context)
+{
+    return NapiUtils::CreateInt32(context->GetEnv(), context->ownerUid_);
 }
 
 bool ConnectionExec::ExecGetDnsUnicode(GetDnsContext *context)

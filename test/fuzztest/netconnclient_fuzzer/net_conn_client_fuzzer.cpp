@@ -1913,6 +1913,28 @@ void SetQueryTraceRouteFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_QUERY_TRACEROUTE), dataParcel);
 }
 
+void GetConnectOwnerUidFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    int32_t protocol = NetConnGetData<int32_t>();
+    uint32_t family = NetConnGetData<uint32_t>();
+    std::string localIp = NetConnGetString(STR_LEN);
+    uint16_t localPort = NetConnGetData<uint16_t>();
+    std::string remoteIp = NetConnGetString(STR_LEN);
+    uint16_t remotePort = NetConnGetData<uint16_t>();
+    dataParcel.WriteInt32(protocol);
+    dataParcel.WriteUint32(family);
+    dataParcel.WriteString(localIp);
+    dataParcel.WriteUint16(localPort);
+    dataParcel.WriteString(remoteIp);
+    dataParcel.WriteUint16(remotePort);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::SetInterfaceUpFuzzTest(data, size);
@@ -1927,6 +1949,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CreateVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::DestroyVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::SetVlanIpFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetConnectOwnerUidFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

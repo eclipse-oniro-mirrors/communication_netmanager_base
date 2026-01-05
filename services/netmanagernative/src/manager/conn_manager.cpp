@@ -513,6 +513,15 @@ int ConnManager::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t ConnManager::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid)
+{
+    NetLinkSocketDiag socketDiag;
+    uint8_t family = (netConnInfo.family_ == NetConnInfo::Family::IPv4) ? AF_INET : AF_INET6;
+    return socketDiag.GetConnectOwnerUid(netConnInfo.protocolType_, family, netConnInfo.localAddress_,
+                                         netConnInfo.localPort_, netConnInfo.remoteAddress_, netConnInfo.remotePort_,
+                                         ownerUid);
+}
+
 #ifdef SUPPORT_SYSVPN
 int32_t ConnManager::UpdateVpnRules(uint16_t netId, const std::vector<std::string> &extMessages, bool add)
 {

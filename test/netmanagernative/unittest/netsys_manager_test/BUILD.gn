@@ -36,6 +36,7 @@ ohos_unittest("netsys_native_manager_test") {
     "iptables_wrapper_test.cpp",
     "local_network_test.cpp",
     "mock_netsys_native_client_test.cpp",
+    "net_conn_info_test.cpp",
     "net_conn_manager_test_util.cpp",
     "net_diag_wrapper_test.cpp",
     "net_ip_mac_info_test.cpp",

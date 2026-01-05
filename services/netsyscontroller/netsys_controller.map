@@ -141,6 +141,7 @@
       "OHOS::NetManagerStandard::NetsysController::CreateVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::DestroyVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::SetVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::NetManagerStandard::NetsysController::GetConnectOwnerUid(OHOS::NetManagerStandard::NetConnInfo const&, int&)";
       "OHOS::NetManagerStandard::NetsysNativeClient::~NetsysNativeClient()";
       "OHOS::NetManagerStandard::NetsysNativeClient::AddInterfaceAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::NetManagerStandard::NetsysNativeClient::ClearDefaultNetWorkNetId()";

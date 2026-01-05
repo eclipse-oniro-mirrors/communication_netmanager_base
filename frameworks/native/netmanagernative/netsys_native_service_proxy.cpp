@@ -2857,6 +2857,39 @@ int32_t NetsysNativeServiceProxy::GetIpNeighTable(std::vector<NetManagerStandard
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                                     int32_t &ownerUid)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (!netConnInfo.Marshalling(data)) {
+        NETNATIVE_LOGE("GetConnectOwnerUid Marshalling failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID),
+                                          data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("GetConnectOwnerUid proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        if (!reply.ReadInt32(ownerUid)) {
+            NETNATIVE_LOGE("GetConnectOwnerUid Read ownerUid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(
     const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
 {

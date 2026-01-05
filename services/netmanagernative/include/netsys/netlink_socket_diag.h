@@ -55,6 +55,9 @@ public:
      */
     int32_t SetSocketDestroyType(int socketType);
     void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
+    int32_t GetConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
+                               const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
+
 private:
     static bool InLookBack(uint32_t a);
 
@@ -62,6 +65,7 @@ private:
     void CloseNetlinkSocket();
     int32_t ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg);
     int32_t GetErrorFromKernel(int32_t fd);
+    int32_t GetErrorFromKernel(int32_t fd, int32_t &kernelError);
     bool IsLoopbackSocket(const inet_diag_msg *msg);
     bool IsMatchNetwork(const inet_diag_msg *msg, const std::string &ipAddr);
     int32_t ProcessSockDiagDumpResponse(uint8_t proto, const std::string &ipAddr, bool excludeLoopback);
@@ -69,6 +73,13 @@ private:
     void SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr, bool excludeLoopback);
     void SockDiagUidDumpCallback(uint8_t proto, const inet_diag_msg *msg, const DestroyFilter& destroy);
     int32_t ProcessSockDiagUidDumpResponse(uint8_t proto, const DestroyFilter& destroy);
+    bool CreateNetlinkSocketForQueryUid();
+    int32_t QueryConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
+                                 const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
+    int32_t MakeQueryUidRequestInfo(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
+                                    const std::string &remoteAddress, uint32_t remotePort, inet_diag_req_v2 &request);
+    int32_t ProcessQueryUidResponse(int32_t &uid);
+
 private:
     struct SockDiagRequest {
         nlmsghdr nlh_;
@@ -91,6 +102,7 @@ private:
 
     int32_t dumpSock_ = -1;
     int32_t destroySock_ = -1;
+    int32_t queryUidSock_ = -1;
     int32_t socketsDestroyed_ = 0;
     SocketDestroyType socketDestroyType_ = SocketDestroyType::DESTROY_DEFAULT;
 };

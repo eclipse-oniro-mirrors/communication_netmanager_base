@@ -26,6 +26,7 @@
 #include "firewall_manager.h"
 #include "interface_manager.h"
 #include "interface_type.h"
+#include "net_conn_info.h"
 #include "route_manager.h"
 #include "vnic_manager.h"
 #include "route_type.h"
@@ -179,6 +180,7 @@ public:
     int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
     int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+    int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

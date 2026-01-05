@@ -236,6 +236,9 @@
       "OHOS::NetManagerStandard::NetConnClient::SetVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "VTT for OHOS::NetManagerStandard::NetIpMacInfo";
       "vtable for OHOS::NetManagerStandard::NetIpMacInfo";
+      "OHOS::NetManagerStandard::NetConnClient::GetConnectOwnerUid(OHOS::NetManagerStandard::NetConnInfo const&, int&)";
+      "VTT for OHOS::NetManagerStandard::NetConnInfo";
+      "vtable for OHOS::NetManagerStandard::NetConnInfo";
     };
   local:
    *;

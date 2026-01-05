@@ -226,5 +226,28 @@ int32_t NetManagerCenter::UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut
     }
     return connService_->UpdateDualStackProbeTime(dualStackProbeTimeOut);
 }
+
+void NetManagerCenter::RegisterVpnService(const sptr<NetVpnBaseService> &service)
+{
+    vpnService_ = service;
+}
+
+bool NetManagerCenter::IsVpnApplication(int32_t uid)
+{
+    if (vpnService_ == nullptr) {
+        return false;
+    }
+
+    return vpnService_->IsVpnApplication(uid);
+}
+
+bool NetManagerCenter::IsAppUidInWhiteList(int32_t callingUid, int32_t appUid)
+{
+    if (vpnService_ == nullptr) {
+        return false;
+    }
+
+    return vpnService_->IsAppUidInWhiteList(callingUid, appUid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

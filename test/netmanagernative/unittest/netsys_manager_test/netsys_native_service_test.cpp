@@ -1072,5 +1072,19 @@ HWTEST_F(NetsysNativeServiceTest, SetVlanIpTest001, TestSize.Level1)
     int32_t ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

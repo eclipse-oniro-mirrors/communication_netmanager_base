@@ -43,6 +43,7 @@
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
 #include "netextattribute_context.h"
+#include "getconnectowneruid_context.h"
 #include "getipneightable_context.h"
 #include "createvlan_context.h"
 #include "destroyvlan_context.h"
@@ -235,6 +236,10 @@ public:
     static bool ExecSetVlanIp(SetVlanIpContext *context);
 
     static napi_value SetVlanIpCallback(SetVlanIpContext *context);
+
+    static bool ExecGetConnectOwnerUid(GetConnectOwnerUidContext *context);
+
+    static napi_value GetConnectOwnerUidCallback(GetConnectOwnerUidContext *context);
 
     static bool ExecGetDnsASCII(GetDnsContext *context);
 

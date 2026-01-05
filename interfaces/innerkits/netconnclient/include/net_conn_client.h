@@ -26,6 +26,7 @@
 #include "i_net_conn_service.h"
 #include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
+#include "net_conn_info.h"
 #include "net_handle.h"
 #include "net_link_info.h"
 #include "net_specifier.h"
@@ -537,6 +538,8 @@ public:
     int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
     int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+    int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
