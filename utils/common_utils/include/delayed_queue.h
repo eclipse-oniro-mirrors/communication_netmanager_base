@@ -32,6 +32,12 @@
 #endif
 
 namespace OHOS::NetManagerStandard {
+
+typedef struct {
+    int index;
+    uint32_t delayTime;
+} elemParam;
+
 template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueue {
 public:
     DelayedQueue() : index_(0), needRun_(true)
@@ -54,10 +60,21 @@ public:
                     }
 #endif
                     for (const auto &elem : elems_[index_]) {
-                        if (elem) {
-                            elem->Execute();
+                        if (!elem) {
+                            continue;
                         }
-                        indexMap_.erase(elem);
+                        elemParam &oldParam = indexMap_[elem];
+                        if (oldParam.delayTime != 0) {
+                            UpdateDelayTime(oldParam.delayTime, elem);
+                        } else {
+                            elem->Execute();
+                            uint32_t updateTime = elem->GetUpdateTime();
+                            if (updateTime > 0) {
+                                UpdateDelayTime(updateTime, elem);
+                            } else {
+                                indexMap_.erase(elem);
+                            }
+                        }
                     }
                     elems_[index_].clear();
                 }
@@ -86,18 +103,45 @@ public:
     {
         std::lock_guard<ffrt::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
-            int oldIndex = indexMap_[elem];
+            int oldIndex = indexMap_[elem].index;
             if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
                 (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
                 elems_[oldIndex].erase(elem);
             }
         }
-        int index = (index_ + DELAYED_COUNT) % (ARRAY_SIZE + DELAYED_COUNT);
-        elems_[index].insert(elem);
-        indexMap_[elem] = index;
+        UpdateDelayTime(DELAYED_COUNT, elem);
+    }
+
+    void Put(const std::shared_ptr<T> &elem, uint32_t delayTime)
+    {
+        std::lock_guard<ffrt::mutex> guard(mutex_);
+        if (delayTime == 0) {
+            return;
+        }
+        if (indexMap_.find(elem) != indexMap_.end()) {
+            int oldIndex = indexMap_[elem].index;
+            if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
+                (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
+                elems_[oldIndex].erase(elem);
+            }
+        }
+        UpdateDelayTime(delayTime, elem);
     }
 
 private:
+    void UpdateDelayTime(uint32_t delayTime, const std::shared_ptr<T> &elem)
+    {
+        elemParam newParam;
+        if (delayTime > DELAYED_COUNT) {
+            newParam.index = (index_ + DELAYED_COUNT) % (ARRAY_SIZE + DELAYED_COUNT);
+            newParam.delayTime = delayTime - DELAYED_COUNT;
+        } else {
+            newParam.index = (index_ + delayTime) % (ARRAY_SIZE + DELAYED_COUNT);
+            newParam.delayTime = 0;
+        }
+        elems_[newParam.index].insert(elem);
+        indexMap_[elem] = newParam;
+    }
     ffrt::thread pthread_;
     int index_;
     ffrt::mutex mutex_;

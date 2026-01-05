@@ -74,6 +74,7 @@ enum CommandType {
     POST_DNS_ABNORMAL_RESULT = 9, // for musl and c-ares
     GET_CONFIG_EXT = 10, // for musl and c-ares
     JUDGE_IPV4 = 11,
+    SET_CONFIG_EXT = 12, // for musl and c-ares
 };
 
 struct RequestInfo {
@@ -112,6 +113,11 @@ struct AddrInfo {
     uint32_t aiAddrLen;
     AlignedSockAddr aiAddr;
     char aiCanonName[MAX_CANON_NAME + 1];
+};
+
+struct AddrInfoWithTtl {
+    struct AddrInfo addrInfo;
+    uint32_t ttl;
 };
 
 struct ParamWrapper {

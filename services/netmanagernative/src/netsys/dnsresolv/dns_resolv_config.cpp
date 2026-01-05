@@ -17,14 +17,38 @@
 
 namespace OHOS::nmd {
 DnsResolvConfig::DelayedTaskWrapper::DelayedTaskWrapper(std::string hostName,
-                                                        NetManagerStandard::LRUCache<AddrInfo> &cache)
+                                                        NetManagerStandard::LRUCache<AddrInfoWithTtl> &cache)
     : hostName_(std::move(hostName)), cache_(cache)
 {
 }
 
 void DnsResolvConfig::DelayedTaskWrapper::Execute() const
 {
+    std::vector<AddrInfoWithTtl> infos = cache_.Get(hostName_);
     cache_.Delete(hostName_);
+    if (infos.size() == 0) {
+        return;
+    }
+
+    for (auto info : infos) {
+        if (info.ttl > remainTime_) {
+            info.ttl -= remainTime_;
+            cache_.Put(hostName_, info);
+        }
+    }
+}
+
+uint32_t DnsResolvConfig::DelayedTaskWrapper::GetUpdateTime()
+{
+    std::vector<AddrInfoWithTtl> infos = cache_.Get(hostName_);
+    if (infos.size() == 0) {
+        return 0;
+    }
+    remainTime_ = infos[0].ttl;
+    for (auto info : infos) {
+        remainTime_ = remainTime_ < info.ttl ? remainTime_ : info.ttl;
+    }
+    return remainTime_;
 }
 
 bool DnsResolvConfig::DelayedTaskWrapper::operator<(const DelayedTaskWrapper &other) const
@@ -113,7 +137,7 @@ std::vector<std::string> DnsResolvConfig::GetDomains() const
     return searchDomains_;
 }
 
-NetManagerStandard::LRUCache<AddrInfo> &DnsResolvConfig::GetCache()
+NetManagerStandard::LRUCache<AddrInfoWithTtl> &DnsResolvConfig::GetCache()
 {
     return cache_;
 }
@@ -121,7 +145,11 @@ NetManagerStandard::LRUCache<AddrInfo> &DnsResolvConfig::GetCache()
 void DnsResolvConfig::SetCacheDelayed(const std::string &hostName)
 {
     auto wrapper = std::make_shared<DelayedTaskWrapper>(hostName, cache_);
-    delayedQueue_.Put(wrapper);
+    uint32_t time = wrapper->GetUpdateTime();
+    if (time == 0) {
+        return;
+    }
+    delayedQueue_.Put(wrapper, time);
 }
 
 void DnsResolvConfig::SetUserDefinedServerFlag(bool flag)
