@@ -149,7 +149,7 @@ private:
     ffrt::condition_variable needRunCondition_;
     ffrt::mutex needRunMutex_;
     std::array<std::set<std::shared_ptr<T>, std::owner_less<std::shared_ptr<T>>>, ARRAY_SIZE + DELAYED_COUNT> elems_;
-    std::map<std::shared_ptr<T>, int, std::owner_less<std::shared_ptr<T>>> indexMap_;
+    std::map<std::shared_ptr<T>, elemParam, std::owner_less<std::shared_ptr<T>>> indexMap_;
 };
 } // namespace OHOS::NetManagerStandard
 

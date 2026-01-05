@@ -74,7 +74,7 @@ enum CommandType {
     POST_DNS_ABNORMAL_RESULT = 9, // for musl and c-ares
     GET_CONFIG_EXT = 10, // for musl and c-ares
     JUDGE_IPV4 = 11,
-    SET_CONFIG_EXT = 12, // for musl and c-ares
+    SET_CACHE_EXT = 12, // for musl and c-ares
 };
 
 struct RequestInfo {

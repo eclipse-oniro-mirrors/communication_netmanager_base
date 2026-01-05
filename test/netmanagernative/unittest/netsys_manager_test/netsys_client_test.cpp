@@ -169,11 +169,11 @@ HWTEST_F(NetsysClientTest, NetSysSetResolvCacheExtTest001, TestSize.Level1)
     EXPECT_EQ(ret, -EINVAL);
 
     struct addrinfo addrInfo;
-    ret = NetSysSetResolvCache(netId, param, &addrInfo, nullptr);
+    ret = NetSysSetResolvCacheExt(netId, param, &addrInfo, nullptr);
     EXPECT_EQ(ret, -EINVAL);
     
     uint32_t ttl[MAX_RESULTS] = {0};
-    ret = NetSysSetResolvCache(netId, param, &addrInfo, ttl);
+    ret = NetSysSetResolvCacheExt(netId, param, &addrInfo, ttl);
     EXPECT_NE(ret, 0);
 }
 

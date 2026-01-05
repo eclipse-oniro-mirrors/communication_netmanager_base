@@ -604,8 +604,8 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
     };
 }
 
-ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &name, uint16_t netId, uint32_t uid,
-                                                            uint32_t resNum)
+ReceiverRunner DnsResolvListenInternal::ProcGetCacheContentExt(const std::string &name, uint16_t netId, uint32_t uid,
+                                                               uint32_t resNum)
 {
     return [this, name, netId, uid, resNum](FileDescriptor fd, const std::string &data) -> FixedLengthReceiverState {
         if (server_ == nullptr) {
@@ -626,8 +626,8 @@ ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &n
     };
 }
 
-ReceiverRunner DnsResolvListenInternal::ProcGetCacheContent(const std::string &name, uint16_t netId, uint32_t uid,
-                                                            AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum)
+ReceiverRunner DnsResolvListenInternal::ProcGetTtlContent(const std::string &name, uint16_t netId, uint32_t uid,
+                                                          AddrInfo addrInfo[MAX_RESULTS], uint32_t resNum)
 {
     return [this, name, netId, uid, addrInfo, resNum](FileDescriptor fd,
                                                       const std::string &data) -> FixedLengthReceiverState {
