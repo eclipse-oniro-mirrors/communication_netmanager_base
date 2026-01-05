@@ -426,7 +426,6 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest001, TestSize.Level1)
 
     auto res = dnsParCache.GetDnsCache(1, hostName);
     EXPECT_NE(res.size(), 0);
-
 }
 
 HWTEST_F(DNSParamCacheTest, SetDnsCacheTest002, TestSize.Level1)
@@ -444,7 +443,6 @@ HWTEST_F(DNSParamCacheTest, SetDnsCacheTest002, TestSize.Level1)
 
     auto res = dnsParCache.GetDnsCache(1, hostName);
     EXPECT_NE(res.size(), 0);
-
 }
 
 } // namespace NetsysNative
