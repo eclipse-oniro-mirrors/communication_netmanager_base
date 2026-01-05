@@ -406,5 +406,46 @@ HWTEST_F(DNSParamCacheTest, RemoveDuplicateNameserversTest001, TestSize.Level1)
     std::vector<std::string> res = dnsParCache.RemoveDuplicateNameservers(servers);
     EXPECT_FALSE(res.empty());
 }
+
+HWTEST_F(DNSParamCacheTest, SetDnsCacheTest001, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    dnsParCache.CreateCacheForNet(1);
+    std::string hostName = "test";
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = 2;
+    dnsParCache.SetDnsCache(1, hostName, addrInfo, 0);
+
+    uint32_t ttl = 10;
+    dnsParCache.SetDnsCache(1, hostName, addrInfo, ttl);
+    
+    AddrInfo addrInfoV6;
+    addrInfoV6.aiFamily = 10;
+    ttl = 700;
+    dnsParCache.SetDnsCache(1, hostName, addrInfoV6, ttl);
+
+    auto res = dnsParCache.GetDnsCache(1, hostName);
+    EXPECT_NE(res.size(), 0);
+
+}
+
+HWTEST_F(DNSParamCacheTest, SetDnsCacheTest002, TestSize.Level1)
+{
+    DnsParamCache dnsParCache;
+    dnsParCache.CreateCacheForNet(1);
+    std::string hostName = "test";
+    dnsParCache.SetCacheDelayed(1, hostName);
+
+    AddrInfo addrInfo;
+    addrInfo.aiFamily = 2;
+    uint32_t ttl = 10;
+    dnsParCache.SetDnsCache(1, hostName, addrInfo, ttl);
+    dnsParCache.SetCacheDelayed(1, hostName);
+
+    auto res = dnsParCache.GetDnsCache(1, hostName);
+    EXPECT_NE(res.size(), 0);
+
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

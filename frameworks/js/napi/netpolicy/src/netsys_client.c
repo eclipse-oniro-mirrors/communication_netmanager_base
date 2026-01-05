@@ -542,7 +542,7 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
 int32_t NetSysSetResolvCacheExt(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res, uint32_t *ttl)
 {
     char *hostName = param.host;
-    if (hostName == NULL || strlen(hostName) == 0 || res == NULL) {
+    if (hostName == NULL || strlen(hostName) == 0 || res == NULL || ttl == NULL) {
         DNS_CONFIG_PRINT("Invalid Param");
         return -EINVAL;
     }
