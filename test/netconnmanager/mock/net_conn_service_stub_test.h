@@ -446,6 +446,11 @@ public:
     {
         return 0;
     }
+
+    int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
