@@ -32,6 +32,7 @@ namespace {
 constexpr bool TEST_BOOL_VALUE = false;
 constexpr int32_t TEST_INT32_VALUE = 1;
 constexpr uint32_t TEST_UINT32_VALUE = 1;
+constexpr uint16_t TEST_UINT16_VALUE = 1;
 constexpr const char *TEST_STRING_VALUE = "test";
 constexpr const char *TEST_DOMAIN = "test.com";
 } // namespace
@@ -1598,6 +1599,25 @@ HWTEST_F(NetConnServiceStubTest, OnDeleteVlanIpTest007, TestSize.Level1)
     EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
     int32_t ret = instance_->OnDeleteVlanIp(data, reply);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnGetConnectOwnerUidTest001
+ * @tc.desc: Test NetConnServiceStub OnGetConnectOwnerUid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetConnectOwnerUidTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data.WriteInt32(TEST_INT32_VALUE));
+    EXPECT_TRUE(data.WriteUint32(TEST_UINT32_VALUE));
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    EXPECT_TRUE(data.WriteUint16(TEST_UINT16_VALUE));
+    EXPECT_TRUE(data.WriteString(TEST_STRING_VALUE));
+    EXPECT_TRUE(data.WriteUint16(TEST_UINT16_VALUE));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

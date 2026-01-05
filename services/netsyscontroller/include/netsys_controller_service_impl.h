@@ -828,6 +828,8 @@ public:
         const std::string &ifName) override;
 
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo) override;
+    int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                               int32_t &ownerUid) override;
 
     /**
      * Register Dns Result Callback Listener.

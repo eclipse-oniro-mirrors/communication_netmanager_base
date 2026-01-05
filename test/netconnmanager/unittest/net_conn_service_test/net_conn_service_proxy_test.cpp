@@ -92,6 +92,11 @@ public:
                 break;
             }
 
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID): {
+                reply.WriteInt32(TEST_UID);
+                break;
+            }
+
             default:
                 reply.WriteUint32(TEST_SUPPLIERID);
                 break;
@@ -801,6 +806,19 @@ HWTEST_F(NetConnServiceProxyTest, DeleteVlanIpTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceProxyTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

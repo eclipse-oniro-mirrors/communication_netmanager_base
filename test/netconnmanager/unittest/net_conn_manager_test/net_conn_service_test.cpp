@@ -2139,5 +2139,18 @@ HWTEST_F(NetConnServiceTest, DeleteVlanIpTest001, TestSize.Level1)
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    auto ret = NetConnService::GetInstance()->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

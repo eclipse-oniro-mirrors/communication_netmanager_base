@@ -26,6 +26,9 @@
 #include "netlink_define.h"
 #include "netnative_log_wrapper.h"
 #include "wrapper_distributor.h"
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include "securec.h"
+#endif
 
 namespace OHOS {
 namespace nmd {

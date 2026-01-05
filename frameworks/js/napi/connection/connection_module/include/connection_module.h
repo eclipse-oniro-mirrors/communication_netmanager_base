@@ -86,6 +86,9 @@ public:
     static constexpr const char *FUNCTION_GET_IP_NEIGH_TABLE = "getIpNeighTable";
     static constexpr const char *INTERFACE_FAMILY_TYPE = "FamilyType";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME_WITH_OPTION = "getAddressesByNameWithOptions";
+    static constexpr const char *FUNCTION_GET_CONNECT_OWNER_UID = "getConnectOwnerUid";
+    static constexpr const char *FUNCTION_GET_CONNECT_OWNER_UID_SYNC = "getConnectOwnerUidSync";
+    static constexpr const char *INTERFACE_PROTOCOL_TYPE = "ProtocolType";
     static constexpr const char *FUNCTION_GET_DNS_ASCII = "getDnsAscii";
     static constexpr const char *FUNCTION_GET_DNS_UNICODE = "getDnsUnicode";
     static constexpr const char *FUNCTION_CREATE_VLAN = "createVlanInterface";
@@ -122,6 +125,7 @@ public:
 private:
     static void InitClasses(napi_env env, napi_value exports);
     static void InitProperties(napi_env env, napi_value exports);
+    static void InitProtocolTypeProperties(napi_env env, napi_value exports);
     static void InitFamilyTypes(napi_env env, napi_value exports);
 
     static napi_value GetDefaultNet(napi_env env, napi_callback_info info);
@@ -174,6 +178,8 @@ private:
     static napi_value SetNetExtAttributeSync(napi_env env, napi_callback_info info);
     static napi_value GetIpNeighTable(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByNameWithOptions(napi_env env, napi_callback_info info);
+    static napi_value GetConnectOwnerUid(napi_env env, napi_callback_info info);
+    static napi_value GetConnectOwnerUidSync(napi_env env, napi_callback_info info);
     static napi_value GetDnsASCII(napi_env env, napi_callback_info info);
     static napi_value GetDnsUnicode(napi_env env, napi_callback_info info);
     static napi_value CreateVlan(napi_env env, napi_callback_info info);

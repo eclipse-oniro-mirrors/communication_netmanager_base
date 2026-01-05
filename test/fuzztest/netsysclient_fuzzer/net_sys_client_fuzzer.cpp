@@ -1653,6 +1653,29 @@ void CmdSetDnsCacheFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdGetConnectOwnerUidFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t protocol = NetSysGetData<int32_t>();
+    uint32_t family = NetSysGetData<uint32_t>();
+    std::string localIp = NetSysGetString(STR_LEN);
+    uint16_t localPort = NetSysGetData<uint16_t>();
+    std::string remoteIp = NetSysGetString(STR_LEN);
+    uint16_t remotePort = NetSysGetData<uint16_t>();
+    dataParcel.WriteInt32(protocol);
+    dataParcel.WriteUint32(family);
+    dataParcel.WriteString(localIp);
+    dataParcel.WriteUint16(localPort);
+    dataParcel.WriteString(remoteIp);
+    dataParcel.WriteUint16(remotePort);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID),
+                    dataParcel);
+}
+
 void CmdSetInternetAccessByIpForWifiShareFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1796,6 +1819,7 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdCreateVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDestroyVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdAddVlanIpFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdGetConnectOwnerUidFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

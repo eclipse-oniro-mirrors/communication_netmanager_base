@@ -1070,6 +1070,13 @@ int32_t NetsysControllerServiceImpl::GetIpNeighTable(std::vector<NetIpMacInfo> &
     return netsysClient_->GetIpNeighTable(ipMacInfo);
 }
 
+int32_t NetsysControllerServiceImpl::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                                        int32_t &ownerUid)
+{
+    NETMGR_LOG_I("GetConnectOwnerUid");
+    return netsysClient_->GetConnectOwnerUid(netConnInfo, ownerUid);
+}
+
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
 {

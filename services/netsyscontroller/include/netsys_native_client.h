@@ -877,6 +877,7 @@ public:
     int32_t DelStaticIpv6Addr(const std::string &ipv6Addr, const std::string &macAddr,
         const std::string &ifName);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo);
+    int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid);
 
         /**
      * Register Dns Result Callback Listener.

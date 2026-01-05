@@ -1985,5 +1985,41 @@ HWTEST_F(NetsysControllerTest, AddVlanIp002, TestSize.Level1)
     int32_t ret = netsysController->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = netsysController->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetConnectOwnerUidTest002, TestSize.Level1)
+{
+    auto netsysController = std::make_shared<NetsysController>();
+    netsysController->netsysService_  = nullptr;
+
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = netsysController->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

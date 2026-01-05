@@ -162,6 +162,7 @@ enum class NetsysInterfaceCode {
     NETSYS_DESTROY_VLAN,
     NETSYS_ADD_VLAN_IP,
     NETSYS_NETWORK_ENABLE_IPV4,
+    NETSYS_GET_CONNECT_OWNER_UID,
 };
 
 enum class NotifyInterfaceCode {

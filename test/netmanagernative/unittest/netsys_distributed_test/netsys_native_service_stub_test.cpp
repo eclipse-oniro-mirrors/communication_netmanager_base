@@ -707,6 +707,11 @@ public:
     {
         return 0;
     }
+
+    int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

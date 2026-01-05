@@ -28,6 +28,7 @@ constexpr int32_t MAX_VNIC_UID_ARRAY_SIZE = 20;
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
+constexpr int32_t INVALID_UID = -1;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
                                         static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
@@ -249,6 +250,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMapExt()
         &NetConnServiceStub::OnAddVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP)] = {
         &NetConnServiceStub::OnDeleteVlanIp, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECT_OWNER_UID)] = {
+        &NetConnServiceStub::OnGetConnectOwnerUid, {Permission::GET_NETWORK_INFO}};
 }
 
 void NetConnServiceStub::InitVnicFuncToInterfaceMap()
@@ -2278,5 +2281,27 @@ int32_t NetConnServiceStub::OnDeleteVlanIp(MessageParcel &data, MessageParcel &r
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnServiceStub::OnGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("Enter OnGetConnectOwnerUid");
+    sptr<NetConnInfo> netConnInfo = NetConnInfo::Unmarshalling(data);
+    if (netConnInfo == nullptr) {
+        NETMGR_LOG_E("netConnInfo is nullptr");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ownerUid = -1;
+    int32_t ret = GetConnectOwnerUid(*netConnInfo, ownerUid);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteInt32(ownerUid)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

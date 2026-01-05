@@ -1442,5 +1442,22 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdAddVlanIp001, TestSize.Level1)
     int32_t ret = notifyStub_->CmdAddVlanIp(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetConnectOwnerUid001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetConnectOwnerUid(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
+
+    data.WriteInt32(IPPROTO_TCP);
+    data.WriteUint32(static_cast<uint32_t>(NetConnInfo::Family::IPv4));
+    data.WriteString("192.168.1.100");
+    data.WriteUint16(1111);
+    data.WriteString("192.168.1.200");
+    data.WriteUint16(2222);
+    ret = notifyStub_->CmdGetConnectOwnerUid(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -440,6 +440,7 @@ public:
     int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
     int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
     void SendNetPolicyChange(uint32_t uid, uint32_t policy);
+    int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

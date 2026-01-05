@@ -91,6 +91,7 @@ constexpr const char *PERSIST_WIFI_DELAY_ELEVATOR_ENABLE = "persist.booster.enab
 constexpr const char *PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE = "persist.booster.enable_wifi_delay_weak_signal";
 constexpr const char *SETTINGS_DATASHARE_URI_HTTP =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=EffectiveTime";
+constexpr int32_t INVALID_UID = -1;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -4392,6 +4393,26 @@ uint32_t NetConnService::GetDefaultNetSupplierId()
 {
     std::shared_lock<ffrt::shared_mutex> lock(defaultNetSupplierMutex_);
     return defaultNetSupplier_ == nullptr ? 0 : defaultNetSupplier_->GetSupplierId();
+}
+
+int32_t NetConnService::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid)
+{
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    if (!NetManagerCenter::GetInstance().IsVpnApplication(callingUid)) {
+        NETMGR_LOG_E("GetConnectOwnerUid failed, The calling application is not vpn application.");
+        return NETMANAGER_ERR_INCORRECT_USAGE;
+    }
+    auto ret = NetsysController::GetInstance().GetConnectOwnerUid(netConnInfo, ownerUid);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetConnectOwnerUid failed, ret = %{public}d", ret);
+        return ret;
+    }
+
+    if (!NetManagerCenter::GetInstance().IsAppUidInWhiteList(callingUid, ownerUid)) {
+        ownerUid = INVALID_UID;
+    }
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

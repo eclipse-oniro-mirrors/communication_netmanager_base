@@ -856,5 +856,53 @@ HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
 
     EXPECT_TRUE(isInternalDefaultNetIdIn);
 }
+
+/**
+ * @tc.name: NetConnManager023
+ * @tc.desc: Test NetConnManager GetConnectOwnerUid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager023, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, GetConnectOwnerUid(_, _)).WillRepeatedly(Return(0));
+    NetManagerBaseAccessToken token;
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t result = netConnClient->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetConnManager024
+ * @tc.desc: Test NetConnManager GetConnectOwnerUid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager024, TestSize.Level1)
+{
+    EXPECT_CALL(*mockNetConnService, GetConnectOwnerUid(_, _)).WillRepeatedly(Return(0));
+    NetManagerBaseAccessToken token;
+    auto netConnClient = std::make_shared<NetConnClient>();
+    netConnClient->NetConnService_ = mockNetConnService;
+
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "incorrect_ip_address";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "incorrect_ip_address";
+    info.remotePort_ = 2222;
+    int32_t result = netConnClient->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(result, NETMANAGER_ERR_INVALID_PARAMETER);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -105,6 +105,7 @@ enum class ConnInterfaceCode {
     CMD_NM_DESTROY_VLAN,
     CMD_NM_ADD_VLAN_IP,
     CMD_NM_DELETE_VLAN_IP,
+    CMD_NM_GET_CONNECT_OWNER_UID,
 };
 
 enum class AdjCallbackInterfaceCode {

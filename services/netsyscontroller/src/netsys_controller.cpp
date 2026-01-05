@@ -1826,5 +1826,16 @@ int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
     }
     return netsysService_->GetIpNeighTable(ipMacInfo);
 }
+
+int32_t NetsysController::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                             int32_t &uid)
+{
+    NETMGR_LOG_D("GetConnectOwnerUid");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetConnectOwnerUid(netConnInfo, uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

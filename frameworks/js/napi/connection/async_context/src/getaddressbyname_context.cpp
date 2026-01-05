@@ -67,7 +67,7 @@ void GetAddressByNameWithOptionsContext::ParseParams(napi_value *params, size_t 
                 return;
             }
         auto family = NapiUtils::GetInt32FromValue(GetEnv(), jsFamily);
-        if (family < static_cast<uint32_t>(Family::All) || family > static_cast<uint32_t>(Family::IPv6)) {
+        if (family < static_cast<int32_t>(Family::All) || family > static_cast<int32_t>(Family::IPv6)) {
             SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
             return;
         }

@@ -23,6 +23,7 @@
 #include "net_ethernet_base_service.h"
 #include "net_policy_base_service.h"
 #include "net_stats_base_service.h"
+#include "net_vpn_base_service.h"
 #include "dual_stack_probe_callback.h"
 
 namespace OHOS {
@@ -63,11 +64,16 @@ public:
     int32_t DualStackProbe(int32_t netId);
     int32_t UpdateDualStackProbeTime(int32_t dualStackProbeTimeOut);
 
+    bool IsVpnApplication(int32_t uid);
+    bool IsAppUidInWhiteList(int32_t callingUid, int32_t appUid);
+    void RegisterVpnService(const sptr<NetVpnBaseService> &service);
+
 private:
     sptr<NetConnBaseService> connService_ = nullptr;
     sptr<NetStatsBaseService> statsService_ = nullptr;
     sptr<NetPolicyBaseService> policyService_ = nullptr;
     sptr<NetEthernetBaseService> ethernetService_ = nullptr;
+    sptr<NetVpnBaseService> vpnService_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

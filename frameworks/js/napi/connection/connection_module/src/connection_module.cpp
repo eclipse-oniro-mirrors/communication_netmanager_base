@@ -38,6 +38,7 @@
 #include "setcustomdnsrule_context.h"
 #include "deletecustomdnsrule_context.h"
 #include "deletecustomdnsrules_context.h"
+#include "getconnectowneruid_context.h"
 #include "getinterfaceconfig_context.h"
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
@@ -268,6 +269,8 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_ASCII, GetDnsASCII),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_UNICODE, GetDnsUnicode),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECT_OWNER_UID, GetConnectOwnerUid),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECT_OWNER_UID_SYNC, GetConnectOwnerUidSync),
         DEFINE_NET_EXT_ATTRIBUTE_FUNCTIONS
         DEFINE_VLAN_FUNCTIONS
         DEFINE_PAC_FUNCTIONS
@@ -382,6 +385,21 @@ void ConnectionModule::InitFamilyTypes(napi_env env, napi_value exports)
     napi_value fTypes = NapiUtils::CreateObject(env);
     NapiUtils::DefineProperties(env, fTypes, familyTypes);
     NapiUtils::SetNamedProperty(env, exports, INTERFACE_FAMILY_TYPE, fTypes);
+
+    InitProtocolTypeProperties(env, exports);
+}
+
+void ConnectionModule::InitProtocolTypeProperties(napi_env env, napi_value exports)
+{
+    std::initializer_list<napi_property_descriptor> protocolTypes = {
+        DECLARE_NAPI_STATIC_PROPERTY("PROTO_TYPE_TCP",
+                                     NapiUtils::CreateUint32(env, static_cast<uint32_t>(IPPROTO_TCP))),
+        DECLARE_NAPI_STATIC_PROPERTY("PROTO_TYPE_UDP",
+                                     NapiUtils::CreateUint32(env, static_cast<uint32_t>(IPPROTO_UDP))),
+    };
+    napi_value protoTypes = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, protoTypes, protocolTypes);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_PROTOCOL_TYPE, protoTypes);
 }
 
 napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info info)
@@ -661,6 +679,19 @@ napi_value ConnectionModule::GetDnsUnicode(napi_env env, napi_callback_info info
     return ModuleTemplate::InterfaceSync<GetDnsContext>(env, info, FUNCTION_GET_DNS_UNICODE, nullptr,
                                                         ConnectionExec::ExecGetDnsUnicode,
                                                         ConnectionExec::GetDnsCallback);
+}
+
+napi_value ConnectionModule::GetConnectOwnerUid(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetConnectOwnerUidContext>(env, info, FUNCTION_GET_CONNECT_OWNER_UID, nullptr,
+        ConnectionAsyncWork::ExecGetConnectOwnerUid, ConnectionAsyncWork::GetConnectOwnerUidCallback);
+}
+
+napi_value ConnectionModule::GetConnectOwnerUidSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetConnectOwnerUidContext>(env, info, FUNCTION_GET_CONNECT_OWNER_UID_SYNC,
+                                                                    nullptr, ConnectionExec::ExecGetConnectOwnerUid,
+                                                                    ConnectionExec::GetConnectOwnerUidCallback);
 }
 
 napi_value ConnectionModule::AddNetworkRoute(napi_env env, napi_callback_info info)

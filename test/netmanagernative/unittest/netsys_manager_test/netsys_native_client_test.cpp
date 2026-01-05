@@ -814,5 +814,20 @@ HWTEST_F(NetsysNativeClientTest, AddVlanIp001, TestSize.Level1)
     int32_t ret = nativeClient->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, GetConnectOwnerUidTest001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    int32_t ret = nativeClient->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

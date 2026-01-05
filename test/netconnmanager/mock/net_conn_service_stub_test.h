@@ -451,6 +451,11 @@ public:
     {
         return 0;
     }
+
+    int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

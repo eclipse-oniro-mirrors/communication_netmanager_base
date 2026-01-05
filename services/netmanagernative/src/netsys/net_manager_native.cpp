@@ -661,6 +661,12 @@ int32_t NetManagerNative::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
     return interfaceManager_->GetIpNeighTable(ipMacInfo);
 }
 
+int32_t NetManagerNative::GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
+                                             int32_t &ownerUid)
+{
+    return connManager_->GetConnectOwnerUid(netConnInfo, ownerUid);
+}
+
 int32_t NetManagerNative::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return dnsManager_->RegisterDnsResultCallback(callback, timeStep);

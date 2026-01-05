@@ -43,6 +43,7 @@ namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
+constexpr int32_t INVALID_UID = -1;
 } // namespace
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -386,14 +387,14 @@ napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext 
 
 bool ConnectionExec::ExecSetAppHttpProxy(SetAppHttpProxyContext *context)
 {
-    HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionSetAppHttpProxy");
+    auto hiAppEventReport = std::make_shared<HiAppEventReport>("NetworkKit", "ConnectionSetAppHttpProxy");
     int32_t errorCode = NetConnClient::GetInstance().SetAppHttpProxy(context->httpProxy_);
     if (errorCode != NET_CONN_SUCCESS) {
         context->SetErrorCode(errorCode);
-        hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, errorCode);
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, errorCode);
         return false;
     }
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, NET_CONN_SUCCESS);
+    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, NET_CONN_SUCCESS);
     return true;
 }
 
@@ -422,16 +423,16 @@ napi_value ConnectionExec::GetAppNetCallback(GetAppNetContext *context)
 
 bool ConnectionExec::ExecSetAppNet(SetAppNetContext *context)
 {
-    HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionSetAppNet");
+    auto hiAppEventReport = std::make_shared<HiAppEventReport>("NetworkKit", "ConnectionSetAppNet");
     NETMANAGER_BASE_LOGI("into");
     int32_t errorCode = NetConnClient::GetInstance().SetAppNet(context->netHandle_.GetNetId());
     if (errorCode != NET_CONN_SUCCESS) {
         NETMANAGER_BASE_LOGE("exec setAppNet failed errorCode: %{public}d", errorCode);
         context->SetErrorCode(errorCode);
-        hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, errorCode);
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, errorCode);
         return false;
     }
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, NET_CONN_SUCCESS);
+    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, NET_CONN_SUCCESS);
     return true;
 }
 
@@ -798,6 +799,35 @@ bool ConnectionExec::ExecGetDnsASCII(GetDnsContext *context)
     }
     context->SetHost(ascii);
     return true;
+}
+
+bool ConnectionExec::ExecGetConnectOwnerUid(GetConnectOwnerUidContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecGetConnectOwnerUid");
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
+        return false;
+    }
+    NetConnInfo netConnInfo;
+    netConnInfo.protocolType_ = context->protocolType_;
+    netConnInfo.family_ = static_cast<NetConnInfo::Family>(context->localAddress_.GetJsValueFamily());
+    netConnInfo.localAddress_ = context->localAddress_.GetAddress();
+    netConnInfo.localPort_ = context->localAddress_.GetPort();
+    netConnInfo.remoteAddress_ = context->remoteAddress_.GetAddress();
+    netConnInfo.remotePort_ = context->remoteAddress_.GetPort();
+    int32_t errorCode = NetConnClient::GetInstance().GetConnectOwnerUid(netConnInfo, context->ownerUid_);
+    if (errorCode != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec getConnectOwnerUid failed errorCode: %{public}d", errorCode);
+        context->ownerUid_ = INVALID_UID;
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetConnectOwnerUidCallback(GetConnectOwnerUidContext *context)
+{
+    return NapiUtils::CreateInt32(context->GetEnv(), context->ownerUid_);
 }
 
 bool ConnectionExec::ExecGetDnsUnicode(GetDnsContext *context)
@@ -1187,7 +1217,7 @@ void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *i
 
 bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
 {
-    HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionRegister");
+    auto hiAppEventReport = std::make_shared<HiAppEventReport>("NetworkKit", "ConnectionRegister");
     auto wCallback = context->GetNetConnCallback();
     sptr<INetConnCallback> callback = wCallback.promote();
     if (callback == nullptr) {
@@ -1201,7 +1231,7 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, conn.timeout_);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ and hasTimeout_ %{public}d", ret);
         context->SetErrorCode(ret);
-        hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         return ret == NETMANAGER_SUCCESS;
     }
 
@@ -1210,14 +1240,14 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, 0);
         NETMANAGER_BASE_LOGD("Register result hasNetSpecifier_ %{public}d", ret);
         context->SetErrorCode(ret);
-        hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         return ret == NETMANAGER_SUCCESS;
     }
 
     int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
     context->SetErrorCode(ret);
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
+    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
     return ret == NETMANAGER_SUCCESS;
 }
 
@@ -1228,7 +1258,7 @@ napi_value ConnectionExec::NetConnectionExec::RegisterCallback(RegisterContext *
 
 bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *context)
 {
-    HiAppEventReport hiAppEventReport("NetworkKit", "ConnectionUnregister");
+    auto hiAppEventReport = std::make_shared<HiAppEventReport>("NetworkKit", "ConnectionUnregister");
     auto wCallback = context->GetNetConnCallback();
     auto callback = wCallback.promote();
     if (callback == nullptr) {
@@ -1239,10 +1269,10 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     if (ret != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGD("Unregister result %{public}d", ret);
-        hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
+        hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
         context->SetErrorCode(ret);
     }
-    hiAppEventReport.ReportSdkEvent(RESULT_SUCCESS, ret);
+    hiAppEventReport->ReportSdkEvent(RESULT_SUCCESS, ret);
     return ret == NETMANAGER_SUCCESS;
 }
 

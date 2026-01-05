@@ -30,6 +30,7 @@
 #include "setinterfaceipaddr_context.h"
 #include "addnetworkroute_context.h"
 #include "interfaceregister_context.h"
+#include "getconnectowneruid_context.h"
 #include "getinterfaceconfig_context.h"
 #include "registernetsupplier_context.h"
 #include "unregisternetsupplier_context.h"
@@ -314,6 +315,17 @@ void ConnectionAsyncWork::DeleteVlanIpCallback(napi_env env, napi_status status,
 {
     BaseAsyncWork::AsyncWorkCallback<DeleteVlanIpContext,
         ConnectionExec::DeleteVlanIpCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecGetConnectOwnerUid(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetConnectOwnerUidContext, ConnectionExec::ExecGetConnectOwnerUid>(env, data);
+}
+
+void ConnectionAsyncWork::GetConnectOwnerUidCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetConnectOwnerUidContext, ConnectionExec::GetConnectOwnerUidCallback>(env, status,
+                                                                                                            data);
 }
 
 void ConnectionAsyncWork::ExecAddNetworkRoute(napi_env env, void *data)

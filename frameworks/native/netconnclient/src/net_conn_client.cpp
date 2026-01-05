@@ -1602,5 +1602,19 @@ int32_t NetConnClient::DeleteVlanIp(const std::string &ifName, uint32_t vlanId, 
     // LCOV_EXCL_STOP
     return proxy->DeleteVlanIp(ifName, vlanId, ip, mask);
 }
+
+int32_t NetConnClient::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid)
+{
+    if (!netConnInfo.CheckValid()) {
+        NETMGR_LOG_E("netConnInfo is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetConnectOwnerUid(netConnInfo, ownerUid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

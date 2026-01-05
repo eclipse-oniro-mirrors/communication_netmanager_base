@@ -357,5 +357,35 @@ HWTEST_F(NetsysNativeServiceTest, AddVlanIp001, TestSize.Level1)
     int32_t ret = instance->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetsysNativeServiceTest, GetConnectOwnerUid001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    instance_->netsysService_ = std::make_unique<OHOS::nmd::NetManagerNative>();
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_NE(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetConnectOwnerUid002, TestSize.Level1)
+{
+    int32_t uid = 0;
+    NetConnInfo info;
+    info.protocolType_ = IPPROTO_TCP;
+    info.family_ = NetConnInfo::Family::IPv4;
+    info.localAddress_ = "192.168.1.100";
+    info.localPort_ = 1111;
+    info.remoteAddress_ = "192.168.1.200";
+    info.remotePort_ = 2222;
+    instance_->netsysService_ = nullptr;
+    int32_t ret = instance_->GetConnectOwnerUid(info, uid);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetsysNative
 } // namespace OHOS
