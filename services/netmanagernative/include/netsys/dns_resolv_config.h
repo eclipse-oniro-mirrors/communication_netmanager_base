@@ -44,7 +44,7 @@ public:
     std::vector<std::string> GetDomains() const;
     uint8_t GetRetryCount() const;
 
-    NetManagerStandard::LRUCache<AddrInfo> &GetCache();
+    NetManagerStandard::LRUCache<AddrInfoWithTtl> &GetCache();
 
     void SetCacheDelayed(const std::string &hostName);
 
@@ -63,16 +63,20 @@ public:
 private:
     class DelayedTaskWrapper {
     public:
-        DelayedTaskWrapper(std::string hostName, NetManagerStandard::LRUCache<AddrInfo> &cache);
+        DelayedTaskWrapper(std::string hostName, NetManagerStandard::LRUCache<AddrInfoWithTtl> &cache);
 
         void Execute() const;
+
+        uint32_t GetUpdateTime();
 
         bool operator<(const DelayedTaskWrapper &other) const;
 
     private:
         std::string hostName_;
 
-        NetManagerStandard::LRUCache<AddrInfo> &cache_;
+        uint32_t remainTime_ = 0;
+
+        NetManagerStandard::LRUCache<AddrInfoWithTtl> &cache_;
     };
 
     uint16_t netId_;
@@ -83,7 +87,7 @@ private:
     std::list<std::shared_ptr<DelayedTaskWrapper>> delayedTaskWrapperList_;
     std::vector<std::string> nameServers_;
     std::vector<std::string> searchDomains_;
-    NetManagerStandard::LRUCache<AddrInfo> cache_;
+    NetManagerStandard::LRUCache<AddrInfoWithTtl> cache_;
     NetManagerStandard::DelayedQueue<DelayedTaskWrapper, NetManagerStandard::DEFAULT_CAPABILITY, DEFAULT_DELAYED_COUNT>
         delayedQueue_;
     bool isIpv6Enable_;
