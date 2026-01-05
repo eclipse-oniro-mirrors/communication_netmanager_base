@@ -186,6 +186,8 @@ static __always_inline __u8 parse_dns_query(struct __sk_buff *skb, __u16 dns_qry
 
         struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
         if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+            __u16 num = 0;
+            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &num, &key, BPF_ANY);
             denyrst = 1;
         }
 
@@ -226,6 +228,8 @@ static __always_inline __u16 parse_dns_response(struct __sk_buff *skb, __u16 dns
 
         struct domain_value *denyValue = bpf_map_lookup_elem(&DOMAIN_DENY_MAP, &key);
         if (denyValue != NULL && match_domain_value(skb, denyValue)) {
+            __u16 num = 0;
+            bpf_map_update_elem(&DOMAIN_DATA_KEY_MAP, &num, &key, BPF_ANY);
             denyrst = 1;
         }
 

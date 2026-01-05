@@ -39,6 +39,9 @@ public:
         RDNSS = 8,
         ROUTEUPDATED = 9,
         ROUTEREMOVED = 10,
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        NFLOG_REPORT = 11,
+#endif
     };
 
     enum class Type {
@@ -59,6 +62,14 @@ public:
         TSTAMP,
         UID,
         VALID,
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        NFLOG_PROTO,
+        NFLOG_IP_SRC,
+        NFLOG_IP_DST,
+        NFLOG_SPORT,
+        NFLOG_DPORT,
+        NFLOG_DOMAIN,
+#endif
     };
 
     enum class SubSys {
@@ -66,6 +77,9 @@ public:
         NET,
         QLOG,
         STRICT,
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        NFLOG,
+#endif
     };
 
     inline void SetAction(Action action)

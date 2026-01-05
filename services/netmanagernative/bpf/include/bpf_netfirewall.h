@@ -309,6 +309,8 @@ private:
 
     int32_t WriteLoopBackBpfMap();
 
+    std::string DecodeDomainFromKey(const DomainHashKey &key);
+
     static std::shared_ptr<NetsysBpfNetFirewall> instance_;
     static bool isBpfLoaded_;
     static bool keepListen_;

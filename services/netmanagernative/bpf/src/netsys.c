@@ -461,6 +461,9 @@ static inline __u8 check_network_policy(net_bear_type_map_value net_bear_mark_ty
 
 static inline __u64 check_broker_policy(uint64_t uid)
 {
+    if (uid < SIM_UID_MIN) {
+        return uid;
+    }
     uint64_t network_access_uid = uid;
     void *broker_map_ptr = &broker_uid_access_policy_map;
     app_uid_key *broker_uid_key = (app_uid_key *)&uid;

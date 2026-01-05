@@ -18,6 +18,10 @@
 
 #include <string>
 #include <vector>
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include <linux/netfilter/nfnetlink.h>
+#include <linux/netfilter/nfnetlink_log.h>
+#endif
 
 namespace OHOS {
 namespace nmd {

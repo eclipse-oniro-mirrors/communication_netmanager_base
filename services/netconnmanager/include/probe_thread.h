@@ -33,7 +33,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class ProbeThread : public virtual RefBase, public std::enable_shared_from_this<ProbeThread> {
+class ProbeThread : public std::enable_shared_from_this<ProbeThread> {
 public:
 
     ProbeThread(uint32_t netId, NetBearType bearType, const NetLinkInfo &netLinkInfo,

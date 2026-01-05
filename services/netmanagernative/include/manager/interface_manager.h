@@ -80,7 +80,7 @@ public:
      * @return Returns 0, delete local IP address to network successfully, otherwise it will fail
      */
     static int DelAddress(const char *interfaceName, const char *addr, int prefixLen,
-                          const std::string &netCapabilities);
+                          int socketType);
 
     /**
      * Get the network interface names

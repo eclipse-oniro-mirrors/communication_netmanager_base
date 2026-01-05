@@ -27,6 +27,7 @@
 #include "net_handle.h"
 #include "net_conn_client.h"
 #include "common_notify_callback_test.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace nmd {
@@ -327,6 +328,38 @@ HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_03, Tes
     dnsQualityDiag.handler_started = true;
     EXPECT_EQ(dnsQualityDiag.send_dns_report(), 0);
     EXPECT_EQ(dnsQualityDiag.report_.size(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_04, TestSize.Level0)
+{
+    DnsQualityDiag dnsQualityDiag;
+    dnsQualityDiag.handler_started = false;
+    dnsQualityDiag.send_dns_report();
+    EXPECT_EQ(dnsQualityDiag.dnsQueryReport_.size(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_05, TestSize.Level0)
+{
+    DnsQualityDiag dnsQualityDiag;
+    dnsQualityDiag.handler_started = true;
+    NetsysNative::NetDnsQueryResultReport netDnsQueryResultReport;
+    dnsQualityDiag.dnsQueryReport_.emplace_back(netDnsQueryResultReport);
+    dnsQualityDiag.send_dns_report();
+    EXPECT_EQ(dnsQualityDiag.dnsQueryReport_.size(), 0);
+    EXPECT_EQ(dnsQualityDiag.resultListeners_.size(), 0);
+}
+
+HWTEST_F(DnsQualityDiagTest, send_dns_report_ShouldReturnZero_WhenCalled_06, TestSize.Level0)
+{
+    DnsQualityDiag dnsQualityDiag;
+    dnsQualityDiag.handler_started = true;
+    NetsysNative::NetDnsQueryResultReport netDnsQueryResultReport;
+    dnsQualityDiag.dnsQueryReport_.emplace_back(netDnsQueryResultReport);
+    auto callback = sptr<NetsysNative::DnsResultCallbackTest>::MakeSptr();
+    dnsQualityDiag.resultListeners_.push_back(callback);
+    dnsQualityDiag.send_dns_report();
+    EXPECT_EQ(dnsQualityDiag.dnsQueryReport_.size(), 0);
+    EXPECT_NE(dnsQualityDiag.resultListeners_.size(), 0);
 }
 
 HWTEST_F(DnsQualityDiagTest, add_dns_report_ShouldReturnZero_WhenCalled_01, TestSize.Level0)

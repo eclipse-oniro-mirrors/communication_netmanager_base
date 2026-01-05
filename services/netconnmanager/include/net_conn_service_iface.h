@@ -44,7 +44,6 @@ public:
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
-    std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
     int32_t SetReuseSupplierId(uint32_t supplierId, uint32_t reuseSupplierId, bool isReused) override;
     int32_t UpdateUidLostDelay(const std::set<uint32_t> &uidLostDelaySet) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;

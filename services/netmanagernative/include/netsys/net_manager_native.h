@@ -92,7 +92,7 @@ public:
     int32_t AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength,
-                                const std::string &netCapabilities);
+                                int socketType);
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
     int32_t InterfaceSetIffUp(std::string ifaceName);
     int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);

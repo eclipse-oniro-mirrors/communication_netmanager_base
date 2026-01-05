@@ -17,6 +17,7 @@
 #define NET_STATS_CLIENT_H
 
 #include <string>
+#include <shared_mutex>
 
 #include "parcel.h"
 #include "singleton.h"
@@ -325,6 +326,7 @@ private:
     std::mutex mutex_;
     sptr<INetStatsService> netStatsService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    std::shared_mutex callbackMutex_;
     sptr<INetStatsCallback> callback_;
 };
 } // namespace NetManagerStandard

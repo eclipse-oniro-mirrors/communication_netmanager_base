@@ -969,15 +969,17 @@ int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, Mes
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
-    std::string netCapabilities;
+    int socketType = 2;
     int32_t result = 0;
-    if (!data.ReadString(netCapabilities)) {
+    // LCOV_EXCL_START
+    if (!data.ReadInt32(socketType)) {
         NETNATIVE_LOG_D("DelInterfaceAddress");
         result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
     } else {
-        NETNATIVE_LOG_D("DelInterfaceAddress with netCapabilities %{public}s", netCapabilities.c_str());
-        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength, netCapabilities);
+        NETNATIVE_LOG_D("DelInterfaceAddress with netCapabilities %{public}d", socketType);
+        result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength, socketType);
     }
+    // LCOV_EXCL_STOP
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("DelInterfaceAddress has recved result %{public}d", result);
 

@@ -334,6 +334,20 @@ void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
                             dataParcel);
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+void OnInterceptRecordFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    int32_t result = NetSysGetData<int32_t>();
+    dataParcel.WriteInt32(result);
+    OnRemoteRequestCallBack(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERCEPT_RECORD),
+                            dataParcel);
+}
+#endif
+
 void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1775,6 +1789,9 @@ void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdAddStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDelStaticIpv6FuzzTest(data, size);
     OHOS::NetManagerStandard::CmdSetInternetAccessByIpForWifiShareFuzzTest(data, size);
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    OHOS::NetManagerStandard::OnInterceptRecordFuzzTest(data, size);
+#endif
     OHOS::NetManagerStandard::CmdGetIpNeighTableFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdCreateVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdDestroyVlanFuzzTest(data, size);

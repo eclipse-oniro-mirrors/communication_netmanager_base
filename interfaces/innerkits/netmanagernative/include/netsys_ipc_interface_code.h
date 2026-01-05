@@ -174,6 +174,9 @@ enum class NotifyInterfaceCode {
     ON_ROUTE_CHANGED,
     ON_DHCP_SUCCESS,
     ON_BANDWIDTH_REACHED_LIMIT,
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    ON_INTERCEPT_RECORD,
+#endif
 };
 
 enum class NetDiagInterfaceCode {

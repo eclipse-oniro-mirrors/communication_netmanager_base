@@ -18,6 +18,8 @@ ohos_unittest("netsys_dnsresolv_test") {
   module_out_path = "netmanager_base/netmanager_base/dnsresolv_test"
 
   sanitize = {
+    cfi = true
+    cfi_cross_dso = true
     debug = false
   }
 

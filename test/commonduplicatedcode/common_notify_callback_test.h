@@ -70,6 +70,13 @@ public:
     {
         return 0;
     }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    int32_t OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record) override
+    {
+        return 0;
+    }
+#endif
 };
 
 class DnsResultCallbackTest : public NetDnsResultCallbackStub {

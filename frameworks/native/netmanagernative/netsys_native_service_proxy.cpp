@@ -838,12 +838,12 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 }
 
 int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                                      int32_t prefixLength, const std::string &netCapabilities)
+                                                      int32_t prefixLength, int socketType)
 {
     NETNATIVE_LOGI("Begin to DelInterfaceAddress");
     MessageParcel data;
     if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
-        !data.WriteInt32(prefixLength) || !data.WriteString(netCapabilities)) {
+        !data.WriteInt32(prefixLength) || !data.WriteInt32(socketType)) {
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -347,9 +347,11 @@ bool NetSupplier::IsConnected() const
 
 bool NetSupplier::RequestToConnect(const NetRequest &netrequest)
 {
+    std::unique_lock<std::shared_mutex> lock(requestListMutex_);
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         requestList_.insert(netrequest.requestId);
     }
+    lock.unlock();
     AddRequest(netrequest);
     return SupplierConnection(netCaps_.ToSet(), netrequest);
 }
@@ -359,12 +361,16 @@ int32_t NetSupplier::SelectAsBestNetwork(const NetRequest &netrequest)
     HILOG_COMM_IMPL(LOG_INFO, LOG_DOMAIN, LOG_TAG,
         "Request[%{public}d] select [%{public}d, %{public}s] as best network", netrequest.requestId,
         supplierId_, netSupplierIdent_.c_str());
+    std::unique_lock<std::shared_mutex> reqLock(requestListMutex_);
     if (requestList_.find(netrequest.requestId) == requestList_.end()) {
         requestList_.insert(netrequest.requestId);
     }
+    reqLock.unlock();
+    std::unique_lock<std::shared_mutex> bestLock(bestReqListMutex_);
     if (bestReqList_.find(netrequest.requestId) == bestReqList_.end()) {
         bestReqList_.insert(netrequest.requestId);
     }
+    bestLock.unlock();
     AddRequest(netrequest);
     return NETMANAGER_SUCCESS;
 }
@@ -377,7 +383,9 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         NETMGR_LOG_D("Same net supplier, no need to disconnect.");
         return;
     }
+    std::shared_lock<std::shared_mutex> rLock(requestListMutex_);
     if (requestList_.empty() && HasNetCap(NET_CAPABILITY_INTERNET)) {
+        rLock.unlock();
         SupplierDisconnection(netCaps_.ToSet(), netrequest);
         return;
     }
@@ -385,25 +393,32 @@ void NetSupplier::ReceiveBestScore(int32_t bestScore, uint32_t supplierId, const
         NETMGR_LOG_D("Can not find request[%{public}d]", netrequest.requestId);
         return;
     }
+    rLock.unlock();
     if (netScore_ >= bestScore) {
         NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
+    std::unique_lock<std::shared_mutex> wlock(requestListMutex_);
     requestList_.erase(netrequest.requestId);
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
+    wlock.unlock();
     SupplierDisconnection(netCaps_.ToSet(), netrequest);
 }
 
 int32_t NetSupplier::CancelRequest(const NetRequest &netrequest)
 {
+    std::unique_lock<std::shared_mutex> reqLock(requestListMutex_);
     auto iter = requestList_.find(netrequest.requestId);
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
     NETMGR_LOG_I("CancelRequest requestId:%{public}u", netrequest.requestId);
     requestList_.erase(netrequest.requestId);
+    reqLock.unlock();
+    std::unique_lock<std::shared_mutex> bestLock(bestReqListMutex_);
     bestReqList_.erase(netrequest.requestId);
+    bestLock.unlock();
     SupplierDisconnection(netCaps_.ToSet(), netrequest);
     return NETMANAGER_SUCCESS;
 }
@@ -431,6 +446,7 @@ void NetSupplier::AddRequest(const NetRequest &netRequest)
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)
 {
+    std::unique_lock<std::shared_mutex> lock(bestReqListMutex_);
     auto iter = bestReqList_.find(reqId);
     if (iter == bestReqList_.end()) {
         return;
@@ -439,9 +455,16 @@ void NetSupplier::RemoveBestRequest(uint32_t reqId)
     NETMGR_LOG_I("RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}u]", supplierId_, reqId);
 }
 
-std::set<uint32_t> &NetSupplier::GetBestRequestList()
+bool NetSupplier::HasBestRequest(uint32_t reqId)
 {
-    return bestReqList_;
+    std::shared_lock<std::shared_mutex> lock(bestReqListMutex_);
+    return bestReqList_.find(reqId) != bestReqList_.end();
+}
+
+size_t NetSupplier::GetBestRequestSize()
+{
+    std::shared_lock<std::shared_mutex> lock(bestReqListMutex_);
+    return bestReqList_.size();
 }
 
 void NetSupplier::SetNetValid(NetDetectionStatus netState)
@@ -601,12 +624,12 @@ std::string NetSupplier::TechToType(NetSlotTech techType)
 void NetSupplier::SetSupplierType(int32_t type)
 {
     NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId_, type);
-    type_ = TechToType(static_cast<NetSlotTech>(type));
+    type_ = type;
 }
 
 std::string NetSupplier::GetSupplierType()
 {
-    return type_;
+    return type_ == -1 ? "" : TechToType(static_cast<NetSlotTech>(type_));
 }
 
 bool NetSupplier::ResumeNetworkInfo()

@@ -89,7 +89,7 @@ private:
     std::shared_ptr<DnsQualityEventHandler> handler_;
 
     std::list<NetsysNative::NetDnsResultReport> report_;
-
+    std::shared_mutex dnsQueryReportMutex_;
     std::list<NetsysNative::NetDnsQueryResultReport> dnsQueryReport_;
 
     int32_t InitHandler();

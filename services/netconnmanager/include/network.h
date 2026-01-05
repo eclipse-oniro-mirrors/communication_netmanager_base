@@ -34,9 +34,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using NetDetectionHandler = std::function<void(uint32_t supplierId, NetDetectionStatus netState)>;
-class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
+class Network : public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
-    Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
+    Network(int32_t netId, uint32_t supplierId, NetBearType bearerType,
             const std::shared_ptr<NetConnEventHandler> &eventHandler);
     ~Network();
     bool operator==(const Network &network) const;
@@ -83,6 +83,7 @@ public:
     int32_t RegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback);
     int32_t UnRegisterDualStackProbeCallback(std::shared_ptr<IDualStackProbeCallback>& callback);
     void UpdateDualStackProbeTime(int32_t dualStackProbeTime);
+    void SetNetDetectionHandler(const NetDetectionHandler &handler);
 
 private:
     bool CreateBasicNetwork();
@@ -101,7 +102,6 @@ private:
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsIfaceNameInUse();
     bool IsNat464Prefered();
-    std::string GetNetCapabilitiesAsString(const uint32_t supplierId) const;
     void RemoveRouteByFamily(INetAddr::IpType addrFamily);
     bool IsAddressValid(const Route &route);
     void ReleaseRouteList(NetLinkInfo &netLinkInfoBck);
@@ -117,15 +117,15 @@ private:
     std::atomic_bool isPhyNetCreated_ = false;
     std::atomic_bool isVirtualCreated_ = false;
     std::shared_ptr<NetMonitor> netMonitor_ = nullptr;
-    NetDetectionHandler netCallback_;
+    NetDetectionHandler netCallback_ = nullptr;
     NetBearType netSupplierType_;
+    bool isInternalDefault_ = false;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
     std::vector<std::shared_ptr<IDualStackProbeCallback>> dualStackProbeCallback_;
-    std::shared_ptr<NetConnEventHandler> eventHandler_;
+    std::shared_ptr<NetConnEventHandler> eventHandler_ = nullptr;
     std::atomic<bool> isDetectingForDns_ = false;
-    std::set<NetCap> netCaps_;
+    bool isSupportInternet_ = false;
     std::shared_ptr<Nat464Service> nat464Service_;
-    std::shared_mutex netCapsMutex;
     uint64_t lastDetectTime_ = 0;
 #ifdef FEATURE_SUPPORT_POWERMANAGER
     bool forbidDetectionFlag_ = false;

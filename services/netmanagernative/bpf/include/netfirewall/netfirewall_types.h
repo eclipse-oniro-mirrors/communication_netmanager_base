@@ -119,6 +119,7 @@ struct intercept_event {
     __be16 sport;
     __be16 dport;
     __u32 appuid;
+    struct domain_hash_key domainData;
 };
 
 struct match_tuple {

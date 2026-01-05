@@ -35,6 +35,9 @@ WrapperDistributor::WrapperDistributor(int32_t socket, const int32_t format, std
     receiver_ = std::make_unique<DataReceiver>(socket, format);
     receiver_->RegisterCallback(
         [this](const std::shared_ptr<NetsysEventMessage> message) { HandleDecodeSuccess(message); });
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    socketFd_ = socket;
+#endif
 }
 
 int32_t WrapperDistributor::Start()
@@ -86,6 +89,11 @@ void WrapperDistributor::HandleStateChanged(const std::shared_ptr<NetsysEventMes
         case NetsysEventMessage::SubSys::QLOG:
             HandleSubSysQlog(message);
             break;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+        case NetsysEventMessage::SubSys::NFLOG:
+            HandleSubSysNflog(message);
+            break;
+#endif
         default:
             break;
     }
@@ -164,6 +172,39 @@ void WrapperDistributor::HandleSubSysQlog(const std::shared_ptr<NetsysEventMessa
     }
     NotifyQuotaLimitReache(alertName, iface);
 }
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+void WrapperDistributor::HandleSubSysNflog(const std::shared_ptr<NetsysEventMessage> &message)
+{
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
+    if (netlinkCallbacks_ == nullptr) {
+        NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
+        return;
+    }
+    const std::string &proto = message->GetMessage(NetsysEventMessage::Type::NFLOG_PROTO);
+    const std::string &ipLocal = message->GetMessage(NetsysEventMessage::Type::NFLOG_IP_SRC);
+    const std::string &ipRemote = message->GetMessage(NetsysEventMessage::Type::NFLOG_IP_DST);
+    const std::string &localPort = message->GetMessage(NetsysEventMessage::Type::NFLOG_SPORT);
+    const std::string &remotePort = message->GetMessage(NetsysEventMessage::Type::NFLOG_DPORT);
+    const std::string &uid = message->GetMessage(NetsysEventMessage::Type::UID);
+    const std::string &tstamp = message->GetMessage(NetsysEventMessage::Type::TSTAMP);
+    const std::string &domain = message->GetMessage(NetsysEventMessage::Type::NFLOG_DOMAIN);
+    auto record = sptr<NetManagerStandard::InterceptRecord>::MakeSptr();
+    record->protocol = static_cast<uint16_t>(ConvertToInt64(proto));
+    record->localIp = ipLocal;
+    record->remoteIp = ipRemote;
+    record->localPort = static_cast<uint16_t>(ConvertToInt64(localPort));
+    record->remotePort = static_cast<uint16_t>(ConvertToInt64(remotePort));
+    record->appUid = static_cast<int32_t>(ConvertToInt64(uid));
+    record->time = static_cast<uint64_t>(ConvertToInt64(tstamp));
+    record->domain = domain;
+    for (auto &callback : *netlinkCallbacks_) {
+        if (callback != nullptr) {
+            callback->OnInterceptRecord(record);
+        }
+    }
+}
+#endif
 
 void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
 {

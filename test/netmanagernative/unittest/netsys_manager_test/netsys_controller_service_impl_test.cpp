@@ -891,8 +891,7 @@ HWTEST_F(NetsysControllerServiceImplTest, DelInterfaceAddressTest001, TestSize.L
     std::string ifName = "eth0";
     std::string ipAddr = "";
     int32_t prefixLength = 123;
-    std::string netCapabilities = "";
-    int32_t ret = instance_->DelInterfaceAddress(ifName, ipAddr, prefixLength, netCapabilities);
+    int32_t ret = instance_->DelInterfaceAddress(ifName, ipAddr, prefixLength, 2);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -948,35 +947,6 @@ HWTEST_F(NetsysControllerServiceImplTest, SetDnsCacheTest001, TestSize.Level1)
     int32_t ret = instance_->SetDnsCache(netId, testHost, info);
     EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
 }
-
-#ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
-HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest001, TestSize.Level1)
-{
-    uint32_t uid = 20000138;
-    std::string ifname = "wlan0";
-    bool add = true;
-    auto ret = NetsysController::GetInstance().UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
- 
-HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest002, TestSize.Level1)
-{
-    uint32_t uid = 0;
-    std::string ifname = "wlan0";
-    bool add = true;
-    auto ret = NetsysController::GetInstance().UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
- 
-HWTEST_F(NetsysControllerTest, UpdateEnterpriseRouteTest003, TestSize.Level1)
-{
-    uint32_t uid = 20000138;
-    std::string ifname = "notexist";
-    bool add = true;
-    auto ret = NetsysController::GetInstance().UpdateEnterpriseRoute(ifname, uid, add);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PARAMETER_ERROR);
-}
-#endif
 
 HWTEST_F(NetsysControllerServiceImplTest, FlushDnsCache001, TestSize.Level1)
 {

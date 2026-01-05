@@ -304,6 +304,34 @@ int32_t NotifyCallbackProxy::OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult)
     return ret;
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+int32_t NotifyCallbackProxy::OnInterceptRecord(sptr<NetManagerStandard::InterceptRecord> &record)
+{
+    NETNATIVE_LOGI("Proxy OnInterceptRecord");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return ERR_NULL_OBJECT;
+    }
+    if (!record->Marshalling(data)) {
+        return ERR_NONE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERCEPT_RECORD), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+#endif
+
 int32_t NotifyCallbackProxy::OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
 {
     NETNATIVE_LOGI("Proxy OnBandwidthReachedLimit");

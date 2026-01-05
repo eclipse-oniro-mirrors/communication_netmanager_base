@@ -163,6 +163,8 @@ private:
     void PrintTrafficSettingsMapInfo(int32_t simId);
     void UpdateCurActiviteSimChanged(int32_t simId, uint64_t ifIndex);
     void SubscribeTelephonyInfo();
+    bool IsSimIdExist(int32_t simId);
+    bool GetIfIndex(int32_t simId, uint64_t &ifIndex);
 #endif // SUPPORT_TRAFFIC_STATISTIC
     void StartSysTimer();
     void StopSysTimer();
@@ -199,6 +201,7 @@ private:
     uint64_t curIfIndex_ = UINT64_MAX;
     std::atomic_bool isWifiConnected_ = false;
     std::map<int32_t, std::pair<ObserverPtr, SettingsInfoPtr>> settingsTrafficMap_;
+    ffrt::shared_mutex simIdToIfIndexMapMutex_;
     std::map<int32_t, uint64_t> simIdToIfIndexMap_;
     std::unique_ptr<FfrtTimer> trafficTimer_ = nullptr;
     sptr<TrafficObserver> trafficObserver_ = nullptr;

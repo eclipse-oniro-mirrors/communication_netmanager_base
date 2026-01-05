@@ -164,7 +164,7 @@ public:
     }
 
     int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                int32_t prefixLength, const std::string &netCapabilities) override
+                                int32_t prefixLength, int socketType) override
     {
         return 0;
     }

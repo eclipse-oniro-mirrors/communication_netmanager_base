@@ -56,12 +56,8 @@ public:
 
 void NetworkTest::SetUpTestCase()
 {
-    NetDetectionHandler detectionHandler = [](uint32_t supplierId, bool ifValid) {
-        std::cout << "supplierId:" << supplierId;
-        std::cout << " IfValid:" << ifValid << std::endl;
-    };
     instance_ =
-        std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID, detectionHandler, NetBearType::BEARER_ETHERNET, nullptr);
+        std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID, NetBearType::BEARER_ETHERNET, nullptr);
 }
 
 void NetworkTest::TearDownTestCase() {}
@@ -75,10 +71,10 @@ HWTEST_F(NetworkTest, operatorTest001, TestSize.Level1)
     int32_t netId1 = 2;
     int32_t netId2 = 3;
     uint32_t supplierId = 4445;
-    Network work0(netId1, supplierId, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
-    Network work1(netId1, TEST_SUPPLIERID, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    Network work0(netId1, supplierId, NetBearType::BEARER_ETHERNET, nullptr);
+    Network work1(netId1, TEST_SUPPLIERID, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_TRUE(work0 == work1);
-    Network work2(netId2, TEST_SUPPLIERID, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
+    Network work2(netId2, TEST_SUPPLIERID, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_FALSE(work1 == work2);
 }
 

@@ -59,6 +59,7 @@ int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &
     int32_t ret = proxy->RegisterNetStatsCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetStatsCallback success, save callback");
+        std::unique_lock<std::shared_mutex> lock(callbackMutex_);
         callback_ = callback;
     }
 
@@ -75,6 +76,7 @@ int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback>
     int32_t ret = proxy->UnregisterNetStatsCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnRegisterNetStatsCallback success, delete callback");
+        std::unique_lock<std::shared_mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
 
@@ -130,6 +132,7 @@ void NetStatsClient::RecoverCallback()
     }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+    std::shared_lock<std::shared_mutex> lock(callbackMutex_);
     if (proxy != nullptr && callback_ != nullptr) {
         int32_t ret = proxy->RegisterNetStatsCallback(callback_);
         NETMGR_LOG_D("Register result %{public}d", ret);
@@ -161,6 +164,7 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         netStatsService_ = nullptr;
     }
 
+    std::shared_lock<std::shared_mutex> lock(callbackMutex_);
     if (callback_ != nullptr) {
         NETMGR_LOG_D("on remote died recover callback");
         std::thread t([sp = shared_from_this()]() { sp->RecoverCallback(); });

@@ -120,7 +120,6 @@ void NetConnAbilityListener::OnAddSystemAbility(int32_t systemAbilityId, const s
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         NETMGR_LOG_I("net conn manager sa is added.");
         NetConnClient::GetInstance().RecoverCallbackAndGlobalProxy();
-        NetConnClient::GetInstance().UnsubscribeSystemAbility();
     }
 }
 
@@ -633,10 +632,6 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
 
 void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
-    if (globalHttpProxy_.GetHost().empty() && preAirplaneCallback_ == nullptr) {
-        NETMGR_LOG_W("no need recovery");
-        return;
-    }
     std::shared_lock<std::shared_mutex> locker(netConnCallbackManagerMapMutex_);
     RecoverCallbackAndGlobalProxy(netConnCallbackManagerMap_);
     RecoverCallbackAndGlobalProxy(systemNetConnCallbackManagerMap_);

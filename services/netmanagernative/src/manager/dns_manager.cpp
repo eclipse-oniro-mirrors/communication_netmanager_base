@@ -58,7 +58,7 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
     t.detach();
 #ifdef FEATURE_NET_FIREWALL_ENABLE
     firewallDomainRulesQueue_ = std::make_shared<ffrt::queue>("firewallDomainRulesQueue");
-#endif    
+#endif
 }
 
 void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)

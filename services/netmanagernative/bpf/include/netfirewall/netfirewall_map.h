@@ -276,6 +276,16 @@ bpf_map_def SEC("maps") LOOP_BACK_IPV4_MAP = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") DOMAIN_DATA_KEY_MAP = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(__u16),
+    .value_size = sizeof(struct domain_hash_key),
+    .max_entries = 1,
+    .map_flags = BPF_F_NO_PREALLOC,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") LOOP_BACK_IPV6_MAP = {
     .type = BPF_MAP_TYPE_LPM_TRIE,
     .key_size = sizeof(struct ipv6_lpm_key),
