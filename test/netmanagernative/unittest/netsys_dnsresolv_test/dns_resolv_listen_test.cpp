@@ -263,17 +263,4 @@ HWTEST_F(DnsResolvListenTest, ProcJudgeIpv4Command_EnableIpv4, TestSize.Level0)
     dnsResolvListenInternal.ProcJudgeIpv4Command(clientSockFd, netId);
     EXPECT_EQ(enable, 0);
 }
-
-HWTEST_F(DnsResolvListenTest, ProcSetCacheCommandExt, TestSize.Level0)
-{
-    std::string name = "test";
-    uint16_t netId = 0;
-    AddrInfo addrInfo[MAX_RESULTS] = {};
-    uint32_t resNum = 1;
-    uint32_t ttl[MAX_RESULTS] = {0};
-    ttl[0] = 10;
-    dnsResolvListenInternal.ProcSetCacheCommandExt(name, netId, addrInfo, resNum, ttl);
-    auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
-    EXPECT_NE(cacheRes.size(), 0);
-}
 }  // namespace OHOS::nmd

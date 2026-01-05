@@ -63,18 +63,7 @@ public:
                         if (!elem) {
                             continue;
                         }
-                        elemParam &oldParam = indexMap_[elem];
-                        if (oldParam.delayTime != 0) {
-                            UpdateDelayTime(oldParam.delayTime, elem);
-                        } else {
-                            elem->Execute();
-                            uint32_t updateTime = elem->GetUpdateTime();
-                            if (updateTime > 0) {
-                                UpdateDelayTime(updateTime, elem);
-                            } else {
-                                indexMap_.erase(elem);
-                            }
-                        }
+                        ExecuteElem(elem);
                     }
                     elems_[index_].clear();
                 }
@@ -142,6 +131,23 @@ private:
         elems_[newParam.index].insert(elem);
         indexMap_[elem] = newParam;
     }
+
+    void ExecuteElem(const std::shared_ptr<T> &elem)
+    {
+        elemParam &oldParam = indexMap_[elem];
+        if (oldParam.delayTime != 0) {
+            UpdateDelayTime(oldParam.delayTime, elem);
+        } else {
+            elem->Execute();
+            uint32_t updateTime = elem->GetUpdateTime();
+            if (updateTime > 0) {
+                UpdateDelayTime(updateTime, elem);
+            } else {
+                indexMap_.erase(elem);
+            }
+        }
+    }
+
     ffrt::thread pthread_;
     int index_;
     ffrt::mutex mutex_;
