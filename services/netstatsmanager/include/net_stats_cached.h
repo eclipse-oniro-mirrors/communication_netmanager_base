@@ -336,7 +336,6 @@ private:
     std::map<uint32_t, HistoryData> cellularHistoryData_;
     std::shared_mutex cellularHistoryDataMutex_;
     bool isPrivateSpaceExist_;
-    ffrt::mutex privateStatuslock_;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;

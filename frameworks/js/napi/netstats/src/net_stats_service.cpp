@@ -440,20 +440,12 @@ int32_t NetStatsService::ProcessOsAccountChanged(int32_t userId, AccountSA::OsAc
             NETMGR_LOG_E("handler is nullptr");
             return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
         }
-        auto ret1 = handler->UpdateStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
-        if (ret1 != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("update stats flag failed, uid:[%{public}d]", userId);
-        }
-        auto ret2 = handler->UpdateSimStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
-        if (ret2 != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("update sim stats flag failed, uid:[%{public}d]", userId);
-        }
-        auto ret3 = handler->UpdateSimStatsFlagByUserId(SIM_PRIVATE_USERID, STATS_DATA_FLAG_UNINSTALLED);
-        if (ret3 != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("update private sim stats failed");
-        }
+        handler->UpdateStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        handler->UpdateSimStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        handler->UpdateSimStatsFlagByUserId(SIM_PRIVATE_USERID, STATS_DATA_FLAG_UNINSTALLED);
         netStatsCached_->SetPrivateStatus(false);
         UpdateStatsData();
+        isUpdate_ = false;
         return 0;
     }
     if (state == AccountSA::OsAccountState::SWITCHED) {

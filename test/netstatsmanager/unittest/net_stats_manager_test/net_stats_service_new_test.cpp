@@ -159,9 +159,8 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
     int32_t ret2 = AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    if (ret1 != 0 || ret2 != 0) {
-        return;
-    }
+    ASSERT_EQ(ret1, 0);
+    ASSERT_EQ(ret2, 0);
 
     std::vector<NetStatsInfo> infos;
     NetStatsInfo info1;
@@ -186,9 +185,8 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
     int32_t ret2 = AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    if (ret1 != 0 || ret2 != 0) {
-        return;
-    }
+    ASSERT_EQ(ret1, 0);
+    ASSERT_EQ(ret2, 0);
     NETMGR_LOG_E("curUserId:%{public}d, defaultUserId:%{public}d", curUserId, defaultUserId);
     std::vector<NetStatsInfo> infos;
     NetStatsInfo info1;
@@ -216,10 +214,8 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
     int32_t defaultUserId = -1;
     int32_t ret2 = AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    if (ret1 != 0 || ret2 != 0) {
-        return;
-    }
-
+    ASSERT_EQ(ret1, 0);
+    ASSERT_EQ(ret2, 0);
     std::vector<NetStatsInfo> infos;
     NetStatsInfo info1;
     info1.userId_ = curUserId;

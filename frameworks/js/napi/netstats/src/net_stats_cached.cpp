@@ -481,7 +481,6 @@ void NetStatsCached::WriteUidStats()
 
 void NetStatsCached::SetPrivateStatus(bool status)
 {
-    std::lock_guard<ffrt::mutex> lock(privateStatuslock_);
     isPrivateSpaceExist_ = status;
 }
 
@@ -490,18 +489,17 @@ void NetStatsCached::WriteUidSimStats()
     if (!(CheckUidSimStor() || isForce_)) {
         return;
     }
-    {
-        std::lock_guard<ffrt::mutex> lock(privateStatuslock_);
-        std::for_each(
-            stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(), [this](NetStatsInfo &info) {
-            if (info.uid_ == uninstalledUid_) {
-                info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
-            }
-            if (info.userId_ == SIM_PRIVATE_USERID && !isPrivateSpaceExist_) {
-                info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
-            }
-        });
-    }
+    bool isPrivateSpaceExistNow = isPrivateSpaceExist_;
+    std::for_each(
+        stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
+            [this, isPrivateSpaceExistNow](NetStatsInfo &info) {
+        if (info.uid_ == uninstalledUid_) {
+            info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+        }
+        if (info.userId_ == SIM_PRIVATE_USERID && !isPrivateSpaceExistNow) {
+            info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
+        }
+    });
 
     auto handler = std::make_unique<NetStatsDataHandler>();
     handler->WriteStatsData(stats_.GetUidSimStatsInfo(), NetStatsDatabaseDefines::UID_SIM_TABLE);
