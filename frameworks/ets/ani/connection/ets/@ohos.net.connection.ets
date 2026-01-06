@@ -548,6 +548,12 @@ export default namespace connection {
   export interface NetConnection {
       on(type: string, callback: Callback<Any>): void;
 
+      onNetLost(callback: Callback<NetHandle>): void;
+
+      onNetUnavailable(callback: Callback<void>): void;
+
+      onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>): void;
+
       register(callback: AsyncCallback<void>): void;
 
       unregister(callback: AsyncCallback<void>): void;
@@ -575,25 +581,31 @@ export default namespace connection {
     on(type: string, callback: Callback<Any>): void {
       if (type == 'netAvailable') {
         this.onNetAvailable(callback as Callback<NetHandle>);
-      } else if (type == 'netBlockStatusChange') {
-        this.onNetBlockStatusChange(callback as Callback<NetBlockStatusInfo>);
       } else if (type == 'netCapabilitiesChange') {
         this.onNetCapabilitiesChange(callback as Callback<NetCapabilityInfo>);
       } else if (type == 'netConnectionPropertiesChange') {
         this.onNetConnectionPropertiesChange(callback as Callback<NetConnectionPropertyInfo>);
-      } else if (type == 'netLost') {
-        this.onNetLost(callback as Callback<NetHandle>);
-      } else if (type == 'netUnavailable') {
-        this.onNetUnavailable(callback as Callback<void>);
       }
     }
 
     native onNetAvailable(callback: Callback<NetHandle>):void;
-    native onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>):void;
+    native onNetBlockStatusChangeInner(callback: Callback<NetBlockStatusInfo>):void;
     native onNetCapabilitiesChange(callback: Callback<NetCapabilityInfo>):void;
     native onNetConnectionPropertiesChange(callback: Callback<NetConnectionPropertyInfo>):void;
-    native onNetLost(callback: Callback<NetHandle>):void;
-    native onNetUnavailable(callback: Callback<void>):void;
+    native onNetLostInner(callback: Callback<NetHandle>):void;
+    native onNetUnavailableInner(callback: Callback<void>):void;
+
+    onNetLost(callback: Callback<NetHandle>): void {
+      this.onNetLostInner(callback)
+    }
+
+    onNetUnavailable(callback: Callback<void>): void {
+      this.onNetUnavailableInner(callback)
+    }
+
+    onNetBlockStatusChange(callback: Callback<NetBlockStatusInfo>): void {
+      this.onNetBlockStatusChangeInner(callback)
+    }
 
     native registerSync():void;
     register(callback: AsyncCallback<void>): void {
