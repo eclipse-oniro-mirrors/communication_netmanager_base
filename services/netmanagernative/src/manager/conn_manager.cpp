@@ -506,6 +506,13 @@ int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetB
     return NETMANAGER_SUCCESS;
 }
 
+int32_t ConnManager::GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
+{
+    NetLinkSocketDiag socketDiag;
+    int32_t ret = socketDiag.GetSystemNetPortStates(netPortStatesInfo);
+    return ret;
+}
+
 int ConnManager::CloseSocketsUid(const std::string &ipAddr, uint32_t uid)
 {
     NetLinkSocketDiag socketDiag;

@@ -356,5 +356,15 @@ HWTEST_F(NetManagerNativeTest, GetConnectOwnerUidTest001, TestSize.Level1)
     auto ret = instance_->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetManagerNativeTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    auto ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    instance_->connManager_ = nullptr;
+    ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace nmd
 } // namespace OHOS

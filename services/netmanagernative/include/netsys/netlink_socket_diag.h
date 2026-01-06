@@ -23,6 +23,7 @@
 #include <sys/socket.h>
 #include <string>
 #include <unistd.h>
+#include "net_port_states_info.h"
 
 namespace OHOS {
 namespace nmd {
@@ -57,6 +58,11 @@ public:
     void DestroyLiveSocketsWithUid(const std::string &ipAddr, uint32_t uid);
     int32_t GetConnectOwnerUid(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
                                const std::string &remoteAddress, uint32_t remotePort, int32_t &uid);
+    int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
+    bool GetTcpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
+    bool GetUdpNetPortStatesInfo(const inet_diag_msg* msg, NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
+    bool ProcessGetNetPortStatesInfo(const uint8_t proto, const inet_diag_msg* msg,
+        NetManagerStandard::NetPortStatesInfo& netPortStatesInfo);
 
 private:
     static bool InLookBack(uint32_t a);
@@ -79,6 +85,8 @@ private:
     int32_t MakeQueryUidRequestInfo(uint8_t proto, uint8_t family, const std::string &localAddress, uint32_t localPort,
                                     const std::string &remoteAddress, uint32_t remotePort, inet_diag_req_v2 &request);
     int32_t ProcessQueryUidResponse(int32_t &uid);
+    int32_t ProcessSockDiagDumpInfo(uint8_t proto,
+                                    NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
 
 private:
     struct SockDiagRequest {

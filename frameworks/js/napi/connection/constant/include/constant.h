@@ -82,6 +82,21 @@ static constexpr const char *KEY_IP_ADDRESS = "ipAddress";
 static constexpr const char *KEY_IFACE_NAME = "iface";
 static constexpr const char *KEY_MAC_ADDRESS = "macAddress";
 
+static constexpr const char *KEY_TCP_PORT_STATES_INFO = "tcpPortStatesInfo";
+static constexpr const char *KEY_TCP_LOCAL_IP = "tcpLocalIp";
+static constexpr const char *KEY_TCP_LOCAL_PORT = "tcpLocalPort";
+static constexpr const char *KEY_TCP_REOMTE_IP = "tcpRemoteIp";
+static constexpr const char *KEY_TCP_REMOTE_PORT = "tcpRemotePort";
+static constexpr const char *KEY_TCP_UID = "tcpUid";
+static constexpr const char *KEY_TCP_PID = "tcpPid";
+static constexpr const char *KEY_TCP_STATE = "tcpState";
+
+static constexpr const char *KEY_UDP_PORT_STATES_INFO = "udpPortStatesInfo";
+static constexpr const char *KEY_UDP_LOCAL_IP = "udpLocalIp";
+static constexpr const char *KEY_UDP_LOCAL_PORT = "udpLocalPort";
+static constexpr const char *KEY_UDP_UID = "udpUid";
+static constexpr const char *KEY_UDP_PID = "udpPid";
+
 enum {
     ARG_NUM_0,
     ARG_NUM_1,

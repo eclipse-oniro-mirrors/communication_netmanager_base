@@ -40,6 +40,7 @@
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
 #include "net_ip_mac_info.h"
+#include "net_port_states_info.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -238,6 +239,7 @@ public:
         const std::string &ipAddr, uint8_t family, bool accessInternet, const std::string &clientNetIfName) = 0;
     virtual int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                        int32_t &ownerUid) = 0;
+    virtual int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

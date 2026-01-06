@@ -451,6 +451,11 @@ public:
     {
         return 0;
     }
+
+    int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

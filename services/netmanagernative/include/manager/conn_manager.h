@@ -32,6 +32,7 @@
 #include "netsys_access_policy.h"
 #include "net_all_capabilities.h"
 #include "net_conn_info.h"
+#include "net_port_states_info.h"
 
 namespace OHOS {
 namespace nmd {
@@ -248,6 +249,7 @@ public:
     int32_t NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes);
     int32_t CloseSocketsUid(const std::string &ipAddr, uint32_t uid);
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid);
+    int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo);
 #ifdef SUPPORT_SYSVPN
     /**
      * update vpn interface rules

@@ -2890,6 +2890,41 @@ int32_t NetsysNativeServiceProxy::GetConnectOwnerUid(const OHOS::NetManagerStand
     return ret;
 }
 
+int32_t NetsysNativeServiceProxy::GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
+{
+    MessageParcel data;
+    
+    // LCOV_EXCL_START This will never happen.
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SYSTEM_NET_PORT_STATES),
+        data, reply, option);
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("GetSystemNetPortStates proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        sptr<NetManagerStandard::NetPortStatesInfo> infoPtr =
+            NetManagerStandard::NetPortStatesInfo::Unmarshalling(reply);
+        if (infoPtr == nullptr) {
+            NETNATIVE_LOGE("GetSystemNetPortStates net port states info unmarshall failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+        netPortStatesInfo = *infoPtr;
+    }
+    // LCOV_EXCL_STOP
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(
     const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
 {
