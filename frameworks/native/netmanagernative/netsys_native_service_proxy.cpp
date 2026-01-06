@@ -2870,8 +2870,10 @@ int32_t NetsysNativeServiceProxy::GetConnectOwnerUid(const OHOS::NetManagerStand
         NETNATIVE_LOGE("GetConnectOwnerUid Marshalling failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID),
-                                          data, reply, option)) {
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote ||
+        ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_CONNECT_OWNER_UID), data,
+                                        reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
