@@ -4385,7 +4385,6 @@ uint32_t NetConnService::GetDefaultNetSupplierId()
 int32_t NetConnService::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();
-    auto callingPid = IPCSkeleton::GetCallingPid();
     if (!NetManagerCenter::GetInstance().IsVpnApplication(callingUid)) {
         NETMGR_LOG_E("GetConnectOwnerUid failed, The calling application is not vpn application.");
         return NETMANAGER_ERR_INCORRECT_USAGE;

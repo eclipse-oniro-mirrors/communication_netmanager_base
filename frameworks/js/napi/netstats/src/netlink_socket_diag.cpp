@@ -568,17 +568,11 @@ int32_t NetLinkSocketDiag::MakeQueryUidRequestInfo(uint8_t proto, uint8_t family
         }
     };
     if (family == AF_INET) {
-        in_addr ip;
-        if (inet_pton(AF_INET, localAddress.c_str(), &ip) != 1) {
+        if ((inet_pton(AF_INET, localAddress.c_str(), &request.id.idiag_src[0]) != 1) ||
+            (inet_pton(AF_INET, remoteAddress.c_str(), &request.id.idiag_dst[0]) != 1)) {
             NETNATIVE_LOGE("Convert IP address failed.");
             return NETMANAGER_ERR_INTERNAL;
         }
-        request.id.idiag_src[0] = ip.s_addr;
-        if (inet_pton(AF_INET, remoteAddress.c_str(), &ip) != 1) {
-            NETNATIVE_LOGE("Convert IP address failed.");
-            return NETMANAGER_ERR_INTERNAL;
-        }
-        request.id.idiag_dst[0] = ip.s_addr;
     } else {
         if ((inet_pton(AF_INET6, localAddress.c_str(), request.id.idiag_src) != 1) ||
             (inet_pton(AF_INET6, remoteAddress.c_str(), request.id.idiag_dst) != 1)) {

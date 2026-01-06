@@ -42,10 +42,7 @@ bool NetConnInfo::Marshalling(Parcel &parcel) const
 
 sptr<NetConnInfo> NetConnInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetConnInfo> ptr = new (std::nothrow) NetConnInfo();
-    if (ptr == nullptr) {
-        return nullptr;
-    }
+    sptr<NetConnInfo> ptr = sptr<NetConnInfo>::MakeSptr();
     if (!parcel.ReadInt32(ptr->protocolType_)) {
         return nullptr;
     }

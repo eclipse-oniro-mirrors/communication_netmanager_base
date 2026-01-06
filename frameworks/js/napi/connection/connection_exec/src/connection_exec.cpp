@@ -820,6 +820,11 @@ bool ConnectionExec::ExecGetDnsASCII(GetDnsContext *context)
 bool ConnectionExec::ExecGetConnectOwnerUid(GetConnectOwnerUidContext *context)
 {
     NETMANAGER_BASE_LOGI("ExecGetConnectOwnerUid");
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
         return false;
