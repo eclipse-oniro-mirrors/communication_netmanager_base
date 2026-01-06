@@ -296,10 +296,13 @@ int32_t DnsParamCache::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
+void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo, uint32_t ttl)
 {
     if (netId == 0) {
         netId = defaultNetId_;
+    }
+    if (ttl == 0) {
+        return;
     }
     std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
@@ -308,7 +311,10 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
         return;
     }
 
-    it->second.GetCache().Put(hostName, addrInfo);
+    AddrInfoWithTtl addrInfoWithTtl;
+    addrInfoWithTtl.addrInfo = addrInfo;
+    addrInfoWithTtl.ttl = ttl > DEFAULT_DELAYED_COUNT ? ttl : DEFAULT_DELAYED_COUNT;
+    it->second.GetCache().Put(hostName, addrInfoWithTtl);
 }
 
 std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::string &hostName)
@@ -324,7 +330,12 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
         return {};
     }
 
-    return it->second.GetCache().Get(hostName);
+    auto infos = it->second.GetCache().Get(hostName);
+    std::vector<AddrInfo> addrInfo;
+    for (auto info : infos) {
+        addrInfo.push_back(info.addrInfo);
+    }
+    return addrInfo;
 }
 
 void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)

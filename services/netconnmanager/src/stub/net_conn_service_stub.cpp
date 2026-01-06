@@ -57,6 +57,8 @@ void NetConnServiceStub::InitNetSupplierFuncToInterfaceMap()
         &NetConnServiceStub::OnUpdateNetSupplierInfo, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO)] = {
         &NetConnServiceStub::OnUpdateNetLinkInfo, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES)] = {
+        &NetConnServiceStub::OnGetSystemNetPortStates, {Permission::GET_IP_MAC_INFO}};
 }
 
 NetConnServiceStub::NetConnServiceStub()
@@ -2300,6 +2302,26 @@ int32_t NetConnServiceStub::OnGetConnectOwnerUid(MessageParcel &data, MessagePar
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("Enter OnGetSystemNetPortStates");
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = GetSystemNetPortStates(netPortStatesInfo);
+    // LCOV_EXCL_START This will never happen.
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        sptr<NetPortStatesInfo> info_ptr = sptr<NetPortStatesInfo>::MakeSptr(netPortStatesInfo);
+        if (!NetPortStatesInfo::Marshalling(reply, info_ptr)) {
+            NETMGR_LOG_E("proxy Marshalling failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    // LCOV_EXCL_STOP
     return NETMANAGER_SUCCESS;
 }
 

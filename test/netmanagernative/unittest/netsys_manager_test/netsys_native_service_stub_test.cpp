@@ -1459,5 +1459,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetConnectOwnerUid001, TestSize.Level1)
     ret = notifyStub_->CmdGetConnectOwnerUid(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetSystemNetPortStates(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

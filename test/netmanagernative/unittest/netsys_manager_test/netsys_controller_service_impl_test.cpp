@@ -1012,5 +1012,12 @@ HWTEST_F(NetsysControllerServiceImplTest, GetConnectOwnerUidTest001, TestSize.Le
     auto ret = instance_->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_TRUE(ret == NetManagerStandard::NETMANAGER_SUCCESS || ret == 400);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1837,5 +1837,17 @@ int32_t NetsysController::GetConnectOwnerUid(const OHOS::NetManagerStandard::Net
     }
     return netsysService_->GetConnectOwnerUid(netConnInfo, uid);
 }
+
+int32_t NetsysController::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    NETMGR_LOG_D("GetSystemNetPortStates");
+    // LCOV_EXCL_START This will never happen.
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    // LCOV_EXCL_STOP
+    return netsysService_->GetSystemNetPortStates(netPortStatesInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

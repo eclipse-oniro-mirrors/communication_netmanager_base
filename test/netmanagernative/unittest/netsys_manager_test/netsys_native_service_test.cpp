@@ -18,6 +18,8 @@
 #include <string>
 
 #include "interface_manager.h"
+#include "netlink_socket_diag.cpp"
+#include "netlink_socket_diag.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
 
@@ -1085,6 +1087,66 @@ HWTEST_F(NetsysNativeServiceTest, GetConnectOwnerUidTest001, TestSize.Level1)
     info.remotePort_ = 2222;
     int32_t ret = instance_->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    instance_->netsysService_  = nullptr;
+    ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetUdpNetPortStatesInfo001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    inet_diag_msg msg;
+    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    msg.idiag_family = AF_INET;
+    NetLinkSocketDiag diag;
+    bool result = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo);
+    
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetUdpNetPortStatesInfo002, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    inet_diag_msg msg;
+    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    msg.idiag_family = AF_INET6;
+    NetLinkSocketDiag diag;
+    bool result1 = diag.GetUdpNetPortStatesInfo(&msg, netPortStatesInfo);
+    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, &msg, netPortStatesInfo);
+    EXPECT_EQ(result1, true);
+    EXPECT_EQ(result2, true);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetTcpNetPortStatesInfo001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    inet_diag_msg msg;
+    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    msg.idiag_family = AF_INET;
+    NetLinkSocketDiag diag;
+    bool result = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo);
+    
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetTcpNetPortStatesInfo002, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    inet_diag_msg msg;
+    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    msg.idiag_family = AF_INET6;
+    NetLinkSocketDiag diag;
+    bool result1 = diag.GetTcpNetPortStatesInfo(&msg, netPortStatesInfo);
+    bool result2 = diag.ProcessGetNetPortStatesInfo(IPPROTO_TCP, &msg, netPortStatesInfo);
+    EXPECT_EQ(result1, true);
+    EXPECT_EQ(result2, true);
 }
 } // namespace NetsysNative
 } // namespace OHOS

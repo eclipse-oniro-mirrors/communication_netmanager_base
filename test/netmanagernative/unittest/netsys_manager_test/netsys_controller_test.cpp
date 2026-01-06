@@ -2021,5 +2021,21 @@ HWTEST_F(NetsysControllerTest, GetConnectOwnerUidTest002, TestSize.Level1)
     int32_t ret = netsysController->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
+
+HWTEST_F(NetsysControllerTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    auto netsysController = std::make_shared<NetsysController>();
+    auto netsysControllerServiceImpl = sptr<NetsysControllerServiceImpl>::MakeSptr();
+    netsysControllerServiceImpl->netsysClient_->netsysNativeService_ = mockNetsysService_;
+    netsysController->netsysService_ = netsysControllerServiceImpl;
+
+    int32_t ret = netsysController->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    netsysController->netsysService_  = nullptr;
+    ret = netsysController->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

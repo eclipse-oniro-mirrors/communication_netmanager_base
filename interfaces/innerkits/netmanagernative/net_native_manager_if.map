@@ -40,6 +40,9 @@
       "OHOS::NetsysNative::NetsysTrafficCallbackStub::OnExceedTrafficLimits(signed char&)";
       "OHOS::NetsysNative::NetsysTrafficCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
       "OHOS::NetManagerStandard::NetIpMacInfo::Marshalling(OHOS::Parcel&, OHOS::sptr<OHOS::NetManagerStandard::NetIpMacInfo> const&)";
+      "OHOS::NetManagerStandard::NetPortStatesInfo::Marshalling(OHOS::Parcel&, OHOS::sptr<OHOS::NetManagerStandard::NetPortStatesInfo> const&)";
+      "OHOS::NetManagerStandard::TcpNetPortStatesInfo::Marshalling(OHOS::Parcel&, OHOS::sptr<OHOS::NetManagerStandard::TcpNetPortStatesInfo> const&)";
+      "OHOS::NetManagerStandard::UdpNetPortStatesInfo::Marshalling(OHOS::Parcel&, OHOS::sptr<OHOS::NetManagerStandard::UdpNetPortStatesInfo> const&)";
       "OHOS::NetManagerStandard::NetConnInfo::Marshalling(OHOS::Parcel&) const";
       "OHOS::NetManagerStandard::NetConnInfo::Unmarshalling(OHOS::Parcel&)";
       "virtual thunk to OHOS::NetsysNative::NotifyCallbackStub::~NotifyCallbackStub()";
@@ -53,6 +56,9 @@
       "vtable for OHOS::NetManagerStandard::NetFirewallPortParam";
       "vtable for OHOS::NetManagerStandard::NetFirewallRule";
       "vtable for OHOS::NetManagerStandard::NetIpMacInfo";
+      "vtable for OHOS::NetManagerStandard::NetPortStatesInfo";
+      "vtable for OHOS::NetManagerStandard::TcpNetPortStatesInfo";
+      "vtable for OHOS::NetManagerStandard::UdpNetPortStatesInfo";
       "vtable for OHOS::NetManagerStandard::NetConnInfo";
       "vtable for OHOS::NetManagerStandard::UidRange";
       "vtable for OHOS::NetsysNative::NetsysNativeServiceProxy";
@@ -72,6 +78,9 @@
       "VTT for OHOS::NetManagerStandard::NetFirewallPortParam";
       "VTT for OHOS::NetManagerStandard::NetFirewallRule";
       "VTT for OHOS::NetManagerStandard::NetIpMacInfo";
+      "VTT for OHOS::NetManagerStandard::NetPortStatesInfo";
+      "VTT for OHOS::NetManagerStandard::TcpNetPortStatesInfo";
+      "VTT for OHOS::NetManagerStandard::UdpNetPortStatesInfo";
       "VTT for OHOS::NetManagerStandard::NetConnInfo";
       "VTT for OHOS::NetManagerStandard::UidRange";
       "VTT for OHOS::NetsysNative::NetsysNativeServiceProxy";

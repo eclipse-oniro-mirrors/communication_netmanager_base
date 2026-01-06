@@ -1616,5 +1616,17 @@ int32_t NetConnClient::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_
     }
     return proxy->GetConnectOwnerUid(netConnInfo, ownerUid);
 }
+
+int32_t NetConnClient::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->GetSystemNetPortStates(netPortStatesInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

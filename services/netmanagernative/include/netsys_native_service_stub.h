@@ -209,6 +209,7 @@ private:
     int32_t CmdDestroyVlan(MessageParcel &data, MessageParcel &reply);
     int32_t CmdAddVlanIp(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

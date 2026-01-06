@@ -2152,5 +2152,12 @@ HWTEST_F(NetConnServiceTest, GetConnectOwnerUidTest001, TestSize.Level1)
     auto ret = NetConnService::GetInstance()->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    auto ret = NetConnService::GetInstance()->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

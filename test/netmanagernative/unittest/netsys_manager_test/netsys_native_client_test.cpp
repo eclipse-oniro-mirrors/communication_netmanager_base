@@ -829,5 +829,13 @@ HWTEST_F(NetsysNativeClientTest, GetConnectOwnerUidTest001, TestSize.Level1)
     int32_t ret = nativeClient->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    auto nativeClient = std::make_shared<NetsysNativeClient>();
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = nativeClient->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -837,5 +837,14 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetConnectOwnerUidTest001, TestSize.Level
     int32_t ret = netsysNativeService->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = netsysNativeService->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

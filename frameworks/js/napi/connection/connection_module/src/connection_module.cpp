@@ -268,6 +268,7 @@ std::initializer_list<napi_property_descriptor> ConnectionModule::createProperty
         DECLARE_NAPI_FUNCTION(FUNCTION_UNREGISTER_NET_SUPPLIER, UnregisterNetSupplier),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_IP_NEIGH_TABLE, GetIpNeighTable),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_ASCII, GetDnsASCII),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_SYSTEM_NET_PORT_STATES, GetSystemNetPortStates),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DNS_UNICODE, GetDnsUnicode),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECT_OWNER_UID, GetConnectOwnerUid),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECT_OWNER_UID_SYNC, GetConnectOwnerUidSync),
@@ -666,6 +667,13 @@ napi_value ConnectionModule::DeleteVlanIp(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<DeleteVlanIpContext>(env, info, FUNCTION_DELETE_VLAN_IP, nullptr,
         ConnectionAsyncWork::ExecDeleteVlanIp, ConnectionAsyncWork::DeleteVlanIpCallback);
+}
+
+napi_value ConnectionModule::GetSystemNetPortStates(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetSystemNetPortStatesContext>(
+        env, info, FUNCTION_GET_SYSTEM_NET_PORT_STATES, nullptr, ConnectionAsyncWork::ExecGetSystemNetPortStates,
+        ConnectionAsyncWork::GetSystemNetPortStatesCallback);
 }
 
 napi_value ConnectionModule::GetDnsASCII(napi_env env, napi_callback_info info)

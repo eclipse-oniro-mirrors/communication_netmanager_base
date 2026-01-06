@@ -95,6 +95,7 @@ public:
     static constexpr const char *FUNCTION_DESTROY_VLAN = "destroyVlanInterface";
     static constexpr const char *FUNCTION_ADD_VLAN_IP = "addVlanIp";
     static constexpr const char *FUNCTION_DELETE_VLAN_IP = "deleteVlanIp";
+    static constexpr const char *FUNCTION_GET_SYSTEM_NET_PORT_STATES = "getSystemNetPortStates";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
     static std::initializer_list<napi_property_descriptor> createPropertyList();
@@ -186,6 +187,7 @@ private:
     static napi_value DestroyVlan(napi_env env, napi_callback_info info);
     static napi_value AddVlanIp(napi_env env, napi_callback_info info);
     static napi_value DeleteVlanIp(napi_env env, napi_callback_info info);
+    static napi_value GetSystemNetPortStates(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

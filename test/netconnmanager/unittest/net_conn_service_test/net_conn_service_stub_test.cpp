@@ -1161,6 +1161,14 @@ HWTEST_F(NetConnServiceStubTest, PAC_OnFindProxyForURL, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceStubTest, OnGetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor()));
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 /**
  * @tc.name: OnGetIpNeighTableTest001
  * @tc.desc: Test NetConnServiceStub OnGetIpNeighTable.

@@ -174,6 +174,10 @@ public:
 
     static void GetConnectOwnerUidCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetSystemNetPortStates(napi_env env, void *data);
+
+    static void GetSystemNetPortStatesCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

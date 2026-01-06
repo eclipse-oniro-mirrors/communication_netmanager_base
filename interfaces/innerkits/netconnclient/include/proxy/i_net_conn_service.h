@@ -36,6 +36,7 @@
 #include "conn_ipc_interface_code.h"
 #include "safe_map.h"
 #include "net_ip_mac_info.h"
+#include "net_port_states_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -144,6 +145,7 @@ public:
     virtual int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
     virtual int32_t DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
     virtual int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) = 0;
+    virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

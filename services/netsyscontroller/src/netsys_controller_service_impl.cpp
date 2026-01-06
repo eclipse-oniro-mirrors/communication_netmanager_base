@@ -1077,6 +1077,12 @@ int32_t NetsysControllerServiceImpl::GetConnectOwnerUid(const OHOS::NetManagerSt
     return netsysClient_->GetConnectOwnerUid(netConnInfo, ownerUid);
 }
 
+int32_t NetsysControllerServiceImpl::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    NETMGR_LOG_I("GetSystemNetPortStates");
+    return netsysClient_->GetSystemNetPortStates(netPortStatesInfo);
+}
+
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
 int32_t NetsysControllerServiceImpl::UpdateEnterpriseRoute(const std::string &interfaceName, uint32_t uid, bool add)
 {

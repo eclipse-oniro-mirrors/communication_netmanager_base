@@ -819,6 +819,13 @@ HWTEST_F(NetConnServiceProxyTest, GetConnectOwnerUidTest001, TestSize.Level1)
     int32_t ret = instance_->GetConnectOwnerUid(info, uid);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceProxyTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t ret = instance_->GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERR_READ_REPLY_FAIL);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

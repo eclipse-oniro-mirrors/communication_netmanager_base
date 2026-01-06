@@ -878,6 +878,7 @@ public:
         const std::string &ifName);
     int32_t GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo);
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo, int32_t &ownerUid);
+    int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo);
 
         /**
      * Register Dns Result Callback Listener.

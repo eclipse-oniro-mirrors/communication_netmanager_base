@@ -40,6 +40,7 @@ ohos_unittest("netsys_native_manager_test") {
     "net_conn_manager_test_util.cpp",
     "net_diag_wrapper_test.cpp",
     "net_ip_mac_info_test.cpp",
+    "net_port_states_info_test.cpp",
     "netlink_msg_test.cpp",
     "netlink_socket_test.cpp",
     "netsys_client_test.cpp",
@@ -150,6 +151,7 @@ ohos_unittest("netsys_native_manager_fault_through_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src"
   ]
 
   deps = [
@@ -216,6 +218,7 @@ ohos_unittest("netsys_native_manager_netsys_native_service_test") {
     "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/netstats/src"
   ]
 
   deps = [

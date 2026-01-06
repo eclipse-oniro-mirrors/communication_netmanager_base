@@ -106,6 +106,7 @@ ohos_shared_library("connection_if") {
     "async_context/src/gethttpproxy_context.cpp",
     "async_context/src/getinterfaceconfig_context.cpp",
     "async_context/src/getipneightable_context.cpp",
+    "async_context/src/getsystemnetportstates_context.cpp",
     "async_context/src/createvlan_context.cpp",
     "async_context/src/destroyvlan_context.cpp",
     "async_context/src/addvlanip_context.cpp",

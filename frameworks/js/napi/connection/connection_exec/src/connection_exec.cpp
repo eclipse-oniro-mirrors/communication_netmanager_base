@@ -132,6 +132,43 @@ napi_value ConnectionExec::CreateIpNeighTable(napi_env env, const NetIpMacInfo &
     return jsIpNeigh;
 }
 
+napi_value ConnectionExec::CreateNetPortStatesInfo(napi_env env, const NetPortStatesInfo &netPortStatesInfo)
+{
+    napi_value netPortStatesInfoObject = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, netPortStatesInfoObject) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+
+    napi_value tcpArray = NapiUtils::CreateArray(env, netPortStatesInfo.tcpNetPortStatesInfo_.size());
+    uint32_t tcpArrayIndex = 0;
+    for (const auto &tcpInfo : netPortStatesInfo.tcpNetPortStatesInfo_) {
+        napi_value item = NapiUtils::CreateObject(env);
+        NapiUtils::SetStringPropertyUtf8(env, item, KEY_TCP_LOCAL_IP, tcpInfo.tcpLocalIp_);
+        NapiUtils::SetUint32Property(env, item, KEY_TCP_LOCAL_PORT, tcpInfo.tcpLocalPort_);
+        NapiUtils::SetStringPropertyUtf8(env, item, KEY_TCP_REOMTE_IP, tcpInfo.tcpRemoteIp_);
+        NapiUtils::SetUint32Property(env, item, KEY_TCP_REMOTE_PORT, tcpInfo.tcpRemotePort_);
+        NapiUtils::SetUint32Property(env, item, KEY_TCP_UID, tcpInfo.tcpUid_);
+        NapiUtils::SetUint32Property(env, item, KEY_TCP_PID, tcpInfo.tcpPid_);
+        NapiUtils::SetUint32Property(env, item, KEY_TCP_STATE, tcpInfo.tcpState_);
+        NapiUtils::SetArrayElement(env, tcpArray, tcpArrayIndex++, item);
+    }
+    NapiUtils::SetNamedProperty(env, netPortStatesInfoObject, KEY_TCP_PORT_STATES_INFO, tcpArray);
+
+    napi_value udpArray = NapiUtils::CreateArray(env, netPortStatesInfo.udpNetPortStatesInfo_.size());
+    uint32_t udpArrayIndex = 0;
+    for (const auto &udpInfo : netPortStatesInfo.udpNetPortStatesInfo_) {
+        napi_value item = NapiUtils::CreateObject(env);
+        NapiUtils::SetStringPropertyUtf8(env, item, KEY_UDP_LOCAL_IP, udpInfo.udpLocalIp_);
+        NapiUtils::SetUint32Property(env, item, KEY_UDP_LOCAL_PORT, udpInfo.udpLocalPort_);
+        NapiUtils::SetUint32Property(env, item, KEY_UDP_UID, udpInfo.udpUid_);
+        NapiUtils::SetUint32Property(env, item, KEY_UDP_PID, udpInfo.udpPid_);
+        NapiUtils::SetArrayElement(env, udpArray, udpArrayIndex++, item);
+    }
+    NapiUtils::SetNamedProperty(env, netPortStatesInfoObject, KEY_UDP_PORT_STATES_INFO, udpArray);
+
+    return netPortStatesInfoObject;
+}
+
 bool ConnectionExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
     return NetHandleExec::ExecGetAddressesByName(context);
@@ -852,6 +889,22 @@ bool ConnectionExec::ExecGetDnsUnicode(GetDnsContext *context)
 napi_value ConnectionExec::GetDnsCallback(GetDnsContext *context)
 {
     return NapiUtils::CreateStringUtf8(context->GetEnv(), context->GetHost());
+}
+
+bool ConnectionExec::ExecGetSystemNetPortStates(GetSystemNetPortStatesContext *context)
+{
+    NETMANAGER_BASE_LOGI("ExecGetSystemNetPortStates");
+    int32_t errorCode = NetConnClient::GetInstance().GetSystemNetPortStates(context->netPortStatesInfo_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetSystemNetPortStatesCallback(GetSystemNetPortStatesContext *context)
+{
+    return CreateNetPortStatesInfo(context->GetEnv(), context->netPortStatesInfo_);
 }
 
 bool ConnectionExec::ExecAddNetworkRoute(AddNetworkRouteContext *context)

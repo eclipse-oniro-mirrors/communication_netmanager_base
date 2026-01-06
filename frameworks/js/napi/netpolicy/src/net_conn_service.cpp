@@ -4414,5 +4414,13 @@ int32_t NetConnService::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    if (NetsysController::GetInstance().GetSystemNetPortStates(netPortStatesInfo) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
