@@ -440,6 +440,7 @@ public:
     void HandleDataShareMessage();
     void SendNetPolicyChange(uint32_t uid, uint32_t policy);
     int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid) override;
+    int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {

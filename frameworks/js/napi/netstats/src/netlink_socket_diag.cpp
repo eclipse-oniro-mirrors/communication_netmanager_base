@@ -40,7 +40,10 @@ constexpr uint32_t LOCKBACK_MASK = 0xff000000;
 constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
 constexpr uid_t PUSH_UID = 7023;
 constexpr uint32_t INET_DIAG_REQ_V2_STATES_ALL = 0xffffffff;
-constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_OWNER_UID = -1;
+constexpr int32_t TCP_STATES = (1 << TCP_ESTABLISHED) | (1 << TCP_SYN_SENT) | (1 << TCP_SYN_RECV) |
+    (1 << TCP_FIN_WAIT1) | (1 << TCP_FIN_WAIT2) | (1 << TCP_TIME_WAIT) | (1 << TCP_CLOSE) | (1 << TCP_CLOSE_WAIT) |
+    (1 << TCP_LAST_ACK) | (1 << TCP_LISTEN) | (1 << TCP_CLOSING);
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
@@ -308,6 +311,138 @@ void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopb
     NETNATIVE_LOGI("Destroyed %{public}d sockets", socketsDestroyed_);
 }
 
+bool NetLinkSocketDiag::GetTcpNetPortStatesInfo(const inet_diag_msg* msg,
+    NetPortStatesInfo& netPortStatesInfo)
+{
+    if (msg == nullptr) {
+        return false;
+    }
+    NetManagerStandard::TcpNetPortStatesInfo tcpInfo;
+    char localAddr[DOMAIN_IP_ADDR_MAX_LEN] = {0};
+    char remoteAddr[DOMAIN_IP_ADDR_MAX_LEN] = {0};
+    if (msg->idiag_family == AF_INET) {
+        in_addr aSrc{.s_addr = msg->id.idiag_src[0]};
+        in_addr aDst{.s_addr = msg->id.idiag_dst[0]};
+        inet_ntop(AF_INET, &aSrc, localAddr, sizeof(localAddr));
+        inet_ntop(AF_INET, &aDst, remoteAddr, sizeof(remoteAddr));
+    } else if (msg->idiag_family == AF_INET6) {
+        inet_ntop(AF_INET6, msg->id.idiag_src, localAddr, sizeof(localAddr));
+        inet_ntop(AF_INET6, msg->id.idiag_dst, remoteAddr, sizeof(remoteAddr));
+    }
+    tcpInfo.tcpLocalIp_ = localAddr;
+    tcpInfo.tcpLocalPort_ = ntohs(msg->id.idiag_sport);
+    tcpInfo.tcpRemoteIp_ = remoteAddr;
+    tcpInfo.tcpRemotePort_ = ntohs(msg->id.idiag_dport);
+    tcpInfo.tcpUid_ = msg->idiag_uid;
+    tcpInfo.tcpPid_ = 0;
+    tcpInfo.tcpState_ = msg->idiag_state;
+    netPortStatesInfo.tcpNetPortStatesInfo_.push_back(tcpInfo);
+    return true;
+}
+
+bool NetLinkSocketDiag::GetUdpNetPortStatesInfo(const inet_diag_msg* msg,
+    NetPortStatesInfo& netPortStatesInfo)
+{
+    if (msg == nullptr) {
+        return false;
+    }
+    NetManagerStandard::UdpNetPortStatesInfo udpInfo;
+    char localAddr[DOMAIN_IP_ADDR_MAX_LEN] = {0};
+    if (msg->idiag_family == AF_INET) {
+        in_addr aSrc { .s_addr = msg->id.idiag_src[0] };
+        inet_ntop(AF_INET, &aSrc, localAddr, sizeof(localAddr));
+    } else if (msg->idiag_family == AF_INET6) {
+        inet_ntop(AF_INET6, msg->id.idiag_src, localAddr, sizeof(localAddr));
+    }
+    udpInfo.udpLocalIp_ = localAddr;
+    udpInfo.udpLocalPort_ = ntohs(msg->id.idiag_sport);
+    udpInfo.udpUid_ = msg->idiag_uid;
+    udpInfo.udpPid_ = 0;
+    netPortStatesInfo.udpNetPortStatesInfo_.push_back(udpInfo);
+    return true;
+}
+
+bool NetLinkSocketDiag::ProcessGetNetPortStatesInfo(const uint8_t proto, const inet_diag_msg* msg,
+    NetPortStatesInfo& netPortStatesInfo)
+{
+    if (proto == IPPROTO_TCP) {
+        if (!GetTcpNetPortStatesInfo(msg, netPortStatesInfo)) {
+            return false;
+        }
+    } else if (proto == IPPROTO_UDP) {
+        if (!GetUdpNetPortStatesInfo(msg, netPortStatesInfo)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int32_t NetLinkSocketDiag::ProcessSockDiagDumpInfo(uint8_t proto,
+                                                   NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
+{
+    char buf[KERNEL_BUFFER_SIZE] = {0};
+    ssize_t readBytes = read(dumpSock_, buf, sizeof(buf));
+    if (readBytes < 0) {
+        NETNATIVE_LOGE("Read netlink dump failed errno:%{public}d %{public}s", errno, strerror(errno));
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    while (readBytes > 0) {
+        uint32_t len = static_cast<uint32_t>(readBytes);
+        for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                return NETMANAGER_ERR_INTERNAL;
+            } else if (nlh->nlmsg_type == NLMSG_DONE) {
+                return NETMANAGER_SUCCESS;
+            }
+            if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(inet_diag_msg))) {
+                continue;
+            }
+            const auto *msg = reinterpret_cast<const inet_diag_msg *>(NLMSG_DATA(nlh));
+            if (!ProcessGetNetPortStatesInfo(proto, msg, netPortStatesInfo)) {
+                continue;
+            }
+        }
+        readBytes = read(dumpSock_, buf, sizeof(buf));
+        if (readBytes < 0) {
+            NETNATIVE_LOGE("Read netlink dump failed errno:%{public}d %{public}s", errno, strerror(errno));
+            return NETMANAGER_ERR_INTERNAL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetLinkSocketDiag::GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo)
+{
+    if (!CreateNetlinkSocket()) {
+        NETNATIVE_LOGE("Create netlink diag socket failed.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
+    for (int32_t proto : {IPPROTO_TCP, IPPROTO_UDP}) {
+        for (const int family : {AF_INET, AF_INET6}) {
+            uint32_t states = 0;
+            if (proto == IPPROTO_TCP) {
+                states = TCP_STATES;
+            } else if (proto == IPPROTO_UDP) {
+                states = -1;
+            }
+            int32_t ret = SendSockDiagDumpRequest(proto, family, states);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETNATIVE_LOGE("Failed to dump %{public}s %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6",
+                               proto == IPPROTO_TCP ? "TCP" : "UDP");
+                continue;
+            }
+            ret = ProcessSockDiagDumpInfo(proto, netPortStatesInfo);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETNATIVE_LOGE("Failed to process %{public}s %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6",
+                               proto == IPPROTO_TCP ? "TCP" : "UDP");
+                continue;
+            }
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetLinkSocketDiag::SetSocketDestroyType(int socketType)
 {
     if (socketType >= static_cast<int>(SocketDestroyType::DESTROY_DEFAULT)) {
@@ -457,7 +592,7 @@ int32_t NetLinkSocketDiag::MakeQueryUidRequestInfo(uint8_t proto, uint8_t family
 
 int32_t NetLinkSocketDiag::ProcessQueryUidResponse(int32_t &uid)
 {
-    uid = INVALID_UID;
+    uid = INVALID_OWNER_UID;
     char buf[KERNEL_BUFFER_SIZE] = {0};
     ssize_t readBytes = read(queryUidSock_, buf, sizeof(buf));
     if (readBytes < 0) {
@@ -497,7 +632,7 @@ int32_t NetLinkSocketDiag::GetConnectOwnerUid(uint8_t proto, uint8_t family, con
                                               uint32_t localPort, const std::string &remoteAddress, uint32_t remotePort,
                                               int32_t &uid)
 {
-    uid = INVALID_UID;
+    uid = INVALID_OWNER_UID;
     if (!CreateNetlinkSocketForQueryUid()) {
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -511,7 +646,7 @@ int32_t NetLinkSocketDiag::GetConnectOwnerUid(uint8_t proto, uint8_t family, con
      * If five-tuple match fails, retry with local address + port only.
      * Reason: Unconnected UDP sockets don't store remote endpoint info.
      */
-    if (uid == INVALID_UID && proto == IPPROTO_UDP) {
+    if (uid == INVALID_OWNER_UID && proto == IPPROTO_UDP) {
         std::string wildcardIp = (family == AF_INET) ? "0.0.0.0" : "::";
         ret = QueryConnectOwnerUid(proto, family, localAddress, localPort, wildcardIp, 0, uid);
     }

@@ -317,6 +317,17 @@ void ConnectionAsyncWork::GetConnectOwnerUidCallback(napi_env env, napi_status s
                                                                                                             data);
 }
 
+void ConnectionAsyncWork::ExecGetSystemNetPortStates(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetSystemNetPortStatesContext, ConnectionExec::ExecGetSystemNetPortStates>(env, data);
+}
+
+void ConnectionAsyncWork::GetSystemNetPortStatesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetSystemNetPortStatesContext,
+        ConnectionExec::GetSystemNetPortStatesCallback>(env, status, data);
+}
+
 void ConnectionAsyncWork::ExecAddNetworkRoute(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<AddNetworkRouteContext, ConnectionExec::ExecAddNetworkRoute>(env, data);

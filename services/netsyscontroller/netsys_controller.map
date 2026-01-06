@@ -138,6 +138,7 @@
       "OHOS::NetManagerStandard::NetsysController::UpdateEnterpriseRoute(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, bool)";
       "OHOS::NetManagerStandard::NetsysController::SetInternetAccessByIpForWifiShare(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned char, bool, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetsysController::GetIpNeighTable(std::__h::vector<OHOS::NetManagerStandard::NetIpMacInfo, std::__h::allocator<OHOS::NetManagerStandard::NetIpMacInfo>>&)";
+      "OHOS::NetManagerStandard::NetsysController::GetSystemNetPortStates(OHOS::NetManagerStandard::NetPortStatesInfo&)";
       "OHOS::NetManagerStandard::NetsysController::CreateVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::DestroyVlan(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetsysController::SetVlanIp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";

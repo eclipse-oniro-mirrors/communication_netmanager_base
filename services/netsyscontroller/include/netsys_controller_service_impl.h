@@ -831,6 +831,7 @@ public:
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                int32_t &ownerUid) override;
 
+    int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) override;
     /**
      * Register Dns Result Callback Listener.
      *

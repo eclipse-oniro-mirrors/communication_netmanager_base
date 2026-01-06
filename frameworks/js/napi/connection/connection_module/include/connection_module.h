@@ -94,6 +94,7 @@ public:
     static constexpr const char *INTERFACE_PROTOCOL_TYPE = "ProtocolType";
     static constexpr const char *FUNCTION_GET_DNS_ASCII = "getDnsAscii";
     static constexpr const char *FUNCTION_GET_DNS_UNICODE = "getDnsUnicode";
+    static constexpr const char *FUNCTION_GET_SYSTEM_NET_PORT_STATES = "getSystemNetPortStates";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
     static std::initializer_list<napi_property_descriptor> createPropertyList();
@@ -184,6 +185,7 @@ private:
     static napi_value GetConnectOwnerUidSync(napi_env env, napi_callback_info info);
     static napi_value GetDnsASCII(napi_env env, napi_callback_info info);
     static napi_value GetDnsUnicode(napi_env env, napi_callback_info info);
+    static napi_value GetSystemNetPortStates(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

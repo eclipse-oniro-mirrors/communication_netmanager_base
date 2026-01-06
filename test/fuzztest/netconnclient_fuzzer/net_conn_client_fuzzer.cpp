@@ -1383,6 +1383,21 @@ void DelStaticIpv6FuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_IPV6), dataParcelNoIfName);
 }
 
+void GetSystemNetPortStates(const uint8_t *data, size_t size)
+{
+    if (data == nullptr) {
+        return;
+    }
+    NetManagerBaseAccessToken token;
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES), dataParcel);
+}
+
 void GetIpNeighTableFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr) {
@@ -1950,6 +1965,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DestroyVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::SetVlanIpFuzzTest(data, size);
     OHOS::NetManagerStandard::GetConnectOwnerUidFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetSystemNetPortStates(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

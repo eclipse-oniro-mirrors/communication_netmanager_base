@@ -2103,6 +2103,13 @@ HWTEST_F(NetConnClientTest, SetVlanIpTest001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 }
 
+HWTEST_F(NetConnClientTest, GetSystemNetPortStatesTest001, TestSize.Level1)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    auto ret = NetConnClient::GetInstance().GetSystemNetPortStates(netPortStatesInfo);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(NetConnClientTest, PostTriggerNetChange001, TestSize.Level1)
 {
     auto netConnCallbackManager = std::make_shared<NetConnClient::NetConnCallbackManager>();

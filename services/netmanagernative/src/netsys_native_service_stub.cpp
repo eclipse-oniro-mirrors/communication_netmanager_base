@@ -390,6 +390,8 @@ void NetsysNativeServiceStub::InitNetStatsInterfaceMap()
         &NetsysNativeServiceStub::CmdSetNetStatusMap;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IP_NEIGH_TABLE)] =
         &NetsysNativeServiceStub::CmdGetIpNeighTable;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SYSTEM_NET_PORT_STATES)] =
+        &NetsysNativeServiceStub::CmdGetSystemNetPortStates;
 }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM
@@ -2117,6 +2119,26 @@ int32_t NetsysNativeServiceStub::CmdGetConnectOwnerUid(MessageParcel &data, Mess
         }
     }
     return ret;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply)
+{
+    NetPortStatesInfo netPortStatesInfo;
+    int32_t result = GetSystemNetPortStates(netPortStatesInfo);
+    // LCOV_EXCL_START This will never happen.
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        sptr<NetPortStatesInfo> info_ptr = sptr<NetPortStatesInfo>::MakeSptr(netPortStatesInfo);
+        if (!NetPortStatesInfo::Marshalling(reply, info_ptr)) {
+            NETNATIVE_LOGE("proxy Marshalling failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    // LCOV_EXCL_STOP
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdRegisterDnsResultListener(MessageParcel &data, MessageParcel &reply)

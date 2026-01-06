@@ -1041,6 +1041,7 @@ public:
     virtual int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) = 0;
     virtual int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                        int32_t &ownerUid) = 0;
+    virtual int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

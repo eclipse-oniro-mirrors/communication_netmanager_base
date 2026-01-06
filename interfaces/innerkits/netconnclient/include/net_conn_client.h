@@ -539,6 +539,7 @@ public:
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
     int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
     int32_t GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid);
+    int32_t GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

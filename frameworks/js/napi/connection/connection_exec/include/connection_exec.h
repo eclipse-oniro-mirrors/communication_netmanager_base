@@ -49,6 +49,7 @@
 #include "destroyvlan_context.h"
 #include "setvlanip_context.h"
 #include "getdns_context.h"
+#include "getsystemnetportstates_context.h"
 
 #define DECLARE_WRITABLE_NAPI_FUNCTION(name, func)                                  \
     {                                                                               \
@@ -72,6 +73,8 @@ public:
     static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
 
     static napi_value CreateIpNeighTable(napi_env env, const NetIpMacInfo &ipNeighTable);
+
+    static napi_value CreateNetPortStatesInfo(napi_env env, const NetPortStatesInfo &netPortStatesInfo);
 
     static bool ExecGetDefaultNet(GetDefaultNetContext *context);
 
@@ -246,6 +249,10 @@ public:
     static bool ExecGetDnsUnicode(GetDnsContext *context);
 
     static napi_value GetDnsCallback(GetDnsContext *context);
+ 
+    static bool ExecGetSystemNetPortStates(GetSystemNetPortStatesContext *context);
+
+    static napi_value GetSystemNetPortStatesCallback(GetSystemNetPortStatesContext *context);
 
     class NetHandleExec final {
     public:

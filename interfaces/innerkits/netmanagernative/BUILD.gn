@@ -69,6 +69,7 @@ ohos_static_library("net_native_parcel") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_net_diag_data.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_conn_info.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_ip_mac_info.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_port_states_info.cpp",
   ]
 
   if (netmanager_base_enable_feature_net_firewall) {

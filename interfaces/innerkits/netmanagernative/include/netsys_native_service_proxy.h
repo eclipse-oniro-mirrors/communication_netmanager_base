@@ -194,6 +194,7 @@ public:
     int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask) override;
     int32_t GetConnectOwnerUid(const OHOS::NetManagerStandard::NetConnInfo &netConnInfo,
                                int32_t &ownerUid) override;
+    int32_t GetSystemNetPortStates(NetManagerStandard::NetPortStatesInfo &netPortStatesInfo) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

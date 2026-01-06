@@ -1734,6 +1734,19 @@ int32_t NetsysNativeClient::GetConnectOwnerUid(const OHOS::NetManagerStandard::N
     return proxy->GetConnectOwnerUid(netConnInfo, ownerUid);
 }
 
+int32_t NetsysNativeClient::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    NETMGR_LOG_D("get system net port states");
+    auto proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->GetSystemNetPortStates(netPortStatesInfo);
+}
+
 int32_t NetsysNativeClient::RegisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
 {

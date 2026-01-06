@@ -2364,5 +2364,33 @@ int32_t NetConnServiceProxy::GetConnectOwnerUid(const NetConnInfo &netConnInfo, 
     return ret;
 }
 
+// LCOV_EXCL_START This will never happen.
+int32_t NetConnServiceProxy::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SYSTEM_NET_PORT_STATES), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        sptr<NetPortStatesInfo> infoPtr = NetPortStatesInfo::Unmarshalling(reply);
+        if (infoPtr == nullptr) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        netPortStatesInfo = *infoPtr;
+    }
+    return ret;
+}
+// LCOV_EXCL_STOP
 } // namespace NetManagerStandard
 } // namespace OHOS

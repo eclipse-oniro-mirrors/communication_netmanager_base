@@ -667,6 +667,17 @@ int32_t NetManagerNative::GetConnectOwnerUid(const OHOS::NetManagerStandard::Net
     return connManager_->GetConnectOwnerUid(netConnInfo, ownerUid);
 }
 
+int32_t NetManagerNative::GetSystemNetPortStates(NetPortStatesInfo &netPortStatesInfo)
+{
+    NETNATIVE_LOGI("GetSystemNetPortStates");
+    if (connManager_ == nullptr) {
+        NETNATIVE_LOGE("connManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return connManager_->GetSystemNetPortStates(netPortStatesInfo);
+}
+
 int32_t NetManagerNative::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     return dnsManager_->RegisterDnsResultCallback(callback, timeStep);
