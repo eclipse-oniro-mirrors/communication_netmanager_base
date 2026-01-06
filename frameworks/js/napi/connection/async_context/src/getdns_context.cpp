@@ -59,8 +59,8 @@ void GetDnsContext::ParseParams(napi_value *params, size_t paramsCount)
             return;
         }
         int32_t process = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_1]);
-        if (process < static_cast<uint32_t>(ConversionProcess::NO_CONFIGURATION) ||
-            process > static_cast<uint32_t>(ConversionProcess::USE_STD3_ASCII_RULES)) {
+        if (process < static_cast<int32_t>(ConversionProcess::NO_CONFIGURATION) ||
+            process > static_cast<int32_t>(ConversionProcess::USE_STD3_ASCII_RULES)) {
             SetParseOK(false);
             SetErrorCode(NETMANAGER_ERR_INVALID_PARAMETER);
             return;
