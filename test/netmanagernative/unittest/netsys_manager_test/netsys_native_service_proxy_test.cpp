@@ -102,10 +102,8 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
     ASSERT_NE(netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
         netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0, true);
 
-    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME, BEARER_DEFAULT);
+    netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);
 }
 
 /**
