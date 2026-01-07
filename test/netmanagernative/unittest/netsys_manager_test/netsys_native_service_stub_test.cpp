@@ -1435,11 +1435,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyVlan001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdSetVlanIp001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceStubTest, CmdAddVlanIp001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetVlanIp(data, reply);
+    int32_t ret = notifyStub_->CmdAddVlanIp(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

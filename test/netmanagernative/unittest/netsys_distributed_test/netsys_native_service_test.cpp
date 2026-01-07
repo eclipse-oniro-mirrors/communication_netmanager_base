@@ -346,7 +346,7 @@ HWTEST_F(NetsysNativeServiceTest, DestroyVlan001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-HWTEST_F(NetsysNativeServiceTest, SetVlanIp001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, AddVlanIp001, TestSize.Level1)
 {
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
@@ -354,7 +354,7 @@ HWTEST_F(NetsysNativeServiceTest, SetVlanIp001, TestSize.Level1)
     uint32_t mask = 24;
     auto instance = std::make_shared<NetsysNativeService>(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     instance->netsysService_ = nullptr;
-    int32_t ret = instance->SetVlanIp(ifName, vlanId, ip, mask);
+    int32_t ret = instance->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 

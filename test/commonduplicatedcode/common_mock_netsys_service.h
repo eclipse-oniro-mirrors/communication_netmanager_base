@@ -209,7 +209,7 @@ public:
     MOCK_METHOD(int32_t, GetIpNeighTable, (std::vector<NetIpMacInfo> &ipMacInfo));
     MOCK_METHOD(int32_t, CreateVlan, (const std::string &ifName, uint32_t vlanId));
     MOCK_METHOD(int32_t, DestroyVlan, (const std::string &ifName, uint32_t vlanId));
-    MOCK_METHOD(int32_t, SetVlanIp, (const std::string &ifName, uint32_t vlanId,
+    MOCK_METHOD(int32_t, AddVlanIp, (const std::string &ifName, uint32_t vlanId,
         const std::string &ip, uint32_t mask));
     MOCK_METHOD(int32_t, GetConnectOwnerUid, (const NetConnInfo &netConnInfo, int32_t &ownerUid));
     MOCK_METHOD(int32_t, GetSystemNetPortStates, (NetPortStatesInfo &netPortStatesInfo));

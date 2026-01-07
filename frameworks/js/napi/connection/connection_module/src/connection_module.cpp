@@ -226,7 +226,8 @@ static void AddCleanupHook(napi_env env)
 #define DEFINE_VLAN_FUNCTIONS \
     DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_VLAN, CreateVlan),          \
     DECLARE_NAPI_FUNCTION(FUNCTION_DESTROY_VLAN, DestroyVlan),        \
-    DECLARE_NAPI_FUNCTION(FUNCTION_SET_VLAN_IP, SetVlanIp),           \
+    DECLARE_NAPI_FUNCTION(FUNCTION_ADD_VLAN_IP, AddVlanIp),           \
+    DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_VLAN_IP, DeleteVlanIp),     \
 
 std::initializer_list<napi_property_descriptor> ConnectionModule::createPropertyList()
 {
@@ -656,10 +657,16 @@ napi_value ConnectionModule::DestroyVlan(napi_env env, napi_callback_info info)
         ConnectionAsyncWork::ExecDestroyVlan, ConnectionAsyncWork::DestroyVlanCallback);
 }
 
-napi_value ConnectionModule::SetVlanIp(napi_env env, napi_callback_info info)
+napi_value ConnectionModule::AddVlanIp(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<SetVlanIpContext>(env, info, FUNCTION_SET_VLAN_IP, nullptr,
-        ConnectionAsyncWork::ExecSetVlanIp, ConnectionAsyncWork::SetVlanIpCallback);
+    return ModuleTemplate::Interface<AddVlanIpContext>(env, info, FUNCTION_ADD_VLAN_IP, nullptr,
+        ConnectionAsyncWork::ExecAddVlanIp, ConnectionAsyncWork::AddVlanIpCallback);
+}
+
+napi_value ConnectionModule::DeleteVlanIp(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<DeleteVlanIpContext>(env, info, FUNCTION_DELETE_VLAN_IP, nullptr,
+        ConnectionAsyncWork::ExecDeleteVlanIp, ConnectionAsyncWork::DeleteVlanIpCallback);
 }
 
 napi_value ConnectionModule::GetSystemNetPortStates(napi_env env, napi_callback_info info)

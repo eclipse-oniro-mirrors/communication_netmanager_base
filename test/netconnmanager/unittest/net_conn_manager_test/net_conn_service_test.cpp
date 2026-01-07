@@ -2117,14 +2117,25 @@ HWTEST_F(NetConnServiceTest, DestroyVlanTest001, TestSize.Level1)
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, SetVlanIpTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, AddVlanIpTest001, TestSize.Level1)
 {
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
     auto netConnService = std::make_shared<NetConnService>();
-    auto ret = netConnService->SetVlanIp(ifName, vlanId, ip, mask);
+    auto ret = netConnService->AddVlanIp(ifName, vlanId, ip, mask);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DeleteVlanIpTest001, TestSize.Level1)
+{
+    std::string ifName = "eth0";
+    uint32_t vlanId = 1;
+    std::string ip = "192.148.1.1";
+    uint32_t mask = 24;
+    auto netConnService = std::make_shared<NetConnService>();
+    auto ret = netConnService->DeleteVlanIp(ifName, vlanId, ip, mask);
     EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
 }
 

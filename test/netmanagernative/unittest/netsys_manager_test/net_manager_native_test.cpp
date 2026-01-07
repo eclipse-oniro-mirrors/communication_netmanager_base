@@ -322,24 +322,24 @@ HWTEST_F(NetManagerNativeTest, DestroyVlan002, TestSize.Level1)
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetManagerNativeTest, SetVlanIp001, TestSize.Level1)
+HWTEST_F(NetManagerNativeTest, AddVlanIp001, TestSize.Level1)
 {
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
     instance_->interfaceManager_ = nullptr;
-    auto ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    auto ret = instance_->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-HWTEST_F(NetManagerNativeTest, SetVlanIp002, TestSize.Level1)
+HWTEST_F(NetManagerNativeTest, AddVlanIp002, TestSize.Level1)
 {
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
     std::string ip = "192.148.1.1";
     uint32_t mask = 24;
-    auto ret = instance_->SetVlanIp(ifName, vlanId, ip, mask);
+    auto ret = instance_->AddVlanIp(ifName, vlanId, ip, mask);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 

@@ -1453,7 +1453,7 @@ void DestroyVlanFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DESTROY_VLAN), dataParcel);
 }
 
-void SetVlanIpFuzzTest(const uint8_t *data, size_t size)
+void AddVlanIpFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr) {
         return;
@@ -1474,7 +1474,31 @@ void SetVlanIpFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ip);
     dataParcel.WriteInt32(mask);
 
-    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP), dataParcel);
+}
+
+void DeleteVlanIpFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr) {
+        return;
+    }
+    NetManagerBaseAccessToken token;
+
+    std::string ifName = NetConnGetString(STR_LEN);
+    int32_t vlanId = NetConnGetData<int32_t>();
+    std::string ip = NetConnGetString(STR_LEN);
+    int32_t mask = NetConnGetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(vlanId);
+    dataParcel.WriteString(ip);
+    dataParcel.WriteInt32(mask);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP), dataParcel);
 }
 
 void RegisterSlotTypeFuzzTest(const uint8_t *data, size_t size)
@@ -1963,7 +1987,8 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIpNeighTableFuzzTest(data, size);
     OHOS::NetManagerStandard::CreateVlanFuzzTest(data, size);
     OHOS::NetManagerStandard::DestroyVlanFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetVlanIpFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddVlanIpFuzzTest(data, size);
+    OHOS::NetManagerStandard::DeleteVlanIpFuzzTest(data, size);
     OHOS::NetManagerStandard::GetConnectOwnerUidFuzzTest(data, size);
     OHOS::NetManagerStandard::GetSystemNetPortStates(data, size);
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NAPI_DESTROY_VLAN_H
-#define NETMANAGER_BASE_NAPI_DESTROY_VLAN_H
+#ifndef NETMANAGER_BASE_NAPI_DELETE_VLAN_IP_H
+#define NETMANAGER_BASE_NAPI_DELETE_VLAN_IP_H
 
 #include <cstddef>
 #include <napi/native_api.h>
@@ -22,19 +22,22 @@
 #include "base_context.h"
 #include "event_manager.h"
 
+#include "inet_addr.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 
-class DestroyVlanContext : public BaseContext {
+class DeleteVlanIpContext : public BaseContext {
 public:
-    DestroyVlanContext() = delete;
-    DestroyVlanContext(napi_env env, std::shared_ptr<EventManager>& manager);
+    DeleteVlanIpContext() = delete;
+    DeleteVlanIpContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
     std::string ifName_;
     uint32_t vlanId_ { 0 };
+    INetAddr address_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -4339,7 +4339,7 @@ int32_t NetConnService::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)
 int32_t NetConnService::CreateVlan(const std::string &ifName, uint32_t vlanId)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     if (NetsysController::GetInstance().CreateVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -4350,7 +4350,7 @@ int32_t NetConnService::CreateVlan(const std::string &ifName, uint32_t vlanId)
 int32_t NetConnService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     if (NetsysController::GetInstance().DestroyVlan(ifName, vlanId) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -4358,13 +4358,26 @@ int32_t NetConnService::DestroyVlan(const std::string &ifName, uint32_t vlanId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetConnService::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                   const std::string &ip, uint32_t mask)
 {
     if (ifName.find("eth") == std::string::npos) {
-        return NETMANAGER_ERR_INCORRECT_IFNAME;
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
-    if (NetsysController::GetInstance().SetVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
+    if (NetsysController::GetInstance().AddVlanIp(ifName, vlanId, ip, mask) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::DeleteVlanIp(const std::string &ifName, uint32_t vlanId,
+                                     const std::string &ip, uint32_t mask)
+{
+    if (ifName.find("eth") == std::string::npos) {
+        return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
+    }
+    std::string name = ifName + "." + std::to_string(vlanId);
+    if (NetsysController::GetInstance().DelInterfaceAddress(name, ip, mask) != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;

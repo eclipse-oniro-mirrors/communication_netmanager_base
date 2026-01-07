@@ -2301,7 +2301,7 @@ int32_t NetConnServiceProxy::DestroyVlan(const std::string &ifName, uint32_t vla
     return reply.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetConnServiceProxy::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                        const std::string &ip, uint32_t mask)
 {
     MessageParcel data;
@@ -2323,7 +2323,38 @@ int32_t NetConnServiceProxy::SetVlanIp(const std::string &ifName, uint32_t vlanI
     }
 
     MessageParcel reply;
-    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_VLAN_IP),
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_VLAN_IP),
+        data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::DeleteVlanIp(const std::string &ifName, uint32_t vlanId,
+                                          const std::string &ip, uint32_t mask)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(vlanId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteString(ip)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint32(mask)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DELETE_VLAN_IP),
         data, reply);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;

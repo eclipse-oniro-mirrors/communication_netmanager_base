@@ -2185,7 +2185,7 @@ int32_t NetsysNativeClient::DestroyVlan(const std::string &ifName, uint32_t vlan
     return proxy->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetsysNativeClient::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetsysNativeClient::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                       const std::string &ip, uint32_t mask)
 {
     auto proxy = GetProxy();
@@ -2195,7 +2195,7 @@ int32_t NetsysNativeClient::SetVlanIp(const std::string &ifName, uint32_t vlanId
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     // LCOV_EXCL_STOP
-    return proxy->SetVlanIp(ifName, vlanId, ip, mask);
+    return proxy->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
 #ifdef FEATURE_ENTERPRISE_ROUTE_CUSTOM

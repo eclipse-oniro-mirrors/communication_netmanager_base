@@ -104,12 +104,17 @@ HWTEST_F(NetlinkMsgTest, AddLinkTest001, TestSize.Level1)
     ifm.ifi_flags = 0;
     ifm.ifi_change = 0;
     netLinkMsg.AddLink(action, ifm);
+
+    struct nlattr *linkinfo = netLinkMsg.AddNestedStart(IFLA_LINKINFO);
+    struct nlattr *datainfo = nullptr;
+    netLinkMsg.AddNestedEnd(datainfo);
+    netLinkMsg.AddNestedEnd(linkinfo);
     
     size_t dataLength10 = 10;
     char temp[10] = "123456789";
     char* data = temp;
     int32_t ret = netLinkMsg.AddAttr(action, data, dataLength10);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS

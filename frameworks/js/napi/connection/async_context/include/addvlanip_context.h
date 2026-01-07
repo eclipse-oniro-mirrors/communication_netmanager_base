@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NAPI_SET_VLAN_IP_H
-#define NETMANAGER_BASE_NAPI_SET_VLAN_IP_H
+#ifndef NETMANAGER_BASE_NAPI_ADD_VLAN_IP_H
+#define NETMANAGER_BASE_NAPI_ADD_VLAN_IP_H
 
 #include <cstddef>
 #include <napi/native_api.h>
@@ -27,16 +27,16 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-class SetVlanIpContext : public BaseContext {
+class AddVlanIpContext : public BaseContext {
 public:
-    SetVlanIpContext() = delete;
-    SetVlanIpContext(napi_env env, std::shared_ptr<EventManager>& manager);
+    AddVlanIpContext() = delete;
+    AddVlanIpContext(napi_env env, std::shared_ptr<EventManager>& manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
     std::string ifName_;
-    uint32_t vlanId_;
+    uint32_t vlanId_ { 0 };
     INetAddr address_;
 };
 } // namespace NetManagerStandard

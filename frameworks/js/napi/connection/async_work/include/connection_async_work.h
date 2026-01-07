@@ -162,9 +162,13 @@ public:
 
     static void DestroyVlanCallback(napi_env env, napi_status status, void *data);
 
-    static void ExecSetVlanIp(napi_env env, void *data);
+    static void ExecAddVlanIp(napi_env env, void *data);
 
-    static void SetVlanIpCallback(napi_env env, napi_status status, void *data);
+    static void AddVlanIpCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecDeleteVlanIp(napi_env env, void *data);
+
+    static void DeleteVlanIpCallback(napi_env env, napi_status status, void *data);
 
     static void ExecGetConnectOwnerUid(napi_env env, void *data);
 

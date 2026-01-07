@@ -995,7 +995,7 @@ public:
 
     int32_t CreateVlan(const std::string &ifName, uint32_t vlanId);
     int32_t DestroyVlan(const std::string &ifName, uint32_t vlanId);
-    int32_t SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
+    int32_t AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask);
 
 #ifdef SUPPORT_SYSVPN
     /**

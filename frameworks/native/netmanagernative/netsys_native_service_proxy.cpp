@@ -4092,7 +4092,7 @@ int32_t NetsysNativeServiceProxy::DestroyVlan(const std::string &ifName, uint32_
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetsysNativeServiceProxy::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                             const std::string &ip, uint32_t mask)
 {
     MessageParcel data;
@@ -4101,12 +4101,12 @@ int32_t NetsysNativeServiceProxy::SetVlanIp(const std::string &ifName, uint32_t 
         return ERR_FLATTEN_OBJECT;
     }
     if (Remote() == nullptr) {
-        NETNATIVE_LOGE("Remote is null in SetVlanIp");
+        NETNATIVE_LOGE("Remote is null in AddVlanIp");
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_VLAN_IP),
+    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_VLAN_IP),
                                         data, reply, option);
     if (res != ERR_NONE) {
         NETNATIVE_LOGE("GetCookieStats SendRequest failed");

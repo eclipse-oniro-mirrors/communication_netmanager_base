@@ -1806,15 +1806,15 @@ int32_t NetsysController::DestroyVlan(const std::string &ifName, uint32_t vlanId
     return netsysService_->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetsysController::SetVlanIp(const std::string &ifName, uint32_t vlanId,
+int32_t NetsysController::AddVlanIp(const std::string &ifName, uint32_t vlanId,
                                     const std::string &ip, uint32_t mask)
 {
-    NETMGR_LOG_I("SetVlanIp");
+    NETMGR_LOG_I("AddVlanIp");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->SetVlanIp(ifName, vlanId, ip, mask);
+    return netsysService_->AddVlanIp(ifName, vlanId, ip, mask);
 }
 
 int32_t NetsysController::GetIpNeighTable(std::vector<NetIpMacInfo> &ipMacInfo)

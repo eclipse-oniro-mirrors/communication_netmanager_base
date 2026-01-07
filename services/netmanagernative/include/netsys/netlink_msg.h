@@ -112,6 +112,20 @@ public:
      */
     void AddLink(uint16_t action, const struct ifinfomsg& ifm);
 
+    /**
+     * Begin adding nested attribute to nlmsghdr
+     *
+     * @param type Added the type of nested attribute
+     */
+    struct nlattr *AddNestedStart(int type);
+
+    /**
+     * End adding nested attribute to nlmsghdr
+     *
+     * @param nested Add the nested attribute to be ended
+     */
+    void AddNestedEnd(struct nlattr *nested);
+
 private:
     std::unique_ptr<char[]> msghdrBuf_;
     struct nlmsghdr *netlinkMessage_;

@@ -47,7 +47,8 @@
 #include "getipneightable_context.h"
 #include "createvlan_context.h"
 #include "destroyvlan_context.h"
-#include "setvlanip_context.h"
+#include "addvlanip_context.h"
+#include "deletevlanip_context.h"
 #include "getdns_context.h"
 #include "getsystemnetportstates_context.h"
 
@@ -236,9 +237,13 @@ public:
 
     static napi_value DestroyVlanCallback(DestroyVlanContext *context);
 
-    static bool ExecSetVlanIp(SetVlanIpContext *context);
+    static bool ExecAddVlanIp(AddVlanIpContext *context);
 
-    static napi_value SetVlanIpCallback(SetVlanIpContext *context);
+    static napi_value AddVlanIpCallback(AddVlanIpContext *context);
+
+    static bool ExecDeleteVlanIp(DeleteVlanIpContext *context);
+
+    static napi_value DeleteVlanIpCallback(DeleteVlanIpContext *context);
 
     static bool ExecGetConnectOwnerUid(GetConnectOwnerUidContext *context);
 

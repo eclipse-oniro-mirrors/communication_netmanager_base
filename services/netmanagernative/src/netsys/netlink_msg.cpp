@@ -142,5 +142,27 @@ void NetlinkMsg::AddLink(uint16_t action, const struct ifinfomsg& msg)
     }
     netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ifinfomsg)));
 }
+
+struct nlattr *NetlinkMsg::AddNestedStart(int type)
+{
+    if (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_ALIGN(sizeof(struct nlattr)) > nmd::NETLINK_MAX_LEN) {
+        return nullptr;
+    }
+    struct nlattr *nested = reinterpret_cast<struct nlattr*>(
+        reinterpret_cast<char*>(netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
+    nested->nla_type = type;
+    nested->nla_len = RTA_LENGTH(0);
+    netlinkMessage_->nlmsg_len = NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_ALIGN(nested->nla_len);
+    return nested;
+}
+
+void NetlinkMsg::AddNestedEnd(struct nlattr *nested)
+{
+    if (nested == nullptr) {
+        return;
+    }
+    nested->nla_len = reinterpret_cast<char*>(netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len) -
+                       reinterpret_cast<char*>(nested);
+}
 } // namespace nmd
 } // namespace OHOS

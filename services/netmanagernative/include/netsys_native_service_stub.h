@@ -207,7 +207,7 @@ private:
     int32_t CmdGetIpNeighTable(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateVlan(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDestroyVlan(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetVlanIp(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddVlanIp(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetConnectOwnerUid(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetSystemNetPortStates(MessageParcel &data, MessageParcel &reply);
 

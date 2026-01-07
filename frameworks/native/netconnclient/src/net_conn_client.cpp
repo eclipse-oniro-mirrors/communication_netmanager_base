@@ -1579,7 +1579,7 @@ int32_t NetConnClient::DestroyVlan(const std::string &ifName, uint32_t vlanId)
     return proxy->DestroyVlan(ifName, vlanId);
 }
 
-int32_t NetConnClient::SetVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
+int32_t NetConnClient::AddVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
 {
     sptr<INetConnService> proxy = GetProxy();
     // LCOV_EXCL_START This will never happen.
@@ -1588,7 +1588,19 @@ int32_t NetConnClient::SetVlanIp(const std::string &ifName, uint32_t vlanId, con
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     // LCOV_EXCL_STOP
-    return proxy->SetVlanIp(ifName, vlanId, ip, mask);
+    return proxy->AddVlanIp(ifName, vlanId, ip, mask);
+}
+
+int32_t NetConnClient::DeleteVlanIp(const std::string &ifName, uint32_t vlanId, const std::string &ip, uint32_t mask)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    // LCOV_EXCL_START This will never happen.
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    // LCOV_EXCL_STOP
+    return proxy->DeleteVlanIp(ifName, vlanId, ip, mask);
 }
 
 int32_t NetConnClient::GetConnectOwnerUid(const NetConnInfo &netConnInfo, int32_t &ownerUid)
