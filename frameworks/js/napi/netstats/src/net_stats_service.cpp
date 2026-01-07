@@ -1245,7 +1245,7 @@ void NetStatsService::AddUidStatsFlag(uint64_t delay)
 {
     std::shared_ptr<NetStatsService> selfPtr = shared_from_this();
     std::function<void()> uidInstallSourceFunc = [selfPtr]() {
-        if (selfPtr->isUpdate_) {
+        if (selfPtr->isUpdate_ || selfPtr->netStatsCached_ == nullptr) {
             return;
         }
 

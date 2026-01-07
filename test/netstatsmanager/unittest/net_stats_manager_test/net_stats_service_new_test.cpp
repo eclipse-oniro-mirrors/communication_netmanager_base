@@ -82,78 +82,78 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level
 
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     std::vector<NetStatsInfoSequence> infos = {};
     uint32_t uid = 1;
     const sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     network->type_ = 1;
     network->startTime_ = 1757600034;
     network->endTime_ = 1867600534;
-    int32_t ret = netStatsService->GetTrafficStatsByUidNetwork(infos, uid, *network);
+    int32_t ret = netStatsService.GetTrafficStatsByUidNetwork(infos, uid, *network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     AccountSA::OsAccountState state = AccountSA::OsAccountState::CREATED;
     int32_t userId = 101;
-    int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    int32_t ret = netStatsService.ProcessOsAccountChanged(userId, state);
     EXPECT_EQ(ret, 0);
     state = AccountSA::OsAccountState::STOPPING;
-    ret = netStatsService->ProcessOsAccountChanged(888, state);
+    ret = netStatsService.ProcessOsAccountChanged(888, state);
     EXPECT_EQ(ret, 0);
-    netStatsService->netStatsCached_->SetCurPrivateUserId(101);
-    EXPECT_EQ(netStatsService->netStatsCached_->GetCurPrivateUserId(), 101);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(101);
+    EXPECT_EQ(netStatsService.netStatsCached_->GetCurPrivateUserId(), 101);
     state = AccountSA::OsAccountState::INVALID_TYPE;
-    ret = netStatsService->ProcessOsAccountChanged(888, state);
+    ret = netStatsService.ProcessOsAccountChanged(888, state);
 }
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t userId = 101;
-    netStatsService->netStatsCached_->SetCurPrivateUserId(userId);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::STOPPED;
-    int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    int32_t ret = netStatsService.ProcessOsAccountChanged(userId, state);
 
-    int32_t curPrivateUserId = netStatsService->netStatsCached_->GetCurPrivateUserId();
+    int32_t curPrivateUserId = netStatsService.netStatsCached_->GetCurPrivateUserId();
     EXPECT_EQ(curPrivateUserId, -1);
 }
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t userId = 101;
-    netStatsService->netStatsCached_->SetCurPrivateUserId(userId);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::SWITCHED;
-    int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    int32_t ret = netStatsService.ProcessOsAccountChanged(userId, state);
     EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest004, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t userId = 101;
-    netStatsService->netStatsCached_->SetCurPrivateUserId(userId);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::LOCKED;
-    int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    int32_t ret = netStatsService.ProcessOsAccountChanged(userId, state);
     EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest005, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    auto netStatsServicePtr = std::make_shared<NetStatsService>();
     int32_t userId = 101;
-    netStatsService->netStatsCached_->SetCurPrivateUserId(userId);
+    netStatsServicePtr->netStatsCached_->SetCurPrivateUserId(userId);
     AccountSA::OsAccountState state = AccountSA::OsAccountState::SWITCHED;
-    int32_t ret = netStatsService->ProcessOsAccountChanged(userId + 1, state);
+    int32_t ret = netStatsServicePtr->ProcessOsAccountChanged(userId + 1, state);
     EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -169,17 +169,17 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
     info2.userId_ = 101;
     infos.push_back(info1);
     infos.push_back(info2);
-    netStatsService->netStatsCached_->SetCurPrivateUserId(101);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(101);
 
     if (curUserId == defaultUserId) {
-        netStatsService->MergeTrafficStatsByAccount(infos);
+        netStatsService.MergeTrafficStatsByAccount(infos);
         EXPECT_EQ(infos[1].userId_, 101);
     }
 }
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -198,9 +198,9 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1
     infos.push_back(info1);
     infos.push_back(info2);
     infos.push_back(info3);
-    netStatsService->netStatsCached_->SetCurDefaultUserId(109);
-    netStatsService->netStatsCached_->SetCurPrivateUserId(curUserId);
-    netStatsService->MergeTrafficStatsByAccount(infos);
+    netStatsService.netStatsCached_->SetCurDefaultUserId(109);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(curUserId);
+    netStatsService.MergeTrafficStatsByAccount(infos);
     if (curUserId == defaultUserId) {
         EXPECT_EQ(infos[1].uid_, DEFAULT_ACCOUNT_UID);
     }
@@ -208,7 +208,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest002, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     
     int32_t curUserId = -1;
     int32_t ret1 = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
@@ -229,9 +229,9 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->netStatsCached_->SetCurDefaultUserId(curUserId);
-    netStatsService->netStatsCached_->SetCurPrivateUserId(108);
-    netStatsService->MergeTrafficStatsByAccount(infos);
+    netStatsService.netStatsCached_->SetCurDefaultUserId(curUserId);
+    netStatsService.netStatsCached_->SetCurPrivateUserId(108);
+    netStatsService.MergeTrafficStatsByAccount(infos);
 
     if (curUserId == defaultUserId) {
         EXPECT_EQ(infos[3].uid_, OTHER_ACCOUNT_UID);
@@ -240,7 +240,7 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest003, TestSize.Level1
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
@@ -256,57 +256,57 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, DEFAULT_ACCOUNT_UID);
-    EXPECT_EQ(infos.size(), 3);
-    infos.push_back(info1);
-    infos.push_back(info2);
-    infos.push_back(info3);
-    infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, OTHER_ACCOUNT_UID);
-    EXPECT_EQ(infos.size(), 1);
-    infos.push_back(info1);
-    infos.push_back(info2);
-    infos.push_back(info3);
-    infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, 888);
-    EXPECT_EQ(infos.size(), 5);
-}
-
-HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest003, TestSize.Level1)
-{
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    int32_t defaultUserId = -1;
-    AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    netStatsService->netStatsCached_->SetCurDefaultUserId(defaultUserId);
-    std::vector<NetStatsInfoSequence> infos;
-    NetStatsInfoSequence info1;
-    info1.info_.userId_ = defaultUserId;
-    NetStatsInfoSequence info2;
-    info2.info_.userId_ = defaultUserId + 1;
-    NetStatsInfoSequence info3;
-    info3.info_.userId_ = 12345612;
-    NetStatsInfoSequence info4;
-    info3.info_.userId_ = 0;
-    infos.push_back(info1);
-    infos.push_back(info2);
-    infos.push_back(info3);
-    infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, Sim_UID);
+    netStatsService.DeleteTrafficStatsByAccount(infos, DEFAULT_ACCOUNT_UID);
     EXPECT_EQ(infos.size(), 2);
     infos.push_back(info1);
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, SIM2_UID);
+    netStatsService.DeleteTrafficStatsByAccount(infos, OTHER_ACCOUNT_UID);
+    EXPECT_EQ(infos.size(), 2);
+    infos.push_back(info1);
+    infos.push_back(info2);
+    infos.push_back(info3);
+    infos.push_back(info4);
+    netStatsService.DeleteTrafficStatsByAccount(infos, 888);
+    EXPECT_EQ(infos.size(), 6);
+}
+
+HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest003, TestSize.Level1)
+{
+    NetStatsService netStatsService;
+    int32_t defaultUserId = -1;
+    AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
+    netStatsService.netStatsCached_->SetCurDefaultUserId(defaultUserId);
+    std::vector<NetStatsInfoSequence> infos;
+    NetStatsInfoSequence info1;
+    info1.info_.userId_ = defaultUserId;
+    NetStatsInfoSequence info2;
+    info2.info_.userId_ = defaultUserId + 1;
+    NetStatsInfoSequence info3;
+    info3.info_.userId_ = 12345612;
+    NetStatsInfoSequence info4;
+    info3.info_.userId_ = 0;
+    infos.push_back(info1);
+    infos.push_back(info2);
+    infos.push_back(info3);
+    infos.push_back(info4);
+    netStatsService.DeleteTrafficStatsByAccount(infos, Sim_UID);
+    EXPECT_EQ(infos.size(), 2);
+    infos.push_back(info1);
+    infos.push_back(info2);
+    infos.push_back(info3);
+    infos.push_back(info4);
+    netStatsService.DeleteTrafficStatsByAccount(infos, SIM2_UID);
     EXPECT_EQ(infos.size(), 4);
 }
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest004, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
-    netStatsService->netStatsCached_->SetCurDefaultUserId(defaultUserId);
+    netStatsService.netStatsCached_->SetCurDefaultUserId(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
     NetStatsInfoSequence info1;
     info1.info_.userId_ = defaultUserId;
@@ -320,25 +320,25 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest004, TestSize.Level
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, DEFAULT_ACCOUNT_UID);
+    netStatsService.DeleteTrafficStatsByAccount(infos, DEFAULT_ACCOUNT_UID);
     EXPECT_EQ(infos.size(), 3);
     infos.push_back(info1);
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, OTHER_ACCOUNT_UID);
+    netStatsService.DeleteTrafficStatsByAccount(infos, OTHER_ACCOUNT_UID);
     EXPECT_EQ(infos.size(), 1);
     infos.push_back(info1);
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, 888);
+    netStatsService.DeleteTrafficStatsByAccount(infos, 888);
     EXPECT_EQ(infos.size(), 5);
 }
 
 HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest002, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int32_t defaultUserId = -1;
     AccountSA::OsAccountManager::GetDefaultActivatedOsAccount(defaultUserId);
     std::vector<NetStatsInfoSequence> infos;
@@ -354,19 +354,19 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest002, TestSize.Level
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, Sim_UID);
-    EXPECT_EQ(infos.size(), 2);
+    netStatsService.DeleteTrafficStatsByAccount(infos, Sim_UID);
+    EXPECT_EQ(infos.size(), 0);
     infos.push_back(info1);
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->DeleteTrafficStatsByAccount(infos, SIM2_UID);
-    EXPECT_EQ(infos.size(), 4);
+    netStatsService.DeleteTrafficStatsByAccount(infos, SIM2_UID);
+    EXPECT_EQ(infos.size(), 0);
 }
 
 HWTEST_F(NetStatsServiceTest, EraseNetStatsInfoByUserIdTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    NetStatsService netStatsService;
     int defaultUserId = 100;
     std::vector<NetStatsInfoSequence> infos;
     NetStatsInfoSequence info1;
@@ -381,36 +381,36 @@ HWTEST_F(NetStatsServiceTest, EraseNetStatsInfoByUserIdTest001, TestSize.Level1)
     infos.push_back(info2);
     infos.push_back(info3);
     infos.push_back(info4);
-    netStatsService->EraseNetStatsInfoByUserId(infos, 0);
+    netStatsService.EraseNetStatsInfoByUserId(infos, 0);
     EXPECT_EQ(infos.size(), 2);
 }
 
 HWTEST_F(NetStatsServiceTest, AddUidStatsFlagTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    netStatsService->AddUidStatsFlag(0);
+    auto netStatsServicePtr = std::make_shared<NetStatsService>();
+    netStatsServicePtr->AddUidStatsFlag(0);
     sleep(1);
-    EXPECT_EQ(netStatsService->isUpdate_, true);
+    EXPECT_EQ(netStatsServicePtr->isUpdate_, true);
 }
 
 HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest001, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    bool ret = netStatsService->CommonEventPackageRemoved(123);
+    NetStatsService netStatsService;
+    bool ret = netStatsService.CommonEventPackageRemoved(123);
     EXPECT_EQ(ret, false);
 }
 
 HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest003, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    bool ret = netStatsService->CommonEventPackageRemoved(SYSTEM_DEFAULT_USERID + USER_ID_DIVIDOR);
+    NetStatsService netStatsService;
+    bool ret = netStatsService.CommonEventPackageRemoved(SYSTEM_DEFAULT_USERID + USER_ID_DIVIDOR);
     EXPECT_EQ(ret, true);
 }
 
 HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest004, TestSize.Level1)
 {
-    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
-    bool ret = netStatsService->CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 1);
+    NetStatsService netStatsService;
+    bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 1);
     EXPECT_EQ(ret, false);
 }
 } // namespace NetManagerStandard
