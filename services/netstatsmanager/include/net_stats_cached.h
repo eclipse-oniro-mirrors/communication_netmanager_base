@@ -129,6 +129,8 @@ public:
 
     void ClearUidStatsFlag();
 
+    void SetPrivateStatus(bool status);
+
 #ifdef SUPPORT_NETWORK_SHARE
     void DeleteIptablesStats();
 
@@ -333,6 +335,7 @@ private:
     int32_t curDefaultUserId_ = -1;
     std::map<uint32_t, HistoryData> cellularHistoryData_;
     std::shared_mutex cellularHistoryDataMutex_;
+    bool isPrivateSpaceExist_;
 #ifdef SUPPORT_NETWORK_SHARE
     std::vector<NetStatsInfo> lastIptablesStatsInfo_;
     uint64_t writeDate_ = 0;
@@ -375,7 +378,7 @@ private:
 
     void UpdateNetStatsFlag(NetStatsInfo &info);
 
-    void UpdateNetStatsUserId(NetStatsInfo &info);
+    void UpdateNetStatsUserIdSim(NetStatsInfo &info);
 
     inline bool CheckUidStor()
     {

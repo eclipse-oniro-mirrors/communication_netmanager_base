@@ -84,6 +84,7 @@ constexpr int32_t SLOT_1 = 1;
 constexpr const char* UID = "uid";
 const std::string LIB_NET_BUNDLE_UTILS_PATH = "libnet_bundle_utils.z.so";
 constexpr uint64_t DELAY_US = 35 * 1000 * 1000;
+constexpr uint64_t UPDATE_FLAG_DELAY_US = 500 * 1000;
 constexpr const char* COMMON_EVENT_STATUS = "usual.event.RGM_STATUS_CHANGED";
 constexpr const char* STATUS_FIELD = "rgmStatus";
 const std::string STATUS_UNLOCKED = "rgm_user_unlocked";
@@ -112,7 +113,9 @@ NetStatsService::NetStatsService()
     netStatsCached_ = std::make_shared<NetStatsCached>();
 #ifdef SUPPORT_TRAFFIC_STATISTIC
     trafficObserver_ = std::make_unique<TrafficObserver>().release();
+#ifndef UNITTEST_FORBID_FFRT
     trafficPlanFfrtQueue_ = std::make_shared<ffrt::queue>("TrafficPlanStatistic");
+#endif
 #endif // SUPPORT_TRAFFIC_STATISTIC
 }
 
@@ -422,6 +425,7 @@ int32_t NetStatsService::ProcessOsAccountChanged(int32_t userId, AccountSA::OsAc
         AccountSA::OsAccountManager::GetOsAccountType(userId, accountType);
         if (accountType == AccountSA::OsAccountType::PRIVATE) {
             netStatsCached_->SetCurPrivateUserId(userId);
+            netStatsCached_->SetPrivateStatus(true);
         }
         return 0;
     }
@@ -436,15 +440,19 @@ int32_t NetStatsService::ProcessOsAccountChanged(int32_t userId, AccountSA::OsAc
             NETMGR_LOG_E("handler is nullptr");
             return static_cast<int32_t>(NETMANAGER_ERR_INTERNAL);
         }
-        auto ret1 = handler->UpdateStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
-        if (ret1 != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("update stats flag failed, uid:[%{public}d]", userId);
-        }
-        auto ret2 = handler->UpdateSimStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
-        if (ret2 != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("update sim stats flag failed, uid:[%{public}d]", userId);
-        }
+        handler->UpdateStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        handler->UpdateSimStatsFlagByUserId(userId, STATS_DATA_FLAG_UNINSTALLED);
+        handler->UpdateSimStatsFlagByUserId(SIM_PRIVATE_USERID, STATS_DATA_FLAG_UNINSTALLED);
+        netStatsCached_->SetPrivateStatus(false);
         UpdateStatsData();
+        isUpdate_ = false;
+        return 0;
+    }
+    if (state == AccountSA::OsAccountState::SWITCHED) {
+        if (userId == netStatsCached_->GetCurPrivateUserId()) {
+            netStatsCached_->SetPrivateStatus(true);
+            AddUidStatsFlag(UPDATE_FLAG_DELAY_US);
+        }
     }
     return 0;
 }
@@ -911,13 +919,13 @@ void NetStatsService::MergeTrafficStatsByAccount(std::vector<NetStatsInfo> &info
 
     if (curUserId == defaultUserId) {
         for (auto &info : infos) {
-            if (info.userId_ == netStatsCached_->GetCurPrivateUserId()) {
+            if (info.userId_ == netStatsCached_->GetCurPrivateUserId() || info.userId_ == SIM_PRIVATE_USERID) {
                 info.uid_ = OTHER_ACCOUNT_UID;
             }
         }
     } else if (curUserId == netStatsCached_->GetCurPrivateUserId()) {
         for (auto &info : infos) {
-            if (info.userId_ != curUserId) {
+            if (info.userId_ != curUserId && info.userId_ != SIM_PRIVATE_USERID) {
                 info.uid_ = DEFAULT_ACCOUNT_UID;
             }
         }
@@ -949,7 +957,12 @@ int32_t NetStatsService::GetHistoryData(std::vector<NetStatsInfo> &infos, std::s
         infos.insert(infos.end(), infos2.begin(), infos2.end());
     } else if (netStatsCached_->GetCurPrivateUserId() != -1) {
         userId = netStatsCached_->GetCurPrivateUserId();
-        history->GetHistoryByIdentAndUserId(infos, ident, userId, start, end);
+        std::vector<NetStatsInfo> infos1;
+        std::vector<NetStatsInfo> infos2;
+        history->GetHistoryByIdentAndUserId(infos1, ident, userId, start, end);
+        history->GetHistoryByIdentAndUserId(infos2, ident, SIM_PRIVATE_USERID, start, end);
+        infos.insert(infos.end(), infos1.begin(), infos1.end());
+        infos.insert(infos.end(), infos2.begin(), infos2.end());
     }
     if (userId == -1) {
         NETMGR_LOG_E("GetHistoryData error. uid:%{public}u, curPrivateUserId: %{public}d",
@@ -962,7 +975,7 @@ int32_t NetStatsService::GetHistoryData(std::vector<NetStatsInfo> &infos, std::s
 int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
                                                      const NetStatsNetwork &networkIpc)
 {
-    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork. uid: %{public}" PRIu32, uid);
     int32_t checkPermission = CheckNetManagerAvailable();
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     if (checkPermission != NETMANAGER_SUCCESS && uid != callingUid) {
@@ -1034,6 +1047,25 @@ void NetStatsService::DeleteTrafficStatsByAccount(std::vector<NetStatsInfoSequen
             } else {
                 ++it;
             }
+        }
+    } else if (uid == Sim_UID || uid == SIM2_UID) {
+        int32_t curUserId = -1;
+        AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(curUserId);
+        if (curUserId == defaultUserId) {
+            EraseNetStatsInfoByUserId(infos, SYSTEM_DEFAULT_USERID);
+        } else {
+            EraseNetStatsInfoByUserId(infos, SIM_PRIVATE_USERID);
+        }
+    }
+}
+
+void NetStatsService::EraseNetStatsInfoByUserId(std::vector<NetStatsInfoSequence> &infos, uint32_t userId)
+{
+    for (auto it = infos.begin(); it != infos.end();) {
+        if (it->info_.userId_ != userId) {
+            it = infos.erase(it);
+        } else {
+            ++it;
         }
     }
 }
@@ -1209,6 +1241,27 @@ void NetStatsService::RefreshUidStatsFlag(uint64_t delay)
     ffrt::submit(std::move(uidInstallSourceFunc), {}, {}, ffrt::task_attr().name("RefreshUidStatsFlag").delay(delay));
 }
 
+void NetStatsService::AddUidStatsFlag(uint64_t delay)
+{
+    std::shared_ptr<NetStatsService> selfPtr = shared_from_this();
+    std::function<void()> uidInstallSourceFunc = [selfPtr]() {
+        if (selfPtr->isUpdate_ || selfPtr->netStatsCached_ == nullptr) {
+            return;
+        }
+
+        auto tmp = selfPtr->GetSampleBundleInfosForActiveUser();
+        for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
+            if (CommonUtils::IsSim(iter->second.bundleName_) ||
+                CommonUtils::IsSim2(iter->second.bundleName_)) {
+                selfPtr->netStatsCached_->SetUidSimSampleBundle(iter->first, iter->second);
+            }
+        }
+        selfPtr->netStatsCached_->SetUidStatsFlag(tmp);
+        selfPtr->isUpdate_ = true;
+    };
+    ffrt::submit(std::move(uidInstallSourceFunc), {}, {}, ffrt::task_attr().name("AddUidStatsFlag").delay(delay));
+}
+
 bool NetStatsService::CommonEventPackageAdded(uint32_t uid)
 {
     SampleBundleInfo sampleBundleInfo = GetSampleBundleInfoForUid(uid);
@@ -1231,7 +1284,8 @@ bool NetStatsService::CommonEventPackageRemoved(uint32_t uid)
 {
     if (static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurDefaultUserId() &&
         uid / USER_ID_DIVIDOR != SYSTEM_DEFAULT_USERID &&
-        static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurPrivateUserId()) {
+        static_cast<int32_t>(uid / USER_ID_DIVIDOR) != netStatsCached_->GetCurPrivateUserId() &&
+        static_cast<int32_t>(uid / USER_ID_DIVIDOR_SIM) != SIM_PRIVATE_USERID) {
         NETMGR_LOG_E("CommonEventPackageRemoved uid:%{public}d", uid);
         return true;
     }
@@ -2001,7 +2055,6 @@ void NetStatsService::DealMonNotification(int32_t simId, bool isDualCard)
     NETMGR_LOG_I("Enter DealMonNotification.");
     auto iter = settingsTrafficMap_.find(simId);
     if (iter == settingsTrafficMap_.end() || iter->second.second == nullptr) {
-        NETMGR_LOG_I("iter is nullptr.");
         return;
     }
     NetMgrNetStatsLimitNotification::GetInstance().PublishNetStatsLimitNotification(NETMGR_STATS_LIMIT_MONTH,

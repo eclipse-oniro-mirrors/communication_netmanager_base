@@ -687,6 +687,24 @@ HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest001, TestSize.Level1)
     ret = netStatsService->ProcessOsAccountChanged(888, state);
 }
 
+HWTEST_F(NetStatsServiceTest, ProcessOsAccountChangedTest002, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    AccountSA::OsAccountState state = AccountSA::OsAccountState::SWITCHED;
+    int32_t userId = 101;
+    netStatsService->netStatsCached_->SetCurPrivateUserId(106);
+    int32_t ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    EXPECT_EQ(ret, 0);
+
+    netStatsService->netStatsCached_->SetCurPrivateUserId(101);
+    ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    EXPECT_EQ(ret, 0);
+
+    userId = 100;
+    ret = netStatsService->ProcessOsAccountChanged(userId, state);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1)
 {
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
@@ -702,8 +720,11 @@ HWTEST_F(NetStatsServiceTest, MergeTrafficStatsByAccountTest001, TestSize.Level1
     info1.userId_ = curUserId;
     NetStatsInfo info2;
     info2.userId_ = 101;
+    NetStatsInfo info3;
+    info2.userId_ = SIM_PRIVATE_USERID;
     infos.push_back(info1);
     infos.push_back(info2);
+    infos.push_back(info3);
     netStatsService->netStatsCached_->SetCurPrivateUserId(101);
 
     if (curUserId == defaultUserId) {
@@ -764,6 +785,7 @@ HWTEST_F(NetStatsServiceTest, DeleteTrafficStatsByAccountTest001, TestSize.Level
     EXPECT_EQ(infos.size(), 4);
 }
 
+#ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
 {
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
@@ -777,7 +799,6 @@ HWTEST_F(NetStatsServiceTest, CalculateTrafficAvailableTest001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 }
 
-#ifdef SUPPORT_TRAFFIC_STATISTIC
 HWTEST_F(NetStatsServiceTest, UpdateBpfMapTest001, TestSize.Level1)
 {
     auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();

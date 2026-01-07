@@ -290,7 +290,11 @@ int32_t NetStatsDataHandler::UpdateStatsFlagByUserId(int32_t userId, uint32_t fl
         NETMGR_LOG_E("db helper instance is nullptr");
         return NETMANAGER_ERR_INTERNAL;
     }
-    return helper->UpdateStatsFlagByUserId(UID_TABLE, userId, flag);
+    int32_t ret = helper->UpdateStatsFlagByUserId(UID_TABLE, userId, flag);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UpdateStatsFlagByUserId failed. userId:%{public}d, flag:%{public}d", userId, flag);
+    }
+    return ret;
 }
 
 int32_t NetStatsDataHandler::UpdateStatsUserIdByUserId(int32_t userId, int32_t newUserId)
@@ -320,7 +324,11 @@ int32_t NetStatsDataHandler::UpdateSimStatsFlagByUserId(int32_t userId, uint32_t
         NETMGR_LOG_E("db helper instance is nullptr");
         return NETMANAGER_ERR_INTERNAL;
     }
-    return helper->UpdateStatsFlag(UID_SIM_TABLE, userId, flag);
+    int32_t ret = helper->UpdateStatsFlagByUserId(UID_SIM_TABLE, userId, flag);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("UpdateSimStatsFlagByUserId failed. userId:%{public}d, flag:%{public}d", userId, flag);
+    }
+    return ret;
 }
 
 int32_t NetStatsDataHandler::UpdateSimStatsFlag(uint32_t uid, uint32_t flag)

@@ -29,7 +29,9 @@ constexpr uint32_t IPTABLES_UID = std::numeric_limits<uint32_t>::max() - 3;
 constexpr uint32_t DEFAULT_ACCOUNT_UID = std::numeric_limits<uint32_t>::max() - 4;
 constexpr uint32_t OTHER_ACCOUNT_UID = std::numeric_limits<uint32_t>::max() - 5;
 constexpr uint32_t USER_ID_DIVIDOR = 200000;
+constexpr uint32_t USER_ID_DIVIDOR_SIM = 100000;
 constexpr uint32_t SYSTEM_DEFAULT_USERID = 0;
+constexpr uint32_t SIM_PRIVATE_USERID = 124;
 enum NetStatsResultCode {
     STATS_DUMP_MESSAGE_FAIL = 2103002,
     STATS_REMOVE_FILE_FAIL,

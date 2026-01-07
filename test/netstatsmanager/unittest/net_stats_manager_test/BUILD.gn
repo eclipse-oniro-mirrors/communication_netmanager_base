@@ -354,6 +354,8 @@ ohos_unittest("net_stats_service_new_test") {
     "LOG_DOMAIN = 0xD0015B0",
     "private = public",
     "protected = public",
+    "UNITTEST_FORBID_FFRT",
+    "NETMANAGER_TEST",
   ]
 
   if (netmanager_base_enable_traffic_statistic) {
