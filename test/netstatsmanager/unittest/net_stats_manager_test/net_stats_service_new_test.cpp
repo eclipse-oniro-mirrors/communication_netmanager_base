@@ -413,5 +413,23 @@ HWTEST_F(NetStatsServiceTest, CommonEventPackageRemovedTest004, TestSize.Level1)
     bool ret = netStatsService.CommonEventPackageRemoved(SIM_PRIVATE_USERID * 1000 + 1);
     EXPECT_EQ(ret, false);
 }
+
+HWTEST_F(NetStatsServiceTest, GetHistoryDataTest001, TestSize.Level1)
+{
+    auto netStatsService = DelayedSingleton<NetStatsService>::GetInstance();
+    std::vector<NetStatsInfo> infos;
+    uint32_t start = 1745847234;
+    uint32_t end = 1745847823;
+    netStatsService->GetHistoryData(infos, "111", 12345612, 0, UINT32_MAX);
+    EXPECT_EQ(infos.size(), 0);
+    netStatsService->GetHistoryData(infos, "111", DEFAULT_ACCOUNT_UID, 0, UINT32_MAX);
+    netStatsService->netStatsCached_->SetCurPrivateUserId(101);
+
+    int32_t ret = netStatsService->GetHistoryData(infos, "111", OTHER_ACCOUNT_UID, 0, UINT32_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    netStatsService->netStatsCached_->SetCurPrivateUserId(-1);
+    ret = netStatsService->GetHistoryData(infos, "111", OTHER_ACCOUNT_UID, 0, UINT32_MAX);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
