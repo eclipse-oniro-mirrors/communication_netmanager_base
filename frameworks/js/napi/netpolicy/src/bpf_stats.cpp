@@ -66,7 +66,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
         NETNATIVE_LOGE("ifaceStatsMap IsValid");
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
 
     iface_stats_value totalStats = {0};
@@ -111,7 +111,7 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     stats = 0;
     BpfMapper<app_uid_stats_key, app_uid_stats_value> appUidStatsMap(APP_UID_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!appUidStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
 
     app_uid_stats_value uidStats = {0};
@@ -125,7 +125,7 @@ int32_t NetsysBpfStats::GetAllSimStatsInfo(std::vector<OHOS::NetManagerStandard:
 {
     BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!uidSimStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
 
     stats.clear();
@@ -173,7 +173,7 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
 {
     BpfMapper<stats_key, stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!uidIfaceStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
 
     stats.clear();
@@ -219,7 +219,7 @@ int32_t NetsysBpfStats::DeleteStatsInfo(const std::string &path, uint32_t uid)
     }
     BpfMapper<stats_key, stats_value> uidStatsMap(path, BPF_ANY);
     if (!uidStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
     auto keys = uidStatsMap.GetAllKeys();
     for (const auto &k : keys) {
@@ -239,7 +239,7 @@ int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType
     std::lock_guard<std::mutex> lock(ifaceStatsMapMutext_);
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
-        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+        return STATS_ERR_INVALID_GET_BPF_MAP;
     }
 
     auto ifIndex = if_nametoindex(interfaceName.c_str());
