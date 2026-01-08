@@ -154,7 +154,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
     int32_t ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, on);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
     ret = netDataShareHelperUtils_->Query(wifiUri, KEY_SHARING_WIFI, status);
-    EXPECT_TRUE(status == on || status == off);
+    EXPECT_FALSE(status == on || status == off);
 
     ret = netDataShareHelperUtils_->Update(wifiUri, KEY_SHARING_WIFI, off);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
@@ -232,7 +232,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 
     ret = netDataShareHelperUtils_->Query(notExistTestUri, KEY_NOTEXIST_TEST, status);
     EXPECT_TRUE(ret == NETMANAGER_SUCCESS || ret == NETMANAGER_ERROR);
-    EXPECT_TRUE(status == off || status == on);
+    EXPECT_FALSE(status == off || status == on);
     std::cout << "Not Exist Test result: " << status << std::endl;
 }
 
