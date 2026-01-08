@@ -949,20 +949,12 @@ int32_t NetStatsService::GetHistoryData(std::vector<NetStatsInfo> &infos, std::s
     int32_t userId = -1;
     if (uid == DEFAULT_ACCOUNT_UID) {
         userId = netStatsCached_->GetCurDefaultUserId();
-        std::vector<NetStatsInfo> infos1;
-        std::vector<NetStatsInfo> infos2;
-        history->GetHistoryByIdentAndUserId(infos1, ident, userId, start, end);
-        history->GetHistoryByIdentAndUserId(infos2, ident, SYSTEM_DEFAULT_USERID, start, end);
-        infos.insert(infos.end(), infos1.begin(), infos1.end());
-        infos.insert(infos.end(), infos2.begin(), infos2.end());
+        history->GetHistoryByIdentAndUserIdWithAppend(infos, ident, userId, start, end);
+        history->GetHistoryByIdentAndUserIdWithAppend(infos, ident, SYSTEM_DEFAULT_USERID, start, end);
     } else if (netStatsCached_->GetCurPrivateUserId() != -1) {
         userId = netStatsCached_->GetCurPrivateUserId();
-        std::vector<NetStatsInfo> infos1;
-        std::vector<NetStatsInfo> infos2;
-        history->GetHistoryByIdentAndUserId(infos1, ident, userId, start, end);
-        history->GetHistoryByIdentAndUserId(infos2, ident, SIM_PRIVATE_USERID, start, end);
-        infos.insert(infos.end(), infos1.begin(), infos1.end());
-        infos.insert(infos.end(), infos2.begin(), infos2.end());
+        history->GetHistoryByIdentAndUserIdWithAppend(infos, ident, userId, start, end);
+        history->GetHistoryByIdentAndUserIdWithAppend(infos, ident, SIM_PRIVATE_USERID, start, end);
     }
     if (userId == -1) {
         NETMGR_LOG_E("GetHistoryData error. uid:%{public}u, curPrivateUserId: %{public}d",

@@ -95,5 +95,17 @@ int32_t NetStatsHistory::GetHistoryByIdentAndUserId(std::vector<NetStatsInfo> &r
     }
     return handler->ReadStatsDataByIdentAndUserId(recv, ident, userId, start, end);
 }
+
+void NetStatsHistory::GetHistoryByIdentAndUserIdWithAppend(std::vector<NetStatsInfo> &netStatsInfos,
+    const std::string &ident, int32_t userId, uint64_t start, uint64_t end)
+{
+    std::vector<NetStatsInfo> recv;
+    int32_t ret = GetHistoryByIdentAndUserId(recv, ident, userId, start, end);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetHistoryByIdentAndUserId error");
+        return;
+    }
+    netStatsInfos.insert(netStatsInfos.end(), recv.begin(), recv.end());
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

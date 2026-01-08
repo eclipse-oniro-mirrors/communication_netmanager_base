@@ -40,6 +40,8 @@ public:
                               uint64_t end = LONG_MAX);
     int32_t GetHistoryByIdentAndUserId(std::vector<NetStatsInfo> &recv, const std::string &ident, int32_t userId,
                     uint64_t start = 0, uint64_t end = LONG_MAX);
+    void GetHistoryByIdentAndUserIdWithAppend(std::vector<NetStatsInfo> &netStatsInfos,
+        const std::string &ident, int32_t userId, uint64_t start = 0, uint64_t end = LONG_MAX);
 };
 
 } // namespace NetManagerStandard
