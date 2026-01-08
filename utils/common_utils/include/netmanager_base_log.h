@@ -56,6 +56,7 @@ extern "C" {
 #define NETMANAGER_BASE_LOGW(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)
 #define NETMANAGER_BASE_LOGD(fmt, ...) ((void)(0, ##__VA_ARGS__))
 
+#define NETMGR_LOGD(fmt, ...) NETMANAGER_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #define NETMGR_LOG_D(fmt, ...) ((void)(0, ##__VA_ARGS__))
 #define NETMGR_LOG_E(fmt, ...) NETMANAGER_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define NETMGR_LOG_W(fmt, ...) NETMANAGER_LOG(WARN, fmt, ##__VA_ARGS__)

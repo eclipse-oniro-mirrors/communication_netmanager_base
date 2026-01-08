@@ -781,7 +781,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
                          httpProbeResult_.GetCode());
         } else if (curlMsg->easy_handle == httpsCurl_) {
             httpsProbeResult_ = {responseCode, redirectUrl};
-            NETMGR_LOG_D("Recv net[%{public}d] https probe response, code:[%{public}d]", netId_,
+            NETMGR_LOGD("Recv net[%{public}d] https probe response, code:[%{public}d]", netId_,
                          httpsProbeResult_.GetCode());
         } else {
             NETMGR_LOG_E("Unknown curl handle.");
