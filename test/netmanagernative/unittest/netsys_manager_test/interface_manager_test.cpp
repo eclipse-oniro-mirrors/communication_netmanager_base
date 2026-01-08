@@ -596,7 +596,7 @@ HWTEST_F(InterfaceManagerTest, CreateVlan001, TestSize.Level1)
     int32_t ret = InterfaceManager::CreateVlan(ifName, vlanId);
     ifName = "wlan0";
     ret = InterfaceManager::CreateVlan(ifName, vlanId);
-    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(InterfaceManagerTest, DestroyVlan001, TestSize.Level1)
