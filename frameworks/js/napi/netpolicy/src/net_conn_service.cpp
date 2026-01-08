@@ -467,7 +467,7 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
 int32_t NetConnService::NetDetection(int32_t netId)
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    NETMGR_LOG_D("NetDetection, call uid [%{public}d]", callingUid);
+    NETMGR_LOGD("NetDetection, call uid [%{public}d]", callingUid);
     httpProxyThreadCv_.notify_all();
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
