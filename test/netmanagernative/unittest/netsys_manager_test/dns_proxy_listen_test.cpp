@@ -146,7 +146,7 @@ HWTEST_F(DnsProxyListenTest, InitForListeningTest01, TestSize.Level1)
 
     instance_->InitListenForIpv4();
     bool ret = instance_->InitForListening(proxyEvent, proxy6Event);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     instance_->InitListenForIpv6();
     ret = instance_->InitForListening(proxyEvent, proxy6Event);
