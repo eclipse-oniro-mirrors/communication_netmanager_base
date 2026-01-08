@@ -116,7 +116,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     {STATS_ERR_INVALID_STATS_VALUE, "The stats value is invalid"},
     {STATS_ERR_INVALID_STATS_TYPE, "Invalid stats type"},
     {STATS_ERR_INVALID_UID_STATS_MAP, "The uid stats map in bpf is invalid"},
-    {STATS_ERR_INVALID_IFACE_NAME_MAP, "Failed to create a system map"},
+    {STATS_ERR_INVALID_GET_NAME_MAP, "Failed to create a system map"},
     {STATS_ERR_GET_IFACE_NAME_FAILED, "Failed to obtain the NIC name"},
     {STATS_ERR_CLEAR_STATS_DATA_FAIL, "Clear stats data failed"},
     {STATS_ERR_CREATE_TABLE_FAIL, "Create stats table failed"},
