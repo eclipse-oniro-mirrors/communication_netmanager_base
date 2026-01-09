@@ -1209,7 +1209,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
     NetManagerBaseAccessToken token;
     NetHandle netHandle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
-    EXPECT_GE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 /**

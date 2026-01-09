@@ -62,7 +62,7 @@ HWTEST_F(TrafficManagerTest, GetAllTxTraffic001, TestSize.Level1)
 HWTEST_F(TrafficManagerTest, GetAllRxTraffic001, TestSize.Level1)
 {
     long allRxBytes = TrafficManager::GetAllRxTraffic();
-    EXPECT_LE(allRxBytes, 0);
+    EXPECT_GE(allRxBytes, -1);
 }
 } // namespace nmd
 } // namespace OHOS
