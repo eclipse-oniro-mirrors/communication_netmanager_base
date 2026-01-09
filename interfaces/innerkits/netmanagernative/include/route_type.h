@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "parcel.h"
+
 namespace OHOS {
 namespace nmd {
 static const int LOCAL_NETWORK_NETID = 99;
@@ -34,11 +36,15 @@ typedef struct MarkMaskParcel {
     int mask;
 } MarkMaskParcel;
 
-struct NetworkRouteInfo {
+struct NetworkRouteInfo final : public Parcelable {
     std::string destination;
     std::string ifName;
     std::string nextHop;
     bool isExcludedRoute = false;
+
+    bool Marshalling(Parcel &parcel) const override;
+    static sptr<NetworkRouteInfo> Unmarshalling(Parcel &parcel);
+    static bool Marshalling(Parcel &parcel, const sptr<NetworkRouteInfo> &object);
 };
 } // namespace nmd
 } // namespace OHOS

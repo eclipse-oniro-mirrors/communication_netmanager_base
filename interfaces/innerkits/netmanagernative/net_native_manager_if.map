@@ -90,6 +90,8 @@
       "VTT for OHOS::NetsysNative::NetDnsQueryResultAddrInfo";
       "VTT for OHOS::NetsysNative::NetDnsQueryResultReport";
       "VTT for OHOS::NetsysNative::NetsysTrafficCallbackStub";
+      "VTT for OHOS::nmd::NetworkRouteInfo";
+      "vtable for OHOS::nmd::NetworkRouteInfo";
     };
   local:
    *;

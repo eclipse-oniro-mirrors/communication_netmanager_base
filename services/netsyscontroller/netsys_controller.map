@@ -166,6 +166,7 @@
       "OHOS::NetManagerStandard::NetsysNativeClient::ShareDnsSet(unsigned short)";
       "OHOS::NetManagerStandard::NetsysNativeClient::StartDnsProxyListen()";
       "OHOS::NetManagerStandard::NetsysNativeClient::UnregisterDnsResultCallback(OHOS::sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> const&)";
+      "OHOS::NetManagerStandard::NetsysController::NetworkAddRoutes(int, std::__h::vector<OHOS::nmd::NetworkRouteInfo, std::__h::allocator<OHOS::nmd::NetworkRouteInfo>> const&)";
     };
   local:
    *;

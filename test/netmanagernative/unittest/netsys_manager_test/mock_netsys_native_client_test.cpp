@@ -67,6 +67,11 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest001, TestSi
     ret = nativeClient_.NetworkAddRoute(netId, iface, "", "");
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    std::vector<nmd::NetworkRouteInfo> infos;
+    infos.resize(1);
+    ret = nativeClient_.NetworkAddRoutes(netId, infos);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     ret = nativeClient_.SetIpv6PrivacyExtensions(iface, 1);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 

@@ -41,6 +41,8 @@ public:
     MOCK_METHOD(int32_t, UnRegisterNotifyCallback, (sptr<INotifyCallback> &callback), (override));
     MOCK_METHOD(int32_t, NetworkAddRoute, (int32_t netId, const std::string &interfaceName,
         const std::string &destination, const std::string &nextHop, bool isExcludedRoute), (override));
+    MOCK_METHOD(int32_t, NetworkAddRoutes, (int32_t netId,
+        const std::vector<nmd::NetworkRouteInfo> &infos), (override));
     MOCK_METHOD(int32_t, NetworkRemoveRoute, (int32_t netId, const std::string &interfaceName,
         const std::string &destination, const std::string &nextHop, bool isExcludedRoute), (override));
     MOCK_METHOD(int32_t, NetworkAddRouteParcel, (int32_t netId, const RouteInfoParcel &routeInfo), (override));

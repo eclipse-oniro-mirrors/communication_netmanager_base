@@ -261,5 +261,35 @@ HWTEST_F(NetlinkSocketTest, DealNeighInfoTest006, TestSize.Level1)
     DealNeighInfo(nlmsgHeader, nlmsgHeader->nlmsg_type, table, ipMacInfoVec);
     EXPECT_EQ(table, 0);
 }
+
+HWTEST_F(NetlinkSocketTest, SendNetlinkMsgsToKernelTest001, TestSize.Level1)
+{
+    std::vector<NetlinkMsg> msgs;
+    auto ret = SendNetlinkMsgsToKernel(msgs);
+    EXPECT_EQ(ret, -1);
+    msgs.emplace_back(NLM_F_REQUEST | NLM_F_CREATE, NETLINK_MAX_LEN, 0);
+    msgs.emplace_back(NLM_F_REQUEST | NLM_F_REPLACE, NETLINK_MAX_LEN, 0);
+    msgs.emplace_back(NLM_F_REQUEST | NLM_F_EXCL, NETLINK_MAX_LEN, 0);
+    ret = SendNetlinkMsgsToKernel(msgs);
+    EXPECT_EQ(ret, -1);
+    msgs.emplace_back(NLM_F_REQUEST | NLM_F_EXCL, NETLINK_MAX_LEN, getpid());
+    ret = SendNetlinkMsgsToKernel(msgs);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetlinkSocketTest, SendNetlinkMsgsToKernelTest002, TestSize.Level1)
+{
+    std::vector<NetlinkMsg> msgs;
+    NetlinkMsg msg(NLM_F_REQUEST, NETLINK_MAX_LEN, getpid());
+
+    struct rtmsg routeMsg = {0};
+    routeMsg.rtm_family = AF_INET;
+    routeMsg.rtm_dst_len = 24;
+    msg.AddRoute(RTM_NEWROUTE, routeMsg);
+    msgs.push_back(std::move(msg));
+
+    auto ret = SendNetlinkMsgsToKernel(msgs);
+    EXPECT_EQ(ret, 28);
+}
 } // namespace nmd
 } // namespace OHOS

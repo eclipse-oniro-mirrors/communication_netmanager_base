@@ -40,6 +40,7 @@ constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
 constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+constexpr uint32_t MAX_ROUTES_ARRAY_SIZE = 1024;
 constexpr uint32_t MAX_IFACENAMES_SIZE = 128;
 constexpr uint32_t MAX_SHARING_TYPE_SIZE = 32;
 constexpr int32_t INVALID_UID = -1;
@@ -94,6 +95,8 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdUnRegisterNotifyCallback;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE)] =
         &NetsysNativeServiceStub::CmdNetworkAddRoute;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTES)] =
+        &NetsysNativeServiceStub::CmdNetworkAddRoutes;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE)] =
         &NetsysNativeServiceStub::CmdNetworkRemoveRoute;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE_PARCEL)] =
@@ -751,6 +754,32 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, Message
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop, isExcludedRoute);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkAddRoute has recved result %{public}d", result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkAddRoutes(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId = 0;
+    int32_t size = 0;
+    if (!data.ReadInt32(netId) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("read net id or size failed");
+        return IPC_STUB_ERR;
+    }
+    size = (size > static_cast<int32_t>(MAX_ROUTES_ARRAY_SIZE)) ? static_cast<int32_t>(MAX_ROUTES_ARRAY_SIZE) : size;
+    sptr<nmd::NetworkRouteInfo> r;
+    std::vector<nmd::NetworkRouteInfo> infos;
+    for (int32_t index = 0; index < size; index++) {
+        r = nmd::NetworkRouteInfo::Unmarshalling(data);
+        if (r == nullptr) {
+            NETNATIVE_LOGE("SysRoute::Unmarshalling(parcel) is null");
+            return IPC_STUB_ERR;
+        }
+        infos.push_back(*r);
+    }
+
+    int32_t result = NetworkAddRoutes(netId, infos);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("NetworkAddRoutes has recvd result %{public}d", result);
     return result;
 }
 

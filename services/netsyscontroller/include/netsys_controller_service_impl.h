@@ -97,6 +97,15 @@ public:
                             const std::string &nextHop, bool isExcludedRoute = false) override;
 
     /**
+ 	* Add routes
+ 	*
+ 	* @param netId Net Id
+ 	* @param infos Route list to be added, each element of type NetworkRouteInfo describes a route entry
+ 	* @return Return the return value of the netsys interface call
+ 	*/
+    int32_t NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos) override;
+
+    /**
      * Remove route
      *
      * @param netId

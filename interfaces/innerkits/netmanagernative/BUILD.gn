@@ -65,6 +65,7 @@ ohos_static_library("net_native_parcel") {
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/route_type.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dnsresolv/netsys_net_dns_result_data.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_net_diag_data.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_conn_info.cpp",

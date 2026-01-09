@@ -263,6 +263,14 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
     return result;
 }
 
+int32_t NetsysNativeService::NetworkAddRoutes(int32_t netId, const std::vector<nmd::NetworkRouteInfo> &infos)
+{
+    NETNATIVE_LOGI("NetworkAddRoutes: netId[%{public}d], infos[%{public}zu]", netId, infos.size());
+    int32_t result = netsysService_->NetworkAddRoutes(netId, infos);
+    NETNATIVE_LOG_D("NetworkAddRoutes %{public}d", result);
+    return result;
+}
+
 int32_t NetsysNativeService::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
     const std::string &destination, const std::string &nextHop, bool isExcludedRoute)
 {
