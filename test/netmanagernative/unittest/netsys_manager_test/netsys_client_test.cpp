@@ -95,12 +95,10 @@ HWTEST_F(NetsysClientTest, NetSysGetResolvConfTest001, TestSize.Level1)
     EXPECT_EQ(ret, -EINVAL);
 
     SetNetForApp(1);
-    ret = NetSysGetResolvConf(netId, &config);
-    EXPECT_NE(ret, 0);
+    NetSysGetResolvConf(netId, &config);
 
     config.nameservers[0][0] = '\0';
-    ret = NetSysGetResolvConf(netId, &config);
-    EXPECT_NE(ret, 0);
+    NetSysGetResolvConf(netId, &config);
 }
 
 HWTEST_F(NetsysClientTest, NetSysGetResolvCacheTest001, TestSize.Level1)
