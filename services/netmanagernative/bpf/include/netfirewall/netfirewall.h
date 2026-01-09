@@ -112,7 +112,7 @@ static __always_inline enum sk_action netfirewall_policy_ingress(struct __sk_buf
         if (!get_match_tuple(skb, &tuple, INGRESS)) {
             return SK_DROP;
         }
-        log_intercept_event(&tuple);
+        log_intercept_event(&tuple, skb);
         return SK_DROP;
     }
 
@@ -179,7 +179,7 @@ static __always_inline enum sk_action netfirewall_policy_egress(struct __sk_buff
         if (!get_match_tuple(skb, &tuple, EGRESS)) {
             return SK_DROP;
         }
-        log_intercept_event(&tuple);
+        log_intercept_event(&tuple, skb);
         return SK_DROP;
     }
 

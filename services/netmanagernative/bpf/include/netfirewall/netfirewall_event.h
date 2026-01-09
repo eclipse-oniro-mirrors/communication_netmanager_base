@@ -89,14 +89,14 @@ static __always_inline void log_intercept(struct match_tuple *tuple)
     output_to_user(EVENT_INTERCEPT, &ev, sizeof(struct intercept_event));
 }
 
-static __always_inline void log_intercept_event(struct match_tuple *tuple)
+static __always_inline void log_intercept_event(struct match_tuple *tuple, struct __sk_buff *skb)
 {
-    if (!tuple) {
+    if (!tuple || !skb) {
         return;
     }
 
-    __u16 num = 0;
-    struct domain_hash_key *domainData = bpf_map_lookup_elem(&DOMAIN_DATA_KEY_MAP, &num);
+    __u64 skbAddr = (__u64)(unsigned long)skb;
+    struct domain_hash_key *domainData = bpf_map_lookup_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr);
 
     struct event *e = bpf_ringbuf_reserve(&EVENT_MAP, sizeof(struct event), 0);
     if (!e) {
@@ -123,6 +123,7 @@ static __always_inline void log_intercept_event(struct match_tuple *tuple)
         e->intercept.ipv6.saddr = tuple->ipv6.saddr;
         e->intercept.ipv6.daddr = tuple->ipv6.daddr;
     }
+    bpf_map_delete_elem(&DOMAIN_DATA_KEY_MAP, &skbAddr);
     bpf_ringbuf_submit(e, 0);
 }
 

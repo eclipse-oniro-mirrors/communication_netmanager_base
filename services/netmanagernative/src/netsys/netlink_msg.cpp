@@ -130,6 +130,61 @@ void NetlinkMsg::AddNeighbor(uint16_t action, const struct ndmsg& msg)
     netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ndmsg)));
 }
 
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+bool NetlinkMsg::InitNflogConfig(uint16_t groupId)
+{
+    if (netlinkMessage_ == nullptr || maxBufLen_ < NLMSG_SPACE(sizeof(nfgenmsg))) {
+        return false;
+    }
+    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(nfgenmsg));
+    netlinkMessage_->nlmsg_type = LOCAL_NFLOG_CONFIG;
+    netlinkMessage_->nlmsg_flags = NLM_F_REQUEST;
+    netlinkMessage_->nlmsg_seq = static_cast<uint32_t>(time(nullptr));
+    netlinkMessage_->nlmsg_pid = 0;
+
+    auto *nfHeader = reinterpret_cast<nfgenmsg *>(NLMSG_DATA(netlinkMessage_));
+    nfHeader->nfgen_family = AF_UNSPEC;
+    nfHeader->version = NFNETLINK_V0;
+    nfHeader->res_id = htons(groupId);
+    return true;
+}
+
+bool NetlinkMsg::AddNlattr(uint16_t type, const void *data, size_t dataSize)
+{
+    if (netlinkMessage_ == nullptr || data == nullptr || dataSize == 0) {
+        return false;
+    }
+    size_t need = NLA_HDRLEN + dataSize;
+    size_t end = NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + NLA_ALIGN(need);
+    if (end > maxBufLen_) {
+        return false;
+    }
+
+    auto *attr =
+        reinterpret_cast<nlattr *>(reinterpret_cast<char *>(netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
+    attr->nla_type = type;
+    attr->nla_len = static_cast<uint16_t>(need);
+
+    void *dest = reinterpret_cast<char *>(attr) + NLA_HDRLEN;
+    size_t dstLen = need - NLA_HDRLEN;
+    if (memcpy_s(dest, dstLen, data, dataSize) != EOK) {
+        return false;
+    }
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(end);
+    return true;
+}
+
+bool NetlinkMsg::AddCmdAttr(uint16_t type, const nfulnl_msg_config_cmd &cmd)
+{
+    return AddNlattr(type, &cmd, sizeof(cmd));
+}
+
+bool NetlinkMsg::AddModeAttr(uint16_t type, const nfulnl_msg_config_mode &mode)
+{
+    return AddNlattr(type, &mode, sizeof(mode));
+}
+#endif
+
 void NetlinkMsg::AddLink(uint16_t action, const struct ifinfomsg& msg)
 {
     netlinkMessage_->nlmsg_type = action;

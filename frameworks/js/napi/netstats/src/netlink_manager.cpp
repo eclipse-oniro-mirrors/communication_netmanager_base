@@ -27,7 +27,7 @@
 #include "netnative_log_wrapper.h"
 #include "wrapper_distributor.h"
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-#include "securec.h"
+#include "netlink_msg.h"
 #endif
 
 namespace OHOS {
@@ -37,17 +37,6 @@ namespace {
 constexpr int32_t NFLOG_QUOTA_GROUP = 1;
 constexpr int32_t UEVENT_GROUP = 0xffffffff;
 constexpr uint8_t NFLOG_NETFILTER_GROUP_ID = 0;
-#ifdef FEATURE_NET_FIREWALL_ENABLE
-constexpr uint32_t PACKET_COPY_LENGTH = 256;
-constexpr int32_t LOCAL_NFLOG_CONFIG = NFNL_SUBSYS_ULOG << 8 | NFULNL_MSG_CONFIG;
-constexpr int16_t MSG_BUFFER_SIZE = 512;
-
-struct NflogConfigMsg {
-    char buffer[MSG_BUFFER_SIZE]{};
-    nlmsghdr *header{nullptr};
-    size_t usedLength{0};
-};
-#endif
 
 struct DistributorParam {
     int32_t groups;
@@ -67,98 +56,38 @@ const std::map<int32_t, DistributorParam> distributorParamList_ = {
 std::map<int32_t, std::unique_ptr<WrapperDistributor>> distributorMap_;
 
 #ifdef FEATURE_NET_FIREWALL_ENABLE
-bool InitNflogConfig(NflogConfigMsg &msg, uint16_t groupId)
-{
-    msg.header = reinterpret_cast<nlmsghdr *>(msg.buffer);
-    msg.header->nlmsg_len = NLMSG_LENGTH(sizeof(nfgenmsg));
-    msg.header->nlmsg_type = LOCAL_NFLOG_CONFIG;
-    msg.header->nlmsg_flags = NLM_F_REQUEST;
-    msg.header->nlmsg_seq = static_cast<uint32_t>(time(nullptr));
-    msg.header->nlmsg_pid = 0;
-
-    nfgenmsg *nfHeader = reinterpret_cast<nfgenmsg *>(NLMSG_DATA(msg.header));
-    nfHeader->nfgen_family = AF_UNSPEC;
-    nfHeader->version = NFNETLINK_V0;
-    nfHeader->res_id = htons(groupId);
-
-    msg.usedLength = NLMSG_ALIGN(msg.header->nlmsg_len);
-    return true;
-}
-
-bool AddCmdAttr(NflogConfigMsg &msg, uint8_t command)
-{
-    nfulnl_msg_config_cmd cmd{};
-    cmd.command = command;
-
-    size_t need = NLA_HDRLEN + sizeof(cmd);
-    size_t end  = msg.usedLength + NLA_ALIGN(need);
-    if (end > sizeof(msg.buffer)) {
-        return false;
-    }
-    auto *attr = reinterpret_cast<nlattr *>(msg.buffer + msg.usedLength);
-    attr->nla_type = NFULA_CFG_CMD;
-    attr->nla_len  = static_cast<uint16_t>(need);
-
-    void *dest = reinterpret_cast<char *>(attr) + NLA_HDRLEN;
-    size_t dstLen = need - NLA_HDRLEN;
-    if (memcpy_s(dest, dstLen, &cmd, sizeof(cmd)) != EOK) {
-        return false;
-    }
-    msg.usedLength = end;
-    return true;
-}
-
-bool AddModeAttr(NflogConfigMsg &msg, uint8_t copyMode, uint32_t copyRange)
-{
-    nfulnl_msg_config_mode mode{};
-    mode.copy_mode  = copyMode;
-    mode.copy_range = htonl(copyRange);
-
-    size_t need = NLA_HDRLEN + sizeof(mode);
-    size_t end  = msg.usedLength + NLA_ALIGN(need);
-    if (end > sizeof(msg.buffer)) {
-        return false;
-    }
-    auto *attr = reinterpret_cast<nlattr *>(msg.buffer + msg.usedLength);
-    attr->nla_type = NFULA_CFG_MODE;
-    attr->nla_len  = static_cast<uint16_t>(need);
-
-    void *dest = reinterpret_cast<char *>(attr) + NLA_HDRLEN;
-    size_t dstLen = need - NLA_HDRLEN;
-    if (memcpy_s(dest, dstLen, &mode, sizeof(mode)) != EOK) {
-        return false;
-    }
-    msg.usedLength = end;
-    return true;
-}
-
 bool SendNflogConfig(int32_t socketFd, uint16_t groupId, uint8_t copyMode, uint32_t copyRange)
 {
-    NflogConfigMsg msg;
-    if (!InitNflogConfig(msg, groupId)) {
+    NetlinkMsg nlMsg(0, MSG_BUFFER_SIZE, 0);
+    if (!nlMsg.InitNflogConfig(groupId)) {
         return false;
     }
-    if (!AddCmdAttr(msg, NFULNL_CFG_CMD_BIND)) {
+    nfulnl_msg_config_cmd cmd{.command = NFULNL_CFG_CMD_BIND};
+    if (!nlMsg.AddCmdAttr(NFULA_CFG_CMD, cmd)) {
         return false;
     }
-    if (!AddModeAttr(msg, copyMode, copyRange)) {
+    nfulnl_msg_config_mode mode{};
+    mode.copy_mode = copyMode;
+    mode.copy_range = htonl(copyRange);
+    if (!nlMsg.AddModeAttr(NFULA_CFG_MODE, mode)) {
         return false;
     }
-    msg.header->nlmsg_len = msg.usedLength;
-    return send(socketFd, msg.buffer, msg.header->nlmsg_len, 0) >= 0;
+    nlmsghdr *hdr = nlMsg.GetNetLinkMessage();
+    return hdr != nullptr && send(socketFd, hdr, hdr->nlmsg_len, 0) >= 0;
 }
 
 bool SendNflogUnbind(int32_t socketFd, uint16_t groupId)
 {
-    NflogConfigMsg msg;
-    if (!InitNflogConfig(msg, groupId)) {
+    NetlinkMsg nlMsg(0, MSG_BUFFER_SIZE, 0);
+    if (!nlMsg.InitNflogConfig(groupId)) {
         return false;
     }
-    if (!AddCmdAttr(msg, NFULNL_CFG_CMD_UNBIND)) {
+    nfulnl_msg_config_cmd cmd{.command = NFULNL_CFG_CMD_UNBIND};
+    if (!nlMsg.AddCmdAttr(NFULA_CFG_CMD, cmd)) {
         return false;
     }
-    msg.header->nlmsg_len = msg.usedLength;
-    return send(socketFd, msg.buffer, msg.header->nlmsg_len, 0) >= 0;
+    nlmsghdr *hdr = nlMsg.GetNetLinkMessage();
+    return hdr != nullptr && send(socketFd, hdr, hdr->nlmsg_len, 0) >= 0;
 }
 #endif
 

@@ -29,10 +29,19 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+#include <linux/netfilter/nfnetlink.h>
+#include <linux/netfilter/nfnetlink_log.h>
+#endif
 
 namespace OHOS {
 namespace nmd {
 constexpr uint32_t NETLINK_MAX_LEN = 1024;
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+constexpr uint32_t PACKET_COPY_LENGTH = 256;
+constexpr int32_t LOCAL_NFLOG_CONFIG = NFNL_SUBSYS_ULOG << 8 | NFULNL_MSG_CONFIG;
+constexpr int16_t MSG_BUFFER_SIZE = 512;
+#endif
 class NetlinkMsg {
 public:
     NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid);
@@ -103,6 +112,48 @@ public:
      * @param msg Added message
      */
     void AddNeighbor(uint16_t action, const struct ndmsg& msg);
+
+#ifdef FEATURE_NET_FIREWALL_ENABLE
+    /**
+     * Init NFLOG config message
+     *
+     * @param msg NFLOG config message buffer
+     * @param groupId NFLOG group id
+     * @return Returns true if init successfully, otherwise false
+     */
+    bool InitNflogConfig(uint16_t groupId);
+
+    /**
+     * Add nlattr to NFLOG config message
+     *
+     * @param type Attr type
+     * @param msg NFLOG config message buffer
+     * @param data Attr data
+     * @param dataSize Attr data length
+     * @return Returns true if add successfully, otherwise false
+     */
+    bool AddNlattr(uint16_t type, const void *data, size_t dataSize);
+
+    /**
+     * Add command attr to NFLOG config message
+     *
+     * @param type Attr type
+     * @param msg NFLOG config message buffer
+     * @param cmd Command payload
+     * @return Returns true if add successfully, otherwise false
+     */
+    bool AddCmdAttr(uint16_t type, const nfulnl_msg_config_cmd &cmd);
+
+    /**
+     * Add mode attr to NFLOG config message
+     *
+     * @param type Attr type
+     * @param msg NFLOG config message buffer
+     * @param mode Mode payload
+     * @return Returns true if add successfully, otherwise false
+     */
+    bool AddModeAttr(uint16_t type, const nfulnl_msg_config_mode &mode);
+#endif
 
     /**
      * Add ifinfomsg message to nlmsghdr
