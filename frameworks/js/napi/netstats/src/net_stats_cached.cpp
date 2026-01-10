@@ -489,14 +489,14 @@ void NetStatsCached::WriteUidSimStats()
     if (!(CheckUidSimStor() || isForce_)) {
         return;
     }
-    bool isPrivateSpaceExistNow = isPrivateSpaceExist_;
+
     std::for_each(
         stats_.GetUidSimStatsInfo().begin(), stats_.GetUidSimStatsInfo().end(),
-            [this, isPrivateSpaceExistNow](NetStatsInfo &info) {
+            [this](NetStatsInfo &info) {
         if (info.uid_ == uninstalledUid_) {
             info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
         }
-        if (info.userId_ == SIM_PRIVATE_USERID && !isPrivateSpaceExistNow) {
+        if (info.userId_ == SIM_PRIVATE_USERID) {
             info.flag_ = STATS_DATA_FLAG_UNINSTALLED;
         }
     });
