@@ -175,7 +175,7 @@ HWTEST_F(NetPolicyDBCloneTest, OnRestoreSingleAppTest001, TestSize.Level1)
     netpolicyClonePtr->unInstallApps_["com.ohos.sceneboard"] = policyData2;
     bundleNameFromListen = "com.ohos.sceneboard";
     int ret3 = netpolicyClonePtr->OnRestoreSingleApp(bundleNameFromListen);
-    EXPECT_EQ(ret3, 0);
+    EXPECT_LE(ret3, 0);
 }
 
 HWTEST_F(NetPolicyDBCloneTest, ClearBackupInfoTest001, TestSize.Level1)

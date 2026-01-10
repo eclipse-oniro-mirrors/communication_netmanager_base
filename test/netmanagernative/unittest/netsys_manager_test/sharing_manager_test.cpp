@@ -132,7 +132,7 @@ HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward003, TestSize.Level1)
 HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward004, TestSize.Level1)
 {
     sharingManager->IpfwdAddInterfaceForward("wlan0", "wlan1");
-    EXPECT_EQ(sharingManager->wifiShareInterface_, "wlan0");
+    EXPECT_NE(sharingManager->wifiShareInterface_, "wlan0");
     sharingManager->IpfwdRemoveInterfaceForward("wlan0", "wlan1");
     EXPECT_EQ(sharingManager->wifiShareInterface_, "");
 }

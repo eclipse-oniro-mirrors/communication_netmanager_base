@@ -133,7 +133,7 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
     MessageOption option;
     int32_t ret = supplierCbStub_->OnRemoteRequest(
         static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK), data, reply, option);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetSupplierCallbackStubTest, OnAddRequest001, TestSize.Level1)

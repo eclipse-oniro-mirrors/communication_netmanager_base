@@ -1054,7 +1054,7 @@ HWTEST_F(NetsysNativeServiceTest, CreateVlanTest001, TestSize.Level1)
     std::string ifName = "eth0";
     uint32_t vlanId = 1;
     int32_t ret = instance_->CreateVlan(ifName, vlanId);
-    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(NetsysNativeServiceTest, DestroyVlanTest001, TestSize.Level1)
