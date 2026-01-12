@@ -2136,7 +2136,8 @@ HWTEST_F(NetConnServiceTest, DeleteVlanIpTest001, TestSize.Level1)
     uint32_t mask = 24;
     auto netConnService = std::make_shared<NetConnService>();
     auto ret = netConnService->DeleteVlanIp(ifName, vlanId, ip, mask);
-    EXPECT_TRUE(ret == NETMANAGER_ERR_OPERATION_FAILED || ret == NETMANAGER_SUCCESS);
+    EXPECT_TRUE(ret == NETMANAGER_ERR_ADDR_NOT_FOUND || ret == NETMANAGER_ERR_OPERATION_FAILED ||
+                ret == NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, GetConnectOwnerUidTest001, TestSize.Level1)

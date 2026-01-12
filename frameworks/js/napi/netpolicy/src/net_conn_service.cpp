@@ -92,6 +92,7 @@ constexpr const char *PERSIST_WIFI_DELAY_WEAK_SIGNAL_ENABLE = "persist.booster.e
 constexpr const char *SETTINGS_DATASHARE_URI_HTTP =
         "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=EffectiveTime";
 constexpr int32_t INVALID_UID = -1;
+constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -4377,7 +4378,10 @@ int32_t NetConnService::DeleteVlanIp(const std::string &ifName, uint32_t vlanId,
         return NETMANAGER_ERR_UNSUPPORTED_IFNAME;
     }
     std::string name = ifName + "." + std::to_string(vlanId);
-    if (NetsysController::GetInstance().DelInterfaceAddress(name, ip, mask) != NETMANAGER_SUCCESS) {
+    auto ret = NetsysController::GetInstance().DelInterfaceAddress(name, ip, mask);
+    if (ret == ERRNO_EADDRNOTAVAIL) {
+        return NETMANAGER_ERR_ADDR_NOT_FOUND;
+    } else if (ret != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
     return NETMANAGER_SUCCESS;
