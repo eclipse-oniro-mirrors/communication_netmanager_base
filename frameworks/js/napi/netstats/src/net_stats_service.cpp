@@ -409,6 +409,7 @@ void NetStatsService::InitPrivateUserId()
         NETMGR_LOG_I("InitPrivateUserId, info: %{public}d", info.GetLocalId());
         if (accountType == AccountSA::OsAccountType::PRIVATE) {
             netStatsCached_->SetCurPrivateUserId(info.GetLocalId());
+            netStatsCached_->SetPrivateStatus(true);
         }
     }
     int32_t defaultUserId = -1;
